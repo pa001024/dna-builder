@@ -329,7 +329,7 @@ onMounted(() => {
                     <div
                         v-for="todo in userTodos"
                         :key="todo.id"
-                        class="card bg-base-100 border border-base-300 p-4 hover:border-primary/50 transition-colors"
+                        class="card bg-base-100 border border-base-300 p-4 hover:border-primary/50 transition-colors duration-200"
                     >
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex-1">
@@ -363,7 +363,7 @@ onMounted(() => {
                     <div
                         v-for="todo in filteredSystemTodos"
                         :key="todo.id"
-                        class="card bg-base-100 border border-base-300 p-4 hover:border-primary/50 transition-colors"
+                        class="card bg-base-100 border border-base-300 p-4 hover:border-primary/50 transition-colors duration-200"
                         :class="{ 'opacity-60': todo.isCompleted }"
                     >
                         <div class="flex items-start justify-between gap-3">
@@ -416,7 +416,9 @@ onMounted(() => {
             <template #content>
                 <div class="space-y-4 py-4">
                     <div class="space-y-2">
-                        <label class="text-sm font-medium text-base-content">{{ $t("todo.formTitle") }} <span class="text-error">*</span></label>
+                        <label class="text-sm font-medium text-base-content"
+                            >{{ $t("todo.formTitle") }} <span class="text-error">*</span></label
+                        >
                         <input
                             v-model="createForm.title"
                             type="text"
@@ -474,7 +476,9 @@ onMounted(() => {
             <template #content>
                 <div class="space-y-4 py-4">
                     <div class="space-y-2">
-                        <label class="text-sm font-medium text-base-content">{{ $t("todo.formTitle") }} <span class="text-error">*</span></label>
+                        <label class="text-sm font-medium text-base-content"
+                            >{{ $t("todo.formTitle") }} <span class="text-error">*</span></label
+                        >
                         <input
                             v-model="editForm.title"
                             type="text"

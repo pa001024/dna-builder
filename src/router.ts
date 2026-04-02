@@ -61,6 +61,12 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
     { name: "achievement", path: "/achievement", component: AchievementList, beforeEnter: () => setMinSize(600, 600) },
     {
+        name: "abyss-usage",
+        path: "/abyss-usage",
+        component: () => import("./views/AbyssUsageView.vue"),
+        beforeEnter: () => setMinSize(900, 700),
+    },
+    {
         name: "game-launcher",
         path: "/game-launcher",
         component: env.isApp ? () => import("./views/GameLauncher.vue") : () => undefined,

@@ -72,22 +72,33 @@ useInitialScrollToSelectedItem()
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedDungeon }">
                 <!-- 搜索栏 -->
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索副本ID/名称/描述/等级/奖励（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索副本ID/名称/描述/等级/奖励（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+                    />
                 </div>
 
                 <!-- 类型筛选Tab -->
                 <div class="p-2 border-b border-base-200">
                     <div class="flex flex-wrap gap-1 pb-1">
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectedType = ''">
+                            @click="selectedType = ''"
+                        >
                             {{ $t("全部") }}
                         </button>
-                        <button v-for="type in allTypes.map(t => getDungeonType(t))" :key="type.t"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
-                            :class="selectedType === type.t ? type.color + ' text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                " @click="selectedType = type.t">
+                        <button
+                            v-for="type in allTypes.map(t => getDungeonType(t))"
+                            :key="type.t"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            :class="
+                                selectedType === type.t ? type.color + ' text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                            "
+                            @click="selectedType = type.t"
+                        >
                             {{ type.label }}
                         </button>
                     </div>
@@ -96,15 +107,21 @@ useInitialScrollToSelectedItem()
                 <!-- 副本列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="dungeon in filteredDungeons" :key="dungeon.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                        <div
+                            v-for="dungeon in filteredDungeons"
+                            :key="dungeon.id"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedDungeonId === dungeon.id }"
-                            @click="selectDungeon(dungeon)">
+                            @click="selectDungeon(dungeon)"
+                        >
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium flex gap-2 items-center">
-                                        <img v-if="dungeon.e" :src="LeveledChar.elementUrl(dungeon.e)"
-                                            class="h-8 w-4 object-cover inline-block rounded" />
+                                        <img
+                                            v-if="dungeon.e"
+                                            :src="LeveledChar.elementUrl(dungeon.e)"
+                                            class="h-8 w-4 object-cover inline-block rounded"
+                                        />
                                         {{ getDungeonName(dungeon) }}
                                     </div>
                                     <div class="text-xs opacity-70 mt-1">
@@ -112,8 +129,7 @@ useInitialScrollToSelectedItem()
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
-                                    <span class="text-xs px-2 py-0.5 rounded"
-                                        :class="getDungeonType(dungeon.t).color + ' text-white'">
+                                    <span class="text-xs px-2 py-0.5 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">
                                         {{ getDungeonType(dungeon.t).label }}
                                     </span>
                                     <span class="text-xs opacity-70">Lv.{{ dungeon.lv }}</span>
@@ -134,9 +150,11 @@ useInitialScrollToSelectedItem()
                     共 {{ filteredDungeons.length }} 个副本
                 </div>
             </div>
-            <div v-if="selectedDungeon"
+            <div
+                v-if="selectedDungeon"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectDungeon(null)">
+                @click="selectDungeon(null)"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
@@ -147,5 +165,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

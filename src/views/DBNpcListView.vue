@@ -85,8 +85,12 @@ useInitialScrollToSelectedItem()
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedNpc }">
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索 NPC ID/名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索 NPC ID/名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+                    />
 
                     <div class="mt-2 flex items-center gap-4 text-xs text-base-content/80">
                         <label class="flex items-center gap-2 select-none cursor-pointer">
@@ -103,10 +107,13 @@ useInitialScrollToSelectedItem()
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="npc in filteredNpcs" :key="npc.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                        <div
+                            v-for="npc in filteredNpcs"
+                            :key="npc.id"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedNpcId === npc.id }"
-                            @click="selectNpc(npc)">
+                            @click="selectNpc(npc)"
+                        >
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
                                     <div class="font-medium">{{ npc.name || `NPC ${npc.id}` }}</div>
@@ -114,12 +121,10 @@ useInitialScrollToSelectedItem()
                                     <div class="text-xs opacity-70 mt-1 flex flex-wrap items-center gap-2">
                                         <span v-if="npc.camp">{{ npc.camp }}</span>
                                         <span v-if="npc.type">{{ npc.type }}</span>
-                                        <span v-if="hasNpcImprCheck(npc)"
-                                            class="px-1.5 py-0.5 rounded bg-secondary text-secondary-content">
+                                        <span v-if="hasNpcImprCheck(npc)" class="px-1.5 py-0.5 rounded bg-secondary text-secondary-content">
                                             印象检定
                                         </span>
-                                        <span v-if="hasNpcImprIncrease(npc)"
-                                            class="px-1.5 py-0.5 rounded bg-success text-success-content">
+                                        <span v-if="hasNpcImprIncrease(npc)" class="px-1.5 py-0.5 rounded bg-success text-success-content">
                                             印象增加
                                         </span>
                                     </div>
@@ -141,13 +146,14 @@ useInitialScrollToSelectedItem()
                     </div>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">共 {{
-                    filteredNpcs.length }} 个 NPC</div>
+                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">共 {{ filteredNpcs.length }} 个 NPC</div>
             </div>
 
-            <div v-if="selectedNpc"
+            <div
+                v-if="selectedNpc"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectNpc(null)">
+                @click="selectNpc(null)"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
@@ -157,5 +163,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

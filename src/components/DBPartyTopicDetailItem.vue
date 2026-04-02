@@ -204,11 +204,7 @@ function getSelectedOption(scopeKey: string, dialogue: Dialogue): DialogueOption
  * @param dialogueMap 对话映射
  * @param incomingIds 入边节点集合
  */
-function collectDialogueNode(
-    dialogue: Dialogue,
-    dialogueMap: Map<number, Dialogue>,
-    incomingIds: Set<number>
-): void {
+function collectDialogueNode(dialogue: Dialogue, dialogueMap: Map<number, Dialogue>, incomingIds: Set<number>): void {
     dialogueMap.set(dialogue.id, dialogue)
 
     if (dialogue.next !== undefined) {
@@ -226,11 +222,7 @@ function collectDialogueNode(
  * @param dialogueMap 对话映射
  * @param incomingIds 入边节点集合
  */
-function collectDialogueOption(
-    option: DialogueOption,
-    dialogueMap: Map<number, Dialogue>,
-    incomingIds: Set<number>
-): void {
+function collectDialogueOption(option: DialogueOption, dialogueMap: Map<number, Dialogue>, incomingIds: Set<number>): void {
     dialogueMap.set(option.id, option)
     incomingIds.add(option.id)
 

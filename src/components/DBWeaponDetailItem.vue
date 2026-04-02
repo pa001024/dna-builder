@@ -494,7 +494,7 @@ watch(
                 <div
                     v-for="char in exclusiveRelatedChars"
                     :key="char.id"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
+                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                 >
                     <div class="flex items-center gap-2 min-w-0">
                         <SRouterLink :to="`/db/char/${char.id}`" class="hover:underline min-w-0 truncate">

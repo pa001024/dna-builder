@@ -248,7 +248,9 @@ const charTabs = computed(() => {
         tabs.push({
             name: "同律",
             url: hasRealSkillWeaponIcon ? skillWeaponUrl : "",
-            skillMaskUrl: hasRealSkillWeaponIcon ? "" : charBuild.value.skillWeaponSkills[0]?.url || charBuild.value.skillWeapon.技能?.[0]?.url || "",
+            skillMaskUrl: hasRealSkillWeaponIcon
+                ? ""
+                : charBuild.value.skillWeaponSkills[0]?.url || charBuild.value.skillWeapon.技能?.[0]?.url || "",
         })
     }
 
@@ -851,7 +853,7 @@ async function shareCharBuild(title: string, desc: string = "") {
         ui.showErrorMessage(t("char-build.share_failed"), error instanceof Error ? error.message : t("char-build.unknown_error"))
     }
 }
-; (globalThis as any).__chapterCounter = 1
+;(globalThis as any).__chapterCounter = 1
 
 let roleCache: DNARoleShowBean | null = null
 async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boolean = false) {
@@ -951,8 +953,16 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
 <template>
     <!-- Tour 组件 -->
-    <VTour ref="tour" :steps="steps" :button-labels="buttonLabels" backdrop highlight no-scroll
-        @on-tour-step="handleTourStep" @on-tour-end="tourStore.markTourCompleted('char-build')" />
+    <VTour
+        ref="tour"
+        :steps="steps"
+        :button-labels="buttonLabels"
+        backdrop
+        highlight
+        no-scroll
+        @on-tour-step="handleTourStep"
+        @on-tour-end="tourStore.markTourCompleted('char-build')"
+    />
 
     <dialog class="modal" :class="{ 'modal-open': simulator_model_show }">
         <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
@@ -978,15 +988,26 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
     </dialog>
     <dialog class="modal" :class="{ 'modal-open': ast_help_model_show }">
         <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
-            <ASTHelp v-if="ast_help_model_show" v-model="ast_help_model_show" :char-build="charBuild"
-                :skill="charBuild.selectedSkill" @select="targetFunction = $event" />
+            <ASTHelp
+                v-if="ast_help_model_show"
+                v-model="ast_help_model_show"
+                :char-build="charBuild"
+                :skill="charBuild.selectedSkill"
+                @select="targetFunction = $event"
+            />
         </div>
         <div class="modal-backdrop" @click="ast_help_model_show = false" />
     </dialog>
     <dialog class="modal" :class="{ 'modal-open': weapon_select_model_show }">
         <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
-            <WeaponListView v-if="weapon_select_model_show" :char-build="charBuild" :default-tab="weaponDefaultTab"
-                :melee="charSettings.meleeWeapon" :ranged="charSettings.rangedWeapon" @change="handleWeaponSelection" />
+            <WeaponListView
+                v-if="weapon_select_model_show"
+                :char-build="charBuild"
+                :default-tab="weaponDefaultTab"
+                :melee="charSettings.meleeWeapon"
+                :ranged="charSettings.rangedWeapon"
+                @change="handleWeaponSelection"
+            />
             <div class="modal-action">
                 <form class="flex justify-end gap-2" method="dialog">
                     <button class="btn btn-primary" @click="applyWeaponSelection">
@@ -1009,32 +1030,48 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 <label class="label" for="share-title">
                     <span class="label-text">{{ $t("char-build.title") }}</span>
                 </label>
-                <input id="share-title" v-model="share_title" type="text" class="input input-bordered w-full"
-                    :placeholder="$t('char-build.enter_title')" maxlength="50" />
+                <input
+                    id="share-title"
+                    v-model="share_title"
+                    type="text"
+                    class="input input-bordered w-full"
+                    :placeholder="$t('char-build.enter_title')"
+                    maxlength="50"
+                />
             </div>
             <div>
                 <label class="label" for="share-desc">
                     <span class="label-text">{{ $t("char-build.description") }}</span>
                 </label>
-                <textarea id="share-desc" v-model="share_desc" class="textarea textarea-bordered w-full"
-                    :placeholder="$t('char-build.enter_description')" rows="3" maxlength="200"></textarea>
+                <textarea
+                    id="share-desc"
+                    v-model="share_desc"
+                    class="textarea textarea-bordered w-full"
+                    :placeholder="$t('char-build.enter_description')"
+                    rows="3"
+                    maxlength="200"
+                ></textarea>
             </div>
         </div>
     </DialogModel>
     <div class="h-full flex flex-col relative">
         <!-- 背景图 -->
-        <div class="inset-0 absolute opacity-50" :style="{
-            backgroundImage: `url(${charBuild.char.bg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-        }" />
+        <div
+            class="inset-0 absolute opacity-50"
+            :style="{
+                backgroundImage: `url(${charBuild.char.bg})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+            }"
+        />
         <!-- 顶部操作栏 -->
-        <div data-tour="top-actions"
-            class="sticky top-0 z-1 bg-base-300/50 backdrop-blur-sm rounded-md p-2 sm:p-3 m-1 sm:m-2 shadow-lg border border-base-200">
+        <div
+            data-tour="top-actions"
+            class="sticky top-0 z-1 bg-base-300/50 backdrop-blur-sm rounded-md p-2 sm:p-3 m-1 sm:m-2 shadow-lg border border-base-200"
+        >
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-2">
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:ml-auto">
-                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" data-tour="tour-button"
-                        @click="tour?.startTour()">
+                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" data-tour="tour-button" @click="tour?.startTour()">
                         <Icon icon="ri:question-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.tour") }}</span>
                     </button>
@@ -1042,8 +1079,11 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         <Icon icon="ri:share-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.share") }}</span>
                     </button>
-                    <button v-if="['黎瑟', '赛琪'].includes(selectedChar)" class="btn btn-sm btn-ghost flex-1 sm:flex-none"
-                        @click="simulator_model_show = true">
+                    <button
+                        v-if="['黎瑟', '赛琪'].includes(selectedChar)"
+                        class="btn btn-sm btn-ghost flex-1 sm:flex-none"
+                        @click="simulator_model_show = true"
+                    >
                         <Icon icon="ri:game-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.simulator") }}</span>
                     </button>
@@ -1051,45 +1091,62 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         <Icon icon="ri:robot-2-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.auto_build") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-success flex-1 sm:flex-none"
-                        @click="$router.push('/char-build-compare')">
+                    <button class="btn btn-sm btn-success flex-1 sm:flex-none" @click="$router.push('/char-build-compare')">
                         <Icon icon="ri:bar-chart-line" class="w-4 h-4" />
                         <span class="hidden sm:inline">{{ $t("build-compare.title") }}</span>
                     </button>
                     <div class="dropdown dropdown-end w-full sm:w-auto">
-                        <div tabindex="0" role="button"
-                            class="btn btn-sm btn-primary w-full sm:w-auto flex-1 sm:flex-none">
+                        <div tabindex="0" role="button" class="btn btn-sm btn-primary w-full sm:w-auto flex-1 sm:flex-none">
                             <Icon icon="ri:save-fill" class="w-4 h-4" />
                             <span class="hidden sm:inline">{{ $t("char-build.save_project") }}</span>
                             <span class="sm:hidden">{{ $t("char-build.save") }}</span>
                         </div>
-                        <div tabindex="0"
-                            class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 shadow-sm">
+                        <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 shadow-sm">
                             <div class="card-body space-y-2">
                                 <h2 class="card-title">{{ $t("char-build.save_project") }}</h2>
                                 <ul v-if="charProject.projects.length > 0">
-                                    <li v-for="(project, index) in charProject.projects" :key="project.name"
+                                    <li
+                                        v-for="(project, index) in charProject.projects"
+                                        :key="project.name"
                                         class="p-2 flex items-center gap-2 rounded-md"
-                                        :class="{ 'bg-base-300': project.name === charProject.selected }">
-                                        <input v-if="editingProjectIndex === index"
-                                            :id="`char-project-name-input-${index}`" v-model="editProjectName"
+                                        :class="{ 'bg-base-300': project.name === charProject.selected }"
+                                    >
+                                        <input
+                                            v-if="editingProjectIndex === index"
+                                            :id="`char-project-name-input-${index}`"
+                                            v-model="editProjectName"
                                             class="bg-base-200 px-2 py-0.5 text-sm w-24 sm:w-36"
-                                            @blur="finishEditProjectName" @keyup.enter="finishEditProjectName"
-                                            @keyup.escape="editingProjectIndex = -1" />
-                                        <span v-else class="font-medium text-sm link link-primary link-hover"
-                                            :title="$t('char-build.click_to_load')" @click="loadConfigByIndex(index)">
+                                            @blur="finishEditProjectName"
+                                            @keyup.enter="finishEditProjectName"
+                                            @keyup.escape="editingProjectIndex = -1"
+                                        />
+                                        <span
+                                            v-else
+                                            class="font-medium text-sm link link-primary link-hover"
+                                            :title="$t('char-build.click_to_load')"
+                                            @click="loadConfigByIndex(index)"
+                                        >
                                             {{ project.name }}
                                         </span>
-                                        <div class="ml-auto btn btn-xs btn-ghost btn-square border-0" :title="$t('char-build.rename')"
-                                            @click="renameProject(index)">
+                                        <div
+                                            class="ml-auto btn btn-xs btn-ghost btn-square border-0"
+                                            :title="$t('char-build.rename')"
+                                            @click="renameProject(index)"
+                                        >
                                             <Icon icon="ri:pencil-fill" class="h-4 w-4" />
                                         </div>
-                                        <div class="btn btn-xs btn-ghost btn-square border-0" :title="$t('char-build.save')"
-                                            @click="saveConfig(index)">
+                                        <div
+                                            class="btn btn-xs btn-ghost btn-square border-0"
+                                            :title="$t('char-build.save')"
+                                            @click="saveConfig(index)"
+                                        >
                                             <Icon icon="ri:save-fill" class="h-4 w-4" />
                                         </div>
-                                        <div class="btn btn-xs btn-ghost btn-square border-0" :title="$t('common.delete')"
-                                            @click="deleteProject(index)">
+                                        <div
+                                            class="btn btn-xs btn-ghost btn-square border-0"
+                                            :title="$t('common.delete')"
+                                            @click="deleteProject(index)"
+                                        >
                                             <Icon icon="ri:delete-bin-2-fill" class="h-4 w-4" />
                                         </div>
                                     </li>
@@ -1114,10 +1171,17 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 <div class="flex flex-col gap-4">
                     <div data-tour="char-tabs" class="flex m-auto gap-2 overflow-x-auto pb-2">
                         <div v-for="tab in charTabs" :key="tab.name" class="flex items-center gap-2 shrink-0">
-                            <div class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
+                            <div
+                                class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
                                 :class="{ 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name }"
-                                @click="charTab = tab.name">
-                                <ImageFallback v-if="!tab.skillMaskUrl" :src="tab.url" alt="角色头像" class="w-full h-full object-cover object-top">
+                                @click="charTab = tab.name"
+                            >
+                                <ImageFallback
+                                    v-if="!tab.skillMaskUrl"
+                                    :src="tab.url"
+                                    alt="角色头像"
+                                    class="w-full h-full object-cover object-top"
+                                >
                                     <Icon icon="kezhou" class="w-full h-full" />
                                 </ImageFallback>
                                 <div
@@ -1126,14 +1190,15 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     class="flex h-full w-full items-center justify-center bg-base-content"
                                     :style="{ mask: `url(${tab.skillMaskUrl}) no-repeat center/68%` }"
                                 />
-                                <div
-                                    class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
+                                <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
                             </div>
                         </div>
                     </div>
                     <!-- 角色 -->
-                    <div v-if="charTab === '角色'"
-                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-3 space-y-3 border border-base-200">
+                    <div
+                        v-if="charTab === '角色'"
+                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-3 space-y-3 border border-base-200"
+                    >
                         <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2 p-1">
                             <div class="flex flex-col">
                                 <div class="text-lg font-bold">
@@ -1147,8 +1212,14 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         </h3>
                         <div class="flex items-center gap-2 text-sm p-1">
                             <div class="flex-1">
-                                <input v-model.number="charSettings.charLevel" type="range"
-                                    class="range range-primary range-xs w-full" min="1" max="80" step="1" />
+                                <input
+                                    v-model.number="charSettings.charLevel"
+                                    type="range"
+                                    class="range range-primary range-xs w-full"
+                                    min="1"
+                                    max="80"
+                                    step="1"
+                                />
                             </div>
                         </div>
                         <!-- 词条 -->
@@ -1157,46 +1228,79 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 <CharAttrShow :attributes="attributes" :char-build="charBuild" @add-skill="addSkill" />
                             </div>
                         </div>
-                        <div class="flex justify-center items-center cursor-pointer p-2 hover:bg-base-100/60 transition-all duration-200"
-                            @click="charDetailExpend = !charDetailExpend">
+                        <div
+                            class="flex justify-center items-center cursor-pointer p-2 hover:bg-base-100/60 transition-all duration-200"
+                            @click="charDetailExpend = !charDetailExpend"
+                        >
                             <Icon icon="radix-icons:chevron-down" :class="{ 'rotate-180': charDetailExpend }" />
                         </div>
                         <!-- 技能选择 -->
                         <div data-tour="skill-select">
-                            <SkillTabs :skills="charBuild.charSkills" :selected-skill-name="charSettings.baseName"
-                                @select="charSettings.baseName = $event" />
+                            <SkillTabs
+                                :skills="charBuild.charSkills"
+                                :selected-skill-name="charSettings.baseName"
+                                @select="charSettings.baseName = $event"
+                            />
                         </div>
                         <div class="flex items-center gap-4 text-sm p-1">
                             <div class="flex-1">
-                                <input v-model.number="charSettings.charSkillLevel" type="range"
-                                    class="range range-primary range-xs w-full" min="1" max="12" step="1" />
+                                <input
+                                    v-model.number="charSettings.charSkillLevel"
+                                    type="range"
+                                    class="range range-primary range-xs w-full"
+                                    min="1"
+                                    max="12"
+                                    step="1"
+                                />
                             </div>
                             <div class="flex-none">Lv. {{ charSettings.charSkillLevel }}</div>
                         </div>
-                        <SkillFields :skill="charBuild.selectedSkill"
+                        <SkillFields
+                            :skill="charBuild.selectedSkill"
                             :selected-identifiers="charBuild.getIdentifierNames(charBuild.targetFunction)"
-                            :char-build="charBuild" :attributes="attributes" @add-skill="addSkill($event)" />
+                            :char-build="charBuild"
+                            :attributes="attributes"
+                            @add-skill="addSkill($event)"
+                        />
                     </div>
 
                     <!-- 武器 -->
-                    <WeaponTab v-if="charTab === '近战'" v-model:model-show="weapon_select_model_show"
-                        @open-weapon-select="weaponDefaultTab = '近战'" wkey="melee" :char-build="charBuild"
-                        :attributes="attributes" @add-skill="addSkill($event)" />
-                    <WeaponTab v-if="charTab === '远程'" v-model:model-show="weapon_select_model_show"
-                        @open-weapon-select="weaponDefaultTab = '远程'" wkey="ranged" :char-build="charBuild"
-                        :attributes="attributes" @add-skill="addSkill($event)" />
-                    <WeaponTab v-if="charTab === '同律'" wkey="skill" :char-build="charBuild" :attributes="attributes"
-                        @add-skill="addSkill($event)" />
+                    <WeaponTab
+                        v-if="charTab === '近战'"
+                        v-model:model-show="weapon_select_model_show"
+                        @open-weapon-select="weaponDefaultTab = '近战'"
+                        wkey="melee"
+                        :char-build="charBuild"
+                        :attributes="attributes"
+                        @add-skill="addSkill($event)"
+                    />
+                    <WeaponTab
+                        v-if="charTab === '远程'"
+                        v-model:model-show="weapon_select_model_show"
+                        @open-weapon-select="weaponDefaultTab = '远程'"
+                        wkey="ranged"
+                        :char-build="charBuild"
+                        :attributes="attributes"
+                        @add-skill="addSkill($event)"
+                    />
+                    <WeaponTab
+                        v-if="charTab === '同律'"
+                        wkey="skill"
+                        :char-build="charBuild"
+                        :attributes="attributes"
+                        @add-skill="addSkill($event)"
+                    />
 
                     <!-- 目标函数 -->
-                    <div data-tour="target-function"
-                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200">
+                    <div
+                        data-tour="target-function"
+                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
+                    >
                         <div class="space-y-2 p-1">
                             <div class="text-sm flex justify-between">
                                 <div class="flex items-center gap-2">
                                     {{ isTimeline ? "时间线" : "表达式" }}
-                                    <div class="btn btn-xs text-lg btn-ghost btn-circle"
-                                        @click="ast_help_model_show = true">
+                                    <div class="btn btn-xs text-lg btn-ghost btn-circle" @click="ast_help_model_show = true">
                                         <Icon icon="ri:question-line" />
                                     </div>
                                 </div>
@@ -1204,17 +1308,23 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             </div>
                             <label v-if="!isTimeline" class="input input-sm input-primary text-sm flex justify-between">
                                 <input v-model="targetFunction" type="text" :placeholder="$t('char-build.damage')" class="grow" />
-                                <div v-if="targetFunction" class="flex items-center cursor-pointer hover:text-primary"
-                                    @click="targetFunction = ''">
+                                <div
+                                    v-if="targetFunction"
+                                    class="flex items-center cursor-pointer hover:text-primary"
+                                    @click="targetFunction = ''"
+                                >
                                     <Icon icon="codicon:chrome-close" />
                                 </div>
                             </label>
                             <!-- 时间线 -->
                             <template v-else>
-                                <Select :value="charSettings.baseName" class="input input-sm input-primary w-full"
-                                    :placeholder="$t('char-build.select_timeline')" @change="charSettings.baseName = $event">
-                                    <SelectItem v-for="timeline in timelines" :key="timeline.name"
-                                        :value="timeline.name">
+                                <Select
+                                    :value="charSettings.baseName"
+                                    class="input input-sm input-primary w-full"
+                                    :placeholder="$t('char-build.select_timeline')"
+                                    @change="charSettings.baseName = $event"
+                                >
+                                    <SelectItem v-for="timeline in timelines" :key="timeline.name" :value="timeline.name">
                                         {{ timeline.name }}
                                     </SelectItem>
                                 </Select>
@@ -1225,14 +1335,12 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     </button>
                                     <label class="label cursor-pointer">
                                         <span class="text-sm text-base-content/80">DPS</span>
-                                        <input v-model="charSettings.timelineDPS" type="checkbox"
-                                            class="toggle toggle-secondary" />
+                                        <input v-model="charSettings.timelineDPS" type="checkbox" class="toggle toggle-secondary" />
                                     </label>
                                 </div>
                             </template>
                             <!-- 错误信息 -->
-                            <div v-if="charBuild.validateAST(targetFunction)"
-                                class="flex text-xs items-center text-red-500">
+                            <div v-if="charBuild.validateAST(targetFunction)" class="flex text-xs items-center text-red-500">
                                 {{ charBuild.validateAST(targetFunction) }}
                             </div>
                             <div v-else data-tour="damage-result" class="flex justify-between items-center p-1">
@@ -1249,20 +1357,33 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             <ScrollArea id="char-build-scroll2" class="sm:flex-1 flex-none">
                 <div class="p-2 space-y-4">
                     <!-- 配装分享 -->
-                    <CollapsibleSection :title="$t('char-build.share_build')" :is-open="!collapsedSections.share"
-                        @toggle="toggleSection('share')">
-                        <DOBBuildShow :charId="charBuild.char.id" :charName="charBuild.char.名称" ref="buildShow"
-                            @use-build="applyLoadedSettings" />
+                    <CollapsibleSection
+                        :title="$t('char-build.share_build')"
+                        :is-open="!collapsedSections.share"
+                        @toggle="toggleSection('share')"
+                    >
+                        <DOBBuildShow
+                            :charId="charBuild.char.id"
+                            :charName="charBuild.char.名称"
+                            ref="buildShow"
+                            @use-build="applyLoadedSettings"
+                        />
                     </CollapsibleSection>
                     <!-- 角色详情 -->
-                    <CollapsibleSection :title="$t('dna-role-detail.title')" :is-open="!collapsedSections.detail"
-                        @toggle="toggleSection('detail')">
+                    <CollapsibleSection
+                        :title="$t('dna-role-detail.title')"
+                        :is-open="!collapsedSections.detail"
+                        @toggle="toggleSection('detail')"
+                    >
                         <CharIntronShow :char="charBuild.char" />
                         <CharSkillShow :char="charBuild.char" />
                     </CollapsibleSection>
                     <!-- 基本设置卡片 -->
-                    <CollapsibleSection :title="$t('char-build.basic_settings')" :is-open="!collapsedSections.basic"
-                        @toggle="toggleSection('basic')">
+                    <CollapsibleSection
+                        :title="$t('char-build.basic_settings')"
+                        :is-open="!collapsedSections.basic"
+                        @toggle="toggleSection('basic')"
+                    >
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-2">
                             <!-- 其他设置 -->
                             <div class="space-y-3">
@@ -1271,12 +1392,16 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         <div class="px-2 text-xs text-gray-400 mb-1">
                                             {{ $t("char-build.hp_percent") }}
                                         </div>
-                                        <Select v-model="charSettings.hpPercent"
+                                        <Select
+                                            v-model="charSettings.hpPercent"
                                             class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                            @change="updateCharBuild">
+                                            @change="updateCharBuild"
+                                        >
                                             <SelectItem
                                                 v-for="hp in [1, ...Array.from({ length: 20 }, (_, i) => (i + 1) * 5)]"
-                                                :key="hp" :value="hp / 100">
+                                                :key="hp"
+                                                :value="hp / 100"
+                                            >
                                                 {{ hp }}%
                                             </SelectItem>
                                         </Select>
@@ -1285,9 +1410,11 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         <div class="px-2 text-xs text-gray-400 mb-1">
                                             {{ $t("char-build.resonance_gain") }}
                                         </div>
-                                        <Select v-model="charSettings.resonanceGain"
+                                        <Select
+                                            v-model="charSettings.resonanceGain"
                                             class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                            @change="updateCharBuild">
+                                            @change="updateCharBuild"
+                                        >
                                             <SelectItem v-for="rg in [0, 0.5, 1, 1.5, 2, 2.5, 3]" :key="rg" :value="rg">
                                                 {{ rg * 100 }}%
                                             </SelectItem>
@@ -1298,8 +1425,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             {{ $t("失衡") }}
                                         </div>
                                         <div class="p-0.5">
-                                            <input v-model="charSettings.imbalance" type="checkbox"
-                                                class="toggle toggle-secondary" />
+                                            <input v-model="charSettings.imbalance" type="checkbox" class="toggle toggle-secondary" />
                                         </div>
                                     </div>
                                 </div>
@@ -1311,9 +1437,11 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         <div class="px-2 text-xs text-gray-400 mb-1">
                                             {{ $t("char-build.enemy") }}
                                         </div>
-                                        <Select v-model="charSettings.enemyId"
+                                        <Select
+                                            v-model="charSettings.enemyId"
                                             class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                            @change="updateCharBuild">
+                                            @change="updateCharBuild"
+                                        >
                                             <SelectItem v-for="enemy in monsterData" :key="enemy.id" :value="enemy.id">
                                                 {{ $t(enemy.n) }}
                                             </SelectItem>
@@ -1323,12 +1451,12 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         <div class="px-2 text-xs text-gray-400 mb-1">
                                             {{ $t("char-build.enemy_resistance") }}
                                         </div>
-                                        <Select v-model="charSettings.enemyResistance"
+                                        <Select
+                                            v-model="charSettings.enemyResistance"
                                             class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                                            @change="updateCharBuild">
-                                            <SelectItem v-for="res in [0, 0.5, -4]" :key="res" :value="res"> {{ res *
-                                                100 }}%
-                                            </SelectItem>
+                                            @change="updateCharBuild"
+                                        >
+                                            <SelectItem v-for="res in [0, 0.5, -4]" :key="res" :value="res"> {{ res * 100 }}% </SelectItem>
                                         </Select>
                                     </div>
                                 </div>
@@ -1338,8 +1466,14 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 <div class="px-2 text-xs text-gray-400 mb-1">
                                     {{ $t("char-build.enemy_level") }} (Lv. {{ charSettings.enemyLevel }})
                                 </div>
-                                <input v-model.number="charSettings.enemyLevel" type="range"
-                                    class="range range-primary range-xs w-full" min="1" max="180" step="1" />
+                                <input
+                                    v-model.number="charSettings.enemyLevel"
+                                    type="range"
+                                    class="range range-primary range-xs w-full"
+                                    min="1"
+                                    max="180"
+                                    step="1"
+                                />
                             </div>
                             <!-- 敌人信息 -->
                             <div class="space-y-3">
@@ -1378,12 +1512,17 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
                     <!-- MOD配置区域 -->
                     <!-- 角色MOD -->
-                    <CollapsibleSection data-tour="char-mods"
+                    <CollapsibleSection
+                        data-tour="char-mods"
                         :title="`${$t('魔之楔')} (${charBuild.getModCostMax(charTab)}/${charBuild.getModCap(charTab)})`"
-                        :badge="`${charBuild.getModCostTransfer(charTab).length}模块`" :is-open="!collapsedSections.mods"
-                        @toggle="toggleSection('mods')">
+                        :badge="`${charBuild.getModCostTransfer(charTab).length}模块`"
+                        :is-open="!collapsedSections.mods"
+                        @toggle="toggleSection('mods')"
+                    >
                         <div class="mt-2">
-                            <ModEditer v-if="charTab === '角色'" :mods="selectedCharMods"
+                            <ModEditer
+                                v-if="charTab === '角色'"
+                                :mods="selectedCharMods"
                                 :mod-options="
                                     modOptions.filter(
                                         m =>
@@ -1391,78 +1530,107 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             (!m.limit || m.limit === charBuild.char.名称 || m.limit === charBuild.char.属性)
                                     )
                                 "
-                                :char-build="charBuild" :aura-mod="charSettings.auraMod" type="角色"
-                                :polset="charBuild.getModCostTransfer(charTab)" @remove-mod="removeMod($event, '角色')"
+                                :char-build="charBuild"
+                                :aura-mod="charSettings.auraMod"
+                                type="角色"
+                                :polset="charBuild.getModCostTransfer(charTab)"
+                                @remove-mod="removeMod($event, '角色')"
                                 @select-mod="selectMod('角色', $event[0], $event[1], $event[2])"
                                 @level-change="charSettings.charMods[$event[0]]![1] = $event[1]"
                                 @select-aura-mod="charSettings.auraMod = $event"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
-                                @sync="syncModFromGame(charBuild.char.id, false)" />
+                                @sync="syncModFromGame(charBuild.char.id, false)"
+                            />
 
                             <!-- 近战武器MOD -->
                             <ModEditer
                                 v-if="charTab === '近战' || (charTab === '同律' && charBuild.skillWeapon?.inherit === 'melee')"
-                                :mods="selectedMeleeMods" :mod-options="modOptions.filter(
-                                    m =>
-                                        m.type === '近战' &&
-                                        (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit))
-                                )
-                                    " :char-build="charBuild" type="近战" :polset="charBuild.getModCostTransfer(charTab)"
+                                :mods="selectedMeleeMods"
+                                :mod-options="
+                                    modOptions.filter(
+                                        m =>
+                                            m.type === '近战' &&
+                                            (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit))
+                                    )
+                                "
+                                :char-build="charBuild"
+                                type="近战"
+                                :polset="charBuild.getModCostTransfer(charTab)"
                                 @remove-mod="removeMod($event, '近战')"
                                 @select-mod="selectMod('近战', $event[0], $event[1], $event[2])"
                                 @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
-                                @sync="syncModFromGame(charBuild.meleeWeapon.id, true)" />
+                                @sync="syncModFromGame(charBuild.meleeWeapon.id, true)"
+                            />
 
                             <!-- 远程武器MOD -->
                             <ModEditer
                                 v-if="charTab === '远程' || (charTab === '同律' && charBuild.skillWeapon?.inherit === 'ranged')"
-                                :mods="selectedRangedMods" :mod-options="modOptions.filter(
-                                    m =>
-                                        m.type === '远程' &&
-                                        (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit))
-                                )
-                                    " :char-build="charBuild" type="远程" :polset="charBuild.getModCostTransfer(charTab)"
+                                :mods="selectedRangedMods"
+                                :mod-options="
+                                    modOptions.filter(
+                                        m =>
+                                            m.type === '远程' &&
+                                            (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit))
+                                    )
+                                "
+                                :char-build="charBuild"
+                                type="远程"
+                                :polset="charBuild.getModCostTransfer(charTab)"
                                 @remove-mod="removeMod($event, '远程')"
                                 @select-mod="selectMod('远程', $event[0], $event[1], $event[2])"
                                 @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
-                                @sync="syncModFromGame(charBuild.rangedWeapon.id, true)" />
+                                @sync="syncModFromGame(charBuild.rangedWeapon.id, true)"
+                            />
 
                             <!-- 同律武器MOD -->
-                            <ModEditer v-if="charTab === '同律' && !charBuild.skillWeapon?.inherit"
-                                :mods="selectedSkillWeaponMods" :mod-options="modOptions.filter(
-                                    m =>
-                                        m.type === charBuild.skillWeapon!.类型 &&
-                                        (!m.limit || [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit))
-                                )
-                                    " :char-build="charBuild" type="同律" :polset="charBuild.getModCostTransfer(charTab)"
+                            <ModEditer
+                                v-if="charTab === '同律' && !charBuild.skillWeapon?.inherit"
+                                :mods="selectedSkillWeaponMods"
+                                :mod-options="
+                                    modOptions.filter(
+                                        m =>
+                                            m.type === charBuild.skillWeapon!.类型 &&
+                                            (!m.limit || [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit))
+                                    )
+                                "
+                                :char-build="charBuild"
+                                type="同律"
+                                :polset="charBuild.getModCostTransfer(charTab)"
                                 @remove-mod="removeMod($event, '同律')"
                                 @select-mod="selectMod('同律', $event[0], $event[1], $event[2])"
                                 @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
-                                @sync="syncModFromGame(charBuild.char.id, false, true)" />
+                                @sync="syncModFromGame(charBuild.char.id, false, true)"
+                            />
                         </div>
                     </CollapsibleSection>
 
                     <!-- MODBUFF列表 -->
-                    <CollapsibleSection v-if="charBuild.modsWithWeapons.some(v => v.buff)"
+                    <CollapsibleSection
+                        v-if="charBuild.modsWithWeapons.some(v => v.buff)"
                         :title="$t('char-build.special_effect_config')"
                         :badge="charBuild.modsWithWeapons.filter(v => v.buff).length"
-                        :is-open="!collapsedSections.effects" @toggle="toggleSection('effects')">
+                        :is-open="!collapsedSections.effects"
+                        @toggle="toggleSection('effects')"
+                    >
                         <div class="mt-2">
                             <EffectSettings :mods="charBuild.modsWithWeapons" :char-build="charBuild" />
                         </div>
                     </CollapsibleSection>
 
                     <!-- BUFF列表 -->
-                    <CollapsibleSection :title="$t('char-build.buff_list')" :badge="selectedBuffs.length"
-                        :is-open="!collapsedSections.buffs" @toggle="toggleSection('buffs')">
+                    <CollapsibleSection
+                        :title="$t('char-build.buff_list')"
+                        :badge="selectedBuffs.length"
+                        :is-open="!collapsedSections.buffs"
+                        @toggle="toggleSection('buffs')"
+                    >
                         <!-- 协战选择 -->
                         <div class="flex flex-wrap items-center gap-4 my-2 p-3 bg-base-200/50 rounded-lg">
                             <span class="text-sm font-semibold">{{ $t("char-build.team") }}</span>
-                            <Select v-model="charSettings.team1" class="input input-bordered input-sm w-32"
-                                @change="updateTeamBuff">
+                            <Select v-model="charSettings.team1" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
                                 <template v-for="charWithElm in groupBy(team1Options, 'elm')" :key="charWithElm[0].elm">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                         {{ $t(charWithElm[0].elm + "属性") }}
@@ -1474,23 +1642,19 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     </SelectGroup>
                                 </template>
                             </Select>
-                            <Select v-model="charSettings.team1Weapon" class="input input-bordered input-sm w-32"
-                                @change="updateTeamBuff">
-                                <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')"
-                                    :key="weaponWithType[0].type">
+                            <Select v-model="charSettings.team1Weapon" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
+                                <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                         {{ $t(weaponWithType[0].type) }}
                                     </SelectLabel>
                                     <SelectGroup>
-                                        <SelectItem v-for="char in weaponWithType" :key="char.value"
-                                            :value="char.value">
+                                        <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
                                             {{ $t(char.label) }}
                                         </SelectItem>
                                     </SelectGroup>
                                 </template>
                             </Select>
-                            <Select v-model="charSettings.team2" class="input input-bordered input-sm w-32"
-                                @change="updateTeamBuff">
+                            <Select v-model="charSettings.team2" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
                                 <template v-for="charWithElm in groupBy(team2Options, 'elm')" :key="charWithElm[0].elm">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                         {{ $t(charWithElm[0].elm + "属性") }}
@@ -1502,45 +1666,59 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     </SelectGroup>
                                 </template>
                             </Select>
-                            <Select v-model="charSettings.team2Weapon" class="input input-bordered input-sm w-32"
-                                @change="updateTeamBuff">
-                                <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')"
-                                    :key="weaponWithType[0].type">
+                            <Select v-model="charSettings.team2Weapon" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
+                                <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                         {{ $t(weaponWithType[0].type) }}
                                     </SelectLabel>
                                     <SelectGroup>
-                                        <SelectItem v-for="char in weaponWithType" :key="char.value"
-                                            :value="char.value">
+                                        <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
                                             {{ $t(char.label) }}
                                         </SelectItem>
                                     </SelectGroup>
                                 </template>
                             </Select>
                         </div>
-                        <BuffEditer :buff-options="buffOptions" :selected-buffs="selectedBuffs" :char-build="charBuild"
-                            @toggle-buff="toggleBuff" @set-buff-lv="setBuffLv" />
+                        <BuffEditer
+                            :buff-options="buffOptions"
+                            :selected-buffs="selectedBuffs"
+                            :char-build="charBuild"
+                            @toggle-buff="toggleBuff"
+                            @set-buff-lv="setBuffLv"
+                        />
                     </CollapsibleSection>
 
                     <!-- 自定义BUFF -->
-                    <div v-if="selectedBuffs.some(v => v.名称 === '自定义BUFF')"
-                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden border border-base-200">
+                    <div
+                        v-if="selectedBuffs.some(v => v.名称 === '自定义BUFF')"
+                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden border border-base-200"
+                    >
                         <div class="p-4">
                             <CustomBuffEditor :buffs="charSettings.customBuff" @submit="charSettings.customBuff = $event" />
                         </div>
                     </div>
 
                     <!-- 动作序列 -->
-                    <CollapsibleSection :title="$t('char-build.actions')" :is-open="!collapsedSections.actions"
-                        @toggle="toggleSection('actions')">
+                    <CollapsibleSection
+                        :title="$t('char-build.actions')"
+                        :is-open="!collapsedSections.actions"
+                        @toggle="toggleSection('actions')"
+                    >
                         <CharActionEditor :char-name="selectedChar" :char-build="charBuild" />
                     </CollapsibleSection>
 
                     <!-- 装配预览 -->
-                    <CollapsibleSection :title="$t('char-build.equipment_preview')"
-                        :is-open="!collapsedSections.preview" @toggle="toggleSection('preview')">
-                        <EquipmentPreview :char-build="charBuild" :attributes="attributes" :char-name="selectedChar"
-                            :char-settings="charSettings" />
+                    <CollapsibleSection
+                        :title="$t('char-build.equipment_preview')"
+                        :is-open="!collapsedSections.preview"
+                        @toggle="toggleSection('preview')"
+                    >
+                        <EquipmentPreview
+                            :char-build="charBuild"
+                            :attributes="attributes"
+                            :char-name="selectedChar"
+                            :char-settings="charSettings"
+                        />
                     </CollapsibleSection>
                 </div>
             </ScrollArea>
@@ -1548,8 +1726,12 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
     </div>
 
     <!-- AI对话助手 -->
-    <AIChatDialog v-if="setting.showAIChat" :char-build="charBuild" @update:char-settings="charSettings = $event"
-        @update:selected-char="selectedChar = $event" />
+    <AIChatDialog
+        v-if="setting.showAIChat"
+        :char-build="charBuild"
+        @update:char-settings="charSettings = $event"
+        @update:selected-char="selectedChar = $event"
+    />
 </template>
 
 <style>

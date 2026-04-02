@@ -108,6 +108,10 @@
     "abyss-dungeon-list": {
         "title": "深渊列表"
     },
+    "abyss-usage": {
+        "desc": "深渊阵容与角色武器统计",
+        "title": "深渊使用率"
+    },
     "accessory": {
         "category": "分类",
         "description": "描述",

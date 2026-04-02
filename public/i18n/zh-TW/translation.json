@@ -4967,6 +4967,10 @@
     "abyss-dungeon-list": {
         "title": "深淵列表"
     },
+    "abyss-usage": {
+        "desc": "深淵陣容與角色武器統計",
+        "title": "深淵使用率"
+    },
     "accessory": {
         "category": "分類",
         "description": "描述",

@@ -122,25 +122,41 @@ useInitialScrollToSelectedItem()
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedWeapon }">
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索武器名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索武器名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+                    />
                 </div>
 
                 <div class="p-2 border-b border-base-200 space-y-2">
                     <div class="flex flex-wrap gap-2">
                         <label class="flex items-center gap-1 cursor-pointer">
-                            <input type="checkbox" v-model="showCategoryFilter"
-                                @change="toggleCategoryFilter(showCategoryFilter)" class="checkbox checkbox-xs" />
+                            <input
+                                type="checkbox"
+                                v-model="showCategoryFilter"
+                                @change="toggleCategoryFilter(showCategoryFilter)"
+                                class="checkbox checkbox-xs"
+                            />
                             <span class="text-xs text-base-content/70">武器分类</span>
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
-                            <input type="checkbox" v-model="showDamageTypeFilter"
-                                @change="toggleDamageTypeFilter(showDamageTypeFilter)" class="checkbox checkbox-xs" />
+                            <input
+                                type="checkbox"
+                                v-model="showDamageTypeFilter"
+                                @change="toggleDamageTypeFilter(showDamageTypeFilter)"
+                                class="checkbox checkbox-xs"
+                            />
                             <span class="text-xs text-base-content/70">伤害类型</span>
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
-                            <input type="checkbox" v-model="showVersionFilter"
-                                @change="toggleVersionFilter(showVersionFilter)" class="checkbox checkbox-xs" />
+                            <input
+                                type="checkbox"
+                                v-model="showVersionFilter"
+                                @change="toggleVersionFilter(showVersionFilter)"
+                                class="checkbox checkbox-xs"
+                            />
                             <span class="text-xs text-base-content/70">{{ $t("char-build.version") }}</span>
                         </label>
                     </div>
@@ -148,14 +164,24 @@ useInitialScrollToSelectedItem()
                     <div v-show="showCategoryFilter">
                         <div class="text-xs text-base-content/70 mb-1">武器分类</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all" :class="selectedCategory === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                " @click="selectedCategory = ''">
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                                :class="
+                                    selectedCategory === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedCategory = ''"
+                            >
                                 {{ $t("全部") }}
                             </button>
-                            <button v-for="cat in categories" :key="cat"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="selectedCategory === cat ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                    " @click="selectedCategory = cat">
+                            <button
+                                v-for="cat in categories"
+                                :key="cat"
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                                :class="
+                                    selectedCategory === cat ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedCategory = cat"
+                            >
                                 {{ $t(cat) }}
                             </button>
                         </div>
@@ -164,31 +190,48 @@ useInitialScrollToSelectedItem()
                     <div v-show="showDamageTypeFilter">
                         <div class="text-xs text-base-content/70 mb-1">伤害类型</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all" :class="selectedDamageType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                " @click="selectedDamageType = ''">
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                                :class="
+                                    selectedDamageType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedDamageType = ''"
+                            >
                                 {{ $t("全部") }}
                             </button>
-                            <button v-for="type in damageTypes" :key="type"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="selectedDamageType === type
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
-                                    " @click="selectedDamageType = type">
+                            <button
+                                v-for="type in damageTypes"
+                                :key="type"
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                                :class="
+                                    selectedDamageType === type
+                                        ? 'bg-primary text-white'
+                                        : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedDamageType = type"
+                            >
                                 {{ $t(type) }}
                             </button>
                         </div>
                     </div>
 
                     <div v-show="showVersionFilter" class="flex flex-wrap gap-1 pb-1">
-                        <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectedVersion = ''">
+                            @click="selectedVersion = ''"
+                        >
                             {{ $t("全部") }}
                         </button>
-                        <button v-for="version in versionOptions" :key="version"
-                            class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                            :class="selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectedVersion = version">
+                        <button
+                            v-for="version in versionOptions"
+                            :key="version"
+                            class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            :class="
+                                selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                            "
+                            @click="selectedVersion = version"
+                        >
                             {{ version }}
                         </button>
                     </div>
@@ -196,10 +239,13 @@ useInitialScrollToSelectedItem()
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="weapon in filteredWeapons" :key="weapon.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                        <div
+                            v-for="weapon in filteredWeapons"
+                            :key="weapon.id"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWeaponId === weapon.id }"
-                            @click="selectedWeaponId = weapon.id">
+                            @click="selectedWeaponId = weapon.id"
+                        >
                             <div class="flex items-start justify-between">
                                 <div class="flex">
                                     <div class="flex items-center gap-2">
@@ -209,7 +255,7 @@ useInitialScrollToSelectedItem()
                                                 {{ $t(weapon.名称) }}
                                             </div>
                                             <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                                <span>{{weapon.类型.map(t => $t(t)).join(", ")}}</span>
+                                                <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
                                                 <span>{{ $t(weapon.伤害类型) }}</span>
                                             </div>
                                         </div>
@@ -254,7 +300,7 @@ useInitialScrollToSelectedItem()
                                 </div>
                                 <div v-if="weapon.射击间隔" class="flex items-center gap-1">
                                     <span>{{ $t("射速") }}</span>
-                                    <span class="font-medium">{{ +((1 / weapon.射击间隔).toFixed(2)) }}</span>
+                                    <span class="font-medium">{{ +(1 / weapon.射击间隔).toFixed(2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -265,9 +311,11 @@ useInitialScrollToSelectedItem()
                     共 {{ filteredWeapons.length }} 个武器
                 </div>
             </div>
-            <div v-if="selectedWeapon"
+            <div
+                v-if="selectedWeapon"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedWeaponId = 0">
+                @click="selectedWeaponId = 0"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
@@ -277,5 +325,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

@@ -988,3 +988,13 @@ export const upsertActivitiesIngameMutation = typedMutation<
         }
     }
 `)
+
+export const submitAbyssUsageMutation = typedMutation<Types.AbyssUsageSubmission, { input: Types.AbyssUsageSubmissionInput }>(
+    /* GraphQL */ `
+        mutation ($input: AbyssUsageSubmissionInput!) {
+            submitAbyssUsage(input: $input) {
+                id
+            }
+        }
+    `
+)

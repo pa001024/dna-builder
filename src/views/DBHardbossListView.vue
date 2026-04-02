@@ -21,7 +21,10 @@ const filteredBosses = computed(() => {
             return true
         } else {
             const q = searchKeyword.value
-            const monsterName = boss.mid.map(id => monsterMap.get(id)?.n ?? "").filter(Boolean).join(" ")
+            const monsterName = boss.mid
+                .map(id => monsterMap.get(id)?.n ?? "")
+                .filter(Boolean)
+                .join(" ")
             // 直接匹配（ID、名称、描述）
             if (`${boss.id}`.includes(q) || boss.name.includes(q) || boss.desc?.includes(q) || monsterName.includes(q)) {
                 return true
@@ -66,17 +69,24 @@ useInitialScrollToSelectedItem()
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedBoss }">
                 <!-- 搜索栏 -->
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索梦魇残声 ID/名称/描述/怪物名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索梦魇残声 ID/名称/描述/怪物名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+                    />
                 </div>
 
                 <!-- Boss列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="boss in filteredBosses" :key="boss.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                        <div
+                            v-for="boss in filteredBosses"
+                            :key="boss.id"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedBossId === boss.id }"
-                            @click="selectBoss(boss)">
+                            @click="selectBoss(boss)"
+                        >
                             <div class="flex items-start justify-between gap-3">
                                 <div class="size-12 shrink-0">
                                     <img :src="getHardbossIcon(boss)" :alt="boss.name" class="w-full h-full object-cover rounded" />
@@ -88,8 +98,7 @@ useInitialScrollToSelectedItem()
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1 ml-2">
-                                    <span class="text-xs px-2 py-0.5 rounded bg-primary text-white"> {{ boss.diff.length
-                                    }} 个难度 </span>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-primary text-white"> {{ boss.diff.length }} 个难度 </span>
                                     <span class="text-xs opacity-70">ID: {{ boss.id }}</span>
                                 </div>
                             </div>
@@ -102,9 +111,11 @@ useInitialScrollToSelectedItem()
                     共 {{ filteredBosses.length }} 个梦魇残声
                 </div>
             </div>
-            <div v-if="selectedBoss"
+            <div
+                v-if="selectedBoss"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectBoss(null)">
+                @click="selectBoss(null)"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

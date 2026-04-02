@@ -47,16 +47,77 @@ const calculateScore = (baseRaidPoint: number, remainingTime: number, formulaId:
     return Math.floor(baseRaidPoint + totalAddition * baseRaidPoint)
 }
 
+/**
+ * 根据目标分数反推剩余时间。
+ * @param baseRaidPoint 基础分数
+ * @param targetScore 目标分数
+ * @param formulaId 公式ID
+ * @returns 反推出的剩余时间
+ */
+const calculateRemainingTimeByScore = (baseRaidPoint: number, targetScore: number, formulaId: number): number => {
+    const formula = RaidCalculation.find(item => item.FomulaId === formulaId)
+    if (!formula) return 0
+
+    const maxTime = Math.max(...formula.RaidTimeZone)
+    if (targetScore <= baseRaidPoint) return 0
+
+    let remainingAddition = targetScore / baseRaidPoint - 1
+    let time = 0
+
+    for (let i = 0; i < formula.RaidTimeZone.length; i++) {
+        const rate = formula.RaidTimeRate[i] ?? 0
+        const zoneEnd = formula.RaidTimeZone[i]
+        const zoneStart = i === 0 ? 0 : formula.RaidTimeZone[i - 1]
+        const zoneDuration = zoneEnd - zoneStart
+
+        if (rate <= 0) continue
+
+        const zoneAddition = zoneDuration * rate
+        if (remainingAddition <= zoneAddition) {
+            return Math.min(time + remainingAddition / rate, maxTime)
+        }
+
+        remainingAddition -= zoneAddition
+        time += zoneDuration
+    }
+
+    return maxTime
+}
+
 // 状态管理
 const selectedSeason = useSearchParam<number>("s", 1002)
+const scoreInput = ref("")
 const remainingTime = ref(30)
 const selectedDungeon = useSearchParam<number>("d", 21213)
 const activeInfoTab = useSearchParam<"score" | "dungeon" | "rank">("t", "rank")
+const seasonTabs = computed(() => Object.values(RaidSeason))
+const dungeonTabs = computed(() => {
+    const season = RaidSeason[selectedSeason.value]
+    if (!season) return []
 
-watch(selectedSeason, newSeason => {
-    if (RaidDungeon[selectedDungeon.value].RaidSeason !== newSeason)
-        selectedDungeon.value = Object.values(RaidDungeon).find(dungeon => dungeon.RaidSeason === newSeason)?.DungeonId || 21013
+    return Object.values(RaidDungeon).filter(dungeon => dungeon.RaidSeason === season.RaidSeason)
 })
+
+/**
+ * 切换赛季时，保留当前副本在新赛季中的序号。
+ * @param nextSeason 目标赛季ID
+ */
+const handleSeasonChange = (nextSeason: number) => {
+    if (selectedSeason.value === nextSeason) return
+
+    const previousDungeon = RaidDungeon[selectedDungeon.value]
+    const previousSeasonDungeons = Object.values(RaidDungeon)
+        .filter(dungeon => dungeon.RaidSeason === previousDungeon?.RaidSeason)
+        .sort((a, b) => a.DifficultyLevel - b.DifficultyLevel)
+    const nextSeasonDungeons = Object.values(RaidDungeon)
+        .filter(dungeon => dungeon.RaidSeason === nextSeason)
+        .sort((a, b) => a.DifficultyLevel - b.DifficultyLevel)
+
+    const previousIndex = previousSeasonDungeons.findIndex(dungeon => dungeon.DungeonId === selectedDungeon.value)
+
+    selectedSeason.value = nextSeason
+    selectedDungeon.value = nextSeasonDungeons[previousIndex]?.DungeonId ?? nextSeasonDungeons.at(-1)?.DungeonId ?? selectedDungeon.value
+}
 
 // 计算当前选中副本的最大允许剩余时间
 const maxAllowedTime = computed(() => {
@@ -70,14 +131,75 @@ const maxAllowedTime = computed(() => {
     return Math.max(...formula.RaidTimeZone)
 })
 
-// 监听剩余时间变化，确保不超过最大值
+const currentDungeonData = computed(() => RaidDungeon[selectedDungeon.value])
+
+const maxScore = computed(() => {
+    const dungeon = currentDungeonData.value
+    if (!dungeon) return 0
+    return calculateScore(dungeon.BaseRaidPoint, maxAllowedTime.value, dungeon.FomulaId)
+})
+
+const minScore = computed(() => currentDungeonData.value?.BaseRaidPoint ?? 0)
+
+/**
+ * 将输入的剩余时间限制在允许范围内，并同步分数输入。
+ * @param value 输入的剩余时间
+ */
 const updateRemainingTime = (value: number) => {
     const maxTime = maxAllowedTime.value
-    remainingTime.value = Math.min(value, maxTime)
+    const nextTime = Math.max(0, Math.min(value, maxTime))
+    remainingTime.value = nextTime
+
+    const dungeon = currentDungeonData.value
+    if (!dungeon) return
+    scoreInput.value = `${calculateScore(dungeon.BaseRaidPoint, nextTime, dungeon.FomulaId)}`
 }
 
-// 处理输入事件，确保类型安全
-const handleInput = (event: Event) => {
+/**
+ * 根据输入分数反推剩余时间，并同步分数输入。
+ * @param event 输入事件
+ */
+const handleScoreInput = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    if (target) {
+        const rawValue = target.value
+        scoreInput.value = rawValue
+
+        if (!rawValue.trim()) return
+
+        const dungeon = currentDungeonData.value
+        if (!dungeon) return
+
+        const parsedScore = Number(rawValue)
+        if (!Number.isFinite(parsedScore)) return
+        if (parsedScore < minScore.value) return
+
+        const nextScore = Math.max(0, Math.min(parsedScore, maxScore.value))
+        updateRemainingTime(calculateRemainingTimeByScore(dungeon.BaseRaidPoint, nextScore, dungeon.FomulaId))
+    }
+}
+
+/**
+ * 分数输入失焦后统一规整显示值。
+ */
+const commitScoreInput = () => {
+    const dungeon = currentDungeonData.value
+    if (!dungeon) return
+
+    const parsedScore = Number(scoreInput.value)
+    const nextScore = Number.isFinite(parsedScore)
+        ? Math.max(minScore.value, Math.min(Math.floor(parsedScore), maxScore.value))
+        : maxScore.value
+
+    scoreInput.value = `${nextScore}`
+    updateRemainingTime(calculateRemainingTimeByScore(dungeon.BaseRaidPoint, nextScore, dungeon.FomulaId))
+}
+
+/**
+ * 根据输入剩余时间更新分数输入。
+ * @param event 输入事件
+ */
+const handleRemainingTimeInput = (event: Event) => {
     const target = event.target as HTMLInputElement
     if (target) {
         updateRemainingTime(Number(target.value))
@@ -86,7 +208,7 @@ const handleInput = (event: Event) => {
 
 // 计算当前选中副本的分数
 const currentScore = computed(() => {
-    const dungeon = RaidDungeon[selectedDungeon.value]
+    const dungeon = currentDungeonData.value
     if (!dungeon) return 0
 
     // 确保使用的剩余时间不超过最大值
@@ -95,11 +217,21 @@ const currentScore = computed(() => {
 })
 
 const currentFormula = computed(() => {
-    const formulaId = RaidDungeon[selectedDungeon.value]?.FomulaId
+    const formulaId = currentDungeonData.value?.FomulaId
     if (!formulaId) return undefined
 
     return RaidCalculation.find(item => item.FomulaId === formulaId)
 })
+
+/**
+ * 初始化或切换副本时，回填最高分数和最大剩余时间。
+ */
+const fillMaxScoreAndTime = () => {
+    remainingTime.value = maxAllowedTime.value
+    scoreInput.value = `${maxScore.value}`
+}
+
+watch(selectedDungeon, fillMaxScoreAndTime, { immediate: true })
 
 // 计算奖励次数函数
 const calculateRewardCount = (score: number, season: number | string): number => {
@@ -136,14 +268,6 @@ const rewardId = computed(() => {
 const currentReward = computed(() => {
     const id = rewardId.value
     return getRewardDetails(id)
-})
-
-// 获取当前赛季下的副本列表
-const currentDungeons = computed(() => {
-    const season = RaidSeason[selectedSeason.value]
-    if (!season) return []
-
-    return Object.values(RaidDungeon).filter(dungeon => dungeon.RaidSeason === season.RaidSeason)
 })
 
 const currentDungeon = computed(() => {
@@ -199,56 +323,37 @@ function getSeasonName(str: number) {
 </script>
 <template>
     <ScrollArea class="p-4 flex h-full min-h-0">
-        <div class="grid grid-cols-3 gap-4 mb-4">
-            <!-- 赛季选择 -->
-            <div>
-                <label class="block text-sm font-medium mb-1">选择赛季:</label>
-                <Select v-model="selectedSeason" class="input input-sm w-full max-w-xs">
-                    <SelectItem v-for="season in Object.values(RaidSeason)" :key="season.RaidSeason" :value="season.RaidSeason">
-                        {{ getSeasonName(season.RaidSeason) }}
-                    </SelectItem>
-                </Select>
+        <div class="mb-4 space-y-3">
+            <div class="join join-horizontal w-full overflow-x-auto rounded-xl bg-base-200/60 p-1">
+                <button
+                    v-for="season in seasonTabs"
+                    :key="season.RaidSeason"
+                    type="button"
+                    class="btn btn-sm join-item flex-1 min-w-0"
+                    :class="selectedSeason === season.RaidSeason ? 'btn-primary shadow-lg' : 'btn-ghost hover:bg-base-100'"
+                    @click="handleSeasonChange(season.RaidSeason)"
+                >
+                    {{ getSeasonName(season.RaidSeason) }}
+                </button>
             </div>
-
-            <!-- 副本选择 -->
-            <div>
-                <label class="block text-sm font-medium mb-1">选择副本:</label>
-                <Select v-model="selectedDungeon" class="input input-sm w-full max-w-xs">
-                    <SelectItem v-for="dungeon in currentDungeons" :key="dungeon.DungeonId" :value="dungeon.DungeonId">
-                        {{ getDungeonName(dungeon.DungeonId) }} (难度{{ dungeon.DifficultyLevel }})
-                    </SelectItem>
-                </Select>
-            </div>
-
-            <!-- 剩余时间输入 -->
-            <div>
-                <label class="block text-sm font-medium mb-1">剩余时间(秒):</label>
-                <div class="flex gap-2 items-end">
-                    <div class="w-full max-w-xs">
-                        <input
-                            :value="remainingTime"
-                            @input="handleInput"
-                            type="number"
-                            min="0"
-                            :max="maxAllowedTime"
-                            step="0.1"
-                            class="input input-sm w-full"
-                            placeholder="输入剩余时间"
-                        />
-                        <p class="text-xs text-gray-500 mt-1">
-                            最大允许时间: {{ maxAllowedTime }}秒 用时: {{ +(maxAllowedTime - remainingTime).toFixed(2) }}秒
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-span-3">
-                <input type="range" v-model="remainingTime" :max="maxAllowedTime" step="0.1" class="range range-primary range-xs w-full" />
+            <div class="join join-horizontal w-full overflow-x-auto rounded-xl bg-base-200/60 p-1">
+                <button
+                    v-for="dungeon in dungeonTabs"
+                    :key="dungeon.DungeonId"
+                    type="button"
+                    class="btn btn-sm join-item flex-1 min-w-0"
+                    :class="selectedDungeon === dungeon.DungeonId ? 'btn-primary shadow-lg' : 'btn-ghost hover:bg-base-100'"
+                    @click="selectedDungeon = dungeon.DungeonId"
+                >
+                    {{ getDungeonName(dungeon.DungeonId) }} (难度{{ dungeon.DifficultyLevel }})
+                </button>
             </div>
         </div>
 
         <div class="mb-4 flex items-center gap-2">
-            <span class="font-medium">分数:</span>
-            <span class="text-xl font-bold">{{ currentScore }}</span>
+            <p class="text-sm mb-2">
+                {{ RaidDungeon[selectedDungeon]?.RaidBuffID.map(id => RaidBuff[id].RaidBuffDes).join("、") }}
+            </p>
         </div>
 
         <div class="tabs tabs-border gap-2 mb-4">
@@ -259,11 +364,62 @@ function getSeasonName(str: number) {
 
         <!-- 计算说明 -->
         <div v-if="activeInfoTab === 'score'">
+            <div class="mb-4 flex items-center gap-2">
+                <span class="font-medium">分数:</span>
+                <span class="text-xl font-bold">{{ currentScore }}</span>
+            </div>
+            <!-- 剩余时间输入 -->
+            <div class="mb-4 grid grid-cols-2">
+                <label class="block text-sm font-medium mb-1">
+                    分数:
+                    <div class="flex gap-2 items-end">
+                        <div class="w-full max-w-xs">
+                            <input
+                                :value="scoreInput"
+                                @input="handleScoreInput"
+                                @change="commitScoreInput"
+                                type="number"
+                                :min="minScore"
+                                :max="maxScore"
+                                class="input input-sm w-full"
+                                placeholder="输入分数"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">最高分数: {{ maxScore }}</p>
+                        </div>
+                    </div>
+                </label>
+                <label class="block text-sm font-medium mb-1">
+                    剩余时间(秒):
+                    <div class="flex gap-2 items-end">
+                        <div class="w-full max-w-xs">
+                            <input
+                                :value="remainingTime"
+                                @input="handleRemainingTimeInput"
+                                type="number"
+                                min="0"
+                                :max="maxAllowedTime"
+                                step="0.1"
+                                class="input input-sm w-full"
+                                placeholder="输入剩余时间"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                最大允许时间: {{ maxAllowedTime }}秒 用时: {{ +(maxAllowedTime - remainingTime).toFixed(2) }}秒
+                            </p>
+                        </div>
+                    </div>
+                </label>
+                <div class="col-span-2">
+                    <input
+                        type="range"
+                        :value="remainingTime"
+                        @input="handleRemainingTimeInput"
+                        :max="maxAllowedTime"
+                        step="0.1"
+                        class="range range-primary range-xs w-full"
+                    />
+                </div>
+            </div>
             <div class="mb-4 p-4 bg-base-100 rounded-md">
-                <h3 class="font-medium mb-2">Buff:</h3>
-                <p class="text-sm mb-2">
-                    {{ RaidDungeon[selectedDungeon]?.RaidBuffID.map(id => RaidBuff[id].RaidBuffDes).join("、") }}
-                </p>
                 <h3 class="font-medium mb-2">分数计算说明:</h3>
                 <p class="text-sm">
                     最终分数 = BaseRaidPoint + (1 + 时间区间1×速率1 + 时间区间2×速率2 + 时间区间3×速率3)
@@ -292,7 +448,7 @@ function getSeasonName(str: number) {
                     </div>
 
                     <!-- 使用RewardItem组件显示奖励 -->
-                    <div class="mt-3 p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
+                    <div class="mt-3 p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
                         <div class="flex items-center justify-between mb-1">
                             <span class="text-sm font-medium">奖励组 {{ rewardId }}</span>
                             <span
@@ -337,7 +493,7 @@ function getSeasonName(str: number) {
                         <p class="text-sm font-bold text-white">{{ item.reward.child?.[0].n }}</p>
                     </div>
                 </div>
-                <div :key="item.reward.id" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
+                <div :key="item.reward.id" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-sm font-medium">奖励组 {{ item.reward.id }}</span>
                         <span

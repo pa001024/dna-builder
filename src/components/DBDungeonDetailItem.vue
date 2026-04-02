@@ -718,8 +718,12 @@ watch(
                                                         :key="`${spawnGroup.id}-gm-${groupMonster.id}-${memberIndex}`"
                                                         class="space-y-1"
                                                     >
-                                                        <DBMonsterCompactCard :monster="new LeveledMonster(groupMonster.id, getSpawnLevelBase())" />
-                                                        <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1 text-xs">
+                                                        <DBMonsterCompactCard
+                                                            :monster="new LeveledMonster(groupMonster.id, getSpawnLevelBase())"
+                                                        />
+                                                        <div
+                                                            class="flex items-center justify-between rounded bg-base-100 px-2 py-1 text-xs"
+                                                        >
                                                             <span class="text-base-content/70">概率</span>
                                                             <span class="font-medium">
                                                                 {{ groupMonster.p ? `${Math.round(groupMonster.p * 100)}%` : "100%" }}
@@ -794,7 +798,7 @@ watch(
                     <div
                         v-for="item in mergedDungeonRewards"
                         :key="`${item.reward.id}-${item.indices.join('-')}`"
-                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
+                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                     >
                         <div class="flex items-center justify-between mb-1">
                             <span class="text-sm font-medium">{{ formatRewardIndexRanges(item.indices) }} 奖励组 {{ item.reward.id }}</span>
@@ -824,7 +828,7 @@ watch(
                     <div
                         v-for="reward in dungeon.sr.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
                         :key="reward.id"
-                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
+                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                     >
                         <div class="flex items-center justify-between mb-1">
                             <span class="text-sm font-medium">特殊奖励组 {{ reward.id }}</span>

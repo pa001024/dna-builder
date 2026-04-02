@@ -380,7 +380,7 @@ function getRewardTypeColor(index: number): string {
                         <tr
                             v-for="(item, index) in rewardLinkItems"
                             :key="index"
-                            class="border-b border-base-content/10 hover:bg-base-300/50 transition-colors"
+                            class="border-b border-base-content/10 hover:bg-base-300/50 transition-colors duration-200"
                         >
                             <td class="py-2 px-3 text-sm">{{ item.reward.id }}</td>
                             <td class="py-2 px-3 text-sm">
@@ -516,7 +516,7 @@ function getRewardTypeColor(index: number): string {
                             <tr
                                 v-for="(item, index) in probabilityData"
                                 :key="item.n"
-                                class="border-b border-base-content/10 hover:bg-base-100/50 transition-colors"
+                                class="border-b border-base-content/10 hover:bg-base-100/50 transition-colors duration-200"
                             >
                                 <td class="py-1.5 px-3 text-xs">{{ item.n }}</td>
                                 <td class="py-1.5 px-3 text-xs">{{ (item.probability * 100).toFixed(2) }}%</td>

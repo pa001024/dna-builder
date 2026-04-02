@@ -165,7 +165,7 @@ const handleMaxInput = (event: Event) => {
                         <!-- 确认按钮 -->
                         <button
                             @click="confirmSelection"
-                            class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-lg transition-colors"
+                            class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-lg transition-colors duration-200"
                         >
                             确认
                         </button>

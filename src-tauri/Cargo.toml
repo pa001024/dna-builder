@@ -1,6 +1,6 @@
 [package]
 name = "dna-builder"
-version = "0.14.3"
+version = "0.15.0"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
@@ -55,6 +55,7 @@ reqwest = { version = "0.12", default-features = false, features = [
     "rustls-tls",
     "blocking",
     "stream",
+    "system-proxy",
 ] }
 arboard = "3.6.1"
 tokio-tungstenite = { version = "0.25", features = ["rustls-tls-native-roots"] }

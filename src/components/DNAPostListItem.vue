@@ -16,7 +16,7 @@ onUnmounted(() => {
 
 <template>
     <div
-        class="card bg-base-100 shadow-md cursor-pointer hover:shadow-lg transition-shadow"
+        class="card bg-base-100 shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-200"
         v-bind="$attrs"
         @click="$router.push(`/dna/posts/${post.gameForumId}/${post.postId}`)"
     >
@@ -57,7 +57,7 @@ onUnmounted(() => {
                     :key="index"
                     :src="img.url"
                     alt="帖子图片"
-                    class="w-16 h-16 object-cover rounded-md cursor-pointer transition-transform hover:scale-105"
+                    class="w-16 h-16 object-cover rounded-md cursor-pointer transition-transform duration-200 hover:scale-105"
                     @mouseenter="ui.startImagePreview(img.url, $event)"
                     @mouseleave="ui.stopImagePreview()"
                 />

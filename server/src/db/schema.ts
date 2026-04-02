@@ -792,6 +792,86 @@ export const dpsRelations = relations(dps, ({ one }) => ({
     timeline: one(timelines, { fields: [dps.timelineId], references: [timelines.id] }),
 }))
 
+/** 深渊使用提交 */
+export const abyssUsageSubmissions = sqliteTable(
+    "abyss_usage_submissions",
+    {
+        id: text("id").$default(id).primaryKey(),
+        uidSha256: text("uid_sha256").notNull(),
+        seasonId: integer("season_id").notNull(),
+        charId: integer("char_id").notNull(),
+        meleeId: integer("melee_id").notNull(),
+        rangedId: integer("ranged_id").notNull(),
+        support1: integer("support_1").notNull(),
+        supportWeapon1: integer("support_weapon_1").notNull(),
+        support2: integer("support_2").notNull(),
+        supportWeapon2: integer("support_weapon_2").notNull(),
+        petId: integer("pet_id"),
+        stars: integer("stars").notNull(),
+        createdAt: text("created_at").$default(now),
+        updateAt: text("update_at").$onUpdate(now),
+    },
+    submissions => [
+        uniqueIndex("abyss_usage_submissions_season_uid_idx").on(submissions.uidSha256, submissions.seasonId),
+        index("abyss_usage_submissions_season_id_idx").on(submissions.seasonId),
+        index("abyss_usage_submissions_lineup_idx").on(
+            submissions.seasonId,
+            submissions.charId,
+            submissions.meleeId,
+            submissions.rangedId,
+            submissions.support1,
+            submissions.supportWeapon1,
+            submissions.support2,
+            submissions.supportWeapon2,
+            submissions.petId
+        ),
+    ]
+)
+
+/** 深渊使用角色明细 */
+export const abyssUsageRoleParticipants = sqliteTable(
+    "abyss_usage_role_participants",
+    {
+        id: text("id").$default(id).primaryKey(),
+        submissionId: text("submission_id")
+            .notNull()
+            .references(() => abyssUsageSubmissions.id, { onDelete: "cascade" }),
+        seasonId: integer("season_id").notNull(),
+        roleType: text("role_type").notNull(),
+        charId: integer("char_id").notNull(),
+        gradeLevel: integer("grade_level").notNull(),
+        createdAt: text("created_at").$default(now),
+    },
+    participants => [
+        index("abyss_usage_role_participants_season_id_idx").on(participants.seasonId),
+        index("abyss_usage_role_participants_submission_id_idx").on(participants.submissionId),
+        index("abyss_usage_role_participants_char_id_idx").on(participants.charId),
+        index("abyss_usage_role_participants_role_type_idx").on(participants.roleType),
+    ]
+)
+
+/** 深渊使用武器明细 */
+export const abyssUsageWeaponParticipants = sqliteTable(
+    "abyss_usage_weapon_participants",
+    {
+        id: text("id").$default(id).primaryKey(),
+        submissionId: text("submission_id")
+            .notNull()
+            .references(() => abyssUsageSubmissions.id, { onDelete: "cascade" }),
+        seasonId: integer("season_id").notNull(),
+        roleType: text("role_type").notNull(),
+        weaponId: integer("weapon_id").notNull(),
+        skillLevel: integer("skill_level").notNull(),
+        createdAt: text("created_at").$default(now),
+    },
+    participants => [
+        index("abyss_usage_weapon_participants_season_id_idx").on(participants.seasonId),
+        index("abyss_usage_weapon_participants_submission_id_idx").on(participants.submissionId),
+        index("abyss_usage_weapon_participants_weapon_id_idx").on(participants.weaponId),
+        index("abyss_usage_weapon_participants_role_type_idx").on(participants.roleType),
+    ]
+)
+
 /** 脚本 */
 export const scripts = sqliteTable(
     "scripts",

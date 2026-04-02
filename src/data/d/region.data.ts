@@ -23,6 +23,7 @@ interface MapMapping {
 }
 
 export const region2Version: Record<number, string> = {
+    2101: "1.0",
     1001: "1.0",
     1002: "1.0",
     1003: "1.0",

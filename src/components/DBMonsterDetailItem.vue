@@ -355,11 +355,7 @@ function getFactionName(faction: number | undefined): string {
 
         <div v-if="monsterTagGroups.length" class="p-3 bg-base-200 rounded space-y-3">
             <div class="text-xs text-base-content/70">号令者信息</div>
-            <div
-                v-for="monsterTagGroup in monsterTagGroups"
-                :key="monsterTagGroup.primaryTag.id"
-                class="rounded bg-base-100 p-3 space-y-2"
-            >
+            <div v-for="monsterTagGroup in monsterTagGroups" :key="monsterTagGroup.primaryTag.id" class="rounded bg-base-100 p-3 space-y-2">
                 <div class="flex items-center justify-between gap-2">
                     <div class="text-sm font-medium">{{ monsterTagGroup.name }}</div>
                     <SRouterLink :to="`/db/monstertag/${monsterTagGroup.primaryTag.id}`" class="text-xs link link-primary">
@@ -374,7 +370,7 @@ function getFactionName(faction: number | undefined): string {
                         v-for="tag in monsterTagGroup.tags"
                         :key="tag.id"
                         :to="`/db/monstertag/${tag.id}`"
-                        class="text-xs px-2 py-1 rounded bg-base-200 hover:bg-base-300 transition-colors"
+                        class="text-xs px-2 py-1 rounded bg-base-200 hover:bg-base-300 transition-colors duration-200"
                     >
                         {{ tag.id }}
                     </SRouterLink>
@@ -457,7 +453,7 @@ function getFactionName(faction: number | undefined): string {
                     <button
                         v-for="dungeonName in allDungeonNames"
                         :key="dungeonName"
-                        class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                         :class="
                             selectedDungeonName === dungeonName
                                 ? 'bg-primary text-white'
@@ -475,7 +471,7 @@ function getFactionName(faction: number | undefined): string {
                 <div
                     v-for="dungeon in selectedDungeons"
                     :key="dungeon.id"
-                    class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors"
+                    class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors duration-200"
                     @click="$router.push(`/db/dungeon/${dungeon.id}`)"
                 >
                     <div class="flex items-center justify-between">
@@ -500,7 +496,7 @@ function getFactionName(faction: number | undefined): string {
                 <div
                     v-for="dungeon in abyssDungeonsFiltered"
                     :key="dungeon.id"
-                    class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors"
+                    class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors duration-200"
                     @click="$router.push(`/db/abyss/${dungeon.id}`)"
                 >
                     <div class="flex items-center justify-between">

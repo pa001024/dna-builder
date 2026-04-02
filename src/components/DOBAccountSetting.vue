@@ -291,7 +291,11 @@ const openRegisterModal = () => {
     registerForm.password = ""
     registerForm.open = true
 }
-const nameEl = ref<HTMLSpanElement>()
+const nameInput = ref<HTMLInputElement>()
+
+/**
+ * @description 切换昵称编辑状态；编辑态使用普通输入框，避免 contenteditable 逐字回写导致反向输入。
+ */
 async function startNameEdit() {
     if (nameEdit.active) {
         nameEdit.active = false
@@ -299,19 +303,15 @@ async function startNameEdit() {
         if (result?.success && result.token) {
             user.jwtToken = result.token
         } else {
-            nameEl.value!.innerText = user.name || "用户"
+            nameEdit.name = user.name || "用户"
         }
     } else {
         nameEdit.active = true
         nameEdit.name = user.name || "用户"
         await nextTick()
-        const span = nameEl.value!
-        span.focus()
-        const selection = window.getSelection()!
-        const range = document.createRange()
-        range.selectNodeContents(span)
-        selection.removeAllRanges()
-        selection.addRange(range)
+        const input = nameInput.value!
+        input.focus()
+        input.select()
     }
 }
 </script>
@@ -330,14 +330,13 @@ async function startNameEdit() {
                         <h1 class="text-2xl font-bold flex gap-2 items-center">
                             <div>
                                 <div class="font-semibold text-base-content">
-                                    <span
+                                    <input
                                         v-if="nameEdit.active"
-                                        ref="nameEl"
-                                        class="select-text px-1 outline rounded-sm"
-                                        :contenteditable="nameEdit.active"
-                                        @input="nameEdit.name = ($event.target as any)!.textContent"
-                                        >{{ nameEdit.name }}</span
-                                    >
+                                        ref="nameInput"
+                                        v-model="nameEdit.name"
+                                        type="text"
+                                        class="input input-ghost input-sm px-1 py-0 h-auto min-h-0 w-auto max-w-64 font-semibold outline rounded-sm"
+                                    />
                                     <span v-else>
                                         {{ user.name || "用户" }}
                                     </span>
@@ -371,7 +370,10 @@ async function startNameEdit() {
                                         <div class="w-72 space-y-2 text-xs leading-5 text-base-content">
                                             <div class="font-semibold">每日经验进度</div>
                                             <div v-if="dailyExperienceStatus">
-                                                今日已获得 {{ dailyExperienceStatus.todayAwardedExp }}/{{ dailyExperienceStatus.totalAvailableExp }} 经验
+                                                今日已获得 {{ dailyExperienceStatus.todayAwardedExp }}/{{
+                                                    dailyExperienceStatus.totalAvailableExp
+                                                }}
+                                                经验
                                             </div>
                                             <div v-else>今日进度暂不可用</div>
                                             <div class="border-t border-base-300/70 pt-2 space-y-1.5">
@@ -395,8 +397,14 @@ async function startNameEdit() {
                                                             (dailyExperienceStatus?.dailyOnlineHourLimit ?? 1)
                                                         "
                                                     >
-                                                        <span v-if="formatRemainingDuration(dailyExperienceStatus?.dailyOnlineHourRetryAfterMs)">
-                                                            （{{ formatRemainingDuration(dailyExperienceStatus?.dailyOnlineHourRetryAfterMs) }}）
+                                                        <span
+                                                            v-if="
+                                                                formatRemainingDuration(dailyExperienceStatus?.dailyOnlineHourRetryAfterMs)
+                                                            "
+                                                        >
+                                                            （{{
+                                                                formatRemainingDuration(dailyExperienceStatus?.dailyOnlineHourRetryAfterMs)
+                                                            }}）
                                                         </span>
                                                     </span>
                                                 </div>

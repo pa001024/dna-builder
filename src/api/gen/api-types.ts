@@ -366,6 +366,81 @@ export interface Activity {
     updateAt?: string
 }
 
+export interface AbyssUsageSubmission {
+    id: string
+    uidSha256: string
+    seasonId: number
+    charId: number
+    meleeId: number
+    rangedId: number
+    support1: number
+    supportWeapon1: number
+    support2: number
+    supportWeapon2: number
+    stars: number
+    petId?: number
+    createdAt?: string
+    updateAt?: string
+    roleParticipants?: AbyssUsageRoleParticipant[]
+    weaponParticipants?: AbyssUsageWeaponParticipant[]
+}
+
+export interface AbyssUsageRoleParticipant {
+    submissionId: string
+    roleType: string
+    charId: number
+    gradeLevel: number
+    createdAt?: string
+}
+
+export interface AbyssUsageWeaponParticipant {
+    submissionId: string
+    roleType: string
+    weaponId: number
+    skillLevel: number
+    createdAt?: string
+}
+
+export interface AbyssRoleUsageStat {
+    charId: number
+    submissionCount: number
+    slotCount: number
+    ownedCount: number
+    gradeLevelDistribution?: number[]
+}
+
+export interface AbyssWeaponUsageStat {
+    weaponId: number
+    submissionCount: number
+    slotCount: number
+    ownedCount: number
+    skillLevelDistribution?: number[]
+}
+
+export interface AbyssUsageLineupStat {
+    charId: number
+    meleeId: number
+    rangedId: number
+    support1: number
+    supportWeapon1: number
+    support2: number
+    supportWeapon2: number
+    petId?: number
+    submissionCount: number
+}
+
+export interface AbyssUsageSlotStat {
+    id: number
+    submissionCount: number
+}
+
+export interface AbyssUsageSlotStats {
+    support: AbyssUsageSlotStat[]
+    meleeWeapon: AbyssUsageSlotStat[]
+    rangedWeapon: AbyssUsageSlotStat[]
+    pet: AbyssUsageSlotStat[]
+}
+
 export interface UsersUpdateInput {
     name?: string
     qq?: string
@@ -460,4 +535,19 @@ export interface ActivityUpdateInput {
     name: string
     icon: string
     desc: string
+}
+
+export interface AbyssUsageSubmissionInput {
+    uidSha256: string
+    charId: number
+    meleeId: number
+    rangedId: number
+    support1: number
+    supportWeapon1: number
+    support2: number
+    supportWeapon2: number
+    stars: number
+    petId?: number
+    ownedChars?: Array<{ charId: number; gradeLevel: number }>
+    ownedWeapons?: Array<{ weaponId: number; skillLevel: number }>
 }

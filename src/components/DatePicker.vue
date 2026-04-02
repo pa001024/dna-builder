@@ -58,14 +58,14 @@ import {
                 <DatePickerCalendar v-slot="{ weekDays, grid }" class="p-4">
                     <DatePickerHeader class="flex items-center justify-between">
                         <DatePickerPrev
-                            class="inline-flex items-center cursor-pointer text-black justify-center rounded-md bg-transparent w-7 h-7 hover:bg-stone-50 active:scale-98 active:transition-all focus:shadow-[0_0_0_2px] focus:shadow-black"
+                            class="inline-flex items-center cursor-pointer text-black justify-center rounded-md bg-transparent w-7 h-7 hover:bg-stone-50 active:scale-98 active:transition-all duration-200 focus:shadow-[0_0_0_2px] focus:shadow-black"
                         >
                             <Icon icon="radix-icons:chevron-left" class="w-4 h-4" />
                         </DatePickerPrev>
 
                         <DatePickerHeading class="text-black font-medium" />
                         <DatePickerNext
-                            class="inline-flex items-center cursor-pointer text-black justify-center rounded-md bg-transparent w-7 h-7 hover:bg-stone-50 active:scale-98 active:transition-all focus:shadow-[0_0_0_2px] focus:shadow-black"
+                            class="inline-flex items-center cursor-pointer text-black justify-center rounded-md bg-transparent w-7 h-7 hover:bg-stone-50 active:scale-98 active:transition-all duration-200 focus:shadow-[0_0_0_2px] focus:shadow-black"
                         >
                             <Icon icon="radix-icons:chevron-right" class="w-4 h-4" />
                         </DatePickerNext>

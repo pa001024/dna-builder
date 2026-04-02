@@ -532,7 +532,12 @@ onMounted(() => {
                                 <input type="checkbox" class="checkbox checkbox-sm" :checked="selectedAll" @click="toggleSelectAll" />
                             </th>
                             <th v-for="column in config.columns" :key="column.key" :class="getHeaderClass(column)">{{ column.title }}</th>
-                            <th v-if="canEdit || canDelete || (config.rowActions && config.rowActions.length > 0)" class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider">操作</th>
+                            <th
+                                v-if="canEdit || canDelete || (config.rowActions && config.rowActions.length > 0)"
+                                class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider"
+                            >
+                                操作
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -550,13 +555,24 @@ onMounted(() => {
                                     @click.stop="toggleSelectItem(item, index)"
                                 />
                             </td>
-                            <td v-for="column in config.columns" :key="column.key" :class="getCellClass(column, item, getCellValue(column, item))">
-                                <span v-if="column.type === 'badge'" class="badge badge-sm" :class="getBadgeClass(column, item, getCellValue(column, item))">
+                            <td
+                                v-for="column in config.columns"
+                                :key="column.key"
+                                :class="getCellClass(column, item, getCellValue(column, item))"
+                            >
+                                <span
+                                    v-if="column.type === 'badge'"
+                                    class="badge badge-sm"
+                                    :class="getBadgeClass(column, item, getCellValue(column, item))"
+                                >
                                     {{ renderCellText(column, item) }}
                                 </span>
                                 <span v-else>{{ renderCellText(column, item) }}</span>
                             </td>
-                            <td v-if="canEdit || canDelete || (config.rowActions && config.rowActions.length > 0)" class="px-8 py-5 whitespace-nowrap text-sm font-medium">
+                            <td
+                                v-if="canEdit || canDelete || (config.rowActions && config.rowActions.length > 0)"
+                                class="px-8 py-5 whitespace-nowrap text-sm font-medium"
+                            >
                                 <div class="flex items-center gap-4">
                                     <button
                                         v-if="canEdit"
@@ -586,7 +602,11 @@ onMounted(() => {
                                         :disabled="action.disabled ? action.disabled(item) : false"
                                         @click="handleRowAction(action.key, item)"
                                     >
-                                        <Icon v-if="action.icon" :icon="action.icon" class="group-hover:scale-110 transition-transform duration-200" />
+                                        <Icon
+                                            v-if="action.icon"
+                                            :icon="action.icon"
+                                            class="group-hover:scale-110 transition-transform duration-200"
+                                        />
                                         <span class="group-hover:underline">{{ action.label }}</span>
                                     </button>
                                 </div>
@@ -594,7 +614,10 @@ onMounted(() => {
                         </tr>
 
                         <tr v-if="!loading && items.length === 0">
-                            <td :colspan="config.columns.length + (config.selectable ? 2 : 1)" class="px-8 py-10 text-center text-sm text-base-content/70">
+                            <td
+                                :colspan="config.columns.length + (config.selectable ? 2 : 1)"
+                                class="px-8 py-10 text-center text-sm text-base-content/70"
+                            >
                                 {{ config.emptyText || "暂无数据" }}
                             </td>
                         </tr>

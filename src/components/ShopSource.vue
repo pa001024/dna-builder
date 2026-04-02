@@ -49,7 +49,7 @@ function formatCutoffTime(timestamp: number) {
     <div v-if="displayShopSources.length > 0" class="space-y-2">
         <div class="text-xs text-base-content/60">商店购买</div>
         <div v-for="source in displayShopSources" :key="source.key">
-            <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors flex items-center gap-4">
+            <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200 flex items-center gap-4">
                 <div class="flex-1">
                     <div class="flex justify-between items-center gap-2 mb-2">
                         <div class="flex items-center gap-2 min-w-0">
@@ -72,19 +72,29 @@ function formatCutoffTime(timestamp: number) {
                                         <div class="flex flex-col gap-2 max-w-75 min-w-28">
                                             <div class="text-sm font-bold">{{ $t("shop-detail.discountInfo") }}</div>
                                             <div class="flex justify-between items-center gap-2 text-sm">
-                                                <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.discount") }}</div>
+                                                <div class="text-xs text-neutral-500 whitespace-nowrap">
+                                                    {{ $t("shop-detail.discount") }}
+                                                </div>
                                                 <div class="font-medium text-primary">{{ source.cutoffInfo.discount }}折</div>
                                             </div>
                                             <div class="flex justify-between items-center gap-2 text-sm">
-                                                <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.originalPrice") }}</div>
-                                                <div class="font-medium text-primary line-through">{{ source.cutoffInfo.originalPrice }}</div>
+                                                <div class="text-xs text-neutral-500 whitespace-nowrap">
+                                                    {{ $t("shop-detail.originalPrice") }}
+                                                </div>
+                                                <div class="font-medium text-primary line-through">
+                                                    {{ source.cutoffInfo.originalPrice }}
+                                                </div>
                                             </div>
                                             <div class="flex justify-between items-center gap-2 text-sm">
-                                                <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.currentPrice") }}</div>
+                                                <div class="text-xs text-neutral-500 whitespace-nowrap">
+                                                    {{ $t("shop-detail.currentPrice") }}
+                                                </div>
                                                 <div class="font-medium text-primary">{{ source.cutoffInfo.price }}</div>
                                             </div>
                                             <div class="text-xs text-neutral-500">
-                                                <div>{{ $t("shop-detail.startTime") }}：{{ formatCutoffTime(source.cutoffInfo.startTime) }}</div>
+                                                <div>
+                                                    {{ $t("shop-detail.startTime") }}：{{ formatCutoffTime(source.cutoffInfo.startTime) }}
+                                                </div>
                                                 <div v-if="typeof source.cutoffInfo.endTime === 'number'">
                                                     {{ $t("shop-detail.endTime") }}：{{ formatCutoffTime(source.cutoffInfo.endTime) }}
                                                 </div>
@@ -100,9 +110,7 @@ function formatCutoffTime(timestamp: number) {
                     </div>
                     <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-base-content/70">
                         <div>{{ formatTimeRange(source.timeStart, source.timeEnd, t("database.until_now")) }}</div>
-                        <div class="shrink-0 whitespace-nowrap">
-                            限购: {{ source.limit || "∞" }} 数量: x{{ source.num }}
-                        </div>
+                        <div class="shrink-0 whitespace-nowrap">限购: {{ source.limit || "∞" }} 数量: x{{ source.num }}</div>
                     </div>
                 </div>
             </div>

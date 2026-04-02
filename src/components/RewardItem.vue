@@ -15,7 +15,7 @@ defineOptions({
 
 // 定义组件接收的Props
 interface Props {
-    reward: RewardItemType
+    reward: RewardItemType | null
     typeFilter?: string[]
 }
 
@@ -337,6 +337,38 @@ function shouldShowRewardItem(item: RewardItemType): boolean {
 }
 
 /**
+ * 获取奖励树中实际会显示的子节点。
+ * @param item 奖励项
+ * @returns 过滤 typeFilter 后仍然可渲染的子节点
+ */
+function getRenderableRewardChildren(item: RewardItemType | null): RewardItemType[] {
+    if (!item) {
+        return []
+    }
+
+    return (item.child || []).filter(
+        child => shouldShowRewardItem(child) && (child.t !== "Reward" || getRenderableRewardChildren(child).length > 0)
+    )
+}
+
+/**
+ * 判断奖励树节点是否需要展示。
+ * @param item 奖励项
+ * @returns 是否存在过滤后仍可显示的节点
+ */
+function shouldRenderRewardNode(item: RewardItemType | null): boolean {
+    if (!item) {
+        return false
+    }
+
+    if (item.t !== "Reward") {
+        return shouldShowRewardItem(item)
+    }
+
+    return shouldShowRewardItem(item) && getRenderableRewardChildren(item).length > 0
+}
+
+/**
  * 获取角色碎片资源对应的角色头像。
  * @param name 资源名
  * @returns 角色头像路径
@@ -371,8 +403,8 @@ function getDropModeText(mode: string): string {
 <template>
     <div class="space-y-1">
         <!-- 递归奖励显示 -->
-        <template v-for="item in reward?.child || []" :key="`${item.id}-${item.t}`">
-            <template v-if="shouldShowRewardItem(item)">
+        <template v-for="item in getRenderableRewardChildren(reward)" :key="`${item.id}-${item.t}`">
+            <template v-if="shouldRenderRewardNode(item)">
                 <div class="flex items-start gap-2 text-xs">
                     <div class="flex-1">
                         <div class="flex items-center gap-2">
@@ -419,7 +451,7 @@ function getDropModeText(mode: string): string {
                             </span>
                         </div>
                         <!-- 递归显示子奖励 -->
-                        <div v-if="item.child && item.child.length" class="pl-4 mt-1 space-y-1">
+                        <div v-if="getRenderableRewardChildren(item).length" class="pl-4 mt-1 space-y-1">
                             <RewardItem :reward="item" :type-filter="typeFilter" />
                         </div>
                     </div>

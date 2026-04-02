@@ -112,7 +112,7 @@ onMounted(() => {
                 <div
                     v-for="guide in guides"
                     :key="guide.id"
-                    class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+                    class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer"
                     @click="goToDetail(guide.id)"
                 >
                     <div class="card-body p-4">

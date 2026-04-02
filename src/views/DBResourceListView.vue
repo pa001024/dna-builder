@@ -40,7 +40,7 @@ useInitialScrollToSelectedItem()
                         v-model="searchKeyword"
                         type="text"
                         :placeholder="$t('resource.searchPlaceholder')"
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
                     />
                 </div>
 
@@ -49,7 +49,7 @@ useInitialScrollToSelectedItem()
                         <div
                             v-for="resource in filteredResources"
                             :key="resource.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedResourceId === resource.id }"
                             @click="selectedResourceId = resource.id"
                         >

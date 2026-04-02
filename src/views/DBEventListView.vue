@@ -287,13 +287,20 @@ useInitialScrollToSelectedItem()
                                 </label>
                                 <label class="label cursor-pointer gap-2 p-0">
                                     <span class="text-sm">仅显示差异</span>
-                                    <input v-model="diffOnlyEnabled" type="checkbox" class="toggle toggle-success toggle-sm" :disabled="!timeFilterEnabled" />
+                                    <input
+                                        v-model="diffOnlyEnabled"
+                                        type="checkbox"
+                                        class="toggle toggle-success toggle-sm"
+                                        :disabled="!timeFilterEnabled"
+                                    />
                                 </label>
                             </div>
                         </div>
 
                         <div class="flex items-center gap-3">
-                            <span class="w-12 shrink-0 text-[11px] text-base-content/60">{{ formatEventTimePoint(eventTimePoints[0] ?? null) }}</span>
+                            <span class="w-12 shrink-0 text-[11px] text-base-content/60">{{
+                                formatEventTimePoint(eventTimePoints[0] ?? null)
+                            }}</span>
                             <input
                                 v-model.number="selectedTimePointIndex"
                                 type="range"
@@ -303,12 +310,16 @@ useInitialScrollToSelectedItem()
                                 step="1"
                                 :disabled="!timeFilterEnabled"
                             />
-                            <span class="w-12 shrink-0 text-right text-[11px] text-base-content/60">{{ formatEventTimePoint(eventTimePoints.at(-1) ?? null) }}</span>
+                            <span class="w-12 shrink-0 text-right text-[11px] text-base-content/60">{{
+                                formatEventTimePoint(eventTimePoints.at(-1) ?? null)
+                            }}</span>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/70">
                             <span>当前时间点：{{ formatEventTimePoint(eventTimePoints[currentTimePointIndex] ?? null) }}</span>
                             <span v-if="selectedTimePoint">选中时间点：{{ formatEventTimePoint(selectedTimePoint) }}</span>
-                            <span v-if="diffOnlyEnabled && previousSelectedTimePoint">对比上一时间点：{{ formatEventTimePoint(previousSelectedTimePoint) }}</span>
+                            <span v-if="diffOnlyEnabled && previousSelectedTimePoint"
+                                >对比上一时间点：{{ formatEventTimePoint(previousSelectedTimePoint) }}</span
+                            >
                             <span class="badge badge-ghost badge-sm">{{ eventTimePoints.length }} 个时间点</span>
                             <span class="badge badge-primary badge-sm">{{ visibleEventCount }} 个活动</span>
                         </div>
@@ -316,7 +327,7 @@ useInitialScrollToSelectedItem()
 
                     <div class="flex flex-wrap gap-1">
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedVersion = ''"
                         >
@@ -325,8 +336,10 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="version in eventVersions"
                             :key="version"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
-                            :class="selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            :class="
+                                selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                            "
                             @click="selectedVersion = version"
                         >
                             {{ version }}
@@ -337,7 +350,7 @@ useInitialScrollToSelectedItem()
                         v-model="searchKeyword"
                         type="text"
                         placeholder="搜索活动ID/名称/描述（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
                     />
                 </div>
 
@@ -349,7 +362,7 @@ useInitialScrollToSelectedItem()
                         <div
                             v-for="item in filteredEvents"
                             :key="item.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedEventId === item.id }"
                             @click="selectedEventId = item.id"
                         >
@@ -358,7 +371,9 @@ useInitialScrollToSelectedItem()
                                     <div class="font-medium truncate">{{ item.name }}</div>
                                     <div class="text-xs opacity-70 mt-1">
                                         {{ formatTimeRange(item.startTime, item.endTime) }}
-                                        <span v-if="getVersionByTime(item.startTime)" class="ml-2">v{{ getVersionByTime(item.startTime) }}</span>
+                                        <span v-if="getVersionByTime(item.startTime)" class="ml-2"
+                                            >v{{ getVersionByTime(item.startTime) }}</span
+                                        >
                                     </div>
                                 </div>
                                 <div class="text-xs text-right opacity-70 whitespace-nowrap">ID: {{ item.id }}</div>

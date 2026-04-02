@@ -5,13 +5,14 @@ import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryDa
 import { headSculptureData } from "@/data/d/headsculpture.data"
 
 type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head"
-type AccessoryDetailItem = (typeof charAccessoryData)[number] & { accessoryType: "char" }
-    | (typeof weaponAccessoryData)[number] & { accessoryType: "weapon" }
-    | (typeof skinData)[number] & { accessoryType: "skin" }
-    | (typeof weaponSkinData)[number] & { accessoryType: "weaponskin" }
-    | (typeof hairData)[number] & { accessoryType: "hair" }
-    | (typeof headFrameData)[number] & { accessoryType: "headframe" }
-    | (typeof headSculptureData)[number] & { accessoryType: "head" }
+type AccessoryDetailItem =
+    | ((typeof charAccessoryData)[number] & { accessoryType: "char" })
+    | ((typeof weaponAccessoryData)[number] & { accessoryType: "weapon" })
+    | ((typeof skinData)[number] & { accessoryType: "skin" })
+    | ((typeof weaponSkinData)[number] & { accessoryType: "weaponskin" })
+    | ((typeof hairData)[number] & { accessoryType: "hair" })
+    | ((typeof headFrameData)[number] & { accessoryType: "headframe" })
+    | ((typeof headSculptureData)[number] & { accessoryType: "head" })
 
 const route = useRoute()
 

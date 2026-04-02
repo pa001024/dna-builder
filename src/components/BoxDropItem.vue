@@ -276,7 +276,7 @@ watch(
                 <div
                     v-for="(item, index) in rewardItems"
                     :key="item.id"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
+                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                 >
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-sm font-medium">#{{ index + 1 }} 奖励组 {{ item.id }}</span>

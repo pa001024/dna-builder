@@ -167,7 +167,7 @@ const questNodes = computed(() => {
         <div v-if="quest.reward?.length" class="card bg-base-100 border border-base-200 rounded p-3">
             <h3 class="font-bold mb-2">奖励列表 ({{ quest.reward.length }}组)</h3>
             <div class="space-y-3">
-                <div v-for="rewardId in quest.reward" :key="rewardId" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
+                <div v-for="rewardId in quest.reward" :key="rewardId" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-sm font-medium">奖励组 {{ rewardId }}</span>
                     </div>

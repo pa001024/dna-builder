@@ -84,8 +84,12 @@ useInitialScrollToSelectedItem()
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedSpot }">
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索钓鱼点/鱼名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索钓鱼点/鱼名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+                    />
                 </div>
 
                 <!-- 筛选条件 -->
@@ -93,15 +97,19 @@ useInitialScrollToSelectedItem()
                     <!-- 类型筛选 -->
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">类型</div>
-                            <div class="flex flex-wrap gap-1 pb-1">
-                                <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
-                                    :class="selectedType === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectFishListType(0)">
+                        <div class="flex flex-wrap gap-1 pb-1">
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                                :class="selectedType === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                                @click="selectFishListType(0)"
+                            >
                                 钓鱼点
                             </button>
-                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                                 :class="selectedType === 1 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectFishListType(1)">
+                                @click="selectFishListType(1)"
+                            >
                                 鱼
                             </button>
                         </div>
@@ -111,10 +119,13 @@ useInitialScrollToSelectedItem()
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
                         <template v-if="selectedType === 0">
-                            <div v-for="spot in filteredSpots" :key="spot.id"
-                                class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                            <div
+                                v-for="spot in filteredSpots"
+                                :key="spot.id"
+                                class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                                 :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedSpotId === spot.id }"
-                                @click="selectSpot(spot.id)">
+                                @click="selectSpot(spot.id)"
+                            >
                                 <div class="flex items-start gap-2">
                                     <div class="w-12 h-12 overflow-hidden rounded-full">
                                         <img :src="`/imgs/webp/${spot.icon}.webp`" class="w-full h-full object-cover" />
@@ -130,14 +141,16 @@ useInitialScrollToSelectedItem()
                             </div>
                         </template>
                         <template v-else>
-                            <div v-for="fish in filteredFish" :key="fish.id"
-                                class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                            <div
+                                v-for="fish in filteredFish"
+                                :key="fish.id"
+                                class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                                 :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedFishId === fish.id }"
-                                @click="selectFish(fish.id)">
+                                @click="selectFish(fish.id)"
+                            >
                                 <div class="flex items-start gap-2">
                                     <div class="w-12 h-12 overflow-hidden rounded-full">
-                                        <img :src="`/imgs/res/T_Fish_${fish.icon}.webp`"
-                                            class="w-full h-full object-cover" />
+                                        <img :src="`/imgs/res/T_Fish_${fish.icon}.webp`" class="w-full h-full object-cover" />
                                     </div>
                                     <div>
                                         <div class="font-medium">{{ fish.name }}</div>
@@ -157,9 +170,11 @@ useInitialScrollToSelectedItem()
                 </div>
             </div>
 
-            <div v-if="selectedSpot"
+            <div
+                v-if="selectedSpot"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedSpotId = 0">
+                @click="selectedSpotId = 0"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 

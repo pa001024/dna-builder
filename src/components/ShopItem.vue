@@ -1,6 +1,18 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { cutoffMap, draftMap, LeveledMod, LeveledPet, LeveledWeapon, modMap, petMap, resourceMap, rewardMap, walnutMap, weaponMap } from "@/data"
+import {
+    cutoffMap,
+    draftMap,
+    LeveledMod,
+    LeveledPet,
+    LeveledWeapon,
+    modMap,
+    petMap,
+    resourceMap,
+    rewardMap,
+    walnutMap,
+    weaponMap,
+} from "@/data"
 import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Cutoff } from "@/data/d/cutoff.data"
 import { headSculptureMap } from "@/data/d/headsculpture.data"
@@ -232,7 +244,7 @@ function getPriceIcon(name: string) {
 <template>
     <div class="space-y-3">
         <!-- 商品项内容 -->
-        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors flex items-center gap-4">
+        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200 flex items-center gap-4">
             <div class="size-16 hover:size-32 transition-all duration-200">
                 <img :src="itemDetail?.icon" class="w-full h-full object-cover rounded" :alt="item.typeName" />
             </div>

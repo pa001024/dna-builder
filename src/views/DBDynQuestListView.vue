@@ -173,16 +173,7 @@ function buildDynQuestFullTextEntries(): DynQuestFullTextEntry[] {
         const snippets = collectDynQuestSnippets(quest)
         const regionName = getRegionName(quest.regionId)
         const subRegionName = getSubRegionName(quest.subRegionId)
-        const searchText = [
-            quest.id,
-            quest.name,
-            regionName,
-            subRegionName,
-            quest.level[0],
-            quest.level[1],
-            quest.chance,
-            ...snippets,
-        ]
+        const searchText = [quest.id, quest.name, regionName, subRegionName, quest.level[0], quest.level[1], quest.chance, ...snippets]
             .filter(v => v !== undefined && v !== null && `${v}`.trim() !== "")
             .join(" ")
 
@@ -559,9 +550,12 @@ useInitialScrollToSelectedItem()
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedQuest }">
                 <!-- 搜索栏 -->
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text"
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
                         :placeholder="showFullTextSearch ? '全文搜索委托/剧情内容（不支持拼音）...' : '搜索委托 ID/名称（支持拼音）...'"
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+                    />
                 </div>
 
                 <!-- 区域筛选 -->
@@ -572,64 +566,97 @@ useInitialScrollToSelectedItem()
                             <span class="text-xs text-base-content/70">剧情全文搜索</span>
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
-                            <input v-model="showRegionFilter" type="checkbox" class="checkbox checkbox-xs"
-                                @change="toggleFilter('region', showRegionFilter)" />
+                            <input
+                                v-model="showRegionFilter"
+                                type="checkbox"
+                                class="checkbox checkbox-xs"
+                                @change="toggleFilter('region', showRegionFilter)"
+                            />
                             <span class="text-xs text-base-content/70">区域筛选</span>
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
-                            <input v-model="showSubRegionFilter" type="checkbox" class="checkbox checkbox-xs"
-                                @change="toggleFilter('subRegion', showSubRegionFilter)" />
+                            <input
+                                v-model="showSubRegionFilter"
+                                type="checkbox"
+                                class="checkbox checkbox-xs"
+                                @change="toggleFilter('subRegion', showSubRegionFilter)"
+                            />
                             <span class="text-xs text-base-content/70">子区域筛选</span>
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
-                            <input v-model="showLevelFilter" type="checkbox" class="checkbox checkbox-xs"
-                                @change="toggleFilter('level', showLevelFilter)" />
+                            <input
+                                v-model="showLevelFilter"
+                                type="checkbox"
+                                class="checkbox checkbox-xs"
+                                @change="toggleFilter('level', showLevelFilter)"
+                            />
                             <span class="text-xs text-base-content/70">等级筛选</span>
                         </label>
                     </div>
 
                     <div v-show="showRegionFilter" class="flex flex-wrap gap-1 pb-1">
-                        <button class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedRegion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectRegion('')">
+                            @click="selectRegion('')"
+                        >
                             全部区域
                         </button>
-                        <button v-for="regionId in allRegions.map(r => String(r))" :key="regionId"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                            :class="selectedRegion === regionId ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                " @click="selectRegion(regionId)">
+                        <button
+                            v-for="regionId in allRegions.map(r => String(r))"
+                            :key="regionId"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            :class="
+                                selectedRegion === regionId ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                            "
+                            @click="selectRegion(regionId)"
+                        >
                             {{ getRegionName(Number(regionId)) }}
                         </button>
                     </div>
 
                     <div v-show="showSubRegionFilter && selectedRegion" class="flex flex-wrap gap-1 pb-1">
-                        <button class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedSubRegion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectSubRegion('')">
+                            @click="selectSubRegion('')"
+                        >
                             全部子区域
                         </button>
-                        <button v-for="subRegion in subRegions" :key="subRegion.id"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                            :class="selectedSubRegion === String(subRegion.id)
-                                ? 'bg-primary text-white'
-                                : 'bg-base-200 text-base-content hover:bg-base-300'
-                                " @click="selectSubRegion(String(subRegion.id))">
+                        <button
+                            v-for="subRegion in subRegions"
+                            :key="subRegion.id"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            :class="
+                                selectedSubRegion === String(subRegion.id)
+                                    ? 'bg-primary text-white'
+                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                            "
+                            @click="selectSubRegion(String(subRegion.id))"
+                        >
                             {{ subRegion.name }}
                         </button>
                     </div>
 
                     <div v-show="showLevelFilter" class="flex flex-wrap gap-1 pb-1">
-                        <button class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedLevel === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectedLevel = ''">
+                            @click="selectedLevel = ''"
+                        >
                             全部等级
                         </button>
-                        <button v-for="levelRange in levelRanges" :key="levelRange.key"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                            :class="selectedLevel === levelRange.key
-                                ? 'bg-primary text-white'
-                                : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectedLevel = levelRange.key">
+                        <button
+                            v-for="levelRange in levelRanges"
+                            :key="levelRange.key"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            :class="
+                                selectedLevel === levelRange.key
+                                    ? 'bg-primary text-white'
+                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                            "
+                            @click="selectedLevel = levelRange.key"
+                        >
                             {{ levelRange.label }}
                         </button>
                     </div>
@@ -638,17 +665,23 @@ useInitialScrollToSelectedItem()
                 <!-- 委托列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="questResult in filteredQuests" :key="questResult.quest.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                        <div
+                            v-for="questResult in filteredQuests"
+                            :key="questResult.quest.id"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedQuestId === questResult.quest.id }"
-                            @click="selectQuest(questResult.quest)">
+                            @click="selectQuest(questResult.quest)"
+                        >
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
                                     <div class="font-medium">{{ questResult.quest.name }}</div>
                                     <div class="text-xs opacity-70 mt-1">
                                         <span>等级: {{ questResult.quest.level[0] }} - {{ questResult.quest.level[1] || "?" }}</span>
-                                        <span v-if="questResult.quest.dayLimit"
-                                            class="ml-2 px-1.5 py-0.5 rounded bg-warning text-warning-content">每日限制</span>
+                                        <span
+                                            v-if="questResult.quest.dayLimit"
+                                            class="ml-2 px-1.5 py-0.5 rounded bg-warning text-warning-content"
+                                            >每日限制</span
+                                        >
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
@@ -663,18 +696,25 @@ useInitialScrollToSelectedItem()
                                 <span>概率: {{ questResult.quest.chance }}%</span>
                             </div>
 
-                            <div v-if="showFullTextSearch && searchKeyword.trim() && questResult.snippet"
-                                class="mt-2 text-xs leading-relaxed opacity-85">
+                            <div
+                                v-if="showFullTextSearch && searchKeyword.trim() && questResult.snippet"
+                                class="mt-2 text-xs leading-relaxed opacity-85"
+                            >
                                 <span class="opacity-65">匹配：</span>
                                 <span v-if="questResult.snippet.prefixEllipsis">...</span>
-                                <template v-for="(segment, index) in questResult.snippet.segments"
-                                    :key="`${questResult.quest.id}-${index}`">
-                                    <span :class="segment.highlighted
-                                        ? selectedQuestId === questResult.quest.id
-                                            ? 'bg-base-100/45 text-primary-content font-semibold px-0.5 rounded underline decoration-primary-content/80 decoration-2 underline-offset-2'
-                                            : 'bg-primary/20 text-base-content font-semibold px-0.5 rounded underline decoration-primary/80 decoration-2 underline-offset-2'
-                                        : ''
-                                        ">
+                                <template
+                                    v-for="(segment, index) in questResult.snippet.segments"
+                                    :key="`${questResult.quest.id}-${index}`"
+                                >
+                                    <span
+                                        :class="
+                                            segment.highlighted
+                                                ? selectedQuestId === questResult.quest.id
+                                                    ? 'bg-base-100/45 text-primary-content font-semibold px-0.5 rounded underline decoration-primary-content/80 decoration-2 underline-offset-2'
+                                                    : 'bg-primary/20 text-base-content font-semibold px-0.5 rounded underline decoration-primary/80 decoration-2 underline-offset-2'
+                                                : ''
+                                        "
+                                    >
                                         {{ segment.text }}
                                     </span>
                                 </template>
@@ -689,9 +729,11 @@ useInitialScrollToSelectedItem()
                     共 {{ filteredQuests.length }} 个委托
                 </div>
             </div>
-            <div v-if="selectedQuest"
+            <div
+                v-if="selectedQuest"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectQuest(null)">
+                @click="selectQuest(null)"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
@@ -702,5 +744,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

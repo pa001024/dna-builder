@@ -36,7 +36,7 @@ const displayDungeonSources = computed(() => {
             <div v-for="source in displayDungeonSources" :key="source.key" class="space-y-2">
                 <div
                     @click="toggleDungeonExpand(source.dungeonId)"
-                    class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors cursor-pointer"
+                    class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors duration-200 cursor-pointer"
                 >
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0">
@@ -53,7 +53,9 @@ const displayDungeonSources = computed(() => {
                     </div>
                     <div class="text-xs text-base-content/50">
                         <span v-if="source.pp" class="mr-2">概率: {{ +(source.pp * 100).toFixed(2) }}%</span>
-                        <span v-if="typeof source.times === 'number' && Number.isFinite(source.times)">期望: {{ +source.times.toFixed(2) }}次</span>
+                        <span v-if="typeof source.times === 'number' && Number.isFinite(source.times)"
+                            >期望: {{ +source.times.toFixed(2) }}次</span
+                        >
                     </div>
                 </div>
                 <div v-if="expandedDungeonId === source.dungeonId" class="p-3 bg-base-100 rounded border border-base-200">

@@ -100,7 +100,7 @@ function handleClickMonsterCard(): void {
 
 <template>
     <div
-        class="group rounded-xl border border-base-300 bg-base-200/70 p-2.5 transition-all hover:border-primary/40 hover:bg-base-200"
+        class="group rounded-xl border border-base-300 bg-base-200/70 p-2.5 transition-all duration-200 hover:border-primary/40 hover:bg-base-200"
         :class="{ 'cursor-pointer': clickable }"
         @click="handleClickMonsterCard"
     >
@@ -116,11 +116,15 @@ function handleClickMonsterCard(): void {
                     >
                         {{ $t(displayMonster.n) }}
                     </SRouterLink>
-                    <span class="shrink-0 rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/75">#{{ displayMonster.id }}</span>
+                    <span class="shrink-0 rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/75"
+                        >#{{ displayMonster.id }}</span
+                    >
                 </div>
 
                 <div class="mt-1 flex flex-wrap items-center gap-1.5">
-                    <span class="rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/80">{{ $t(getFactionName(displayMonster.f)) }}</span>
+                    <span class="rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/80">{{
+                        $t(getFactionName(displayMonster.f))
+                    }}</span>
                     <span class="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] text-primary">Lv.{{ monsterLevel ?? "--" }}</span>
                     <span
                         v-if="displayMonster.t"

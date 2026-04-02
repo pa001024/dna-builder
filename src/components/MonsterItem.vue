@@ -48,7 +48,7 @@ const monsterLevelText = computed(() => {
 </script>
 
 <template>
-    <div class="flex items-center gap-3 rounded-lg bg-base-200 p-2 transition-colors hover:bg-base-300">
+    <div class="flex items-center gap-3 rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-base-300">
         <div class="shrink-0 rounded-lg bg-linear-45 from-base-300 to-base-100 p-1.5">
             <img :src="monsterIcon" :alt="displayMonster.n" class="size-6 rounded-md object-cover" />
         </div>

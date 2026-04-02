@@ -136,12 +136,7 @@ async function stopMCPServer() {
 
         // 提示用户如何手动停止
         setTimeout(async () => {
-            if (
-                await ui.showDialog(
-                    t("setting.confirm"),
-                    t("ai.mcp_manual_stop_message")
-                )
-            ) {
+            if (await ui.showDialog(t("setting.confirm"), t("ai.mcp_manual_stop_message"))) {
                 if (env.isApp) {
                     launchExe("taskmgr.exe", "")
                 }
@@ -548,7 +543,7 @@ onMounted(() => {
         <!-- 对话列表 -->
         <div class="flex-none w-60 flex flex-col items-stretch overflow-hidden p-4 bg-base-100 gap-4 border-r border-gray-200">
             <button
-                class="p-2 px-4 text-md cursor-pointer btn btn-primary btn-block rounded-lg hover:bg-primary/90 transition-colors"
+                class="p-2 px-4 text-md cursor-pointer btn btn-primary btn-block rounded-lg hover:bg-primary/90 transition-colors duration-200"
                 @click="createNewConversation"
             >
                 新对话

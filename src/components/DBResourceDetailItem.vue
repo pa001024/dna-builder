@@ -1,9 +1,20 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import type { RouteLocationRaw } from "vue-router"
+import { regionMap } from "@/data/d/region.data"
+import { subRegionMap } from "@/data/d/subregion.data"
 import { collectResourceDraftSources } from "@/utils/draft-source"
 import { getRarityBadgeClass } from "@/utils/rarity-utils"
 import { collectResourceDungeonSources, collectResourceShopSources } from "@/utils/resource-source"
 import type { Resource } from "../data/d/resource.data"
+
+interface ResourceSourceGroup {
+    srId: number
+    regionId: number
+    subRegionName: string
+    regionName: string
+    count: number
+}
 
 const props = defineProps<{
     resource: Resource
@@ -13,6 +24,42 @@ const rarityText = computed(() => ["白", "绿", "蓝", "紫", "金"][props.reso
 const draftSources = computed(() => collectResourceDraftSources(props.resource))
 const dungeonSources = computed(() => collectResourceDungeonSources(props.resource))
 const shopSources = computed(() => collectResourceShopSources(props.resource))
+const mapSources = computed<ResourceSourceGroup[]>(() => {
+    const grouped = new Map<number, ResourceSourceGroup>()
+
+    for (const source of props.resource.source || []) {
+        const subRegion = subRegionMap.get(source.srId)
+        if (!subRegion) continue
+        const region = regionMap.get(subRegion.rid)
+        if (!region) continue
+        const current = grouped.get(source.srId)
+        const nextCount = (current?.count || 0) + (source.pos?.length || 0)
+        grouped.set(source.srId, {
+            srId: source.srId,
+            regionId: subRegion.rid,
+            subRegionName: subRegion.name,
+            regionName: region.name,
+            count: nextCount,
+        })
+    }
+
+    return [...grouped.values()].sort((a, b) => b.count - a.count || a.srId - b.srId)
+})
+
+/**
+ * 生成跳转到本地地图的资源点位链接。
+ * @param regionId 地区 ID
+ * @returns 路由对象
+ */
+function getMapLocalLink(regionId: number): RouteLocationRaw {
+    return {
+        name: "map-local",
+        query: {
+            regionId: String(regionId),
+            rid: String(props.resource.id),
+        },
+    }
+}
 
 function getResourceIconUrl(icon: string): string {
     return icon ? `/imgs/res/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
@@ -54,6 +101,23 @@ function getResourceIconUrl(icon: string): string {
                 <DraftSource :draft-sources="draftSources" />
                 <DungeonSource :dungeon-sources="dungeonSources" />
                 <ShopSource :shop-sources="shopSources" />
+            </div>
+        </div>
+
+        <div v-if="mapSources.length" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">地图点位</div>
+            <div class="space-y-2">
+                <div v-for="source in mapSources" :key="source.srId" class="p-2 bg-base-100 rounded border border-base-200">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <SRouterLink :to="getMapLocalLink(source.regionId)" class="hover:underline min-w-0 wrap-break-word">
+                                {{ source.subRegionName }}
+                            </SRouterLink>
+                            <div class="text-xs text-base-content/60 mt-1">{{ source.regionName }}</div>
+                        </div>
+                        <span class="text-xs text-base-content/70 shrink-0">{{ source.count }} 个点位</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

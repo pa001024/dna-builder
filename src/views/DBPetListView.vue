@@ -150,7 +150,7 @@ useInitialScrollToSelectedItem()
                         v-model="searchKeyword"
                         type="text"
                         placeholder="搜索魔灵名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
                     />
                 </div>
 
@@ -159,7 +159,7 @@ useInitialScrollToSelectedItem()
                         <div class="text-xs text-base-content/70 mb-1">{{ $t("char-build.enemy_type") }}</div>
                         <div class="flex flex-wrap gap-1 pb-1">
                             <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                                 :class="selectedType === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                                 @click="selectedType = 0"
                             >
@@ -168,7 +168,7 @@ useInitialScrollToSelectedItem()
                             <button
                                 v-for="type in types"
                                 :key="type"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
                                 :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                                 @click="selectedType = type"
                             >
@@ -181,7 +181,7 @@ useInitialScrollToSelectedItem()
                         <div class="text-xs text-base-content/70 mb-1">{{ $t("char-build.quality") }}</div>
                         <div class="flex flex-wrap gap-1 pb-1">
                             <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                                 :class="selectedQuality === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                                 @click="selectedQuality = 0"
                             >
@@ -190,7 +190,7 @@ useInitialScrollToSelectedItem()
                             <button
                                 v-for="quality in qualities"
                                 :key="quality"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
                                 :class="
                                     selectedQuality === quality
                                         ? 'bg-primary text-white'
@@ -202,7 +202,6 @@ useInitialScrollToSelectedItem()
                             </button>
                         </div>
                     </div>
-
                 </div>
 
                 <ScrollArea class="flex-1">
@@ -210,7 +209,7 @@ useInitialScrollToSelectedItem()
                         <div
                             v-for="item in filteredPets"
                             :key="item.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPetId === item.id }"
                             @click="selectedPetId = (item as Pet | PetEntry).id"
                         >

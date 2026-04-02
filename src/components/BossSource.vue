@@ -21,7 +21,7 @@ function getHardbossIcon(hardbossId?: number) {
     <div v-if="props.bossSources.length > 0" class="space-y-2">
         <div class="text-xs text-base-content/60">{{ $t("database.hardboss") }}</div>
         <div v-for="source in props.bossSources" :key="source.key">
-            <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors flex items-center gap-4">
+            <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200 flex items-center gap-4">
                 <div class="size-16 shrink-0">
                     <img :src="getHardbossIcon(source.hardbossId)" class="w-full h-full object-cover rounded" :alt="source.hardbossName" />
                 </div>

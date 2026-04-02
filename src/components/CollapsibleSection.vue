@@ -35,7 +35,7 @@ function toggle() {
         :class="collapseClass"
     >
         <div
-            class="flex items-center justify-between p-4 cursor-pointer bg-linear-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
+            class="flex items-center justify-between p-4 cursor-pointer bg-linear-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors duration-200"
             @click="toggle"
         >
             <div class="flex items-center gap-2">

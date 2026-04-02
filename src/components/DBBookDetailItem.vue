@@ -220,7 +220,7 @@ function selectResource(resourceId: number): void {
                     v-for="resource in book.res"
                     :key="resource.id"
                     type="button"
-                    class="shrink-0 rounded-full border px-3 py-1 text-sm transition-colors"
+                    class="shrink-0 rounded-full border px-3 py-1 text-sm transition-colors duration-200"
                     :class="{
                         'border-primary bg-primary text-primary-content': selectedResource?.id === resource.id,
                         'border-base-300 bg-base-200 hover:bg-base-300': selectedResource?.id !== resource.id,

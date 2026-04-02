@@ -367,7 +367,12 @@ const weaponAttributeEntries = computed<DisplayAttribute[]>(() => {
  * @returns 是否需要显示属性转换说明
  */
 function isInheritedWeaponAttack(key: string) {
-    return key === "攻击" && activeWeaponKey.value === "skill" && !!charBuild.value.skillWeapon?.inherit && charBuild.value.skillWeapon?.atk === "all"
+    return (
+        key === "攻击" &&
+        activeWeaponKey.value === "skill" &&
+        !!charBuild.value.skillWeapon?.inherit &&
+        charBuild.value.skillWeapon?.atk === "all"
+    )
 }
 
 /**
@@ -2302,7 +2307,9 @@ onMounted(() => {
                                                     v-if="'基础' + item.key in charBuild.char"
                                                     class="flex justify-between gap-8 text-sm text-cyan-200"
                                                 >
-                                                    <div class="text-white/75">{{ $t("char-build.base_attr_label", { attr: $t(item.key) }) }}</div>
+                                                    <div class="text-white/75">
+                                                        {{ $t("char-build.base_attr_label", { attr: $t(item.key) }) }}
+                                                    </div>
                                                     {{ charBuild.char[("基础" + item.key) as keyof LeveledChar] }}
                                                 </li>
                                                 <li
@@ -2405,9 +2412,13 @@ onMounted(() => {
                                                     class="flex justify-between gap-8 text-sm text-cyan-200"
                                                 >
                                                     <div class="text-white/75">
-                                                        {{ item.key === "攻击"
-                                                            ? $t("char-build.base_weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(item.key)) })
-                                                            : $t("char-build.base_attr_label", { attr: $t(item.key) }) }}
+                                                        {{
+                                                            item.key === "攻击"
+                                                                ? $t("char-build.base_weapon_attack_label", {
+                                                                      dmg: $t(getWeaponAttackLabelPrefix(item.key)),
+                                                                  })
+                                                                : $t("char-build.base_attr_label", { attr: $t(item.key) })
+                                                        }}
                                                     </div>
                                                     {{
                                                         formatWeaponProp(
@@ -2420,7 +2431,9 @@ onMounted(() => {
                                                     v-if="baseWeapon && '射速' in baseWeapon && item.key === '攻速'"
                                                     class="flex justify-between gap-8 text-sm text-cyan-200"
                                                 >
-                                                    <div class="text-white/75">{{ $t("char-build.base_attr_label", { attr: $t(item.key) }) }}</div>
+                                                    <div class="text-white/75">
+                                                        {{ $t("char-build.base_attr_label", { attr: $t(item.key) }) }}
+                                                    </div>
                                                     {{ formatWeaponProp("基础攻击", (baseWeapon as never)["射速"] as number) }}
                                                 </li>
                                                 <li
@@ -2525,13 +2538,19 @@ onMounted(() => {
                                             <div class="flex items-center gap-1 text-[12px] text-white/72">
                                                 <span>{{
                                                     item.key === "攻击"
-                                                        ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(item.key)) })
+                                                        ? $t("char-build.weapon_attack_label", {
+                                                              dmg: $t(getWeaponAttackLabelPrefix(item.key)),
+                                                          })
                                                         : getAttributeDisplayMeta(item.key).label
                                                 }}</span>
                                                 <FullTooltip v-if="isInheritedWeaponAttack(item.key)" side="top">
                                                     <template #tooltip>
                                                         <div class="text-sm text-white">
-                                                            {{ $t("char-build.weapon_attack_converted_from", { dmg: $t(getInheritedWeaponAttackTooltip()) }) }}
+                                                            {{
+                                                                $t("char-build.weapon_attack_converted_from", {
+                                                                    dmg: $t(getInheritedWeaponAttackTooltip()),
+                                                                })
+                                                            }}
                                                         </div>
                                                     </template>
                                                     <button class="inline-flex text-white/55 hover:text-cyan-200" @click.stop>

@@ -5006,6 +5006,10 @@
     "abyss-dungeon-list": {
         "title": "Abyss list"
     },
+    "abyss-usage": {
+        "desc": "Abyss lineup and role/weapon statistics",
+        "title": "Abyss Usage"
+    },
     "accessory": {
         "category": "Category",
         "description": "Description",

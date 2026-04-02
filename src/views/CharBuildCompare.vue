@@ -296,7 +296,10 @@ const charBuilds = computed(() => {
         })
 
         // Combine BUFFs from project and additional selections for this configuration
-        const combinedBuffs = [...baseBuild.buffs, ...config.additionalBuffs.map(v => createLeveledBuff(v[0], v[1], config.charSettings.customBuff))]
+        const combinedBuffs = [
+            ...baseBuild.buffs,
+            ...config.additionalBuffs.map(v => createLeveledBuff(v[0], v[1], config.charSettings.customBuff)),
+        ]
 
         // Create new CharBuild instance with combined settings for this configuration
         return new CharBuild({
@@ -633,7 +636,9 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 </div>
                             </div>
                             <BuffEditer
-                                :selected-buffs="config.additionalBuffs.map(([name, lv]) => createLeveledBuff(name, lv, config.charSettings.customBuff))"
+                                :selected-buffs="
+                                    config.additionalBuffs.map(([name, lv]) => createLeveledBuff(name, lv, config.charSettings.customBuff))
+                                "
                                 :buff-options="getFilteredBuffOptions(index)"
                                 :char-build="charBuilds[index]"
                                 @toggle-buff="toggleBuff(index, $event)"

@@ -625,7 +625,11 @@ onBeforeUnmount(() => {
         <div v-if="exclusiveWeapon && leveledExclusiveWeapon" class="p-1 bg-base-200 rounded">
             <div class="p-2 rounded">
                 <div class="flex items-center gap-3 mb-1">
-                    <ImageFallback :src="leveledExclusiveWeapon.url" :alt="exclusiveWeapon.名称" class="size-12 rounded object-cover shrink-0" />
+                    <ImageFallback
+                        :src="leveledExclusiveWeapon.url"
+                        :alt="exclusiveWeapon.名称"
+                        class="size-12 rounded object-cover shrink-0"
+                    />
                     <SRouterLink :to="`/db/weapon/${exclusiveWeapon.id}`" class="font-medium link link-primary">
                         {{ $t(exclusiveWeapon.名称) }}
                     </SRouterLink>
@@ -676,10 +680,7 @@ onBeforeUnmount(() => {
                             :alt="leveledWeapon.名称"
                             class="size-12 rounded object-cover shrink-0"
                         />
-                        <div
-                            v-else
-                            class="size-12 rounded shrink-0"
-                        >
+                        <div v-else class="size-12 rounded shrink-0">
                             <div
                                 class="flex h-full w-full items-center justify-center bg-base-content"
                                 :style="{ mask: `url(${getSkillWeaponMaskUrl(leveledWeapon)}) no-repeat center/68%` }"
@@ -780,11 +781,7 @@ onBeforeUnmount(() => {
                         <div v-if="skin.defaultItem && Object.keys(skin.defaultItem).length > 0" class="space-y-2">
                             <div class="text-xs text-base-content/70">默认奖励</div>
                             <div class="space-y-2">
-                                <div
-                                    v-for="groupName in Object.keys(skin.defaultItem)"
-                                    :key="`${skin.id}-${groupName}`"
-                                    class="space-y-1"
-                                >
+                                <div v-for="groupName in Object.keys(skin.defaultItem)" :key="`${skin.id}-${groupName}`" class="space-y-1">
                                     <div class="text-xs text-base-content/70">{{ getRewardTypeText(groupName) }}</div>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <ResourceCostItem
@@ -803,7 +800,11 @@ onBeforeUnmount(() => {
                         <div v-if="skin.upgrade && skin.upgrade.length > 0" class="space-y-2">
                             <div class="text-xs text-base-content/70">升级消耗</div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <div v-for="entry in skinUpgradeCostItems.filter(entry => entry.skinId === skin.id)" :key="`${entry.skinId}-${entry.step.step}`" class="space-y-1">
+                                <div
+                                    v-for="entry in skinUpgradeCostItems.filter(entry => entry.skinId === skin.id)"
+                                    :key="`${entry.skinId}-${entry.step.step}`"
+                                    class="space-y-1"
+                                >
                                     <div class="text-xs text-base-content/70">Lv.{{ entry.step.step }}</div>
                                     <ResourceCostItem :name="entry.step.currency" :value="getSkinUpgradeValue(entry.step)" />
                                 </div>

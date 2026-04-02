@@ -4896,6 +4896,10 @@
     "abyss-dungeon-list": {
         "title": "Liste des Abysses"
     },
+    "abyss-usage": {
+        "desc": "Statistiques des compositions et des armes/personnages des Abysses",
+        "title": "Utilisation des Abysses"
+    },
     "accessory": {
         "category": "Catégorie",
         "description": "Description",

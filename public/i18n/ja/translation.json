@@ -4999,6 +4999,10 @@
     "abyss-dungeon-list": {
         "title": "アビスリスト"
     },
+    "abyss-usage": {
+        "desc": "アビスの編成とキャラ・武器の統計",
+        "title": "アビス使用率"
+    },
     "accessory": {
         "category": "カテゴリ",
         "description": "説明",

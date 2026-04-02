@@ -16,7 +16,7 @@ const emit = defineEmits<{
 }>()
 </script>
 <template>
-    <div class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors cursor-pointer group">
+    <div class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors duration-200 cursor-pointer group">
         <div class="relative w-full h-full flex items-center justify-center">
             <ShowProps v-if="weapon" :props="weapon.getProperties()">
                 <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
@@ -55,7 +55,7 @@ const emit = defineEmits<{
                     <!-- 关闭按钮 -->
                     <button
                         v-if="!noremove"
-                        class="absolute cursor-pointer -top-2 -right-2 w-5 h-5 bg-red-400 bg-opacity-50 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                        class="absolute cursor-pointer -top-2 -right-2 w-5 h-5 bg-red-400 bg-opacity-50 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors duration-200"
                         @click.stop="emit('removeWeapon')"
                     >
                         <span class="text-white text-xs">×</span>

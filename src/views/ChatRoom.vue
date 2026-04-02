@@ -553,7 +553,12 @@ function cancelReply() {
                     @loadref="r => (el = r)"
                 >
                     <!-- 消息列表 -->
-                    <div v-for="item in msgs.filter(msg => !isUserBlocked(msg.user?.id))" v-if="msgs" :key="item.id" class="group flex items-start gap-2">
+                    <div
+                        v-for="item in msgs.filter(msg => !isUserBlocked(msg.user?.id))"
+                        v-if="msgs"
+                        :key="item.id"
+                        class="group flex items-start gap-2"
+                    >
                         <div v-if="!item.content && editId !== item.id" class="text-xs text-base-content/60 m-auto">
                             {{
                                 $t("chat.retractedAMessage", {

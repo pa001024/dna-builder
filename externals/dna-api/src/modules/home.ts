@@ -33,12 +33,12 @@ import { DNASubModule } from "./base"
 const DNA_GAME_ID = 268
 
 export class HomeAPI extends DNASubModule {
-    async adminAdjustScore(postId: number, gameForumId: number, weight: string, gameId: number = DNA_GAME_ID) {
+    async adminAdjustScore(postId: string, gameForumId: number, weight: string, gameId: number = DNA_GAME_ID) {
         const data = { postId, gameId: gameId ?? DNA_GAME_ID, gameForumId, weight }
         return await this._dna_request("forum/moderator/setPostWeight", data)
     }
 
-    async adminDelete(post: { postId: number; gameId?: number; gameForumId: number }, content: string, reasonCode: number) {
+    async adminDelete(post: { postId: string; gameId?: number; gameForumId: number }, content: string, reasonCode: number) {
         const data = {
             postId: post.postId,
             gameId: post.gameId ?? DNA_GAME_ID,
@@ -50,7 +50,7 @@ export class HomeAPI extends DNASubModule {
     }
 
     async adminMovePost(
-        post: { postId: number; gameId?: number; gameForumId: number },
+        post: { postId: string; gameId?: number; gameForumId: number },
         newGameId: number,
         newForumId: number,
         newTopicIdStr: string
@@ -66,7 +66,7 @@ export class HomeAPI extends DNASubModule {
         return await this._dna_request("forum/moderator/postMove", data)
     }
 
-    async adminRefreshTime(post: { postId: number; gameId?: number; gameForumId: number }, refresh: number) {
+    async adminRefreshTime(post: { postId: string; gameId?: number; gameForumId: number }, refresh: number) {
         const data = {
             postId: post.postId,
             gameId: post.gameId ?? DNA_GAME_ID,
@@ -80,11 +80,11 @@ export class HomeAPI extends DNASubModule {
         return await this._dna_request<DNABlockBean>("user/block/list")
     }
 
-    async blockOther(blockPostId: number, blockUserId: string, type: number) {
+    async blockOther(blockPostId: string, blockUserId: string, type: number) {
         return await this._dna_request("user/block/other", { blockPostId, blockUserId, type })
     }
 
-    async collect(postId: number, toUserId: string, operateType = 1) {
+    async collect(postId: string, toUserId: string, operateType = 1) {
         const data = { operateType, postId, toUserId }
         return await this._dna_request("forum/collect", data)
     }
@@ -246,16 +246,17 @@ export class HomeAPI extends DNASubModule {
         return await this._dna_request<DNATopicListResponse>("forum/getPostByTopic", data)
     }
 
-    async getPostCommentList(postId: number, pageIndex: number = 1, pageSize: number = 20, isOnlyPublisher: number = 0) {
+    async getPostCommentList(postId: string, pageIndex: number = 1, pageSize: number = 20, isOnlyPublisher: number = 0, showOrderType = 1) {
         return await this._dna_request<DNACommentListResponse>("forum/comment/getPostCommentList", {
-            postId,
+            isOnlyPublisher,
             pageIndex,
             pageSize,
-            isOnlyPublisher,
+            postId,
+            showOrderType,
         })
     }
 
-    async getPostDetail(postId: string | number) {
+    async getPostDetail(postId: string) {
         return await this._dna_request<DNAPostDetailResponse>("forum/getPostDetail", { postId })
     }
 
@@ -279,7 +280,7 @@ export class HomeAPI extends DNASubModule {
         return await this._dna_request<DNAHomeOffWaterResponse>("forum/getRecommendPosts", { gameId, pageIndex, pageSize })
     }
 
-    async getReplyList(postId: number, postCommentId: number, pageIndex: number = 1, pageSize: number = 20) {
+    async getReplyList(postId: string, postCommentId: number, pageIndex: number = 1, pageSize: number = 20) {
         return await this._dna_request<DNAReplyListResponse>("forum/comment/getReplyList", { postId, postCommentId, pageIndex, pageSize })
     }
 
@@ -333,27 +334,27 @@ export class HomeAPI extends DNASubModule {
         return await this._dna_request("forum/like", data)
     }
 
-    async lockPost(post: { postId: number; gameId?: number; gameForumId: number }, operateType: number) {
+    async lockPost(post: { postId: string; gameId?: number; gameForumId: number }, operateType: number) {
         const data = { postId: post.postId, gameId: post.gameId ?? DNA_GAME_ID, gameForumId: post.gameForumId, operateType }
         return await this._dna_request("forum/moderator/postLock", data)
     }
 
-    async postDownOrUp(post: { postId: number; gameId?: number; gameForumId: number }, operateType: number) {
+    async postDownOrUp(post: { postId: string; gameId?: number; gameForumId: number }, operateType: number) {
         const data = { postId: post.postId, gameId: post.gameId ?? DNA_GAME_ID, gameForumId: post.gameForumId, operateType }
         return await this._dna_request("forum/moderator/postDownOrUp", data)
     }
 
-    async postElite(post: { postId: number; gameId?: number; gameForumId: number }, operateType: number) {
+    async postElite(post: { postId: string; gameId?: number; gameForumId: number }, operateType: number) {
         const data = { postId: post.postId, gameId: post.gameId ?? DNA_GAME_ID, gameForumId: post.gameForumId, operateType }
         return await this._dna_request("forum/moderator/postElite", data)
     }
 
-    async postHide(post: { postId: number; gameId?: number; gameForumId: number }, operateType: number) {
+    async postHide(post: { postId: string; gameId?: number; gameForumId: number }, operateType: number) {
         const data = { postId: post.postId, gameId: post.gameId ?? DNA_GAME_ID, gameForumId: post.gameForumId, operateType }
         return await this._dna_request("forum/moderator/postHide", data)
     }
 
-    async reRank(post: { postId: number; gameId?: number; gameForumId: number }, weight: number) {
+    async reRank(post: { postId: string; gameId?: number; gameForumId: number }, weight: number) {
         const data = { postId: post.postId, gameId: post.gameId ?? DNA_GAME_ID, gameForumId: post.gameForumId, weight }
         return await this._dna_request("forum/moderator/reRank", data)
     }
@@ -402,7 +403,7 @@ export class HomeAPI extends DNASubModule {
         return await this._dna_request<DNASignInBean>("user/signIn", data)
     }
 
-    async strongRecommend(post: { postId: number; gameId?: number; gameForumId: number }, operateType = 1) {
+    async strongRecommend(post: { postId: string; gameId?: number; gameForumId: number }, operateType = 1) {
         const data = {
             postId: post.postId,
             gameId: post.gameId ?? DNA_GAME_ID,
@@ -416,7 +417,7 @@ export class HomeAPI extends DNASubModule {
         return await this._dna_request("encourage/level/viewCommunity")
     }
 
-    async viewCount(postId: number, gameId = DNA_GAME_ID) {
+    async viewCount(postId: string, gameId = DNA_GAME_ID) {
         return await this._dna_request("forum/viewCount", { gameId, postId })
     }
 

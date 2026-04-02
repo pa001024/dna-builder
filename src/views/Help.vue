@@ -252,7 +252,7 @@ const getBadgeClass = (badge?: string) => {
             <!-- 导航箭头（桌面） -->
             <button
                 v-if="!isMobile"
-                class="absolute left-8 top-1/2 -translate-y-1/2 z-200 btn btn-circle btn-lg btn-ghost btn-primary shadow-lg hover:scale-110 transition-transform -translate-x-1/2"
+                class="absolute left-8 top-1/2 -translate-y-1/2 z-200 btn btn-circle btn-lg btn-ghost btn-primary shadow-lg hover:scale-110 transition-transform duration-200 -translate-x-1/2"
                 :disabled="currentIndex === 0"
                 @click="prevSlide"
             >
@@ -260,7 +260,7 @@ const getBadgeClass = (badge?: string) => {
             </button>
             <button
                 v-if="!isMobile"
-                class="absolute right-8 top-1/2 -translate-y-1/2 z-200 btn btn-circle btn-lg btn-ghost btn-primary shadow-lg hover:scale-110 transition-transform translate-x-1/2"
+                class="absolute right-8 top-1/2 -translate-y-1/2 z-200 btn btn-circle btn-lg btn-ghost btn-primary shadow-lg hover:scale-110 transition-transform duration-200 translate-x-1/2"
                 :disabled="currentIndex === helpSections.length - 1"
                 @click="nextSlide"
             >
@@ -309,7 +309,7 @@ const getBadgeClass = (badge?: string) => {
                                         <div
                                             v-for="(step, idx) in section.steps"
                                             :key="idx"
-                                            class="flex items-start gap-3 p-4 bg-base-200/50 rounded-xl hover:bg-base-200 transition-colors"
+                                            class="flex items-start gap-3 p-4 bg-base-200/50 rounded-xl hover:bg-base-200 transition-colors duration-200"
                                         >
                                             <div :class="['badge', 'badge-lg', getBadgeClass(step.badge)]">
                                                 {{ idx + 1 }}
@@ -336,7 +336,7 @@ const getBadgeClass = (badge?: string) => {
                                         <li
                                             v-for="(feature, idx) in section.features"
                                             :key="idx"
-                                            class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors"
+                                            class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors duration-200"
                                         >
                                             <Icon icon="ri:checkbox-circle-fill" class="w-5 h-5 text-success shrink-0 mt-0.5" />
                                             <span class="text-sm">{{ t(feature) }}</span>
@@ -354,7 +354,7 @@ const getBadgeClass = (badge?: string) => {
                                         <li
                                             v-for="(control, idx) in section.controls"
                                             :key="idx"
-                                            class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors"
+                                            class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors duration-200"
                                         >
                                             <Icon icon="ri:checkbox-circle-fill" class="w-5 h-5 text-info shrink-0 mt-0.5" />
                                             <span class="text-sm">{{ t(control) }}</span>
@@ -373,7 +373,7 @@ const getBadgeClass = (badge?: string) => {
                                             <li
                                                 v-for="(feature, featIdx) in category.features"
                                                 :key="featIdx"
-                                                class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors"
+                                                class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors duration-200"
                                             >
                                                 <Icon icon="ri:checkbox-circle-fill" class="w-5 h-5 text-success shrink-0 mt-0.5" />
                                                 <span class="text-sm">{{ t(feature) }}</span>
@@ -433,7 +433,7 @@ const getBadgeClass = (badge?: string) => {
                                         <div
                                             v-for="(step, idx) in section.steps"
                                             :key="idx"
-                                            class="flex items-start gap-3 p-4 bg-base-200/50 rounded-xl hover:bg-base-200 transition-colors"
+                                            class="flex items-start gap-3 p-4 bg-base-200/50 rounded-xl hover:bg-base-200 transition-colors duration-200"
                                         >
                                             <div :class="['badge', 'badge-lg', getBadgeClass(step.badge)]">
                                                 {{ idx + 1 }}
@@ -460,7 +460,7 @@ const getBadgeClass = (badge?: string) => {
                                         <li
                                             v-for="(feature, idx) in section.features"
                                             :key="idx"
-                                            class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors"
+                                            class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors duration-200"
                                         >
                                             <Icon icon="ri:checkbox-circle-fill" class="w-5 h-5 text-success shrink-0 mt-0.5" />
                                             <span class="text-sm">{{ t(feature) }}</span>
@@ -478,7 +478,7 @@ const getBadgeClass = (badge?: string) => {
                                         <li
                                             v-for="(control, idx) in section.controls"
                                             :key="idx"
-                                            class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors"
+                                            class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors duration-200"
                                         >
                                             <Icon icon="ri:checkbox-circle-fill" class="w-5 h-5 text-info shrink-0 mt-0.5" />
                                             <span class="text-sm">{{ t(control) }}</span>
@@ -497,7 +497,7 @@ const getBadgeClass = (badge?: string) => {
                                             <li
                                                 v-for="(feature, featIdx) in category.features"
                                                 :key="featIdx"
-                                                class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors"
+                                                class="flex items-start gap-2 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors duration-200"
                                             >
                                                 <Icon icon="ri:checkbox-circle-fill" class="w-5 h-5 text-success shrink-0 mt-0.5" />
                                                 <span class="text-sm">{{ t(feature) }}</span>

@@ -72,7 +72,7 @@ function closeMobileDrawer() {
                     <li v-if="tab.name && tab.show !== false && tab.path">
                         <RouterLink
                             :to="tab.path"
-                            class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                            class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors duration-200"
                             @click="closeMobileDrawer"
                         >
                             <Icon v-if="tab.icon" :icon="tab.icon" class="w-6 h-6" />
@@ -85,7 +85,7 @@ function closeMobileDrawer() {
                 <li>
                     <RouterLink
                         to="/game-accounts"
-                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors duration-200"
                         @click="closeMobileDrawer"
                     >
                         <Icon icon="ri:user-line" class="w-6 h-6" />
@@ -95,7 +95,7 @@ function closeMobileDrawer() {
                 <li>
                     <RouterLink
                         to="/setting"
-                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors duration-200"
                         @click="closeMobileDrawer"
                     >
                         <Icon icon="ri:settings-3-line" class="w-6 h-6" />

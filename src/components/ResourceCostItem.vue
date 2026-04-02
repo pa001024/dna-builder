@@ -488,7 +488,7 @@ function handleCardClick() {
                 :class="getWalnutBackgroundColor(value[1])"
             />
             <SRouterLink :to="`/db/walnut/${Number(value[1])}`" stop class="hover:underline">
-                {{ `密函: ${getWalnutReward(value[1]).walnut?.名称 || value[1]}` }}
+                {{ getWalnutReward(value[1]).walnut?.名称 || value[1] }}
             </SRouterLink>
         </span>
         <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
@@ -513,10 +513,7 @@ function handleCardClick() {
         <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
     </div>
     <div
-        v-else-if="
-            Array.isArray(value) &&
-            isFashionCostType(value[2])
-        "
+        v-else-if="Array.isArray(value) && isFashionCostType(value[2])"
         class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200"
         v-bind="$attrs"
         @click="$emit('click')"
@@ -528,12 +525,7 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 bg-linear-15 rounded"
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
-            <SRouterLink
-                v-if="getFashionLink(value[2], value[1])"
-                :to="getFashionLink(value[2], value[1])"
-                stop
-                class="hover:underline"
-            >
+            <SRouterLink v-if="getFashionLink(value[2], value[1])" :to="getFashionLink(value[2], value[1])" stop class="hover:underline">
                 {{ nameString }}
             </SRouterLink>
             <span v-else>{{ name }}</span>
@@ -541,11 +533,7 @@ function handleCardClick() {
         <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
     </div>
     <div
-        v-else-if="
-            Array.isArray(value) &&
-            isAccessoryCostType(value[2]) &&
-            getAccessoryByType(value[2], value[1])
-        "
+        v-else-if="Array.isArray(value) && isAccessoryCostType(value[2]) && getAccessoryByType(value[2], value[1])"
         class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200"
         v-bind="$attrs"
         @click="$emit('click')"

@@ -137,7 +137,7 @@ const currentMonster = computed(() => {
         <!-- --- HUD: Top Left Settings --- -->
         <div class="absolute top-4 left-4 pointer-events-auto">
             <button
-                class="p-3 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 rounded-xl text-white transition-colors"
+                class="p-3 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 rounded-xl text-white transition-colors duration-200"
                 @click="isSettingsOpen = true"
             >
                 <Icon icon="ri:settings-3-line" />
@@ -275,11 +275,11 @@ const currentMonster = computed(() => {
                     <div class="flex items-center justify-between">
                         <label class="text-sm font-bold text-slate-400">自动升级 (+5 / {{ localSettings.autoLevelInterval }}s)</label>
                         <button
-                            :class="`w-12 h-6 rounded-full transition-colors relative ${localSettings.autoLevelUp ? 'bg-green-500' : 'bg-slate-600'}`"
+                            :class="`w-12 h-6 rounded-full transition-colors duration-200 relative ${localSettings.autoLevelUp ? 'bg-green-500' : 'bg-slate-600'}`"
                             @click="toggleAutoLevelUp"
                         >
                             <div
-                                :class="`absolute top-1 bottom-1 left-1 w-4 bg-white rounded-full transition-transform ${localSettings.autoLevelUp ? 'translate-x-6' : ''}`"
+                                :class="`absolute top-1 bottom-1 left-1 w-4 bg-white rounded-full transition-transform duration-200 ${localSettings.autoLevelUp ? 'translate-x-6' : ''}`"
                             />
                         </button>
                     </div>
@@ -308,7 +308,7 @@ const currentMonster = computed(() => {
                 </div>
 
                 <button
-                    class="w-full mt-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors"
+                    class="w-full mt-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors duration-200"
                     @click="closeSettings"
                 >
                     应用

@@ -205,7 +205,7 @@ const astTreeText = computed(() => {
                     <button
                         v-for="ex in examples"
                         :key="ex.expr"
-                        class="w-full text-left p-2 rounded bg-base-100 hover:bg-base-300 transition-colors flex items-center justify-between group"
+                        class="w-full text-left p-2 rounded bg-base-100 hover:bg-base-300 transition-colors duration-200 flex items-center justify-between group"
                         @click="selectExample(ex.expr)"
                     >
                         <span class="text-sm text-base-content/80">{{ ex.label }}</span>
@@ -219,7 +219,7 @@ const astTreeText = computed(() => {
                     <button
                         v-for="(expr, label) in internals"
                         :key="label"
-                        class="w-full text-left p-2 rounded bg-base-100 hover:bg-base-300 transition-colors flex items-center justify-between group"
+                        class="w-full text-left p-2 rounded bg-base-100 hover:bg-base-300 transition-colors duration-200 flex items-center justify-between group"
                         @click="selectExample(label)"
                     >
                         <span class="text-sm text-base-content/80">{{ label }}</span>

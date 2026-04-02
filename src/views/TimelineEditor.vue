@@ -1472,7 +1472,12 @@ const importTimelineJson = () => {
                             hp: json.hp || [],
                         }
                         if (index !== -1) {
-                            if (!(await ui.showDialog(t("timeline.overwrite_confirm_title"), t("timeline.overwrite_confirm_message", { name: json.name })))) {
+                            if (
+                                !(await ui.showDialog(
+                                    t("timeline.overwrite_confirm_title"),
+                                    t("timeline.overwrite_confirm_message", { name: json.name })
+                                ))
+                            ) {
                                 return
                             }
                             timelineData.value[index] = val
@@ -1680,10 +1685,18 @@ const importTimelineJson = () => {
                                     >
                                         <Icon icon="ri:pencil-fill" class="h-4 w-4" />
                                     </div>
-                                    <div class="btn btn-xs btn-ghost btn-square border-0" :title="$t('timeline.save')" @click="saveTimeline(index)">
+                                    <div
+                                        class="btn btn-xs btn-ghost btn-square border-0"
+                                        :title="$t('timeline.save')"
+                                        @click="saveTimeline(index)"
+                                    >
                                         <Icon icon="ri:save-fill" class="h-4 w-4" />
                                     </div>
-                                    <div class="btn btn-xs btn-ghost btn-square border-0" :title="$t('common.delete')" @click="deleteTimeline(index)">
+                                    <div
+                                        class="btn btn-xs btn-ghost btn-square border-0"
+                                        :title="$t('common.delete')"
+                                        @click="deleteTimeline(index)"
+                                    >
                                         <Icon icon="ri:delete-bin-2-fill" class="h-4 w-4" />
                                     </div>
                                 </li>

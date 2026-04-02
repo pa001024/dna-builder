@@ -171,7 +171,7 @@ useInitialScrollToSelectedItem()
                         v-model="searchKeyword"
                         type="text"
                         placeholder="搜索怪物名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
                     />
                 </div>
 
@@ -179,7 +179,7 @@ useInitialScrollToSelectedItem()
                 <div class="p-2">
                     <div class="flex flex-wrap gap-1 pb-2">
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="
                                 normalizedSelectedType === 'allMonster'
                                     ? 'bg-primary text-white'
@@ -190,7 +190,7 @@ useInitialScrollToSelectedItem()
                             全部
                         </button>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="
                                 normalizedSelectedType === 'normalMonster'
                                     ? 'bg-primary text-white'
@@ -201,7 +201,7 @@ useInitialScrollToSelectedItem()
                             普通
                         </button>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="
                                 normalizedSelectedType === 'commanderMonster'
                                     ? 'bg-primary text-white'
@@ -212,7 +212,7 @@ useInitialScrollToSelectedItem()
                             号令者
                         </button>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="
                                 normalizedSelectedType === 'monsterTag'
                                     ? 'bg-primary text-white'
@@ -227,7 +227,7 @@ useInitialScrollToSelectedItem()
                     <div class="flex flex-wrap gap-1 pb-1">
                         <template v-if="normalizedSelectedType !== 'monsterTag'">
                             <button
-                                class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                                class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                                 :class="
                                     selectedFaction === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
                                 "
@@ -238,7 +238,7 @@ useInitialScrollToSelectedItem()
                             <button
                                 v-for="faction in factions"
                                 :key="faction"
-                                class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
+                                class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
                                 :class="
                                     selectedFaction === faction
                                         ? 'bg-primary text-white'
@@ -259,7 +259,7 @@ useInitialScrollToSelectedItem()
                             <div
                                 v-for="monster in filteredMonsters"
                                 :key="monster.id"
-                                class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                                class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                                 :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedMonsterId === monster.id }"
                                 @click="selectMonster(monster.id)"
                             >
@@ -295,7 +295,7 @@ useInitialScrollToSelectedItem()
                             <div
                                 v-for="monsterTag in filteredMonsterTags"
                                 :key="monsterTag.primaryTag.id"
-                                class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                                class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                                 :class="{
                                     'bg-primary/90 text-primary-content hover:bg-primary':
                                         selectedMonsterTagId === monsterTag.primaryTag.id,
@@ -348,4 +348,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-

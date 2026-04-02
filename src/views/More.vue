@@ -47,6 +47,11 @@ const items = [
         icon: "ri:trophy-line",
     },
     {
+        name: "abyss-usage",
+        path: "/abyss-usage",
+        icon: "ri:bar-chart-line",
+    },
+    {
         name: "setting",
         path: "/setting",
         icon: "ri:settings-3-line",

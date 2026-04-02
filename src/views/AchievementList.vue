@@ -289,7 +289,7 @@ function getAchievementIcon(category: string) {
                     <!-- 全部分类选项 -->
                     <div>
                         <div
-                            class="flex flex-col items-end p-4 cursor-pointer transition-colors border-r-2"
+                            class="flex flex-col items-end p-4 cursor-pointer transition-colors duration-200 border-r-2"
                             :class="selectedCategory === null ? 'border-primary text-primary' : 'border-transparent'"
                             @click="selectedCategory = null"
                         >
@@ -304,7 +304,7 @@ function getAchievementIcon(category: string) {
                     <div
                         v-for="(achievements, category) in categorizedAchievements"
                         :key="category"
-                        class="flex gap-2 justify-between items-center cursor-pointer transition-colors border-r-2 hover:bg-base-200"
+                        class="flex gap-2 justify-between items-center cursor-pointer transition-colors duration-200 border-r-2 hover:bg-base-200"
                         :class="selectedCategory === category ? 'border-primary text-primary' : 'border-transparent'"
                         @click="selectCategory(category)"
                     >
@@ -367,7 +367,7 @@ function getAchievementIcon(category: string) {
                         <div
                             v-for="achievement in filteredAchievements"
                             :key="achievement.id"
-                            class="bg-base-100 rounded-lg border border-base-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                            class="bg-base-100 rounded-lg border border-base-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
                         >
                             <div class="p-4">
                                 <div class="flex justify-between items-start mb-3">

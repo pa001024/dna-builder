@@ -55,7 +55,7 @@ export class TrendAPI extends DNASubModule {
         operateType: number,
         postCommentId: number,
         postCommentReplyId: number,
-        postId: number,
+        postId: string,
         postType: number,
         toUserId: string
     ) {
@@ -184,7 +184,7 @@ export class TrendAPI extends DNASubModule {
         })
     }
 
-    async viewCount(gameId: number, postId: number) {
+    async viewCount(gameId: number, postId: string) {
         return await this._dna_request("forum/viewCount", { gameId, postId })
     }
 }

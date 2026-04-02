@@ -102,12 +102,16 @@ function selectWeapon(weapon: Weapon) {
                         v-model="searchQuery"
                         type="text"
                         :placeholder="$t('weapon-list.searchPlaceholder')"
-                        class="input input-bordered input-sm w-full pl-10 pr-4 focus:input-primary transition-all"
+                        class="input input-bordered input-sm w-full pl-10 pr-4 focus:input-primary transition-all duration-200"
                     />
                     <Icon icon="ri:search-line" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 w-4 h-4" />
                 </div>
 
-                <button class="btn btn-sm whitespace-nowrap" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="sortByIncome = !sortByIncome">
+                <button
+                    class="btn btn-sm whitespace-nowrap"
+                    :class="sortByIncome ? 'btn-secondary' : 'btn-outline'"
+                    @click="sortByIncome = !sortByIncome"
+                >
                     {{ sortByIncome ? "收益排序：高→低" : "默认顺序" }}
                 </button>
             </div>
@@ -205,7 +209,8 @@ function selectWeapon(weapon: Weapon) {
                                 {{ $t(weapon.伤害类型) }}
                             </span>
                             <span v-if="charBuild" class="text-primary">
-                                {{ $t("weapon-list.income") }}: {{
+                                {{ $t("weapon-list.income") }}:
+                                {{
                                     format100r(
                                         charBuild.calcIncome(
                                             new LeveledWeapon(weapon, undefined, undefined, inv.getWBuffLv(weapon.id, charBuild.char.属性))
@@ -217,7 +222,7 @@ function selectWeapon(weapon: Weapon) {
 
                         <!-- 底部属性条 -->
                         <div class="grid grid-cols-3 gap-1 pt-2 border-t border-base-200">
-                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-warning transition-colors">
+                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-warning transition-colors duration-200">
                                 <svg
                                     aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -233,7 +238,7 @@ function selectWeapon(weapon: Weapon) {
                                 </svg>
                                 <span>{{ format100(weapon.暴击) }}</span>
                             </div>
-                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-success transition-colors">
+                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-success transition-colors duration-200">
                                 <svg
                                     aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -249,7 +254,7 @@ function selectWeapon(weapon: Weapon) {
                                 </svg>
                                 <span>{{ format100(weapon.暴伤) }}</span>
                             </div>
-                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-primary transition-colors">
+                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-primary transition-colors duration-200">
                                 <svg
                                     aria-hidden="true"
                                     width="1em"

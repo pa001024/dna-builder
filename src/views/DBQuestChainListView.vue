@@ -566,7 +566,7 @@ useInitialScrollToSelectedItem()
                         v-model="searchKeyword"
                         type="text"
                         :placeholder="showFullTextSearch ? '全文搜索任务/对话内容（不支持拼音）...' : '搜索任务 ID/名称（支持拼音）...'"
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
                     />
 
                     <div class="mt-2 flex items-center gap-4 text-xs text-base-content/80 flex-wrap">
@@ -592,7 +592,7 @@ useInitialScrollToSelectedItem()
                         <div
                             v-for="questChainResult in filteredQuestChains"
                             :key="questChainResult.questChain.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{
                                 'bg-primary/90 text-primary-content hover:bg-primary':
                                     selectedQuestChainId === questChainResult.questChain.id,
@@ -685,5 +685,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

@@ -2,45 +2,22 @@ import { invoke } from "@tauri-apps/api/core"
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { getFileHash, getFileSize, tauriFetch } from "@/api/app"
 
-/**
- * rawurl
- * 正式服
- * http://pan01-cdn-dna-ali.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/BaseVersion.json
- * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/PreDownloadVersion.json
- * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/10/BaseVersion.json
- *
- * B服
- * http://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_Bili_Pub/PackageBaseVersion.txt
- *
- * 热更
- * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT_CN_Pub/VersionList.json
- * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT_CN_Pub/1010116/PakFilesInfo.json
- * http://pan01-1-eo.shyxhy.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT_CN_Pub/1010116/ResDiscreteInfo.json
- * 先看/VersionList.json 拿到 patchVersion
- * 拼到/${version}/PakFilesInfo.json 拿到文件名 拼到/${version}/${filename}
- * 本地
- * DNA Game\EM\EMPatches\Paks\CN\PC_OBT_CN_Pub\Patch\
- * 本地版本缓存 VersionList.json
- * 语音包记录 OptionalPatchSigns.json
- * patch下载到 Patch\${version}\
- */
-
 export const CDN_LIST = [
     {
         name: "阿里",
-        url: "http://pan01-cdn-dna-ali.shyxhy.com",
+        url: "https://pan01-cdn-dna-ali.shyxhy.com",
     },
     {
         name: "火山",
-        url: "http://pan01-1-hs.shyxhy.com",
+        url: "https://pan01-1-hs.shyxhy.com",
     },
     {
         name: "腾讯",
-        url: "http://pan01-1-eo.shyxhy.com",
+        url: "https://pan01-1-eo.shyxhy.com",
     },
     {
         name: "海外",
-        url: "http://pan01-pack2.dna-panstudio.com",
+        url: "https://pan01-pack2.dna-panstudio.com",
     },
 ]
 export const VERSION_URL_PUB = (server: string) => `/Packages/${server}/WindowsNoEditor/`
@@ -67,15 +44,6 @@ export interface GameAssets {
     ZipMd5: string
     ZipSize: number
     bIsSDK: string
-}
-
-/**
- * 统一本地哈希字符串格式，避免大小写差异影响比较结果。
- * @param hash 原始哈希字符串
- * @returns 归一化后的哈希字符串
- */
-export function normalizeFileHash(hash: string) {
-    return hash.trim().toLowerCase()
 }
 
 /**
@@ -159,7 +127,7 @@ export async function isLocalFileMatch(filePath: string, expectedSize: number, e
             return false
         }
 
-        return normalizeFileHash(actualHash) === normalizeFileHash(expectedHash)
+        return actualHash === expectedHash
     } catch (error) {
         console.error("校验本地文件 hash 失败:", error)
         return false

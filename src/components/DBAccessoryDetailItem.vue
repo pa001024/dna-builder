@@ -39,7 +39,14 @@ type HeadAccessoryItem = HeadSculptureItem & {
     accessoryType: "head"
 }
 
-type DetailAccessoryItem = CharAccessoryItem | WeaponAccessoryItem | SkinAccessoryItem | WeaponSkinAccessoryItem | HairAccessoryItem | HeadFrameAccessoryItem | HeadAccessoryItem
+type DetailAccessoryItem =
+    | CharAccessoryItem
+    | WeaponAccessoryItem
+    | SkinAccessoryItem
+    | WeaponSkinAccessoryItem
+    | HairAccessoryItem
+    | HeadFrameAccessoryItem
+    | HeadAccessoryItem
 
 const props = defineProps<{
     accessory: DetailAccessoryItem
@@ -95,9 +102,7 @@ function isHeadAccessory(accessory: DetailAccessoryItem): accessory is HeadAcces
  * @param accessory 详情数据
  * @returns 是否为不显示稀有度的饰品
  */
-function isNoRarityAccessory(
-    accessory: DetailAccessoryItem
-): accessory is HeadFrameAccessoryItem | HeadAccessoryItem {
+function isNoRarityAccessory(accessory: DetailAccessoryItem): accessory is HeadFrameAccessoryItem | HeadAccessoryItem {
     return accessory.accessoryType === "headframe" || accessory.accessoryType === "head"
 }
 
@@ -445,11 +450,7 @@ const accessoryUnlock = computed(() => {
     <div class="p-3 space-y-3">
         <div class="flex items-start justify-between gap-3">
             <div class="flex items-start gap-3 min-w-0">
-                <img
-                    :src="accessoryIcon"
-                    :alt="accessoryName"
-                    class="size-12 rounded-lg bg-base-200 object-cover"
-                />
+                <img :src="accessoryIcon" :alt="accessoryName" class="size-12 rounded-lg bg-base-200 object-cover" />
                 <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
                         <SRouterLink v-if="accessoryDetailLink" :to="accessoryDetailLink" class="text-lg font-bold link link-primary">

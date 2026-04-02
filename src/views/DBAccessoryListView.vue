@@ -276,63 +276,63 @@ useInitialScrollToSelectedItem()
                         v-model="searchKeyword"
                         type="text"
                         :placeholder="$t('accessory.searchPlaceholder')"
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
                     />
                 </div>
 
                 <div class="p-2 border-b border-base-200">
                     <div class="flex flex-wrap gap-1 pb-1">
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === 'all' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'all'"
                         >
                             {{ $t("accessory.typeAll") }}
                         </button>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === 'char' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'char'"
                         >
                             {{ $t("accessory.typeChar") }}
                         </button>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === 'weapon' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'weapon'"
                         >
                             {{ $t("accessory.typeWeapon") }}
                         </button>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === 'skin' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'skin'"
                         >
                             {{ $t("accessory.typeSkin") }}
                         </button>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === 'weaponskin' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'weaponskin'"
                         >
                             {{ $t("accessory.typeWeaponSkin") }}
                         </button>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === 'hair' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'hair'"
                         >
                             {{ $t("accessory.typeHair") }}
                         </button>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === 'headframe' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'headframe'"
                         >
                             {{ $t("accessory.typeHeadFrame") }}
                         </button>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === 'head' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedType = 'head'"
                         >
@@ -342,7 +342,7 @@ useInitialScrollToSelectedItem()
 
                     <div class="flex flex-wrap gap-1 pb-1">
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedRarity === -1 ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedRarity = -1"
                         >
@@ -351,7 +351,7 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="rarity in allRarities"
                             :key="rarity"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedRarity === rarity ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedRarity = rarity"
                         >
@@ -361,7 +361,7 @@ useInitialScrollToSelectedItem()
 
                     <div class="flex flex-wrap gap-1">
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedUnlock === 'all' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedUnlock = 'all'"
                         >
@@ -370,7 +370,7 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="unlockMethod in allUnlockMethods"
                             :key="unlockMethod"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedUnlock === unlockMethod ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                             @click="selectedUnlock = unlockMethod"
                         >
@@ -384,7 +384,7 @@ useInitialScrollToSelectedItem()
                         <div
                             v-for="accessory in filteredAccessories"
                             :key="`${accessory.accessoryType}:${accessory.id}`"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{
                                 'bg-primary/90 text-primary-content hover:bg-primary':
                                     selectedAccessoryKey === `${accessory.accessoryType}:${accessory.id}`,

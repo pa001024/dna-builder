@@ -60,7 +60,7 @@ async function resolveGrantUserId(form: Record<string, unknown>): Promise<string
         throw new Error("匹配到多个同名用户，请改用用户 ID 或邮箱")
     }
 
-        throw new Error(`未找到邮箱对应用户：${userEmail}`)
+    throw new Error(`未找到邮箱对应用户：${userEmail}`)
 }
 
 /**

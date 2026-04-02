@@ -497,7 +497,7 @@ function handleTransfer(charName: string) {
                 <div
                     v-for="item in items"
                     :key="item.type"
-                    class="p-3 mb-2 bg-base-100 rounded cursor-move hover:bg-base-300 transition-colors"
+                    class="p-3 mb-2 bg-base-100 rounded cursor-move hover:bg-base-300 transition-colors duration-200"
                     @mousedown="onMouseDown($event, item)"
                 >
                     <div class="flex items-center gap-2">

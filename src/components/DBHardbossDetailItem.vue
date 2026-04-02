@@ -228,22 +228,24 @@ const activeFilterTimestamp = computed(() => {
  */
 const filteredDiffs = computed<HardbossDiffView[]>(() => {
     return (
-        bossDetail.value?.diff.map(diff => ({
-            id: diff.id,
-            lv: diff.lv,
-            rewards: filterRewardsByMode(
-                diff.dr,
-                activeFilterTimestamp.value,
-                previousSelectedTimePoint.value?.timestamp ?? null,
-                diffOnlyEnabled.value
-            ),
-            activeRewardCount: countActiveRewardsByTimestamp(diff.dr, activeFilterTimestamp.value),
-            changedRewardCount: countChangedRewardsByTimestamp(
-                diff.dr,
-                activeFilterTimestamp.value,
-                previousSelectedTimePoint.value?.timestamp ?? null
-            ),
-        }))?.filter(diff => !diffOnlyEnabled.value || diff.changedRewardCount > 0) ?? []
+        bossDetail.value?.diff
+            .map(diff => ({
+                id: diff.id,
+                lv: diff.lv,
+                rewards: filterRewardsByMode(
+                    diff.dr,
+                    activeFilterTimestamp.value,
+                    previousSelectedTimePoint.value?.timestamp ?? null,
+                    diffOnlyEnabled.value
+                ),
+                activeRewardCount: countActiveRewardsByTimestamp(diff.dr, activeFilterTimestamp.value),
+                changedRewardCount: countChangedRewardsByTimestamp(
+                    diff.dr,
+                    activeFilterTimestamp.value,
+                    previousSelectedTimePoint.value?.timestamp ?? null
+                ),
+            }))
+            ?.filter(diff => !diffOnlyEnabled.value || diff.changedRewardCount > 0) ?? []
     )
 })
 
@@ -536,7 +538,7 @@ function getHardbossIcon(boss: HardBoss): string {
                 <div
                     v-for="dr in diff.rewards"
                     :key="`${dr.DynamicRewardId}-${dr.Index}`"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
+                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                 >
                     <div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-base-content/70">
                         <span

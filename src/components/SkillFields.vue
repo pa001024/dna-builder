@@ -172,9 +172,7 @@ onBeforeUnmount(() => {
                 v-if="field.影响"
                 class="justify-between items-center gap-4 flex overflow-hidden transition-all duration-300"
                 :class="
-                    isFieldExpanded(field, index)
-                        ? 'opacity-80 max-h-32'
-                        : 'opacity-0 max-h-0 group-hover:opacity-80 group-hover:max-h-32'
+                    isFieldExpanded(field, index) ? 'opacity-80 max-h-32' : 'opacity-0 max-h-0 group-hover:opacity-80 group-hover:max-h-32'
                 "
             >
                 <div>{{ $t("属性影响") }}</div>
@@ -191,9 +189,7 @@ onBeforeUnmount(() => {
                 v-if="getSkillFieldExtraItems(field).length"
                 class="justify-between items-center gap-4 flex overflow-hidden transition-all duration-300 text-xs"
                 :class="
-                    isFieldExpanded(field, index)
-                        ? 'opacity-80 max-h-32'
-                        : 'opacity-0 max-h-0 group-hover:opacity-80 group-hover:max-h-32'
+                    isFieldExpanded(field, index) ? 'opacity-80 max-h-32' : 'opacity-0 max-h-0 group-hover:opacity-80 group-hover:max-h-32'
                 "
             >
                 <span>{{ $t("额外字段") }}</span>

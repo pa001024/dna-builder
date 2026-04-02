@@ -76,7 +76,7 @@ defineExpose({
                             v-for="forum in gameConfig.gameAllForumList"
                             :key="forum.id"
                             :to="`/dna/posts/${forum.id}`"
-                            class="bg-base-200 p-3 rounded-lg cursor-pointer hover:bg-base-300 transition-colors flex items-center"
+                            class="bg-base-200 p-3 rounded-lg cursor-pointer hover:bg-base-300 transition-colors duration-200 flex items-center"
                         >
                             <img :src="forum.iconUrl" alt="Forum Icon" class="w-6 h-6 mr-2" />
                             <span>{{ forum.name }}</span>
@@ -93,7 +93,7 @@ defineExpose({
                             v-for="topic in gameConfig.topicList"
                             :key="topic.topicId"
                             :to="`/dna/topic/${topic.topicId}`"
-                            class="bg-base-200 p-3 rounded-lg cursor-pointer hover:bg-base-300 transition-colors flex items-center"
+                            class="bg-base-200 p-3 rounded-lg cursor-pointer hover:bg-base-300 transition-colors duration-200 flex items-center"
                         >
                             <img :src="topic.topicIconUrl" alt="Wiki Icon" class="w-6 h-6 mr-2" />
                             <span>{{ topic.topicName }}</span>

@@ -7,7 +7,7 @@ import { useGameStore } from "../store/game"
 import { type ConfigOption, engineConfigCategories, gameUserSettingsConfigCategories } from "../utils/game-config"
 
 const game = useGameStore()
-    ; (globalThis as any).__chapterCounter = 1
+;(globalThis as any).__chapterCounter = 1
 // 配置文件状态
 const engineIni = ref<Record<string, any>>({})
 const gameUserSettingsIni = ref<Record<string, any>>({})
@@ -582,11 +582,16 @@ gc.TimeBetweenPurgingMoreObjectsThanTheQuantum=0.004
 gc.CreateGCClusters=1
 gc.TimeBetweenPurgingPendingKillObjects=0.004
 r.ShaderCodeLibrary.MaxShaderGroupSize=31457280
-r.ShaderCodeLibrary.SeparateLoadingCache=1`.split("\n").reduce((acc, line) => {
-        const [key, value] = line.split("=")
-        acc[`SystemSettings|${key.trim()}`] = value
-        return acc
-    }, {} as Record<string, string>)
+r.ShaderCodeLibrary.SeparateLoadingCache=1`
+        .split("\n")
+        .reduce(
+            (acc, line) => {
+                const [key, value] = line.split("=")
+                acc[`SystemSettings|${key.trim()}`] = value
+                return acc
+            },
+            {} as Record<string, string>
+        )
 
     const presets: Record<string, Record<string, any>> = {
         low: {
@@ -930,8 +935,7 @@ function openConfigDir() {
         <!-- 配置文件路径显示 -->
         <div v-if="game.path" class="bg-base-200 p-2 rounded-lg text-sm">
             <div class="text-base-content/70">配置目录:</div>
-            <div class="font-mono text-xs break-all hover:underline cursor-pointer" @click="openConfigDir">{{ configDir
-            }}</div>
+            <div class="font-mono text-xs break-all hover:underline cursor-pointer" @click="openConfigDir">{{ configDir }}</div>
         </div>
         <div v-else class="bg-warning/10 p-2 rounded-lg text-sm text-warning">请先在游戏设置中配置游戏路径</div>
 
@@ -959,40 +963,60 @@ function openConfigDir() {
                     <div class="text-sm font-medium">分辨率</div>
                     <div class="text-xs text-base-content/50">游戏窗口分辨率</div>
                     <div class="flex flex-wrap gap-2 mt-2">
-                        <button v-for="res in commonResolutions" :key="res.label" class="btn btn-sm" :class="{
-                            'btn-primary':
-                                !isCustomResolution && currentResolution.width === res.width && currentResolution.height === res.height,
-                            'btn-outline':
-                                isCustomResolution || currentResolution.width !== res.width || currentResolution.height !== res.height,
-                        }" @click="selectResolution(res.width, res.height)">
+                        <button
+                            v-for="res in commonResolutions"
+                            :key="res.label"
+                            class="btn btn-sm"
+                            :class="{
+                                'btn-primary':
+                                    !isCustomResolution && currentResolution.width === res.width && currentResolution.height === res.height,
+                                'btn-outline':
+                                    isCustomResolution || currentResolution.width !== res.width || currentResolution.height !== res.height,
+                            }"
+                            @click="selectResolution(res.width, res.height)"
+                        >
                             {{ res.label }}
                         </button>
-                        <button class="btn btn-sm" :class="{
-                            'btn-primary': isCustomResolution,
-                            'btn-outline': !isCustomResolution,
-                        }" @click="isCustomResolution = true">
+                        <button
+                            class="btn btn-sm"
+                            :class="{
+                                'btn-primary': isCustomResolution,
+                                'btn-outline': !isCustomResolution,
+                            }"
+                            @click="isCustomResolution = true"
+                        >
                             自定义
                         </button>
                     </div>
                     <!-- 自定义分辨率输入 -->
                     <div v-if="isCustomResolution" class="flex items-center gap-2 mt-2">
-                        <input v-model.number="customResolution.width" type="number"
-                            class="input input-bordered input-sm w-24" placeholder="宽度" />
+                        <input
+                            v-model.number="customResolution.width"
+                            type="number"
+                            class="input input-bordered input-sm w-24"
+                            placeholder="宽度"
+                        />
                         <span class="text-base-content/50">x</span>
-                        <input v-model.number="customResolution.height" type="number"
-                            class="input input-bordered input-sm w-24" placeholder="高度" />
+                        <input
+                            v-model.number="customResolution.height"
+                            type="number"
+                            class="input input-bordered input-sm w-24"
+                            placeholder="高度"
+                        />
                         <button class="btn btn-sm btn-primary" @click="applyCustomResolution">应用</button>
                     </div>
                 </div>
 
                 <!-- 其他游戏设置选项 -->
-                <div v-for="option in gameSettingsCategory.options.filter(opt => opt.key !== 'ResolutionSize')"
-                    :key="option.key" class="flex flex-col gap-2 p-3 bg-base-200 rounded">
+                <div
+                    v-for="option in gameSettingsCategory.options.filter(opt => opt.key !== 'ResolutionSize')"
+                    :key="option.key"
+                    class="flex flex-col gap-2 p-3 bg-base-200 rounded"
+                >
                     <!-- 标题和操作区 -->
                     <div class="flex items-center justify-between gap-2">
                         <span class="text-sm font-medium">{{ option.label }}</span>
-                        <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值"
-                            @click="resetOption(option)">
+                        <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值" @click="resetOption(option)">
                             <Icon icon="ri:refresh-line" />
                         </button>
                     </div>
@@ -1006,22 +1030,31 @@ function openConfigDir() {
                     <div class="flex items-center gap-2">
                         <!-- 布尔值开关 -->
                         <div v-if="option.type === 'boolean'" class="flex-1">
-                            <input :checked="getOptionValue(option)" type="checkbox" class="toggle toggle-secondary"
-                                @change="setOptionValue(option, ($event.target as HTMLInputElement).checked)" />
+                            <input
+                                :checked="getOptionValue(option)"
+                                type="checkbox"
+                                class="toggle toggle-secondary"
+                                @change="setOptionValue(option, ($event.target as HTMLInputElement).checked)"
+                            />
                         </div>
 
                         <!-- 数字输入 -->
                         <div v-else-if="option.type === 'number'" class="flex-1">
-                            <input :value="getOptionValue(option)" type="number"
+                            <input
+                                :value="getOptionValue(option)"
+                                type="number"
                                 class="input input-bordered input-sm w-full"
-                                @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))" />
+                                @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))"
+                            />
                         </div>
 
                         <!-- 选择器 -->
                         <div v-else-if="option.type === 'select'" class="flex-1">
-                            <Select :model-value="getOptionValue(option)"
+                            <Select
+                                :model-value="getOptionValue(option)"
                                 class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-full"
-                                @update:model-value="setOptionValue(option, $event)">
+                                @update:model-value="setOptionValue(option, $event)"
+                            >
                                 <SelectItem v-for="(opt, idx) in option.options" :key="idx" :value="opt.value">
                                     {{ opt.label }}
                                 </SelectItem>
@@ -1037,24 +1070,31 @@ function openConfigDir() {
 
         <!-- 引擎设置分类（放在折叠框中） -->
         <div v-if="game.path" class="space-y-4">
-            <CollapsibleSection v-for="category in engineCategories" :key="category.name" :title="category.label"
-                :is-open="expandedCategories.has(category.name)" @toggle="toggleCategory(category.name)">
+            <CollapsibleSection
+                v-for="category in engineCategories"
+                :key="category.name"
+                :title="category.label"
+                :is-open="expandedCategories.has(category.name)"
+                @toggle="toggleCategory(category.name)"
+            >
                 <div v-if="category.description" class="text-xs text-base-content/50 my-3">
                     {{ category.description }}
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div v-for="option in category.options" :key="option.key"
-                        class="flex flex-col gap-2 p-3 bg-base-200 rounded">
+                    <div v-for="option in category.options" :key="option.key" class="flex flex-col gap-2 p-3 bg-base-200 rounded">
                         <!-- 标题和操作区 -->
                         <div class="flex items-center justify-between gap-2">
                             <div class="flex items-center gap-2">
                                 <!-- 启用/禁用开关 -->
-                                <input :checked="isOptionEnabled(option)" type="checkbox"
-                                    class="toggle toggle-primary toggle-sm" @change="toggleOptionEnabled(option)" />
+                                <input
+                                    :checked="isOptionEnabled(option)"
+                                    type="checkbox"
+                                    class="toggle toggle-primary toggle-sm"
+                                    @change="toggleOptionEnabled(option)"
+                                />
                                 <span class="text-sm font-medium">{{ option.label }}</span>
                             </div>
-                            <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值"
-                                @click="resetOption(option)">
+                            <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值" @click="resetOption(option)">
                                 <Icon icon="ri:refresh-line" />
                             </button>
                         </div>
@@ -1068,31 +1108,45 @@ function openConfigDir() {
                         <div class="flex items-center gap-2">
                             <!-- 布尔值开关 -->
                             <div v-if="option.type === 'boolean'" class="flex-1">
-                                <input :checked="getOptionValue(option)" type="checkbox" class="toggle toggle-secondary"
+                                <input
+                                    :checked="getOptionValue(option)"
+                                    type="checkbox"
+                                    class="toggle toggle-secondary"
                                     :disabled="!isOptionEnabled(option)"
-                                    @change="setOptionValue(option, ($event.target as HTMLInputElement).checked)" />
+                                    @change="setOptionValue(option, ($event.target as HTMLInputElement).checked)"
+                                />
                             </div>
 
                             <!-- 数字输入 -->
                             <div v-else-if="option.type === 'number'" class="flex-1">
-                                <input :value="getOptionValue(option)" type="number"
-                                    class="input input-bordered input-sm w-full" :disabled="!isOptionEnabled(option)"
-                                    @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))" />
+                                <input
+                                    :value="getOptionValue(option)"
+                                    type="number"
+                                    class="input input-bordered input-sm w-full"
+                                    :disabled="!isOptionEnabled(option)"
+                                    @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))"
+                                />
                             </div>
 
                             <!-- 字符串输入 -->
                             <div v-else-if="option.type === 'string'" class="flex-1">
-                                <input :value="getOptionValue(option)" type="text"
-                                    class="input input-bordered input-sm w-full" :disabled="!isOptionEnabled(option)"
-                                    @input="setOptionValue(option, ($event.target as HTMLInputElement).value)" />
+                                <input
+                                    :value="getOptionValue(option)"
+                                    type="text"
+                                    class="input input-bordered input-sm w-full"
+                                    :disabled="!isOptionEnabled(option)"
+                                    @input="setOptionValue(option, ($event.target as HTMLInputElement).value)"
+                                />
                             </div>
 
                             <!-- 选择器 -->
                             <div v-else-if="option.type === 'select'" class="flex-1">
-                                <Select :model-value="getOptionValue(option)"
+                                <Select
+                                    :model-value="getOptionValue(option)"
                                     class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-full"
                                     :disabled="!isOptionEnabled(option)"
-                                    @update:model-value="setOptionValue(option, $event)">
+                                    @update:model-value="setOptionValue(option, $event)"
+                                >
                                     <SelectItem v-for="(opt, idx) in option.options" :key="idx" :value="opt.value">
                                         {{ opt.label }}
                                     </SelectItem>
@@ -1100,8 +1154,7 @@ function openConfigDir() {
                             </div>
 
                             <!-- 默认值显示 -->
-                            <div class="text-xs text-base-content/50 whitespace-nowrap">默认: {{ option.defaultValue }}
-                            </div>
+                            <div class="text-xs text-base-content/50 whitespace-nowrap">默认: {{ option.defaultValue }}</div>
                         </div>
                     </div>
                 </div>

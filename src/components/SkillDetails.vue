@@ -146,14 +146,14 @@ const formatBuffBody = (buffBody: BuffBody): string => {
                     <div
                         v-for="(attr, idx) in effect.t"
                         :key="idx"
-                        class="text-xs bg-base-200/50 p-1.5 rounded hover:bg-base-200/80 transition-colors"
+                        class="text-xs bg-base-200/50 p-1.5 rounded hover:bg-base-200/80 transition-colors duration-200"
                     >
                         {{ formatEffectAttr(attr) }}
                         <div v-if="attr.pe !== undefined" class="text-xs text-secondary font-medium">
                             <div
                                 v-for="(value, key) in attr.pe"
                                 :key="key"
-                                class="bg-base-200/50 p-1.5 rounded hover:bg-base-200/80 transition-colors"
+                                class="bg-base-200/50 p-1.5 rounded hover:bg-base-200/80 transition-colors duration-200"
                             >
                                 <span class="font-medium">{{ key }}:</span>
                                 <span class="ml-2">{{ formatValue(value!) }}</span>
@@ -173,7 +173,7 @@ const formatBuffBody = (buffBody: BuffBody): string => {
                     <div
                         v-for="(body, idx) in buff.t"
                         :key="idx"
-                        class="text-xs bg-base-200/50 p-1.5 rounded hover:bg-base-200/80 transition-colors"
+                        class="text-xs bg-base-200/50 p-1.5 rounded hover:bg-base-200/80 transition-colors duration-200"
                     >
                         {{ formatBuffBody(body) }}
                     </div>
@@ -190,7 +190,7 @@ const formatBuffBody = (buffBody: BuffBody): string => {
                     <div
                         v-for="(value, key) in passive.v"
                         :key="key"
-                        class="bg-base-200/50 p-1.5 rounded hover:bg-base-200/80 transition-colors"
+                        class="bg-base-200/50 p-1.5 rounded hover:bg-base-200/80 transition-colors duration-200"
                     >
                         <span class="font-medium">{{ key }}:</span>
                         <span class="ml-2">{{ formatValue(value) }}</span>

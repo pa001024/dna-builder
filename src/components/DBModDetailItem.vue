@@ -463,7 +463,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                     <div v-for="dungeon in modDungeons" :key="dungeon.id" class="space-y-2">
                         <div
                             @click="toggleDungeonExpand(dungeon.id)"
-                            class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors cursor-pointer"
+                            class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors duration-200 cursor-pointer"
                         >
                             <div class="flex justify-between items-center">
                                 <div class="flex items-center gap-2 min-w-0">
