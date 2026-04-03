@@ -403,7 +403,6 @@ export interface AbyssUsageWeaponParticipant {
 export interface AbyssRoleUsageStat {
     charId: number
     submissionCount: number
-    slotCount: number
     ownedCount: number
     gradeLevelDistribution?: number[]
 }
@@ -411,7 +410,6 @@ export interface AbyssRoleUsageStat {
 export interface AbyssWeaponUsageStat {
     weaponId: number
     submissionCount: number
-    slotCount: number
     ownedCount: number
     skillLevelDistribution?: number[]
 }

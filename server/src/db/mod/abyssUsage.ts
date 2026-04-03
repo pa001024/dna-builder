@@ -95,7 +95,6 @@ export const typeDefs = /* GraphQL */ `
     type AbyssRoleUsageStat {
         charId: Int!
         submissionCount: Int!
-        slotCount: Int!
         ownedCount: Int!
         gradeLevelDistribution: [Int!]!
     }
@@ -103,7 +102,6 @@ export const typeDefs = /* GraphQL */ `
     type AbyssWeaponUsageStat {
         weaponId: Int!
         submissionCount: Int!
-        slotCount: Int!
         ownedCount: Int!
         skillLevelDistribution: [Int!]!
     }
@@ -407,11 +405,10 @@ function buildRoleStats(rows: AbyssUsageRoleStatRow[]) {
         .map(([charId, bucket]) => ({
             charId,
             submissionCount: bucket.submissionIds.size,
-            slotCount: [...bucket.grade.values()].reduce((sum, set) => sum + set.size, 0),
             ownedCount: bucket.ownedSubmissionIds.size,
             gradeLevelDistribution: buildIndexedDistribution(bucket.grade),
         }))
-        .sort((a, b) => b.submissionCount - a.submissionCount || b.slotCount - a.slotCount || a.charId - b.charId)
+        .sort((a, b) => b.submissionCount - a.submissionCount || a.charId - b.charId)
 }
 
 /**
@@ -448,11 +445,10 @@ function buildWeaponStats(rows: AbyssUsageWeaponStatRow[]) {
         .map(([weaponId, bucket]) => ({
             weaponId,
             submissionCount: bucket.submissionIds.size,
-            slotCount: [...bucket.skill.values()].reduce((sum, set) => sum + set.size, 0),
             ownedCount: bucket.ownedSubmissionIds.size,
             skillLevelDistribution: buildIndexedDistribution(bucket.skill),
         }))
-        .sort((a, b) => b.submissionCount - a.submissionCount || b.slotCount - a.slotCount || a.weaponId - b.weaponId)
+        .sort((a, b) => b.submissionCount - a.submissionCount || a.weaponId - b.weaponId)
 }
 
 /**
@@ -731,10 +727,8 @@ export const resolvers = {
             if (args?.mainOnly != null && typeof args.mainOnly !== "boolean") {
                 throw createGraphQLError("mainOnly 非法")
             }
-            const limit = args?.limit
-            if (limit != null && (!Number.isInteger(limit) || limit <= 0)) {
-                throw createGraphQLError("limit 非法")
-            }
+            const requestedLimit = args?.limit
+            const limit = requestedLimit == null ? 20 : Math.min(requestedLimit, 20)
             return loadLineupStatRows(args?.seasonId, charId, args?.mainOnly, limit)
         },
         abyssUsageSlotStats: async (_parent, args) => {

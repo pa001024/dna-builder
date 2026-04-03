@@ -1110,7 +1110,6 @@ export const abyssUsageRoleStatsQuery = typedQuery(
             abyssUsageRoleStats(seasonId: $seasonId) {
                 charId
                 submissionCount
-                slotCount
                 ownedCount
                 gradeLevelDistribution
             }
@@ -1124,7 +1123,6 @@ export const abyssUsageWeaponStatsQuery = typedQuery(
             abyssUsageWeaponStats(seasonId: $seasonId) {
                 weaponId
                 submissionCount
-                slotCount
                 ownedCount
                 skillLevelDistribution
             }
@@ -1181,7 +1179,6 @@ export const abyssUsageRoleRankQuery = typedQuery(
             abyssUsageRoleRank(seasonId: $seasonId, limit: $limit) {
                 charId
                 submissionCount
-                slotCount
                 ownedCount
                 gradeLevelDistribution
             }
@@ -1195,7 +1192,6 @@ export const abyssUsageWeaponRankQuery = typedQuery(
             abyssUsageWeaponRank(seasonId: $seasonId, limit: $limit) {
                 weaponId
                 submissionCount
-                slotCount
                 ownedCount
                 skillLevelDistribution
             }
