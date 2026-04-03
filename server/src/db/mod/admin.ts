@@ -41,7 +41,7 @@ export const resolvers = {
          * 需要管理员权限
          */
         adminStats: async (_parent, _args, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
 
@@ -85,7 +85,7 @@ export const resolvers = {
          * limit: 返回数量，默认5条
          */
         recentActivities: async (_parent, args, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
 

@@ -69,7 +69,7 @@ function verifyApiToken(token: string) {
  * 校验 JWT 管理员权限
  */
 function verifyAdmin(context: Context) {
-    if (!context.user || !context.user.roles?.includes("admin")) {
+    if (!context.user?.roles?.includes("admin")) {
         throw createGraphQLError("无权限")
     }
 }

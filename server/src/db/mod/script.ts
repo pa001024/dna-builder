@@ -388,7 +388,7 @@ export const resolvers = {
             }
         },
         recommendScript: async (_parent, { id, recommended }, context, info) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
 
@@ -437,7 +437,7 @@ export const resolvers = {
             }
         },
         pinScript: async (_parent, { id, pinned }, context, info) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
 

@@ -394,7 +394,7 @@ export const resolvers = {
             }
         },
         recommendGuide: async (_parent, { id, recommended }, context, info) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
 
@@ -439,7 +439,7 @@ export const resolvers = {
             }
         },
         pinGuide: async (_parent, { id, pinned }, context, info) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
 

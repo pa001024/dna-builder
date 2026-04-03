@@ -188,7 +188,7 @@ export const resolvers = {
             return user
         },
         users: async (_parent, args, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
 
@@ -205,7 +205,7 @@ export const resolvers = {
             })
         },
         usersCount: async (_parent, args, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
 
@@ -472,7 +472,7 @@ export const resolvers = {
             }
         },
         deleteUser: async (_parent, { id }, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
 
@@ -480,7 +480,7 @@ export const resolvers = {
             return result.length > 0
         },
         updateUser: async (_parent, { id, email, roles }, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
 

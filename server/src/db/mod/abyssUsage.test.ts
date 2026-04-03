@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import { createHash } from "node:crypto"
 import { eq } from "drizzle-orm"
 import jwt from "jsonwebtoken"
@@ -28,15 +28,6 @@ async function graphqlRequest<T>(query: string, variables?: Record<string, unkno
         body: JSON.stringify({ query, variables }),
     })
     return (await response.json()) as T
-}
-
-/**
- * 清空深渊使用相关数据。
- */
-async function clearAbyssUsageData() {
-    await db.delete(schema.abyssUsageWeaponParticipants)
-    await db.delete(schema.abyssUsageRoleParticipants)
-    await db.delete(schema.abyssUsageSubmissions)
 }
 
 /**

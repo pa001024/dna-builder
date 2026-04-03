@@ -32,6 +32,10 @@ type UsageGroup = {
     items: AbyssRoleUsageStat[]
 }
 
+type UsageGroupRow = {
+    groups: UsageGroup[]
+}
+
 type SlotStatKind = "support" | "meleeWeapon" | "rangedWeapon" | "pet"
 
 type SlotStatSection = {
@@ -116,6 +120,9 @@ const seasonCharLink = computed(() => {
 
 const lineupTotal = computed(() => lineupStats.value.reduce((sum, item) => sum + (item.submissionCount || 0), 0))
 
+const compactRoleGroupMaxItems = 2
+const compactRoleRowMaxItems = 6
+
 const slotStatSections = computed<SlotStatSection[]>(() => {
     const stats = slotStats.value
     if (!stats) {
@@ -175,6 +182,43 @@ const groupedRoleRanks = computed<UsageGroup[]>(() => {
     }
 
     return groups.filter(group => group.items.length > 0)
+})
+
+/**
+ * 将角色使用率分组合并为渲染行。
+ * 条目较少的分组会和相邻的少量分组并排展示，避免整行只放一个窄分组。
+ * @returns 渲染行列表。
+ */
+const groupedRoleRankRows = computed<UsageGroupRow[]>(() => {
+    const rows: UsageGroupRow[] = []
+    let pendingGroups: UsageGroup[] = []
+    let pendingItems = 0
+
+    for (const group of groupedRoleRanks.value) {
+        const isCompact = group.items.length <= compactRoleGroupMaxItems
+
+        if (!pendingGroups.length) {
+            pendingGroups = [group]
+            pendingItems = group.items.length
+            continue
+        }
+
+        if (isCompact && pendingItems + group.items.length <= compactRoleRowMaxItems) {
+            pendingGroups.push(group)
+            pendingItems += group.items.length
+            continue
+        }
+
+        rows.push({ groups: pendingGroups })
+        pendingGroups = [group]
+        pendingItems = group.items.length
+    }
+
+    if (pendingGroups.length) {
+        rows.push({ groups: pendingGroups })
+    }
+
+    return rows
 })
 
 function getCharName(charId?: number) {
@@ -617,32 +661,42 @@ onMounted(async () => {
                         </div>
                     </div>
                     <div class="space-y-3">
-                        <div v-for="group in groupedRoleRanks" :key="group.label" class="space-y-2">
-                            <div class="text-xs font-medium opacity-60">{{ group.label }}</div>
-                            <div class="flex flex-wrap justify-center gap-2">
-                                <div
-                                    v-for="item in group.items"
-                                    :key="item.charId"
-                                    class="group card w-16 shrink-0 transition-all duration-300"
-                                >
-                                    <RouterLink
-                                        :to="getCharLink(item.charId)"
-                                        class="card-body bg-linear-30 from-indigo-300/50 to-indigo-600/50 rounded-2xl relative p-2 overflow-hidden"
+                        <div
+                            v-for="row in groupedRoleRankRows"
+                            :key="row.groups.map(group => group.label).join('|')"
+                            class="grid gap-3 lg:grid-cols-[repeat(auto-fit,minmax(0,1fr))]"
+                        >
+                            <div
+                                v-for="group in row.groups"
+                                :key="group.label"
+                                class="space-y-2 rounded-2xl bg-base-200 p-3"
+                            >
+                                <div class="text-xs font-medium opacity-60">{{ group.label }}</div>
+                                <div class="flex flex-wrap justify-center gap-2">
+                                    <div
+                                        v-for="item in group.items"
+                                        :key="item.charId"
+                                        class="group card w-16 shrink-0 transition-all duration-300"
                                     >
-                                        <img
-                                            class="absolute inset-0 h-full object-cover pointer-events-none mask-b-from-60%"
-                                            :src="getCharIcon(item.charId)"
-                                            :alt="getCharName(item.charId)"
-                                        />
-                                        <div class="flex flex-col items-center z-1 text-white text-shadow-md text-shadow-black/30">
-                                            <div class="avatar mb-2">
-                                                <div class="h-16 rounded-full"></div>
+                                        <RouterLink
+                                            :to="getCharLink(item.charId)"
+                                            class="card-body bg-linear-30 from-indigo-300/50 to-indigo-600/50 rounded-2xl relative p-2 overflow-hidden"
+                                        >
+                                            <img
+                                                class="absolute inset-0 h-full object-cover pointer-events-none mask-b-from-60%"
+                                                :src="getCharIcon(item.charId)"
+                                                :alt="getCharName(item.charId)"
+                                            />
+                                            <div class="flex flex-col items-center z-1 text-white text-shadow-md text-shadow-black/30">
+                                                <div class="avatar mb-2">
+                                                    <div class="h-16 rounded-full"></div>
+                                                </div>
+                                                <div class="font-medium text-center text-sm leading-tight">
+                                                    {{ formatUsageRate(item.submissionCount || 0, item.ownedCount || 0) }}
+                                                </div>
                                             </div>
-                                            <div class="font-medium text-center text-sm leading-tight">
-                                                {{ formatUsageRate(item.submissionCount || 0, item.ownedCount || 0) }}
-                                            </div>
-                                        </div>
-                                    </RouterLink>
+                                        </RouterLink>
+                                    </div>
                                 </div>
                             </div>
                         </div>

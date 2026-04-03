@@ -696,7 +696,7 @@ async function loadLineupStatRows(seasonId?: number | null, charId?: number | nu
 export const resolvers = {
     Query: {
         abyssUsageSubmissions: async (_parent, args, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
             const limit = args?.limit ?? 20

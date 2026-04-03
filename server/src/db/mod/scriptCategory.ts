@@ -10,7 +10,7 @@ import type { Context } from "../yoga"
  * @throws 无管理员权限时抛出业务错误
  */
 function assertAdmin(context: Context) {
-    if (!context.user || !context.user.roles?.includes("admin")) {
+    if (!context.user?.roles?.includes("admin")) {
         throw createGraphQLError("无权限")
     }
 }

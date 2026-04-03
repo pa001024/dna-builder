@@ -132,7 +132,7 @@ type ShopProductRow = typeof schema.shopProducts.$inferSelect & {
  * @throws GraphQLError 当用户不是管理员时抛出。
  */
 function requireAdmin(context: Context) {
-    if (!context.user || !context.user.roles?.includes("admin")) {
+    if (!context.user?.roles?.includes("admin")) {
         throw createGraphQLError("Unauthorized: Admin role required")
     }
 }
@@ -645,7 +645,7 @@ async function grantShopProductToUser(tx: any, userId: string, productId: string
             asset: true,
         },
     })
-    if (!product || !product.asset) {
+    if (!product?.asset) {
         throw createGraphQLError("商品不存在")
     }
 
@@ -701,7 +701,7 @@ async function revokeShopProductFromUser(tx: any, userId: string, productId: str
             asset: true,
         },
     })
-    if (!product || !product.asset) {
+    if (!product?.asset) {
         throw createGraphQLError("商品不存在")
     }
 
@@ -812,7 +812,7 @@ export const resolvers = {
                         asset: true,
                     },
                 })
-                if (!product || !product.isActive) {
+                if (!product?.isActive) {
                     throw createGraphQLError("商品不存在或已下架")
                 }
                 if (!isShopProductAvailable(product)) {
