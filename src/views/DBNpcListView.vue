@@ -157,7 +157,7 @@ useInitialScrollToSelectedItem()
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
-            <ScrollArea v-if="selectedNpc" class="flex-1">
+            <ScrollArea v-if="selectedNpc" class="flex-2">
                 <DBNpcDetailItem :npc="selectedNpc" />
             </ScrollArea>
         </div>

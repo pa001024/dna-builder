@@ -259,8 +259,10 @@ function scrollNodeToTop(element: HTMLElement, container: HTMLElement | Window) 
 
     const containerRect = container.getBoundingClientRect()
     const elementRect = element.getBoundingClientRect()
+    const containerStyle = window.getComputedStyle(container)
+    const paddingTop = Number.parseFloat(containerStyle.scrollPaddingTop || containerStyle.paddingTop || "0") || 0
     container.scrollTo({
-        top: container.scrollTop + (elementRect.top - containerRect.top) - topOffset,
+        top: container.scrollTop + (elementRect.top - containerRect.top) - paddingTop - topOffset,
         behavior: "smooth",
     })
 }
@@ -1040,14 +1042,13 @@ watch(flattenedDialogueChain, () => {
 
 <template>
     <div class="text-sm space-y-2">
-        <div class="flex items-center justify-end">
+        <div v-if="hasPlayableDialogue" class="flex items-center justify-end">
             <label class="flex items-center gap-2 text-xs text-base-content/80 select-none">
                 <span>自动播放</span>
                 <input
                     v-model="autoPlayEnabled"
                     type="checkbox"
                     class="toggle toggle-primary toggle-sm"
-                    :disabled="!hasPlayableDialogue"
                     @change="handleAutoPlaySwitchChange"
                 />
             </label>

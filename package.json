@@ -35,6 +35,7 @@
         "@antv/g": "^6.3.1",
         "@antv/g6": "^5.1.0",
         "@codemirror/commands": "^6.10.3",
+        "@chenglou/pretext": "^0.0.4",
         "@codemirror/lang-javascript": "^6.2.5",
         "@codemirror/language": "^6.12.3",
         "@codemirror/state": "^6.6.0",
