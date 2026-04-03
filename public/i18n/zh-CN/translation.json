@@ -844,7 +844,7 @@
     },
     "pet_detail": {
         "active_skill": "主动技能",
-        "alternative_form": "异化形态",
+        "alternative_form": "异化",
         "base_id": "基础ID",
         "breakthrough_level_range": "滑块等级范围为 0 到 3，开启老道后视作等级 +1。",
         "capture_exp": "捕获经验",

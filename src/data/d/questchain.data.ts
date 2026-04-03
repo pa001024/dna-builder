@@ -1,3 +1,5 @@
+import { applyVersionGate } from "../versionGate"
+
 export interface QuestChain {
     id: number
     name: string
@@ -15,6 +17,7 @@ export interface QuestChain {
     desc?: string
     detail?: string
     npc?: number
+    版本?: string
 }
 
 export interface QuestChainItem {
@@ -23,7 +26,57 @@ export interface QuestChainItem {
     next?: Record<string, number>
 }
 
-export const questChainData: QuestChain[] = [
+export type QuestChainVersionRange = readonly [number, number, string]
+
+/**
+ * 将任务链版本范围展开为逐项映射。
+ * @param ranges 任务链 id 区间与版本号
+ * @returns 任务链版本映射
+ */
+function buildQuestChainVersionMap(ranges: QuestChainVersionRange[]): Record<number, string> {
+    const result: Record<number, string> = {}
+    for (const [start, end, version] of ranges) {
+        for (let id = start; id <= end; id++) {
+            result[id] = version
+        }
+    }
+    return result
+}
+
+export const questChain2VersionRanges: QuestChainVersionRange[] = [
+    [100101, 100103, "1.0"],
+    [100201, 100208, "1.0"],
+    [100301, 100307, "1.0"],
+    [110101, 110101, "1.0"],
+    [110103, 110103, "1.0"],
+    [110105, 110105, "1.0"],
+    [110107, 110109, "1.0"],
+    [120001, 120002, "1.0"],
+    [120003, 120003, "1.1"],
+    [120101, 120106, "1.1"],
+    [120111, 120114, "1.0"],
+    [200101, 200104, "1.0"],
+    [200201, 200201, "1.0"],
+    [200203, 200216, "1.0"],
+    [200219, 200225, "1.0"],
+    [200227, 200236, "1.0"],
+    [200301, 200304, "1.1"],
+    [200305, 200305, "1.2"],
+    [200306, 200306, "1.1"],
+    [200307, 200308, "1.2"],
+    [200309, 200309, "1.1"],
+    [200310, 200315, "1.2"],
+    [400101, 400107, "1.0"],
+    [400111, 400111, "1.1"],
+    [120201, 120206, "1.3"],
+    [120301, 120308, "1.3"],
+    [200317, 200318, "1.3"],
+    [400121, 400129, "1.3"],
+]
+
+export const questChain2Version: Record<number, string> = buildQuestChainVersionMap(questChain2VersionRanges)
+
+const questChainDataRaw: QuestChain[] = [
     {
         id: 100101,
         name: "逃离净界岛",
@@ -6779,6 +6832,13 @@ export const questChainData: QuestChain[] = [
         ],
     },
 ]
+
+const questChainDataWithVersion = questChainDataRaw.map(questChain => ({
+    ...questChain,
+    版本: questChain2Version[questChain.id],
+}))
+
+export const questChainData: QuestChain[] = applyVersionGate(questChainDataWithVersion)
 
 export const questChainMap = new Map(questChainData.map(questChain => [questChain.id, questChain]))
 

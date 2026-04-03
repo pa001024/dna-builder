@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
-import { draftMap, modMap, weaponMap } from "@/data"
+import { LeveledMod, LeveledWeapon, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
 import { Walnut } from "../data/d/walnut.data"
 import { WalnutSequenceSimulator } from "../utils/walnut-utils"
 
@@ -9,13 +9,35 @@ const props = defineProps<{
 }>()
 
 interface RewardLinkInfo {
+    icon: string
     text: string
     to: string
 }
 
+/**
+ * 根据奖励项反查对应图纸。
+ * @param reward 奖励项
+ * @returns 图纸数据或 null
+ */
+function getDraftByReward(reward: Walnut["奖励"][number]) {
+    if (!reward.d) {
+        return null
+    }
+
+    if (reward.type === "Mod") {
+        return modDraftMap.get(reward.id) ?? null
+    }
+
+    if (reward.type === "Weapon") {
+        return weaponDraftMap.get(reward.id) ?? null
+    }
+
+    return null
+}
+
 // 草稿数据，用于 DBDraftDetailItem 组件
 const draft = computed(() => {
-    return draftMap.get(props.walnut.奖励[0].id) ?? null
+    return getDraftByReward(props.walnut.奖励[0]) ?? null
 })
 
 // 模拟开函相关状态
@@ -56,8 +78,48 @@ const rewardLinkItems = computed(() =>
     props.walnut.奖励.map(reward => ({
         reward,
         links: getRewardLinks(reward),
+        icon: getRewardIcon(reward),
     }))
 )
+
+/**
+ * 获取奖励对应的图标地址。
+ * @param reward 奖励项
+ * @returns 图标地址
+ */
+function getRewardIcon(reward: Walnut["奖励"][number]): string {
+    if (reward.d) {
+        const draft = getDraftByReward(reward)
+        if (!draft) {
+            return "/imgs/webp/T_Head_Empty.webp"
+        }
+
+        if (draft.t === "Mod") {
+            return LeveledMod.url(modMap.get(draft.p)?.icon)
+        }
+
+        if (draft.t === "Weapon") {
+            return LeveledWeapon.idToUrl(draft.p)
+        }
+
+        return "/imgs/webp/T_Head_Empty.webp"
+    }
+
+    if (reward.type === "Mod") {
+        return LeveledMod.url(modMap.get(reward.id)?.icon)
+    }
+
+    if (reward.type === "Weapon") {
+        return LeveledWeapon.idToUrl(reward.id)
+    }
+
+    if (reward.type === "Resource") {
+        const resource = resourceMap.get(reward.id)
+        return resource?.icon ? `/imgs/res/${resource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    }
+
+    return "/imgs/webp/T_Head_Empty.webp"
+}
 
 /**
  * 获取奖励对应的跳转链接。
@@ -68,35 +130,22 @@ function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
     const links: RewardLinkInfo[] = []
 
     if (reward.d) {
-        const draft = draftMap.get(reward.id)
+        const draft = getDraftByReward(reward)
         if (draft) {
             links.push({
+                icon: "/imgs/webp/T_Head_Empty.webp",
                 text: `图纸: ${draft.n}`,
                 to: `/db/draft/${draft.id}`,
             })
-
-            if (draft.t === "Mod") {
-                const mod = modMap.get(draft.p)
-                if (mod) {
-                    links.push({
-                        text: `本体: ${mod.系列}${mod.名称}`,
-                        to: `/db/mod/${mod.id}`,
-                    })
-                }
-            } else if (draft.t === "Weapon") {
-                const weapon = weaponMap.get(draft.p)
-                if (weapon) {
-                    links.push({
-                        text: `本体: ${weapon.名称}`,
-                        to: `/db/weapon/${weapon.id}`,
-                    })
-                }
-            }
+            return links
         }
-    } else if (reward.type === "Mod") {
+    }
+
+    if (reward.type === "Mod") {
         const mod = modMap.get(reward.id)
         if (mod) {
             links.push({
+                icon: LeveledMod.url(mod.icon),
                 text: `${mod.系列}${mod.名称}`,
                 to: `/db/mod/${mod.id}`,
             })
@@ -105,8 +154,18 @@ function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
         const weapon = weaponMap.get(reward.id)
         if (weapon) {
             links.push({
+                icon: LeveledWeapon.idToUrl(weapon.id),
                 text: weapon.名称,
                 to: `/db/weapon/${weapon.id}`,
+            })
+        }
+    } else if (reward.type === "Resource") {
+        const resource = resourceMap.get(reward.id)
+        if (resource) {
+            links.push({
+                icon: resource.icon ? `/imgs/res/${resource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp",
+                text: resource.name,
+                to: `/db/resource/${resource.id}`,
             })
         }
     }
@@ -384,15 +443,18 @@ function getRewardTypeColor(index: number): string {
                         >
                             <td class="py-2 px-3 text-sm">{{ item.reward.id }}</td>
                             <td class="py-2 px-3 text-sm">
-                                <template v-if="item.links.length > 0">
-                                    <span v-for="(link, linkIndex) in item.links" :key="link.to" class="inline-flex items-center">
-                                        <SRouterLink :to="link.to" class="link link-primary hover:underline">
-                                            {{ link.text }}
-                                        </SRouterLink>
-                                        <span v-if="linkIndex < item.links.length - 1" class="mx-1 text-base-content/50">/</span>
-                                    </span>
-                                </template>
-                                <span v-else>{{ $t(item.reward.name) }}</span>
+                                <div class="flex items-center gap-2">
+                                    <img :src="item.icon" :alt="item.reward.name" class="size-6 shrink-0 rounded bg-base-300 object-cover" />
+                                    <template v-if="item.links.length > 0">
+                                        <span v-for="(link, linkIndex) in item.links" :key="link.to" class="inline-flex items-center gap-1">
+                                            <SRouterLink :to="link.to" class="link link-primary hover:underline">
+                                                {{ link.text }}
+                                            </SRouterLink>
+                                            <span v-if="linkIndex < item.links.length - 1" class="mx-1 text-base-content/50">/</span>
+                                        </span>
+                                    </template>
+                                    <span v-else>{{ item.reward.d ? `图纸: ${item.reward.name}` : $t(item.reward.name) }}</span>
+                                </div>
                             </td>
                             <td class="py-2 px-3 text-sm">{{ item.reward.count }}</td>
                             <td class="py-2 px-3 text-sm">{{ index > 0 ? `0~${props.walnut.参数[index]}` : 1 }}</td>

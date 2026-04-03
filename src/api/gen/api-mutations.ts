@@ -61,7 +61,6 @@ export const claimDailyLaunchExperienceMutation = typedMutation<Types.UserExperi
             source
             awardedExp
             retryAfterMs
-            token
             user {
                 id
                 name
@@ -87,7 +86,6 @@ export const claimDailyOnlineExperienceMutation = typedMutation<Types.UserExperi
             source
             awardedExp
             retryAfterMs
-            token
             user {
                 id
                 name

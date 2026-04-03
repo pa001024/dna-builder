@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useLocalStorage } from "@vueuse/core"
 import Fuse, { type FuseResultMatch } from "fuse.js"
 import { computed, ref, watch } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
@@ -40,8 +41,10 @@ const selectedQuestChainId = useSearchParam<number>("id", 0)
 const showImprCheckOnly = useSearchParam<boolean>("ico", false)
 const showImprIncreaseOnly = useSearchParam<boolean>("iio", false)
 const showFullTextSearch = useSearchParam<boolean>("fts", false)
+const selectedVersion = useSearchParam<string>("ver", "")
 const settingStore = useSettingStore()
 const localizedQuestData = ref<QuestStory[]>([])
+const showVersionFilter = useLocalStorage("questchain.showVersionFilter", false)
 
 /**
  * 异步加载当前语言任务剧情数据，并忽略过期结果。
@@ -336,6 +339,10 @@ function passesQuestChainSwitchFilters(questChain: QuestChain): boolean {
         return false
     }
 
+    if (selectedVersion.value && (questChain.版本 || "") !== selectedVersion.value) {
+        return false
+    }
+
     return true
 }
 
@@ -547,6 +554,20 @@ const filteredQuestChains = computed<QuestChainSearchResult[]>(() => {
 })
 
 /**
+ * 获取可用版本列表。
+ */
+const versionOptions = computed(() => {
+    const versionSet = new Set<string>()
+    for (const questChain of questChainData) {
+        const version = questChain.版本 || ""
+        if (version) {
+            versionSet.add(version)
+        }
+    }
+    return Array.from(versionSet).sort((a, b) => a.localeCompare(b, "zh-CN", { numeric: true }))
+})
+
+/**
  * 选中任务链。
  * @param questChain 任务链
  */
@@ -572,18 +593,44 @@ useInitialScrollToSelectedItem()
                     <div class="mt-2 flex items-center gap-4 text-xs text-base-content/80 flex-wrap">
                         <label class="flex items-center gap-2 select-none cursor-pointer">
                             <input v-model="showImprCheckOnly" type="checkbox" class="checkbox checkbox-xs" />
-                            <span>仅显示含印象检定</span>
+                            <span>印象检定</span>
                         </label>
 
                         <label class="flex items-center gap-2 select-none cursor-pointer">
                             <input v-model="showImprIncreaseOnly" type="checkbox" class="checkbox checkbox-xs" />
-                            <span>仅显示印象增加</span>
+                            <span>印象增加</span>
                         </label>
 
                         <label class="flex items-center gap-2 select-none cursor-pointer">
                             <input v-model="showFullTextSearch" type="checkbox" class="checkbox checkbox-xs" />
-                            <span>对话全文搜索</span>
+                            <span>全文搜索</span>
                         </label>
+
+                        <label class="flex items-center gap-2 select-none cursor-pointer">
+                            <input v-model="showVersionFilter" type="checkbox" class="checkbox checkbox-xs" />
+                            <span>{{ $t("char-build.version") }}</span>
+                        </label>
+                    </div>
+
+                    <div v-show="showVersionFilter" class="mt-2 flex flex-wrap gap-1">
+                        <button
+                            class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                            :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedVersion = ''"
+                        >
+                            全部
+                        </button>
+                        <button
+                            v-for="version in versionOptions"
+                            :key="version"
+                            class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            :class="
+                                selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                            "
+                            @click="selectedVersion = version"
+                        >
+                            {{ version }}
+                        </button>
                     </div>
                 </div>
 
@@ -636,6 +683,7 @@ useInitialScrollToSelectedItem()
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
                                 <span>{{ $t(questChainResult.questChain.episode) }}</span>
                                 <span v-if="questChainResult.questChain.type">类型: {{ questChainResult.questChain.type }}</span>
+                                <span v-if="questChainResult.questChain.版本">v{{ questChainResult.questChain.版本 }}</span>
                             </div>
 
                             <div

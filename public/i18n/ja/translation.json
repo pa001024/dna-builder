@@ -5741,7 +5741,7 @@
     },
     "pet_detail": {
         "active_skill": "アクティブスキル",
-        "alternative_form": "異化形態",
+        "alternative_form": "異化",
         "base_id": "ベースID",
         "breakthrough_level_range": "スライダーのレベル範囲は0から3です。老練を有効にするとレベル+1として扱います。",
         "capture_exp": "捕獲経験値",

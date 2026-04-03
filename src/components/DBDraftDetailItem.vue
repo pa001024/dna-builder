@@ -79,7 +79,7 @@ const productDisplay = computed(() => {
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
+    <div class="space-y-3">
         <div class="p-3 flex items-center gap-3">
             <SRouterLink :to="`/db/draft/${draft.id}`" class="text-lg font-bold link link-primary"> 图纸: {{ draft.n }} </SRouterLink>
             <div class="text-xs opacity-70">ID: {{ draft.id }}</div>

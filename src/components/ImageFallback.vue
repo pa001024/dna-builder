@@ -45,7 +45,6 @@ watch(normalizedSrc, resetState, { immediate: true })
 
 <template>
     <div class="inline-flex justify-center items-center relative">
-        <div v-if="isLoading && !hasError" class="absolute w-12 h-12 m-auto animate-spin rounded-full border-b-2 border-base-content" />
         <img v-if="!hasError" v-bind="$attrs" :src="normalizedSrc" :alt="alt" @load="handleLoad" @error="handleError" />
         <slot v-else />
     </div>

@@ -94,7 +94,6 @@ export const typeDefs = /* GraphQL */ `
         awardedExp: Int!
         awardedPoints: Int!
         retryAfterMs: Int
-        token: String
         user: User
     }
 
@@ -421,7 +420,6 @@ export const resolvers = {
                 awardedExp: result.awardedExp,
                 awardedPoints: result.awardedPoints,
                 retryAfterMs,
-                token: signToken(result.user),
                 user: result.user,
             }
         },
@@ -467,7 +465,6 @@ export const resolvers = {
                 awardedExp: result.awardedExp,
                 awardedPoints: result.awardedPoints,
                 retryAfterMs: 0,
-                token: signToken(result.user),
                 user: result.user,
             }
         },

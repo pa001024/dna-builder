@@ -5748,7 +5748,7 @@
     },
     "pet_detail": {
         "active_skill": "Active skill",
-        "alternative_form": "Alternative form",
+        "alternative_form": "Eldritch",
         "base_id": "Base ID",
         "breakthrough_level_range": "The slider level range is 0 to 3. When Old Master is enabled, it is treated as level +1.",
         "capture_exp": "Capture EXP",

@@ -27,6 +27,14 @@ const spotPet = computed(() => {
 })
 
 /**
+ * 获取钓鱼池图标 URL。
+ * @returns 钓鱼池图标 URL；若未配置则使用默认图标。
+ */
+const spotIcon = computed(() => {
+    return props.spot.icon ? `/imgs/webp/${props.spot.icon}.webp` : "/imgs/webp/T_Tab_Angling00.webp"
+})
+
+/**
  * 获取稀有度颜色
  */
 function getRarityColor(rarity: number): string {
@@ -323,7 +331,7 @@ function clearHistory() {
                         <div class="p-3 bg-base-200 rounded space-y-2">
                             <div class="flex items-center gap-3 mb-3">
                                 <div class="w-12 h-12 overflow-hidden rounded-full">
-                                    <img :src="`/imgs/webp/${spot.icon}.webp`" class="w-full h-full object-cover" />
+                                    <img :src="spotIcon" class="w-full h-full object-cover" />
                                 </div>
                                 <div>
                                     <SRouterLink :to="`/db/fishspot/${spot.id}`" class="font-medium text-lg link link-primary">{{

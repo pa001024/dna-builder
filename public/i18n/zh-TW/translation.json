@@ -5706,7 +5706,7 @@
     },
     "pet_detail": {
         "active_skill": "主動技能",
-        "alternative_form": "異化形態",
+        "alternative_form": "異化",
         "base_id": "基礎ID",
         "breakthrough_level_range": "滑塊等級範圍為 0 到 3，開啟老道後視作等級 +1。",
         "capture_exp": "捕獲經驗",

@@ -80,7 +80,7 @@ const MAPPINGS: Mapping[] = [
     },
     { source: "Pet", targetStem: "pet", targetVar: "t", locales: ["cn"] },
     { source: "PetEntry", targetStem: "pet", targetVar: "petEntrys", locales: ["cn"] },
-    { source: "QuestChain", targetStem: "questchain", targetVar: "questChainData", locales: ["cn"] },
+    { source: "QuestChain", targetStem: "questchain", targetVar: "questChainDataRaw", locales: ["cn"] },
     {
         source: "QuestStory",
         targetStem: "quest",

@@ -45,7 +45,6 @@ export interface UserExperienceRewardResult {
     awardedExp: number
     awardedPoints: number
     retryAfterMs?: number
-    token?: string
     user?: User
 }
 

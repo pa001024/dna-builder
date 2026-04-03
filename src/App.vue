@@ -40,16 +40,13 @@ function getLocalDateKey() {
 }
 
 /**
- * @description 确保经验奖励 mutation 返回的新 token 和用户资料会同步回本地状态。
+ * @description 确保经验奖励 mutation 返回的用户资料会同步回本地状态。
  * @param result 奖励接口返回值。
  */
 function applyExperienceRewardResult(
-    result?: { token?: string; user?: any; retryAfterMs?: number; source?: string; success?: boolean } | null
+    result?: { user?: any; retryAfterMs?: number; source?: string; success?: boolean } | null
 ) {
     if (!result) return
-    if (result.token) {
-        user.jwtToken = result.token
-    }
     if (result.user) {
         user.setProfile(result.user)
     }

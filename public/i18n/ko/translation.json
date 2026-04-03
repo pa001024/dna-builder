@@ -5748,7 +5748,7 @@
     },
     "pet_detail": {
         "active_skill": "액티브 스킬",
-        "alternative_form": "이형 형태",
+        "alternative_form": "이형",
         "base_id": "기본 ID",
         "breakthrough_level_range": "슬라이더 레벨 범위는 0에서 3입니다. 노련함을 켜면 레벨 +1로 취급합니다.",
         "capture_exp": "포획 경험치",

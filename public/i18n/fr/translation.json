@@ -5672,7 +5672,7 @@
     },
     "pet_detail": {
         "active_skill": "Compétence active",
-        "alternative_form": "Forme alternative",
+        "alternative_form": "Altération",
         "base_id": "ID de base",
         "breakthrough_level_range": "La plage du curseur est de 0 à 3. Quand Vieil Expert est activé, cela compte comme niveau +1.",
         "capture_exp": "EXP de capture",

@@ -115,7 +115,7 @@ function parsePostIds(value?: string) {
  */
 function isRetryableRoleInfoLookupFailure(error: unknown) {
     const message = error instanceof Error ? error.message : String(error || "")
-    return message.includes("请求失败: 空返回值")
+    return message.includes("空返回值")
 }
 
 /**
@@ -326,27 +326,38 @@ function parseAbyssBestTimeVo1WithOwned(roleInfo: DNARoleEntity, bestTimeVo1?: A
 }
 
 /**
- * 从当前账号已持有数据里提取深渊上传 payload。
+ * 从当前账号已持有数据里提取深渊上传 payload，并返回失败原因。
  * @param roleInfo 角色信息。
- * @returns 上传 payload；若无法反解返回 null。
+ * @returns 上传 payload 和失败原因。
  */
-async function buildAbyssUploadPayload(roleInfo: DNARoleEntity): Promise<AbyssUsageSubmissionInput | null> {
+async function buildAbyssUploadPayloadWithReason(
+    roleInfo: DNARoleEntity
+): Promise<{ payload: AbyssUsageSubmissionInput | null; reason: string | null }> {
     const roleShow = roleInfo.roleInfo?.roleShow
+    if (!roleShow) {
+        return { payload: null, reason: "缺少 roleShow" }
+    }
+
     const bestTimeVo1 = roleInfo.roleInfo?.abyssInfo?.bestTimeVo1
-    if (!roleShow || !bestTimeVo1) {
-        return null
+    if (!bestTimeVo1) {
+        return { payload: null, reason: "缺少 abyssInfo.bestTimeVo1" }
     }
 
     const lineup = parseAbyssBestTimeVo1WithOwned(roleInfo, bestTimeVo1)
-    const uidSha256 = sha256(String(roleShow.roleId ?? ""))
+    const uidSource = String(roleShow.roleId ?? "")
+    if (!uidSource) {
+        return { payload: null, reason: "缺少 roleId" }
+    }
+
+    const uidSha256 = sha256(uidSource)
     if (!uidSha256) {
-        return null
+        return { payload: null, reason: "uidSha256 生成失败" }
     }
 
     const starsValue = String(roleInfo.roleInfo.abyssInfo?.stars ?? "").split("/")[0]
     const stars = Number(starsValue)
     if (!Number.isInteger(stars) || stars < 0) {
-        throw new Error("stars 非法")
+        return { payload: null, reason: `stars 非法: ${starsValue || "空"}` }
     }
 
     const payload: AbyssUsageSubmissionInput = {
@@ -365,7 +376,7 @@ async function buildAbyssUploadPayload(roleInfo: DNARoleEntity): Promise<AbyssUs
     if (lineup.petId != null) {
         payload.petId = lineup.petId
     }
-    return payload
+    return { payload, reason: null }
 }
 
 /**
@@ -565,9 +576,9 @@ async function updateAbyssUsageFromComments() {
                             } catch (error) {
                                 if (isRetryableRoleInfoLookupFailure(error)) {
                                     console.log(
-                                        `评论 ${comment.commentId} 角色信息查询失败，10 秒后重试: ${error instanceof Error ? error.message : String(error)}`
+                                        `评论 ${comment.commentId} 角色信息查询失败，1 秒后重试: ${error instanceof Error ? error.message : String(error)}`
                                     )
-                                    await sleep(10000)
+                                    await sleep(1000)
                                     try {
                                         roleInfo = await getRoleInfoForUserId(userId)
                                     } catch (retryError) {
@@ -601,15 +612,17 @@ async function updateAbyssUsageFromComments() {
                             await sleep(2000)
                         }
 
-                        const payload = await buildAbyssUploadPayload(roleInfo)
-                        if (!payload) {
-                            console.log(`评论 ${comment.commentId} 无法生成深渊上传数据`)
+                        const uploadResult = await buildAbyssUploadPayloadWithReason(roleInfo)
+                        if (!uploadResult.payload) {
+                            console.log(
+                                `评论 ${comment.commentId} 无法生成深渊上传数据: ${uploadResult.reason ?? "未知原因"}，postId: ${postId}，pageIndex: ${currentPageIndex}，userId: ${userId}`
+                            )
                             await markCommentUploaded(postId, comment.commentId, userId, currentPageIndex)
                             skippedCount++
                             continue
                         }
 
-                        const submissionId = await submitAbyssUsage(payload)
+                        const submissionId = await submitAbyssUsage(uploadResult.payload)
                         if (!submissionId) {
                             throw new Error("上传结果为空")
                         }

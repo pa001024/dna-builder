@@ -47,6 +47,15 @@ const filteredFish = computed(() => {
 })
 
 /**
+ * 获取钓鱼点图标 URL。
+ * @param icon 钓鱼点图标标识。
+ * @returns 钓鱼点图标 URL；若未配置则使用默认图标。
+ */
+function getSpotIcon(icon?: string) {
+    return icon ? `/imgs/webp/${icon}.webp` : "/imgs/webp/T_Tab_Angling00.webp"
+}
+
+/**
  * 切换列表类型并清空另一侧选中项。
  * @param type 目标类型
  */
@@ -128,7 +137,7 @@ useInitialScrollToSelectedItem()
                             >
                                 <div class="flex items-start gap-2">
                                     <div class="w-12 h-12 overflow-hidden rounded-full">
-                                        <img :src="`/imgs/webp/${spot.icon}.webp`" class="w-full h-full object-cover" />
+                                        <img :src="getSpotIcon(spot.icon)" class="w-full h-full object-cover" />
                                     </div>
                                     <div>
                                         <div class="font-medium">{{ spot.name }}</div>

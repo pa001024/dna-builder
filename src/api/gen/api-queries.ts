@@ -1086,7 +1086,6 @@ export const abyssUsageSubmissionsQuery = typedQuery(
                 createdAt
                 updateAt
                 roleParticipants {
-                    id
                     submissionId
                     roleType
                     charId
@@ -1094,7 +1093,6 @@ export const abyssUsageSubmissionsQuery = typedQuery(
                     createdAt
                 }
                 weaponParticipants {
-                    id
                     submissionId
                     roleType
                     weaponId

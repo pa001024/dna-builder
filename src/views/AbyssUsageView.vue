@@ -1,21 +1,26 @@
 <script setup lang="ts">
 import type { DNAAPI } from "dna-api"
 import { computed, onMounted, ref } from "vue"
+import { utils, writeFile } from "xlsx"
 import { abyssUsageBaseQuery } from "@/api/combined"
 import type {
     AbyssRoleUsageStat,
     AbyssUsageLineupStat,
+    AbyssUsageRoleParticipant,
     AbyssUsageSlotStat,
     AbyssUsageSlotStats,
+    AbyssUsageSubmission,
+    AbyssUsageWeaponParticipant,
     AbyssWeaponUsageStat,
 } from "@/api/gen/api-types"
-import { abyssUsageLineupStatsQuery, submitAbyssUsageMutation } from "@/api/graphql"
+import { abyssUsageLineupStatsQuery, abyssUsageSubmissionsQuery, submitAbyssUsageMutation } from "@/api/graphql"
 import { abyssDungeonMap, charMap, petMap, weaponMap } from "@/data"
 import { LeveledChar } from "@/data/leveled/LeveledChar"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
+import { useUserStore } from "@/store/user"
 import { buildAbyssUploadPayload, getCurrentAbyssSeason } from "@/utils/abyss-upload"
 import { formatTimeRange } from "@/utils/time"
 
@@ -53,11 +58,13 @@ type DistributionItem = {
 
 const setting = useSettingStore()
 const ui = useUIStore()
+const user = useUserStore()
 
 let api: DNAAPI
 
 const loading = ref(false)
 const abyssUploading = ref(false)
+const exporting = ref(false)
 const seasonInfo = ref<ReturnType<typeof getCurrentAbyssSeason>>(null)
 const roleStats = ref<AbyssRoleUsageStat[]>([])
 const weaponStats = ref<AbyssWeaponUsageStat[]>([])
@@ -580,6 +587,162 @@ function getLineupSlots(item: AbyssUsageLineupStat): LineupSlot[] {
     return slots
 }
 
+/**
+ * 获取深渊提交导出文件名。
+ * @returns 文件名。
+ */
+function getAbyssExportFileName() {
+    const seasonId = seasonInfo.value?.seasonId || "all"
+    return `abyss-usage-${seasonId}.xlsx`
+}
+
+/**
+ * 拉取所有深渊提交。
+ * @returns 全量提交列表。
+ */
+async function loadAllAbyssSubmissions() {
+    const pageSize = 200
+    const submissions: AbyssUsageSubmission[] = []
+    for (let offset = 0; ; offset += pageSize) {
+        const page = await abyssUsageSubmissionsQuery({ limit: pageSize, offset }, { requestPolicy: "network-only" })
+        submissions.push(...(page || []))
+        if (!page || page.length < pageSize) {
+            break
+        }
+    }
+    return submissions
+}
+
+/**
+ * 格式化角色参与明细。
+ * @param participants 角色参与列表。
+ * @returns 可读文本。
+ */
+function formatRoleParticipants(participants?: AbyssUsageRoleParticipant[]) {
+    return (participants || []).map(item => `${getCharName(item.charId)}(${item.charId})/${item.gradeLevel}`).join(" | ")
+}
+
+/**
+ * 格式化武器参与明细。
+ * @param participants 武器参与列表。
+ * @returns 可读文本。
+ */
+function formatWeaponParticipants(participants?: AbyssUsageWeaponParticipant[]) {
+    return (participants || []).map(item => `${getWeaponName(item.weaponId)}(${item.weaponId})/${item.skillLevel}`).join(" | ")
+}
+
+/**
+ * 导出深渊提交为 Excel。
+ */
+async function exportAbyssSubmissions() {
+    if (!user.isAdmin) {
+        return
+    }
+    exporting.value = true
+    try {
+        const submissions = await loadAllAbyssSubmissions()
+        if (!submissions.length) {
+            ui.showErrorMessage("没有可导出的深渊提交")
+            return
+        }
+        const workbook = utils.book_new()
+        const submissionRows = [
+            [
+                "提交ID",
+                "赛季ID",
+                "UID_SHA256",
+                "主角色",
+                "主角色ID",
+                "近战武器",
+                "近战武器ID",
+                "远程武器",
+                "远程武器ID",
+                "助战1",
+                "助战1ID",
+                "助战武器1",
+                "助战武器1ID",
+                "助战2",
+                "助战2ID",
+                "助战武器2",
+                "助战武器2ID",
+                "魔灵",
+                "魔灵ID",
+                "星级",
+                "创建时间",
+                "更新时间",
+                "角色参与",
+                "武器参与",
+            ],
+            ...submissions.map(item => [
+                item.id,
+                item.seasonId,
+                item.uidSha256,
+                getCharName(item.charId),
+                item.charId,
+                getWeaponName(item.meleeId),
+                item.meleeId,
+                getWeaponName(item.rangedId),
+                item.rangedId,
+                getCharName(item.support1),
+                item.support1,
+                getWeaponName(item.supportWeapon1),
+                item.supportWeapon1,
+                getCharName(item.support2),
+                item.support2,
+                getWeaponName(item.supportWeapon2),
+                item.supportWeapon2,
+                getPetName(item.petId),
+                item.petId || "",
+                item.stars,
+                item.createdAt || "",
+                item.updateAt || "",
+                formatRoleParticipants(item.roleParticipants),
+                formatWeaponParticipants(item.weaponParticipants),
+            ]),
+        ]
+        const roleRows = [
+            ["提交ID", "赛季ID", "角色ID", "角色名称", "角色类型", "等级", "创建时间"],
+            ...submissions.flatMap(item =>
+                (item.roleParticipants || []).map(participant => [
+                    item.id,
+                    item.seasonId,
+                    participant.charId,
+                    getCharName(participant.charId),
+                    participant.roleType,
+                    participant.gradeLevel,
+                    participant.createdAt || "",
+                ])
+            ),
+        ]
+        const weaponRows = [
+            ["提交ID", "赛季ID", "武器ID", "武器名称", "角色类型", "技能等级", "创建时间"],
+            ...submissions.flatMap(item =>
+                (item.weaponParticipants || []).map(participant => [
+                    item.id,
+                    item.seasonId,
+                    participant.weaponId,
+                    getWeaponName(participant.weaponId),
+                    participant.roleType,
+                    participant.skillLevel,
+                    participant.createdAt || "",
+                ])
+            ),
+        ]
+        const submissionSheet = utils.aoa_to_sheet(submissionRows)
+        const roleSheet = utils.aoa_to_sheet(roleRows)
+        const weaponSheet = utils.aoa_to_sheet(weaponRows)
+        utils.book_append_sheet(workbook, submissionSheet, "提交")
+        utils.book_append_sheet(workbook, roleSheet, "角色参与")
+        utils.book_append_sheet(workbook, weaponSheet, "武器参与")
+        writeFile(workbook, getAbyssExportFileName())
+        ui.showSuccessMessage("深渊提交已导出")
+    } catch (error) {
+        ui.showErrorMessage("导出深渊提交失败", error instanceof Error ? error.message : String(error))
+    } finally {
+        exporting.value = false
+    }
+}
+
 async function loadStats() {
     loading.value = true
     try {
@@ -632,6 +795,11 @@ onMounted(async () => {
                             </div>
                         </div>
                         <div class="flex items-center gap-2 self-start md:self-auto">
+                            <button v-if="user.isAdmin" class="btn btn-sm btn-outline" :disabled="exporting" @click="exportAbyssSubmissions">
+                                <span v-if="exporting" class="loading loading-spinner loading-xs"></span>
+                                <Icon v-else icon="ri:file-excel-2-line" />
+                                导出
+                            </button>
                             <button class="btn btn-sm btn-primary" :disabled="abyssUploading" @click="uploadAbyssUsage">
                                 <span v-if="abyssUploading" class="loading loading-spinner loading-xs"></span>
                                 <Icon v-else icon="ri:upload-2-line" />

@@ -293,6 +293,12 @@ const questDetails = computed<QuestDetailItem[]>(() => {
 })
 
 /**
+ * 获取任务链版本号。
+ * @returns 版本号
+ */
+const questChainVersion = computed(() => props.questChain.版本 || "")
+
+/**
  * 获取子区域名称。
  * @param subRegionId 子区域 ID
  * @returns 子区域名称
@@ -318,7 +324,10 @@ function getSubRegionName(subRegionId: number): string {
                     <SRouterLink :to="`/db/questchain/${questChain.id}`" class="text-lg font-bold link link-primary">
                         {{ questChain.name }}
                     </SRouterLink>
-                    <div class="text-sm text-base-content/70">ID: {{ questChain.id }}</div>
+                    <div class="text-sm text-base-content/70 flex flex-wrap items-center gap-2">
+                        <span>ID: {{ questChain.id }}</span>
+                        <span v-if="questChainVersion">v{{ questChainVersion }}</span>
+                    </div>
                 </div>
             </div>
 
