@@ -25,15 +25,24 @@ const cargoTomlContent = fs.readFileSync(cargoTomlPath, "utf8")
 
 // 更新版本号
 const newVersion = version || packageJson.version // incrementPatchVersion(packageJson.version)
-packageJson.version = newVersion
-tauriConf.version = newVersion
 const updatedCargoTomlContent = cargoTomlContent.replace(/version = "(.*?)"/, `version = "${newVersion}"`)
+const packageJsonVersionChanged = packageJson.version !== newVersion
+const tauriConfVersionChanged = tauriConf.version !== newVersion
+const cargoTomlVersionChanged = updatedCargoTomlContent !== cargoTomlContent
 
 // 写入更新后的文件
 // 更新Cargo.toml中的版本号
-fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 4)}\n`)
-fs.writeFileSync(tauriConfPath, `${JSON.stringify(tauriConf, null, 4)}\n`)
-fs.writeFileSync(cargoTomlPath, updatedCargoTomlContent)
+if (packageJsonVersionChanged) {
+    packageJson.version = newVersion
+    fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 4)}\n`)
+}
+if (tauriConfVersionChanged) {
+    tauriConf.version = newVersion
+    fs.writeFileSync(tauriConfPath, `${JSON.stringify(tauriConf, null, 4)}\n`)
+}
+if (cargoTomlVersionChanged) {
+    fs.writeFileSync(cargoTomlPath, updatedCargoTomlContent)
+}
 
 // console.log(`Version updated to ${newVersion}`)
 
