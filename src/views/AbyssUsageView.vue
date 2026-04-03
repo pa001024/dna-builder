@@ -669,7 +669,7 @@ onMounted(async () => {
                             <div
                                 v-for="group in row.groups"
                                 :key="group.label"
-                                class="space-y-2 rounded-2xl bg-base-200 p-3"
+                                class="space-y-2 p-3 hover:bg-base-200 rounded transition-all duration-300"
                             >
                                 <div class="text-xs font-medium opacity-60">{{ group.label }}</div>
                                 <div class="flex flex-wrap justify-center gap-2">

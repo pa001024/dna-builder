@@ -116,7 +116,9 @@ function isVersionAllowed(version: string): boolean {
     return parsedVersion <= getCurrentVersionLimit()
 }
 
-useInitialScrollToSelectedItem()
+useInitialScrollToSelectedItem({
+    selectedSelector: '[data-selected="true"]',
+})
 </script>
 
 <template>
@@ -180,7 +182,12 @@ useInitialScrollToSelectedItem()
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="group in groupedDungeons" :key="group.key" class="rounded border border-base-200 bg-base-200/60">
+                        <div
+                            v-for="group in groupedDungeons"
+                            :key="group.key"
+                            class="rounded border border-base-200 bg-base-200/60 overflow-hidden"
+                            :data-selected="getDefaultDungeonInGroup(group)?.id === selectedDungeon?.id ? 'true' : 'false'"
+                        >
                             <button
                                 type="button"
                                 class="w-full p-3 text-left transition-colors duration-200 hover:bg-base-300"
