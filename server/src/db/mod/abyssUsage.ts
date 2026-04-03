@@ -132,6 +132,7 @@ export const typeDefs = /* GraphQL */ `
 
     type Query {
         abyssUsageSubmissions(limit: Int = 20, offset: Int = 0): [AbyssUsageSubmission!]!
+        abyssUsageSubmissionsCount(seasonId: Int): Int!
         abyssUsageRoleStats(seasonId: Int): [AbyssRoleUsageStat!]!
         abyssUsageWeaponStats(seasonId: Int): [AbyssWeaponUsageStat!]!
         abyssUsageLineupStats(seasonId: Int, charId: Int, mainOnly: Boolean, limit: Int): [AbyssUsageLineupStat!]!
@@ -708,6 +709,11 @@ export const resolvers = {
                 roleParticipants: grouped.role.get(item.id) || [],
                 weaponParticipants: grouped.weapon.get(item.id) || [],
             }))
+        },
+        abyssUsageSubmissionsCount: async (_parent, args, context) => {
+            const where = args?.seasonId ? eq(schema.abyssUsageSubmissions.seasonId, args.seasonId) : undefined
+            const row = await db.select({ count: sql<number>`count(*)` }).from(schema.abyssUsageSubmissions).where(where)
+            return row[0]?.count || 0
         },
         abyssUsageRoleStats: async (_parent, args) => {
             const rows = await loadRoleStatRows(args?.seasonId)

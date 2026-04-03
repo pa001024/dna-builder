@@ -3,6 +3,7 @@ import {
     abyssUsageRoleRankQuery,
     abyssUsageRoleStatsQuery,
     abyssUsageSlotStatsQuery,
+    abyssUsageSubmissionsCountQuery,
     abyssUsageWeaponRankQuery,
     abyssUsageWeaponStatsQuery,
     adminShopRedemptionsCountQuery,
@@ -35,6 +36,7 @@ export const adminShopRedemptionsWithCountQuery = combinedQuery(adminShopRedempt
 export const abyssUsageBaseQuery = combinedQuery(
     abyssUsageRoleStatsQuery,
     abyssUsageWeaponStatsQuery,
+    abyssUsageSubmissionsCountQuery,
     abyssUsageLineupStatsQuery,
     abyssUsageSlotStatsQuery,
     abyssUsageRoleRankQuery,

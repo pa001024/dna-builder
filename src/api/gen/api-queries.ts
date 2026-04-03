@@ -1104,6 +1104,14 @@ export const abyssUsageSubmissionsQuery = typedQuery(
     ` as const
 )<Types.AbyssUsageSubmission[], { limit?: number; offset?: number }>()
 
+export const abyssUsageSubmissionsCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($seasonId: Int) {
+            abyssUsageSubmissionsCount(seasonId: $seasonId)
+        }
+    ` as const
+)<number, { seasonId?: number }>()
+
 export const abyssUsageRoleStatsQuery = typedQuery(
     /* GraphQL */ `
         query ($seasonId: Int) {

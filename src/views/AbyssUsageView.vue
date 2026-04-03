@@ -13,7 +13,11 @@ import type {
     AbyssUsageWeaponParticipant,
     AbyssWeaponUsageStat,
 } from "@/api/gen/api-types"
-import { abyssUsageLineupStatsQuery, abyssUsageSubmissionsQuery, submitAbyssUsageMutation } from "@/api/graphql"
+import {
+    abyssUsageLineupStatsQuery,
+    abyssUsageSubmissionsQuery,
+    submitAbyssUsageMutation,
+} from "@/api/graphql"
 import { abyssDungeonMap, charMap, petMap, weaponMap } from "@/data"
 import { LeveledChar } from "@/data/leveled/LeveledChar"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
@@ -66,6 +70,7 @@ const loading = ref(false)
 const abyssUploading = ref(false)
 const exporting = ref(false)
 const seasonInfo = ref<ReturnType<typeof getCurrentAbyssSeason>>(null)
+const abyssSubmissionsCount = ref(0)
 const roleStats = ref<AbyssRoleUsageStat[]>([])
 const weaponStats = ref<AbyssWeaponUsageStat[]>([])
 const lineupStats = ref<AbyssUsageLineupStat[]>([])
@@ -125,7 +130,7 @@ const seasonCharLink = computed(() => {
     return charId ? `/db/char/${charId}` : "/db/char/0"
 })
 
-const lineupTotal = computed(() => lineupStats.value.reduce((sum, item) => sum + (item.submissionCount || 0), 0))
+const lineupTotal = computed(() => abyssSubmissionsCount.value)
 
 const compactRoleGroupMaxItems = 2
 const compactRoleRowMaxItems = 6
@@ -749,10 +754,11 @@ async function loadStats() {
         const currentSeason = getCurrentAbyssSeason()
         seasonInfo.value = currentSeason
         const seasonId = currentSeason?.seasonId
-        const baseRes = await abyssUsageBaseQuery({ seasonId }, { requestPolicy: "network-only" })
+        const baseRes = await abyssUsageBaseQuery({ seasonId, limit: 6 }, { requestPolicy: "network-only" })
         roleStats.value = baseRes?.abyssUsageRoleStats ?? []
         weaponStats.value = baseRes?.abyssUsageWeaponStats ?? []
         lineupStats.value = baseRes?.abyssUsageLineupStats ?? []
+        abyssSubmissionsCount.value = baseRes?.abyssUsageSubmissionsCount ?? 0
         slotStats.value = baseRes?.abyssUsageSlotStats ?? null
         roleRanks.value = baseRes?.abyssUsageRoleRank ?? []
         weaponRanks.value = baseRes?.abyssUsageWeaponRank ?? []
