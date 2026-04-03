@@ -47,6 +47,20 @@ type AbyssUsageSlotStats = {
     pet: Array<{ id: number; submissionCount: number }>
 }
 
+type AbyssUsageParticipantsBundle = {
+    roleRows: AbyssUsageRoleStatRow[]
+    weaponRows: AbyssUsageWeaponStatRow[]
+}
+
+type AbyssUsageSubmissionBundle = {
+    count: number
+    lineupRows: Awaited<ReturnType<typeof loadLineupStatRows>>
+    slotStats: AbyssUsageSlotStats
+}
+
+const abyssUsageParticipantCache = new Map<string, Promise<AbyssUsageParticipantsBundle>>()
+const abyssUsageSubmissionCache = new Map<string, Promise<AbyssUsageSubmissionBundle>>()
+
 /**
  * 归一化深渊统计用角色 ID。
  * @param charId 角色 ID。
@@ -54,6 +68,10 @@ type AbyssUsageSlotStats = {
  */
 function normalizeAbyssCharId(charId: number): number {
     return charId === 160101 ? 1601 : charId
+}
+
+function getAbyssUsageCacheKey(seasonId?: number | null) {
+    return seasonId ? String(seasonId) : "all"
 }
 
 export const typeDefs = /* GraphQL */ `
@@ -467,51 +485,58 @@ function buildIndexedDistribution(grouped: Map<number, Set<string>>) {
 }
 
 /**
- * 按赛季在角色数据层直接聚合。
+ * 一次性拉取角色和武器参与明细，避免重复扫表。
  * @param seasonId 赛季 ID。
- * @returns 角色统计行。
+ * @returns 聚合用参与明细。
  */
-async function loadRoleStatRows(seasonId?: number | null) {
-    const where = seasonId ? eq(schema.abyssUsageRoleParticipants.seasonId, seasonId) : undefined
-    return await db
-        .select({
-            submissionId: schema.abyssUsageRoleParticipants.submissionId,
-            charId: schema.abyssUsageRoleParticipants.charId,
-            roleType: schema.abyssUsageRoleParticipants.roleType,
-            gradeLevel: schema.abyssUsageRoleParticipants.gradeLevel,
-        })
-        .from(schema.abyssUsageRoleParticipants)
-        .where(where)
-        .groupBy(
-            schema.abyssUsageRoleParticipants.submissionId,
-            schema.abyssUsageRoleParticipants.charId,
-            schema.abyssUsageRoleParticipants.roleType,
-            schema.abyssUsageRoleParticipants.gradeLevel
-        )
-}
+async function loadAbyssParticipantRows(seasonId?: number | null) {
+    const cacheKey = getAbyssUsageCacheKey(seasonId)
+    const cached = abyssUsageParticipantCache.get(cacheKey)
+    if (cached) return await cached
 
-/**
- * 按赛季在武器数据层直接聚合。
- * @param seasonId 赛季 ID。
- * @returns 武器统计行。
- */
-async function loadWeaponStatRows(seasonId?: number | null) {
-    const where = seasonId ? eq(schema.abyssUsageWeaponParticipants.seasonId, seasonId) : undefined
-    return await db
-        .select({
-            submissionId: schema.abyssUsageWeaponParticipants.submissionId,
-            weaponId: schema.abyssUsageWeaponParticipants.weaponId,
-            roleType: schema.abyssUsageWeaponParticipants.roleType,
-            skillLevel: schema.abyssUsageWeaponParticipants.skillLevel,
-        })
-        .from(schema.abyssUsageWeaponParticipants)
-        .where(where)
-        .groupBy(
-            schema.abyssUsageWeaponParticipants.submissionId,
-            schema.abyssUsageWeaponParticipants.weaponId,
-            schema.abyssUsageWeaponParticipants.roleType,
-            schema.abyssUsageWeaponParticipants.skillLevel
-        )
+    const promise = (async () => {
+        const roleWhere = seasonId ? eq(schema.abyssUsageRoleParticipants.seasonId, seasonId) : undefined
+        const weaponWhere = seasonId ? eq(schema.abyssUsageWeaponParticipants.seasonId, seasonId) : undefined
+        const roleRows = await db
+            .select({
+                submissionId: schema.abyssUsageRoleParticipants.submissionId,
+                charId: schema.abyssUsageRoleParticipants.charId,
+                roleType: schema.abyssUsageRoleParticipants.roleType,
+                gradeLevel: schema.abyssUsageRoleParticipants.gradeLevel,
+            })
+            .from(schema.abyssUsageRoleParticipants)
+            .where(roleWhere)
+            .groupBy(
+                schema.abyssUsageRoleParticipants.submissionId,
+                schema.abyssUsageRoleParticipants.charId,
+                schema.abyssUsageRoleParticipants.roleType,
+                schema.abyssUsageRoleParticipants.gradeLevel
+            )
+        const weaponRows = await db
+            .select({
+                submissionId: schema.abyssUsageWeaponParticipants.submissionId,
+                weaponId: schema.abyssUsageWeaponParticipants.weaponId,
+                roleType: schema.abyssUsageWeaponParticipants.roleType,
+                skillLevel: schema.abyssUsageWeaponParticipants.skillLevel,
+            })
+            .from(schema.abyssUsageWeaponParticipants)
+            .where(weaponWhere)
+            .groupBy(
+                schema.abyssUsageWeaponParticipants.submissionId,
+                schema.abyssUsageWeaponParticipants.weaponId,
+                schema.abyssUsageWeaponParticipants.roleType,
+                schema.abyssUsageWeaponParticipants.skillLevel
+            )
+        return { roleRows, weaponRows }
+    })()
+
+    abyssUsageParticipantCache.set(cacheKey, promise)
+    try {
+        return await promise
+    } catch (error) {
+        abyssUsageParticipantCache.delete(cacheKey)
+        throw error
+    }
 }
 
 /**
@@ -690,6 +715,34 @@ async function loadLineupStatRows(seasonId?: number | null, charId?: number | nu
     return await query
 }
 
+async function loadAbyssUsageSubmissionBundle(seasonId?: number | null, charId?: number | null, mainOnly?: boolean | null, limit = 20) {
+    const cacheKey = `${getAbyssUsageCacheKey(seasonId)}|${charId || 0}|${mainOnly ? 1 : 0}|${limit}`
+    const cached = abyssUsageSubmissionCache.get(cacheKey)
+    if (cached) return await cached
+
+    const promise = (async () => {
+        const countRows = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(schema.abyssUsageSubmissions)
+            .where(seasonId ? eq(schema.abyssUsageSubmissions.seasonId, seasonId) : undefined)
+        const [lineupRows, slotStats] = await Promise.all([loadLineupStatRows(seasonId, charId, mainOnly, limit), loadSlotStats(seasonId)])
+        return { count: countRows[0]?.count || 0, lineupRows, slotStats }
+    })()
+
+    abyssUsageSubmissionCache.set(cacheKey, promise)
+    try {
+        return await promise
+    } catch (error) {
+        abyssUsageSubmissionCache.delete(cacheKey)
+        throw error
+    }
+}
+
+function invalidateAbyssUsageCaches() {
+    abyssUsageParticipantCache.clear()
+    abyssUsageSubmissionCache.clear()
+}
+
 export const resolvers = {
     Query: {
         abyssUsageSubmissions: async (_parent, args, context) => {
@@ -710,20 +763,19 @@ export const resolvers = {
                 weaponParticipants: grouped.weapon.get(item.id) || [],
             }))
         },
-        abyssUsageSubmissionsCount: async (_parent, args, context) => {
-            const where = args?.seasonId ? eq(schema.abyssUsageSubmissions.seasonId, args.seasonId) : undefined
-            const row = await db.select({ count: sql<number>`count(*)` }).from(schema.abyssUsageSubmissions).where(where)
-            return row[0]?.count || 0
+        abyssUsageSubmissionsCount: async (_parent, args) => {
+            const bundle = await loadAbyssUsageSubmissionBundle(args?.seasonId)
+            return bundle.count
         },
         abyssUsageRoleStats: async (_parent, args) => {
-            const rows = await loadRoleStatRows(args?.seasonId)
-            if (rows.length === 0) return []
-            return buildRoleStats(rows)
+            const { roleRows } = await loadAbyssParticipantRows(args?.seasonId)
+            if (roleRows.length === 0) return []
+            return buildRoleStats(roleRows)
         },
         abyssUsageWeaponStats: async (_parent, args) => {
-            const rows = await loadWeaponStatRows(args?.seasonId)
-            if (rows.length === 0) return []
-            return buildWeaponStats(rows)
+            const { weaponRows } = await loadAbyssParticipantRows(args?.seasonId)
+            if (weaponRows.length === 0) return []
+            return buildWeaponStats(weaponRows)
         },
         abyssUsageLineupStats: async (_parent, args) => {
             const charId = args?.charId
@@ -735,21 +787,23 @@ export const resolvers = {
             }
             const requestedLimit = args?.limit
             const limit = requestedLimit == null ? 20 : Math.min(requestedLimit, 20)
-            return loadLineupStatRows(args?.seasonId, charId, args?.mainOnly, limit)
+            const bundle = await loadAbyssUsageSubmissionBundle(args?.seasonId, charId, args?.mainOnly, limit)
+            return bundle.lineupRows
         },
         abyssUsageSlotStats: async (_parent, args) => {
-            return await loadSlotStats(args?.seasonId)
+            const bundle = await loadAbyssUsageSubmissionBundle(args?.seasonId)
+            return bundle.slotStats
         },
         abyssUsageRoleRank: async (_parent, args) => {
-            const rows = await loadRoleStatRows(args?.seasonId)
-            if (rows.length === 0) return []
-            return buildRoleStats(rows)
+            const { roleRows } = await loadAbyssParticipantRows(args?.seasonId)
+            if (roleRows.length === 0) return []
+            return buildRoleStats(roleRows)
         },
         abyssUsageWeaponRank: async (_parent, args) => {
             const limit = args?.limit ?? 20
-            const rows = await loadWeaponStatRows(args?.seasonId)
-            if (rows.length === 0) return []
-            return buildWeaponStats(rows).slice(0, limit)
+            const { weaponRows } = await loadAbyssParticipantRows(args?.seasonId)
+            if (weaponRows.length === 0) return []
+            return buildWeaponStats(weaponRows).slice(0, limit)
         },
     },
     Mutation: {
@@ -793,7 +847,6 @@ export const resolvers = {
                     stars: input.stars,
                     petId: input.petId ?? null,
                 }
-
                 const [submission] = await tx
                     .insert(schema.abyssUsageSubmissions)
                     .values(submissionPayload)
@@ -833,6 +886,7 @@ export const resolvers = {
                     .insert(schema.abyssUsageWeaponParticipants)
                     .values([...buildOwnedWeaponParticipantRows(submission.id, seasonId, ownedWeapons), ...usageResult.weaponParticipants])
 
+                invalidateAbyssUsageCaches()
                 return {
                     ...serializeSubmission(submission),
                     roleParticipants: [
