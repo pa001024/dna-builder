@@ -21304,7 +21304,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80230224,
-                content: "Quoi ? Vraiment ?",
+                content: "Des murmures parcourent la foule.",
                 voice: "inv/Zhiliu/002/C8D91320",
                 next: 80230225,
             },
@@ -21358,7 +21358,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80230231,
-                content: "Ça ne va pas non plus ? Alors... que faut-il faire ?",
+                content: "Des murmures parcourent la foule.",
                 voice: "inv/Zhiliu/002/C8D91446",
                 next: 80230232,
             },

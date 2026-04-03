@@ -21010,7 +21010,7 @@ export const partyTopicData_jp: PartyTopic[] = [
             },
             {
                 id: 80230224,
-                content: "なんだって？本気か？",
+                content: "（ざわ…ざわ……）",
                 voice: "inv/Zhiliu/002/C8D91320",
                 next: 80230225,
             },
@@ -21064,7 +21064,7 @@ export const partyTopicData_jp: PartyTopic[] = [
             },
             {
                 id: 80230231,
-                content: "じゃあどうすれば……",
+                content: "（ざわ…ざわ……）",
                 voice: "inv/Zhiliu/002/C8D91446",
                 next: 80230232,
             },
