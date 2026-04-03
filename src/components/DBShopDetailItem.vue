@@ -47,7 +47,7 @@ interface FilteredShopMainTab extends Omit<ShopMainTab, "subTabs"> {
 
 const shopTabs = computed(() => props.shop.mainTabs.map(t => t.name))
 const selectedShop = useSearchParam("tab", props.shop.mainTabs[0].name || "")
-const timeFilterEnabled = useSearchParam("tf", false)
+const timeFilterEnabled = useSearchParam("tf", true)
 const selectedTimePointIndex = useSearchParam("ti", 0)
 const diffOnlyEnabled = useSearchParam("td", false)
 
@@ -526,7 +526,7 @@ function formatShopTimeShort(timestamp: number): string {
                 <div class="flex flex-wrap items-center gap-4">
                     <button type="button" class="btn btn-xs btn-ghost" @click="resetToCurrentTimePoint">重置到当前</button>
                     <label class="label cursor-pointer gap-2 p-0">
-                        <span class="text-sm">仅显示可购买</span>
+                        <span class="text-sm">仅当前</span>
                         <input v-model="timeFilterEnabled" type="checkbox" class="toggle toggle-primary toggle-sm" />
                     </label>
                     <label class="label cursor-pointer gap-2 p-0">
@@ -549,7 +549,7 @@ function formatShopTimeShort(timestamp: number): string {
                 <span v-if="selectedTimePoint?.isCurrent" class="rounded bg-primary px-2 py-1 text-primary-content">当前</span>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div v-if="timeFilterEnabled && shopTimePoints.length > 1" class="flex items-center gap-3">
                 <span class="w-12 shrink-0 text-[11px] text-base-content/60">{{ shopTimePoints[0]?.shortLabel }}</span>
                 <input
                     v-model.number="selectedTimePointIndex"

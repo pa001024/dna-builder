@@ -103,6 +103,7 @@ const itemDetail = computed(() => {
                 type: "Resource" as const,
                 res,
                 icon: `/imgs/res/${res?.icon}.webp`,
+                link: res?.id ? `/db/resource/${res.id}` : "",
             }
         case "Draft":
             const draft = draftMap.get(props.item.typeId)
@@ -151,6 +152,7 @@ const itemDetail = computed(() => {
                 return {
                     type: props.item.itemType,
                     icon: `/imgs/webp/${head.icon}.webp`,
+                    link: `/db/accessory/head/${head.id}`,
                 }
             } else {
                 return {
@@ -216,6 +218,12 @@ const itemDetail = computed(() => {
             return {
                 type: props.item.itemType,
                 icon: resolveSkinIconUrl(acc.icon),
+                link:
+                    props.item.itemType === "CharAccessory"
+                        ? `/db/accessory/char/${acc.id}`
+                        : props.item.itemType === "WeaponAccessory"
+                          ? `/db/accessory/weapon/${acc.id}`
+                          : `/db/accessory/weaponskin/${acc.id}`,
             }
         case "TitleFrame":
             return {

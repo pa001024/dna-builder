@@ -281,9 +281,9 @@ const relatedShopSources = computed<ShopSourceInfo[]>(() => {
         weapon: "WeaponAccessory",
         skin: "Skin",
         weaponskin: "WeaponSkin",
-        hair: "",
+        hair: "Hair",
         headframe: "HeadFrame",
-        head: "",
+        head: "HeadSculpture",
     } as const
     const targetItemType = itemTypeMap[props.accessory.accessoryType]
     if (!targetItemType) {
