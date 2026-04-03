@@ -81,6 +81,27 @@ const SMOKE_EXPECTED = {
     lineupStats: new Map<string, number>(),
 }
 
+const SINGLE_RUN_SUBMISSION: SmokedSubmission = {
+    uidSha256: sha256("single-run"),
+    charId: 4102,
+    meleeId: 10304,
+    rangedId: 20102,
+    support1: 0,
+    supportWeapon1: 0,
+    support2: 0,
+    supportWeapon2: 0,
+    petId: 4241,
+    stars: 1,
+    ownedChars: [
+        { charId: 4102, gradeLevel: 6 },
+        { charId: 1601, gradeLevel: 6 },
+    ],
+    ownedWeapons: [
+        { weaponId: 10304, skillLevel: 6 },
+        { weaponId: 20102, skillLevel: 3 },
+    ],
+}
+
 const SMOKE_ADMIN_TOKEN = jwt.sign(
     {
         id: "smoke-admin",
@@ -409,6 +430,80 @@ describe("abyssUsage", () => {
         expect(anonymousResult.errors?.[0]?.message).toBeUndefined()
         expect(anonymousResult.data?.submitAbyssUsage?.id).toBeTypeOf("string")
 
+        const singleRunResult = await graphqlRequest<{ data?: { submitAbyssUsage?: { id: string } }; errors?: Array<{ message: string }> }>(
+            `
+            mutation SubmitAbyssUsage($input: AbyssUsageSubmissionInput!) {
+                submitAbyssUsage(input: $input) {
+                    id
+                }
+            }
+        `,
+            {
+                input: {
+                    uidSha256: SINGLE_RUN_SUBMISSION.uidSha256,
+                    charId: SINGLE_RUN_SUBMISSION.charId,
+                    meleeId: SINGLE_RUN_SUBMISSION.meleeId,
+                    rangedId: SINGLE_RUN_SUBMISSION.rangedId,
+                    support1: SINGLE_RUN_SUBMISSION.support1,
+                    supportWeapon1: SINGLE_RUN_SUBMISSION.supportWeapon1,
+                    support2: SINGLE_RUN_SUBMISSION.support2,
+                    supportWeapon2: SINGLE_RUN_SUBMISSION.supportWeapon2,
+                    stars: SINGLE_RUN_SUBMISSION.stars,
+                    petId: SINGLE_RUN_SUBMISSION.petId,
+                    ownedChars: SINGLE_RUN_SUBMISSION.ownedChars,
+                    ownedWeapons: SINGLE_RUN_SUBMISSION.ownedWeapons,
+                },
+            }
+        )
+        expect(singleRunResult.errors).toBeUndefined()
+        expect(singleRunResult.data?.submitAbyssUsage?.id).toBeTypeOf("string")
+
+        const storedSingleRun = await db.query.abyssUsageSubmissions.findFirst({
+            where: eq(schema.abyssUsageSubmissions.uidSha256, SINGLE_RUN_SUBMISSION.uidSha256),
+        })
+        expect(storedSingleRun?.support1).toBe(0)
+        expect(storedSingleRun?.supportWeapon1).toBe(0)
+        expect(storedSingleRun?.support2).toBe(0)
+        expect(storedSingleRun?.supportWeapon2).toBe(0)
+
+        const normalizedOwnerResult = await graphqlRequest<{
+            data?: { submitAbyssUsage?: { roleParticipants?: Array<{ charId: number; gradeLevel: number }> } }
+            errors?: Array<{ message: string }>
+        }>(
+            `
+            mutation SubmitAbyssUsage($input: AbyssUsageSubmissionInput!) {
+                submitAbyssUsage(input: $input) {
+                    roleParticipants {
+                        charId
+                        gradeLevel
+                    }
+                }
+            }
+        `,
+            {
+                input: {
+                    uidSha256: sha256("owner-160101"),
+                    charId: SINGLE_RUN_SUBMISSION.charId,
+                    meleeId: SINGLE_RUN_SUBMISSION.meleeId,
+                    rangedId: SINGLE_RUN_SUBMISSION.rangedId,
+                    support1: 0,
+                    supportWeapon1: 0,
+                    support2: 0,
+                    supportWeapon2: 0,
+                    stars: 1,
+                    ownedChars: [
+                        { charId: 160101, gradeLevel: 6 },
+                        { charId: 4102, gradeLevel: 5 },
+                    ],
+                    ownedWeapons: SINGLE_RUN_SUBMISSION.ownedWeapons,
+                },
+            }
+        )
+        expect(normalizedOwnerResult.errors).toBeUndefined()
+        const ownerChars = normalizedOwnerResult.data?.submitAbyssUsage?.roleParticipants || []
+        expect(ownerChars.some(item => item.charId === 160101)).toBe(true)
+        expect(ownerChars.some(item => item.charId === 1601)).toBe(false)
+
         await seedSmokeSubmissions()
 
         const statsResult = await graphqlRequest<{
@@ -482,7 +577,7 @@ describe("abyssUsage", () => {
 
         expect(statsResult.errors).toBeUndefined()
         const submissions = statsResult.data?.abyssUsageSubmissions || []
-        expect(submissions).toHaveLength(SMOKE_SUBMISSIONS.length + 1)
+        expect(submissions).toHaveLength(SMOKE_SUBMISSIONS.length + 3)
         expect(submissions.every(item => item.seasonId === SMOKE_SEASON_ID)).toBe(true)
 
         const roleRows = statsResult.data?.abyssUsageRoleStats || []
@@ -492,6 +587,8 @@ describe("abyssUsage", () => {
         expect(roleRows.length).toBeGreaterThan(0)
         expect(weaponRows.length).toBeGreaterThan(0)
         expect(lineupRows.length).toBeGreaterThan(0)
+        expect(roleRows.some(item => item.charId === 160101)).toBe(false)
+        expect(roleRows.some(item => item.charId === 1601)).toBe(true)
 
         for (const [charId, expected] of SMOKE_EXPECTED.roleStats.entries()) {
             const actual = roleRows.find(item => item.charId === charId)

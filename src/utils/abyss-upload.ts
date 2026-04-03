@@ -130,10 +130,9 @@ export function buildAbyssOwnedIds(roleInfo: DNARoleEntity): AbyssUsageOwnedInpu
         if (!char.unLocked) {
             continue
         }
-        const normalizedCharId = normalizeAbyssCharId(char.charId)
-        const current = charMap.get(normalizedCharId)
+        const current = charMap.get(char.charId)
         if (current == null || char.gradeLevel > current) {
-            charMap.set(normalizedCharId, char.gradeLevel)
+            charMap.set(char.charId, char.gradeLevel)
         }
     }
     const weaponMap = new Map<number, number>()

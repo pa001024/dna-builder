@@ -47,6 +47,15 @@ type AbyssUsageSlotStats = {
     pet: Array<{ id: number; submissionCount: number }>
 }
 
+/**
+ * 归一化深渊统计用角色 ID。
+ * @param charId 角色 ID。
+ * @returns 统计时使用的角色 ID。
+ */
+function normalizeAbyssCharId(charId: number): number {
+    return charId === 160101 ? 1601 : charId
+}
+
 export const typeDefs = /* GraphQL */ `
     type AbyssUsageSubmission {
         id: String!
@@ -309,11 +318,15 @@ function buildUsageParticipantRows(
         },
     ]
 
-    if (usageParticipants.some(item => item.gradeLevel == null || item.skillLevel == null)) {
+    const validParticipants = usageParticipants.filter(
+        item => item.charId > 0 && item.weaponId > 0 && item.gradeLevel != null && item.skillLevel != null
+    )
+
+    if (validParticipants.length === 0) {
         return null
     }
 
-    for (const item of usageParticipants) {
+    for (const item of validParticipants) {
         const roleCurrent = roleParticipantMap.get(item.charId)
         if (!roleCurrent || item.gradeLevel! > roleCurrent.gradeLevel) {
             roleParticipantMap.set(item.charId, {
@@ -333,7 +346,7 @@ function buildUsageParticipantRows(
     }
 
     return {
-        usageParticipants: usageParticipants.map(item => ({
+        usageParticipants: validParticipants.map(item => ({
             submissionId,
             seasonId,
             roleType: item.roleType,
@@ -374,20 +387,21 @@ function buildRoleStats(rows: AbyssUsageRoleStatRow[]) {
         }
     >()
     for (const row of rows) {
-        const bucket = grouped.get(row.charId) || {
+        const charId = normalizeAbyssCharId(row.charId)
+        const groupedBucket = grouped.get(charId) || {
             submissionIds: new Set<string>(),
             ownedSubmissionIds: new Set<string>(),
             grade: new Map<number, Set<string>>(),
         }
         if (row.roleType === "owned") {
-            bucket.ownedSubmissionIds.add(row.submissionId)
+            groupedBucket.ownedSubmissionIds.add(row.submissionId)
         } else {
-            bucket.submissionIds.add(row.submissionId)
-            const gradeSet = bucket.grade.get(row.gradeLevel) || new Set<string>()
+            groupedBucket.submissionIds.add(row.submissionId)
+            const gradeSet = groupedBucket.grade.get(row.gradeLevel) || new Set<string>()
             gradeSet.add(row.submissionId)
-            bucket.grade.set(row.gradeLevel, gradeSet)
+            groupedBucket.grade.set(row.gradeLevel, gradeSet)
         }
-        grouped.set(row.charId, bucket)
+        grouped.set(charId, groupedBucket)
     }
     return [...grouped.entries()]
         .map(([charId, bucket]) => ({
@@ -589,7 +603,9 @@ async function loadParticipantsBySubmissionIds(submissionIds: string[]) {
 }
 
 function normalizeLineupSupport(support1: number, supportWeapon1: number, support2: number, supportWeapon2: number) {
-    if (support1 < support2 || (support1 === support2 && supportWeapon1 <= supportWeapon2)) {
+    const leftRank = support1 > 0 ? support1 : Number.POSITIVE_INFINITY
+    const rightRank = support2 > 0 ? support2 : Number.POSITIVE_INFINITY
+    if (leftRank < rightRank || (leftRank === rightRank && supportWeapon1 <= supportWeapon2)) {
         return {
             support1,
             supportWeapon1,
@@ -610,7 +626,8 @@ function normalizeLineupSupport(support1: number, supportWeapon1: number, suppor
  * @param charIds 角色 ID 列表。
  */
 function validateLineupDistinct(charIds: number[]) {
-    if (new Set(charIds).size !== charIds.length) {
+    const activeCharIds = charIds.filter(charId => charId > 0)
+    if (new Set(activeCharIds).size !== activeCharIds.length) {
         throw createGraphQLError("阵容角色重复")
     }
 }
@@ -743,10 +760,10 @@ export const resolvers = {
             if (!Number.isInteger(input.charId) || input.charId <= 0) throw createGraphQLError("charId 非法")
             if (!Number.isInteger(input.meleeId) || input.meleeId <= 0) throw createGraphQLError("meleeId 非法")
             if (!Number.isInteger(input.rangedId) || input.rangedId <= 0) throw createGraphQLError("rangedId 非法")
-            if (!Number.isInteger(input.support1) || input.support1 <= 0) throw createGraphQLError("support1 非法")
-            if (!Number.isInteger(input.supportWeapon1) || input.supportWeapon1 <= 0) throw createGraphQLError("supportWeapon1 非法")
-            if (!Number.isInteger(input.support2) || input.support2 <= 0) throw createGraphQLError("support2 非法")
-            if (!Number.isInteger(input.supportWeapon2) || input.supportWeapon2 <= 0) throw createGraphQLError("supportWeapon2 非法")
+            if (!Number.isInteger(input.support1) || input.support1 < 0) throw createGraphQLError("support1 非法")
+            if (!Number.isInteger(input.supportWeapon1) || input.supportWeapon1 < 0) throw createGraphQLError("supportWeapon1 非法")
+            if (!Number.isInteger(input.support2) || input.support2 < 0) throw createGraphQLError("support2 非法")
+            if (!Number.isInteger(input.supportWeapon2) || input.supportWeapon2 < 0) throw createGraphQLError("supportWeapon2 非法")
             if (!Number.isInteger(input.stars) || input.stars < 0) throw createGraphQLError("stars 非法")
 
             const uidSha256 = input.uidSha256.trim()
