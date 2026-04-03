@@ -605,10 +605,12 @@ const t: Region[] = [
 ]
 
 export const mapOffsets: Record<string, [number, number]> = {
-    WBP_Map_Prologue_Bg: [-60, 30],
-    WBP_Map_Prologue_100101: [-60, 30],
+    WBP_Map_Prologue_Bg: [-65, 30],
+    WBP_Map_Prologue_100101: [-65, 30],
     WBP_Map_Prologue_100102: [5, 0],
     WBP_Map_Prologue_100103: [-125, 0],
+    WBP_Map_East_Yanjindu_L0: [-150, -150],
+    "WBP_Map_East_Yanjindu_L-1": [-150, -150],
 }
 
 const regionDataWithVersion = t.map(region => ({

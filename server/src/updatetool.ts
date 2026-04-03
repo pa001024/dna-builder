@@ -86,6 +86,16 @@ type AbyssUsageSubmissionInput = {
     ownedWeapons?: Array<{ weaponId: number; skillLevel: number }>
 }
 
+type RoleInfoLookupResult = {
+    is_success?: boolean
+    data?: DNARoleEntity | null
+    msg?: string
+}
+
+type RoleInfoLookupApi = {
+    defaultRoleForTool(mode: number, userId: string): Promise<RoleInfoLookupResult>
+}
+
 /**
  * 解析帖子 ID 列表。
  * @param value 环境变量值。
@@ -96,6 +106,16 @@ function parsePostIds(value?: string) {
         .split(",")
         .map(item => item.trim())
         .filter(item => item.length > 0)
+}
+
+/**
+ * 判断角色信息查询失败是否属于可重试场景。
+ * @param error 异常或返回消息。
+ * @returns 是否需要重试。
+ */
+function isRetryableRoleInfoLookupFailure(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error || "")
+    return message.includes("请求失败: 空返回值")
 }
 
 /**
@@ -380,6 +400,33 @@ async function submitAbyssUsage(payload: AbyssUsageSubmissionInput) {
 }
 
 /**
+ * 创建按 userid 缓存的角色信息查询器。
+ * @param dnaAPI DNA API 实例。
+ * @returns 按 userid 缓存的角色信息查询函数。
+ */
+function createRoleInfoLookup(dnaAPI: RoleInfoLookupApi) {
+    const cache = new Map<string, Promise<DNARoleEntity | null>>()
+
+    return async (userId: string) => {
+        const cached = cache.get(userId)
+        if (cached) {
+            return cached
+        }
+
+        const promise = (async () => {
+            const roleRes = await dnaAPI.defaultRoleForTool(2, userId)
+            if (!roleRes.is_success) {
+                throw new Error(roleRes.msg || "角色信息查询失败")
+            }
+            return roleRes.data || null
+        })()
+
+        cache.set(userId, promise)
+        return promise
+    }
+}
+
+/**
  * 判断评论是否已经处理过。
  * @param postId 帖子 ID。
  * @param commentId 评论 ID。
@@ -469,10 +516,13 @@ async function updateAbyssUsageFromComments() {
     let uploadedCount = 0
     let skippedCount = 0
     let wsClient: WsClient | null = null
+    const processedUserIds = new Set<string>()
+    const roleInfoCache = new Map<string, DNARoleEntity | null>()
 
     console.log(`${new Date().toLocaleString()} 开始扫描帖子评论 - postId: ${POST_IDS.join(",")}`)
 
     try {
+        const getRoleInfoForUserId = createRoleInfoLookup(dnaAPI)
         for (const postId of POST_IDS) {
             const pageIndex = Math.max(1, await getLastUploadedPageIndex(postId))
             console.log(`开始扫描帖子 ${postId}，从第 ${pageIndex} 页继续扫描`)
@@ -500,21 +550,58 @@ async function updateAbyssUsageFromComments() {
                         continue
                     }
 
+                    if (processedUserIds.has(userId)) {
+                        await markCommentUploaded(postId, comment.commentId, userId, currentPageIndex)
+                        skippedCount++
+                        console.log(`评论 ${comment.commentId} 对应 userId ${userId} 已处理，已写入跳过列表`)
+                        continue
+                    }
+
                     try {
+                        let roleInfo = roleInfoCache.get(userId)
+                        if (roleInfo === undefined) {
+                            try {
+                                roleInfo = await getRoleInfoForUserId(userId)
+                            } catch (error) {
+                                if (isRetryableRoleInfoLookupFailure(error)) {
+                                    console.log(
+                                        `评论 ${comment.commentId} 角色信息查询失败，10 秒后重试: ${error instanceof Error ? error.message : String(error)}`
+                                    )
+                                    await sleep(10000)
+                                    try {
+                                        roleInfo = await getRoleInfoForUserId(userId)
+                                    } catch (retryError) {
+                                        const retryMessage = retryError instanceof Error ? retryError.message : String(retryError)
+                                        if (isRetryableRoleInfoLookupFailure(retryError)) {
+                                            console.log(`评论 ${comment.commentId} 角色信息查询失败，已重试仍失败，已跳过: ${retryMessage}`)
+                                        } else {
+                                            console.error(`评论 ${comment.commentId} 角色信息查询失败:`, retryError)
+                                        }
+                                        roleInfo = null
+                                    }
+                                } else {
+                                    throw error
+                                }
+                            }
+                            if (roleInfo === null) {
+                                console.log(`评论 ${comment.commentId} 未查询到角色信息`)
+                            }
+                            roleInfoCache.set(userId, roleInfo)
+                        }
+
+                        if (!roleInfo) {
+                            console.log(`评论 ${comment.commentId} 角色信息最终失败，已跳过且不写入db`)
+                            skippedCount++
+                            continue
+                        }
+
                         if (!wsClient) {
                             wsClient = new WsClient(dnaAPI.BASE_WEB_SOCKET_URL, dnaAPI.token, USER_ID || "", 10000)
                             await wsClient.connect()
                             await sleep(2000)
                         }
-                        const roleRes = await dnaAPI.defaultRoleForTool(2, userId)
-                        if (!roleRes.is_success || !roleRes.data) {
-                            console.log(`评论 ${comment.commentId} 未查询到角色信息`)
-                            await markCommentUploaded(postId, comment.commentId, userId, currentPageIndex)
-                            skippedCount++
-                            continue
-                        }
 
-                        const payload = await buildAbyssUploadPayload(roleRes.data)
+                        const payload = await buildAbyssUploadPayload(roleInfo)
                         if (!payload) {
                             console.log(`评论 ${comment.commentId} 无法生成深渊上传数据`)
                             await markCommentUploaded(postId, comment.commentId, userId, currentPageIndex)
@@ -528,6 +615,7 @@ async function updateAbyssUsageFromComments() {
                         }
 
                         await markCommentUploaded(postId, comment.commentId, userId, currentPageIndex)
+                        processedUserIds.add(userId)
                         uploadedCount++
                         console.log(`评论 ${comment.commentId} 上传成功，submissionId: ${submissionId}`)
                     } catch (error) {

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { petMap } from "@/data/d"
 import regionData, { mapOffsets, type Region, regionMap } from "@/data/d/region.data"
 import { resourceData, resourceMap } from "@/data/d/resource.data"
@@ -243,7 +244,8 @@ if (!firstProfile) {
     throw new Error("mapLocalProfiles 不能为空")
 }
 
-const selectedRegionId = ref<number>(firstProfile.regionId)
+const routeRegionId = useSearchParam<number>("regionId", firstProfile.regionId)
+const selectedRegionId = ref<number>(routeRegionId.value)
 const activeLayerIds = ref<Set<string>>(new Set())
 const selectedSingleLayerByGroup = ref<Map<string, string>>(new Map())
 const focusedLayerId = ref<string | null>(null)
@@ -255,6 +257,17 @@ const zoom = ref(1)
 const minZoom = 0.12
 const maxZoom = 6
 const panOffset = ref({ x: 0, y: 0 })
+const pointFocusAnimationFrameId = ref(0)
+const pointFocusOverlayVisible = ref(false)
+const pointFocusOverlayCanvasRef = ref<HTMLCanvasElement>()
+const pointFocusAnimationState = ref<{
+    snapshotCanvas: HTMLCanvasElement
+    snapshotZoom: number
+    snapshotPan: { x: number; y: number }
+    centerX: number
+    centerY: number
+    dpr: number
+} | null>(null)
 
 const isDragging = ref(false)
 const dragDistance = ref(0)
@@ -272,6 +285,7 @@ const hoverCoordinateInfo = ref<HoverCoordinateInfo | null>(null)
 const showTeleportPoints = ref(true)
 const selectedTeleportIcons = ref<Set<string>>(new Set())
 const isSidebarCollapsed = ref(false)
+const pendingRoutePointFocusTimerId = ref(0)
 const routePointInfo = computed<RoutePointInfo | null>(() => {
     const target = mapLocalRouteTarget.value
     if (target.pointX === null || target.pointY === null) return null
@@ -936,8 +950,7 @@ function focusMapPoint(worldX: number, worldY: number, name: string) {
         return
     }
     pendingMapPointFocus.value = null
-    panOffset.value = { x: container.clientWidth / 2 - mapped.x * zoom.value, y: container.clientHeight / 2 - mapped.y * zoom.value }
-    requestDraw()
+    animatePointFocus(mapped.x, mapped.y)
 }
 
 /**
@@ -957,8 +970,148 @@ function flushPendingMapPointFocus() {
         name: pending.name,
         iconUrl: pending.iconUrl,
     }
-    panOffset.value = { x: container.clientWidth / 2 - mapped.x * zoom.value, y: container.clientHeight / 2 - mapped.y * zoom.value }
-    requestDraw()
+    animatePointFocus(mapped.x, mapped.y)
+}
+
+/**
+ * 取消点位聚焦动画。
+ */
+function cancelPointFocusAnimation() {
+    if (!pointFocusAnimationFrameId.value) return
+    cancelAnimationFrame(pointFocusAnimationFrameId.value)
+    pointFocusAnimationFrameId.value = 0
+    pointFocusOverlayVisible.value = false
+    pointFocusAnimationState.value = null
+}
+
+/**
+ * 在覆盖层上绘制点位动画快照。
+ * @param currentZoom 当前缩放值
+ * @param currentPan 当前平移值
+ */
+function drawPointFocusSnapshot(currentZoom: number, currentPan: { x: number; y: number }) {
+    const state = pointFocusAnimationState.value
+    const overlayCanvas = pointFocusOverlayCanvasRef.value
+    if (!state || !overlayCanvas) return
+
+    const overlayCtx = overlayCanvas.getContext("2d")
+    if (!overlayCtx) return
+
+    const scale = currentZoom / Math.max(state.snapshotZoom, 1e-6)
+    overlayCtx.setTransform(1, 0, 0, 1, 0, 0)
+    overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height)
+    overlayCtx.save()
+    overlayCtx.translate(currentPan.x * state.dpr, currentPan.y * state.dpr)
+    overlayCtx.scale(scale, scale)
+    overlayCtx.translate(-state.snapshotPan.x * state.dpr, -state.snapshotPan.y * state.dpr)
+    overlayCtx.drawImage(state.snapshotCanvas, 0, 0)
+    overlayCtx.restore()
+    pointFocusOverlayVisible.value = true
+}
+
+/**
+ * 记录当前主画布为动画快照。
+ * @param mainCanvas 主画布
+ */
+function capturePointFocusSnapshot(mainCanvas: HTMLCanvasElement) {
+    const overlayCanvas = pointFocusOverlayCanvasRef.value
+    if (!overlayCanvas) return
+
+    const state = pointFocusAnimationState.value
+    if (!state) return
+
+    const snapshotCanvas = state.snapshotCanvas
+    snapshotCanvas.width = mainCanvas.width
+    snapshotCanvas.height = mainCanvas.height
+    const snapshotCtx = snapshotCanvas.getContext("2d")
+    if (!snapshotCtx) return
+    snapshotCtx.setTransform(1, 0, 0, 1, 0, 0)
+    snapshotCtx.clearRect(0, 0, snapshotCanvas.width, snapshotCanvas.height)
+    snapshotCtx.drawImage(mainCanvas, 0, 0)
+}
+
+/**
+ * 播放传入点位的缩放聚焦动画。
+ * @param targetMapX 目标地图 X
+ * @param targetMapY 目标地图 Y
+ */
+function animatePointFocus(targetMapX: number, targetMapY: number) {
+    const container = containerRef.value
+    const mainCanvas = canvasRef.value
+    const overlayCanvas = pointFocusOverlayCanvasRef.value
+    if (!container || !mainCanvas || !overlayCanvas) return
+
+    cancelPointFocusAnimation()
+    const startZoom = zoom.value
+    const endZoom = Math.min(maxZoom, Math.max(startZoom * 1.6, 1.4))
+    const startPan = { ...panOffset.value }
+    const endPan = {
+        x: container.clientWidth / 2 - targetMapX * endZoom,
+        y: container.clientHeight / 2 - targetMapY * endZoom,
+    }
+    const snapshotCanvas = document.createElement("canvas")
+    const dpr = window.devicePixelRatio || 1
+    const duration = 420
+    const renderInterval = 50
+    const startTime = performance.now()
+    let lastRenderTime = -renderInterval
+
+    pointFocusAnimationState.value = {
+        snapshotCanvas,
+        snapshotZoom: startZoom,
+        snapshotPan: startPan,
+        centerX: container.clientWidth / 2,
+        centerY: container.clientHeight / 2,
+        dpr,
+    }
+    capturePointFocusSnapshot(mainCanvas)
+
+    const step = (now: number) => {
+        const t = Math.min(1, (now - startTime) / duration)
+        const eased = 1 - Math.pow(1 - t, 3)
+        const currentZoom = startZoom + (endZoom - startZoom) * eased
+        const currentPan = {
+            x: startPan.x + (endPan.x - startPan.x) * eased,
+            y: startPan.y + (endPan.y - startPan.y) * eased,
+        }
+        drawPointFocusSnapshot(currentZoom, currentPan)
+
+        if (t < 1) {
+            if (now - lastRenderTime >= renderInterval) {
+                zoom.value = currentZoom
+                panOffset.value = currentPan
+                drawScene()
+                capturePointFocusSnapshot(mainCanvas)
+                pointFocusAnimationState.value = {
+                    snapshotCanvas,
+                    snapshotZoom: currentZoom,
+                    snapshotPan: currentPan,
+                    centerX: container.clientWidth / 2,
+                    centerY: container.clientHeight / 2,
+                    dpr,
+                }
+                lastRenderTime = now
+            }
+
+            pointFocusAnimationFrameId.value = requestAnimationFrame(step)
+            return
+        }
+
+        pointFocusAnimationFrameId.value = 0
+        zoom.value = endZoom
+        panOffset.value = endPan
+        drawScene()
+        pointFocusOverlayVisible.value = false
+        pointFocusAnimationState.value = null
+        const overlayCtx = overlayCanvas.getContext("2d")
+        if (overlayCtx) {
+            overlayCtx.setTransform(1, 0, 0, 1, 0, 0)
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height)
+        }
+        requestDraw()
+    }
+
+    pointFocusAnimationFrameId.value = requestAnimationFrame(step)
 }
 const hoveredSubRegion = computed(() => {
     if (hoveredSubRegionId.value === null) return null
@@ -1341,6 +1494,7 @@ function screenToMap(screenX: number, screenY: number) {
 function resetView() {
     const container = containerRef.value
     if (!container) return
+    cancelPointFocusAnimation()
     const fitZoom = Math.min(container.clientWidth / renderSize.value.width, container.clientHeight / renderSize.value.height)
     zoom.value = Math.max(minZoom, Math.min(maxZoom, fitZoom))
     panOffset.value = {
@@ -1434,6 +1588,12 @@ function syncRouteMapPoint() {
         name: routePoint.name,
         iconUrl: routePoint.iconUrl,
     }
+    pendingMapPointFocus.value = {
+        worldX: routePoint.x,
+        worldY: routePoint.y,
+        name: routePoint.name,
+        iconUrl: routePoint.iconUrl,
+    }
     requestDraw()
 }
 
@@ -1492,21 +1652,6 @@ function syncResourcePanelState() {
 }
 
 /**
- * 清除当前传入的路由点位参数。
- */
-async function clearRouteMapPoint() {
-    routeMapPoint.value = null
-    selectedMapPoint.value = null
-    requestDraw()
-    const nextQuery = { ...route.query }
-    delete nextQuery.pointName
-    delete nextQuery.pointX
-    delete nextQuery.pointY
-    delete nextQuery.pointIcon
-    await router.replace({ query: nextQuery })
-}
-
-/**
  * 按路由 query 自动定位到区域/子区域/RC。
  */
 function applyRouteTargetSelection() {
@@ -1527,6 +1672,7 @@ function applyRouteTargetSelection() {
         const hasRegion = mapLocalProfiles.some(profile => profile.regionId === target.regionId)
         if (hasRegion) {
             selectedRegionId.value = target.regionId
+            consumedRouteTargetToken.value = token
         } else {
             consumedRouteTargetToken.value = token
         }
@@ -1576,6 +1722,48 @@ function applyRouteTargetSelection() {
         selectedResourceIds.value = new Set()
     }
     consumedRouteTargetToken.value = token
+}
+
+/**
+ * 同步路由中的区域选择到本地选中状态。
+ * 路由驱动切换时保留传入点位，由后续路由消费逻辑继续处理。
+ */
+function syncRouteRegionSelection() {
+    const nextRegionId = routeRegionId.value
+    if (selectedRegionId.value !== nextRegionId) {
+        selectedRegionId.value = nextRegionId
+    }
+}
+
+/**
+ * 手动切换区域时先清理点位 query，再更新 regionId。
+ * @param event 选择框事件
+ */
+async function handleRegionChange(event: Event) {
+    const nextRegionId = Number((event.target as HTMLSelectElement).value)
+    const nextQuery = { ...route.query }
+    delete nextQuery.pointName
+    delete nextQuery.pointX
+    delete nextQuery.pointY
+    delete nextQuery.pointIcon
+    nextQuery.regionId = String(nextRegionId)
+    await router.replace({ query: nextQuery })
+}
+
+/**
+ * 清除当前传入的路由点位参数。
+ */
+async function clearRouteMapPoint() {
+    routeMapPoint.value = null
+    selectedMapPoint.value = null
+    pendingMapPointFocus.value = null
+    requestDraw()
+    const nextQuery = { ...route.query }
+    delete nextQuery.pointName
+    delete nextQuery.pointX
+    delete nextQuery.pointY
+    delete nextQuery.pointIcon
+    await router.replace({ query: nextQuery })
 }
 
 /**
@@ -2034,6 +2222,12 @@ function drawScene() {
         canvas.height = targetHeight
     }
 
+    const overlayCanvas = pointFocusOverlayCanvasRef.value
+    if (overlayCanvas && (overlayCanvas.width !== targetWidth || overlayCanvas.height !== targetHeight)) {
+        overlayCanvas.width = targetWidth
+        overlayCanvas.height = targetHeight
+    }
+
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
@@ -2199,9 +2393,19 @@ function handleCanvasClick(event: MouseEvent) {
 }
 
 watch(
-    () => currentProfile.value.regionId,
+    () => routeRegionId.value,
+    () => {
+        syncRouteRegionSelection()
+    },
+    { immediate: true }
+)
+
+watch(
+    () => selectedRegionId.value,
     async () => {
-        await clearRouteMapPoint()
+        selectedMapPoint.value = null
+        pendingMapPointFocus.value = null
+        requestDraw()
         initializeActiveLayers(currentProfile.value)
         resetRegionSelectionState()
         await loadCurrentProfileImages()
@@ -2254,16 +2458,27 @@ onMounted(() => {
     resizeObserver.observe(container)
     syncRouteMapPoint()
     requestDraw()
-    flushPendingMapPointFocus()
+    if (pendingMapPointFocus.value) {
+        pendingRoutePointFocusTimerId.value = window.setTimeout(() => {
+            pendingRoutePointFocusTimerId.value = 0
+            flushPendingMapPointFocus()
+        }, 500)
+    }
 })
 
 onUnmounted(() => {
+    if (pendingRoutePointFocusTimerId.value) {
+        clearTimeout(pendingRoutePointFocusTimerId.value)
+        pendingRoutePointFocusTimerId.value = 0
+    }
     if (drawRaf) {
         cancelAnimationFrame(drawRaf)
         drawRaf = 0
     }
     resizeObserver?.disconnect()
     resizeObserver = null
+    pointFocusOverlayVisible.value = false
+    pointFocusAnimationState.value = null
 })
 </script>
 
@@ -2286,7 +2501,7 @@ onUnmounted(() => {
 
                     <div class="space-y-2">
                         <div class="text-xs opacity-70">区域</div>
-                        <select v-model.number="selectedRegionId" class="select select-bordered select-sm w-full">
+                        <select :value="selectedRegionId" class="select select-bordered select-sm w-full" @change="handleRegionChange">
                             <option v-for="region in regionOptions" :key="region.id" :value="region.id">
                                 {{ region.id }} - {{ region.name }}
                             </option>
@@ -2531,6 +2746,11 @@ onUnmounted(() => {
                 @pointerleave="handlePointerLeave"
                 @wheel="handleWheel"
                 @click="handleCanvasClick"
+            />
+            <canvas
+                ref="pointFocusOverlayCanvasRef"
+                class="pointer-events-none absolute inset-0 h-full w-full db-map-local-canvas"
+                :class="pointFocusOverlayVisible ? 'block' : 'hidden'"
             />
 
             <div class="absolute top-3 left-3 z-10 flex flex-col gap-2">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DNAAPI, DNARoleEntity } from "dna-api"
+import type { DNAAPI } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { abyssUsageBaseQuery } from "@/api/combined"
 import type {
@@ -833,7 +833,7 @@ onMounted(async () => {
                                         </span>
                                         <FullTooltip v-else side="top">
                                             <template #tooltip>
-                                                <div class="max-w-72 whitespace-normal break-words leading-snug">
+                                                <div class="max-w-72 whitespace-normal wrap-break-word leading-snug">
                                                     {{ getDistributionTooltip("support", item.charId, distribution.level) }}
                                                 </div>
                                             </template>
@@ -879,7 +879,7 @@ onMounted(async () => {
                                         </span>
                                         <FullTooltip v-else side="top">
                                             <template #tooltip>
-                                                <div class="max-w-72 whitespace-normal break-words leading-snug">
+                                                <div class="max-w-72 whitespace-normal wrap-break-word leading-snug">
                                                     {{ getDistributionTooltip("meleeWeapon", item.weaponId, distribution.level) }}
                                                 </div>
                                             </template>
