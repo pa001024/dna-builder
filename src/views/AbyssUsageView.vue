@@ -13,11 +13,7 @@ import type {
     AbyssUsageWeaponParticipant,
     AbyssWeaponUsageStat,
 } from "@/api/gen/api-types"
-import {
-    abyssUsageLineupStatsQuery,
-    abyssUsageSubmissionsQuery,
-    submitAbyssUsageMutation,
-} from "@/api/graphql"
+import { abyssUsageLineupStatsQuery, abyssUsageSubmissionsQuery, submitAbyssUsageMutation } from "@/api/graphql"
 import { abyssDungeonMap, charMap, petMap, weaponMap } from "@/data"
 import { LeveledChar } from "@/data/leveled/LeveledChar"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
@@ -132,8 +128,8 @@ const seasonCharLink = computed(() => {
 
 const lineupTotal = computed(() => abyssSubmissionsCount.value)
 
-const compactRoleGroupMaxItems = 2
-const compactRoleRowMaxItems = 6
+const compactRoleGroupMaxItems = 6
+const compactRoleRowMaxItems = 12
 
 const slotStatSections = computed<SlotStatSection[]>(() => {
     const stats = slotStats.value
@@ -801,7 +797,12 @@ onMounted(async () => {
                             </div>
                         </div>
                         <div class="flex items-center gap-2 self-start md:self-auto">
-                            <button v-if="user.isAdmin" class="btn btn-sm btn-outline" :disabled="exporting" @click="exportAbyssSubmissions">
+                            <button
+                                v-if="user.isAdmin"
+                                class="btn btn-sm btn-outline"
+                                :disabled="exporting"
+                                @click="exportAbyssSubmissions"
+                            >
                                 <span v-if="exporting" class="loading loading-spinner loading-xs"></span>
                                 <Icon v-else icon="ri:file-excel-2-line" />
                                 导出
