@@ -45,6 +45,38 @@ const cutoffInfo = computed<Cutoff | null>(() => cutoffMap.get(props.item.id) ??
 const currentPrice = computed(() => cutoffInfo.value?.price ?? props.item.price)
 
 /**
+ * 获取现实货币支付信息。
+ * @returns 支付货币与金额；未配置时返回空
+ */
+const payInfo = computed(() => {
+    const pay = props.item.pay
+    if (!pay) {
+        return null
+    }
+
+    const currency = pay.CNY != null ? "CNY" : Object.keys(pay)[0]
+    const amount = currency ? pay[currency as keyof NonNullable<typeof pay>] : undefined
+    if (typeof amount !== "number") {
+        return null
+    }
+
+    const currencies = Object.entries(pay)
+        .filter(([, value]) => typeof value === "number")
+        .sort(([a], [b]) => {
+            if (a === "CNY") return -1
+            if (b === "CNY") return 1
+            return a.localeCompare(b)
+        })
+        .map(([code, value]) => ({ code, value: value as number }))
+
+    return {
+        currency,
+        amount,
+        currencies,
+    }
+})
+
+/**
  * 格式化时间戳，便于 tooltip 展示。
  * @param timestamp 秒级时间戳
  * @returns 本地化时间文本
@@ -276,13 +308,28 @@ function getPriceIcon(name: string) {
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <FullTooltip v-if="cutoffInfo" side="top">
+                        <FullTooltip v-if="payInfo" side="top">
+                            <template #tooltip>
+                                <div class="flex flex-col gap-2 min-w-28">
+                                    <div class="text-sm font-bold">现实货币</div>
+                                    <div v-for="currency in payInfo.currencies" :key="currency.code" class="flex items-center justify-between gap-3 text-sm">
+                                        <span class="text-xs text-neutral-500 whitespace-nowrap">{{ currency.code }}</span>
+                                        <span class="font-medium text-primary">{{ currency.value }}</span>
+                                    </div>
+                                </div>
+                            </template>
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs text-base-content/70">{{ payInfo.currency }}</span>
+                                <span class="text-sm font-medium">{{ payInfo.amount }}</span>
+                            </div>
+                        </FullTooltip>
+                        <FullTooltip v-else-if="cutoffInfo" side="top">
                             <template #tooltip>
                                 <div class="flex flex-col gap-2 max-w-75 min-w-28">
                                     <div class="text-sm font-bold">{{ $t("shop-detail.discountInfo") }}</div>
                                     <div class="flex justify-between items-center gap-2 text-sm">
                                         <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.discount") }}</div>
-                                        <div class="font-medium text-primary">{{ cutoffInfo.discount }}折</div>
+                                        <div class="font-medium text-primary">{{ +(cutoffInfo.discount / 10).toFixed(1) }}折</div>
                                     </div>
                                     <div class="flex justify-between items-center gap-2 text-sm">
                                         <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.originalPrice") }}</div>
