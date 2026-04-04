@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import type { Dungeon, RewardChild } from "@/data"
-import { LeveledMonster, MonsterLevelUpperLimit, rewardMap } from "@/data"
+import { LeveledChar, LeveledMonster, MonsterLevelUpperLimit, rewardMap } from "@/data"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 
@@ -461,44 +461,20 @@ watch(
 <template>
     <div class="p-3 space-y-3">
         <!-- 详情头部 -->
-        <div class="flex items-center justify-between">
-            <div>
+        <div class="p-2 space-y-2">
+            <div class="flex items-center gap-3">
+                <img v-if="dungeon.e" :src="LeveledChar.elementUrl(dungeon.e)" alt="" class="h-8 inline-block" />
                 <SRouterLink :to="`/db/dungeon/${dungeon.id}`" class="text-lg font-bold link link-primary">
                     {{ dungeon.n }}
                 </SRouterLink>
-                <div class="text-sm text-base-content/70">
-                    {{ dungeon.desc }}
-                </div>
+                <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
+                <div class="flex-1"></div>
+                <span class="text-xs px-2 py-1 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">
+                    Lv.{{ dungeon.lv }} {{ dungeon.t }}
+                </span>
             </div>
-            <span class="text-xs px-2 py-1 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">
-                {{ getDungeonType(dungeon.t).label }}
-            </span>
-        </div>
-
-        <!-- 副本信息 -->
-        <div class="card bg-base-100 border border-base-200 rounded-lg p-3">
-            <h3 class="font-bold mb-2">副本信息</h3>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">ID</span>
-                    <span>{{ dungeon.id }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">等级</span>
-                    <span>Lv.{{ dungeon.lv }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">类型</span>
-                    <span>{{ dungeon.t }}</span>
-                </div>
-                <div v-if="dungeon.e" class="flex justify-between">
-                    <span class="text-base-content/70">属性</span>
-                    <span>{{ dungeon.e }}</span>
-                </div>
-                <div v-if="dungeon.win" class="flex justify-between">
-                    <span class="text-base-content/70">胜利</span>
-                    <span>{{ dungeon.win === 1 ? "手动" : dungeon.win === 2 ? "自动" : "特殊" }}</span>
-                </div>
+            <div class="text-sm text-base-content/70">
+                {{ dungeon.desc }}
             </div>
         </div>
 
@@ -514,7 +490,7 @@ watch(
             </button>
         </div>
 
-        <div v-if="isEndlessDungeon" class="card bg-base-100 border border-base-200 rounded-lg p-3">
+        <div v-if="isEndlessDungeon" class="card bg-base-200 rounded-lg p-3">
             <div class="mb-1 flex items-center justify-between text-sm">
                 <span>无尽波次</span>
                 <span>{{ selectedEndlessWave }} / {{ ENDLESS_MAX_WAVE }}</span>
@@ -534,7 +510,7 @@ watch(
 
         <template v-if="activeTab === 'monster'">
             <!-- 普通怪物 -->
-            <div v-if="dungeon.m?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
+            <div v-if="dungeon.m?.length" class="card bg-base-200 rounded-lg p-3">
                 <!-- 等级控制 -->
                 <div class="flex items-center gap-4 mb-3">
                     <span class="text-sm min-w-12">Lv. {{ monsterTabLevel }}</span>
@@ -549,7 +525,7 @@ watch(
                     />
                     <span v-else class="text-xs text-base-content/70">无尽副本等级由上方波次滑块控制</span>
                 </div>
-                <h3 class="font-bold mb-2">普通怪物 ({{ dungeon.m.length }}种)</h3>
+                <h3 class="text-xs text-base-content/70 mb-2">普通怪物 ({{ dungeon.m.length }}种)</h3>
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
                     <DBMonsterCompactCard
                         v-for="monsterId in dungeon.m"
@@ -560,8 +536,8 @@ watch(
             </div>
 
             <!-- 特殊怪物 -->
-            <div v-if="dungeon.sm?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-                <h3 class="font-bold mb-2">特殊怪物 ({{ dungeon.sm.length }}种)</h3>
+            <div v-if="dungeon.sm?.length" class="card bg-base-200 rounded-lg p-3">
+                <h3 class="text-xs text-base-content/70 mb-2">特殊怪物 ({{ dungeon.sm.length }}种)</h3>
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
                     <DBMonsterCompactCard
                         v-for="monsterId in dungeon.sm"
@@ -571,16 +547,13 @@ watch(
                 </div>
             </div>
 
-            <div
-                v-if="!dungeon.m?.length && !dungeon.sm?.length"
-                class="card bg-base-100 border border-base-200 rounded-lg p-3 text-sm text-base-content/70"
-            >
+            <div v-if="!dungeon.m?.length && !dungeon.sm?.length" class="card bg-base-200 rounded-lg p-3 text-sm text-base-content/70">
                 暂无怪物数据
             </div>
         </template>
 
         <template v-else-if="activeTab === 'wave'">
-            <div class="card bg-base-100 border border-base-200 rounded-lg p-3">
+            <div class="card bg-base-200 rounded-lg p-3">
                 <div class="flex items-center justify-between">
                     <span class="text-sm">刷新范围显示</span>
                     <label class="label cursor-pointer gap-2 p-0">
@@ -592,8 +565,8 @@ watch(
             </div>
 
             <!-- 怪物波次 -->
-            <div v-if="dungeon.spawn?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-                <h3 class="font-bold mb-2">怪物波次 ({{ dungeon.spawn.length }}波)</h3>
+            <div v-if="dungeon.spawn?.length" class="card bg-base-200 rounded-lg p-3">
+                <h3 class="text-xs text-base-content/70 mb-2">怪物波次 ({{ dungeon.spawn.length }}波)</h3>
                 <div class="space-y-3">
                     <div
                         v-for="(wave, waveIndex) in dungeon.spawn"
@@ -609,7 +582,7 @@ watch(
                             <div
                                 v-for="(spawnGenerator, spawnIndex) in wave"
                                 :key="`${waveIndex}-${spawnGenerator.id}-${spawnIndex}`"
-                                class="rounded border border-base-300 bg-base-100/80 p-2"
+                                class="rounded border border-base-300 bg-base-200/80 p-2"
                             >
                                 <div class="mb-2 grid gap-1 text-xs text-base-content/70 md:grid-cols-2">
                                     <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
@@ -631,7 +604,7 @@ watch(
                                 </div>
 
                                 <div v-if="getSpawnGeneratorMonsters(spawnGenerator).length" class="mb-2">
-                                    <div class="mb-1 text-xs font-medium text-base-content/70">
+                                    <div class="text-xs text-base-content/70 mb-2">
                                         普通怪物 ({{ getSpawnGeneratorMonsters(spawnGenerator).length }}种)
                                     </div>
                                     <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
@@ -652,7 +625,7 @@ watch(
                                 </div>
 
                                 <div v-if="getSpawnGeneratorGroups(spawnGenerator).length" class="mb-2">
-                                    <div class="mb-1 text-xs font-medium text-base-content/70">
+                                    <div class="text-xs text-base-content/70 mb-2">
                                         组刷怪 ({{ getSpawnGeneratorGroups(spawnGenerator).length }}组)
                                     </div>
                                     <div class="space-y-2">
@@ -662,54 +635,54 @@ watch(
                                             class="rounded border border-base-300 bg-base-200/60 p-2"
                                         >
                                             <div class="mb-2 grid gap-1 text-xs text-base-content/70 md:grid-cols-3">
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
                                                     <span>组ID</span>
                                                     <span>{{ spawnGroup.id }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
                                                     <span>数量</span>
                                                     <span>{{ getSpawnGroupCountText(spawnGroup) }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
                                                     <span>权重</span>
                                                     <span>{{ getSpawnGroupWeightText(spawnGroup) }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
                                                     <span>检测时间</span>
                                                     <span>{{ spawnGroup.gt ? `${spawnGroup.gt}s` : "-" }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
                                                     <span>检测延迟</span>
                                                     <span>{{ spawnGroup.gdt ? `${spawnGroup.gdt}s` : "-" }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
                                                     <span>补怪间隔</span>
                                                     <span>{{ spawnGroup.gri ? `${spawnGroup.gri}s` : "-" }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
                                                     <span>阈值</span>
                                                     <span>{{ spawnGroup.gth || "-" }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
                                                     <span>组上限</span>
                                                     <span>{{ spawnGroup.gl || "-" }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
                                                     <span>组半径 / Z</span>
                                                     <span>{{ spawnGroup.gar || "-" }} / {{ spawnGroup.gz || "-" }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1 md:col-span-3">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1 md:col-span-3">
                                                     <span>初始中心范围</span>
                                                     <span>{{ formatSpawnRadius(spawnGroup.gir) }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1 md:col-span-3">
+                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1 md:col-span-3">
                                                     <span>刷新中心范围</span>
                                                     <span>{{ formatSpawnRadius(spawnGroup.gr) }}</span>
                                                 </div>
                                             </div>
 
                                             <div v-if="getSpawnGroupMembers(spawnGroup).length">
-                                                <div class="mb-1 text-xs font-medium text-base-content/70">
+                                                <div class="text-xs text-base-content/70 mb-2">
                                                     组成员 ({{ getSpawnGroupMembers(spawnGroup).length }}种)
                                                 </div>
                                                 <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
@@ -722,7 +695,7 @@ watch(
                                                             :monster="new LeveledMonster(groupMonster.id, getSpawnLevelBase())"
                                                         />
                                                         <div
-                                                            class="flex items-center justify-between rounded bg-base-100 px-2 py-1 text-xs"
+                                                            class="flex items-center justify-between rounded bg-base-200 px-2 py-1 text-xs"
                                                         >
                                                             <span class="text-base-content/70">概率</span>
                                                             <span class="font-medium">
@@ -767,11 +740,11 @@ watch(
                 </div>
             </div>
 
-            <div v-else class="card bg-base-100 border border-base-200 rounded-lg p-3 text-sm text-base-content/70">暂无波次数据</div>
+            <div v-else class="card bg-base-200 rounded-lg p-3 text-sm text-base-content/70">暂无波次数据</div>
         </template>
 
         <template v-else>
-            <div v-if="isEndlessDungeon && dungeon.r?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
+            <div v-if="isEndlessDungeon && dungeon.r?.length" class="card bg-base-200 rounded-lg p-3">
                 <div class="mb-2 flex items-center justify-between">
                     <h3 class="font-bold">波数累计奖励 (1~{{ cumulativeWaveCount }}波)</h3>
                     <label class="label cursor-pointer gap-2 text-xs">
@@ -792,8 +765,8 @@ watch(
             </div>
 
             <!-- 奖励列表 -->
-            <div v-if="dungeon.r?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-                <h3 class="font-bold mb-2">奖励列表</h3>
+            <div v-if="dungeon.r?.length" class="card bg-base-200 rounded-lg p-3">
+                <div class="text-xs text-base-content/70 mb-2">{{ $t("奖励列表") }}</div>
                 <div class="space-y-3">
                     <div
                         v-for="item in mergedDungeonRewards"
@@ -822,8 +795,8 @@ watch(
             </div>
 
             <!-- 特殊奖励 -->
-            <div v-if="dungeon.sr?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-                <h3 class="font-bold mb-2">特殊奖励 ({{ dungeon.sr.length }}组)</h3>
+            <div v-if="dungeon.sr?.length" class="card bg-base-200 rounded-lg p-3">
+                <h3 class="text-xs text-base-content/70 mb-2">特殊奖励 ({{ dungeon.sr.length }}组)</h3>
                 <div class="space-y-3">
                     <div
                         v-for="reward in dungeon.sr.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
@@ -850,10 +823,7 @@ watch(
                 </div>
             </div>
 
-            <div
-                v-if="!dungeon.r?.length && !dungeon.sr?.length"
-                class="card bg-base-100 border border-base-200 rounded-lg p-3 text-sm text-base-content/70"
-            >
+            <div v-if="!dungeon.r?.length && !dungeon.sr?.length" class="card bg-base-200 rounded-lg p-3 text-sm text-base-content/70">
                 暂无奖励数据
             </div>
         </template>

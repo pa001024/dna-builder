@@ -57,9 +57,9 @@ const displayDungeonSources = computed(() => {
                             >期望: {{ +source.times.toFixed(2) }}次</span
                         >
                     </div>
-                </div>
-                <div v-if="expandedDungeonId === source.dungeonId" class="p-3 bg-base-100 rounded border border-base-200">
-                    <DBDungeonDetailItem :dungeon="source.dungeon" />
+                    <div v-if="expandedDungeonId === source.dungeonId">
+                        <DBDungeonDetailItem :dungeon="source.dungeon" />
+                    </div>
                 </div>
             </div>
         </div>
