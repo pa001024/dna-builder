@@ -10,6 +10,7 @@ import { matchPinyin } from "../utils/pinyin-utils"
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDungeonId = useSearchParam<number>("id", 0)
 const selectedType = useSearchParam<string>("tp", "")
+const selectedLevel = useSearchParam<string>("lv", "")
 
 // 根据 ID 获取选中的副本
 const selectedDungeon = computed(() => {
@@ -22,11 +23,24 @@ const allTypes = computed(() => {
     return Array.from(types).sort()
 })
 
-// 按类型和关键词筛选副本
+// 所有副本等级
+const allLevels = computed(() => {
+    const levels = new Set(dungeonData.map(d => d.lv))
+    return Array.from(levels).sort((a, b) => a - b)
+})
+
+/**
+ * 按类型、等级和关键词筛选副本。
+ */
 const filteredDungeons = computed(() => {
     return dungeonData.filter(d => {
         const matchesType = selectedType.value === "" || d.t === selectedType.value
         if (!matchesType) {
+            return false
+        }
+
+        const matchesLevel = selectedLevel.value === "" || `${d.lv}` === selectedLevel.value
+        if (!matchesLevel) {
             return false
         }
 
@@ -100,6 +114,26 @@ useInitialScrollToSelectedItem()
                             @click="selectedType = type.t"
                         >
                             {{ type.label }}
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap gap-1 pt-2 pb-1">
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
+                            :class="selectedLevel === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedLevel = ''"
+                        >
+                            {{ $t("全部") }}
+                        </button>
+                        <button
+                            v-for="level in allLevels"
+                            :key="level"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            :class="
+                                selectedLevel === `${level}` ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                            "
+                            @click="selectedLevel = `${level}`"
+                        >
+                            Lv.{{ level }}
                         </button>
                     </div>
                 </div>

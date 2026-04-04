@@ -502,7 +502,7 @@ watch(
             </div>
         </div>
 
-        <div class="tabs tabs-boxed bg-base-200/60 p-1">
+        <div class="tabs tabs-box bg-base-200/60 p-1">
             <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'reward' }" @click="activeTab = 'reward'">
                 奖励 ({{ (dungeon.r?.length || 0) + (dungeon.sr?.length || 0) }})
             </button>

@@ -89,7 +89,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-300">
+    <div class="h-full flex flex-col">
         <template v-if="map && map.mapUrl">
             <div class="flex-1 overflow-hidden">
                 <MapRenderer

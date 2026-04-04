@@ -1,4 +1,5 @@
 import { dungeonMap, rewardMap } from "@/data"
+import { charMap, modMap } from "@/data/d"
 import { getHardBossDetail, hardBossMap } from "@/data/d/hardboss.data"
 import { questChainData } from "@/data/d/questchain.data"
 import type { Resource } from "@/data/d/resource.data"
@@ -28,6 +29,52 @@ export interface ResourceQuestSourceInfo {
     num?: number
     timeStart?: number
     timeEnd?: number
+}
+
+export interface ModQuestSourceInfo {
+    key: string
+    questChainId: number
+    questChainName: string
+    chapterName: string
+    episode: string
+    rewardId: number
+    num?: number
+    timeStart?: number
+    timeEnd?: number
+}
+
+interface ModSpecialSourceRule {
+    sourceType: "charBreakthrough"
+    sourceTypeLabel: string
+    charId: number
+    description: string
+    num?: number
+}
+
+const modSpecialSourceRules = new Map<number, ModSpecialSourceRule[]>([
+    [
+        150401,
+        [
+            {
+                sourceType: "charBreakthrough",
+                sourceTypeLabel: "角色突破",
+                charId: 1504,
+                description: "20级突破奖励",
+                num: 1,
+            },
+        ],
+    ],
+])
+
+export interface ModCharBreakthroughSourceInfo {
+    key: string
+    sourceTypeLabel: string
+    title: string
+    link: string
+    detail?: string
+    charId: number
+    charName?: string
+    num?: number
 }
 
 /**
@@ -179,6 +226,83 @@ export function collectResourceQuestSources(resource: Resource): ResourceQuestSo
             })
         })
     })
+
+    return sources
+}
+
+/**
+ * 扫描任务链奖励表，反查魔之楔对应的任务来源。
+ * @param mod 魔之楔数据
+ * @returns 任务来源列表
+ */
+export function collectModQuestSources(modId: number): ModQuestSourceInfo[] {
+    const sources: ModQuestSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+    const mod = modMap.get(modId)
+    if (!mod) {
+        return sources
+    }
+
+    questChainData.forEach(questChain => {
+        const rewardIds = [...(questChain.reward || []), ...Object.values(questChain.questReward || {})]
+        rewardIds.forEach(rewardId => {
+            const rewardDetails = getRewardDetails(rewardId)
+            const matched = findInRewardTree(rewardDetails, mod.id, "Mod")
+            if (!matched) {
+                return
+            }
+
+            const key = `mod-quest-${questChain.id}-${rewardId}-${mod.id}`
+            if (sourceKeySet.has(key)) {
+                return
+            }
+
+            sourceKeySet.add(key)
+            sources.push({
+                key,
+                questChainId: questChain.id,
+                questChainName: questChain.name,
+                chapterName: questChain.chapterName,
+                episode: questChain.episode,
+                rewardId,
+                num: matched.num,
+                timeStart: questChain.startTime,
+                timeEnd: questChain.endTime,
+            })
+        })
+    })
+
+    return sources
+}
+
+/**
+ * 扫描特殊规则，反查魔之楔对应的角色突破来源。
+ * @param modId 魔之楔ID
+ * @returns 角色突破来源列表
+ */
+export function collectModCharBreakthroughSources(modId: number): ModCharBreakthroughSourceInfo[] {
+    const sources: ModCharBreakthroughSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    for (const specialRule of modSpecialSourceRules.get(modId) || []) {
+        const char = charMap.get(specialRule.charId)
+        const key = `mod-special-${modId}-${specialRule.sourceType}-${specialRule.charId}`
+        if (sourceKeySet.has(key)) {
+            continue
+        }
+
+        sourceKeySet.add(key)
+        sources.push({
+            key,
+            sourceTypeLabel: specialRule.sourceTypeLabel,
+            title: char?.名称 || String(specialRule.charId),
+            link: `/db/char/${specialRule.charId}`,
+            detail: specialRule.description,
+            charId: specialRule.charId,
+            charName: char?.名称,
+            num: specialRule.num,
+        })
+    }
 
     return sources
 }

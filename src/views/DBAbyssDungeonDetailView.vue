@@ -10,7 +10,7 @@ const dungeon = computed(() => abyssDungeonMap.get(dungeonId.value))
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-300">
+    <div class="h-full flex flex-col">
         <ScrollArea v-if="dungeon" class="flex-1">
             <DBAbyssDungeonDetailItem :dungeon="dungeon" />
         </ScrollArea>

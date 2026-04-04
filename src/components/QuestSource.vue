@@ -1,21 +1,28 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { resourceMap } from "@/data"
+import { modMap, resourceMap } from "@/data"
+import { LeveledMod } from "@/data/leveled/LeveledMod"
 import type { ResourceQuestSourceInfo } from "@/utils/resource-source"
 import { formatTimeRange } from "@/utils/time"
 
 const props = defineProps<{
     questSources: ResourceQuestSourceInfo[]
-    resourceId: number
+    resourceId?: number
+    modId?: number
 }>()
 
 const displayQuestSources = computed(() => props.questSources)
 
-const resourceTarget = computed(() => resourceMap.get(props.resourceId) || null)
-const resourceName = computed(() => resourceTarget.value?.name || String(props.resourceId))
-const resourceIconUrl = computed(() =>
-    resourceTarget.value?.icon ? `/imgs/res/${resourceTarget.value.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-)
+const resourceTarget = computed(() => (props.resourceId ? resourceMap.get(props.resourceId) || null : null))
+const modTarget = computed(() => (props.modId ? modMap.get(props.modId) || null : null))
+const sourceName = computed(() => resourceTarget.value?.name || modTarget.value?.名称 || String(props.resourceId ?? props.modId ?? ""))
+const sourceIconUrl = computed(() => {
+    if (resourceTarget.value?.icon) {
+        return `/imgs/res/${resourceTarget.value.icon}.webp`
+    }
+
+    return modTarget.value ? LeveledMod.url(modTarget.value.icon) : "/imgs/webp/T_Head_Empty.webp"
+})
 </script>
 
 <template>
@@ -32,8 +39,8 @@ const resourceIconUrl = computed(() =>
                             <div class="text-xs text-base-content/70 mt-1">{{ source.chapterName }} - {{ source.episode }}</div>
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
-                            <img :src="resourceIconUrl" class="w-4 h-4 object-cover rounded" :alt="resourceName" />
-                            <span class="text-xs text-base-content/70 truncate max-w-24">{{ resourceName }}</span>
+                            <img :src="sourceIconUrl" class="w-4 h-4 object-cover rounded" :alt="sourceName" />
+                            <span class="text-xs text-base-content/70 truncate max-w-24">{{ sourceName }}</span>
                             <span class="text-sm text-base-content/70">{{ source.num ?? 1 }}</span>
                         </div>
                     </div>

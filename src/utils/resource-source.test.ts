@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest"
 import { resourceMap } from "@/data/d"
-import { collectResourceHardbossSources, collectResourceQuestSources } from "./resource-source"
-import { getRewardDetails } from "./reward-utils"
+import {
+    collectModCharBreakthroughSources,
+    collectModQuestSources,
+    collectResourceHardbossSources,
+    collectResourceQuestSources,
+} from "./resource-source"
 
 describe("resource-source", () => {
     it("应该为梦魇残声材料收集 walnut 归一来源", () => {
@@ -37,5 +41,22 @@ describe("resource-source", () => {
         expect(matchedSource?.num).toBe(1)
         expect(matchedSource?.timeStart).toBe(1775854800)
         expect(matchedSource?.timeEnd).toBe(1776718800)
+    })
+
+    it("应该从任务奖励组中反查魔之楔来源", () => {
+        const sources = collectModQuestSources(11001)
+
+        expect(sources.length).toBeGreaterThan(0)
+        expect(sources.every(source => typeof source.num === "number")).toBe(true)
+    })
+
+    it("应该为150401应用角色突破特殊来源规则", () => {
+        const sources = collectModCharBreakthroughSources(150401)
+        const matchedSource = sources.find(source => source.charId === 1504)
+
+        expect(matchedSource).toBeTruthy()
+        expect(matchedSource?.sourceTypeLabel).toBe("角色突破")
+        expect(matchedSource?.detail).toBe("20级突破奖励")
+        expect(matchedSource?.title).toBe("苏乙")
     })
 })
