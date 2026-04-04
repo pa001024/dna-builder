@@ -887,6 +887,31 @@ describe("CharBuild类测试", () => {
 
     // 自动构筑测试
     describe("自动构筑测试", () => {
+        it("当初始MOD数量已达上限时不应继续超量添加", () => {
+            const charBuild = createCharBuild()
+            charBuild.mods = [
+                new LeveledMod(41001),
+                new LeveledMod(41002),
+                new LeveledMod(41003),
+                new LeveledMod(41004),
+                new LeveledMod(41007),
+                new LeveledMod(41213),
+                new LeveledMod(41214),
+                new LeveledMod(41311),
+            ]
+            charBuild.buffs = []
+
+            const result = charBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions: [new LeveledModWithCount(41324, undefined, undefined, 5)],
+                enableLog: true,
+            })
+
+            expect(result.newBuild.charMods.length).toBe(8)
+            expect(result.newBuild.charMods.some(mod => mod?.id === 41324)).toBe(false)
+        })
+
         it("应该优先补齐趋向条件再继续常规迭代", () => {
             const charBuild = createCharBuild()
             charBuild.mods = [new LeveledMod(41002), new LeveledMod(41003), new LeveledMod(41746)]

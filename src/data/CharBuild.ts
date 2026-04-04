@@ -2105,7 +2105,16 @@ export class CharBuild {
             if (enableLog) logString += `${msg}\n`
         }
         log(`开始自动构筑`)
+        /**
+         * 判断指定槽位类型是否已经达到上限。
+         * @param key MOD槽位类型
+         * @returns 是否已满
+         */
+        function isTypeFull(key: ModTypeKey) {
+            return localBuild[key].length >= ModTypeMaxSlot[key]
+        }
         function addMod(key: ModTypeKey, mod: LeveledMod) {
+            if (isTypeFull(key)) return false
             localBuild[key].push(mod)
             // 记录互斥系列
             if (CharBuild.exclusiveSeries.includes(mod.系列) || (mod.系列 === "囚狼" && mod.id > 100000)) {
@@ -2117,6 +2126,7 @@ export class CharBuild {
             } else {
                 selectedModCount.set(mod.id, (selectedModCount.get(mod.id) || 0) + 1)
             }
+            return true
         }
         function removeMod(key: ModTypeKey, index: number) {
             const mod = localBuild[key][index]!
@@ -2368,9 +2378,12 @@ export class CharBuild {
                 }
 
                 if (!best) break
-                addMod(best.key, best.mod)
-                changed = true
-                log(`第${iter}次迭代: 条件优先添加${ModTypeMap[best.key]}>>> ${best.mod.名称}`)
+                if (addMod(best.key, best.mod)) {
+                    changed = true
+                    log(`第${iter}次迭代: 条件优先添加${ModTypeMap[best.key]}>>> ${best.mod.名称}`)
+                } else {
+                    break
+                }
             }
 
             return changed
@@ -2445,7 +2458,7 @@ export class CharBuild {
                 while (localBuild[key].length < ModTypeMaxSlot[key]) {
                     // 不添加收益0的MOD
                     if (maxedIncome <= 0) break
-                    addMod(key, maxed)
+                    if (!addMod(key, maxed)) break
                     changed = true
                     log(
                         `第${iter}次迭代: 添加${ModTypeMap[key]}(${localBuild[key].length}/${ModTypeMaxSlot[key]})>>> ${maxed.名称}(+${+(maxedIncome * 100).toFixed(2)}%)`
@@ -2477,8 +2490,11 @@ export class CharBuild {
                         `第${iter}次迭代: ${ModTypeMap[key]}>>> ${maxed.名称} 替换 ${removableMod.名称} (${+(lastIncome * 100).toFixed(2)}% -> ${+(newIncome * 100).toFixed(2)}%)`
                     )
                     removeMod(key, removableIndex)
-                    addMod(key, maxed)
-                    changed = true
+                    if (addMod(key, maxed)) {
+                        changed = true
+                    } else {
+                        addMod(key, removableMod)
+                    }
                 }
             })
             if (!changed) log(`无可替换MOD 结束自动构筑`)
