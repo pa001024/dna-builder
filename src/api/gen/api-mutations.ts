@@ -992,6 +992,7 @@ export const submitAbyssUsageMutation = typedMutation<Types.AbyssUsageSubmission
         mutation ($input: AbyssUsageSubmissionInput!) {
             submitAbyssUsage(input: $input) {
                 id
+                level
                 reward {
                     success
                     message

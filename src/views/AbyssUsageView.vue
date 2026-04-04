@@ -5,6 +5,7 @@ import { utils, writeFile } from "xlsx"
 import { abyssUsageBaseQuery } from "@/api/combined"
 import type {
     AbyssRoleUsageStat,
+    AbyssUsageLevelStat,
     AbyssUsageLineupStat,
     AbyssUsageRoleParticipant,
     AbyssUsageSlotStat,
@@ -14,6 +15,7 @@ import type {
     AbyssWeaponUsageStat,
 } from "@/api/gen/api-types"
 import { abyssUsageLineupStatsQuery, abyssUsageSubmissionsQuery, submitAbyssUsageMutation } from "@/api/graphql"
+import RangeSelector from "@/components/RangeSelector.vue"
 import { abyssDungeonMap, charMap, petMap, weaponMap } from "@/data"
 import { LeveledChar } from "@/data/leveled/LeveledChar"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
@@ -57,6 +59,10 @@ type DistributionItem = {
     percent: string
 }
 
+type LevelStatItem = AbyssUsageLevelStat & {
+    percent: string
+}
+
 const setting = useSettingStore()
 const ui = useUIStore()
 const user = useUserStore()
@@ -67,6 +73,10 @@ const loading = ref(false)
 const abyssUploading = ref(false)
 const exporting = ref(false)
 const seasonInfo = ref<ReturnType<typeof getCurrentAbyssSeason>>(null)
+const DEFAULT_LEVEL_RANGE_FROM = 1
+const DEFAULT_LEVEL_RANGE_TO = 65
+const levelRangeFrom = ref(DEFAULT_LEVEL_RANGE_FROM)
+const levelRangeTo = ref(DEFAULT_LEVEL_RANGE_TO)
 const abyssSubmissionsCount = ref(0)
 const roleStats = ref<AbyssRoleUsageStat[]>([])
 const weaponStats = ref<AbyssWeaponUsageStat[]>([])
@@ -74,6 +84,7 @@ const lineupStats = ref<AbyssUsageLineupStat[]>([])
 const roleRanks = ref<AbyssRoleUsageStat[]>([])
 const weaponRanks = ref<AbyssWeaponUsageStat[]>([])
 const slotStats = ref<AbyssUsageSlotStats | null>(null)
+const levelStats = ref<AbyssUsageLevelStat[]>([])
 const selectedAssistantCharId = ref<number | null>(null)
 const assistantMainOnly = ref(false)
 const assistantLineupStats = ref<AbyssUsageLineupStat[]>([])
@@ -138,6 +149,23 @@ const seasonCharLink = computed(() => {
 })
 
 const lineupTotal = computed(() => abyssSubmissionsCount.value)
+
+const currentLevelRange = computed(() => {
+    const minLevel = Math.min(levelRangeFrom.value, levelRangeTo.value)
+    const maxLevel = Math.max(levelRangeFrom.value, levelRangeTo.value)
+    if (minLevel === DEFAULT_LEVEL_RANGE_FROM && maxLevel === DEFAULT_LEVEL_RANGE_TO) {
+        return { minLevel: undefined, maxLevel: undefined }
+    }
+    return { minLevel, maxLevel }
+})
+
+const levelStatItems = computed<LevelStatItem[]>(() => {
+    const total = levelStats.value.reduce((sum, item) => sum + (item.submissionCount || 0), 0)
+    return levelStats.value.map(item => ({
+        ...item,
+        percent: total ? `${((item.submissionCount / total) * 100).toFixed(1)}%` : "0.0%",
+    }))
+})
 
 const compactRoleGroupMaxItems = 6
 const compactRoleRowMaxItems = 12
@@ -397,6 +425,17 @@ function formatSharePercent(value: number, total: number) {
 }
 
 /**
+ * 处理等级范围筛选确认。
+ * @param from 等级下限。
+ * @param to 等级上限。
+ */
+async function handleLevelRangeChange(from: number, to: number) {
+    levelRangeFrom.value = from
+    levelRangeTo.value = to
+    await loadStats()
+}
+
+/**
  * 将阿拉伯数字等级转为罗马数字。
  * @param level 等级数值。
  * @returns 罗马数字文本。
@@ -499,10 +538,11 @@ async function loadAssistantLineups(charId: number | null) {
         assistantLineupStats.value = []
         return
     }
-    const result = await abyssUsageLineupStatsQuery(
-        { seasonId, charId: charId || undefined, mainOnly: assistantMainOnly.value || undefined, limit: 6 },
-        { requestPolicy: "network-only" }
-    )
+    const { minLevel, maxLevel } = currentLevelRange.value
+        const result = await abyssUsageLineupStatsQuery(
+            { seasonId, charId: charId || undefined, mainOnly: assistantMainOnly.value || undefined, limit: 6, minLevel, maxLevel },
+            { requestPolicy: "network-only" }
+        )
     assistantLineupStats.value = result ?? []
 }
 
@@ -618,8 +658,12 @@ function getAbyssExportFileName() {
 async function loadAllAbyssSubmissions() {
     const pageSize = 200
     const submissions: AbyssUsageSubmission[] = []
+    const { minLevel, maxLevel } = currentLevelRange.value
     for (let offset = 0; ; offset += pageSize) {
-        const page = await abyssUsageSubmissionsQuery({ limit: pageSize, offset }, { requestPolicy: "network-only" })
+        const page = await abyssUsageSubmissionsQuery(
+            { limit: pageSize, offset, minLevel, maxLevel },
+            { requestPolicy: "network-only" }
+        )
         submissions.push(...(page || []))
         if (!page || page.length < pageSize) {
             break
@@ -764,12 +808,14 @@ async function loadStats() {
         const currentSeason = getCurrentAbyssSeason()
         seasonInfo.value = currentSeason
         const seasonId = currentSeason?.seasonId
-        const baseRes = await abyssUsageBaseQuery({ seasonId, limit: 6 }, { requestPolicy: "network-only" })
+        const { minLevel, maxLevel } = currentLevelRange.value
+        const baseRes = await abyssUsageBaseQuery({ seasonId, limit: 6, minLevel, maxLevel }, { requestPolicy: "network-only" })
         roleStats.value = baseRes?.abyssUsageRoleStats ?? []
         weaponStats.value = baseRes?.abyssUsageWeaponStats ?? []
         lineupStats.value = baseRes?.abyssUsageLineupStats ?? []
         abyssSubmissionsCount.value = baseRes?.abyssUsageSubmissionsCount ?? 0
         slotStats.value = baseRes?.abyssUsageSlotStats ?? null
+        levelStats.value = baseRes?.abyssUsageLevelStats ?? []
         roleRanks.value = baseRes?.abyssUsageRoleRank ?? []
         weaponRanks.value = baseRes?.abyssUsageWeaponRank ?? []
         assistantLineupStats.value = []
@@ -822,6 +868,14 @@ onMounted(async () => {
                             </div>
                         </div>
                         <div class="flex items-center gap-2 self-start md:self-auto">
+                            <RangeSelector
+                                v-model:from="levelRangeFrom"
+                                v-model:to="levelRangeTo"
+                                :min="1"
+                                :max="65"
+                                class="btn btn-sm btn-outline min-w-28"
+                                @change="handleLevelRangeChange"
+                            />
                             <button
                                 v-if="user.isAdmin"
                                 class="btn btn-sm btn-outline"
@@ -1054,6 +1108,39 @@ onMounted(async () => {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl bg-base-100 shadow-md">
+                <div class="p-5">
+                    <div class="mb-4 flex items-end justify-between gap-3">
+                        <div>
+                            <h2 class="text-xl font-bold">历练等级分布</h2>
+                        </div>
+                        <div class="text-sm opacity-60">
+                            Lv.{{ currentLevelRange.minLevel }} - Lv.{{ currentLevelRange.maxLevel }} · {{ abyssSubmissionsCount }} 次提交
+                        </div>
+                    </div>
+                    <div v-if="levelStatItems.length" class="space-y-3">
+                        <div
+                            v-for="item in levelStatItems"
+                            :key="item.level"
+                            class="grid gap-3 rounded-xl bg-base-200 p-3 md:grid-cols-[4rem_minmax(0,1fr)_5rem] md:items-center"
+                        >
+                            <div class="text-sm font-semibold">Lv.{{ item.level }}</div>
+                            <div class="space-y-2">
+                                <div class="h-2 overflow-hidden rounded-full bg-base-300">
+                                    <div
+                                        class="h-full rounded-full bg-primary transition-[width] duration-500"
+                                        :style="{ width: item.percent }"
+                                    ></div>
+                                </div>
+                                <div class="text-xs opacity-60">{{ item.submissionCount }} 次</div>
+                            </div>
+                            <div class="text-right text-sm font-medium opacity-70">{{ item.percent }}</div>
+                        </div>
+                    </div>
+                    <div v-else class="py-6 text-center text-sm opacity-60">暂无结果</div>
                 </div>
             </div>
 

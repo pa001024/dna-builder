@@ -374,6 +374,7 @@ export interface AbyssUsageSubmission {
     id: string
     uidSha256: string
     seasonId: number
+    level?: number
     charId: number
     meleeId: number
     rangedId: number
@@ -438,10 +439,15 @@ export interface AbyssUsageSlotStat {
 }
 
 export interface AbyssUsageSlotStats {
-    support: AbyssUsageSlotStat[]
-    meleeWeapon: AbyssUsageSlotStat[]
-    rangedWeapon: AbyssUsageSlotStat[]
-    pet: AbyssUsageSlotStat[]
+    support?: AbyssUsageSlotStat[]
+    meleeWeapon?: AbyssUsageSlotStat[]
+    rangedWeapon?: AbyssUsageSlotStat[]
+    pet?: AbyssUsageSlotStat[]
+}
+
+export interface AbyssUsageLevelStat {
+    level: number
+    submissionCount: number
 }
 
 export interface UsersUpdateInput {
@@ -540,8 +546,19 @@ export interface ActivityUpdateInput {
     desc: string
 }
 
+export interface AbyssOwnedCharInput {
+    charId: number
+    gradeLevel: number
+}
+
+export interface AbyssOwnedWeaponInput {
+    weaponId: number
+    skillLevel: number
+}
+
 export interface AbyssUsageSubmissionInput {
     uidSha256: string
+    level?: number
     charId: number
     meleeId: number
     rangedId: number
@@ -551,6 +568,6 @@ export interface AbyssUsageSubmissionInput {
     supportWeapon2: number
     stars: number
     petId?: number
-    ownedChars?: Array<{ charId: number; gradeLevel: number }>
-    ownedWeapons?: Array<{ weaponId: number; skillLevel: number }>
+    ownedChars?: AbyssOwnedCharInput[]
+    ownedWeapons?: AbyssOwnedWeaponInput[]
 }

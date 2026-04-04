@@ -155,6 +155,20 @@
             "when": 1775081718759,
             "tag": "0021_regular_the_hood",
             "breakpoints": true
+        },
+        {
+            "idx": 22,
+            "version": "6",
+            "when": 1775285360528,
+            "tag": "0022_nostalgic_glorian",
+            "breakpoints": true
+        },
+        {
+            "idx": 23,
+            "version": "6",
+            "when": 1775287270713,
+            "tag": "0023_broken_nekra",
+            "breakpoints": true
         }
     ]
 }

@@ -10,6 +10,7 @@ import { matchPinyin } from "../utils/pinyin-utils"
 
 const inv = useInvStore()
 const ui = useUIStore()
+const syncing = ref(false)
 // 武器
 const allWeapons = weaponData.filter(v => !v.类型[0].startsWith("同律"))
 const weaponSearchQuery = ref("")
@@ -196,7 +197,11 @@ async function handleImport() {
 
 async function syncInventory() {
     const setting = useSettingStore()
+    if (syncing.value) {
+        return
+    }
     try {
+        syncing.value = true
         const api = await setting.getDNAAPI()
         if (!api) {
             ui.showErrorMessage("请先登录皎皎角账号")
@@ -232,6 +237,7 @@ async function syncInventory() {
         ui.showErrorMessage("库存同步失败:", e instanceof Error ? e.message : String(e))
     } finally {
         setting.stopHeartbeat()
+        syncing.value = false
     }
 }
 
@@ -309,147 +315,182 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
 const showExpCalculator = ref(false)
 </script>
 <template>
-    <ScrollArea class="h-full">
-        <div class="flex h-full flex-col p-4">
-            <div class="flex justify-end gap-2 mb-4">
-                <div class="btn btn-sm btn-primary" @click="showExpCalculator = true">经验计算</div>
-                <div class="btn btn-sm btn-primary" @click="syncInventory">同步游戏</div>
-                <div class="btn btn-sm btn-primary" @click="handleImport">导入JSON</div>
-                <div class="btn btn-sm btn-primary" @click="handleExport">复制JSON</div>
-            </div>
-            <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
-                <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
-                    <SectionMarker />
-                    <h3 class="text-lg font-semibold">拥有武器</h3>
-                    <div class="ml-auto flex items-center gap-4">
-                        <label class="w-40 input input-sm">
-                            <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
-                                    <circle cx="11" cy="11" r="8" />
-                                    <path d="m21 21-4.3-4.3" />
-                                </g>
-                            </svg>
-                            <input v-model="weaponSearchQuery" type="search" class="grow" placeholder="搜索（支持拼音）..." />
-                        </label>
-                        <div
-                            class="btn btn-sm btn-secondary"
-                            :class="{ 'btn-disabled': !filteredWeapons.length }"
-                            @click="handleSelectAllWeapons"
-                        >
-                            {{ filteredWeapons.length && Object.keys(inv.weapons).length === filteredWeapons.length ? `取消全选` : `全选` }}
-                        </div>
-                        <div class="label text-xs">
-                            近战 <input v-model="inv.enableWeapons.近战" type="checkbox" class="toggle toggle-secondary" />
-                        </div>
-                        <div class="label text-xs">
-                            远程 <input v-model="inv.enableWeapons.远程" type="checkbox" class="toggle toggle-secondary" />
+    <div class="relative h-full">
+        <ScrollArea class="h-full">
+            <div class="flex h-full flex-col p-4">
+                <div class="flex justify-end gap-2 mb-4">
+                    <div class="btn btn-sm btn-primary" @click="showExpCalculator = true">经验计算</div>
+                    <div class="btn btn-sm btn-primary" @click="syncInventory">
+                        <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
+                        <span>{{ syncing ? "同步中" : "同步游戏" }}</span>
+                    </div>
+                    <div class="btn btn-sm btn-primary" @click="handleImport">导入JSON</div>
+                    <div class="btn btn-sm btn-primary" @click="handleExport">复制JSON</div>
+                </div>
+                <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
+                    <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
+                        <SectionMarker />
+                        <h3 class="text-lg font-semibold">拥有武器</h3>
+                        <div class="ml-auto flex items-center gap-4">
+                            <label class="w-40 input input-sm">
+                                <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                    </g>
+                                </svg>
+                                <input v-model="weaponSearchQuery" type="search" class="grow" placeholder="搜索（支持拼音）..." />
+                            </label>
+                            <div
+                                class="btn btn-sm btn-secondary"
+                                :class="{ 'btn-disabled': !filteredWeapons.length }"
+                                @click="handleSelectAllWeapons"
+                            >
+                                {{
+                                    filteredWeapons.length && Object.keys(inv.weapons).length === filteredWeapons.length
+                                        ? `取消全选`
+                                        : `全选`
+                                }}
+                            </div>
+                            <div class="label text-xs">
+                                近战 <input v-model="inv.enableWeapons.近战" type="checkbox" class="toggle toggle-secondary" />
+                            </div>
+                            <div class="label text-xs">
+                                远程 <input v-model="inv.enableWeapons.远程" type="checkbox" class="toggle toggle-secondary" />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="min-h-80 w-full pb-4">
-                    <div
-                        v-if="inv.enableWeapons.近战 || inv.enableWeapons.远程"
-                        class="p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4"
-                    >
-                        <WeaponItem
-                            v-for="(weapon, index) in filteredWeapons"
-                            :key="index"
-                            :selected="weapon.id in inv.weapons"
-                            :weapon="weapon"
-                            :index="index"
-                            noremove
-                            control
-                            @click="toggleSelectWeapon(weapon.id, weapon.类型)"
-                            @refine-change="inv.setWeaponRefineLv(weapon.id, $event)"
-                        />
-                    </div>
-                    <div v-else class="p-4 flex w-full h-72 justify-center items-center text-gray-500">
-                        已选择所有, 更改筛选选择自己的库存
-                    </div>
-                </div>
-            </div>
-            <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
-                <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
-                    <SectionMarker />
-                    <h3 class="text-lg font-semibold">拥有MOD</h3>
-                    <div class="ml-auto flex flex-wrap items-center gap-4">
-                        <label class="w-40 input input-sm">
-                            <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
-                                    <circle cx="11" cy="11" r="8" />
-                                    <path d="m21 21-4.3-4.3" />
-                                </g>
-                            </svg>
-                            <input v-model="modSearchQuery" type="search" class="grow" placeholder="搜索（支持拼音）..." />
-                        </label>
+                    <div class="min-h-80 w-full pb-4">
                         <div
-                            class="btn btn-sm btn-secondary"
-                            :class="{ 'btn-disabled': !filteredMods.length }"
-                            @click="handleSelectAllMods"
+                            v-if="inv.enableWeapons.近战 || inv.enableWeapons.远程"
+                            class="p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4"
                         >
-                            {{ filteredMods.length && filteredSelectedMods.length === filteredMods.length ? `取消全选` : `全选` }}
-                        </div>
-                        <div v-for="color in ['金', '紫', '蓝', '绿', '白'] as const" :key="color" class="label text-xs">
-                            {{ color }}
-                            <input
-                                :checked="inv.enableMods[color]"
-                                type="checkbox"
-                                class="toggle toggle-secondary"
-                                @change="inv.enableMods[color] = ($event.target! as any).checked"
+                            <WeaponItem
+                                v-for="(weapon, index) in filteredWeapons"
+                                :key="index"
+                                :selected="weapon.id in inv.weapons"
+                                :weapon="weapon"
+                                :index="index"
+                                noremove
+                                control
+                                @click="toggleSelectWeapon(weapon.id, weapon.类型)"
+                                @refine-change="inv.setWeaponRefineLv(weapon.id, $event)"
                             />
                         </div>
+                        <div v-else class="p-4 flex w-full h-72 justify-center items-center text-gray-500">
+                            已选择所有, 更改筛选选择自己的库存
+                        </div>
                     </div>
                 </div>
-                <div class="min-h-80 w-full pb-4">
-                    <div
-                        v-if="(['金', '紫', '蓝', '绿', '白'] as const).some(color => inv.enableMods[color])"
-                        class="p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4"
-                    >
-                        <ModItem
-                            v-for="(mod, index) in filteredMods"
-                            :key="index"
-                            :mod="mod"
-                            :selected="mod.id in inv.mods"
-                            :count="mod.系列 === '契约者' ? inv.mods[mod.id]?.[1] : 0"
-                            :index="index"
-                            control
-                            noremove
-                            @click="toggleSelectMod(mod.id, mod.品质)"
-                            @lv-change="inv.mods[mod.id] = [$event, inv.mods[mod.id][1]]"
-                            @count-change="inv.mods[mod.id] = [inv.mods[mod.id][0], $event]"
+                <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
+                    <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
+                        <SectionMarker />
+                        <h3 class="text-lg font-semibold">拥有MOD</h3>
+                        <div class="ml-auto flex flex-wrap items-center gap-4">
+                            <label class="w-40 input input-sm">
+                                <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                    </g>
+                                </svg>
+                                <input v-model="modSearchQuery" type="search" class="grow" placeholder="搜索（支持拼音）..." />
+                            </label>
+                            <div
+                                class="btn btn-sm btn-secondary"
+                                :class="{ 'btn-disabled': !filteredMods.length }"
+                                @click="handleSelectAllMods"
+                            >
+                                {{ filteredMods.length && filteredSelectedMods.length === filteredMods.length ? `取消全选` : `全选` }}
+                            </div>
+                            <div v-for="color in ['金', '紫', '蓝', '绿', '白'] as const" :key="color" class="label text-xs">
+                                {{ color }}
+                                <input
+                                    :checked="inv.enableMods[color]"
+                                    type="checkbox"
+                                    class="toggle toggle-secondary"
+                                    @change="inv.enableMods[color] = ($event.target! as any).checked"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="min-h-80 w-full pb-4">
+                        <div
+                            v-if="(['金', '紫', '蓝', '绿', '白'] as const).some(color => inv.enableMods[color])"
+                            class="p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4"
+                        >
+                            <ModItem
+                                v-for="(mod, index) in filteredMods"
+                                :key="index"
+                                :mod="mod"
+                                :selected="mod.id in inv.mods"
+                                :count="mod.系列 === '契约者' ? inv.mods[mod.id]?.[1] : 0"
+                                :index="index"
+                                control
+                                noremove
+                                @click="toggleSelectMod(mod.id, mod.品质)"
+                                @lv-change="inv.mods[mod.id] = [$event, inv.mods[mod.id][1]]"
+                                @count-change="inv.mods[mod.id] = [inv.mods[mod.id][0], $event]"
+                            />
+                        </div>
+                        <div v-else class="p-4 flex w-full h-72 justify-center items-center text-gray-500">
+                            已选择所有, 更改筛选选择自己的库存
+                        </div>
+                    </div>
+                </div>
+                <!-- 特效编辑 -->
+                <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
+                    <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
+                        <SectionMarker />
+                        <h3 class="text-lg font-semibold">特效编辑</h3>
+                        <div class="ml-auto flex flex-wrap items-center gap-4">
+                            <div
+                                class="btn btn-sm btn-primary"
+                                @click="buffOptions.forEach(buff => setBuffLv(buff.value, buff.value.mx || 1))"
+                            >
+                                全部最大
+                            </div>
+                            <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, 0))">
+                                全部关闭
+                            </div>
+                        </div>
+                    </div>
+                    <div class="min-h-80 w-full p-4">
+                        <BuffEditer
+                            class="h-120"
+                            :buff-options="buffOptions"
+                            :selected-buffs="selectedBuffs"
+                            @toggle-buff="toggleBuff"
+                            @set-buff-lv="setBuffLv"
                         />
                     </div>
-                    <div v-else class="p-4 flex w-full h-72 justify-center items-center text-gray-500">
-                        已选择所有, 更改筛选选择自己的库存
-                    </div>
                 </div>
             </div>
-            <!-- 特效编辑 -->
-            <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
-                <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
-                    <SectionMarker />
-                    <h3 class="text-lg font-semibold">特效编辑</h3>
-                    <div class="ml-auto flex flex-wrap items-center gap-4">
-                        <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, buff.value.mx || 1))">
-                            全部最大
+        </ScrollArea>
+        <div v-if="showExpCalculator" class="absolute inset-0 bg-base-100 z-20">
+            <div class="absolute flex justify-center items-center p-2 z-10">
+                <div
+                    class="flex items-center gap-1 text-xs bg-base-200 hover:bg-base-300 cursor-pointer p-1 rounded"
+                    @click="showExpCalculator = false"
+                >
+                    <Icon icon="ri:close-line" class="text-2xl text-red-500" />
+                </div>
+            </div>
+            <ScrollArea class="h-full">
+                <div class="flex h-full flex-col p-4">
+                    <div class="flex justify-end gap-2 mb-4">
+                        <div class="btn btn-sm btn-primary" @click="showExpCalculator = false">退出全屏</div>
+                        <div class="btn btn-sm btn-primary" :class="{ loading: syncing }" @click="syncInventory">
+                            <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
+                            <span>{{ syncing ? "同步中" : "同步游戏" }}</span>
                         </div>
-                        <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, 0))">全部关闭</div>
+                        <div class="btn btn-sm btn-primary" @click="handleImport">导入JSON</div>
+                        <div class="btn btn-sm btn-primary" @click="handleExport">复制JSON</div>
                     </div>
+                    <PlayerExpCalculator />
                 </div>
-                <div class="min-h-80 w-full p-4">
-                    <BuffEditer
-                        class="h-120"
-                        :buff-options="buffOptions"
-                        :selected-buffs="selectedBuffs"
-                        @toggle-buff="toggleBuff"
-                        @set-buff-lv="setBuffLv"
-                    />
-                </div>
-            </div>
+            </ScrollArea>
         </div>
-        <DialogModel v-model="showExpCalculator" class="max-w-[90vw]">
-            <PlayerExpCalculator />
-        </DialogModel>
-    </ScrollArea>
+    </div>
 </template>

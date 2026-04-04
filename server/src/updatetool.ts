@@ -73,6 +73,7 @@ type AbyssBestTimeIds = {
 
 type AbyssUsageSubmissionInput = {
     uidSha256: string
+    level?: number | null
     charId: number
     meleeId: number
     rangedId: number
@@ -354,6 +355,11 @@ async function buildAbyssUploadPayloadWithReason(
         return { payload: null, reason: "uidSha256 生成失败" }
     }
 
+    const level = roleShow.level
+    if (!Number.isInteger(level) || level <= 0) {
+        return { payload: null, reason: `level 非法: ${String(level)}` }
+    }
+
     const starsValue = String(roleInfo.roleInfo.abyssInfo?.stars ?? "").split("/")[0]
     const stars = Number(starsValue)
     if (!Number.isInteger(stars) || stars < 0) {
@@ -362,6 +368,7 @@ async function buildAbyssUploadPayloadWithReason(
 
     const payload: AbyssUsageSubmissionInput = {
         uidSha256,
+        level,
         charId: lineup.charId != null ? normalizeAbyssCharId(lineup.charId) : 0,
         meleeId: lineup.meleeId ?? 0,
         rangedId: lineup.rangedId ?? 0,

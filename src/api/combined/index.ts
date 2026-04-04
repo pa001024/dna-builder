@@ -1,4 +1,5 @@
 import {
+    abyssUsageLevelStatsQuery,
     abyssUsageLineupStatsQuery,
     abyssUsageRoleRankQuery,
     abyssUsageRoleStatsQuery,
@@ -39,6 +40,7 @@ export const abyssUsageBaseQuery = combinedQuery(
     abyssUsageSubmissionsCountQuery,
     abyssUsageLineupStatsQuery,
     abyssUsageSlotStatsQuery,
+    abyssUsageLevelStatsQuery,
     abyssUsageRoleRankQuery,
     abyssUsageWeaponRankQuery
 )

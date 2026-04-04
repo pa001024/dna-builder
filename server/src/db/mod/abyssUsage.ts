@@ -1,5 +1,5 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { and, desc, eq, inArray, or, sql } from "drizzle-orm"
+import { and, desc, eq, gte, inArray, lte, or, sql } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
 import { abyssDungeons } from "../../../../src/data/d/abyss.data"
 import { db, schema } from ".."
@@ -13,6 +13,7 @@ import {
 
 type AbyssUsageSubmissionInput = {
     uidSha256: string
+    level?: number | null
     charId: number
     meleeId: number
     rangedId: number
@@ -80,11 +81,54 @@ function getAbyssUsageCacheKey(seasonId?: number | null) {
     return seasonId ? String(seasonId) : "all"
 }
 
+function getAbyssUsageFilterKey(seasonId?: number | null, minLevel?: number | null, maxLevel?: number | null) {
+    return `${getAbyssUsageCacheKey(seasonId)}|lv:${minLevel ?? "min"}-${maxLevel ?? "max"}`
+}
+
+function buildLevelWhere(minLevel?: number | null, maxLevel?: number | null) {
+    const hasMin = Number.isInteger(minLevel as number) && (minLevel as number) > 0
+    const hasMax = Number.isInteger(maxLevel as number) && (maxLevel as number) > 0
+    if (!hasMin && !hasMax) {
+        return undefined
+    }
+    const conditions = []
+    if (hasMin) {
+        conditions.push(gte(schema.abyssUsageSubmissions.level, minLevel as number))
+    }
+    if (hasMax) {
+        conditions.push(lte(schema.abyssUsageSubmissions.level, maxLevel as number))
+    }
+    return and(...conditions)
+}
+
+/**
+ * 构建提交表的等级筛选条件。
+ * @param minLevel 最小等级。
+ * @param maxLevel 最大等级。
+ * @returns 提交表等级条件。
+ */
+function buildSubmissionLevelWhere(minLevel?: number | null, maxLevel?: number | null) {
+    const hasMin = Number.isInteger(minLevel as number) && (minLevel as number) > 0
+    const hasMax = Number.isInteger(maxLevel as number) && (maxLevel as number) > 0
+    if (!hasMin && !hasMax) {
+        return undefined
+    }
+    const conditions = []
+    if (hasMin) {
+        conditions.push(gte(schema.abyssUsageSubmissions.level, minLevel as number))
+    }
+    if (hasMax) {
+        conditions.push(lte(schema.abyssUsageSubmissions.level, maxLevel as number))
+    }
+    return and(...conditions)
+}
+
 export const typeDefs = /* GraphQL */ `
     type AbyssUsageSubmission {
         id: String!
         uidSha256: String!
         seasonId: Int!
+        level: Int
         charId: Int!
         meleeId: Int!
         rangedId: Int!
@@ -155,15 +199,28 @@ export const typeDefs = /* GraphQL */ `
         pet: [AbyssUsageSlotStat!]!
     }
 
+    type AbyssUsageLevelStat {
+        level: Int!
+        submissionCount: Int!
+    }
+
     type Query {
-        abyssUsageSubmissions(limit: Int = 20, offset: Int = 0): [AbyssUsageSubmission!]!
-        abyssUsageSubmissionsCount(seasonId: Int): Int!
-        abyssUsageRoleStats(seasonId: Int): [AbyssRoleUsageStat!]!
-        abyssUsageWeaponStats(seasonId: Int): [AbyssWeaponUsageStat!]!
-        abyssUsageLineupStats(seasonId: Int, charId: Int, mainOnly: Boolean, limit: Int): [AbyssUsageLineupStat!]!
-        abyssUsageSlotStats(seasonId: Int): AbyssUsageSlotStats!
-        abyssUsageRoleRank(seasonId: Int, limit: Int = 20): [AbyssRoleUsageStat!]!
-        abyssUsageWeaponRank(seasonId: Int, limit: Int = 20): [AbyssWeaponUsageStat!]!
+        abyssUsageSubmissions(limit: Int = 20, offset: Int = 0, seasonId: Int, minLevel: Int, maxLevel: Int): [AbyssUsageSubmission!]!
+        abyssUsageSubmissionsCount(seasonId: Int, minLevel: Int, maxLevel: Int): Int!
+        abyssUsageRoleStats(seasonId: Int, minLevel: Int, maxLevel: Int): [AbyssRoleUsageStat!]!
+        abyssUsageWeaponStats(seasonId: Int, minLevel: Int, maxLevel: Int): [AbyssWeaponUsageStat!]!
+        abyssUsageLineupStats(
+            seasonId: Int
+            charId: Int
+            mainOnly: Boolean
+            limit: Int
+            minLevel: Int
+            maxLevel: Int
+        ): [AbyssUsageLineupStat!]!
+        abyssUsageSlotStats(seasonId: Int, minLevel: Int, maxLevel: Int): AbyssUsageSlotStats!
+        abyssUsageLevelStats(seasonId: Int, minLevel: Int, maxLevel: Int): [AbyssUsageLevelStat!]!
+        abyssUsageRoleRank(seasonId: Int, limit: Int = 20, minLevel: Int, maxLevel: Int): [AbyssRoleUsageStat!]!
+        abyssUsageWeaponRank(seasonId: Int, limit: Int = 20, minLevel: Int, maxLevel: Int): [AbyssWeaponUsageStat!]!
     }
 
     input AbyssOwnedCharInput {
@@ -178,6 +235,7 @@ export const typeDefs = /* GraphQL */ `
 
     input AbyssUsageSubmissionInput {
         uidSha256: String!
+        level: Int
         charId: Int!
         meleeId: Int!
         rangedId: Int!
@@ -496,14 +554,25 @@ function buildIndexedDistribution(grouped: Map<number, Set<string>>) {
  * @param seasonId 赛季 ID。
  * @returns 聚合用参与明细。
  */
-async function loadAbyssParticipantRows(seasonId?: number | null) {
-    const cacheKey = getAbyssUsageCacheKey(seasonId)
+async function loadAbyssParticipantRows(seasonId?: number | null, minLevel?: number | null, maxLevel?: number | null) {
+    const cacheKey = getAbyssUsageFilterKey(seasonId, minLevel, maxLevel)
     const cached = abyssUsageParticipantCache.get(cacheKey)
     if (cached) return await cached
 
     const promise = (async () => {
-        const roleWhere = seasonId ? eq(schema.abyssUsageRoleParticipants.seasonId, seasonId) : undefined
-        const weaponWhere = seasonId ? eq(schema.abyssUsageWeaponParticipants.seasonId, seasonId) : undefined
+        const levelWhere = buildSubmissionLevelWhere(minLevel, maxLevel)
+        const roleWhere =
+            seasonId && levelWhere
+                ? and(eq(schema.abyssUsageRoleParticipants.seasonId, seasonId), levelWhere)
+                : seasonId
+                  ? eq(schema.abyssUsageRoleParticipants.seasonId, seasonId)
+                  : levelWhere
+        const weaponWhere =
+            seasonId && levelWhere
+                ? and(eq(schema.abyssUsageWeaponParticipants.seasonId, seasonId), levelWhere)
+                : seasonId
+                  ? eq(schema.abyssUsageWeaponParticipants.seasonId, seasonId)
+                  : levelWhere
         const roleRows = await db
             .select({
                 submissionId: schema.abyssUsageRoleParticipants.submissionId,
@@ -512,6 +581,7 @@ async function loadAbyssParticipantRows(seasonId?: number | null) {
                 gradeLevel: schema.abyssUsageRoleParticipants.gradeLevel,
             })
             .from(schema.abyssUsageRoleParticipants)
+            .innerJoin(schema.abyssUsageSubmissions, eq(schema.abyssUsageRoleParticipants.submissionId, schema.abyssUsageSubmissions.id))
             .where(roleWhere)
             .groupBy(
                 schema.abyssUsageRoleParticipants.submissionId,
@@ -527,6 +597,7 @@ async function loadAbyssParticipantRows(seasonId?: number | null) {
                 skillLevel: schema.abyssUsageWeaponParticipants.skillLevel,
             })
             .from(schema.abyssUsageWeaponParticipants)
+            .innerJoin(schema.abyssUsageSubmissions, eq(schema.abyssUsageWeaponParticipants.submissionId, schema.abyssUsageSubmissions.id))
             .where(weaponWhere)
             .groupBy(
                 schema.abyssUsageWeaponParticipants.submissionId,
@@ -551,49 +622,50 @@ async function loadAbyssParticipantRows(seasonId?: number | null) {
  * @param seasonId 赛季 ID。
  * @returns 分组后的单项出现次数统计。
  */
-async function loadSlotStats(seasonId?: number | null) {
-    const seasonWhere = seasonId ? sql`WHERE ${schema.abyssUsageSubmissions.seasonId} = ${seasonId}` : sql``
-    const rows = (await db.all(
-        sql`
-            WITH raw AS (
-                SELECT ${"support"} AS kind, ${schema.abyssUsageSubmissions.support1} AS id
-                FROM ${schema.abyssUsageSubmissions}
-                ${seasonWhere}
-                UNION ALL
-                SELECT ${"support"} AS kind, ${schema.abyssUsageSubmissions.support2} AS id
-                FROM ${schema.abyssUsageSubmissions}
-                ${seasonWhere}
-                UNION ALL
-                SELECT ${"meleeWeapon"} AS kind, ${schema.abyssUsageSubmissions.meleeId} AS id
-                FROM ${schema.abyssUsageSubmissions}
-                ${seasonWhere}
-                UNION ALL
-                SELECT ${"rangedWeapon"} AS kind, ${schema.abyssUsageSubmissions.rangedId} AS id
-                FROM ${schema.abyssUsageSubmissions}
-                ${seasonWhere}
-                UNION ALL
-                SELECT ${"pet"} AS kind, ${schema.abyssUsageSubmissions.petId} AS id
-                FROM ${schema.abyssUsageSubmissions}
-                ${seasonWhere}
-            )
-            SELECT kind, id, count(*) AS submissionCount
-            FROM raw
-            WHERE id IS NOT NULL AND id > 0
-            GROUP BY kind, id
-            ORDER BY kind, submissionCount DESC, id ASC
-        `
-    )) as AbyssUsageSlotStatRow[]
+async function loadSlotStats(seasonId?: number | null, minLevel?: number | null, maxLevel?: number | null) {
+    const levelWhere = buildSubmissionLevelWhere(minLevel, maxLevel)
+    const where =
+        seasonId && levelWhere
+            ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
+            : seasonId
+              ? eq(schema.abyssUsageSubmissions.seasonId, seasonId)
+              : levelWhere
+    const submissions = await db.query.abyssUsageSubmissions.findMany({
+        where,
+        columns: {
+            support1: true,
+            support2: true,
+            meleeId: true,
+            rangedId: true,
+            petId: true,
+        },
+    })
+    const rows: AbyssUsageSlotStatRow[] = []
+    for (const item of submissions) {
+        if (item.support1 > 0) rows.push({ kind: "support", id: item.support1, submissionCount: 1 })
+        if (item.support2 > 0) rows.push({ kind: "support", id: item.support2, submissionCount: 1 })
+        if (item.meleeId > 0) rows.push({ kind: "meleeWeapon", id: item.meleeId, submissionCount: 1 })
+        if (item.rangedId > 0) rows.push({ kind: "rangedWeapon", id: item.rangedId, submissionCount: 1 })
+        if (item.petId != null && item.petId > 0) rows.push({ kind: "pet", id: item.petId, submissionCount: 1 })
+    }
     const result: AbyssUsageSlotStats = {
         support: [],
         meleeWeapon: [],
         rangedWeapon: [],
         pet: [],
     }
+    const grouped = new Map<string, { kind: AbyssUsageSlotStatRow["kind"]; id: number; submissionCount: number }>()
     for (const row of rows) {
-        const id = row.id
-        if (id == null || !Number.isInteger(id) || id <= 0) continue
-        const safeId = id as number
-        result[row.kind].push({ id: safeId, submissionCount: row.submissionCount })
+        const key = `${row.kind}:${row.id}`
+        const current = grouped.get(key)
+        if (current) {
+            current.submissionCount += row.submissionCount
+        } else {
+            grouped.set(key, { kind: row.kind, id: row.id!, submissionCount: row.submissionCount })
+        }
+    }
+    for (const row of grouped.values()) {
+        result[row.kind].push({ id: row.id, submissionCount: row.submissionCount })
     }
     return result
 }
@@ -666,16 +738,27 @@ function validateLineupDistinct(charIds: number[]) {
  * @param seasonId 赛季 ID。
  * @returns 阵容统计行。
  */
-async function loadLineupStatRows(seasonId?: number | null, charId?: number | null, mainOnly?: boolean | null, limit?: number | null) {
-    const seasonWhere = seasonId ? eq(schema.abyssUsageSubmissions.seasonId, seasonId) : undefined
+async function loadLineupStatRows(
+    seasonId?: number | null,
+    charId?: number | null,
+    mainOnly?: boolean | null,
+    limit?: number | null,
+    minLevel?: number | null,
+    maxLevel?: number | null
+) {
+    const levelWhere = buildSubmissionLevelWhere(minLevel, maxLevel)
+    const seasonWhere =
+        seasonId && levelWhere
+            ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
+            : seasonId
+              ? eq(schema.abyssUsageSubmissions.seasonId, seasonId)
+              : levelWhere
     const charWhere =
         charId && charId > 0
             ? mainOnly
                 ? eq(schema.abyssUsageSubmissions.charId, charId)
                 : or(
                       eq(schema.abyssUsageSubmissions.charId, charId),
-                      eq(schema.abyssUsageSubmissions.meleeId, charId),
-                      eq(schema.abyssUsageSubmissions.rangedId, charId),
                       eq(schema.abyssUsageSubmissions.support1, charId),
                       eq(schema.abyssUsageSubmissions.support2, charId)
                   )
@@ -722,17 +805,31 @@ async function loadLineupStatRows(seasonId?: number | null, charId?: number | nu
     return await query
 }
 
-async function loadAbyssUsageSubmissionBundle(seasonId?: number | null, charId?: number | null, mainOnly?: boolean | null, limit = 20) {
-    const cacheKey = `${getAbyssUsageCacheKey(seasonId)}|${charId || 0}|${mainOnly ? 1 : 0}|${limit}`
+async function loadAbyssUsageSubmissionBundle(
+    seasonId?: number | null,
+    charId?: number | null,
+    mainOnly?: boolean | null,
+    limit = 20,
+    minLevel?: number | null,
+    maxLevel?: number | null
+) {
+    const cacheKey = `${getAbyssUsageFilterKey(seasonId, minLevel, maxLevel)}|${charId || 0}|${mainOnly ? 1 : 0}|${limit}`
     const cached = abyssUsageSubmissionCache.get(cacheKey)
     if (cached) return await cached
 
     const promise = (async () => {
-        const countRows = await db
-            .select({ count: sql<number>`count(*)` })
-            .from(schema.abyssUsageSubmissions)
-            .where(seasonId ? eq(schema.abyssUsageSubmissions.seasonId, seasonId) : undefined)
-        const [lineupRows, slotStats] = await Promise.all([loadLineupStatRows(seasonId, charId, mainOnly, limit), loadSlotStats(seasonId)])
+        const levelWhere = buildLevelWhere(minLevel, maxLevel)
+        const countWhere =
+            seasonId && levelWhere
+                ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
+                : seasonId
+                  ? eq(schema.abyssUsageSubmissions.seasonId, seasonId)
+                  : levelWhere
+        const countRows = await db.select({ count: sql<number>`count(*)` }).from(schema.abyssUsageSubmissions).where(countWhere)
+        const [lineupRows, slotStats] = await Promise.all([
+            loadLineupStatRows(seasonId, charId, mainOnly, limit, minLevel, maxLevel),
+            loadSlotStats(seasonId, minLevel, maxLevel),
+        ])
         return { count: countRows[0]?.count || 0, lineupRows, slotStats }
     })()
 
@@ -743,6 +840,31 @@ async function loadAbyssUsageSubmissionBundle(seasonId?: number | null, charId?:
         abyssUsageSubmissionCache.delete(cacheKey)
         throw error
     }
+}
+
+/**
+ * 按赛季和等级范围统计提交数量分布。
+ * @param seasonId 赛季 ID。
+ * @returns 按 level 排序的分布统计。
+ */
+async function loadLevelStats(seasonId?: number | null, minLevel?: number | null, maxLevel?: number | null) {
+    const levelWhere = buildLevelWhere(minLevel, maxLevel)
+    const where =
+        seasonId && levelWhere
+            ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
+            : seasonId
+              ? eq(schema.abyssUsageSubmissions.seasonId, seasonId)
+              : levelWhere
+    const rows = await db
+        .select({
+            level: schema.abyssUsageSubmissions.level,
+            submissionCount: sql<number>`count(*)`,
+        })
+        .from(schema.abyssUsageSubmissions)
+        .where(where)
+        .groupBy(schema.abyssUsageSubmissions.level)
+        .orderBy(schema.abyssUsageSubmissions.level)
+    return rows.filter((row): row is { level: number; submissionCount: number } => row.level != null)
 }
 
 function invalidateAbyssUsageCaches() {
@@ -771,16 +893,16 @@ export const resolvers = {
             }))
         },
         abyssUsageSubmissionsCount: async (_parent, args) => {
-            const bundle = await loadAbyssUsageSubmissionBundle(args?.seasonId)
+            const bundle = await loadAbyssUsageSubmissionBundle(args?.seasonId, undefined, undefined, 20, args?.minLevel, args?.maxLevel)
             return bundle.count
         },
         abyssUsageRoleStats: async (_parent, args) => {
-            const { roleRows } = await loadAbyssParticipantRows(args?.seasonId)
+            const { roleRows } = await loadAbyssParticipantRows(args?.seasonId, args?.minLevel, args?.maxLevel)
             if (roleRows.length === 0) return []
             return buildRoleStats(roleRows)
         },
         abyssUsageWeaponStats: async (_parent, args) => {
-            const { weaponRows } = await loadAbyssParticipantRows(args?.seasonId)
+            const { weaponRows } = await loadAbyssParticipantRows(args?.seasonId, args?.minLevel, args?.maxLevel)
             if (weaponRows.length === 0) return []
             return buildWeaponStats(weaponRows)
         },
@@ -794,21 +916,31 @@ export const resolvers = {
             }
             const requestedLimit = args?.limit
             const limit = requestedLimit == null ? 20 : Math.min(requestedLimit, 20)
-            const bundle = await loadAbyssUsageSubmissionBundle(args?.seasonId, charId, args?.mainOnly, limit)
+            const bundle = await loadAbyssUsageSubmissionBundle(
+                args?.seasonId,
+                charId,
+                args?.mainOnly,
+                limit,
+                args?.minLevel,
+                args?.maxLevel
+            )
             return bundle.lineupRows
         },
         abyssUsageSlotStats: async (_parent, args) => {
-            const bundle = await loadAbyssUsageSubmissionBundle(args?.seasonId)
+            const bundle = await loadAbyssUsageSubmissionBundle(args?.seasonId, undefined, undefined, 20, args?.minLevel, args?.maxLevel)
             return bundle.slotStats
         },
+        abyssUsageLevelStats: async (_parent, args, _context, _info) => {
+            return await loadLevelStats(args?.seasonId, args?.minLevel, args?.maxLevel)
+        },
         abyssUsageRoleRank: async (_parent, args) => {
-            const { roleRows } = await loadAbyssParticipantRows(args?.seasonId)
+            const { roleRows } = await loadAbyssParticipantRows(args?.seasonId, args?.minLevel, args?.maxLevel)
             if (roleRows.length === 0) return []
             return buildRoleStats(roleRows)
         },
         abyssUsageWeaponRank: async (_parent, args) => {
             const limit = args?.limit ?? 20
-            const { weaponRows } = await loadAbyssParticipantRows(args?.seasonId)
+            const { weaponRows } = await loadAbyssParticipantRows(args?.seasonId, args?.minLevel, args?.maxLevel)
             if (weaponRows.length === 0) return []
             return buildWeaponStats(weaponRows).slice(0, limit)
         },
@@ -844,6 +976,7 @@ export const resolvers = {
                 const submissionPayload = {
                     uidSha256,
                     seasonId,
+                    level: input.level ?? null,
                     charId: input.charId,
                     meleeId: input.meleeId,
                     rangedId: input.rangedId,

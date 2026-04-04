@@ -478,6 +478,7 @@ describe("abyssUsage", () => {
             data?: {
                 submitAbyssUsage?: {
                     id: string
+                    level?: number
                     reward?: {
                         success: boolean
                         awardedExp: number
@@ -491,6 +492,7 @@ describe("abyssUsage", () => {
             mutation SubmitAbyssUsage($input: AbyssUsageSubmissionInput!) {
                 submitAbyssUsage(input: $input) {
                     id
+                    level
                     reward {
                         success
                         awardedExp
@@ -517,6 +519,7 @@ describe("abyssUsage", () => {
         )
         expect(anonymousResult.errors?.[0]?.message).toBeUndefined()
         expect(anonymousResult.data?.submitAbyssUsage?.id).toBeTypeOf("string")
+        expect(anonymousResult.data?.submitAbyssUsage?.level).toBe(sample?.stars)
         expect(anonymousResult.data?.submitAbyssUsage?.reward?.success).toBe(false)
         expect(anonymousResult.data?.submitAbyssUsage?.reward?.awardedExp).toBe(0)
         expect(anonymousResult.data?.submitAbyssUsage?.reward?.awardedPoints).toBe(0)

@@ -1,0 +1,1 @@
+ALTER TABLE `abyss_usage_submissions` ADD `level` integer;

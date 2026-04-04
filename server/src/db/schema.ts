@@ -799,6 +799,7 @@ export const abyssUsageSubmissions = sqliteTable(
         id: text("id").$default(id).primaryKey(),
         uidSha256: text("uid_sha256").notNull(),
         seasonId: integer("season_id").notNull(),
+        level: integer("level"),
         charId: integer("char_id").notNull(),
         meleeId: integer("melee_id").notNull(),
         rangedId: integer("ranged_id").notNull(),
@@ -814,6 +815,7 @@ export const abyssUsageSubmissions = sqliteTable(
     submissions => [
         uniqueIndex("abyss_usage_submissions_season_uid_idx").on(submissions.uidSha256, submissions.seasonId),
         index("abyss_usage_submissions_season_id_idx").on(submissions.seasonId),
+        index("abyss_usage_submissions_season_id_level_idx").on(submissions.seasonId, submissions.level),
         index("abyss_usage_submissions_lineup_idx").on(
             submissions.seasonId,
             submissions.charId,

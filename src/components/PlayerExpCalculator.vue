@@ -23,37 +23,48 @@ const MOD_QUALITY_INDEX: Record<string, number> = {
     金: 4,
 }
 
-// 用户输入的经验来源
-const manualExpSources = useLocalStorage<Record<string, number>>("playerExp.manual", {
+/**
+ * 手动经验来源默认值
+ */
+const MANUAL_EXP_SOURCE_DEFAULTS = {
     每日任务: 0,
+    其他: 0,
     魔灵获取: 0,
     魔灵突破: 0,
     角色获取: 0,
     角色溯源: 0,
     武器获取: 0,
     武器熔炼: 0,
+}
+
+/**
+ * 手动经验来源显示顺序
+ */
+const MANUAL_EXP_SOURCE_ORDER = ["每日任务", "其他", "魔灵获取", "魔灵突破", "角色获取", "角色溯源", "武器获取", "武器熔炼"] as const
+
+// 用户输入的经验来源
+const manualExpSources = useLocalStorage<Record<string, number>>("playerExp.manual", {
+    ...MANUAL_EXP_SOURCE_DEFAULTS,
 })
 
 // 校验并修复 manualExpSources 数据
 function validateManualExpSources() {
-    const defaults = {
-        每日任务: 0,
-        魔灵获取: 0,
-        魔灵突破: 0,
-        角色获取: 0,
-        角色溯源: 0,
-        武器获取: 0,
-        武器熔炼: 0,
-    }
     // 先检查字段是否在默认值中，不在则删除
     for (const key in manualExpSources.value) {
-        if (!(key in defaults)) {
+        if (!(key in MANUAL_EXP_SOURCE_DEFAULTS)) {
             delete manualExpSources.value[key]
         } else {
             const value = manualExpSources.value[key]
             if (typeof value !== "number" || isNaN(value) || value < 0) {
-                manualExpSources.value[key] = defaults[key as keyof typeof defaults]
+                manualExpSources.value[key] = MANUAL_EXP_SOURCE_DEFAULTS[key as keyof typeof MANUAL_EXP_SOURCE_DEFAULTS]
             }
+        }
+    }
+
+    // 再补齐可能缺失的新字段，避免旧本地数据不显示新来源
+    for (const key of MANUAL_EXP_SOURCE_ORDER) {
+        if (!(key in manualExpSources.value)) {
+            manualExpSources.value[key] = MANUAL_EXP_SOURCE_DEFAULTS[key]
         }
     }
 }
@@ -133,13 +144,7 @@ const roleInfo = useLocalStorage<DNARoleEntity>("dna.roleInfo", {} as any)
  */
 function isConfigModified(): boolean {
     const manualDefaults = {
-        每日任务: 0,
-        魔灵获取: 0,
-        魔灵突破: 0,
-        角色获取: 0,
-        角色溯源: 0,
-        武器获取: 0,
-        武器熔炼: 0,
+        ...MANUAL_EXP_SOURCE_DEFAULTS,
     }
     const breakthroughDefaults = {
         角色突破: [0, 0, 0, 0, 0, 0],
@@ -393,13 +398,7 @@ async function syncGameData() {
  */
 function resetData() {
     manualExpSources.value = {
-        每日任务: 0,
-        魔灵获取: 0,
-        魔灵突破: 0,
-        角色获取: 0,
-        角色溯源: 0,
-        武器获取: 0,
-        武器熔炼: 0,
+        ...MANUAL_EXP_SOURCE_DEFAULTS,
     }
     breakthroughRecords.value = {
         角色突破: [0, 0, 0, 0, 0, 0],
@@ -435,22 +434,21 @@ async function importData() {
         // 校验并修复 manualExpSources
         if (data.manual) {
             const defaults = {
-                每日任务: 0,
-                魔灵获取: 0,
-                魔灵突破: 0,
-                角色获取: 0,
-                角色溯源: 0,
-                武器获取: 0,
-                武器熔炼: 0,
+                ...MANUAL_EXP_SOURCE_DEFAULTS,
             }
             for (const key in data.manual) {
-                if (!(key in defaults)) {
+                if (!(key in MANUAL_EXP_SOURCE_DEFAULTS)) {
                     delete data.manual[key]
                 } else {
                     const value = data.manual[key]
                     if (typeof value !== "number" || isNaN(value) || value < 0) {
                         data.manual[key] = defaults[key as keyof typeof defaults]
                     }
+                }
+            }
+            for (const key of MANUAL_EXP_SOURCE_ORDER) {
+                if (!(key in data.manual)) {
+                    data.manual[key] = MANUAL_EXP_SOURCE_DEFAULTS[key]
                 }
             }
             manualExpSources.value = data.manual
@@ -631,11 +629,11 @@ const extraTotalExp = computed(() => {
                             手动输入
                         </h3>
                         <div class="space-y-3">
-                            <div v-for="(_, reason) in manualExpSources" :key="reason" class="space-y-1">
+                            <div v-for="reason in MANUAL_EXP_SOURCE_ORDER" :key="reason" class="space-y-1">
                                 <div class="flex justify-between items-center">
                                     <label class="text-sm font-medium">
                                         {{ reason }}
-                                        {{ ["每日任务", "魔灵获取", "魔灵突破"].includes(reason) ? "" : "(可同步)" }}
+                                        {{ ["每日任务", "其他", "魔灵获取", "魔灵突破"].includes(reason) ? "" : "(可同步)" }}
                                     </label>
                                     <span class="text-xs opacity-70">{{ getExpPerItemLabel(reason) }}</span>
                                 </div>

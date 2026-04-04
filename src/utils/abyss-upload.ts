@@ -205,6 +205,7 @@ export async function buildAbyssUploadPayload(roleInfo: DNARoleEntity): Promise<
 
     const payload: AbyssUsageSubmissionInput = {
         uidSha256,
+        level: roleShow.level,
         charId: lineup.charId != null ? normalizeAbyssCharId(lineup.charId) : 0,
         meleeId: lineup.meleeId ?? 0,
         rangedId: lineup.rangedId ?? 0,
