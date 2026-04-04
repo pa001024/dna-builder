@@ -133,7 +133,7 @@ export const users = sqliteTable(
         selectedTitleAssetId: text("selected_title_asset_id"),
         selectedNameCardAssetId: text("selected_name_card_asset_id"),
         createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        updateAt: text("update_at"),
     },
     users => [uniqueIndex("email_idx").on(users.email)]
 )
@@ -891,7 +891,7 @@ export const scripts = sqliteTable(
         isRecommended: integer("is_recommended", { mode: "boolean" }).default(false),
         isPinned: integer("is_pinned", { mode: "boolean" }).default(false),
         createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        updateAt: text("update_at"),
     },
     scripts => [
         index("scripts_category_idx").on(scripts.category),
