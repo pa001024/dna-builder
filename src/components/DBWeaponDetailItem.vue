@@ -11,6 +11,7 @@ import { LeveledMod } from "../data/leveled/LeveledMod"
 import { LeveledSkill } from "../data/leveled/LeveledSkill"
 import { LeveledWeapon } from "../data/leveled/LeveledWeapon"
 import { formatProp } from "../util"
+import SkillCreatureCards from "./SkillCreatureCards.vue"
 
 const props = defineProps<{
     weapon: Weapon
@@ -55,6 +56,7 @@ function toReplaceLeveledSkill(replaceSkill: WeaponSkill) {
         类型: replaceSkill.类型,
         描述: replaceSkill.描述,
         字段: replaceSkill.字段,
+        创造物: replaceSkill.创造物,
     }
     return new LeveledSkill(skillData, 10, leveledWeapon.value.名称)
 }
@@ -302,7 +304,7 @@ watch(
 
         <div class="p-3 bg-base-200 rounded mb-3">
             <div class="text-xs text-base-content/70 mb-2">{{ $t("char-build.base_attr") }}</div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2">
                 <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
                     <span class="text-base-content/70">{{ $t("攻击") }}</span>
                     <span class="font-medium text-primary">{{ leveledWeapon.基础攻击 }}</span>
@@ -381,6 +383,19 @@ watch(
                         </span>
                     </div>
                     <SkillFields :skill="skill" />
+                    <div v-if="skill.skillData.创造物 && skill.skillData.创造物.length > 0" class="mt-2">
+                        <SkillCreatureCards :creatures="skill.skillData.创造物" />
+                    </div>
+                    <div v-if="skill.skillData.子技能 && skill.skillData.子技能.length > 0" class="mt-2 space-y-2">
+                        <div v-for="subSkill in skill.skillData.子技能" :key="subSkill.名称 || subSkill.id || ''">
+                            <div v-if="subSkill.创造物 && subSkill.创造物.length > 0">
+                                <SkillCreatureCards
+                                    :creatures="subSkill.创造物"
+                                    :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -446,6 +461,19 @@ watch(
                                 {{ item.mod.效果 }}
                             </div>
                             <SkillFields :skill="item.replaceSkill" />
+                            <div v-if="item.replaceSkill.skillData.创造物 && item.replaceSkill.skillData.创造物.length > 0" class="mt-2">
+                                <SkillCreatureCards :creatures="item.replaceSkill.skillData.创造物" />
+                            </div>
+                            <div v-if="item.replaceSkill.skillData.子技能 && item.replaceSkill.skillData.子技能.length > 0" class="mt-2 space-y-2">
+                                <div v-for="subSkill in item.replaceSkill.skillData.子技能" :key="subSkill.名称 || subSkill.id || ''">
+                                    <div v-if="subSkill.创造物 && subSkill.创造物.length > 0">
+                                        <SkillCreatureCards
+                                            :creatures="subSkill.创造物"
+                                            :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -610,7 +610,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="char.第七溯源消耗 && char.第七溯源消耗.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("第七溯源消耗") }}</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("溯源突破") }}</div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <ResourceCostItem
                     v-for="cost in char.第七溯源消耗"
@@ -624,6 +624,7 @@ onBeforeUnmount(() => {
         <!-- 专武 -->
         <div v-if="exclusiveWeapon && leveledExclusiveWeapon" class="p-1 bg-base-200 rounded">
             <div class="p-2 rounded">
+                <div class="text-xs text-base-content/70 mb-2">{{ $t("专武") }}</div>
                 <div class="flex items-center gap-3 mb-1">
                     <ImageFallback
                         :src="leveledExclusiveWeapon.url"
@@ -673,6 +674,7 @@ onBeforeUnmount(() => {
         <div v-if="char.同律武器 && char.同律武器.length > 0" class="p-1 bg-base-200 rounded">
             <div class="space-y-3">
                 <div v-for="leveledWeapon in leveledWeapons" :key="leveledWeapon.id" class="p-2 rounded">
+                    <div class="text-xs text-base-content/70 mb-2">{{ $t("同律武器") }}</div>
                     <div class="flex items-center gap-3 mb-1">
                         <ImageFallback
                             v-if="hasRealSkillWeaponIcon(leveledWeapon)"

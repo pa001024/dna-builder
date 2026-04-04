@@ -161,6 +161,7 @@ export interface Skill {
     字段?: SkillField[]
     术语解释?: Record<string, string>
     召唤物?: SkillSummon
+    创造物?: SkillCreature[]
     cd?: number
     e?: SkillEffect[]
     b?: SkillBuff[]
@@ -179,6 +180,7 @@ export interface SubSkill {
     字段?: SkillField[]
     术语解释?: Record<string, string>
     召唤物?: SkillSummon
+    创造物?: SkillCreature[]
     cd?: number
     e?: SkillEffect[]
     b?: SkillBuff[]
@@ -350,6 +352,7 @@ export interface WeaponSkill {
     削韧?: number[]
     延迟?: number[]
     卡肉?: number[]
+    创造物?: SkillCreature[]
 }
 
 export enum WeaponSkillType {
@@ -364,6 +367,28 @@ export interface SkillSummon {
     名称: string
     攻击延迟: number
     攻击间隔: number
+}
+
+export interface SkillCreature {
+    id?: number
+    形状?: SkillCreatureShape
+    时长?: number
+    速度?: number
+    射击间隔?: number
+    特效循环间隔?: number
+    Vars?: Record<string, number | string | boolean>
+    标签?: string[]
+}
+
+export interface SkillCreatureShape {
+    类型?: "Sphere" | "Box" | "Capsule"
+    BoxHeight?: number
+    BoxLength?: number
+    BoxWidth?: number
+    SphereRadius?: number
+    CapsuleRadius?: number
+    CapsuleHeight?: number
+    Radius?: number
 }
 
 export interface SkillField {
