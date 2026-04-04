@@ -1253,7 +1253,7 @@ dependencies = [
 
 [[package]]
 name = "dna-builder"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "arboard",
  "async-trait",
