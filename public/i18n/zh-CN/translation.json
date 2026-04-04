@@ -108,7 +108,12 @@
     "abyss-dungeon-list": {
         "title": "深渊列表"
     },
+    "abyss-usage": {
+        "desc": "深渊阵容与角色武器统计",
+        "title": "深渊使用率"
+    },
     "accessory": {
+        "category": "分类",
         "description": "描述",
         "draftCoinCost": "铜币消耗",
         "draftDuration": "铸造时间",
@@ -126,7 +131,9 @@
         "totalCount": "共 {{count}} 个饰品",
         "type": "类型",
         "typeAll": "全部",
+        "typeAvatar": "头像",
         "typeChar": "角色饰品",
+        "typeHair": "发型",
         "typeHeadFrame": "头像框",
         "typeSkin": "角色皮肤",
         "typeWeapon": "武器饰品",
@@ -442,6 +449,8 @@
         "dungeon_desc": "查看副本信息和奖励掉落",
         "dynquest": "派遣委托",
         "dynquest_desc": "查看派遣委托信息和奖励",
+        "event": "活动",
+        "event_desc": "查看活动列表与活动详情",
         "fish": "钓鱼",
         "fish_desc": "钓鱼点详细收益计算",
         "hardboss": "梦魇残声",
@@ -465,6 +474,8 @@
         "rank_desc": "查看排名赛奖励",
         "reputation": "区域声名",
         "reputation_desc": "查看区域声名等级与委托信息",
+        "resource": "资源",
+        "resource_desc": "查看资源信息和图标",
         "shop": "商店",
         "shop_desc": "查看商店物品信息",
         "title": "资料库",
@@ -538,6 +549,12 @@
     "errorBoundary": {
         "retry": "重试",
         "title": "组件渲染出错"
+    },
+    "event-detail": {
+        "title": "活动详情"
+    },
+    "event-list": {
+        "title": "活动列表"
     },
     "fish-list": {
         "title": "钓鱼"
@@ -784,6 +801,9 @@
     "map-list": {
         "title": "地图列表"
     },
+    "map-local": {
+        "title": "地图"
+    },
     "mod-detail": {
         "title": "魔之楔详情"
     },
@@ -824,7 +844,7 @@
     },
     "pet_detail": {
         "active_skill": "主动技能",
-        "alternative_form": "异化形态",
+        "alternative_form": "异化",
         "base_id": "基础ID",
         "breakthrough_level_range": "滑块等级范围为 0 到 3，开启老道后视作等级 +1。",
         "capture_exp": "捕获经验",
@@ -899,6 +919,23 @@
         "nextRefresh": "下次刷新",
         "onlyOnce": "仅一次",
         "zhouben": "周本"
+    },
+    "resource": {
+        "background": "背景",
+        "description": "描述",
+        "icon": "图标",
+        "id": "ID",
+        "name": "名称",
+        "rarity": "稀有度",
+        "searchPlaceholder": "搜索资源ID/名称（支持拼音）...",
+        "source": "来源",
+        "title": "资源"
+    },
+    "resource-detail": {
+        "title": "资源详情"
+    },
+    "resource-list": {
+        "title": "资源列表"
     },
     "room": {
         "remove": "删除房间"

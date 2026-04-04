@@ -65,7 +65,8 @@ if (env.isApp && getCurrentWindow().label === "main") {
                 const realPath = path?.replace(/EM\\Binaries\\Win64\\EM-Win64-Shipping.exe$/, "EM.exe")
                 const running = !!path
 
-                if (realPath && (!game.path || game.path !== realPath)) {
+                // 只在未配置路径时自动补全，避免把别的服务器路径写回当前配置。
+                if (!game.path && realPath) {
                     game.path = realPath
                 }
                 if (game.running !== running) {

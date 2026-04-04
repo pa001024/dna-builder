@@ -92,6 +92,7 @@ struct CloudGameWindowOptions {
     always_on_top: Option<bool>,
     skip_taskbar: Option<bool>,
     incognito: Option<bool>,
+    #[allow(unused)]
     open_devtools: Option<bool>,
     user_agent: Option<String>,
     proxy_url: Option<String>,

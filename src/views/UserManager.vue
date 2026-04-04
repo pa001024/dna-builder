@@ -165,7 +165,7 @@ onBeforeUnmount(() => {
                         <tr
                             v-for="user in users"
                             :key="user.id"
-                            class="border-b border-base-300 transition-colors hover:bg-base-100/50"
+                            class="border-b border-base-300 transition-colors duration-200 hover:bg-base-100/50"
                             :class="{ 'bg-primary/10 hover:bg-primary/20': user.id === setting.dnaUserId }"
                         >
                             <!-- 名称 -->

@@ -3,9 +3,13 @@ node .husky/update-version.js
 
 # 格式化代码
 npm run format
-cd src-tauri
-cargo fmt
-cd ..
+
+# 只有 Rust 文件有变更时才运行 cargo fmt
+if git diff --cached --name-only --diff-filter=ACM | rg -n "\\.rs$" >/dev/null; then
+    cd src-tauri
+    cargo fmt
+    cd ..
+fi
 
 # 暂存修改的版本文件
 git add package.json

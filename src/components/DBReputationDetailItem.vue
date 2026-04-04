@@ -169,14 +169,14 @@ const totalLevelExp = computed(() => {
 
         <div class="flex gap-2">
             <button
-                class="px-3 py-1.5 text-sm rounded-full transition-all"
+                class="px-3 py-1.5 text-sm rounded-full transition-all duration-200"
                 :class="activeTab === 'levels' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                 @click="activeTab = 'levels'"
             >
                 {{ $t("reputation.level") }} ({{ reputation.levels.length }})
             </button>
             <button
-                class="px-3 py-1.5 text-sm rounded-full transition-all"
+                class="px-3 py-1.5 text-sm rounded-full transition-all duration-200"
                 :class="activeTab === 'entrusts' ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'"
                 @click="activeTab = 'entrusts'"
             >

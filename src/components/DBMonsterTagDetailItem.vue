@@ -182,7 +182,7 @@ function formatBonusValue(value: number): string {
                     v-for="tag in currentTags"
                     :key="tag.id"
                     :to="`/db/monstertag/${tag.id}`"
-                    class="text-xs px-2 py-1 rounded bg-base-300 hover:bg-base-100 transition-colors"
+                    class="text-xs px-2 py-1 rounded bg-base-300 hover:bg-base-100 transition-colors duration-200"
                     :class="{ 'bg-primary text-primary-content hover:bg-primary': tag.id === monsterTag.id }"
                 >
                     {{ tag.id }}

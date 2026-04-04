@@ -128,7 +128,7 @@ export const headSculptureData: HeadSculpture[] = [
     },
     {
         id: 10022,
-        name: "Portrait : Flora",
+        name: "Portrait: Flora",
         desc: "可将头像更换为芙罗拉的形象。",
         icon: "T_Head_Fuluo",
     },

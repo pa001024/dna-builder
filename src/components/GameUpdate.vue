@@ -6,7 +6,16 @@ import { t } from "i18next"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
-import { cleanupTempDir, extractGameAssets, getFileSize, listDirectories, listFiles, readTextFile, renameFile, writeTextFile } from "../api/app"
+import {
+    cleanupTempDir,
+    extractGameAssets,
+    getFileSize,
+    listDirectories,
+    listFiles,
+    readTextFile,
+    renameFile,
+    writeTextFile,
+} from "../api/app"
 import { useGameStore } from "../store/game"
 import {
     CDN_LIST,
@@ -630,11 +639,10 @@ async function checkHotUpdateStatus() {
         let allFilesComplete = true
         let totalSizeBytes = 0
         for (const version of pendingVersions) {
-            const hotUpdatePakInfo = version.patchVersion === pendingVersions[0].patchVersion ? firstHotUpdatePakInfo : await getHotUpdatePakFilesInfo(
-                selectedCDN.value,
-                activeChannel,
-                version.patchVersion
-            )
+            const hotUpdatePakInfo =
+                version.patchVersion === pendingVersions[0].patchVersion
+                    ? firstHotUpdatePakInfo
+                    : await getHotUpdatePakFilesInfo(selectedCDN.value, activeChannel, version.patchVersion)
             const pakFiles = hotUpdatePakInfo.pakFilesMap.WindowsNoEditor?.pakFileInfos ?? []
             for (const file of pakFiles) {
                 if (file.pakOptionalSign) continue
@@ -1178,7 +1186,7 @@ const launchGame = async () => {
         <div class="flex flex-col h-full p-8 max-w-7xl mx-auto gap-8">
             <!-- 顶部 HUD：服务器配置 -->
             <header
-                class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-base-300/20 backdrop-blur-md rounded-2xl p-4 border border-base-content/5 shadow-xl transition-all hover:border-base-content/10"
+                class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-base-300/20 backdrop-blur-md rounded-2xl p-4 border border-base-content/5 shadow-xl transition-all duration-200 hover:border-base-content/10"
             >
                 <div class="flex items-center gap-3">
                     <img src="/setup-icon.webp" alt="LOGO" class="h-8" />
@@ -1189,7 +1197,7 @@ const launchGame = async () => {
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="group relative">
                         <div
-                            class="flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors cursor-pointer"
+                            class="flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200 cursor-pointer"
                         >
                             <Icon icon="ri:server-line" class="text-base-content/40 w-4 h-4" />
                             <input
@@ -1213,7 +1221,7 @@ const launchGame = async () => {
 
                     <div class="group relative">
                         <div
-                            class="flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors cursor-pointer"
+                            class="flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200 cursor-pointer"
                         >
                             <Icon icon="ri:cloud-line" class="text-base-content/40 w-4 h-4" />
                             <Select
@@ -1228,7 +1236,7 @@ const launchGame = async () => {
                     </div>
 
                     <div
-                        class="group relative flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors"
+                        class="group relative flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200"
                         :title="t('game-update.threads')"
                     >
                         <Icon icon="ri:speed-line" class="text-base-content/40 w-4 h-4" />
@@ -1242,7 +1250,7 @@ const launchGame = async () => {
                     </div>
 
                     <label
-                        class="group relative flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors cursor-pointer"
+                        class="group relative flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200 cursor-pointer"
                     >
                         <input v-model="showOptionalVoicePacks" type="checkbox" class="checkbox checkbox-xs" />
                         <span class="text-sm">语音包</span>
@@ -1256,19 +1264,19 @@ const launchGame = async () => {
                 <div v-if="versionList" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <!-- 目录设置卡片 -->
                     <div
-                        class="md:col-span-2 bg-base-300/40 backdrop-blur-sm border border-base-content/10 rounded-2xl p-5 hover:bg-base-300/50 transition-colors group"
+                        class="md:col-span-2 bg-base-300/40 backdrop-blur-sm border border-base-content/10 rounded-2xl p-5 hover:bg-base-300/50 transition-colors duration-200 group"
                     >
                         <div class="flex justify-between items-center mb-3">
                             <span class="opacity-60 text-xs font-bold uppercase tracking-wider">{{ t("game-update.install_path") }}</span>
                             <button
                                 @click="selectGameDir"
-                                class="text-primary hover:text-base-content text-xs flex items-center gap-1 transition-colors"
+                                class="text-primary hover:text-base-content text-xs flex items-center gap-1 transition-colors duration-200"
                             >
                                 <Icon icon="ri:folder-line" /> {{ t("game-update.change") }}
                             </button>
                         </div>
                         <div
-                            class="text-sm font-mono truncate opacity-80 group-hover:text-base-content transition-colors"
+                            class="text-sm font-mono truncate opacity-80 group-hover:text-base-content transition-colors duration-200"
                             :title="gamePath"
                         >
                             {{ gamePath || t("game-update.no_path_selected") }}
@@ -1330,7 +1338,7 @@ const launchGame = async () => {
                     <button
                         @click="preDownloadAllFiles()"
                         :disabled="isDownloading || isExtracting"
-                        class="px-4 py-2 bg-info hover:bg-info/80 text-base-content text-xs font-bold uppercase tracking-wide rounded-lg transition-all shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-4 py-2 bg-info hover:bg-info/80 text-base-content text-xs font-bold uppercase tracking-wide rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {{ isDownloading ? t("game-update.downloading") : t("game-update.start_pre_download") }}
                     </button>

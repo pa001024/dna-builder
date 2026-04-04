@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { calculateFishPrice } from "@/utils/fish-utils"
-import { Fish, fish2SpotMap, fishingSpotMap, fishMap } from "../data"
+import { Fish, fish2SpotMap, fishingSpotMap, fishMap, resourceMap } from "../data"
 
 const props = defineProps<{
     fish: Fish
@@ -60,6 +60,11 @@ function getS2BFish(s2bId?: number): Fish | null {
 const s2bFish = computed(() => getS2BFish(props.fish.s2b))
 
 /**
+ * 获取鱼对应的资源信息
+ */
+const fishResource = computed(() => resourceMap.get(props.fish.rid) || null)
+
+/**
  * 获取当前鱼所在的鱼池和权重信息
  */
 const fishSpots = computed(() => {
@@ -90,13 +95,23 @@ const fishSpots = computed(() => {
         </div>
 
         <div class="flex justify-center items-center">
-            <img :src="`/imgs/webp/T_Fish_${fish.icon}.webp`" class="w-24 object-cover rounded" />
+            <img :src="`/imgs/res/T_Fish_${fish.icon}.webp`" class="w-24 object-cover rounded" />
         </div>
 
         <div class="flex flex-wrap gap-2 text-sm opacity-70">
             <span>Lv. {{ fish.level }}</span>
             <span>长度: {{ fish.length[0] }}-{{ fish.length[1] }}</span>
             <span>价格: {{ fish.price[0] }}</span>
+        </div>
+
+        <div v-if="fishResource?.desc" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("resource.description") }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap">{{ fishResource.desc }}</div>
+        </div>
+
+        <div v-if="fishResource?.desc2" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("resource.background") }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap">{{ fishResource.desc2 }}</div>
         </div>
 
         <div class="p-3 bg-base-200 rounded">
@@ -112,7 +127,7 @@ const fishSpots = computed(() => {
         <div v-if="s2bFish" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-1">授渔以鱼</div>
             <div class="flex items-center gap-2">
-                <img :src="`/imgs/webp/T_Fish_${s2bFish.icon}.webp`" class="w-10 h-10 object-cover rounded" />
+                <img :src="`/imgs/res/T_Fish_${s2bFish.icon}.webp`" class="w-10 h-10 object-cover rounded" />
                 <SRouterLink :to="`/db/fish/${s2bFish.id}`" class="text-sm link link-primary">
                     {{ s2bFish.name }}
                 </SRouterLink>

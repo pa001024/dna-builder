@@ -25,12 +25,14 @@ export function rsa_encrypt(text: string, public_key_b64: string): string {
             lines.push(public_key_b64.slice(i, i + 64))
         }
         const pem = `-----BEGIN PUBLIC KEY-----\n${lines.join("\n")}\n-----END PUBLIC KEY-----`
-
         const publicKey = forge.pki.publicKeyFromPem(pem)
         const textBytes = forge.util.encodeUtf8(text)
-        const encrypted = publicKey.encrypt(textBytes)
-
-        return forge.util.encode64(encrypted)
+        const chunk_size = 0x75
+        let encrypted_bytes = ""
+        for (let i = 0; i < textBytes.length; i += chunk_size) {
+            encrypted_bytes += publicKey.encrypt(textBytes.slice(i, i + chunk_size))
+        }
+        return forge.util.encode64(encrypted_bytes)
     } catch (e) {
         throw new Error(`[DNA] RSA 加密失败: ${(e as Error).message}`)
     }
@@ -49,6 +51,60 @@ export function rand_str2(length: number = 16): string {
     let result = ""
     for (let i = 0; i < length; i++) {
         result += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return result
+}
+
+/**
+ * 兼容 Java.util.Random 的最小实现，用于还原原生签名逻辑。
+ */
+class JavaRandom {
+    private readonly multiplier = 0x5deece66dn
+    private readonly addend = 0xbn
+    private readonly mask = (1n << 48n) - 1n
+    private seed: bigint
+
+    constructor(seed: bigint = BigInt(Date.now())) {
+        this.seed = (seed ^ this.multiplier) & this.mask
+    }
+
+    /**
+     * 生成指定 bit 数的随机值。
+     */
+    private next(bits: number): number {
+        this.seed = (this.seed * this.multiplier + this.addend) & this.mask
+        return Number(this.seed >> BigInt(48 - bits))
+    }
+
+    /**
+     * 生成指定上界内的随机整数。
+     */
+    public nextInt(bound: number): number {
+        if (bound <= 0) {
+            throw new Error("bound must be positive")
+        }
+        if ((bound & -bound) === bound) {
+            return Number((BigInt(bound) * BigInt(this.next(31))) >> 31n)
+        }
+        let bits = 0
+        let value = 0
+        do {
+            bits = this.next(31)
+            value = bits % bound
+        } while (bits - value + (bound - 1) < 0)
+        return value
+    }
+}
+
+/**
+ * 生成原生 `p63.b(30)` 对应的 30 位数字串。
+ */
+function rand_digit_str(length: number): string {
+    const chars = "01234567890123456789012345678901234567890123456789010123456789"
+    const random = new JavaRandom()
+    let result = ""
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(random.nextInt(0x3e))
     }
     return result
 }
@@ -248,6 +304,34 @@ export function build_signature122(pk: string, payload: Record<string, any>, tok
     const tn = `${rk_encrypted},${sign_encoded}`
 
     return { rk, tn, sa }
+}
+
+/**
+ * 生成 1.3.0 版本的请求签名。
+ * @param pk RSA 公钥
+ * @param payload 请求参数
+ * @param token 可选 token
+ * @returns 包含 rk、tn、sa 的签名数据
+ */
+export function build_signature130(pk: string, payload: Record<string, any>, token?: string): Record<string, any> {
+    const rk = rand_str(16)
+    const raw_sa = rand_digit_str(30)
+
+    const sign_params: Record<string, any> = {}
+    for (const [k, v] of Object.entries(payload)) {
+        sign_params[k] = String(v)
+    }
+    if (token) {
+        sign_params.token = token
+    }
+    sign_params.sa = raw_sa
+
+    const sign_val = sign_shuffled(sign_params, rk)
+    const sign_encoded = xor_encode(sign_val, rk)
+    const rk_encrypted = rsa_encrypt(rk, pk)
+    const tn = `${rk_encrypted},${sign_encoded}`
+
+    return { rk, tn, sa: raw_sa }
 }
 
 // 构建上传图片签名（返回签名和密钥）

@@ -1,4 +1,5 @@
 import { type FieldNode, type GraphQLResolveInfo, Kind } from "graphql"
+import { resolvers as abyssUsageResolvers, typeDefs as abyssUsageSchema } from "./abyssUsage"
 import { resolvers as activityResolvers, typeDefs as activitySchema } from "./activity"
 import { resolvers as adminResolvers, typeDefs as adminSchema } from "./admin"
 import { resolvers as buildResolvers, typeDefs as buildSchema } from "./build"
@@ -27,6 +28,7 @@ export function schemaWith(ctx: any) {
         missionsIngameSchema,
         guideSchema,
         adminSchema,
+        abyssUsageSchema,
         todoSchema,
         buildSchema,
         timelineSchema,
@@ -45,6 +47,7 @@ export function schemaWith(ctx: any) {
         missionsIngameResolvers,
         guideResolvers,
         adminResolvers,
+        abyssUsageResolvers,
         todoResolvers,
         buildResolvers,
         timelineResolvers,

@@ -2,12 +2,18 @@
 // 作为客户端，通过 GraphQL API 更新委托数据到远端服务器
 
 import "dotenv/config"
+import { Database } from "bun:sqlite"
+import { createHash } from "node:crypto"
 import { readFileSync, writeFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { fetch } from "bun"
 import { Cron } from "croner"
-import type { DNAActivity } from "dna-api"
+import type { DNAActivity, DNACommentListResponse, DNARoleEntity } from "dna-api"
+import { and, desc, eq } from "drizzle-orm"
+import { drizzle } from "drizzle-orm/bun-sqlite"
+import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
 import { WebSocket } from "ws"
+import { charMap, petMap, weaponMap } from "../../src/data"
 import { getDNAAPI } from "./api/dna"
 
 // 环境变量配置
@@ -17,11 +23,637 @@ const DEV_CODE = process.env.DEV_CODE
 const USER_TOKEN = process.env.USER_TOKEN
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN
 const USER_ID = process.env.USER_ID
+const POST_IDS = parsePostIds(process.env.POST_ID)
 const ENV_FILE_PATH = resolve(process.cwd(), ".env")
+const UPLOAD_DB_PATH = resolve(process.cwd(), "upload.db")
 
 if (!API_TOKEN || !DEV_CODE || !USER_TOKEN || !REFRESH_TOKEN) {
     console.error("缺少必要的环境变量: API_TOKEN, DEV_CODE, USER_TOKEN, REFRESH_TOKEN")
     process.exit(1)
+}
+
+const uploadDb = drizzle(new Database(UPLOAD_DB_PATH))
+
+const uploadComments = sqliteTable(
+    "upload_comments",
+    {
+        id: text("id").primaryKey(),
+        postId: text("post_id").notNull(),
+        commentId: integer("comment_id").notNull(),
+        userId: text("user_id").notNull(),
+        pageIndex: integer("page_index").notNull(),
+        uploadedAt: text("uploaded_at").notNull(),
+    },
+    table => [uniqueIndex("upload_comments_post_comment_idx").on(table.postId, table.commentId)]
+)
+
+type UploadCommentRow = typeof uploadComments.$inferInsert
+
+type AbyssBestTimeVo1 = {
+    charIcon?: string
+    closeWeaponIcon?: string
+    langRangeWeaponIcon?: string
+    petIcon?: string
+    phantomCharIcon1?: string
+    phantomCharIcon2?: string
+    phantomWeaponIcon1?: string
+    phantomWeaponIcon2?: string
+}
+
+type AbyssBestTimeIds = {
+    charId: number | null
+    meleeId: number | null
+    rangedId: number | null
+    petId: number | null
+    support1: number | null
+    supportWeapon1: number | null
+    support2: number | null
+    supportWeapon2: number | null
+}
+
+type AbyssUsageSubmissionInput = {
+    uidSha256: string
+    level?: number | null
+    charId: number
+    meleeId: number
+    rangedId: number
+    support1: number
+    supportWeapon1: number
+    support2: number
+    supportWeapon2: number
+    stars: number
+    petId?: number | null
+    ownedChars?: Array<{ charId: number; gradeLevel: number }>
+    ownedWeapons?: Array<{ weaponId: number; skillLevel: number }>
+}
+
+type RoleInfoLookupResult = {
+    is_success?: boolean
+    data?: DNARoleEntity | null
+    msg?: string
+}
+
+type RoleInfoLookupApi = {
+    defaultRoleForTool(mode: number, userId: string): Promise<RoleInfoLookupResult>
+}
+
+/**
+ * 解析帖子 ID 列表。
+ * @param value 环境变量值。
+ * @returns 帖子 ID 数组。
+ */
+function parsePostIds(value?: string) {
+    return (value || "")
+        .split(",")
+        .map(item => item.trim())
+        .filter(item => item.length > 0)
+}
+
+/**
+ * 判断角色信息查询失败是否属于可重试场景。
+ * @param error 异常或返回消息。
+ * @returns 是否需要重试。
+ */
+function isRetryableRoleInfoLookupFailure(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error || "")
+    return message.includes("空返回值")
+}
+
+/**
+ * 初始化上传去重表。
+ */
+function ensureUploadDb() {
+    uploadDb.run(`
+        CREATE TABLE IF NOT EXISTS upload_comments (
+            id TEXT PRIMARY KEY NOT NULL,
+            post_id INTEGER NOT NULL,
+            comment_id INTEGER NOT NULL,
+            user_id TEXT NOT NULL,
+            page_index INTEGER NOT NULL,
+            uploaded_at TEXT NOT NULL
+        )
+    `)
+    uploadDb.run(`
+        CREATE UNIQUE INDEX IF NOT EXISTS upload_comments_post_comment_idx
+        ON upload_comments(post_id, comment_id)
+    `)
+}
+
+/**
+ * 计算字符串 SHA-256。
+ * @param input 输入字符串。
+ * @returns 十六进制摘要。
+ */
+function sha256(input: string) {
+    return createHash("sha256").update(input, "utf8").digest("hex")
+}
+
+/**
+ * 归一化深渊上传用的角色 ID。
+ * @param charId 角色 ID。
+ * @returns 上传时使用的角色 ID。
+ */
+function normalizeAbyssCharId(charId: number): number {
+    return charId === 160101 ? 1601 : charId
+}
+
+/**
+ * 从图标 URL 中提取资源名。
+ * @param url 图标地址。
+ * @returns 资源名。
+ */
+function extractAbyssIconName(url?: string) {
+    if (!url) {
+        return ""
+    }
+    const match = url.match(/Head_(.+?)\.png(?:\?.*)?$/i)
+    if (!match?.[1]) {
+        return ""
+    }
+    let icon = match[1].replace(/^Pet_/, "")
+    if (icon === "Bow_Lieyan") {
+        icon = "Bow_Shashi"
+    } else if (icon === "Bow_hugaung") {
+        icon = "Bow_Huguang"
+    }
+    return icon
+}
+
+/**
+ * 按图标字段建立反查表。
+ * @param items 数据项。
+ * @returns 图标到 ID 的映射。
+ */
+function buildIconIdMap<T extends { id: number; icon?: string }>(items: Iterable<T>) {
+    const map = new Map<string, number>()
+    for (const item of items) {
+        if (item.icon) {
+            map.set(item.icon, item.id)
+        }
+    }
+    map.set("Nanzhu", 160101)
+    return map
+}
+
+const charIconIdMap = buildIconIdMap(charMap.values())
+const weaponIconIdMap = buildIconIdMap(weaponMap.values())
+const petIconIdMap = buildIconIdMap(petMap.values())
+
+/**
+ * 从已持有角色中优先按 icon 反查角色 ID。
+ * @param roleInfo 角色信息。
+ * @param icon 图标名。
+ * @returns 角色 ID。
+ */
+function findOwnedCharIdByIcon(roleInfo: DNARoleEntity, icon?: string) {
+    const roleShow = roleInfo.roleInfo?.roleShow
+    if (!roleShow || !icon) {
+        return null
+    }
+    const found = roleShow.roleChars.find(item => item.icon === icon && item.unLocked)
+    return found ? found.charId : null
+}
+
+/**
+ * 从已持有武器中优先按 icon 反查武器 ID。
+ * @param roleInfo 角色信息。
+ * @param icon 图标名。
+ * @returns 武器 ID。
+ */
+function findOwnedWeaponIdByIcon(roleInfo: DNARoleEntity, icon?: string) {
+    const roleShow = roleInfo.roleInfo?.roleShow
+    if (!roleShow || !icon) {
+        return null
+    }
+    const ownedWeapons = [...roleShow.closeWeapons, ...roleShow.langRangeWeapons]
+    const found = ownedWeapons.find(item => item.icon === icon && item.unLocked)
+    return found ? found.weaponId : null
+}
+
+/**
+ * 反解深渊阵容图片到 ID。
+ * @param bestTimeVo1 深渊阵容图。
+ * @returns 结构化 ID。
+ */
+function parseAbyssBestTimeVo1(bestTimeVo1?: AbyssBestTimeVo1 | null): AbyssBestTimeIds {
+    const supportSlots = [
+        {
+            charId: charIconIdMap.get(extractAbyssIconName(bestTimeVo1?.phantomCharIcon1)) ?? null,
+            weaponId: weaponIconIdMap.get(extractAbyssIconName(bestTimeVo1?.phantomWeaponIcon1)) ?? null,
+        },
+        {
+            charId: charIconIdMap.get(extractAbyssIconName(bestTimeVo1?.phantomCharIcon2)) ?? null,
+            weaponId: weaponIconIdMap.get(extractAbyssIconName(bestTimeVo1?.phantomWeaponIcon2)) ?? null,
+        },
+    ]
+
+    supportSlots.sort((left, right) => {
+        const leftChar = left.charId ?? Number.POSITIVE_INFINITY
+        const rightChar = right.charId ?? Number.POSITIVE_INFINITY
+        if (leftChar !== rightChar) {
+            return leftChar - rightChar
+        }
+        const leftWeapon = left.weaponId ?? Number.POSITIVE_INFINITY
+        const rightWeapon = right.weaponId ?? Number.POSITIVE_INFINITY
+        return leftWeapon - rightWeapon
+    })
+
+    return {
+        charId: charIconIdMap.get(extractAbyssIconName(bestTimeVo1?.charIcon)) ?? null,
+        meleeId: weaponIconIdMap.get(extractAbyssIconName(bestTimeVo1?.closeWeaponIcon)) ?? null,
+        rangedId: weaponIconIdMap.get(extractAbyssIconName(bestTimeVo1?.langRangeWeaponIcon)) ?? null,
+        petId: petIconIdMap.get(extractAbyssIconName(bestTimeVo1?.petIcon)) ?? null,
+        support1: supportSlots[0]?.charId ?? null,
+        supportWeapon1: supportSlots[0]?.weaponId ?? null,
+        support2: supportSlots[1]?.charId ?? null,
+        supportWeapon2: supportSlots[1]?.weaponId ?? null,
+    }
+}
+
+/**
+ * 归一化可拥有的角色 ID 列表。
+ * @param items 角色列表。
+ * @returns 去重后的角色列表。
+ */
+function normalizeOwnedCharIds(items?: Array<{ charId: number; gradeLevel: number }>) {
+    const charLevels = new Map<number, number>()
+    for (const item of items || []) {
+        if (!Number.isInteger(item.charId) || item.charId <= 0) continue
+        if (!Number.isInteger(item.gradeLevel) || item.gradeLevel < 0) continue
+        const current = charLevels.get(item.charId)
+        if (current == null || item.gradeLevel > current) {
+            charLevels.set(item.charId, item.gradeLevel)
+        }
+    }
+    return [...charLevels.entries()].map(([charId, gradeLevel]) => ({ charId, gradeLevel }))
+}
+
+/**
+ * 归一化可拥有的武器 ID 列表。
+ * @param items 武器列表。
+ * @returns 去重后的武器列表。
+ */
+function normalizeOwnedWeaponIds(items?: Array<{ weaponId: number; skillLevel: number }>) {
+    const weaponLevels = new Map<number, number>()
+    for (const item of items || []) {
+        if (!Number.isInteger(item.weaponId) || item.weaponId <= 0) continue
+        if (!Number.isInteger(item.skillLevel) || item.skillLevel < 0) continue
+        const current = weaponLevels.get(item.weaponId)
+        if (current == null || item.skillLevel > current) {
+            weaponLevels.set(item.weaponId, item.skillLevel)
+        }
+    }
+    return [...weaponLevels.entries()].map(([weaponId, skillLevel]) => ({ weaponId, skillLevel }))
+}
+
+/**
+ * 先按持有信息反解，失败后回退到全局图标映射。
+ * @param roleInfo 角色信息。
+ * @param bestTimeVo1 深渊阵容图。
+ * @returns 结构化 ID。
+ */
+function parseAbyssBestTimeVo1WithOwned(roleInfo: DNARoleEntity, bestTimeVo1?: AbyssBestTimeVo1 | null): AbyssBestTimeIds {
+    const parsed = parseAbyssBestTimeVo1(bestTimeVo1)
+    return {
+        charId: normalizeAbyssCharId(findOwnedCharIdByIcon(roleInfo, bestTimeVo1?.charIcon) ?? parsed.charId ?? 0) || null,
+        meleeId: findOwnedWeaponIdByIcon(roleInfo, bestTimeVo1?.closeWeaponIcon) ?? parsed.meleeId,
+        rangedId: findOwnedWeaponIdByIcon(roleInfo, bestTimeVo1?.langRangeWeaponIcon) ?? parsed.rangedId,
+        petId: parsed.petId,
+        support1: normalizeAbyssCharId(findOwnedCharIdByIcon(roleInfo, bestTimeVo1?.phantomCharIcon1) ?? parsed.support1 ?? 0) || null,
+        supportWeapon1: findOwnedWeaponIdByIcon(roleInfo, bestTimeVo1?.phantomWeaponIcon1) ?? parsed.supportWeapon1,
+        support2: normalizeAbyssCharId(findOwnedCharIdByIcon(roleInfo, bestTimeVo1?.phantomCharIcon2) ?? parsed.support2 ?? 0) || null,
+        supportWeapon2: findOwnedWeaponIdByIcon(roleInfo, bestTimeVo1?.phantomWeaponIcon2) ?? parsed.supportWeapon2,
+    }
+}
+
+/**
+ * 从当前账号已持有数据里提取深渊上传 payload，并返回失败原因。
+ * @param roleInfo 角色信息。
+ * @returns 上传 payload 和失败原因。
+ */
+async function buildAbyssUploadPayloadWithReason(
+    roleInfo: DNARoleEntity
+): Promise<{ payload: AbyssUsageSubmissionInput | null; reason: string | null }> {
+    const roleShow = roleInfo.roleInfo?.roleShow
+    if (!roleShow) {
+        return { payload: null, reason: "缺少 roleShow" }
+    }
+
+    const bestTimeVo1 = roleInfo.roleInfo?.abyssInfo?.bestTimeVo1
+    if (!bestTimeVo1) {
+        return { payload: null, reason: "缺少 abyssInfo.bestTimeVo1" }
+    }
+
+    const lineup = parseAbyssBestTimeVo1WithOwned(roleInfo, bestTimeVo1)
+    const uidSource = String(roleShow.roleId ?? "")
+    if (!uidSource) {
+        return { payload: null, reason: "缺少 roleId" }
+    }
+
+    const uidSha256 = sha256(uidSource)
+    if (!uidSha256) {
+        return { payload: null, reason: "uidSha256 生成失败" }
+    }
+
+    const level = roleShow.level
+    if (!Number.isInteger(level) || level <= 0) {
+        return { payload: null, reason: `level 非法: ${String(level)}` }
+    }
+
+    const starsValue = String(roleInfo.roleInfo.abyssInfo?.stars ?? "").split("/")[0]
+    const stars = Number(starsValue)
+    if (!Number.isInteger(stars) || stars < 0) {
+        return { payload: null, reason: `stars 非法: ${starsValue || "空"}` }
+    }
+
+    const payload: AbyssUsageSubmissionInput = {
+        uidSha256,
+        level,
+        charId: lineup.charId != null ? normalizeAbyssCharId(lineup.charId) : 0,
+        meleeId: lineup.meleeId ?? 0,
+        rangedId: lineup.rangedId ?? 0,
+        support1: lineup.support1 != null ? normalizeAbyssCharId(lineup.support1) : 0,
+        supportWeapon1: lineup.supportWeapon1 ?? 0,
+        support2: lineup.support2 != null ? normalizeAbyssCharId(lineup.support2) : 0,
+        supportWeapon2: lineup.supportWeapon2 ?? 0,
+        stars,
+        ownedChars: normalizeOwnedCharIds(roleShow.roleChars),
+        ownedWeapons: normalizeOwnedWeaponIds([...roleShow.closeWeapons, ...roleShow.langRangeWeapons]),
+    }
+    if (lineup.petId != null) {
+        payload.petId = lineup.petId
+    }
+    return { payload, reason: null }
+}
+
+/**
+ * 提交深渊使用数据。
+ * @param payload 深渊提交数据。
+ */
+async function submitAbyssUsage(payload: AbyssUsageSubmissionInput) {
+    const mutation = `
+        mutation SubmitAbyssUsage($input: AbyssUsageSubmissionInput!) {
+            submitAbyssUsage(input: $input) {
+                id
+            }
+        }
+    `
+    const response = await fetch(`${API_BASE_URL}/graphql`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            query: mutation,
+            variables: {
+                input: payload,
+            },
+        }),
+    })
+    const result = await response.json()
+    if (result.errors?.length) {
+        throw new Error(result.errors.map((item: { message: string }) => item.message).join(", "))
+    }
+    return result.data?.submitAbyssUsage?.id as string | undefined
+}
+
+/**
+ * 创建按 userid 缓存的角色信息查询器。
+ * @param dnaAPI DNA API 实例。
+ * @returns 按 userid 缓存的角色信息查询函数。
+ */
+function createRoleInfoLookup(dnaAPI: RoleInfoLookupApi) {
+    const cache = new Map<string, Promise<DNARoleEntity | null>>()
+
+    return async (userId: string) => {
+        const cached = cache.get(userId)
+        if (cached) {
+            return cached
+        }
+
+        const promise = (async () => {
+            const roleRes = await dnaAPI.defaultRoleForTool(2, userId)
+            if (!roleRes.is_success) {
+                throw new Error(roleRes.msg || "角色信息查询失败")
+            }
+            return roleRes.data || null
+        })()
+
+        cache.set(userId, promise)
+        return promise
+    }
+}
+
+/**
+ * 判断评论是否已经处理过。
+ * @param postId 帖子 ID。
+ * @param commentId 评论 ID。
+ * @returns 是否已处理。
+ */
+async function hasUploadedComment(postId: string, commentId: number) {
+    const rows = await uploadDb
+        .select({ id: uploadComments.id })
+        .from(uploadComments)
+        .where(and(eq(uploadComments.postId, postId), eq(uploadComments.commentId, commentId)))
+        .limit(1)
+    return rows.length > 0
+}
+
+/**
+ * 获取已处理到的最后页码。
+ * @param postId 帖子 ID。
+ * @returns 最后一页页码。
+ */
+async function getLastUploadedPageIndex(postId: string) {
+    const rows = await uploadDb
+        .select({ pageIndex: uploadComments.pageIndex })
+        .from(uploadComments)
+        .where(eq(uploadComments.postId, postId))
+        .orderBy(desc(uploadComments.pageIndex))
+        .limit(1)
+    return rows[0]?.pageIndex ?? 0
+}
+
+/**
+ * 记录评论已处理。
+ * @param postId 帖子 ID。
+ * @param commentId 评论 ID。
+ * @param userId 用户 ID。
+ * @param pageIndex 页码。
+ */
+async function markCommentUploaded(postId: string, commentId: number, userId: string, pageIndex: number) {
+    const row: UploadCommentRow = {
+        id: `${postId}-${commentId}`,
+        postId,
+        commentId,
+        userId,
+        pageIndex,
+        uploadedAt: new Date().toISOString(),
+    }
+    await uploadDb
+        .insert(uploadComments)
+        .values(row)
+        .onConflictDoUpdate({
+            target: [uploadComments.postId, uploadComments.commentId],
+            set: {
+                userId,
+                pageIndex,
+                uploadedAt: row.uploadedAt,
+            },
+        })
+}
+
+/**
+ * 拉取评论分页。
+ * @param dnaAPI DNA API 实例。
+ * @param pageIndex 页码。
+ * @returns 评论分页数据。
+ */
+async function fetchPostComments(dnaAPI: ReturnType<typeof getDNAAPI>, postId: string, pageIndex: number): Promise<DNACommentListResponse> {
+    if (!postId) {
+        throw new Error("POST_ID 未配置")
+    }
+    const res = await dnaAPI.getPostCommentList(postId, pageIndex, 20, 0)
+    if (res.is_success && res.data) {
+        return res.data
+    }
+    throw new Error(`获取评论失败: ${res.msg}`)
+}
+
+/**
+ * 扫描帖子评论并自动上传深渊数据。
+ */
+async function updateAbyssUsageFromComments() {
+    if (POST_IDS.length === 0) {
+        console.log("未配置 POST_ID，跳过深渊评论上传")
+        return
+    }
+    ensureUploadDb()
+    const dnaAPI = await prepareDNAAPI()
+    let totalComments = 0
+    let uploadedCount = 0
+    let skippedCount = 0
+    let wsClient: WsClient | null = null
+    const processedUserIds = new Set<string>()
+    const roleInfoCache = new Map<string, DNARoleEntity | null>()
+
+    console.log(`${new Date().toLocaleString()} 开始扫描帖子评论 - postId: ${POST_IDS.join(",")}`)
+
+    try {
+        const getRoleInfoForUserId = createRoleInfoLookup(dnaAPI)
+        for (const postId of POST_IDS) {
+            const pageIndex = Math.max(1, await getLastUploadedPageIndex(postId))
+            console.log(`开始扫描帖子 ${postId}，从第 ${pageIndex} 页继续扫描`)
+
+            let currentPageIndex = pageIndex
+            while (true) {
+                const page = await fetchPostComments(dnaAPI, postId, currentPageIndex)
+                const comments = page.postCommentList || []
+                if (comments.length === 0) {
+                    break
+                }
+
+                for (const comment of comments) {
+                    totalComments++
+                    if (await hasUploadedComment(postId, comment.commentId)) {
+                        skippedCount++
+                        continue
+                    }
+
+                    const userId = comment.userId?.trim()
+                    if (!userId) {
+                        console.log(`评论 ${comment.commentId} 缺少 userId，已跳过`)
+                        await markCommentUploaded(postId, comment.commentId, "", currentPageIndex)
+                        skippedCount++
+                        continue
+                    }
+
+                    if (processedUserIds.has(userId)) {
+                        await markCommentUploaded(postId, comment.commentId, userId, currentPageIndex)
+                        skippedCount++
+                        console.log(`评论 ${comment.commentId} 对应 userId ${userId} 已处理，已写入跳过列表`)
+                        continue
+                    }
+
+                    try {
+                        let roleInfo = roleInfoCache.get(userId)
+                        if (roleInfo === undefined) {
+                            try {
+                                roleInfo = await getRoleInfoForUserId(userId)
+                            } catch (error) {
+                                if (isRetryableRoleInfoLookupFailure(error)) {
+                                    console.log(
+                                        `评论 ${comment.commentId} 角色信息查询失败，1 秒后重试: ${error instanceof Error ? error.message : String(error)}`
+                                    )
+                                    await sleep(1000)
+                                    try {
+                                        roleInfo = await getRoleInfoForUserId(userId)
+                                    } catch (retryError) {
+                                        const retryMessage = retryError instanceof Error ? retryError.message : String(retryError)
+                                        if (isRetryableRoleInfoLookupFailure(retryError)) {
+                                            console.log(`评论 ${comment.commentId} 角色信息查询失败，已重试仍失败，已跳过: ${retryMessage}`)
+                                        } else {
+                                            console.error(`评论 ${comment.commentId} 角色信息查询失败:`, retryError)
+                                        }
+                                        roleInfo = null
+                                    }
+                                } else {
+                                    throw error
+                                }
+                            }
+                            if (roleInfo === null) {
+                                console.log(`评论 ${comment.commentId} 未查询到角色信息`)
+                            }
+                            roleInfoCache.set(userId, roleInfo)
+                        }
+
+                        if (!roleInfo) {
+                            console.log(`评论 ${comment.commentId} 角色信息最终失败，已跳过且不写入db`)
+                            skippedCount++
+                            continue
+                        }
+
+                        if (!wsClient) {
+                            wsClient = new WsClient(dnaAPI.BASE_WEB_SOCKET_URL, dnaAPI.token, USER_ID || "", 10000)
+                            await wsClient.connect()
+                            await sleep(2000)
+                        }
+
+                        const uploadResult = await buildAbyssUploadPayloadWithReason(roleInfo)
+                        if (!uploadResult.payload) {
+                            console.log(
+                                `评论 ${comment.commentId} 无法生成深渊上传数据: ${uploadResult.reason ?? "未知原因"}，postId: ${postId}，pageIndex: ${currentPageIndex}，userId: ${userId}`
+                            )
+                            await markCommentUploaded(postId, comment.commentId, userId, currentPageIndex)
+                            skippedCount++
+                            continue
+                        }
+
+                        const submissionId = await submitAbyssUsage(uploadResult.payload)
+                        if (!submissionId) {
+                            throw new Error("上传结果为空")
+                        }
+
+                        await markCommentUploaded(postId, comment.commentId, userId, currentPageIndex)
+                        processedUserIds.add(userId)
+                        uploadedCount++
+                        console.log(`评论 ${comment.commentId} 上传成功，submissionId: ${submissionId}`)
+                    } catch (error) {
+                        console.error(`评论 ${comment.commentId} 处理失败:`, error)
+                    }
+                }
+
+                if (!page.hasNext) {
+                    break
+                }
+                currentPageIndex++
+            }
+        }
+    } finally {
+        wsClient?.close()
+    }
+
+    console.log(`${new Date().toLocaleString()} 评论扫描完成，评论数: ${totalComments}, 已上传: ${uploadedCount}, 已跳过: ${skippedCount}`)
 }
 
 // 休眠函数
@@ -70,6 +702,7 @@ class WsClient {
     connect(): Promise<void> {
         return new Promise((resolve, reject) => {
             try {
+                let settled = false
                 // 创建WebSocket连接，添加自定义请求头
                 const ws = new WebSocket(this.url, {
                     headers: {
@@ -83,23 +716,34 @@ class WsClient {
                     console.log(`${new Date().toLocaleString()} WebSocket连接已建立`)
                     this.isConnected = true
                     this.startHeartbeat()
-                    resolve()
                 })
 
                 ws.on("message", (data: WebSocket.Data) => {
                     console.log(`${new Date().toLocaleString()} 收到WebSocket消息: ${data}`)
+                    if (!settled) {
+                        settled = true
+                        resolve()
+                    }
                 })
 
                 ws.on("close", () => {
                     console.log(`${new Date().toLocaleString()} WebSocket连接已关闭`)
                     this.isConnected = false
                     this.stopHeartbeat()
+                    if (!settled) {
+                        settled = true
+                        reject(new Error("WebSocket在收到首条消息前关闭"))
+                    }
                 })
 
                 ws.on("error", (error: Error) => {
                     console.error(`${new Date().toLocaleString()} WebSocket错误: ${error}`)
                     this.isConnected = false
                     this.stopHeartbeat()
+                    if (!settled) {
+                        settled = true
+                        reject(error)
+                    }
                 })
 
                 this.ws = ws
@@ -410,6 +1054,7 @@ async function main() {
 
     console.log(`启动模式: ${mode}, 服务器: ${server}`)
     console.log(`GraphQL API: ${API_BASE_URL}`)
+    console.log(`评论帖子 ID: ${POST_IDS.length > 0 ? POST_IDS.join(",") : "未配置"}`)
 
     if (mode === "cron") {
         // 持续定时执行（每小时）
@@ -417,6 +1062,7 @@ async function main() {
             await updateMH(server, 2)
             // 防止API没更新
             await updateMH(server, 3)
+            await updateAbyssUsageFromComments()
             const next = getNextUpdateTime()
             console.log(`下一次同步: ${new Date(next).toLocaleString()}`)
         }
@@ -427,6 +1073,7 @@ async function main() {
 
         // 立即执行一次
         await updateMH(server, 1)
+        await updateAbyssUsageFromComments()
 
         // 保持进程运行
         process.on("SIGINT", () => {
@@ -436,8 +1083,10 @@ async function main() {
         })
     } else {
         // 执行一次
-        await updateMH(server, 10)
+        await updateMH(server, 1)
+        await updateAbyssUsageFromComments()
         console.log(`${new Date().toLocaleString()} 更新完成`)
+        process.exit(0)
     }
 }
 

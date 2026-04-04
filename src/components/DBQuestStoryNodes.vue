@@ -259,8 +259,10 @@ function scrollNodeToTop(element: HTMLElement, container: HTMLElement | Window) 
 
     const containerRect = container.getBoundingClientRect()
     const elementRect = element.getBoundingClientRect()
+    const containerStyle = window.getComputedStyle(container)
+    const paddingTop = Number.parseFloat(containerStyle.scrollPaddingTop || containerStyle.paddingTop || "0") || 0
     container.scrollTo({
-        top: container.scrollTop + (elementRect.top - containerRect.top) - topOffset,
+        top: container.scrollTop + (elementRect.top - containerRect.top) - paddingTop - topOffset,
         behavior: "smooth",
     })
 }
@@ -320,11 +322,7 @@ function getSelectedOption(scopeKey: string, dialogue: Dialogue): DialogueOption
  * @param dialogueMap 对话映射
  * @param incomingIds 入边节点集合
  */
-function collectDialogueNode(
-    dialogue: Dialogue,
-    dialogueMap: Map<number, Dialogue>,
-    incomingIds: Set<number>
-): void {
+function collectDialogueNode(dialogue: Dialogue, dialogueMap: Map<number, Dialogue>, incomingIds: Set<number>): void {
     dialogueMap.set(dialogue.id, dialogue)
 
     if (dialogue.next !== undefined) {
@@ -342,11 +340,7 @@ function collectDialogueNode(
  * @param dialogueMap 对话映射
  * @param incomingIds 入边节点集合
  */
-function collectDialogueOption(
-    option: DialogueOption,
-    dialogueMap: Map<number, Dialogue>,
-    incomingIds: Set<number>
-): void {
+function collectDialogueOption(option: DialogueOption, dialogueMap: Map<number, Dialogue>, incomingIds: Set<number>): void {
     dialogueMap.set(option.id, option)
     incomingIds.add(option.id)
 
@@ -1048,14 +1042,13 @@ watch(flattenedDialogueChain, () => {
 
 <template>
     <div class="text-sm space-y-2">
-        <div class="flex items-center justify-end">
+        <div v-if="hasPlayableDialogue" class="flex items-center justify-end">
             <label class="flex items-center gap-2 text-xs text-base-content/80 select-none">
                 <span>自动播放</span>
                 <input
                     v-model="autoPlayEnabled"
                     type="checkbox"
                     class="toggle toggle-primary toggle-sm"
-                    :disabled="!hasPlayableDialogue"
                     @change="handleAutoPlaySwitchChange"
                 />
             </label>
@@ -1209,7 +1202,7 @@ watch(flattenedDialogueChain, () => {
                     <span class="text-primary">→</span>
                     <button
                         type="button"
-                        class="cursor-pointer rounded border border-primary/30 bg-primary/5 px-1.5 py-0.5 text-primary/80 hover:bg-primary/10 hover:border-primary/50 transition-colors"
+                        class="cursor-pointer rounded border border-primary/30 bg-primary/5 px-1.5 py-0.5 text-primary/80 hover:bg-primary/10 hover:border-primary/50 transition-colors duration-200"
                         @click="jumpToQuestNode(nextId)"
                     >
                         {{ getNodeLabel(nextId) }}

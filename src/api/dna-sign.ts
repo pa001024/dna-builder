@@ -117,7 +117,7 @@ export async function handleLike(api: DNAAPI, posts: DNAPostListBean[]): Promise
             const post = posts[i]
             await api.likePost({
                 gameForumId: String(post.gameForumId),
-                postId: String(post.postId),
+                postId: post.postId,
                 postType: String(post.postType),
                 userId: post.userId,
             })
@@ -156,7 +156,7 @@ export async function handleReply(api: DNAAPI, posts: DNAPostListBean[]): Promis
             const res = await api.createComment(
                 {
                     userId: post.userId,
-                    postId: String(post.postId),
+                    postId: post.postId,
                     gameForumId: post.gameForumId,
                 },
                 getRandomReply()

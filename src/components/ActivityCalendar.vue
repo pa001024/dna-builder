@@ -743,7 +743,7 @@ onMounted(() => {
                                 v-for="item in groupedActivities"
                                 :key="`${item.category}-${item.activity.originalIndex}`"
                                 :ref="(el: any) => el && activityRefs.set(item.activity.originalIndex!, el as HTMLElement)"
-                                class="absolute bg-base-100 rounded-lg shadow-md hover:shadow-lg transition-all border-l-4 cursor-pointer group"
+                                class="absolute bg-base-100 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border-l-4 cursor-pointer group"
                                 :class="{
                                     'border-primary': getActivityStatus(item.activity) === 'ongoing',
                                     'border-gray-300': getActivityStatus(item.activity) === 'ended',

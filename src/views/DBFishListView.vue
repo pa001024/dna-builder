@@ -46,6 +46,45 @@ const filteredFish = computed(() => {
     })
 })
 
+/**
+ * 获取钓鱼点图标 URL。
+ * @param icon 钓鱼点图标标识。
+ * @returns 钓鱼点图标 URL；若未配置则使用默认图标。
+ */
+function getSpotIcon(icon?: string) {
+    return icon ? `/imgs/webp/${icon}.webp` : "/imgs/webp/T_Tab_Angling00.webp"
+}
+
+/**
+ * 切换列表类型并清空另一侧选中项。
+ * @param type 目标类型
+ */
+function selectFishListType(type: 0 | 1) {
+    selectedType.value = type
+    selectedSpotId.value = 0
+    selectedFishId.value = 0
+}
+
+/**
+ * 选择钓鱼点并切回钓鱼点列表。
+ * @param spotId 钓鱼点 ID
+ */
+function selectSpot(spotId: number) {
+    selectedType.value = 0
+    selectedSpotId.value = spotId
+    selectedFishId.value = 0
+}
+
+/**
+ * 选择鱼并切回鱼列表。
+ * @param fishId 鱼 ID
+ */
+function selectFish(fishId: number) {
+    selectedType.value = 1
+    selectedSpotId.value = 0
+    selectedFishId.value = fishId
+}
+
 useInitialScrollToSelectedItem()
 </script>
 
@@ -54,8 +93,12 @@ useInitialScrollToSelectedItem()
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedSpot }">
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索钓鱼点/鱼名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索钓鱼点/鱼名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+                    />
                 </div>
 
                 <!-- 筛选条件 -->
@@ -64,14 +107,18 @@ useInitialScrollToSelectedItem()
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">类型</div>
                         <div class="flex flex-wrap gap-1 pb-1">
-                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                                 :class="selectedType === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = 0">
+                                @click="selectFishListType(0)"
+                            >
                                 钓鱼点
                             </button>
-                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                                 :class="selectedType === 1 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = 1">
+                                @click="selectFishListType(1)"
+                            >
                                 鱼
                             </button>
                         </div>
@@ -80,41 +127,50 @@ useInitialScrollToSelectedItem()
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="spot in filteredSpots" v-if="selectedType === 0" :key="spot.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedSpotId === spot.id }"
-                            @click="((selectedSpotId = spot.id), (selectedFishId = 0))">
-                            <div class="flex items-start gap-2">
-                                <div class="w-12 h-12 overflow-hidden rounded-full">
-                                    <img :src="`/imgs/webp/${spot.icon}.webp`" class="w-full h-full object-cover" />
-                                </div>
-                                <div>
-                                    <div class="font-medium">{{ spot.name }}</div>
-                                    <div class="text-xs opacity-70 mt-1">
-                                        <span>ID: {{ spot.id }}</span>
-                                        <span class="ml-2">鱼数限制: {{ spot.fishCountLimit }}</span>
+                        <template v-if="selectedType === 0">
+                            <div
+                                v-for="spot in filteredSpots"
+                                :key="spot.id"
+                                class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
+                                :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedSpotId === spot.id }"
+                                @click="selectSpot(spot.id)"
+                            >
+                                <div class="flex items-start gap-2">
+                                    <div class="w-12 h-12 overflow-hidden rounded-full">
+                                        <img :src="getSpotIcon(spot.icon)" class="w-full h-full object-cover" />
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">{{ spot.name }}</div>
+                                        <div class="text-xs opacity-70 mt-1">
+                                            <span>ID: {{ spot.id }}</span>
+                                            <span class="ml-2">鱼数限制: {{ spot.fishCountLimit }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div v-for="fish in filteredFish" v-else :key="fish.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedFishId === fish.id }"
-                            @click="((selectedFishId = fish.id), (selectedSpotId = 0))">
-                            <div class="flex items-start gap-2">
-                                <div class="w-12 h-12 overflow-hidden rounded-full">
-                                    <img :src="`/imgs/webp/T_Fish_${fish.icon}.webp`"
-                                        class="w-full h-full object-cover" />
-                                </div>
-                                <div>
-                                    <div class="font-medium">{{ fish.name }}</div>
-                                    <div class="text-xs opacity-70 mt-1">
-                                        <span>ID: {{ fish.id }}</span>
-                                        <span class="ml-2">Lv.: {{ fish.level }}</span>
+                        </template>
+                        <template v-else>
+                            <div
+                                v-for="fish in filteredFish"
+                                :key="fish.id"
+                                class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
+                                :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedFishId === fish.id }"
+                                @click="selectFish(fish.id)"
+                            >
+                                <div class="flex items-start gap-2">
+                                    <div class="w-12 h-12 overflow-hidden rounded-full">
+                                        <img :src="`/imgs/res/T_Fish_${fish.icon}.webp`" class="w-full h-full object-cover" />
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">{{ fish.name }}</div>
+                                        <div class="text-xs opacity-70 mt-1">
+                                            <span>ID: {{ fish.id }}</span>
+                                            <span class="ml-2">Lv.: {{ fish.level }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </template>
                     </div>
                 </ScrollArea>
 
@@ -123,9 +179,11 @@ useInitialScrollToSelectedItem()
                 </div>
             </div>
 
-            <div v-if="selectedSpot"
+            <div
+                v-if="selectedSpot"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedSpotId = 0">
+                @click="selectedSpotId = 0"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
@@ -139,5 +197,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import type { Dungeon, RewardChild } from "@/data"
-import { LeveledMonster, rewardMap } from "@/data"
+import { LeveledMonster, MonsterLevelUpperLimit, rewardMap } from "@/data"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 
@@ -13,7 +13,7 @@ const props = defineProps<{
 const currentLevel = ref(props.dungeon.lv)
 const ENDLESS_MAX_WAVE = 99
 const ENDLESS_LEVEL_STEP = 5
-const MAX_MONSTER_LEVEL = 240
+const MAX_MONSTER_LEVEL = MonsterLevelUpperLimit
 type SpawnWave = NonNullable<Dungeon["spawn"]>[number]
 type SpawnGenerator = SpawnWave[number]
 type SpawnMonsterInfo = NonNullable<SpawnGenerator["m"]>[number]
@@ -48,16 +48,16 @@ interface CumulativeRewardDisplayItem {
  * @returns 默认页签
  */
 function getDefaultDetailTab(dungeon: Dungeon): DetailTab {
+    if (dungeon.r?.length || dungeon.sr?.length) {
+        return "reward"
+    }
+
     if (dungeon.m?.length || dungeon.sm?.length) {
         return "monster"
     }
 
     if (dungeon.spawn?.length) {
         return "wave"
-    }
-
-    if (dungeon.r?.length || dungeon.sr?.length) {
-        return "reward"
     }
 
     return "monster"
@@ -503,14 +503,14 @@ watch(
         </div>
 
         <div class="tabs tabs-boxed bg-base-200/60 p-1">
+            <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'reward' }" @click="activeTab = 'reward'">
+                奖励 ({{ (dungeon.r?.length || 0) + (dungeon.sr?.length || 0) }})
+            </button>
             <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'monster' }" @click="activeTab = 'monster'">
                 怪物 ({{ (dungeon.m?.length || 0) + (dungeon.sm?.length || 0) }})
             </button>
             <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'wave' }" @click="activeTab = 'wave'">
                 波次 ({{ dungeon.spawn?.length || 0 }})
-            </button>
-            <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'reward' }" @click="activeTab = 'reward'">
-                奖励 ({{ (dungeon.r?.length || 0) + (dungeon.sr?.length || 0) }})
             </button>
         </div>
 
@@ -544,7 +544,7 @@ watch(
                         type="range"
                         class="range range-primary range-xs grow"
                         min="1"
-                        max="240"
+                        :max="MonsterLevelUpperLimit"
                         step="1"
                     />
                     <span v-else class="text-xs text-base-content/70">无尽副本等级由上方波次滑块控制</span>
@@ -718,8 +718,12 @@ watch(
                                                         :key="`${spawnGroup.id}-gm-${groupMonster.id}-${memberIndex}`"
                                                         class="space-y-1"
                                                     >
-                                                        <DBMonsterCompactCard :monster="new LeveledMonster(groupMonster.id, getSpawnLevelBase())" />
-                                                        <div class="flex items-center justify-between rounded bg-base-100 px-2 py-1 text-xs">
+                                                        <DBMonsterCompactCard
+                                                            :monster="new LeveledMonster(groupMonster.id, getSpawnLevelBase())"
+                                                        />
+                                                        <div
+                                                            class="flex items-center justify-between rounded bg-base-100 px-2 py-1 text-xs"
+                                                        >
                                                             <span class="text-base-content/70">概率</span>
                                                             <span class="font-medium">
                                                                 {{ groupMonster.p ? `${Math.round(groupMonster.p * 100)}%` : "100%" }}
@@ -794,7 +798,7 @@ watch(
                     <div
                         v-for="item in mergedDungeonRewards"
                         :key="`${item.reward.id}-${item.indices.join('-')}`"
-                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
+                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                     >
                         <div class="flex items-center justify-between mb-1">
                             <span class="text-sm font-medium">{{ formatRewardIndexRanges(item.indices) }} 奖励组 {{ item.reward.id }}</span>
@@ -824,7 +828,7 @@ watch(
                     <div
                         v-for="reward in dungeon.sr.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
                         :key="reward.id"
-                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
+                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                     >
                         <div class="flex items-center justify-between mb-1">
                             <span class="text-sm font-medium">特殊奖励组 {{ reward.id }}</span>

@@ -25,6 +25,9 @@ export const meQuery = typedQuery(
                     dailyMessageLimit
                     dailyOnlineHourRetryAfterMs
                 }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
                 createdAt
                 updateAt
             }
@@ -1066,3 +1069,165 @@ export const activitiesQuery = typedQuery(
         }
     ` as const
 )<Types.Activity[], { server: string; startTime?: number; endTime?: number }>()
+
+export const abyssUsageSubmissionsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($limit: Int, $offset: Int, $seasonId: Int, $minLevel: Int, $maxLevel: Int) {
+            abyssUsageSubmissions(limit: $limit, offset: $offset, seasonId: $seasonId, minLevel: $minLevel, maxLevel: $maxLevel) {
+                id
+                uidSha256
+                seasonId
+                level
+                charId
+                meleeId
+                rangedId
+                support1
+                supportWeapon1
+                support2
+                supportWeapon2
+                stars
+                petId
+                createdAt
+                updateAt
+                roleParticipants {
+                    submissionId
+                    roleType
+                    charId
+                    gradeLevel
+                    createdAt
+                }
+                weaponParticipants {
+                    submissionId
+                    roleType
+                    weaponId
+                    skillLevel
+                    createdAt
+                }
+            }
+        }
+    ` as const
+)<Types.AbyssUsageSubmission[], { limit?: number; offset?: number; seasonId?: number; minLevel?: number; maxLevel?: number }>()
+
+export const abyssUsageSubmissionsCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($seasonId: Int, $minLevel: Int, $maxLevel: Int) {
+            abyssUsageSubmissionsCount(seasonId: $seasonId, minLevel: $minLevel, maxLevel: $maxLevel)
+        }
+    ` as const
+)<number, { seasonId?: number; minLevel?: number; maxLevel?: number }>()
+
+export const abyssUsageRoleStatsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($seasonId: Int, $minLevel: Int, $maxLevel: Int) {
+            abyssUsageRoleStats(seasonId: $seasonId, minLevel: $minLevel, maxLevel: $maxLevel) {
+                charId
+                submissionCount
+                ownedCount
+                gradeLevelDistribution
+            }
+        }
+    ` as const
+)<Types.AbyssRoleUsageStat[], { seasonId?: number; minLevel?: number; maxLevel?: number }>()
+
+export const abyssUsageWeaponStatsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($seasonId: Int, $minLevel: Int, $maxLevel: Int) {
+            abyssUsageWeaponStats(seasonId: $seasonId, minLevel: $minLevel, maxLevel: $maxLevel) {
+                weaponId
+                submissionCount
+                ownedCount
+                skillLevelDistribution
+            }
+        }
+    ` as const
+)<Types.AbyssWeaponUsageStat[], { seasonId?: number; minLevel?: number; maxLevel?: number }>()
+
+export const abyssUsageLineupStatsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($seasonId: Int, $charId: Int, $mainOnly: Boolean, $limit: Int, $minLevel: Int, $maxLevel: Int) {
+            abyssUsageLineupStats(
+                seasonId: $seasonId
+                charId: $charId
+                mainOnly: $mainOnly
+                limit: $limit
+                minLevel: $minLevel
+                maxLevel: $maxLevel
+            ) {
+                charId
+                meleeId
+                rangedId
+                support1
+                supportWeapon1
+                support2
+                supportWeapon2
+                petId
+                submissionCount
+            }
+        }
+    ` as const
+)<
+    Types.AbyssUsageLineupStat[],
+    { seasonId?: number; charId?: number; mainOnly?: boolean; limit?: number; minLevel?: number; maxLevel?: number }
+>()
+
+export const abyssUsageSlotStatsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($seasonId: Int, $minLevel: Int, $maxLevel: Int) {
+            abyssUsageSlotStats(seasonId: $seasonId, minLevel: $minLevel, maxLevel: $maxLevel) {
+                support {
+                    id
+                    submissionCount
+                }
+                meleeWeapon {
+                    id
+                    submissionCount
+                }
+                rangedWeapon {
+                    id
+                    submissionCount
+                }
+                pet {
+                    id
+                    submissionCount
+                }
+            }
+        }
+    ` as const
+)<Types.AbyssUsageSlotStats, { seasonId?: number; minLevel?: number; maxLevel?: number }>()
+
+export const abyssUsageLevelStatsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($seasonId: Int, $minLevel: Int, $maxLevel: Int) {
+            abyssUsageLevelStats(seasonId: $seasonId, minLevel: $minLevel, maxLevel: $maxLevel) {
+                level
+                submissionCount
+            }
+        }
+    ` as const
+)<Types.AbyssUsageLevelStat[], { seasonId?: number; minLevel?: number; maxLevel?: number }>()
+
+export const abyssUsageRoleRankQuery = typedQuery(
+    /* GraphQL */ `
+        query ($seasonId: Int, $limit: Int, $minLevel: Int, $maxLevel: Int) {
+            abyssUsageRoleRank(seasonId: $seasonId, limit: $limit, minLevel: $minLevel, maxLevel: $maxLevel) {
+                charId
+                submissionCount
+                ownedCount
+                gradeLevelDistribution
+            }
+        }
+    ` as const
+)<Types.AbyssRoleUsageStat[], { seasonId?: number; limit?: number; minLevel?: number; maxLevel?: number }>()
+
+export const abyssUsageWeaponRankQuery = typedQuery(
+    /* GraphQL */ `
+        query ($seasonId: Int, $limit: Int, $minLevel: Int, $maxLevel: Int) {
+            abyssUsageWeaponRank(seasonId: $seasonId, limit: $limit, minLevel: $minLevel, maxLevel: $maxLevel) {
+                weaponId
+                submissionCount
+                ownedCount
+                skillLevelDistribution
+            }
+        }
+    ` as const
+)<Types.AbyssWeaponUsageStat[], { seasonId?: number; limit?: number; minLevel?: number; maxLevel?: number }>()

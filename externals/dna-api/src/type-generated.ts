@@ -55,7 +55,7 @@ export interface DNAPostListBean {
     postContent: string
     postCover: string
     postCoverVo: DNAPostCoverVoEntity
-    postId: number
+    postId: string
     postStatus: number
     postTitle: string
     postType: number
@@ -796,7 +796,7 @@ export interface DNACreatorSelectGameBean {
 
 export interface DNARankListEntity {
     postCoverVo: DNAPostCoverVoRankBean
-    postId: number
+    postId: string
     userHeadUrl: string
     userName: string
 }
@@ -878,7 +878,7 @@ export interface DNAActiveBannerListEntity {
     commentCount: number
     content: string
     id: string
-    postId: number
+    postId: string
     title: string
     url: string
 }
@@ -1401,7 +1401,7 @@ export interface DNASearchCardBean {
     name: string
     needNav: number
     picUrl: string
-    postId: number
+    postId: string
 }
 
 export interface DNATopicListEntity {

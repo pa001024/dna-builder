@@ -9,6 +9,7 @@ export const USER_EXPERIENCE_SOURCES = {
     DAILY_LAUNCH: "daily_launch",
     DAILY_ONLINE_HOUR: "daily_online_hour",
     DAILY_MESSAGE: "daily_message",
+    ABYSS_USAGE_UPLOAD: "abyss_usage_upload",
 } as const
 
 export type UserExperienceSource = (typeof USER_EXPERIENCE_SOURCES)[keyof typeof USER_EXPERIENCE_SOURCES]
@@ -17,6 +18,7 @@ export const USER_EXPERIENCE_REWARD_MAP: Record<UserExperienceSource, number> = 
     [USER_EXPERIENCE_SOURCES.DAILY_LAUNCH]: 2,
     [USER_EXPERIENCE_SOURCES.DAILY_ONLINE_HOUR]: 3,
     [USER_EXPERIENCE_SOURCES.DAILY_MESSAGE]: 1,
+    [USER_EXPERIENCE_SOURCES.ABYSS_USAGE_UPLOAD]: 50,
 }
 
 export type UserExperienceGrantResult = {
@@ -38,6 +40,13 @@ export type UserExperienceEligibility =
       }
 
 export type TodayUserExperienceRewardMap = Partial<Record<UserExperienceSource, typeof schema.userExperienceRewards.$inferSelect>>
+export type UserExperienceRewardRecord = typeof schema.userExperienceRewards.$inferSelect
+
+type UserExperienceTx = {
+    query: typeof db.query
+    insert: typeof db.insert
+    update: typeof db.update
+}
 
 /**
  * @description 计算当前用户距离“每日在线一小时”奖励的剩余等待时长。
@@ -167,6 +176,101 @@ export async function getTodayUserExperienceRewards(userId: string): Promise<Tod
 }
 
 /**
+ * @description 生成深渊上传奖励的赛季去重键。
+ * @param seasonId 深渊赛季 ID。
+ * @returns 奖励去重键。
+ */
+export function getAbyssUsageUploadRewardDateKey(seasonId: number) {
+    return `abyss_usage_upload:${seasonId}`
+}
+
+/**
+ * @description 查询用户指定经验奖励是否已领取。
+ * @param userId 用户 ID。
+ * @param source 奖励来源。
+ * @param dateKey 去重键。
+ * @returns 对应奖励记录；不存在则返回 `null`。
+ */
+export async function getUserExperienceRewardByDateKey(
+    userId: string,
+    source: UserExperienceSource,
+    dateKey: string
+): Promise<UserExperienceRewardRecord | null> {
+    return (
+        (await db.query.userExperienceRewards.findFirst({
+            where: and(
+                eq(schema.userExperienceRewards.userId, userId),
+                eq(schema.userExperienceRewards.source, source),
+                eq(schema.userExperienceRewards.dateKey, dateKey)
+            ),
+        })) ?? null
+    )
+}
+
+async function grantUserExperienceByDateKeyWithTx(
+    tx: UserExperienceTx,
+    userId: string,
+    source: UserExperienceSource,
+    dateKey: string
+): Promise<UserExperienceGrantResult> {
+    const awardedExp = USER_EXPERIENCE_REWARD_MAP[source]
+    const awardedPoints = awardedExp
+    const currentUser = await tx.query.users.findFirst({
+        where: eq(schema.users.id, userId),
+    })
+
+    if (!currentUser) {
+        throw new Error("user not found")
+    }
+
+    const rewardRecord = (
+        await tx
+            .insert(schema.userExperienceRewards)
+            .values({
+                userId,
+                source,
+                dateKey,
+                awardedExp,
+            })
+            .onConflictDoNothing()
+            .returning()
+    )[0]
+
+    if (!rewardRecord) {
+        return {
+            awardedExp: 0,
+            awardedPoints: 0,
+            user: currentUser,
+            levelChanged: false,
+            alreadyClaimed: true,
+        }
+    }
+
+    const nextExperience = (currentUser.experience ?? 0) + awardedExp
+    const nextPoints = (currentUser.points ?? 0) + awardedPoints
+    const nextLevel = calculateUserLevel(nextExperience)
+    const updatedUser = (
+        await tx
+            .update(schema.users)
+            .set({
+                experience: nextExperience,
+                points: nextPoints,
+                level: nextLevel,
+            })
+            .where(eq(schema.users.id, userId))
+            .returning()
+    )[0]
+
+    return {
+        awardedExp,
+        awardedPoints,
+        user: updatedUser,
+        levelChanged: nextLevel !== (currentUser.level ?? 1),
+        alreadyClaimed: false,
+    }
+}
+
+/**
  * @description 校验“每日在线一小时”奖励是否满足领取条件。
  * 必须先领取当天的“每日打开软件”奖励，并且距离那次领取已满 1 小时。
  * @param userId 用户 ID。
@@ -207,70 +311,37 @@ export async function validateDailyOnlineExperienceEligibility(
 }
 
 /**
- * @description 为用户发放指定来源的经验，并保证同一来源每天只能领取一次。
+ * @description 为用户发放一次性经验奖励，并保证同一来源与日期键只能领取一次。
+ * @param userId 用户 ID。
+ * @param source 经验来源。
+ * @param dateKey 领取去重键。
+ * @returns 发放结果，包含是否重复领取与是否升级。
+ * @throws Error 当用户不存在时抛出异常。
+ */
+export async function grantUserExperienceByDateKey(
+    userId: string,
+    source: UserExperienceSource,
+    dateKey: string
+): Promise<UserExperienceGrantResult> {
+    return await db.transaction(async tx => grantUserExperienceByDateKeyWithTx(tx, userId, source, dateKey))
+}
+
+export async function grantUserExperienceByDateKeyInTx(
+    tx: UserExperienceTx,
+    userId: string,
+    source: UserExperienceSource,
+    dateKey: string
+): Promise<UserExperienceGrantResult> {
+    return await grantUserExperienceByDateKeyWithTx(tx, userId, source, dateKey)
+}
+
+/**
+ * @description 为用户发放指定来源的每日经验奖励，并保证同一来源每天只能领取一次。
  * @param userId 用户 ID。
  * @param source 经验来源。
  * @returns 发放结果，包含是否重复领取与是否升级。
  * @throws Error 当用户不存在时抛出异常。
  */
 export async function grantDailyUserExperience(userId: string, source: UserExperienceSource): Promise<UserExperienceGrantResult> {
-    const awardedExp = USER_EXPERIENCE_REWARD_MAP[source]
-    const awardedPoints = awardedExp
-    const dateKey = getShanghaiDateKey()
-
-    return await db.transaction(async tx => {
-        const currentUser = await tx.query.users.findFirst({
-            where: eq(schema.users.id, userId),
-        })
-
-        if (!currentUser) {
-            throw new Error("user not found")
-        }
-
-        const rewardRecord = (
-            await tx
-                .insert(schema.userExperienceRewards)
-                .values({
-                    userId,
-                    source,
-                    dateKey,
-                    awardedExp,
-                })
-                .onConflictDoNothing()
-                .returning()
-        )[0]
-
-        if (!rewardRecord) {
-            return {
-                awardedExp: 0,
-                awardedPoints: 0,
-                user: currentUser,
-                levelChanged: false,
-                alreadyClaimed: true,
-            }
-        }
-
-        const nextExperience = (currentUser.experience ?? 0) + awardedExp
-        const nextPoints = (currentUser.points ?? 0) + awardedPoints
-        const nextLevel = calculateUserLevel(nextExperience)
-        const updatedUser = (
-            await tx
-                .update(schema.users)
-                .set({
-                    experience: nextExperience,
-                    points: nextPoints,
-                    level: nextLevel,
-                })
-                .where(eq(schema.users.id, userId))
-                .returning()
-        )[0]
-
-        return {
-            awardedExp,
-            awardedPoints,
-            user: updatedUser,
-            levelChanged: nextLevel !== (currentUser.level ?? 1),
-            alreadyClaimed: false,
-        }
-    })
+    return await grantUserExperienceByDateKey(userId, source, getShanghaiDateKey())
 }

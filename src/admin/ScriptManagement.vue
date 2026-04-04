@@ -22,10 +22,7 @@ const extraCategoryNames = ref<string[]>([])
  * @returns 下拉组件可用的分类选项
  */
 const categoryOptions = computed(() => {
-    const names = new Set([
-        ...scriptCategories.value.map(category => category.name),
-        ...extraCategoryNames.value,
-    ])
+    const names = new Set([...scriptCategories.value.map(category => category.name), ...extraCategoryNames.value])
     return [...names].map(name => ({
         label: name,
         value: name,

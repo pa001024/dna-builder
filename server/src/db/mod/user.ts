@@ -6,9 +6,12 @@ import { sendPasswordResetEmail } from "../../util/email"
 import { db, schema } from ".."
 import { id } from "../schema"
 import { type Context, jwtToken } from "../yoga"
+import { getCurrentSeasonId } from "./abyssUsage"
 import {
+    getAbyssUsageUploadRewardDateKey,
     getDailyOnlineExperienceRetryAfterMs,
     getTodayUserExperienceRewards,
+    getUserExperienceRewardByDateKey,
     grantDailyUserExperience,
     USER_EXPERIENCE_REWARD_MAP,
     USER_EXPERIENCE_SOURCES,
@@ -64,6 +67,7 @@ export const typeDefs = /* GraphQL */ `
         currentTitleClass: String
         nameEffectClass: String
         dailyExperienceStatus: UserDailyExperienceStatus
+        abyssUsageUploadStatus: UserAbyssUsageUploadStatus
         createdAt: String
         updateAt: String
     }
@@ -80,6 +84,10 @@ export const typeDefs = /* GraphQL */ `
         dailyOnlineHourRetryAfterMs: Int
     }
 
+    type UserAbyssUsageUploadStatus {
+        uploadedThisSeason: Boolean!
+    }
+
     type UserLoginResult {
         success: Boolean!
         message: String!
@@ -94,7 +102,6 @@ export const typeDefs = /* GraphQL */ `
         awardedExp: Int!
         awardedPoints: Int!
         retryAfterMs: Int
-        token: String
         user: User
     }
 
@@ -188,7 +195,7 @@ export const resolvers = {
             return user
         },
         users: async (_parent, args, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
 
@@ -205,7 +212,7 @@ export const resolvers = {
             })
         },
         usersCount: async (_parent, args, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
 
@@ -284,6 +291,30 @@ export const resolvers = {
                 dailyMessageLimit: 1,
                 dailyOnlineHourRetryAfterMs: onlineReward ? 0 : onlineRetryAfterMs,
             }
+        },
+        /**
+         * @description 汇总当前用户本赛季深渊上传状态，仅本人可见。
+         * @param parent 当前用户对象。
+         * @param _args GraphQL 参数。
+         * @param context 请求上下文。
+         * @returns 当前赛季是否已上传。
+         */
+        abyssUsageUploadStatus: async (parent: typeof schema.users.$inferSelect, _args: unknown, context: Context) => {
+            if (!context.user || context.user.id !== parent.id) {
+                return null
+            }
+
+            const currentSeasonId = getCurrentSeasonId()
+            if (!currentSeasonId) {
+                return { uploadedThisSeason: false }
+            }
+
+            const reward = await getUserExperienceRewardByDateKey(
+                parent.id,
+                USER_EXPERIENCE_SOURCES.ABYSS_USAGE_UPLOAD,
+                getAbyssUsageUploadRewardDateKey(currentSeasonId)
+            )
+            return { uploadedThisSeason: Boolean(reward) }
         },
     } as any,
     Mutation: {
@@ -421,7 +452,6 @@ export const resolvers = {
                 awardedExp: result.awardedExp,
                 awardedPoints: result.awardedPoints,
                 retryAfterMs,
-                token: signToken(result.user),
                 user: result.user,
             }
         },
@@ -467,12 +497,11 @@ export const resolvers = {
                 awardedExp: result.awardedExp,
                 awardedPoints: result.awardedPoints,
                 retryAfterMs: 0,
-                token: signToken(result.user),
                 user: result.user,
             }
         },
         deleteUser: async (_parent, { id }, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
 
@@ -480,7 +509,7 @@ export const resolvers = {
             return result.length > 0
         },
         updateUser: async (_parent, { id, email, roles }, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("Unauthorized: Admin role required")
             }
 

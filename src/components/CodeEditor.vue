@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { defaultKeymap, history, historyKeymap, indentWithTab, moveLineDown, moveLineUp, toggleComment } from "@codemirror/commands"
 import { javascript } from "@codemirror/lang-javascript"
-import { bracketMatching, foldGutter, foldKeymap, HighlightStyle, indentOnInput, indentUnit, syntaxHighlighting } from "@codemirror/language"
+import {
+    bracketMatching,
+    foldGutter,
+    foldKeymap,
+    HighlightStyle,
+    indentOnInput,
+    indentUnit,
+    syntaxHighlighting,
+} from "@codemirror/language"
 import { Compartment, EditorState, type Extension } from "@codemirror/state"
 import { EditorView, highlightActiveLineGutter, keymap, lineNumbers } from "@codemirror/view"
 import { tags as t } from "@lezer/highlight"
 import { onBeforeUnmount, onMounted, ref, watch } from "vue"
 
 type Command = (view: EditorView) => boolean
-
 
 interface FileViewState {
     selectionAnchor: number
@@ -77,9 +84,9 @@ function createEditorThemeExtension(): Extension {
                 ".cm-activeLine": { backgroundColor: "var(--cm-active-line)" },
                 ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--cm-caret)" },
                 "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
-                {
-                    backgroundColor: "var(--cm-selection)",
-                },
+                    {
+                        backgroundColor: "var(--cm-selection)",
+                    },
             },
             { dark: true }
         ),
@@ -305,12 +312,9 @@ watch(
     }
 )
 
-watch(
-    model,
-    value => {
-        replaceDocument(value || "")
-    }
-)
+watch(model, value => {
+    replaceDocument(value || "")
+})
 
 defineExpose({
     safeUpdate,
@@ -322,7 +326,6 @@ defineExpose({
         replaceDocument(value || "")
     },
 })
-
 </script>
 
 <template>
@@ -333,11 +336,11 @@ defineExpose({
 :root {
     --cm-foreground: #ccc;
     --cm-comment: #999;
-    --cm-keyword: #B38CFF;
-    --cm-string: #82D99F;
-    --cm-number: #F48CAD;
-    --cm-function: #F28C4D;
-    --cm-class: #81CFD4;
+    --cm-keyword: #b38cff;
+    --cm-string: #82d99f;
+    --cm-number: #f48cad;
+    --cm-function: #f28c4d;
+    --cm-class: #81cfd4;
     --cm-property: #f8c555;
     --cm-operator: #67cdcc;
     --cm-gutter-foreground: #999;
@@ -350,12 +353,12 @@ defineExpose({
 [data-theme="light"] {
     --cm-foreground: #000;
     --cm-comment: #708090;
-    --cm-keyword: #5F36B2;
-    --cm-string: #6AA621;
-    --cm-number: #E54595;
-    --cm-function: #4078F2;
-    --cm-class: #B15EF2;
-    --cm-property: #17181A;
+    --cm-keyword: #5f36b2;
+    --cm-string: #6aa621;
+    --cm-number: #e54595;
+    --cm-function: #4078f2;
+    --cm-class: #b15ef2;
+    --cm-property: #17181a;
     --cm-operator: #9a6e3a;
     --cm-gutter-foreground: #708090;
     --cm-gutter-border: #708090;

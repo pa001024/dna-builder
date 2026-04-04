@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import type { RouteLocationRaw } from "vue-router"
 import type { Book, BookResource } from "@/data/d/book.data"
 import { convertRegionMapIdToDBMapId } from "@/data/d/map.data"
 import { regionMap } from "@/data/d/region.data"
@@ -50,26 +51,46 @@ const selectedResource = computed(() => {
 })
 
 /**
- * 当前条目的显示描述。
- */
-const selectedResourceDescription = computed(() => {
-    return selectedResource.value?.desc || props.book.desc
-})
-
-/**
  * 当前条目的位置信息。
  */
-const selectedResourceLocation = computed(() => {
+const selectedResourceLocation = computed<BookLocationInfo | null>(() => {
     if (!selectedResource.value) {
-        return {
-            subRegionName: "未知区域",
-            regionName: "未知地区",
-            mapId: null,
-        } satisfies BookLocationInfo
+        return null
     }
 
     return getBookLocationInfo(selectedResource.value)
 })
+
+/**
+ * 当前条目的地图跳转目标。
+ * @param resource 读物条目
+ * @param target 目标坐标字段
+ * @returns 路由对象或 null
+ */
+function getMapLocalLink(resource: BookResource, target: "pos" | "treasurePos"): RouteLocationRaw | null {
+    const point = resource[target]
+    if (!resource.srId) return null
+    const subRegion = subRegionMap.get(resource.srId)
+    const region = subRegion ? regionMap.get(subRegion.rid) : undefined
+    if (!point || !subRegion || !region?.mapMapping?.length) return null
+
+    return {
+        name: "map-local",
+        query: {
+            regionId: String(subRegion.rid),
+            subRegionId: String(resource.srId),
+            pointName: target === "pos" ? `${getResourceDisplayName(resource)}` : `${getResourceDisplayName(resource)} 藏宝点`,
+            pointX: String(point[0]),
+            pointY: String(point[1]),
+            pointIcon: props.book.icon,
+        },
+    }
+}
+
+const selectedResourcePosLink = computed(() => (selectedResource.value ? getMapLocalLink(selectedResource.value, "pos") : null))
+const selectedResourceTreasureLink = computed(() =>
+    selectedResource.value ? getMapLocalLink(selectedResource.value, "treasurePos") : null
+)
 
 /**
  * 当前条目文本对应的可渲染片段。
@@ -115,6 +136,9 @@ function getResourceTypeLabel(type: string): string {
     if (type === "TreasureChest") {
         return "宝箱获取"
     }
+    if (type === "Read") {
+        return "直接获取"
+    }
     return type || "未知类型"
 }
 
@@ -132,14 +156,19 @@ function getResourceDisplayName(resource: BookResource): string {
  * @param resource 读物条目
  * @returns 位置信息
  */
-function getBookLocationInfo(resource: BookResource): BookLocationInfo {
+function getBookLocationInfo(resource: BookResource): BookLocationInfo | null {
+    if (!resource.srId) {
+        return null
+    }
+
     const subRegion = subRegionMap.get(resource.srId)
     const region = subRegion ? regionMap.get(subRegion.rid) : undefined
-    const dbMapId = convertRegionMapIdToDBMapId(region?.mapId)
+    if (!subRegion || !region) return null
+    const dbMapId = convertRegionMapIdToDBMapId(region.mapId)
 
     return {
-        subRegionName: subRegion?.name || `子区域 ${resource.srId}`,
-        regionName: region?.name || (subRegion ? `地区 ${subRegion.rid}` : "未知地区"),
+        subRegionName: subRegion.name,
+        regionName: region.name,
         mapId: dbMapId,
     }
 }
@@ -165,7 +194,12 @@ function selectResource(resourceId: number): void {
 <template>
     <div class="p-3 space-y-3">
         <div class="flex items-start gap-3">
-            <img :src="getBookIcon(book.icon)" :alt="book.name" class="size-14 rounded-lg bg-base-200 object-cover shrink-0" loading="lazy" />
+            <img
+                :src="getBookIcon(book.icon)"
+                :alt="book.name"
+                class="size-14 rounded-lg bg-base-200 object-cover shrink-0"
+                loading="lazy"
+            />
             <div class="min-w-0">
                 <SRouterLink :to="`/db/book/${book.id}`" class="text-lg font-bold link link-primary wrap-break-word">
                     {{ book.name }}
@@ -180,30 +214,24 @@ function selectResource(resourceId: number): void {
             <div class="text-sm leading-6 whitespace-pre-wrap wrap-break-word">{{ book.desc }}</div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-3">
-            <div class="card bg-base-100 border border-base-200 rounded p-2 space-y-2">
-                <div class="text-xs text-base-content/70 px-1">条目列表</div>
+        <div class="card bg-base-100 border border-base-200 rounded p-3 space-y-3">
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
                 <button
                     v-for="resource in book.res"
                     :key="resource.id"
                     type="button"
-                    class="w-full text-left rounded p-2 transition-colors bg-base-200 hover:bg-base-300"
+                    class="shrink-0 rounded-full border px-3 py-1 text-sm transition-colors duration-200"
                     :class="{
-                        'bg-primary/90 text-primary-content hover:bg-primary': selectedResource?.id === resource.id,
+                        'border-primary bg-primary text-primary-content': selectedResource?.id === resource.id,
+                        'border-base-300 bg-base-200 hover:bg-base-300': selectedResource?.id !== resource.id,
                     }"
                     @click="selectResource(resource.id)"
                 >
-                    <div class="font-medium text-sm wrap-break-word">
-                        {{ getResourceDisplayName(resource) }}
-                    </div>
-                    <div class="text-xs opacity-75 mt-1">ID: {{ resource.id }} | {{ getResourceTypeLabel(resource.type) }}</div>
-                    <div class="text-xs opacity-70 mt-1">
-                        {{ getBookLocationInfo(resource).regionName }} · {{ getBookLocationInfo(resource).subRegionName }}
-                    </div>
+                    {{ getResourceDisplayName(resource) }}
                 </button>
             </div>
 
-            <div v-if="selectedResource" class="card bg-base-100 border border-base-200 rounded p-3">
+            <div v-if="selectedResource" class="space-y-3">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <div class="text-base font-semibold wrap-break-word">{{ getResourceDisplayName(selectedResource) }}</div>
@@ -216,34 +244,54 @@ function selectResource(resourceId: number): void {
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mt-3">
                     <div class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">子区域</span>
-                        <span class="text-right wrap-break-word">{{ selectedResourceLocation.subRegionName }} ({{ selectedResource.srId }})</span>
+                        <template v-if="selectedResourceLocation">
+                            <span class="text-base-content/70">子区域</span>
+                            <span class="text-right wrap-break-word"
+                                >{{ selectedResourceLocation.subRegionName }} ({{ selectedResource.srId }})</span
+                            >
+                        </template>
                     </div>
 
-                    <div class="flex items-start justify-between gap-2">
+                    <div v-if="selectedResourceLocation" class="flex items-start justify-between gap-2">
                         <span class="text-base-content/70">所属地区</span>
                         <span class="text-right wrap-break-word">{{ selectedResourceLocation.regionName }}</span>
-                    </div>
-
-                    <div v-if="selectedResourceLocation.mapId" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">地图</span>
-                        <SRouterLink :to="`/db/map/${selectedResourceLocation.mapId}`" class="text-right link link-primary">
-                            地图 {{ selectedResourceLocation.mapId }}
-                        </SRouterLink>
                     </div>
 
                     <div v-if="selectedResource.mId" class="flex items-start justify-between gap-2">
                         <span class="text-base-content/70">机制 ID</span>
                         <span>{{ selectedResource.mId }}</span>
                     </div>
-                </div>
 
-                <div v-if="selectedResourceDescription" class="mt-3 p-2 rounded bg-base-200/70 text-sm leading-6 whitespace-pre-wrap wrap-break-word">
-                    {{ selectedResourceDescription }}
+                    <div v-if="selectedResource.srId && selectedResource.pos" class="flex items-start justify-between gap-2">
+                        <span class="text-base-content/70">坐标点</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-right"
+                                >({{ selectedResource.pos[0].toFixed(2) }}, {{ selectedResource.pos[1].toFixed(2) }})</span
+                            >
+                            <SRouterLink v-if="selectedResourcePosLink" :to="selectedResourcePosLink!" class="link link-primary">
+                                跳转
+                            </SRouterLink>
+                        </div>
+                    </div>
+
+                    <div v-if="selectedResource.srId && selectedResource.treasurePos" class="flex items-start justify-between gap-2">
+                        <span class="text-base-content/70">藏宝点</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-right"
+                                >({{ selectedResource.treasurePos[0].toFixed(2) }}, {{ selectedResource.treasurePos[1].toFixed(2) }})</span
+                            >
+                            <SRouterLink v-if="selectedResourceTreasureLink" :to="selectedResourceTreasureLink!" class="link link-primary">
+                                跳转
+                            </SRouterLink>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-3 rounded-lg bg-base-200 p-3 text-sm leading-7 whitespace-pre-wrap wrap-break-word">
-                    <template v-for="(segment, index) in selectedResourceTextSegments" :key="`${selectedResource.id}-${index}-${segment.tone}`">
+                    <template
+                        v-for="(segment, index) in selectedResourceTextSegments"
+                        :key="`${selectedResource.id}-${index}-${segment.tone}`"
+                    >
                         <span
                             :class="{
                                 'text-primary font-semibold': segment.tone === 'highlight',

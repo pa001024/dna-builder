@@ -139,7 +139,7 @@ const filterDPSList = (dpsList: DPS[]) => {
                             <div
                                 v-for="tier in tiers"
                                 :key="tier.level"
-                                class="p-3 rounded-lg cursor-pointer transition-all hover:shadow-lg"
+                                class="p-3 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-lg"
                                 :class="getTierColor(tier.level)"
                                 @click="filterByTier(tier.level)"
                             >
@@ -169,7 +169,7 @@ const filterDPSList = (dpsList: DPS[]) => {
                                 <div
                                     v-for="(dpsItem, index) in filterDPSList(dpsList)"
                                     :key="dpsItem.id"
-                                    class="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                                    class="border rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
                                     :class="getTierColor(getTierLevel(dpsItem.dpsValue))"
                                 >
                                     <div class="flex justify-between items-start">

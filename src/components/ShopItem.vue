@@ -1,12 +1,27 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { cutoffMap, draftMap, LeveledMod, LeveledWeapon, modMap, resourceMap, rewardMap, walnutMap, weaponMap } from "@/data"
-import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import {
+    cutoffMap,
+    draftMap,
+    LeveledMod,
+    LeveledPet,
+    LeveledWeapon,
+    modMap,
+    petMap,
+    resourceMap,
+    rewardMap,
+    walnutMap,
+    weaponMap,
+} from "@/data"
+import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Cutoff } from "@/data/d/cutoff.data"
 import { headSculptureMap } from "@/data/d/headsculpture.data"
 import { mountData } from "@/data/d/mount.data"
+import { getImprType, getRegionType } from "@/data/d/quest.data"
 import type { ShopItem } from "@/data/d/shop.data"
+import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRewardDetails, getRewardTypeText } from "@/utils/reward-utils"
+import { formatDateTime } from "@/utils/time"
 
 // 定义带有子项的商品类型
 interface ShopItemWithChildren extends ShopItem {
@@ -30,12 +45,54 @@ const cutoffInfo = computed<Cutoff | null>(() => cutoffMap.get(props.item.id) ??
 const currentPrice = computed(() => cutoffInfo.value?.price ?? props.item.price)
 
 /**
+ * 获取现实货币支付信息。
+ * @returns 支付货币与金额；未配置时返回空
+ */
+const payInfo = computed(() => {
+    const pay = props.item.pay
+    if (!pay) {
+        return null
+    }
+
+    const currency = pay.CNY != null ? "CNY" : Object.keys(pay)[0]
+    const amount = currency ? pay[currency as keyof NonNullable<typeof pay>] : undefined
+    if (typeof amount !== "number") {
+        return null
+    }
+
+    const currencies = Object.entries(pay)
+        .filter(([, value]) => typeof value === "number")
+        .sort(([a], [b]) => {
+            if (a === "CNY") return -1
+            if (b === "CNY") return 1
+            return a.localeCompare(b)
+        })
+        .map(([code, value]) => ({ code, value: value as number }))
+
+    return {
+        currency,
+        amount,
+        currencies,
+    }
+})
+
+/**
  * 格式化时间戳，便于 tooltip 展示。
  * @param timestamp 秒级时间戳
  * @returns 本地化时间文本
  */
 function formatCutoffTime(timestamp: number) {
-    return new Date(timestamp * 1000).toLocaleString()
+    return formatDateTime(timestamp)
+}
+
+/**
+ * 格式化印象检定标签。
+ * @param imprCheck 印象检定原始数据
+ * @returns 印象检定文本
+ */
+function formatImpressionCheck(imprCheck: NonNullable<ShopItem["imprCheck"]>): string {
+    const [regionId, imprType, threshold] = imprCheck
+    return `印象检定 ${getRegionType(regionId)}·${getImprType(imprType as Parameters<typeof getImprType>[0])} ≥ ${threshold}`
 }
 
 const itemDetail = computed(() => {
@@ -56,12 +113,29 @@ const itemDetail = computed(() => {
                 icon: LeveledWeapon.url(weapon?.icon),
                 link: `/db/weapon/${weapon?.id}`,
             }
+        case "Pet":
+            const pet = petMap.get(props.item.typeId)
+            return {
+                type: "Pet" as const,
+                pet,
+                icon: pet?.icon ? LeveledPet.url(pet.icon) : "/imgs/webp/T_Head_Empty.webp",
+                link: `/db/pet/${pet?.id}`,
+            }
+        case "Hair":
+            const hair = hairData.find(item => item.id === props.item.typeId)
+            return {
+                type: "Hair" as const,
+                hair,
+                icon: hair?.icon ? resolveSkinIconUrl(hair.icon) : "/imgs/webp/T_Head_Empty.webp",
+                link: `/db/accessory/hair/${hair?.id}`,
+            }
         case "Resource":
             const res = resourceMap.get(props.item.typeId)
             return {
                 type: "Resource" as const,
                 res,
                 icon: `/imgs/res/${res?.icon}.webp`,
+                link: res?.id ? `/db/resource/${res.id}` : "",
             }
         case "Draft":
             const draft = draftMap.get(props.item.typeId)
@@ -75,7 +149,7 @@ const itemDetail = computed(() => {
                     switch (draft.t) {
                         case "CharAccessory":
                             let acc = charAccessoryData.find(item => item.id === props.item.typeId)
-                            if (acc) icon = `/imgs/fashion/${acc.icon}.webp`
+                            if (acc) icon = resolveSkinIconUrl(acc.icon)
                     }
                 }
             }
@@ -109,7 +183,8 @@ const itemDetail = computed(() => {
             if (head) {
                 return {
                     type: props.item.itemType,
-                    icon: `/imgs/head/${head.icon}.webp`,
+                    icon: `/imgs/webp/${head.icon}.webp`,
+                    link: `/db/accessory/head/${head.id}`,
                 }
             } else {
                 return {
@@ -140,7 +215,7 @@ const itemDetail = computed(() => {
             }
             return {
                 type: props.item.itemType,
-                icon: `/imgs/webp/${skin.icon}.webp`,
+                icon: resolveSkinIconUrl(skin.icon),
                 link: `/db/accessory/skin/${skin.id}`,
             }
         case "Title":
@@ -174,7 +249,13 @@ const itemDetail = computed(() => {
                 }
             return {
                 type: props.item.itemType,
-                icon: `/imgs/fashion/${acc.icon}.webp`,
+                icon: resolveSkinIconUrl(acc.icon),
+                link:
+                    props.item.itemType === "CharAccessory"
+                        ? `/db/accessory/char/${acc.id}`
+                        : props.item.itemType === "WeaponAccessory"
+                          ? `/db/accessory/weapon/${acc.id}`
+                          : `/db/accessory/weaponskin/${acc.id}`,
             }
         case "TitleFrame":
             return {
@@ -203,7 +284,7 @@ function getPriceIcon(name: string) {
 <template>
     <div class="space-y-3">
         <!-- 商品项内容 -->
-        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors flex items-center gap-4">
+        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200 flex items-center gap-4">
             <div class="size-16 hover:size-32 transition-all duration-200">
                 <img :src="itemDetail?.icon" class="w-full h-full object-cover rounded" :alt="item.typeName" />
             </div>
@@ -227,13 +308,28 @@ function getPriceIcon(name: string) {
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <FullTooltip v-if="cutoffInfo" side="top">
+                        <FullTooltip v-if="payInfo" side="top">
+                            <template #tooltip>
+                                <div class="flex flex-col gap-2 min-w-28">
+                                    <div class="text-sm font-bold">现实货币</div>
+                                    <div v-for="currency in payInfo.currencies" :key="currency.code" class="flex items-center justify-between gap-3 text-sm">
+                                        <span class="text-xs text-neutral-500 whitespace-nowrap">{{ currency.code }}</span>
+                                        <span class="font-medium text-primary">{{ currency.value }}</span>
+                                    </div>
+                                </div>
+                            </template>
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs text-base-content/70">{{ payInfo.currency }}</span>
+                                <span class="text-sm font-medium">{{ payInfo.amount }}</span>
+                            </div>
+                        </FullTooltip>
+                        <FullTooltip v-else-if="cutoffInfo" side="top">
                             <template #tooltip>
                                 <div class="flex flex-col gap-2 max-w-75 min-w-28">
                                     <div class="text-sm font-bold">{{ $t("shop-detail.discountInfo") }}</div>
                                     <div class="flex justify-between items-center gap-2 text-sm">
                                         <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.discount") }}</div>
-                                        <div class="font-medium text-primary">{{ cutoffInfo.discount }}折</div>
+                                        <div class="font-medium text-primary">{{ +(cutoffInfo.discount / 10).toFixed(1) }}折</div>
                                     </div>
                                     <div class="flex justify-between items-center gap-2 text-sm">
                                         <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.originalPrice") }}</div>
@@ -272,10 +368,15 @@ function getPriceIcon(name: string) {
                     <div v-if="item.lv"><span class="text-base-content/70">解锁等级:</span> {{ item.lv }}</div>
                     <div v-if="item.cond"><span class="text-base-content/70">解锁条件:</span> {{ item.cond }}</div>
                 </div>
+                <div v-if="item.imprCheck" class="mt-1">
+                    <span class="rounded border border-info/40 bg-info/10 px-1.5 py-0.5 text-[10px] leading-none text-info">
+                        {{ formatImpressionCheck(item.imprCheck) }}
+                    </span>
+                </div>
                 <div v-if="item.startTime" class="mt-1 text-xs text-base-content/70">
-                    <span>开始时间:</span> {{ new Date(item.startTime * 1000).toLocaleString() }}
+                    <span>开始时间:</span> {{ formatDateTime(item.startTime) }}
                     <span v-if="item.endTime" class="ml-2">结束时间:</span>
-                    {{ item.endTime ? new Date(item.endTime * 1000).toLocaleString() : "" }}
+                    {{ item.endTime ? formatDateTime(item.endTime) : "" }}
                 </div>
                 <div v-if="item.itemType === 'Reward'" class="mt-1">
                     <RewardItem :reward="getRewardDetails(item.typeId)!" />

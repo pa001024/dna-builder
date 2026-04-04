@@ -1,7 +1,10 @@
+import { applyVersionGate } from "../versionGate"
+
 export interface Region {
     id: number
     name: string
     type?: string
+    版本?: string
     mapId?: number
     mapImage?: string
     mapCenter?: [number, number]
@@ -17,6 +20,34 @@ interface MapMapping {
     pos: number[]
     opacity: number
     zOrder: number
+}
+
+export const region2Version: Record<number, string> = {
+    2101: "1.0",
+    1001: "1.0",
+    1002: "1.0",
+    1003: "1.0",
+    1004: "1.0",
+    1005: "1.0",
+    1006: "1.0",
+    1007: "1.0",
+    1008: "1.0",
+    1009: "1.0",
+    1010: "1.0",
+    1011: "1.0",
+    1012: "1.0",
+    1013: "1.0",
+    1017: "1.0",
+    1018: "1.0",
+    1019: "1.0",
+    1020: "1.0",
+    1021: "1.0",
+    1041: "1.1",
+    1057: "1.1",
+    1045: "1.3",
+    1052: "1.3",
+    1053: "1.3",
+    1055: "1.3",
 }
 
 const t: Region[] = [
@@ -271,7 +302,7 @@ const t: Region[] = [
         mapImage: "WBP_Map_Reg_East_Haojing",
         mapCenter: [20670, -49970],
         mapScale: [0.3, 1],
-        isRandom: [104501, 104502, 104503, 104504, 104505, 104506, 104507, 104508],
+        isRandom: [104501, 104502, 104503, 104504, 104505, 104506],
         alertDisable: true,
         mapMapping: [
             {
@@ -331,7 +362,7 @@ const t: Region[] = [
         type: "Main",
         mapId: 500,
         mapScale: [0.3, 1],
-        isRandom: [105101, 105102, 105103],
+        isRandom: [105101],
         alertDisable: true,
     },
     {
@@ -368,7 +399,7 @@ const t: Region[] = [
         mapCenter: [19500, 23500],
         mapScale: [0.3, 1],
         mapRotation: 270,
-        isRandom: [105301, 105302],
+        isRandom: [105301],
         alertDisable: true,
         mapMapping: [
             {
@@ -574,15 +605,24 @@ const t: Region[] = [
 ]
 
 export const mapOffsets: Record<string, [number, number]> = {
-    WBP_Map_Prologue_Bg: [-60, 30],
-    WBP_Map_Prologue_100101: [-60, 30],
+    WBP_Map_Prologue_Bg: [-65, 30],
+    WBP_Map_Prologue_100101: [-65, 30],
     WBP_Map_Prologue_100102: [5, 0],
     WBP_Map_Prologue_100103: [-125, 0],
+    WBP_Map_East_Yanjindu_L0: [-150, -150],
+    "WBP_Map_East_Yanjindu_L-1": [-150, -150],
 }
 
-export const regionMap = t.reduce((acc, cur) => {
+const regionDataWithVersion = t.map(region => ({
+    ...region,
+    版本: region2Version[region.id] || "99.9",
+}))
+
+const filteredRegionData = applyVersionGate(regionDataWithVersion)
+
+export const regionMap = filteredRegionData.reduce((acc, cur) => {
     acc.set(cur.id, cur)
     return acc
 }, new Map<number, Region>())
 
-export default t
+export default filteredRegionData

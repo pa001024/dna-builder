@@ -444,7 +444,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                         <SRouterLink
                             v-for="rcWeight in location.rcWeights"
                             :key="`${location.subRegionId}-${rcWeight.rcId}-${rcWeight.rcIndex}`"
-                            class="px-1.5 py-0.5 rounded bg-base-300 text-xs hover:bg-primary/20 transition-colors"
+                            class="px-1.5 py-0.5 rounded bg-base-300 text-xs hover:bg-primary/20 transition-colors duration-200"
                             :to="{
                                 name: 'map-local',
                                 query: {
@@ -467,7 +467,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
 
         <div v-if="petShopSources.length > 0" class="space-y-2">
             <div class="text-xs text-base-content/60">{{ $t("pet_detail.shop_purchase") }}</div>
-            <div v-for="source in petShopSources" :key="source.key" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors">
+            <div v-for="source in petShopSources" :key="source.key" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
                 <div class="flex justify-between items-center gap-2 mb-2">
                     <div class="flex items-center gap-2 min-w-0">
                         <SRouterLink :to="`/db/shop/${source.shopId}/${source.subTabId}`" class="hover:underline min-w-0 truncate">

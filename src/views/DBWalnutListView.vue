@@ -2,6 +2,7 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
+import { LeveledMod, LeveledWeapon, modMap, resourceMap, weaponMap } from "@/data"
 import walnutData, { Walnut } from "../data/d/walnut.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
@@ -47,6 +48,33 @@ function selectWalnut(walnut: Walnut | null) {
     selectedWalnutId.value = walnut?.id || 0
 }
 
+/**
+ * 获取密函列表首个产物的图标。
+ * @param walnut 密函数据
+ * @returns 图标地址
+ */
+function getWalnutProductIcon(walnut: Walnut): string {
+    const reward = walnut.奖励[0]
+    if (!reward) {
+        return "/imgs/webp/T_Head_Empty.webp"
+    }
+
+    if (reward.type === "Mod") {
+        return LeveledMod.url(modMap.get(reward.id)?.icon)
+    }
+
+    if (reward.type === "Weapon") {
+        return LeveledWeapon.idToUrl(weaponMap.get(reward.id)?.id ?? reward.id)
+    }
+
+    if (reward.type === "Resource") {
+        const resource = resourceMap.get(reward.id)
+        return resource?.icon ? `/imgs/res/${resource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    }
+
+    return "/imgs/webp/T_Head_Empty.webp"
+}
+
 useInitialScrollToSelectedItem()
 </script>
 
@@ -57,22 +85,31 @@ useInitialScrollToSelectedItem()
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedWalnut }">
                 <!-- 搜索栏 -->
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索密函ID/名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索密函ID/名称（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+                    />
                 </div>
 
                 <!-- 类型筛选Tab -->
                 <div class="p-2 border-b border-base-200">
                     <div class="flex flex-wrap gap-1 pb-1">
-                        <button class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all"
+                        <button
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectedType = 0">
+                            @click="selectedType = 0"
+                        >
                             全部
                         </button>
-                        <button v-for="type in allTypes" :key="type"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all cursor-pointer"
+                        <button
+                            v-for="type in allTypes"
+                            :key="type"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
                             :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectedType = type">
+                            @click="selectedType = type"
+                        >
                             {{ $t(type === 1 ? "角色" : type === 2 ? "武器" : "魔之楔") }}
                         </button>
                     </div>
@@ -81,28 +118,30 @@ useInitialScrollToSelectedItem()
                 <!-- 密函列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="walnut in filteredWalnuts" :key="walnut.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                        <div
+                            v-for="walnut in filteredWalnuts"
+                            :key="walnut.id"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWalnutId === walnut.id }"
-                            @click="selectWalnut(walnut)">
-                            <div class="flex items-start justify-between">
-                                <div>
+                            @click="selectWalnut(walnut)"
+                        >
+                            <div class="flex items-start gap-3 justify-between">
+                                <img
+                                    :src="getWalnutProductIcon(walnut)"
+                                    :alt="walnut.名称"
+                                    class="size-10 shrink-0 rounded bg-base-300 object-cover"
+                                />
+                                <div class="flex-1 min-w-0">
                                     <div class="font-medium">
                                         {{ walnut.名称 }}
                                     </div>
-                                    <div class="text-xs opacity-70 mt-1">ID: {{ walnut.id }} | 稀有度: {{ walnut.稀有度 }}星
-                                    </div>
+                                    <div class="text-xs opacity-70 mt-1">ID: {{ walnut.id }} | 稀有度: {{ walnut.稀有度 }}星</div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
                                     <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
                                         {{ walnut.类型 === 1 ? "角色" : walnut.类型 === 2 ? "武器" : "魔之楔" }}
                                     </span>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-2 mt-2 text-xs opacity-70 flex-wrap">
-                                <span v-for="way in walnut.获取途径" :key="way" class="bg-base-300 px-2 py-0.5 rounded">
-                                    {{ way }}
-                                </span>
                             </div>
                         </div>
                     </div>
@@ -113,18 +152,18 @@ useInitialScrollToSelectedItem()
                     共 {{ filteredWalnuts.length }} 个密函
                 </div>
             </div>
-            <div v-if="selectedWalnut"
+            <div
+                v-if="selectedWalnut"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectWalnut(null)">
+                @click="selectWalnut(null)"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
             <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedWalnut" class="flex-1">
+            <ScrollArea v-if="selectedWalnut" class="flex-2">
                 <DBWalnutDetailItem :walnut="selectedWalnut" />
             </ScrollArea>
         </div>
     </div>
 </template>
-
-

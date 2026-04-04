@@ -280,7 +280,7 @@ export const resolvers = {
             return true
         },
         createSystemTodo: async (_parent, args, context, info) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
 
@@ -315,7 +315,7 @@ export const resolvers = {
             }
         },
         updateSystemTodo: async (_parent, args, context, info) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
 
@@ -370,7 +370,7 @@ export const resolvers = {
             }
         },
         deleteSystemTodo: async (_parent, { id }, context) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
 

@@ -1,3 +1,5 @@
+import { applyVersionGate } from "../versionGate"
+
 export interface QuestChain {
     id: number
     name: string
@@ -15,6 +17,7 @@ export interface QuestChain {
     desc?: string
     detail?: string
     npc?: number
+    版本?: string
 }
 
 export interface QuestChainItem {
@@ -23,7 +26,57 @@ export interface QuestChainItem {
     next?: Record<string, number>
 }
 
-export const questChainData: QuestChain[] = [
+export type QuestChainVersionRange = readonly [number, number, string]
+
+/**
+ * 将任务链版本范围展开为逐项映射。
+ * @param ranges 任务链 id 区间与版本号
+ * @returns 任务链版本映射
+ */
+function buildQuestChainVersionMap(ranges: QuestChainVersionRange[]): Record<number, string> {
+    const result: Record<number, string> = {}
+    for (const [start, end, version] of ranges) {
+        for (let id = start; id <= end; id++) {
+            result[id] = version
+        }
+    }
+    return result
+}
+
+export const questChain2VersionRanges: QuestChainVersionRange[] = [
+    [100101, 100103, "1.0"],
+    [100201, 100208, "1.0"],
+    [100301, 100307, "1.0"],
+    [110101, 110101, "1.0"],
+    [110103, 110103, "1.0"],
+    [110105, 110105, "1.0"],
+    [110107, 110109, "1.0"],
+    [120001, 120002, "1.0"],
+    [120003, 120003, "1.1"],
+    [120101, 120106, "1.1"],
+    [120111, 120114, "1.0"],
+    [200101, 200104, "1.0"],
+    [200201, 200201, "1.0"],
+    [200203, 200216, "1.0"],
+    [200219, 200225, "1.0"],
+    [200227, 200236, "1.0"],
+    [200301, 200304, "1.1"],
+    [200305, 200305, "1.2"],
+    [200306, 200306, "1.1"],
+    [200307, 200308, "1.2"],
+    [200309, 200309, "1.1"],
+    [200310, 200315, "1.2"],
+    [400101, 400107, "1.0"],
+    [400111, 400111, "1.1"],
+    [120201, 120206, "1.3"],
+    [120301, 120308, "1.3"],
+    [200317, 200318, "1.3"],
+    [400121, 400129, "1.3"],
+]
+
+export const questChain2Version: Record<number, string> = buildQuestChainVersionMap(questChain2VersionRanges)
+
+const questChainDataRaw: QuestChain[] = [
     {
         id: 100101,
         name: "逃离净界岛",
@@ -3058,7 +3111,7 @@ export const questChainData: QuestChain[] = [
         icon: "T_Chapter_Icon03",
         reward: [50538],
         questReward: {
-            "12020103": 4000022,
+            "12020105": 4000022,
         },
         quests: [
             {
@@ -3750,13 +3803,6 @@ export const questChainData: QuestChain[] = [
                 id: 12020615,
                 sr: 105301,
                 next: {
-                    Success: 12020616,
-                },
-            },
-            {
-                id: 12020616,
-                sr: 105301,
-                next: {
                     Success: 12020617,
                 },
             },
@@ -3818,13 +3864,6 @@ export const questChainData: QuestChain[] = [
             },
             {
                 id: 12020627,
-                sr: 104504,
-                next: {
-                    Success: 12020628,
-                },
-            },
-            {
-                id: 12020628,
                 sr: 104504,
             },
         ],
@@ -6443,140 +6482,6 @@ export const questChainData: QuestChain[] = [
         ],
     },
     {
-        id: 200317,
-        name: "若言琴上有琴声",
-        chapterName: "世界纪游",
-        episode: "若言琴上有琴声",
-        desc: "与逍遥生对话",
-        detail: "在皓京周边与白闲逛之时，竟在路边看到了一位熟悉的无由生，如果没有记错的话，它的名字应该叫逍遥生，多少也算是有“过命”交情的“熟人”，你们决定上前搭话。",
-        type: 3,
-        reward: [50629],
-        quests: [
-            {
-                id: 20031700,
-                sr: 104504,
-                next: {
-                    Success: 20031701,
-                },
-            },
-            {
-                id: 20031701,
-                sr: 104504,
-                next: {
-                    Success: 20031702,
-                },
-            },
-            {
-                id: 20031702,
-                sr: 104504,
-                next: {
-                    Success: 20031703,
-                },
-            },
-            {
-                id: 20031703,
-                sr: 104504,
-                next: {
-                    Success: 20031704,
-                },
-            },
-            {
-                id: 20031704,
-                sr: 104504,
-                next: {
-                    Success: 20031705,
-                },
-            },
-            {
-                id: 20031705,
-                sr: 104504,
-                next: {
-                    Success: 20031706,
-                },
-            },
-            {
-                id: 20031706,
-                sr: 104504,
-                next: {
-                    Success: 20031707,
-                },
-            },
-            {
-                id: 20031707,
-                sr: 104504,
-                next: {
-                    Success: 20031708,
-                },
-            },
-            {
-                id: 20031708,
-                sr: 104504,
-                next: {
-                    Success: 20031710,
-                },
-            },
-            {
-                id: 20031710,
-                sr: 104504,
-                next: {
-                    Success: 20031711,
-                },
-            },
-            {
-                id: 20031711,
-                sr: 104504,
-            },
-        ],
-    },
-    {
-        id: 200318,
-        name: "忘川回响",
-        chapterName: "世界纪游",
-        episode: "忘川回响",
-        type: 3,
-        reward: [50630],
-        quests: [
-            {
-                id: 20031801,
-                sr: 104501,
-                next: {
-                    Success: 20031803,
-                },
-            },
-            {
-                id: 20031803,
-                sr: 104501,
-                next: {
-                    Success: 20031805,
-                },
-            },
-            {
-                id: 20031805,
-                sr: 104501,
-                next: {
-                    Success: 20031806,
-                },
-            },
-            {
-                id: 20031806,
-                sr: 104501,
-                next: {
-                    Success: 20031807,
-                },
-            },
-            {
-                id: 20031807,
-                next: {
-                    Success: 20031808,
-                },
-            },
-            {
-                id: 20031808,
-                sr: 104501,
-            },
-        ],
-    },
-    {
         id: 400101,
         name: "狩猎委托·其一",
         chapterName: "世界纪游",
@@ -6791,7 +6696,7 @@ export const questChainData: QuestChain[] = [
         episode: "定格的往事·第一缕风",
         type: 5,
         reward: [50615],
-        startTime: 1775786400,
+        startTime: 1775768400,
         endTime: 1776718800,
         quests: [
             {
@@ -6807,7 +6712,7 @@ export const questChainData: QuestChain[] = [
         episode: "定格的往事·坚冰中绽放",
         type: 5,
         reward: [50616],
-        startTime: 1775872800,
+        startTime: 1775854800,
         endTime: 1776718800,
         quests: [
             {
@@ -6823,7 +6728,7 @@ export const questChainData: QuestChain[] = [
         episode: "定格的往事·无光的舞台",
         type: 5,
         reward: [50617],
-        startTime: 1775959200,
+        startTime: 1775941200,
         endTime: 1776718800,
         quests: [
             {
@@ -6839,7 +6744,7 @@ export const questChainData: QuestChain[] = [
         episode: "定格的往事·璀璨终曲",
         type: 5,
         reward: [50618],
-        startTime: 1776045600,
+        startTime: 1776027600,
         endTime: 1776718800,
         quests: [
             {
@@ -6855,7 +6760,7 @@ export const questChainData: QuestChain[] = [
         episode: "定格的往事·织星撷香",
         type: 5,
         reward: [50619],
-        startTime: 1776132000,
+        startTime: 1776114000,
         endTime: 1776718800,
         quests: [
             {
@@ -6871,7 +6776,7 @@ export const questChainData: QuestChain[] = [
         episode: "定格的往事·神阙弈天",
         type: 5,
         reward: [50620],
-        startTime: 1776218400,
+        startTime: 1776200400,
         endTime: 1776718800,
         quests: [
             {
@@ -6917,7 +6822,7 @@ export const questChainData: QuestChain[] = [
         episode: "定格的往事·后日谈",
         type: 5,
         reward: [50613],
-        startTime: 1776218400,
+        startTime: 1776200400,
         endTime: 1776718800,
         quests: [
             {
@@ -6927,6 +6832,13 @@ export const questChainData: QuestChain[] = [
         ],
     },
 ]
+
+const questChainDataWithVersion = questChainDataRaw.map(questChain => ({
+    ...questChain,
+    版本: questChain2Version[questChain.id],
+}))
+
+export const questChainData: QuestChain[] = applyVersionGate(questChainDataWithVersion)
 
 export const questChainMap = new Map(questChainData.map(questChain => [questChain.id, questChain]))
 

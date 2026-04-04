@@ -1,4 +1,12 @@
 import {
+    abyssUsageLevelStatsQuery,
+    abyssUsageLineupStatsQuery,
+    abyssUsageRoleRankQuery,
+    abyssUsageRoleStatsQuery,
+    abyssUsageSlotStatsQuery,
+    abyssUsageSubmissionsCountQuery,
+    abyssUsageWeaponRankQuery,
+    abyssUsageWeaponStatsQuery,
     adminShopRedemptionsCountQuery,
     adminShopRedemptionsQuery,
     buildsCountQuery,
@@ -26,3 +34,13 @@ export const roomsWithCountQuery = combinedQuery(roomsQuery, roomsCountQuery)
 export const guidesWithCountQuery = combinedQuery(guidesQuery, guidesCountQuery)
 export const shopProductsWithCountQuery = combinedQuery(shopProductsQuery, shopProductsCountQuery)
 export const adminShopRedemptionsWithCountQuery = combinedQuery(adminShopRedemptionsQuery, adminShopRedemptionsCountQuery)
+export const abyssUsageBaseQuery = combinedQuery(
+    abyssUsageRoleStatsQuery,
+    abyssUsageWeaponStatsQuery,
+    abyssUsageSubmissionsCountQuery,
+    abyssUsageLineupStatsQuery,
+    abyssUsageSlotStatsQuery,
+    abyssUsageLevelStatsQuery,
+    abyssUsageRoleRankQuery,
+    abyssUsageWeaponRankQuery
+)

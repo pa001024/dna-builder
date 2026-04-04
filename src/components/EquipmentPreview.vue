@@ -92,7 +92,7 @@ function getWeaponAttackLabelPrefix(key: string) {
             </h4>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
                 <div
-                    class="col-span-2 bg-linear-to-br from-primary/10 to-primary/5 rounded-lg p-3 border border-primary/20 hover:border-primary/40 transition-colors"
+                    class="col-span-2 bg-linear-to-br from-primary/10 to-primary/5 rounded-lg p-3 border border-primary/20 hover:border-primary/40 transition-colors duration-200"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
                         {{ charSettings.baseName }} -
@@ -111,7 +111,7 @@ function getWeaponAttackLabelPrefix(key: string) {
                 <div
                     v-for="[key, val] in Object.entries(attributes).filter(([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && v)"
                     :key="key"
-                    class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20 hover:border-secondary/40 transition-colors"
+                    class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20 hover:border-secondary/40 transition-colors duration-200"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
                         {{ key === "攻击" ? $t(getWeaponAttackLabelPrefix(key)) : "" }}{{ $t(key) }}
@@ -160,9 +160,7 @@ function getWeaponAttackLabelPrefix(key: string) {
                     class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
-                        {{ key === "攻击"
-                            ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) })
-                            : $t(key) }}
+                        {{ key === "攻击" ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) }) : $t(key) }}
                     </div>
                     <div class="text-secondary font-bold text-lg font-orbitron">
                         {{ ["攻击", "攻速", "多重", "弹匣", "装填"].includes(key) ? `${+val.toFixed(2)}` : `${+(val * 100).toFixed(2)}%` }}

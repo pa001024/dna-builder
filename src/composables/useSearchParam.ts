@@ -1,5 +1,5 @@
 import { computed, type WritableComputedRef } from "vue"
-import { type LocationQuery, type LocationQueryValue, useRoute, useRouter } from "vue-router"
+import { type LocationQuery, type LocationQueryValue, type Router, useRoute, useRouter } from "vue-router"
 
 /**
  * URL 参数绑定配置。
@@ -84,6 +84,51 @@ function serializeSearchParamValue<T>(value: T): string | undefined {
     }
 }
 
+interface PendingQueryReplace {
+    query: LocationQuery
+    scheduled: boolean
+}
+
+const pendingQueryReplaceMap = new WeakMap<Router, PendingQueryReplace>()
+
+/**
+ * 获取或创建当前 router 的待提交 query。
+ * @param router 路由实例
+ * @param baseQuery 基础 query
+ * @returns 待提交 query 容器
+ */
+function getPendingQueryReplace(router: Router, baseQuery: LocationQuery): PendingQueryReplace {
+    const existing = pendingQueryReplaceMap.get(router)
+    if (existing) {
+        return existing
+    }
+
+    const pending: PendingQueryReplace = {
+        query: { ...baseQuery },
+        scheduled: false,
+    }
+    pendingQueryReplaceMap.set(router, pending)
+    return pending
+}
+
+/**
+ * 调度一次 query 合并写回。
+ * @param router 路由实例
+ * @param pending 待提交 query 容器
+ */
+function scheduleQueryReplace(router: Router, pending: PendingQueryReplace) {
+    if (pending.scheduled) return
+    pending.scheduled = true
+
+    queueMicrotask(() => {
+        const currentPending = pendingQueryReplaceMap.get(router)
+        if (!currentPending) return
+
+        pendingQueryReplaceMap.delete(router)
+        void router.replace({ query: currentPending.query })
+    })
+}
+
 /**
  * 按默认值类型解析 query 字符串。
  * @param rawValue query 原始字符串
@@ -162,16 +207,16 @@ export function useSearchParam<T>(key: string, defaultValue: T, options?: UseSea
             return parseSearchParamValue(rawValue, defaultValue, options)
         },
         set(value) {
-            const nextQuery: LocationQuery = { ...route.query }
-            const currentRawValue = normalizeQueryValue(route.query[key])
+            const pending = getPendingQueryReplace(router, route.query)
+            const currentRawValue = normalizeQueryValue(pending.query[key])
 
             if (isValueEqual(value, defaultValue)) {
                 if (currentRawValue === undefined) {
                     return
                 }
 
-                delete nextQuery[key]
-                void router.replace({ query: nextQuery })
+                delete pending.query[key]
+                scheduleQueryReplace(router, pending)
                 return
             }
 
@@ -181,8 +226,8 @@ export function useSearchParam<T>(key: string, defaultValue: T, options?: UseSea
                     return
                 }
 
-                delete nextQuery[key]
-                void router.replace({ query: nextQuery })
+                delete pending.query[key]
+                scheduleQueryReplace(router, pending)
                 return
             }
 
@@ -190,8 +235,8 @@ export function useSearchParam<T>(key: string, defaultValue: T, options?: UseSea
                 return
             }
 
-            nextQuery[key] = serializedValue
-            void router.replace({ query: nextQuery })
+            pending.query[key] = serializedValue
+            scheduleQueryReplace(router, pending)
         },
     })
 }

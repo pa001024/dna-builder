@@ -162,8 +162,7 @@ const cardLayout = {
 </script>
 
 <template>
-    <div class="relative p-8 h-100 w-240 flex items-center justify-center"
-        style="--spacing: min(0.4rem, calc(0.7vw / 2))">
+    <div class="relative p-8 h-100 w-240 flex items-center justify-center" style="--spacing: min(0.4rem, calc(0.7vw / 2))">
         <!-- 左侧卡片 (两行两列) -->
         <div class="absolute left-8 top-1/2 transform -translate-y-1/2">
             <div v-for="(row, rowIndex) in cardLayout.left" :key="rowIndex" class="flex gap-4 mb-4">
@@ -172,41 +171,48 @@ const cardLayout = {
                         <!-- 特殊形状卡片 -->
                         <div class="relative w-28 h-44 m-3 my-1 transition-transform duration-300 hover:scale-105">
                             <!-- 背景层 -->
-                            <div class="absolute inset-0 bottom-8 transform -skew-x-15 rounded-2xl rounded-bl-md rounded-tr-md bg-linear-to-b game-style-mod-view-item"
-                                :class="getQualityColor(mods[index]?.品质 || '白')"></div>
+                            <div
+                                class="absolute inset-0 bottom-8 transform -skew-x-15 rounded-2xl rounded-bl-md rounded-tr-md bg-linear-to-b game-style-mod-view-item"
+                                :class="getQualityColor(mods[index]?.品质 || '白')"
+                            ></div>
 
                             <!-- 内容层 -->
-                            <ShowProps v-if="mods[index]" :props="mods[index]!.getProperties()"
-                                :title="`${$t(mods[index]!.系列)}${$t(mods[index]!.名称)}`" :rarity="mods[index]!.品质"
-                                :polarity="mods[index]!.极性" :cost="mods[index]!.耐受"
+                            <ShowProps
+                                v-if="mods[index]"
+                                :props="mods[index]!.getProperties()"
+                                :title="`${$t(mods[index]!.系列)}${$t(mods[index]!.名称)}`"
+                                :rarity="mods[index]!.品质"
+                                :polarity="mods[index]!.极性"
+                                :cost="mods[index]!.耐受"
                                 :type="`${$t(mods[index]!.类型)}${mods[index]!.属性 ? `,${$t(mods[index]!.属性 + '属性')}` : ''}${mods[index]!.限定 ? `,${$t(mods[index]!.限定)}` : ''}`"
-                                :effdesc="mods[index]!.效果" :eff="getModEff(mods[index]!)">
+                                :effdesc="mods[index]!.效果"
+                                :eff="getModEff(mods[index]!)"
+                            >
                                 <div class="relative h-full">
                                     <!-- 耐受值和极性标签 (左侧卡片在右上角) -->
                                     <div class="absolute top-1 -right-3">
                                         <span
                                             class="text-xs bg-black/80 px-1.5 py-0.5 rounded-full flex items-center gap-0.5"
-                                            :class="inferredTrendSet.has(index) ? 'text-green-500' : 'text-white'">
-                                            <Icon class="inline-block mb-1" v-if="mods[index]!.极性"
-                                                :icon="`po-${mods[index]!.极性!}`" />
+                                            :class="inferredTrendSet.has(index) ? 'text-green-500' : 'text-white'"
+                                        >
+                                            <Icon class="inline-block mb-1" v-if="mods[index]!.极性" :icon="`po-${mods[index]!.极性!}`" />
                                             {{ getDisplayCost(mods[index], index) }}
                                         </span>
                                     </div>
 
                                     <!-- 图标 -->
                                     <div class="flex justify-center translate-x-1 pt-2">
-                                        <img :src="getModIcon(mods[index])" class="size-32 max-w-32 pointer-events-none"
-                                            alt="" />
+                                        <img :src="getModIcon(mods[index])" class="size-32 max-w-32 pointer-events-none" alt="" />
                                     </div>
 
                                     <!-- 等级 -->
-                                    <div
-                                        class="absolute top-32 text-center text-lg -translate-x-2 flex items-center justify-center">
-                                        <div v-for="i in 5" :key="i"
-                                            class="scale-y-75 inline-block relative w-4 left-2">
+                                    <div class="absolute top-32 text-center text-lg -translate-x-2 flex items-center justify-center">
+                                        <div v-for="i in 5" :key="i" class="scale-y-75 inline-block relative w-4 left-2">
                                             <span class="absolute size-3 left-0 inline-block bg-black rotate-45"></span>
-                                            <span class="absolute size-2 top-0.5 left-0.5 inline-block rotate-45"
-                                                :class="[i + 5 <= mods[index].等级 ? 'bg-white' : 'bg-gray-600']"></span>
+                                            <span
+                                                class="absolute size-2 top-0.5 left-0.5 inline-block rotate-45"
+                                                :class="[i + 5 <= mods[index].等级 ? 'bg-white' : 'bg-gray-600']"
+                                            ></span>
                                         </div>
                                     </div>
                                     <!-- 信息 -->
@@ -230,41 +236,51 @@ const cardLayout = {
                         <!-- 特殊形状卡片 -->
                         <div class="relative w-28 h-44 m-3 my-1 transition-transform duration-300 hover:scale-105">
                             <!-- 背景层 -->
-                            <div class="absolute inset-0 bottom-8 transform skew-x-15 rounded-2xl rounded-bl-md rounded-tr-md bg-linear-to-b game-style-mod-view-item"
-                                :class="getQualityColor(mods[index]?.品质 || '白')"></div>
+                            <div
+                                class="absolute inset-0 bottom-8 transform skew-x-15 rounded-2xl rounded-bl-md rounded-tr-md bg-linear-to-b game-style-mod-view-item"
+                                :class="getQualityColor(mods[index]?.品质 || '白')"
+                            ></div>
 
                             <!-- 内容层 -->
-                            <ShowProps v-if="mods[index]" :props="mods[index]!.getProperties()"
-                                :title="`${$t(mods[index]!.系列)}${$t(mods[index]!.名称)}`" :rarity="mods[index]!.品质"
-                                :polarity="mods[index]!.极性" :cost="mods[index]!.耐受"
+                            <ShowProps
+                                v-if="mods[index]"
+                                :props="mods[index]!.getProperties()"
+                                :title="`${$t(mods[index]!.系列)}${$t(mods[index]!.名称)}`"
+                                :rarity="mods[index]!.品质"
+                                :polarity="mods[index]!.极性"
+                                :cost="mods[index]!.耐受"
                                 :type="`${$t(mods[index]!.类型)}${mods[index]!.属性 ? `,${$t(mods[index]!.属性 + '属性')}` : ''}${mods[index]!.限定 ? `,${$t(mods[index]!.限定)}` : ''}`"
-                                :effdesc="mods[index]!.效果" :eff="getModEff(mods[index]!)">
+                                :effdesc="mods[index]!.效果"
+                                :eff="getModEff(mods[index]!)"
+                            >
                                 <div class="relative h-full">
                                     <!-- 耐受值和极性标签 (右侧卡片在右上角) -->
                                     <div class="absolute top-1 -left-3">
                                         <span
                                             class="text-xs bg-black/80 px-1.5 py-0.5 rounded-full flex items-center gap-0.5"
-                                            :class="inferredTrendSet.has(index) ? 'text-green-500' : 'text-white'">
-                                            <Icon class="inline-block mb-1" v-if="mods[index]!.极性"
-                                                :icon="`po-${mods[index]!.极性!}`" />
+                                            :class="inferredTrendSet.has(index) ? 'text-green-500' : 'text-white'"
+                                        >
+                                            <Icon class="inline-block mb-1" v-if="mods[index]!.极性" :icon="`po-${mods[index]!.极性!}`" />
                                             {{ getDisplayCost(mods[index], index) }}
                                         </span>
                                     </div>
 
                                     <!-- 图标 -->
                                     <div class="flex justify-center translate-x-1 pt-2">
-                                        <img :src="getModIcon(mods[index])" class="size-32 max-w-32 pointer-events-none"
-                                            alt="" />
+                                        <img :src="getModIcon(mods[index])" class="size-32 max-w-32 pointer-events-none" alt="" />
                                     </div>
 
                                     <!-- 等级 -->
-                                    <div v-if="mods[index].品质 === '金'"
-                                        class="absolute top-32 text-center text-lg translate-x-6 flex items-center justify-center">
-                                        <div v-for="i in 5" :key="i"
-                                            class="scale-y-75 inline-block relative w-4 left-2">
+                                    <div
+                                        v-if="mods[index].品质 === '金'"
+                                        class="absolute top-32 text-center text-lg translate-x-6 flex items-center justify-center"
+                                    >
+                                        <div v-for="i in 5" :key="i" class="scale-y-75 inline-block relative w-4 left-2">
                                             <span class="absolute size-3 left-0 inline-block bg-black rotate-45"></span>
-                                            <span class="absolute size-2 top-0.5 left-0.5 inline-block rotate-45"
-                                                :class="[i + 5 <= mods[index].等级 ? 'bg-white' : 'bg-gray-600']"></span>
+                                            <span
+                                                class="absolute size-2 top-0.5 left-0.5 inline-block rotate-45"
+                                                :class="[i + 5 <= mods[index].等级 ? 'bg-white' : 'bg-gray-600']"
+                                            ></span>
                                         </div>
                                     </div>
                                     <!-- 信息 -->
@@ -286,15 +302,26 @@ const cardLayout = {
             <div class="absolute -top-40">
                 <svg class="w-52 h-24" viewBox="0 0 100 50">
                     <!-- 背景弧形 (120度) -->
-                    <path d="M25,35 A30,30 0 0,1 75,35" fill="none" stroke-linecap="round"
-                        stroke="rgba(255, 255, 255, 0.3)" stroke-width="4" />
+                    <path
+                        d="M25,35 A30,30 0 0,1 75,35"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke="rgba(255, 255, 255, 0.3)"
+                        stroke-width="4"
+                    />
                     <!-- 进度弧形 (120度) -->
-                    <path d="M25,35 A30,30 0 0,1 75,35" fill="none" stroke="rgba(255, 255, 255, 0.9)" stroke-width="4"
-                        stroke-linecap="round" :style="{
+                    <path
+                        d="M25,35 A30,30 0 0,1 75,35"
+                        fill="none"
+                        stroke="rgba(255, 255, 255, 0.9)"
+                        stroke-width="4"
+                        stroke-linecap="round"
+                        :style="{
                             strokeDasharray: '62.83',
                             strokeDashoffset: `calc(62.83 - (62.83 * ${endurancePercent} / 100))`,
                             transition: 'stroke-dashoffset 0.5s ease-in-out',
-                        }" />
+                        }"
+                    />
                 </svg>
             </div>
 
@@ -305,27 +332,38 @@ const cardLayout = {
             </div>
 
             <!-- 中心圆形卡片 -->
-            <ShowProps :props="mods[cardLayout.center]!.getProperties()"
+            <ShowProps
+                :props="mods[cardLayout.center]!.getProperties()"
                 :title="`${$t(mods[cardLayout.center]!.系列)}${$t(mods[cardLayout.center]!.名称)}`"
-                :rarity="mods[cardLayout.center]!.品质" :polarity="mods[cardLayout.center]!.极性"
+                :rarity="mods[cardLayout.center]!.品质"
+                :polarity="mods[cardLayout.center]!.极性"
                 :cost="mods[cardLayout.center]!.耐受"
                 :type="`${$t(mods[cardLayout.center]!.类型)}${mods[cardLayout.center]!.属性 ? `,${$t(mods[cardLayout.center]!.属性 + '属性')}` : ''}${mods[cardLayout.center]!.限定 ? `,${$t(mods[cardLayout.center]!.限定)}` : ''}`"
-                :effdesc="mods[cardLayout.center]!.效果" :eff="getModEff(mods[cardLayout.center]!)">
-
+                :effdesc="mods[cardLayout.center]!.效果"
+                :eff="getModEff(mods[cardLayout.center]!)"
+            >
                 <div class="transform transition-all duration-300 hover:scale-105 hover:border-white/70">
-                    <div class="relative rounded-full border-4 border-white/40 " v-if="mods[cardLayout.center]">
+                    <div class="relative rounded-full border-4 border-white/40" v-if="mods[cardLayout.center]">
                         <!-- 背景渐变 -->
-                        <div class="absolute inset-0 bg-linear-to-b rounded-full"
-                            :class="getQualityColor(mods[cardLayout.center]?.品质 || '白')"></div>
+                        <div
+                            class="absolute inset-0 bg-linear-to-b rounded-full"
+                            :class="getQualityColor(mods[cardLayout.center]?.品质 || '白')"
+                        ></div>
 
                         <!-- 弧形耐受值指示器 -->
                         <div
-                            class="absolute -bottom-1 -right-1 w-8 h-8 bg-black/80 flex items-center justify-center rounded-full border-2 border-white/40">
+                            class="absolute -bottom-1 -right-1 w-8 h-8 bg-black/80 flex items-center justify-center rounded-full border-2 border-white/40"
+                        >
                             <!-- 耐受值和极性 -->
-                            <span class="text-xs whitespace-nowrap flex items-center gap-0.5"
-                                :class="inferredTrendSet.has(cardLayout.center) ? 'text-green-500' : 'text-white'">
-                                <Icon class="inline-block mb-1" v-if="mods[cardLayout.center]?.极性"
-                                    :icon="`po-${mods[cardLayout.center]!.极性!}`" />
+                            <span
+                                class="text-xs whitespace-nowrap flex items-center gap-0.5"
+                                :class="inferredTrendSet.has(cardLayout.center) ? 'text-green-500' : 'text-white'"
+                            >
+                                <Icon
+                                    class="inline-block mb-1"
+                                    v-if="mods[cardLayout.center]?.极性"
+                                    :icon="`po-${mods[cardLayout.center]!.极性!}`"
+                                />
                                 {{ getDisplayCost(mods[cardLayout.center]!, cardLayout.center) }}
                             </span>
                         </div>
@@ -333,15 +371,18 @@ const cardLayout = {
                         <!-- 卡片内容 -->
                         <div class="relative">
                             <!-- 图标 -->
-                            <img :src="getModIcon(mods[cardLayout.center]!)"
-                                class="size-32 max-w-32 pointer-events-none" alt="" />
+                            <img :src="getModIcon(mods[cardLayout.center]!)" class="size-32 max-w-32 pointer-events-none" alt="" />
                         </div>
                     </div>
-                    <div v-else
-                        class="relative rounded-full border-4 border-white/40 transform transition-all duration-300 hover:scale-105 hover:border-white/70">
+                    <div
+                        v-else
+                        class="relative rounded-full border-4 border-white/40 transform transition-all duration-300 hover:scale-105 hover:border-white/70"
+                    >
                         <!-- 背景渐变 -->
-                        <div class="absolute inset-0 bg-linear-to-b rounded-full"
-                            :class="getQualityColor(mods[cardLayout.center]?.品质 || '白')"></div>
+                        <div
+                            class="absolute inset-0 bg-linear-to-b rounded-full"
+                            :class="getQualityColor(mods[cardLayout.center]?.品质 || '白')"
+                        ></div>
                     </div>
                     <!-- 信息 -->
                     <div v-if="mods[cardLayout.center]" class="text-center font-semibold pt-3">

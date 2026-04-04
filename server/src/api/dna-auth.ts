@@ -211,7 +211,7 @@ export const dnaAuthPlugin = () => {
     app.post(
         "/verify",
         async ({ body: { sessionId, imageUrl }, set }) => {
-            if (!sessionId || !imageUrl || !imageUrl.startsWith("https://herobox-img.yingxiong.com/")) {
+            if (!sessionId || !imageUrl?.startsWith("https://herobox-img.yingxiong.com/")) {
                 set.status = 400
                 return { success: false, error: "非法参数" }
             }

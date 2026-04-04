@@ -5700,8 +5700,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             "Un petit oiseau rondouillard dont nul ne connaît le nom, gros comme un avant-bras. En le serrant contre soi, on peut enfouir son visage dans son ventre moelleux et laisser s’envoler la fatigue de la journée.",
         reward: 7050,
         consume: {
-            "19003": 3,
-            "19006": 3,
+            "19007": 3,
         },
         dialogues: [
             {
@@ -6060,7 +6059,7 @@ export const partyTopicData_fr: PartyTopic[] = [
         consume: {
             "19002": 6,
             "19004": 6,
-            "19006": 6,
+            "19008": 6,
         },
         dialogues: [
             {
@@ -6366,9 +6365,8 @@ export const partyTopicData_fr: PartyTopic[] = [
             "Une lettre dissimulée depuis des années dans la doublure d’un oiseau à câlins. Le papier est couvert de plis, chargé de nostalgie et d’affection.",
         reward: 7052,
         consume: {
+            "19001": 9,
             "19002": 9,
-            "19005": 9,
-            "19008": 9,
         },
         dialogues: [
             {
@@ -17280,7 +17278,6 @@ export const partyTopicData_fr: PartyTopic[] = [
             "La vérité change toujours selon ce que les gens sont prêts à croire. Il n’existe pas de vérité absolue. Il en va de même pour les relations humaines : il n’existe pas d’ennemis éternels — seulement des intérêts éternels.",
         reward: 7050,
         consume: {
-            "19003": 3,
             "19006": 3,
         },
         dialogues: [
@@ -17607,8 +17604,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             "Un pain qui glisse facilement dans la gorge... du miel encore tiède qui n’a pas figé. Dans l’esprit des Charons, c’est l’image même d’une vie digne. Ils avalent cette illusion amère comme si c’était la réalité.",
         reward: 7051,
         consume: {
-            "19002": 6,
-            "19004": 6,
+            "19005": 6,
             "19006": 6,
         },
         dialogues: [
@@ -18053,9 +18049,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             "Une gorgée tiède descend doucement dans la gorge. L’espace d’un instant, on s’imagine pouvoir laisser derrière soi les regrets d’hier.",
         reward: 7052,
         consume: {
-            "19002": 9,
             "19005": 9,
-            "19008": 9,
         },
         dialogues: [
             {
@@ -20853,15 +20847,290 @@ export const partyTopicData_fr: PartyTopic[] = [
             "Les Neuf Chapitres de Dafeng suivent leur cours immuable, identiques hier comme aujourd’hui. Telle est la Voie Céleste.",
         reward: 7050,
         consume: {
-            "19005": 2,
-            "19006": 2,
+            "19007": 2,
         },
         dialogues: [
             {
-                id: 10010101,
-                content: "Berry, je...",
-                voice: "story/1001/100101/190F2A32",
-                npc: 100001,
+                id: 80230101,
+                content:
+                    "La cérémonie de sélection du Haut Chancelier de Longyuan va commencer — Que ceux qui ont reçu la faveur de Taihao avancent, dans l’ordre imparti —",
+                voice: "inv/Zhiliu/001/C8D8FEF2",
+                next: 80230102,
+            },
+            {
+                id: 80230103,
+                content:
+                    "Je suis l’actuelle Haut Chancelier de Longyuan, et j’exerce également au sein du Bureau des Rites. Par décret de Taihao, je suis chargée d’éprouver votre envergure, votre jugement et votre éveil.",
+                voice: "inv/Zhiliu/001/C8D8FF46",
+                npc: 240071,
+                next: 80230104,
+            },
+            {
+                id: 80230104,
+                content:
+                    "En ce jour, dans le Pavillon de l’Arbitrage, chacun de vos gestes, chacune de vos paroles sera observée par Son regard. Rien ne pourra être dissimulé — pas même la plus infime pensée.",
+                voice: "inv/Zhiliu/001/C8D8FF70",
+                npc: 240071,
+                next: 80230105,
+            },
+            {
+                id: 80230105,
+                content:
+                    "La décision finale ne m’appartient pas. Seule la volonté divine de Taihao tranchera quant à celui ou celle qui est digne de porter ce fardeau.",
+                voice: "inv/Zhiliu/001/C8D8FF9A",
+                npc: 240071,
+                next: 80230106,
+            },
+            {
+                id: 80230106,
+                content:
+                    "Souvenez-vous de la sainteté de ce lieu. Écartez toute pensée parasite, et répondez avec sincérité et lucidité. À présent — que la cérémonie commence.",
+                voice: "inv/Zhiliu/001/C8D8FFC4",
+                npc: 240071,
+                next: 80230107,
+            },
+            {
+                id: 80230107,
+                content: "Approchez. Présentez-vous. D’où venez-vous, et quel est votre nom ?",
+                voice: "inv/Zhiliu/001/C8D8FFEE",
+                npc: 240071,
+                next: 80230108,
+            },
+            {
+                id: 80230108,
+                content:
+                    "Votre Excellence, je me nomme Gu Yan. Je suis natif de ces terres ; ma famille réside depuis des générations au Village de Jiaolan, au pied de Haojing.",
+                voice: "inv/Zhiliu/001/C8D90018",
+                npc: 790078,
+                next: 80230109,
+            },
+            {
+                id: 80230109,
+                content:
+                    "Inutile d’être si nerveux. Lorsque le présage du Haut Chancelier de Longyuan s’est posé sur vous, votre famille a dû s’en réjouir grandement, n’est-ce pas ?",
+                voice: "inv/Zhiliu/001/C8D90042",
+                npc: 240071,
+                next: 80230110,
+            },
+            {
+                id: 80230110,
+                content:
+                    "Évidemment ! Lorsque le Bi’an est venu porter l’heureuse nouvelle, ma mère n’en comprenait pas encore la portée. Mais lorsqu’elle a réalisé que notre lignée allait donner naissance à un Haut Chancelier, elle a failli s’évanouir de joie.",
+                voice: "inv/Zhiliu/001/C8D9006C",
+                npc: 790078,
+                next: 80230111,
+            },
+            {
+                id: 80230111,
+                content:
+                    "Par la suite, elle a ramassé un à un les pétales parfumés tombés ce jour-là, les a fait encadrer avec le plus grand soin, affirmant qu’ils deviendraient un trésor transmis à nos descendants.",
+                voice: "inv/Zhiliu/001/C8D90096",
+                npc: 790078,
+                next: 80230112,
+            },
+            {
+                id: 80230112,
+                content:
+                    "<I>Hm...</> Recevoir la faveur de Taihao n’est que la première étape. Il vous faudra encore franchir trois épreuves avant de pouvoir prétendre à cet honneur.",
+                voice: "inv/Zhiliu/001/C8D900C0",
+                npc: 240071,
+                next: 80230113,
+            },
+            {
+                id: 80230113,
+                content: "Assez de bavardages. Répondez maintenant —",
+                voice: "inv/Zhiliu/001/C8D900EA",
+                npc: 240071,
+                next: 80230114,
+            },
+            {
+                id: 80230114,
+                content:
+                    "Le peuple de Huaxu grandit en récitant les Neuf Chapitres de Dafeng. Mais vous êtes-vous déjà interrogé sur leur véritable nature ?",
+                voice: "inv/Zhiliu/001/C8D90114",
+                npc: 240071,
+                next: 80230115,
+            },
+            {
+                id: 80230115,
+                content: "... Ils sont, sans l’ombre d’un doute, l’émanation de la puissance divine de Taihao.",
+                voice: "inv/Zhiliu/001/C8D9013E",
+                npc: 790078,
+                next: 80230116,
+            },
+            {
+                id: 80230116,
+                content:
+                    "Les Neuf Chapitres sont semblables au cycle du soleil et de la lune, au cours des fleuves se jetant vers la mer — ils incarnent l’ordre naturel du Ciel et de la Terre. Depuis des temps immémoriaux, ils demeurent inchangés. Quand bien même le monde serait bouleversé, les montagnes réduites en poussière et les océans asséchés, ils subsisteraient, éternels comme les astres.",
+                voice: "inv/Zhiliu/001/C8D90168",
+                npc: 790078,
+                next: 80230117,
+            },
+            {
+                id: 80230117,
+                content:
+                    "Nous honorons les Neuf Chapitres comme le poisson honore l’eau, ou l’oiseau le vent — vivant en leur sein, sans même en avoir pleinement conscience.",
+                voice: "inv/Zhiliu/001/C8D90192",
+                npc: 790078,
+                next: 80230118,
+            },
+            {
+                id: 80230118,
+                content:
+                    "Votre ferveur est manifeste. Taihao en est témoin, tout comme moi. Retirez-vous pour l’instant. Rentrez chez vous et attendez la décision.",
+                voice: "inv/Zhiliu/001/C8D901BC",
+                npc: 240071,
+                next: 80230119,
+            },
+            {
+                id: 80230119,
+                content: "Suivant.",
+                voice: "inv/Zhiliu/001/C8D901E6",
+                npc: 240071,
+                next: 80230120,
+            },
+            {
+                id: 80230121,
+                content: "Votre Excellence. Je me nomme Zhiliu.",
+                voice: "inv/Zhiliu/001/C8D9023A",
+                npc: 790076,
+                next: 80230122,
+            },
+            {
+                id: 80230122,
+                content:
+                    "Zhiliu. La question qui vous est posée est la même que pour votre prédécesseur — quelle est, selon vous, la nature profonde des Neuf Chapitres de Dafeng ?",
+                voice: "inv/Zhiliu/001/C8D90264",
+                npc: 240071,
+                next: 80230123,
+            },
+            {
+                id: 80230123,
+                content: "... Vous interrogez leur essence.",
+                voice: "inv/Zhiliu/001/C8D9028E",
+                npc: 790076,
+                next: 80230124,
+            },
+            {
+                id: 80230124,
+                content:
+                    "J’ai, à ce sujet, une humble opinion. Si mes paroles venaient à dépasser ma condition, j’implore d’avance votre indulgence, ainsi que celle de Taihao.",
+                voice: "inv/Zhiliu/001/C8D902B8",
+                npc: 790076,
+                next: 80230125,
+            },
+            {
+                id: 80230125,
+                content: "Oh ? Exposez donc votre compréhension de cette « essence ».",
+                voice: "inv/Zhiliu/001/C8D902E2",
+                npc: 240071,
+                next: 80230126,
+            },
+            {
+                id: 80230126,
+                content: "Taihao n’est pas une loi céleste née de la nature elle-même. Il est issu de la volonté des peuples.",
+                voice: "inv/Zhiliu/001/C8D9030C",
+                npc: 790076,
+                next: 80230127,
+            },
+            {
+                id: 80230127,
+                content:
+                    "Autrefois, les habitants de Huaxu étaient las des guerres incessantes. Épuisés par les conflits, ils aspiraient à la paix. Répondant à ce vœu, les ancêtres Ju et Yang posèrent les fondations des Neuf Chapitres de Dafeng, leur conférant une puissance sans égale.",
+                voice: "inv/Zhiliu/001/C8D90336",
+                npc: 790076,
+                next: 80230128,
+            },
+            {
+                id: 80230128,
+                content:
+                    "Les dieux et les peuples se sont ainsi accomplis mutuellement. L’un ne saurait exister sans l’autre. Les hommes déposèrent volontairement les armes, confièrent à Taihao le droit de juger le bien et le mal, et s’engagèrent à respecter ses préceptes. C’est ainsi que Huaxu prit la forme que nous lui connaissons aujourd’hui.",
+                voice: "inv/Zhiliu/001/C8D90360",
+                npc: 790076,
+                next: 80230129,
+            },
+            {
+                id: 80230129,
+                content:
+                    "En retour, Taihao transforma la promesse de paix en réalité, étendant sa bénédiction à tous les êtres. Un cycle sans fin, perpétuellement renouvelé. De ce fait, l’essence des Neuf Chapitres de Dafeng réside dans un <H>pacte</> — un engagement librement consenti par les deux parties.",
+                voice: "inv/Zhiliu/001/C8D9038A",
+                npc: 790076,
+                next: 80230130,
+            },
+            {
+                id: 80230130,
+                content: "... Un pacte, dites-vous. Votre interprétation est audacieuse.",
+                voice: "inv/Zhiliu/001/C8D903B4",
+                npc: 240071,
+                next: 80230131,
+            },
+            {
+                id: 80230131,
+                content:
+                    "Permettez-moi alors une autre question. Vous affirmez que Taihao répond aux vœux du peuple — mais qu’en est-il de ceux que Sa lumière n’atteint pas ?",
+                voice: "inv/Zhiliu/001/C8D903DE",
+                npc: 240071,
+                next: 80230132,
+            },
+            {
+                id: 80230132,
+                content:
+                    "Des rumeurs circulent récemment à propos des Neuf Chapitres, attisées notamment par certains Vagabonds. Vous n’ignorez pas ces propos — inutile d’éluder le sujet.",
+                voice: "inv/Zhiliu/001/C8D90408",
+                npc: 240071,
+                next: 80230133,
+            },
+            {
+                id: 80230133,
+                content:
+                    "Les cœurs humains abritent d’innombrables voix. Même lorsqu’un dieu recueille les aspirations de la multitude, il ne peut en préserver qu’une seule. Un monde où chacun verrait ses désirs pleinement exaucés n’existe probablement pas.",
+                voice: "inv/Zhiliu/001/C8D90432",
+                npc: 790076,
+                next: 80230134,
+            },
+            {
+                id: 80230134,
+                content:
+                    "Unir la majorité autour d’un consensus, discipliner la dissidence de la minorité — tel est le prix de l’ordre, et le fondement de la pérennité de l’État.",
+                voice: "inv/Zhiliu/001/C8D9045C",
+                npc: 790076,
+                next: 80230135,
+            },
+            {
+                id: 80230135,
+                content: "Intéressant... Répétez-moi votre nom.",
+                voice: "inv/Zhiliu/001/C8D90486",
+                npc: 240071,
+                next: 80230136,
+            },
+            {
+                id: 80230136,
+                content: "Zhiliu. Je suis à votre écoute, Votre Excellence.",
+                voice: "inv/Zhiliu/001/C8D904B0",
+                npc: 790076,
+                next: 80230137,
+            },
+            {
+                id: 80230137,
+                content:
+                    "« Apaiser les flots déchaînés, interrompre les courants indociles... » Un nom de bon augure. Retournez attendre la décision.",
+                voice: "inv/Zhiliu/001/C8D904DA",
+                npc: 240071,
+                next: 80230138,
+            },
+            {
+                id: 80230138,
+                content: "Zhiliu. Vous avez su retenir mon attention. Permettez-moi donc un dernier avertissement.",
+                voice: "inv/Zhiliu/001/C8D90504",
+                npc: 240071,
+                next: 80230139,
+            },
+            {
+                id: 80230139,
+                content:
+                    "— Gouverner un État, c’est emprunter la voie du carnage. Vous devrez endosser l’infamie, et détourner le regard des plaintes du peuple. Avez-vous réellement pris cette résolution ?",
+                voice: "inv/Zhiliu/001/C8D9052E",
+                npc: 240071,
             },
         ],
     },
@@ -20876,14 +21145,380 @@ export const partyTopicData_fr: PartyTopic[] = [
         reward: 7051,
         consume: {
             "19002": 5,
-            "19004": 5,
         },
         dialogues: [
             {
-                id: 10010101,
-                content: "Berry, je...",
-                voice: "story/1001/100101/190F2A32",
-                npc: 100001,
+                id: 80230201,
+                content: "Les Neuf Chapitres de Dafeng se sont trompés — il y a eu une injustice ! Je réclame réparation !",
+                voice: "inv/Zhiliu/002/C8D90F5A",
+                npc: 790077,
+                next: 80230202,
+            },
+            {
+                id: 80230202,
+                content: "Je vous en prie, honorable personne, écoutez-moi... cela ne vous prendra qu’un instant—",
+                voice: "inv/Zhiliu/002/C8D90F84",
+                npc: 790077,
+                next: 80230203,
+            },
+            {
+                id: 80230203,
+                content: "Je vous en supplie... accordez-moi un moment—",
+                voice: "inv/Zhiliu/002/C8D90FAE",
+                npc: 790077,
+                next: 80230204,
+            },
+            {
+                id: 80230205,
+                content: "Que se passe-t-il ?",
+                voice: "inv/Zhiliu/002/C8D91002",
+                npc: 790076,
+                next: 80230206,
+            },
+            {
+                id: 80230206,
+                content: "— !",
+                voice: "inv/Zhiliu/002/C8D9102C",
+                npc: 790077,
+                next: 80230207,
+            },
+            {
+                id: 80230207,
+                content:
+                    "J’étais atteinte d’une maladie grave. Une médecin de la Pharmacie Zesheng m’a sauvée. Elle n’a jamais accepté le moindre paiement... et pourtant, elle a été exécutée par un Bi’an !",
+                voice: "inv/Zhiliu/002/C8D91056",
+                npc: 790077,
+                next: 80230208,
+            },
+            {
+                id: 80230208,
+                content:
+                    "Je vous en prie... au moins — au moins rendez-lui son honneur ! C’était une médecin dévouée, uniquement animée par le désir de sauver des vies ! Les Neuf Chapitres de Dafeng ont jugé que son remède m’avait nui, mais ce n’était qu’un effet temporaire !",
+                voice: "inv/Zhiliu/002/C8D91080",
+                npc: 790077,
+                next: 80230209,
+            },
+            {
+                id: 80230209,
+                content:
+                    "Ma maladie était complexe. Tous les autres médecins refusaient de me prendre en charge. Elle seule a osé proposer une méthode risquée — combattre le mal par le mal.",
+                voice: "inv/Zhiliu/002/C8D910AA",
+                npc: 790077,
+                next: 80230210,
+            },
+            {
+                id: 80230210,
+                content:
+                    "Elle m’a expliqué chaque danger : convulsions, voire un arrêt temporaire de la respiration. J’ai accepté ces risques de mon plein gré... je n’aurais jamais imaginé que cela lui coûterait la vie.",
+                voice: "inv/Zhiliu/002/C8D910D4",
+                npc: 790077,
+                next: 80230211,
+            },
+            {
+                id: 80230211,
+                content:
+                    "Si je comprends bien, vous affirmez que les Neuf Chapitres de Dafeng ont mal jugé le traitement, et que celle qui vous a soignée est morte sous une accusation infondée. Est-ce bien cela ?",
+                voice: "inv/Zhiliu/002/C8D910FE",
+                npc: 790076,
+                next: 80230212,
+            },
+            {
+                id: 80230212,
+                content:
+                    "Exactement ! Je me tiens encore devant vous, bien vivante. Les morts ne se relèvent pas pour protester, n’est-ce pas ?",
+                voice: "inv/Zhiliu/002/C8D91128",
+                npc: 790077,
+                next: 80230213,
+            },
+            {
+                id: 80230213,
+                content: "Je suis en vie... et celle qui m’a sauvée est morte pour cela. Je... je ne peux accepter une telle injustice.",
+                voice: "inv/Zhiliu/002/C8D91152",
+                npc: 790077,
+                next: 80230214,
+            },
+            {
+                id: 80230214,
+                content: "Je comprends. Je ne peux rien vous promettre, mais je ferai ce qui est en mon pouvoir.",
+                voice: "inv/Zhiliu/002/C8D9117C",
+                npc: 790076,
+                next: 80230215,
+            },
+            {
+                id: 80230215,
+                content: "Merci... Merci infiniment.",
+                voice: "inv/Zhiliu/002/C8D911A6",
+                npc: 790077,
+                next: 80230216,
+            },
+            {
+                id: 80230216,
+                content:
+                    "... En réalité, je sais combien cette affaire est difficile. Vous ne pourrez peut-être rien y changer. Je suis restée ici plusieurs jours — vous êtes la seule personne à vous être arrêtée pour m’écouter...",
+                voice: "inv/Zhiliu/002/C8D911D0",
+                npc: 790077,
+                next: 80230217,
+            },
+            {
+                id: 80230217,
+                content: "Ne serait-ce que pour cette bonté, je vous en suis reconnaissante.",
+                voice: "inv/Zhiliu/002/C8D911FA",
+                npc: 790077,
+                next: 80230218,
+            },
+            {
+                id: 80230218,
+                content: "Ce n’est qu’une chose sans importance.",
+                voice: "inv/Zhiliu/002/C8D91224",
+                npc: 790076,
+                next: 80230219,
+            },
+            {
+                id: 80230220,
+                content: "Puisque vous êtes tous présents, nous allons à présent entamer la seconde épreuve.",
+                voice: "inv/Zhiliu/002/C8D91278",
+                npc: 240071,
+                next: 80230221,
+            },
+            {
+                id: 80230221,
+                content: "... Il y a eu injustice... Je réclame réparation...",
+                voice: "inv/Zhiliu/002/C8D912A2",
+                npc: 790077,
+                next: 80230222,
+            },
+            {
+                id: 80230222,
+                content:
+                    "Pourquoi cette fille fait-elle encore scandale sous le Pavillon ? Elle importune les passants et trouble la quiétude de Taihao. Votre Excellence, ne vaudrait-il pas mieux demander au Magistrat de Yingtian de la faire évacuer ?",
+                voice: "inv/Zhiliu/002/C8D912CC",
+                npc: 790080,
+                next: 80230223,
+            },
+            {
+                id: 80230223,
+                content: "Calmez-vous. Elle est précisément l’épreuve d’aujourd’hui.",
+                voice: "inv/Zhiliu/002/C8D912F6",
+                npc: 240071,
+                next: 80230224,
+            },
+            {
+                id: 80230224,
+                content: "Des murmures parcourent la foule.",
+                voice: "inv/Zhiliu/002/C8D91320",
+                next: 80230225,
+            },
+            {
+                id: 80230225,
+                content:
+                    "Les Neuf Chapitres de Dafeng forment un système colossal, fonctionnant sans relâche depuis des générations. Même une infime probabilité d’erreur finit, avec le temps, par engendrer des failles.",
+                voice: "inv/Zhiliu/002/C8D9134A",
+                npc: 240071,
+                next: 80230226,
+            },
+            {
+                id: 80230226,
+                content:
+                    "Savoir assister Taihao dans le traitement de ces failles constitue un pilier de la gouvernance. C’est l’objet de votre épreuve. Exprimez vos idées sans réserve.",
+                voice: "inv/Zhiliu/002/C8D91374",
+                npc: 240071,
+                next: 80230227,
+            },
+            {
+                id: 80230227,
+                content:
+                    "Votre Excellence, la légitimité des Neuf Chapitres est profondément ancrée dans le cœur du peuple. Ces voix dissonantes ne méritent aucune attention.",
+                voice: "inv/Zhiliu/002/C8D9139E",
+                npc: 790080,
+                next: 80230228,
+            },
+            {
+                id: 80230228,
+                content:
+                    "Un barrage de mille lieues peut céder à cause d’une simple fourmi. Fermer les yeux trop longtemps ne ferait qu’encourager des forces telles que les Pics Extérieurs, et nourrir des menaces latentes.",
+                voice: "inv/Zhiliu/002/C8D913C8",
+                npc: 240071,
+                next: 80230229,
+            },
+            {
+                id: 80230229,
+                content:
+                    "À mes yeux, il n’existe que deux moyens : la contrainte ou l’appât du gain. Une menace suffisamment dissuasive, ou une récompense assez séduisante, et même les plus obstinés finiront par céder.",
+                voice: "inv/Zhiliu/002/C8D913F2",
+                npc: 790081,
+                next: 80230230,
+            },
+            {
+                id: 80230230,
+                content:
+                    "Les hommes ne sont pas de simples plantes. Mépriser le cœur humain ne peut qu’engendrer un retour de flamme. Vous n’apaiserez rien — vous ne ferez qu’aggraver les choses.",
+                voice: "inv/Zhiliu/002/C8D9141C",
+                npc: 240071,
+                next: 80230231,
+            },
+            {
+                id: 80230231,
+                content: "Des murmures parcourent la foule.",
+                voice: "inv/Zhiliu/002/C8D91446",
+                next: 80230232,
+            },
+            {
+                id: 80230232,
+                content: "J’ai une solution. Permettez-moi d’essayer.",
+                voice: "inv/Zhiliu/002/C8D91470",
+                npc: 790076,
+                next: 80230233,
+            },
+            {
+                id: 80230234,
+                content: "Vous... c’est vous... vous êtes revenue...",
+                voice: "inv/Zhiliu/002/C8D914C4",
+                npc: 790077,
+                next: 80230235,
+            },
+            {
+                id: 80230235,
+                content: "Si vite... auriez-vous trouvé un moyen ?",
+                voice: "inv/Zhiliu/002/C8D914EE",
+                npc: 790077,
+                next: 80230236,
+            },
+            {
+                id: 80230236,
+                content: "Je suis désolée. Je crains de ne pouvoir satisfaire votre requête.",
+                voice: "inv/Zhiliu/002/C8D91518",
+                npc: 790076,
+                next: 80230237,
+            },
+            {
+                id: 80230237,
+                content: "...",
+                voice: "inv/Zhiliu/002/C8D91542",
+                npc: 790077,
+                next: 80230238,
+            },
+            {
+                id: 80230238,
+                content:
+                    "Les Neuf Chapitres de Dafeng soutiennent l’existence de tout Huaxu. La confiance du peuple est le socle de leur fonctionnement. On ne peut ébranler ce fondement pour quelques erreurs isolées. C’est une question de choix et de conséquences.",
+                voice: "inv/Zhiliu/002/C8D9156C",
+                npc: 790076,
+                next: 80230239,
+            },
+            {
+                id: 80230239,
+                content:
+                    "Ce que je peux toutefois vous promettre, c’est qu’une fois la tempête apaisée, la Pharmacie Zesheng recevra un soutien discret.",
+                voice: "inv/Zhiliu/002/C8D91596",
+                npc: 790076,
+                next: 80230240,
+            },
+            {
+                id: 80230240,
+                content: "Quant à vous, je peux faire en sorte qu’une compensation vous soit accordée, afin d’alléger votre peine.",
+                voice: "inv/Zhiliu/002/C8D915C0",
+                npc: 790077,
+                next: 80230241,
+            },
+            {
+                id: 80230241,
+                content:
+                    "Tout cela paraît raisonnable... mais ce n’est pas ce que je souhaite. Sans cette médecin, je serais déjà morte. À quoi l’argent peut-il bien servir aux défunts ?",
+                voice: "inv/Zhiliu/002/C8D915EA",
+                npc: 790077,
+                next: 80230242,
+            },
+            {
+                id: 80230242,
+                content:
+                    "Et pour celle qui m’a sauvée au prix de sa vie, ces biens matériels n’ont plus aucun sens. La seule chose que je puisse encore défendre, c’est sa pureté après la mort.",
+                voice: "inv/Zhiliu/002/C8D91614",
+                npc: 790077,
+                next: 80230243,
+            },
+            {
+                id: 80230243,
+                content:
+                    "Si j’accepte cet argent, ma vie sera peut-être plus aisée... mais qu’adviendra-t-il de ma conscience ? Si elle se met à me ronger, aucun remède ne pourra jamais la guérir.",
+                voice: "inv/Zhiliu/002/C8D9163E",
+                npc: 790077,
+                next: 80230244,
+            },
+            {
+                id: 80230244,
+                content:
+                    "Dites-moi... le fonctionnement des Neuf Chapitres de Dafeng exige-t-il réellement que chaque injustice soit ensevelie l’une après l’autre ?",
+                voice: "inv/Zhiliu/002/C8D91668",
+                npc: 790077,
+                next: 80230245,
+            },
+            {
+                id: 80230245,
+                content:
+                    "... Votre tempérament me rappelle celui que j’avais autrefois. Il y a des choses que je ne dirai qu’à vous seule.",
+                voice: "inv/Zhiliu/002/C8D91692",
+                npc: 790076,
+                next: 80230246,
+            },
+            {
+                id: 80230247,
+                content:
+                    "Chancelier Zhiliu ! Je ne m’attendais pas à ce que vous régliez cette affaire si aisément. En quelques mots, vous lui avez même fait signer l’acte de renonciation à sa plainte ! Quel est votre secret ? Apprenez-nous donc !",
+                voice: "inv/Zhiliu/002/C8D916E6",
+                npc: 790081,
+                next: 80230248,
+            },
+            {
+                id: 80230248,
+                content:
+                    "Vous me flattez. Je n’ai pas encore achevé toutes les épreuves et ne mérite pas un tel titre. Je me suis contentée de lui exposer les réalités.",
+                voice: "inv/Zhiliu/002/C8D91710",
+                npc: 790076,
+                next: 80230249,
+            },
+            {
+                id: 80230249,
+                content: "Si vous n’avez rien d’autre à me demander, je vais prendre congé.",
+                voice: "inv/Zhiliu/002/C8D9173A",
+                npc: 790076,
+                next: 80230250,
+            },
+            {
+                id: 80230251,
+                content:
+                    "Vous savez... j’ai entendu dire que Zhiliu avait elle aussi, jadis, subi une injustice de la part des Neuf Chapitres.",
+                voice: "inv/Zhiliu/002/C8D9178E",
+                npc: 790080,
+                next: 80230252,
+            },
+            {
+                id: 80230252,
+                content:
+                    "Elle se tenait là, exactement à la même place, implorant réparation... un sujet de commérages pour les habitants du quartier.",
+                voice: "inv/Zhiliu/002/C8D917B8",
+                npc: 790080,
+                next: 80230253,
+            },
+            {
+                id: 80230253,
+                content: "Et aujourd’hui, elle règle ce genre d’affaire sans même ciller. Est-ce cela, accomplir de grandes choses ?",
+                voice: "inv/Zhiliu/002/C8D917E2",
+                npc: 790080,
+                next: 80230254,
+            },
+            {
+                id: 80230254,
+                content:
+                    "Hélas... elle sera sans doute le prochain Haut Chancelier de Longyuan. Il n’y a rien à envier — nous n’aurions jamais la dureté nécessaire. Seul quelqu’un capable de se dépouiller de toute compassion peut supporter un tel poids.",
+                voice: "inv/Zhiliu/002/C8D9180C",
+                npc: 790080,
+                next: 80230255,
+            },
+            {
+                id: 80230255,
+                content: "Hm... Faut-il vraiment se dépouiller de toute compassion pour gouverner un grand État... ?",
+                voice: "inv/Zhiliu/002/C8D91836",
+                npc: 790076,
             },
         ],
     },
@@ -20897,15 +21532,265 @@ export const partyTopicData_fr: PartyTopic[] = [
             "Ce qui m’abandonne appartient à hier et ne saurait être retenu. Ce qui trouble mon cœur nourrit les tourments d’aujourd’hui.",
         reward: 7052,
         consume: {
-            "19007": 8,
-            "19008": 8,
+            "19002": 8,
+            "19003": 4,
         },
         dialogues: [
             {
-                id: 10010101,
-                content: "Berry, je...",
-                voice: "story/1001/100101/190F2A32",
-                npc: 100001,
+                id: 80230301,
+                content:
+                    "Voici venue la dernière épreuve. Permettez-moi de vous adresser mes félicitations par avance. Si vous franchissez ce seuil, vous gravirez le sommet du Pavillon de l’Arbitrage et porterez officiellement le titre de Haut Chancelier de Longyuan.",
+                voice: "inv/Zhiliu/003/C8D91FC2",
+                npc: 240071,
+                next: 80230302,
+            },
+            {
+                id: 80230302,
+                content: "Cette ultime épreuve se nomme : « Questionner le cœur ».",
+                voice: "inv/Zhiliu/003/C8D91FEC",
+                npc: 240071,
+                next: 80230303,
+            },
+            {
+                id: 80230303,
+                content:
+                    "Sous la lumière divine de Taihao, les démons de votre passé se manifesteront sans détour, aussi nettement qu’une ombre projetée par la lumière.",
+                voice: "inv/Zhiliu/003/C8D92016",
+                npc: 240071,
+                next: 80230304,
+            },
+            {
+                id: 80230304,
+                content:
+                    "Seuls ceux dotés d’une volonté véritable sauront trancher avec leur passé, piétiner la faiblesse de leur cœur et assumer la charge de « porter le poids du monde et sauver le peuple ».",
+                voice: "inv/Zhiliu/003/C8D92040",
+                npc: 240071,
+                next: 80230305,
+            },
+            {
+                id: 80230305,
+                content: "Zhiliu. Êtes-vous prête ?",
+                voice: "inv/Zhiliu/003/C8D9206A",
+                npc: 240071,
+                next: 80230306,
+            },
+            {
+                id: 80230306,
+                content: "Il y a bien longtemps que ma décision est prise. Rien d’extérieur ne fera plus vaciller mon cœur.",
+                voice: "inv/Zhiliu/003/C8D92094",
+                npc: 790076,
+                next: 80230307,
+            },
+            {
+                id: 80230307,
+                content: "Bien. Je ne me suis pas trompée à votre sujet.",
+                voice: "inv/Zhiliu/003/C8D920BE",
+                npc: 240071,
+                next: 80230308,
+            },
+            {
+                id: 80230308,
+                content: "Dès notre première rencontre, j’ai compris que vous étiez la plus prometteuse parmi eux.",
+                voice: "inv/Zhiliu/003/C8D920E8",
+                npc: 240071,
+                next: 80230309,
+            },
+            {
+                id: 80230309,
+                content:
+                    "Que l’épreuve commence. Les personnes non concernées vont se retirer. Je vous attendrai à l’extérieur, dans l’attente de votre issue.",
+                voice: "inv/Zhiliu/003/C8D92112",
+                npc: 240071,
+            },
+            {
+                id: 80230311,
+                content: "— !",
+                voice: "inv/Zhiliu/003/C8D92166",
+                npc: 790076,
+                next: 80230312,
+            },
+            {
+                id: 80230312,
+                content: "...",
+                voice: "inv/Zhiliu/003/C8D92190",
+                npc: 790076,
+                next: 80230313,
+            },
+            {
+                id: 80230314,
+                content: "... Pourquoi... ?",
+                voice: "inv/Zhiliu/003/C8D921E4",
+                next: 80230315,
+            },
+            {
+                id: 80230315,
+                content: "<I>Comme prévu...</>",
+                voice: "inv/Zhiliu/003/C8D9220E",
+                npc: 790076,
+                next: 80230316,
+            },
+            {
+                id: 80230316,
+                content: "As-tu déjà oublié... les nuits où <H>nous</> ne parvenions pas à trouver le sommeil ?",
+                voice: "inv/Zhiliu/003/C8D92238",
+                next: 80230317,
+            },
+            {
+                id: 80230317,
+                content:
+                    "As-tu oublié... la faim dans cette grotte, si vorace qu’elle rongeait jusqu’à nos os, chaque parcelle de notre corps, chaque mèche de cheveux hurlant : « j’ai faim... j’ai faim... »",
+                voice: "inv/Zhiliu/003/C8D92262",
+                next: 80230318,
+            },
+            {
+                id: 80230318,
+                content:
+                    "As-tu oublié... cet instant où la main calleuse de ce bandit s’est refermée autour de <H>notre</> cou ? Peu importaient nos gestes désespérés, nos coups de pieds, rien ne pouvait l’arrêter...",
+                voice: "inv/Zhiliu/003/C8D9228C",
+                next: 80230319,
+            },
+            {
+                id: 80230319,
+                content:
+                    "L’air disparaissait peu à peu... le monde se faisait flou... et la mort glaciale nous entraînait vers la brume...",
+                voice: "inv/Zhiliu/003/C8D922B6",
+                next: 80230320,
+            },
+            {
+                id: 80230320,
+                content:
+                    "Et puis... as-tu oublié ce moment où <H>il</> a surgi, a percuté le bandit, et où l’air est revenu d’un seul coup dans nos poumons ?",
+                voice: "inv/Zhiliu/003/C8D922E0",
+                next: 80230321,
+            },
+            {
+                id: 80230321,
+                content: "Il t’a sauvée sans rien attendre en retour... et n’a récolté que la mort et l’oubli.",
+                voice: "inv/Zhiliu/003/C8D9230A",
+                next: 80230322,
+            },
+            {
+                id: 80230322,
+                content:
+                    "Et maintenant... tu serais prête à le trahir, à trahir le serment que nous avions fait, pour rejoindre <H>leur</> camp ?",
+                voice: "inv/Zhiliu/003/C8D92334",
+                next: 80230323,
+            },
+            {
+                id: 80230323,
+                content: "...",
+                voice: "inv/Zhiliu/003/C8D9235E",
+                npc: 790076,
+                next: 80230324,
+            },
+            {
+                id: 80230324,
+                content: "<I>Oui... oui... tu n’as pas besoin de te souvenir. L’oubli est bien plus doux.</>",
+                voice: "inv/Zhiliu/003/C8D92388",
+                next: 80230325,
+            },
+            {
+                id: 80230325,
+                content:
+                    "<I>Tu es sur le point de t’élever au-dessus de tous. Les tourments du passé ne peuvent plus t’atteindre. Comparés à la position qui t’attend, ils ne sont rien — pas même le poids d’une plume.</>",
+                voice: "inv/Zhiliu/003/C8D923B2",
+                next: 80230326,
+            },
+            {
+                id: 80230326,
+                content:
+                    "<I>Se souvenir n’est qu’une preuve de faiblesse. Les faibles se laissent enchaîner par une conscience inutile, et finissent par plier. Leurs genoux ne supportent pas le poids de la terre et restent à jamais prosternés dans la poussière.</>",
+                voice: "inv/Zhiliu/003/C8D923DC",
+                next: 80230327,
+            },
+            {
+                id: 80230327,
+                content:
+                    "<I>Ils se noient dans leurs illusions pendant que le monde demeure immobile. Mais toi... tu es plus ferme, plus courageuse. Tu comprends le prix des choix. C’est pour cela que tu es destinée à de grandes choses. Combien sont capables de se dépouiller de toute compassion ?</>",
+                voice: "inv/Zhiliu/003/C8D92406",
+                next: 80230328,
+            },
+            {
+                id: 80230328,
+                content: "<I>Ne l’écoute pas ! Zhiliu — en quoi serais-tu différente de ceux qui détournent le regard ?</>",
+                voice: "inv/Zhiliu/003/C8D92430",
+                next: 80230329,
+            },
+            {
+                id: 80230329,
+                content: "<I>Zhiliu, y as-tu réfléchi ? Veux-tu vraiment devenir leur complice ?!</>",
+                voice: "inv/Zhiliu/003/C8D9245A",
+                next: 80230330,
+            },
+            {
+                id: 80230330,
+                content: "<I>Si tu fais ce pas... seras-tu encore celle que tu étais hier ?</>",
+                voice: "inv/Zhiliu/003/C8D92484",
+                next: 80230331,
+            },
+            {
+                id: 80230332,
+                content: "Au secours... Quelqu’un... sauvez-moi... Il fait si noir... j’ai peur... je... je ne peux pas rester ici... !",
+                voice: "inv/Zhiliu/003/C8D924D8",
+                next: 80230333,
+            },
+            {
+                id: 80230334,
+                content:
+                    "Sais-tu... qu’il y a des années, j’ai appris à maîtriser ma peur de l’obscurité ? Depuis, elle n’entrave plus mes gestes.",
+                voice: "inv/Zhiliu/003/C8D9252C",
+                npc: 790076,
+                next: 80230335,
+            },
+            {
+                id: 80230335,
+                content: "Quand j’ai compris que ni la peur ni la douleur ne pouvaient changer quoi que ce soit, je les ai abandonnées.",
+                voice: "inv/Zhiliu/003/C8D92556",
+                npc: 790076,
+                next: 80230336,
+            },
+            {
+                id: 80230336,
+                content:
+                    "Car j’ai soudain réalisé que le temps accordé à l’existence humaine est bien trop court — trop court pour obtenir ce que l’on désire réellement avant que tout ne s’achève.",
+                voice: "inv/Zhiliu/003/C8D92580",
+                npc: 790076,
+                next: 80230337,
+            },
+            {
+                id: 80230337,
+                content:
+                    "À partir de ce jour, j’ai pris ma décision. Ni ma conscience, ni mon passé ne freineront plus mes pas. Il me reste quelque chose à accomplir.",
+                voice: "inv/Zhiliu/003/C8D925AA",
+                npc: 790076,
+                next: 80230338,
+            },
+            {
+                id: 80230338,
+                content:
+                    "Je suis désolée de te laisser ici, dans l’obscurité... Mais personne ne viendra te sauver. Tu devras trouver seule le chemin pour en sortir.",
+                voice: "inv/Zhiliu/003/C8D925D4",
+                npc: 790076,
+                next: 80230339,
+            },
+            {
+                id: 80230339,
+                content: "Je n’ai plus rien à ajouter.",
+                voice: "inv/Zhiliu/003/C8D925FE",
+                npc: 790076,
+                next: 80230340,
+            },
+            {
+                id: 80230341,
+                content: "Proclamation solennelle —",
+                voice: "inv/Zhiliu/003/C8D92652",
+                next: 80230342,
+            },
+            {
+                id: 80230342,
+                content:
+                    "Zhiliu, citoyenne de Haojing, est élevée au rang de Haut Chancelier de Longyuan — qu’elle porte le poids du monde, soutienne le peuple, ne trahisse pas l’espérance de Taihao, et fasse perdurer le souffle de Dafeng à travers les âges —",
+                voice: "inv/Zhiliu/003/C8D9267C",
             },
         ],
     },
@@ -20918,15 +21803,305 @@ export const partyTopicData_fr: PartyTopic[] = [
         memoryDesc: "Les années usent toute chose. Mais certaines volontés demeurent inchangées, sans jamais vaciller.",
         reward: 7053,
         consume: {
-            "19001": 10,
-            "19002": 10,
+            "19005": 10,
+            "19006": 10,
+            "19008": 10,
         },
         dialogues: [
             {
-                id: 10010101,
-                content: "Berry, je...",
-                voice: "story/1001/100101/190F2A32",
-                npc: 100001,
+                id: 80230401,
+                content:
+                    "Le Haut Chancelier de Longyuan n’est désigné qu’une fois tous les quatre ans. Ils sont peu nombreux à avoir occupé ce poste, et les récits de leur sélection sont souvent lacunaires. Pouvoir aujourd’hui entendre autant de détails de la bouche même de celle qui l’a traversée... quelle rare et délicieuse occasion !",
+                voice: "inv/Zhiliu/004/C8D9302A",
+                npc: 790079,
+                next: 80230402,
+            },
+            {
+                id: 80230402,
+                content: "Assister à cette page d’histoire encore vivante apaise l’une de mes plus anciennes curiosités.",
+                voice: "inv/Zhiliu/004/C8D93054",
+                npc: 790079,
+                next: 80230403,
+            },
+            {
+                id: 80230403,
+                content:
+                    "... Si ressasser ces souvenirs suffit à vous calmer un moment et à vous éviter de semer de nouveaux troubles, alors je n’aurai pas parlé en vain.",
+                voice: "inv/Zhiliu/004/C8D9307E",
+                npc: 790076,
+                next: 80230404,
+            },
+            {
+                id: 80230404,
+                content:
+                    "Qin Qiu, je vous préviens d’une chose. {nickname} est mon {性别:invité|invitée} d’honneur. Je ne tolérerai aucun incident {性别:le|la} concernant. Agissez avec retenue.",
+                voice: "inv/Zhiliu/004/C8D930A8",
+                npc: 790076,
+                next: 80230405,
+            },
+            {
+                id: 80230405,
+                content:
+                    "Ha ha ! {性别:Le jeune ami|La jeune amie} que vous avez ramené de Givrelac, après un si long voyage, est effectivement fort {性别:divertissant|divertissante}. Je n’ai fait que {性别:le|la} taquiner un peu.",
+                voice: "inv/Zhiliu/004/C8D930D2",
+                npc: 790079,
+                next: 80230406,
+            },
+            {
+                id: 80230406,
+                content: "Cela dit... vous voir accorder tant d’attention à quelqu’un est un spectacle peu commun.",
+                voice: "inv/Zhiliu/004/C8D930FC",
+                npc: 790079,
+                next: 80230407,
+            },
+            {
+                id: 80230407,
+                content:
+                    "À propos de votre « grand dessein »... vous n’avez vraiment pas l’intention de lui en dire ne serait-ce qu’un mot ?",
+                voice: "inv/Zhiliu/004/C8D93126",
+                npc: 790079,
+                next: 80230408,
+            },
+            {
+                id: 80230408,
+                content: "... J’ai mes propres arrangements. Je vous conseille de ne pas nourrir d’idées superflues.",
+                voice: "inv/Zhiliu/004/C8D93150",
+                npc: 790076,
+                next: 80230409,
+            },
+            {
+                id: 80230409,
+                content:
+                    "Tout le monde sait que je suis réputé pour ma duplicité, pour mon goût des manœuvres et des chemins détournés. Vous, en revanche, agissez ouvertement, avec une maîtrise admirable.",
+                voice: "inv/Zhiliu/004/C8D9317A",
+                npc: 790079,
+                next: 80230410,
+            },
+            {
+                id: 80230410,
+                content: "Mais lorsqu’il s’agit de véritable dureté... je suis loin d’égaler ne serait-ce que votre ombre.",
+                voice: "inv/Zhiliu/004/C8D931A4",
+                npc: 790079,
+                next: 80230411,
+            },
+            {
+                id: 80230411,
+                content:
+                    "Et pourtant, ne tenez-vous pas {性别:ce jeune ami|cette jeune amie} en estime ? Si votre plan venait à être découvert, le jour où tous vous tourneront le dos — y compris {性别:lui|elle} — pensez-vous vraiment que le prix en vaudra la peine ?",
+                voice: "inv/Zhiliu/004/C8D931CE",
+                npc: 790079,
+                next: 80230412,
+            },
+            {
+                id: 80230412,
+                content: "Qin Qiu, évitez de juger ce que vous ne comprenez pas. J’ose croire que c’est le minimum de décence.",
+                voice: "inv/Zhiliu/004/C8D931F8",
+                npc: 790076,
+                next: 80230413,
+            },
+            {
+                id: 80230413,
+                content:
+                    "Nos intérêts ne font que coïncider provisoirement. Chacun obtient ce qu’il cherche, rien de plus. Quant à ce « grand dessein » que vous évoquez, vous n’en connaissez pas la moindre parcelle.",
+                voice: "inv/Zhiliu/004/C8D93222",
+                npc: 790076,
+                next: 80230414,
+            },
+            {
+                id: 80230414,
+                content: "Oh ? Vous aurais-je mise en colère ? Allons, allons... inutile de vous emporter.",
+                voice: "inv/Zhiliu/004/C8D9324C",
+                npc: 790079,
+                next: 80230415,
+            },
+            {
+                id: 80230415,
+                content: "Patronne Zhiliu — vous êtes là ?",
+                voice: "inv/Zhiliu/004/C8D93276",
+                next: 80230416,
+            },
+            {
+                id: 80230416,
+                content:
+                    "Héhé... votre assistante vous cherche. Il est sans doute temps pour moi de prendre congé, avant de devenir vraiment importun.",
+                voice: "inv/Zhiliu/004/C8D932A0",
+                npc: 790079,
+                next: 80230417,
+            },
+            {
+                id: 80230417,
+                content:
+                    "Une personne aussi occupée que le Haut Chancelier de Longyuan n’a guère de temps à perdre avec un homme de l’ombre comme moi.",
+                voice: "inv/Zhiliu/004/C8D932CA",
+                npc: 790079,
+                next: 80230418,
+            },
+            {
+                id: 80230418,
+                content: "Alors, je ne vous raccompagnerai pas.",
+                voice: "inv/Zhiliu/004/C8D932F4",
+                npc: 790076,
+                next: 80230419,
+            },
+            {
+                id: 80230420,
+                content: "Patronne Zhiliu, il y a du nouveau à Éternel Printemps. Ils hésitent sur une décision et souhaitent votre avis.",
+                voice: "inv/Zhiliu/004/C8D93348",
+                npc: 790077,
+                next: 80230421,
+            },
+            {
+                id: 80230421,
+                content: "Très bien.",
+                voice: "inv/Zhiliu/004/C8D93372",
+                npc: 790076,
+                next: 80230422,
+            },
+            {
+                id: 80230422,
+                content: "Vous semblez un peu fatiguée... Tout va bien ?",
+                voice: "inv/Zhiliu/004/C8D9339C",
+                npc: 790077,
+                next: 80230423,
+            },
+            {
+                id: 80230423,
+                content:
+                    "... Hé hé, rien de sérieux. Qin Qiu est resté fidèle à lui-même, à poser mille questions inutiles. Lui répondre m’a simplement demandé plus de paroles que prévu.",
+                voice: "inv/Zhiliu/004/C8D933C6",
+                npc: 790076,
+                next: 80230424,
+            },
+            {
+                id: 80230424,
+                content:
+                    "Nous avons évoqué aussi la façon dont toi et moi nous sommes rencontrées, autrefois, sous le Pavillon de l’Arbitrage. Dire que tant d’années se sont écoulées...",
+                voice: "inv/Zhiliu/004/C8D933F0",
+                npc: 790076,
+                next: 80230425,
+            },
+            {
+                id: 80230425,
+                content: "Vraiment ? Vous êtes remontés si loin dans le passé ?",
+                voice: "inv/Zhiliu/004/C8D9341A",
+                npc: 790077,
+                next: 80230426,
+            },
+            {
+                id: 80230426,
+                content:
+                    "À l’époque, lorsque je tentais de laver le nom de la médecin qui m’avait sauvée, je suis restée tant de jours sous le Pavillon, à essuyer l’indifférence et les regards froids... qu’au fond, je n’espérais déjà plus grand-chose.",
+                voice: "inv/Zhiliu/004/C8D93444",
+                npc: 790077,
+                next: 80230427,
+            },
+            {
+                id: 80230427,
+                content:
+                    "Quand vous êtes venue me parler, j’ai bien essayé de protester encore un peu, mais au fond de moi, je savais que tout s’arrêterait là.",
+                voice: "inv/Zhiliu/004/C8D9346E",
+                npc: 790077,
+                next: 80230428,
+            },
+            {
+                id: 80230428,
+                content: "Je n’aurais jamais imaginé que vous me diriez alors...",
+                voice: "inv/Zhiliu/004/C8D93498",
+                npc: 790077,
+                next: 80230429,
+            },
+            {
+                id: 80230429,
+                content:
+                    "J’ai utilisé une technique secrète de la Secte de l’Insondable Trésor pour dissimuler nos voix. Ce que je vais te dire — ainsi que ce sentiment d’impuissance que tu ressens aujourd’hui — tu devras t’en souvenir, et n’en parler à personne.",
+                voice: "inv/Zhiliu/004/C8D934C2",
+                next: 80230430,
+            },
+            {
+                id: 80230430,
+                content:
+                    "Moi aussi, autrefois, je me suis tenue sous le Pavillon de l’Arbitrage, à courir partout pour défendre l’innocence d’autrui. Très vite, j’ai compris que c’était comme briser un rocher à coups d’œuf.",
+                voice: "inv/Zhiliu/004/C8D934EC",
+                next: 80230431,
+            },
+            {
+                id: 80230431,
+                content:
+                    "Comment la force d’un insecte pourrait-elle ébranler un arbre ? Les Neuf Chapitres de Dafeng forment un système immense, insensible à la volonté d’un individu.",
+                voice: "inv/Zhiliu/004/C8D93516",
+                next: 80230432,
+            },
+            {
+                id: 80230432,
+                content:
+                    "À ce stade, tes efforts ne font qu’apaiser ta conscience. Le monde continuera de tourner, inchangé, et jour après jour, tu t’éloigneras de la résolution qui t’animait.",
+                voice: "inv/Zhiliu/004/C8D93540",
+                next: 80230433,
+            },
+            {
+                id: 80230433,
+                content: "C’est pourquoi — tu dois, pour l’instant, accepter de céder. Mais je peux te faire une promesse.",
+                voice: "inv/Zhiliu/004/C8D9356A",
+                next: 80230434,
+            },
+            {
+                id: 80230434,
+                content:
+                    "Le jour viendra où les Neuf Chapitres de Dafeng prendront fin. Quel qu’en soit le prix, je remettrai ce monde inversé sur ses rails... Peux-tu me faire confiance ?",
+                voice: "inv/Zhiliu/004/C8D93594",
+                next: 80230435,
+            },
+            {
+                id: 80230436,
+                content:
+                    "Le temps passe si vite... Dire que la promesse que vous m’avez faite autrefois est sur le point de se réaliser... Mais Patronne, vous avez tant couru ces derniers temps. Votre visage est bien plus marqué qu’avant... Prenez soin de vous.",
+                voice: "inv/Zhiliu/004/C8D935E8",
+                npc: 790077,
+                next: 80230437,
+            },
+            {
+                id: 80230437,
+                content: "Rassure-toi. Je sais ce que je fais.",
+                voice: "inv/Zhiliu/004/C8D93612",
+                npc: 790076,
+                next: 80230438,
+            },
+            {
+                id: 80230438,
+                content: "Vous savez, beaucoup de gens vous craignent. Ils murmurent sur votre passage.",
+                voice: "inv/Zhiliu/004/C8D9363C",
+                npc: 790077,
+                next: 80230439,
+            },
+            {
+                id: 80230439,
+                content:
+                    "Ils disent que vous avez un cœur de pierre, que vous agissez comme un démon, que votre bienveillance n’est qu’une façade... Mais moi, je sais qui vous êtes réellement.",
+                voice: "inv/Zhiliu/004/C8D93666",
+                npc: 790077,
+                next: 80230440,
+            },
+            {
+                id: 80230440,
+                content:
+                    "J’admire profondément votre détermination. Plus je reste à vos côtés, plus je remercie le destin que ce soit vous que j’aie rencontrée ce jour-là.",
+                voice: "inv/Zhiliu/004/C8D93690",
+                npc: 790077,
+                next: 80230441,
+            },
+            {
+                id: 80230441,
+                content:
+                    "Hé hé... Pourquoi tant de paroles soudainement ? Si tu veux me remercier, attends que l’affaire d’Éternel Printemps soit réglée.",
+                voice: "inv/Zhiliu/004/C8D936BA",
+                npc: 790076,
+                next: 80230442,
+            },
+            {
+                id: 80230442,
+                content: "Bien compris, Patronne Zhiliu —",
+                voice: "inv/Zhiliu/004/C8D936E4",
+                npc: 790077,
             },
         ],
     },
@@ -20940,16 +22115,447 @@ export const partyTopicData_fr: PartyTopic[] = [
             "Une flûte de bambou. Sur son corps se devinent encore les traces d’une fracture ancienne, puis d’une réparation maladroite. Nul ne saurait dire ce que ces cicatrices ont altéré dans la pureté de sa voix.",
         reward: 7050,
         consume: {
-            "19005": 2,
-            "19006": 2,
+            "19001": 2,
         },
         conditionId: 120206,
         dialogues: [
             {
-                id: 10010101,
-                content: "Berry, je...",
-                voice: "story/1001/100101/190F2A32",
-                npc: 100001,
+                id: 80220101,
+                content: "……",
+                voice: "inv/Yuming/001/C8D29652",
+                npc: 790072,
+                next: 80220102,
+            },
+            {
+                id: 80220102,
+                content: "Yuming... ?",
+                voice: "inv/Yuming/001/C8D2967C",
+                npc: 790073,
+                next: 80220103,
+            },
+            {
+                id: 80220103,
+                content: "Buxia.",
+                voice: "inv/Yuming/001/C8D296A6",
+                npc: 790072,
+                next: 80220104,
+            },
+            {
+                id: 80220104,
+                content: "J’ai entendu la flûte de très loin. Je me suis dit que ce ne pouvait être que toi.",
+                voice: "inv/Yuming/001/C8D296D0",
+                npc: 790073,
+                next: 80220105,
+            },
+            {
+                id: 80220105,
+                content: "Tu avais quelque chose à me demander ?",
+                voice: "inv/Yuming/001/C8D296FA",
+                npc: 790072,
+                next: 80220106,
+            },
+            {
+                id: 80220106,
+                content: "Eh bien... Yuming, pourrais-tu regarder ceci ?",
+                voice: "inv/Yuming/001/C8D29724",
+                npc: 790073,
+                next: 80220107,
+            },
+            {
+                id: 80220107,
+                content: "Avec Kezhou, nous l’avons trouvé juste à l’extérieur des Pics Extérieurs. Il a été mordu par une bête sauvage.",
+                voice: "inv/Yuming/001/C8D2974E",
+                npc: 790073,
+                next: 80220108,
+            },
+            {
+                id: 80220108,
+                content:
+                    "Kezhou est beaucoup trop brusque pour s’occuper de ce genre de chose... alors je suis venue te voir. Si on le laisse ainsi, il ne survivra pas longtemps.",
+                voice: "inv/Yuming/001/C8D29778",
+                npc: 790073,
+                next: 80220109,
+            },
+            {
+                id: 80220109,
+                content: "...",
+                voice: "inv/Yuming/001/C8D297A2",
+                npc: 790072,
+                next: 80220110,
+            },
+            {
+                id: 80220110,
+                content: "Yuming ?",
+                voice: "inv/Yuming/001/C8D297CC",
+                npc: 790073,
+                next: 80220111,
+            },
+            {
+                id: 80220111,
+                content: "Ce n’est rien. Laisse-moi voir.",
+                voice: "inv/Yuming/001/C8D297F6",
+                npc: 790072,
+                next: 80220112,
+            },
+            {
+                id: 80220112,
+                content:
+                    "Quand nous l’avons trouvé, il était recroquevillé dans une fissure entre les rochers, fixant l’extérieur sans bouger. Nous avons découvert plusieurs renards adultes morts non loin de là... c’est en suivant leurs traces de sang que nous sommes arrivés jusqu’à lui.",
+                voice: "inv/Yuming/001/C8D29820",
+                npc: 790073,
+                next: 80220113,
+            },
+            {
+                id: 80220113,
+                content:
+                    "Quand Kezhou l’a pris dans ses bras, il n’a ni crié ni résisté. Ou plutôt... il est si jeune qu’il ne comprend même pas ce qui lui arrive. Il a simplement tremblé tout le long du chemin.",
+                voice: "inv/Yuming/001/C8D2984A",
+                npc: 790073,
+                next: 80220114,
+            },
+            {
+                id: 80220114,
+                content: "... Les blessures sont traitées.",
+                voice: "inv/Yuming/001/C8D29874",
+                npc: 790072,
+                next: 80220115,
+            },
+            {
+                id: 80220115,
+                content: "Dis à Kezhou d’aller couper du bois. Je vais lui construire un abri pour le protéger de la pluie.",
+                voice: "inv/Yuming/001/C8D2989E",
+                npc: 790072,
+                next: 80220116,
+            },
+            {
+                id: 80220116,
+                content: "Tu veux dire... que nous pouvons le garder ?",
+                voice: "inv/Yuming/001/C8D298C8",
+                npc: 790073,
+                next: 80220117,
+            },
+            {
+                id: 80220117,
+                content: "C’est formidable ! J’y vais tout de suite ! Oh, et il lui faut un nom... Ce sera Juju, d’accord ? Petit renard !",
+                voice: "inv/Yuming/001/C8D298F2",
+                npc: 790073,
+                next: 80220118,
+            },
+            {
+                id: 80220118,
+                content: "Un an plus tard...",
+                voice: "inv/Yuming/001/C8D2991C",
+                next: 80220119,
+            },
+            {
+                id: 80220119,
+                content: "Buxia ?",
+                voice: "inv/Yuming/001/C8D29946",
+                npc: 790072,
+                next: 80220120,
+            },
+            {
+                id: 80220120,
+                content: "...",
+                voice: "inv/Yuming/001/C8D29970",
+                npc: 790073,
+                next: 80220121,
+            },
+            {
+                id: 80220121,
+                content: "Buxia.",
+                voice: "inv/Yuming/001/C8D2999A",
+                npc: 790072,
+                next: 80220122,
+            },
+            {
+                id: 80220122,
+                content: "Yuming ! Tu es déjà de retour ?",
+                voice: "inv/Yuming/001/C8D299C4",
+                npc: 790073,
+                next: 80220123,
+            },
+            {
+                id: 80220123,
+                content: "Ton oreille... ?",
+                voice: "inv/Yuming/001/C8D299EE",
+                npc: 790072,
+                next: 80220124,
+            },
+            {
+                id: 80220124,
+                content:
+                    "Oh, ça ? Rien de grave. Il y en a juste une qui fait parfois des siennes. L’autre fonctionne très bien ! ... Hm, à tous les coups, c’est mon corps qui me dit que je devrais faire une sieste !",
+                voice: "inv/Yuming/001/C8D29A18",
+                npc: 790073,
+                next: 80220125,
+            },
+            {
+                id: 80220125,
+                content:
+                    "... Ne sois pas négligente. Si toi et Kezhou n’aviez pas été surpris à paresser, le maître ne vous aurait pas punis à recopier des textes pendant trois jours pour endurcir votre esprit. Ton talent n’est pas le sien. Si tu continues à suivre son rythme, tu finiras par être entraînée dans sa chute.",
+                voice: "inv/Yuming/001/C8D29A42",
+                npc: 790072,
+                next: 80220126,
+            },
+            {
+                id: 80220126,
+                content: "Quant à ton oreille... nous devrions aller à Haojing dès que possible, pour consulter un médecin.",
+                voice: "inv/Yuming/001/C8D29A6C",
+                npc: 790072,
+                next: 80220127,
+            },
+            {
+                id: 80220127,
+                content:
+                    "D’accord, d’accord... Yuming, tu es encore jeune, et pourtant tu parles déjà comme le maître, toujours à sermonner.",
+                voice: "inv/Yuming/001/C8D29A96",
+                npc: 790073,
+                next: 80220128,
+            },
+            {
+                id: 80220128,
+                content: "Au fait... comment va Juju ? La pluie était si forte hier... j’étais un peu inquiète.",
+                voice: "inv/Yuming/001/C8D29AC0",
+                npc: 790073,
+                next: 80220129,
+            },
+            {
+                id: 80220129,
+                content:
+                    "Je suis allé le voir aujourd’hui, derrière la montagne. L’abri que je lui avais construit a été détruit par un éboulement. Il s’était recroquevillé sous les planches brisées, laissant l’eau de pluie s’infiltrer dans son pelage.",
+                voice: "inv/Yuming/001/C8D29AEA",
+                npc: 790072,
+                next: 80220130,
+            },
+            {
+                id: 80220130,
+                content: "J’ai réparé l’abri et ajouté de la paille sèche. Mais il tremblait toujours, comme avant.",
+                voice: "inv/Yuming/001/C8D29B14",
+                npc: 790072,
+                next: 80220131,
+            },
+            {
+                id: 80220131,
+                content: "Ah... comment veux-tu que je sois rassurée après ça...",
+                voice: "inv/Yuming/001/C8D29B3E",
+                npc: 790073,
+                next: 80220132,
+            },
+            {
+                id: 80220132,
+                content: "Que faites-vous ici ? Buxia, as-tu terminé de recopier tes textes ?",
+                voice: "inv/Yuming/001/C8D29B68",
+                npc: 790074,
+                next: 80220133,
+            },
+            {
+                id: 80220133,
+                content:
+                    "Ah— Maître ! N–Nous discutions d’arts martiaux ! Ce matin, Yuming a exécuté une technique à la lance absolument incroyable, je n’avais jamais vu ça... alors je lui ai demandé conseil, voilà tout ! Hé hé...",
+                voice: "inv/Yuming/001/C8D29B92",
+                npc: 790073,
+                next: 80220134,
+            },
+            {
+                id: 80220134,
+                content: "... Oui.",
+                voice: "inv/Yuming/001/C8D29BBC",
+                npc: 790072,
+                next: 80220135,
+            },
+            {
+                id: 80220135,
+                content:
+                    "<I>Hmpf.</> L’un de vous parle davantage quand il ment. L’autre se tait presque entièrement. Me prenez-vous pour un vieil homme incapable de comprendre, comme ce petit renard que vous élevez ?",
+                voice: "inv/Yuming/001/C8D29BE6",
+                npc: 790074,
+                next: 80220136,
+            },
+            {
+                id: 80220136,
+                content: "Alors... vous saviez depuis le début, Maître...",
+                voice: "inv/Yuming/001/C8D29C10",
+                npc: 790073,
+                next: 80220137,
+            },
+            {
+                id: 80220137,
+                content:
+                    "Je suis vieux, pas aveugle. Je le savais déjà il y a un an, quand vous avez ramené cette petite chose. Elle gambade partout depuis lors.",
+                voice: "inv/Yuming/001/C8D29C3A",
+                npc: 790074,
+                next: 80220138,
+            },
+            {
+                id: 80220138,
+                content:
+                    "Ces derniers jours, je ne l’avais plus vue. Je suis donc venu vérifier. Je vous ai trouvés ici, l’air soucieux... et en plus, vous avez essayé de me tromper.",
+                voice: "inv/Yuming/001/C8D29C64",
+                npc: 790074,
+                next: 80220139,
+            },
+            {
+                id: 80220139,
+                content:
+                    "Eh bien... c’est parce que vous avez toujours cet air détaché, presque immortel... Je me suis dit qu’un maître aussi vénérable préférerait sans doute les grues ou les cerfs, pas un renard...",
+                voice: "inv/Yuming/001/C8D29C8E",
+                npc: 790073,
+                next: 80220140,
+            },
+            {
+                id: 80220140,
+                content:
+                    "Tu parles trop. Encore une habitude prise avec Kezhou ? Depuis quand est-ce que je fais des histoires pour si peu ? Parle. Qu’est-ce qui se passe ?",
+                voice: "inv/Yuming/001/C8D29CB8",
+                npc: 790074,
+                next: 80220141,
+            },
+            {
+                id: 80220141,
+                content: "Buxia et Yuming expliquent ce qui est arrivé à Juju.",
+                voice: "inv/Yuming/001/C8D29CE2",
+                next: 80220142,
+            },
+            {
+                id: 80220142,
+                content:
+                    "Ha ha. Je m’attendais à bien pire. À votre place, je l’aurais simplement porté et ramené là d’où il vient. Les Pics Extérieurs ne sont pas son foyer. Il appartient à la forêt sauvage.",
+                voice: "inv/Yuming/001/C8D29D0C",
+                npc: 790074,
+                next: 80220143,
+            },
+            {
+                id: 80220143,
+                content:
+                    "M–Mais... comment fera-t-il quand il aura faim ? Qui lui donnera à manger ? Et quand il fera froid, qui ajoutera de la litière dans son abri ?",
+                voice: "inv/Yuming/001/C8D29D36",
+                npc: 790073,
+                next: 80220144,
+            },
+            {
+                id: 80220144,
+                content: "Voilà précisément pourquoi il ne grandit pas.",
+                voice: "inv/Yuming/001/C8D29D60",
+                npc: 790074,
+                next: 80220145,
+            },
+            {
+                id: 80220145,
+                content:
+                    "Vous lui avez construit un abri contre la pluie, mais vous ne lui avez jamais appris à survivre à l’hiver. Vous l’avez nourri, mais vous ne lui avez jamais appris à chasser.",
+                voice: "inv/Yuming/001/C8D29D8A",
+                npc: 790074,
+                next: 80220146,
+            },
+            {
+                id: 80220146,
+                content:
+                    "Lorsqu’il a froid ou faim, il n’attend que vous. Comment pourrait-il vivre seul ? Le jour où mes disciples étourdis détourneront le regard... une seule nuit de pluie suffira à lui coûter la vie.",
+                voice: "inv/Yuming/001/C8D29DB4",
+                npc: 790074,
+                next: 80220147,
+            },
+            {
+                id: 80220147,
+                content: "A–Alors... vous voulez dire que...",
+                voice: "inv/Yuming/001/C8D29DDE",
+                npc: 790073,
+                next: 80220148,
+            },
+            {
+                id: 80220148,
+                content:
+                    "Même si ton cœur se refuse à l’admettre, il doit retourner à la forêt. C’est une bête sauvage. La protéger sans cesse, c’est lui retirer toute chance de survivre.",
+                voice: "inv/Yuming/001/C8D29E08",
+                npc: 790074,
+                next: 80220149,
+            },
+            {
+                id: 80220149,
+                content: "... Je comprends. Laissez-moi en discuter avec mes deux frères d’armes...",
+                voice: "inv/Yuming/001/C8D29E32",
+                npc: 790073,
+                next: 80220150,
+            },
+            {
+                id: 80220150,
+                content: "...",
+                voice: "inv/Yuming/001/C8D29E5C",
+                npc: 790072,
+                next: 80220151,
+            },
+            {
+                id: 80220151,
+                content: "Yuming. Tu es tourmenté.",
+                voice: "inv/Yuming/001/C8D29E86",
+                npc: 790074,
+                next: 80220152,
+            },
+            {
+                id: 80220152,
+                content: "Non.",
+                voice: "inv/Yuming/001/C8D29EB0",
+                npc: 790072,
+                next: 80220153,
+            },
+            {
+                id: 80220153,
+                content: "Un seul mot ? Voilà encore un mensonge.",
+                voice: "inv/Yuming/001/C8D29EDA",
+                npc: 790074,
+                next: 80220154,
+            },
+            {
+                id: 80220154,
+                content: "... Votre disciple a manqué de discernement.",
+                voice: "inv/Yuming/001/C8D29F04",
+                npc: 790072,
+                next: 80220155,
+            },
+            {
+                id: 80220155,
+                content: "Peut-être n’aurions-nous jamais dû recueillir Juju ce jour-là. Mais l’erreur est déjà commise.",
+                voice: "inv/Yuming/001/C8D29F2E",
+                npc: 790072,
+                next: 80220156,
+            },
+            {
+                id: 80220156,
+                content:
+                    "Comme vous l’avez dit, il a vécu longtemps à nos côtés. Il a perdu la capacité de survivre seul. Si nous le relâchons maintenant... j’ai peur qu’il ne—",
+                voice: "inv/Yuming/001/C8D29F58",
+                npc: 790072,
+                next: 80220157,
+            },
+            {
+                id: 80220157,
+                content:
+                    "Qu’il ne meure de froid ou de faim. Je le sais aussi bien que toi. Mais retiens ceci : si tu choisis d’agir, ne crains pas les conséquences. Et si tu crains les conséquences, alors n’agis pas.",
+                voice: "inv/Yuming/001/C8D29F82",
+                npc: 790074,
+                next: 80220158,
+            },
+            {
+                id: 80220158,
+                content:
+                    "Chaque décision s’accompagne d’un gain et d’une perte. Tout comme nous, vagabonds, avons abandonné les Neuf Chapitres de Dafeng pour nous protéger par nous-mêmes. Il n’est pas question de bien ou de mal. Seulement de choix.",
+                voice: "inv/Yuming/001/C8D29FAC",
+                npc: 790074,
+                next: 80220159,
+            },
+            {
+                id: 80220159,
+                content: "Tout ce que je te demande, c’est de réfléchir avant de faire ton choix. Ne vis pas dans le regret.",
+                voice: "inv/Yuming/001/C8D29FD6",
+                npc: 790074,
+                next: 80220160,
+            },
+            {
+                id: 80220160,
+                content: "Je suivrai votre enseignement.",
+                voice: "inv/Yuming/001/C8D2A000",
+                npc: 790072,
             },
         ],
     },
@@ -20964,14 +22570,272 @@ export const partyTopicData_fr: PartyTopic[] = [
         reward: 7051,
         consume: {
             "19002": 5,
+            "19003": 5,
             "19004": 5,
         },
         dialogues: [
             {
-                id: 10010101,
-                content: "Berry, je...",
-                voice: "story/1001/100101/190F2A32",
-                npc: 100001,
+                id: 80220201,
+                content: "...",
+                voice: "inv/Yuming/002/C8D2A6BA",
+                npc: 790072,
+                next: 80220202,
+            },
+            {
+                id: 80220202,
+                content: "Qu’est-ce que... c’est quoi, ça ?! Buxia, elle... elle est devenue une créature ?!",
+                voice: "inv/Yuming/002/C8D2A6E4",
+                next: 80220203,
+            },
+            {
+                id: 80220203,
+                content: "Non... non... reste loin de moi ! Je ne veux pas mourir !",
+                voice: "inv/Yuming/002/C8D2A70E",
+                next: 80220204,
+            },
+            {
+                id: 80220204,
+                content: "Serait-ce... le châtiment du Seigneur divin... pour avoir renié Sa grâce ?!",
+                voice: "inv/Yuming/002/C8D2A738",
+                next: 80220205,
+            },
+            {
+                id: 80220205,
+                content: "Papa... papa... S’il te plaît... réveille-toi... dis quelque chose...",
+                voice: "inv/Yuming/002/C8D2A762",
+                next: 80220206,
+            },
+            {
+                id: 80220206,
+                content: "Yuming... aide-moi... Je ne veux pas...",
+                voice: "inv/Yuming/002/C8D2A78C",
+                npc: 790073,
+                next: 80220207,
+            },
+            {
+                id: 80220207,
+                content: "...",
+                voice: "inv/Yuming/002/C8D2A7B6",
+                npc: 790072,
+                next: 80220208,
+            },
+            {
+                id: 80220208,
+                content: "Est-ce toi qui m’as montré tout cela... Taihao ?",
+                voice: "inv/Yuming/002/C8D2A7E0",
+                npc: 790072,
+                next: 80220209,
+            },
+            {
+                id: 80220209,
+                content: "Ce n’est pas mon œuvre. Je n’ai nul dessein de fouiller l’esprit des mortels.",
+                voice: "inv/Yuming/002/C8D2A80A",
+                next: 80220210,
+            },
+            {
+                id: 80220210,
+                content: "Alors pourquoi apparaître dans mon esprit ? Je ne suis qu’un simple mortel... et un Vagabond de surcroît.",
+                voice: "inv/Yuming/002/C8D2A834",
+                npc: 790072,
+                next: 80220211,
+            },
+            {
+                id: 80220211,
+                content:
+                    "Ton cœur appelait, désireux de réponses. J’ai perçu en toi une volonté qui ne saurait se contenter d’une cage. C’est pour cela que j’ai répondu.",
+                voice: "inv/Yuming/002/C8D2A85E",
+                next: 80220212,
+            },
+            {
+                id: 80220212,
+                content: "... Je ne pensais pas, au plus profond de moi-même, espérer réellement une réponse de ta part.",
+                voice: "inv/Yuming/002/C8D2A888",
+                npc: 790072,
+                next: 80220213,
+            },
+            {
+                id: 80220213,
+                content: "Ce que tu as vu n’était qu’un ancien cauchemar, un lien du passé dont tu ne t’es pas encore libéré.",
+                voice: "inv/Yuming/002/C8D2A8B2",
+                next: 80220214,
+            },
+            {
+                id: 80220214,
+                content: "... Je le sais.",
+                voice: "inv/Yuming/002/C8D2A8DC",
+                npc: 790072,
+                next: 80220215,
+            },
+            {
+                id: 80220215,
+                content: "Est-ce ici qu’elle repose ?",
+                voice: "inv/Yuming/002/C8D2A906",
+                next: 80220216,
+            },
+            {
+                id: 80220216,
+                content:
+                    "Elle... est devenue autre chose. Je n’ai même pas pu récupérer ses restes. Je n’ai retrouvé que quelques-uns de ses vêtements. C’est tout ce que j’ai pu enterrer ici.",
+                voice: "inv/Yuming/002/C8D2A930",
+                npc: 790072,
+                next: 80220217,
+            },
+            {
+                id: 80220217,
+                content: "Si je l’ai enterrée ici, et non aux Pics Extérieurs...",
+                voice: "inv/Yuming/002/C8D2A95A",
+                npc: 790072,
+                next: 80220218,
+            },
+            {
+                id: 80220218,
+                content:
+                    "C’est parce que ses derniers mots furent : « Si, à l’époque, j’avais choisi les Neuf Chapitres de Dafeng... le résultat aurait-il été différent ? »",
+                voice: "inv/Yuming/002/C8D2A984",
+                npc: 790072,
+                next: 80220219,
+            },
+            {
+                id: 80220219,
+                content:
+                    "La Patriarche Fufeng nous l’a enseigné : un médecin ne fait aucune distinction entre ses patients, pas même lorsqu’il s’agit de Vagabonds. Tant qu’il reste la moindre chance, comment pourrais-je refuser de la soigner ?",
+                voice: "inv/Yuming/002/C8D2A9AE",
+                next: 80220220,
+            },
+            {
+                id: 80220220,
+                content:
+                    "Mais il s’agissait de la Dégradation... une maladie incurable. Une fois déclarée, il n’existe plus aucun retour possible. Elle est sur le point de devenir une créature monstrueuse. Partez. Profitez-en tant que vous le pouvez. Fuyez !",
+                voice: "inv/Yuming/002/C8D2A9D8",
+                next: 80220221,
+            },
+            {
+                id: 80220221,
+                content:
+                    "Hélas... si vous, Vagabonds, n’aviez pas obstinément quitté la protection des Neuf Chapitres de Dafeng... rien de tout cela ne serait arrivé.",
+                voice: "inv/Yuming/002/C8D2AA02",
+                next: 80220222,
+            },
+            {
+                id: 80220222,
+                content: "Tout ce que je te demande, c’est de réfléchir avant de faire ton choix. Ne vis pas dans le regret.",
+                voice: "inv/Yuming/002/C8D2AA2C",
+                npc: 790074,
+                next: 80220223,
+            },
+            {
+                id: 80220223,
+                content: "... Un choix.",
+                voice: "inv/Yuming/002/C8D2AA56",
+                npc: 790072,
+                next: 80220224,
+            },
+            {
+                id: 80220224,
+                content: "Taihao... si nous avions choisi les Neuf Chapitres de Dafeng, le dénouement aurait-il été différent ?",
+                voice: "inv/Yuming/002/C8D2AA80",
+                npc: 790072,
+                next: 80220225,
+            },
+            {
+                id: 80220225,
+                content:
+                    "Vous, Vagabonds, aspirez à une liberté sans entraves, mais ignorez qu’un cerf-volant sans fil s’écrase, et qu’un fleuve sans digue devient un déluge.",
+                voice: "inv/Yuming/002/C8D2AAAA",
+                next: 80220226,
+            },
+            {
+                id: 80220226,
+                content:
+                    "Le passé est scellé. L’avenir, lui, demeure ouvert. Reconnaître son égarement et rebrousser chemin n’est jamais trop tard.",
+                voice: "inv/Yuming/002/C8D2AAD4",
+                next: 80220227,
+            },
+            {
+                id: 80220227,
+                content: "J’ai dit ce qui devait l’être. Réfléchis avec soin.",
+                voice: "inv/Yuming/002/C8D2AAFE",
+                next: 80220228,
+            },
+            {
+                id: 80220228,
+                content: "L’illusion de Taihao se dissipe à l’horizon.",
+                voice: "inv/Yuming/002/C8D2AB28",
+                next: 80220229,
+            },
+            {
+                id: 80220229,
+                content: "<I>Oouh...</>",
+                voice: "inv/Yuming/002/C8D2AB52",
+                next: 80220230,
+            },
+            {
+                id: 80220230,
+                content: "... Tu es en vie. Alors ce jour-là, tu as réussi à quitter les Pics Extérieurs...",
+                voice: "inv/Yuming/002/C8D2AB7C",
+                npc: 790072,
+                next: 80220231,
+            },
+            {
+                id: 80220231,
+                content: "<I>Oouh... oouh...</>",
+                voice: "inv/Yuming/002/C8D2ABA6",
+                next: 80220232,
+            },
+            {
+                id: 80220232,
+                content: "Tu pleures ?",
+                voice: "inv/Yuming/002/C8D2ABD0",
+                npc: 790072,
+                next: 80220233,
+            },
+            {
+                id: 80220233,
+                content:
+                    "Est-ce pour elle... pour le maître... pour ces innocents qui ont péri ? Ou est-ce pour moi... parce que mon cœur a vacillé ?",
+                voice: "inv/Yuming/002/C8D2ABFA",
+                npc: 790072,
+                next: 80220234,
+            },
+            {
+                id: 80220234,
+                content: "<I>Oouh...</>",
+                voice: "inv/Yuming/002/C8D2AC24",
+                next: 80220235,
+            },
+            {
+                id: 80220235,
+                content: "Tu veux que je te ramène aux Pics Extérieurs ?",
+                voice: "inv/Yuming/002/C8D2AC4E",
+                npc: 790072,
+                next: 80220236,
+            },
+            {
+                id: 80220236,
+                content: "<I>Ouh !</>",
+                voice: "inv/Yuming/002/C8D2AC78",
+                next: 80220237,
+            },
+            {
+                id: 80220237,
+                content: "Désolé. Je ne peux plus y retourner.",
+                voice: "inv/Yuming/002/C8D2ACA2",
+                npc: 790072,
+                next: 80220238,
+            },
+            {
+                id: 80220238,
+                content:
+                    "<I>Cette petite bête, déjà habituée à être protégée par les hommes... loin des Pics Extérieurs, elle ne survivrait pas.</>",
+                voice: "inv/Yuming/002/C8D2ACCC",
+                npc: 790072,
+                next: 80220239,
+            },
+            {
+                id: 80220239,
+                content: "Les Pics Extérieurs sont par là. La route qui t’attend désormais... c’est à toi d’en décider.",
+                voice: "inv/Yuming/002/C8D2ACF6",
+                npc: 790072,
             },
         ],
     },
@@ -20985,15 +22849,441 @@ export const partyTopicData_fr: PartyTopic[] = [
             "Une agrafe de ceinture en jade. Quelqu’un a tenté, après sa rupture, d’en rassembler les fragments et de la conserver avec soin. Mais la profonde fissure qui la traverse ne pourra jamais retrouver son état d’origine.",
         reward: 7052,
         consume: {
+            "19002": 8,
             "19007": 8,
-            "19008": 8,
         },
         dialogues: [
             {
-                id: 10010101,
-                content: "Berry, je...",
-                voice: "story/1001/100101/190F2A32",
-                npc: 100001,
+                id: 80220301,
+                content: "... Ha... ha...",
+                voice: "inv/Yuming/003/C8D2B722",
+                npc: 790075,
+                next: 80220302,
+            },
+            {
+                id: 80220302,
+                content: "Muet comme une tombe aux Pics Extérieurs, mais pour faire le chien, là tu as du talent.",
+                voice: "inv/Yuming/003/C8D2B74C",
+                npc: 790075,
+                next: 80220303,
+            },
+            {
+                id: 80220303,
+                content: "... Rends-toi.",
+                voice: "inv/Yuming/003/C8D2B776",
+                npc: 790072,
+                next: 80220304,
+            },
+            {
+                id: 80220304,
+                content: "Me rendre ? Quelle plaisanterie. À t’entendre, on croirait presque que c’est moi le criminel.",
+                voice: "inv/Yuming/003/C8D2B7A0",
+                npc: 790075,
+                next: 80220305,
+            },
+            {
+                id: 80220305,
+                content:
+                    "Tu t’es rendu coupable de blessures et d’homicides. Tu es un criminel. Le repentir est la seule voie qui te reste.",
+                voice: "inv/Yuming/003/C8D2B7CA",
+                npc: 790072,
+                next: 80220306,
+            },
+            {
+                id: 80220306,
+                content:
+                    "Me repentir ? Risible. Ce vieux scélérat a dévoyé les contrats, pressuré les travailleurs et écrasé ses voisins. Je n’ai fait que rendre justice au nom du Ciel.",
+                voice: "inv/Yuming/003/C8D2B7F4",
+                npc: 790075,
+                next: 80220307,
+            },
+            {
+                id: 80220307,
+                content:
+                    "Usurper l’autorité pour servir ses intérêts n’est pas rendre justice. Si la Voie Céleste existe, elle n’a nul besoin que des mortels parlent en son nom.",
+                voice: "inv/Yuming/003/C8D2B81E",
+                npc: 790072,
+                next: 80220308,
+            },
+            {
+                id: 80220308,
+                content:
+                    "La Voie céleste, vraiment ? Alors dis-moi : quand ce vieil escroc utilisait un contrat truqué pour dépouiller des familles entières, quand d’innombrables foyers étaient ruinés, où était donc ta Voie Céleste ? Où étaient les Neuf Chapitres de Dafeng ?",
+                voice: "inv/Yuming/003/C8D2B848",
+                npc: 790075,
+                next: 80220309,
+            },
+            {
+                id: 80220309,
+                content:
+                    "Les Neuf Chapitres n’ont pas été établis en un jour, et ils ne sont pas immuables. Comment juger de tels crimes relève de la décision de Taihao, et non de la nôtre. Nous n’avons pas le droit de nous arroger ce pouvoir.",
+                voice: "inv/Yuming/003/C8D2B872",
+                npc: 790072,
+                next: 80220310,
+            },
+            {
+                id: 80220310,
+                content: "... Ha. De bien beaux discours. Très bien. Alors voyons ce que vaut réellement un Magistrat de Yingtian.",
+                voice: "inv/Yuming/003/C8D2B89C",
+                npc: 790075,
+                next: 80220311,
+            },
+            {
+                id: 80220311,
+                content:
+                    "Yuming et le Vagabond croisent le fer. Le combat est bref. Le Vagabond est rapidement vaincu. La lance de Yuming frappe sa poitrine — mais ne la transperce pas. Une agrafe de ceinture en jade, brisée en deux, tombe de sa poitrine.",
+                voice: "inv/Yuming/003/C8D2B8C6",
+                next: 80220312,
+            },
+            {
+                id: 80220312,
+                content: "C’est... l’agrafe du maître...",
+                voice: "inv/Yuming/003/C8D2B8F0",
+                npc: 790072,
+                next: 80220313,
+            },
+            {
+                id: 80220313,
+                content:
+                    "Le jour où la Dégradation a emporté Buxia, il est resté en arrière pour permettre aux autres de fuir. Je l’ai ramassée dans la mare de sang qu’il a laissée derrière lui.",
+                voice: "inv/Yuming/003/C8D2B91A",
+                npc: 790075,
+                next: 80220314,
+            },
+            {
+                id: 80220314,
+                content:
+                    "J’ai tenté de la recoller, de la conserver comme un souvenir... Mais ce qui est brisé\nest destiné à se briser à nouveau.",
+                voice: "inv/Yuming/003/C8D2B944",
+                npc: 790075,
+                next: 80220315,
+            },
+            {
+                id: 80220315,
+                content:
+                    "Parmi les Vagabonds, tous respectaient Yan Shanting. Il nous a appris ce qu’était la liberté, l’absence de chaînes, le courage d’avancer même contre des milliers, et la valeur d’une parole donnée.",
+                voice: "inv/Yuming/003/C8D2B96E",
+                npc: 790075,
+                next: 80220316,
+            },
+            {
+                id: 80220316,
+                content:
+                    "Et toi alors ? Magistrat de Yingtian... Son disciple favori, qui a tourné le dos aux Vagabonds pour aller remuer la queue devant cette misérable autorité !",
+                voice: "inv/Yuming/003/C8D2B998",
+                npc: 790075,
+                next: 80220317,
+            },
+            {
+                id: 80220317,
+                content: "...",
+                voice: "inv/Yuming/003/C8D2B9C2",
+                npc: 790072,
+                next: 80220318,
+            },
+            {
+                id: 80220318,
+                content: "... Pars. Si tu as survécu à ce coup, alors le Ciel n’a pas décrété que ton heure était venue.",
+                voice: "inv/Yuming/003/C8D2B9EC",
+                npc: 790072,
+                next: 80220319,
+            },
+            {
+                id: 80220319,
+                content: "...<I> Hmpf.</>",
+                voice: "inv/Yuming/003/C8D2BA16",
+                npc: 790075,
+                next: 80220320,
+            },
+            {
+                id: 80220320,
+                content:
+                    "Le Vagabond lance un dernier regard à Yuming, puis s’enfuit sous la pluie, jusqu’à disparaître de son champ de vision...",
+                voice: "inv/Yuming/003/C8D2BA40",
+                next: 80220321,
+            },
+            {
+                id: 80220321,
+                content: "Cela aurait dû s’arrêter là.",
+                voice: "inv/Yuming/003/C8D2BA6A",
+                next: 80220322,
+            },
+            {
+                id: 80220322,
+                content:
+                    "Mais soudain, une rafale violente surgit par l’arrière. Avant que Yuming n’ait le temps de réagir, le Vagabond s’effondre, sans vie.",
+                voice: "inv/Yuming/003/C8D2BA94",
+                next: 80220323,
+            },
+            {
+                id: 80220323,
+                content: "Un Bi’an est déjà sur lui. Ses griffes ont transpercé sa poitrine.",
+                voice: "inv/Yuming/003/C8D2BABE",
+                next: 80220324,
+            },
+            {
+                id: 80220324,
+                content: "<I>Rooooaaar— !</>",
+                voice: "inv/Yuming/003/C8D2BAE8",
+                next: 80220325,
+            },
+            {
+                id: 80220325,
+                content: "...",
+                voice: "inv/Yuming/003/C8D2BB12",
+                npc: 790072,
+                next: 80220326,
+            },
+            {
+                id: 80220326,
+                content: "Yuming.",
+                voice: "inv/Yuming/003/C8D2BB3C",
+                npc: 790074,
+                next: 80220327,
+            },
+            {
+                id: 80220327,
+                content: "...",
+                voice: "inv/Yuming/003/C8D2BB66",
+                npc: 790072,
+                next: 80220328,
+            },
+            {
+                id: 80220328,
+                content: "Maître...",
+                voice: "inv/Yuming/003/C8D2BB90",
+                npc: 790072,
+                next: 80220329,
+            },
+            {
+                id: 80220329,
+                content: "Tu as grandi, Yuming. Et tu t’es endurci.",
+                voice: "inv/Yuming/003/C8D2BBBA",
+                npc: 790074,
+                next: 80220330,
+            },
+            {
+                id: 80220330,
+                content: "Maître... je n’ai plus grandi depuis bien des années.",
+                voice: "inv/Yuming/003/C8D2BBE4",
+                npc: 790072,
+                next: 80220331,
+            },
+            {
+                id: 80220331,
+                content: "Petit insolent ! J’avais enfin préparé une entrée un peu sentimentale, et tu la réduis en miettes.",
+                voice: "inv/Yuming/003/C8D2BC0E",
+                npc: 790074,
+                next: 80220332,
+            },
+            {
+                id: 80220332,
+                content: "Qu’y a-t-il ? Encore ce visage tourmenté ?",
+                voice: "inv/Yuming/003/C8D2BC38",
+                npc: 790074,
+                next: 80220333,
+            },
+            {
+                id: 80220333,
+                content: "... Rien...",
+                voice: "inv/Yuming/003/C8D2BC62",
+                npc: 790072,
+                next: 80220334,
+            },
+            {
+                id: 80220334,
+                content: "Mensonge. Je te l’ai dit cent fois : quand tu mens, tu ne prononces jamais plus de deux mots.",
+                voice: "inv/Yuming/003/C8D2BC8C",
+                npc: 790074,
+                next: 80220335,
+            },
+            {
+                id: 80220335,
+                content: "Maître... êtes-vous venu me réprimander ?",
+                voice: "inv/Yuming/003/C8D2BCB6",
+                npc: 790072,
+                next: 80220336,
+            },
+            {
+                id: 80220336,
+                content: "J’ai trahi vos attentes. J’ai croisé le fer avec d’anciens compagnons.",
+                voice: "inv/Yuming/003/C8D2BCE0",
+                npc: 790072,
+                next: 80220337,
+            },
+            {
+                id: 80220337,
+                content:
+                    "Je vous ai trahi. J’ai renié les Vagabonds. J’ai choisi les Neuf Chapitres de Dafeng. Aujourd’hui, je n’ai plus le courage de vous faire face.",
+                voice: "inv/Yuming/003/C8D2BD0A",
+                npc: 790072,
+                next: 80220338,
+            },
+            {
+                id: 80220338,
+                content: "Tête de mule. Moi qui me suis toujours cru brillant, comment ai-je pu former un disciple aussi obtus ?",
+                voice: "inv/Yuming/003/C8D2BD34",
+                npc: 790074,
+                next: 80220339,
+            },
+            {
+                id: 80220339,
+                content: "Votre disciple manque de discernement.",
+                voice: "inv/Yuming/003/C8D2BD5E",
+                npc: 790072,
+                next: 80220340,
+            },
+            {
+                id: 80220340,
+                content: "Je vais te poser une seule question. As-tu déjà regretté ce choix ?",
+                voice: "inv/Yuming/003/C8D2BD88",
+                npc: 790074,
+                next: 80220341,
+            },
+            {
+                id: 80220341,
+                content: "Yuming... ne le sait pas.",
+                voice: "inv/Yuming/003/C8D2BDB2",
+                npc: 790072,
+                next: 80220342,
+            },
+            {
+                id: 80220342,
+                content:
+                    "Alors posons la question autrement. Si le temps revenait en arrière, choisirais-tu encore de devenir Magistrat de Yingtian ?",
+                voice: "inv/Yuming/003/C8D2BDDC",
+                npc: 790074,
+                next: 80220343,
+            },
+            {
+                id: 80220343,
+                content: "... Oui.",
+                voice: "inv/Yuming/003/C8D2BE06",
+                npc: 790072,
+                next: 80220344,
+            },
+            {
+                id: 80220344,
+                content: "Pourquoi ?",
+                voice: "inv/Yuming/003/C8D2BE30",
+                npc: 790074,
+                next: 80220345,
+            },
+            {
+                id: 80220345,
+                content:
+                    "Sous les Neuf Chapitres, nous avons perdu une part de liberté, une part de justice immédiate. Mais... <H>mieux vaut des règles imparfaites que l’absence totale de règles</>.",
+                voice: "inv/Yuming/003/C8D2BE5A",
+                npc: 790072,
+                next: 80220346,
+            },
+            {
+                id: 80220346,
+                content:
+                    "Sans les Neuf Chapitres, le monde sombrerait dans le chaos. Même les Vagabonds, aussi déterminés soient-ils à punir le mal, ne peuvent qu’en atténuer les symptômes.",
+                voice: "inv/Yuming/003/C8D2BE84",
+                npc: 790072,
+                next: 80220347,
+            },
+            {
+                id: 80220347,
+                content: "Et surtout... je ne veux plus jamais voir ce qui est arrivé à Buxia se reproduire.",
+                voice: "inv/Yuming/003/C8D2BEAE",
+                npc: 790072,
+                next: 80220348,
+            },
+            {
+                id: 80220348,
+                content: "... Je ne veux plus voir un autre Yan Shanting mourir en héros.",
+                voice: "inv/Yuming/003/C8D2BED8",
+                npc: 790072,
+                next: 80220349,
+            },
+            {
+                id: 80220349,
+                content:
+                    "Ha... ha ha ! Puisque tu as suivi ton cœur, que reste-t-il à dire ? Même si le choix t’a été imposé, si tu devais revivre cette vie, tu choisirais encore de la même façon. Qui aurait alors le droit de te juger ?",
+                voice: "inv/Yuming/003/C8D2BF02",
+                npc: 790074,
+                next: 80220350,
+            },
+            {
+                id: 80220350,
+                content: "Même si aujourd’hui, je me dresse contre vous... contre le maître que j’admirais autrefois ?",
+                voice: "inv/Yuming/003/C8D2BF2C",
+                npc: 790072,
+                next: 80220351,
+            },
+            {
+                id: 80220351,
+                content:
+                    "Enfant, on suit ses parents. À l’âge adulte, ses maîtres. Puis les puissants. Puis ses propres enfants. Mais si un homme passe sa vie entière sur une route tracée par d’autres, sans jamais faire un seul choix par lui-même... Alors peut-on vraiment dire qu’il a vécu ?",
+                voice: "inv/Yuming/003/C8D2BF56",
+                npc: 790074,
+                next: 80220352,
+            },
+            {
+                id: 80220352,
+                content: "Je ne t’ai jamais enseigné de me suivre aveuglément. Je ne t’ai appris qu’une chose : <H>vivre sans regret</>.",
+                voice: "inv/Yuming/003/C8D2BF80",
+                npc: 790074,
+                next: 80220353,
+            },
+            {
+                id: 80220353,
+                content: "Yuming, te souviens-tu de la raison pour laquelle j’ai défié les Neuf Chapitres ?",
+                voice: "inv/Yuming/003/C8D2BFAA",
+                npc: 790074,
+                next: 80220354,
+            },
+            {
+                id: 80220354,
+                content: "Pour que les hommes ne soient pas enfermés dans une cage sans jamais apprendre à se tenir debout ?",
+                voice: "inv/Yuming/003/C8D2BFD4",
+                npc: 790072,
+                next: 80220355,
+            },
+            {
+                id: 80220355,
+                content: "Non. C’était pour arracher, au-delà même de la Voie Céleste, le <H>droit de choisir une autre voie</>.",
+                voice: "inv/Yuming/003/C8D2BFFE",
+                npc: 790074,
+                next: 80220356,
+            },
+            {
+                id: 80220356,
+                content:
+                    "Les Pics Extérieurs s’opposent aux Neuf Chapitres, mais ont toujours laissé chacun venir et partir librement. Être Vagabond doit rester un choix. Pas une autre prison.",
+                voice: "inv/Yuming/003/C8D2C028",
+                npc: 790074,
+                next: 80220357,
+            },
+            {
+                id: 80220357,
+                content: "Ne te punis plus, Yuming. Parce que...",
+                voice: "inv/Yuming/003/C8D2C052",
+                npc: 790074,
+                next: 80220358,
+            },
+            {
+                id: 80220358,
+                content: "Tu es ma fierté.",
+                voice: "inv/Yuming/003/C8D2C07C",
+                npc: 790074,
+                next: 80220359,
+            },
+            {
+                id: 80220359,
+                content: "Maître...",
+                voice: "inv/Yuming/003/C8D2C0A6",
+                npc: 790072,
+                next: 80220360,
+            },
+            {
+                id: 80220360,
+                content: "Votre disciple... suivra fidèlement votre enseignement.",
+                voice: "inv/Yuming/003/C8D2C0D0",
+                npc: 790072,
             },
         ],
     },
@@ -21007,8 +23297,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             "Trois adolescents avaient autrefois attaché ce petit grelot au cou d’un renard sauvage, en lui disant : « Ici, c’est chez toi. » Après une errance trop longue, il est peut-être temps, pour le voyageur, de rentrer jeter un dernier regard.",
         reward: 7053,
         consume: {
-            "19001": 10,
-            "19002": 10,
+            "19006": 10,
         },
         dialogues: [
             {

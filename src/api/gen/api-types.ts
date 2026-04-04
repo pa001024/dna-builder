@@ -15,6 +15,7 @@ export interface User {
     currentTitleClass?: string
     nameEffectClass?: string
     dailyExperienceStatus?: UserDailyExperienceStatus
+    abyssUsageUploadStatus?: UserAbyssUsageUploadStatus
     createdAt?: string
     updateAt?: string
 }
@@ -31,6 +32,10 @@ export interface UserDailyExperienceStatus {
     dailyOnlineHourRetryAfterMs?: number
 }
 
+export interface UserAbyssUsageUploadStatus {
+    uploadedThisSeason: boolean
+}
+
 export interface UserLoginResult {
     success: boolean
     message: string
@@ -45,7 +50,6 @@ export interface UserExperienceRewardResult {
     awardedExp: number
     awardedPoints: number
     retryAfterMs?: number
-    token?: string
     user?: User
 }
 
@@ -366,6 +370,86 @@ export interface Activity {
     updateAt?: string
 }
 
+export interface AbyssUsageSubmission {
+    id: string
+    uidSha256: string
+    seasonId: number
+    level?: number
+    charId: number
+    meleeId: number
+    rangedId: number
+    support1: number
+    supportWeapon1: number
+    support2: number
+    supportWeapon2: number
+    stars: number
+    petId?: number
+    createdAt?: string
+    updateAt?: string
+    roleParticipants?: AbyssUsageRoleParticipant[]
+    weaponParticipants?: AbyssUsageWeaponParticipant[]
+    reward?: UserExperienceRewardResult
+}
+
+export interface AbyssUsageRoleParticipant {
+    submissionId: string
+    roleType: string
+    charId: number
+    gradeLevel: number
+    createdAt?: string
+}
+
+export interface AbyssUsageWeaponParticipant {
+    submissionId: string
+    roleType: string
+    weaponId: number
+    skillLevel: number
+    createdAt?: string
+}
+
+export interface AbyssRoleUsageStat {
+    charId: number
+    submissionCount: number
+    ownedCount: number
+    gradeLevelDistribution?: number[]
+}
+
+export interface AbyssWeaponUsageStat {
+    weaponId: number
+    submissionCount: number
+    ownedCount: number
+    skillLevelDistribution?: number[]
+}
+
+export interface AbyssUsageLineupStat {
+    charId: number
+    meleeId: number
+    rangedId: number
+    support1: number
+    supportWeapon1: number
+    support2: number
+    supportWeapon2: number
+    petId?: number
+    submissionCount: number
+}
+
+export interface AbyssUsageSlotStat {
+    id: number
+    submissionCount: number
+}
+
+export interface AbyssUsageSlotStats {
+    support?: AbyssUsageSlotStat[]
+    meleeWeapon?: AbyssUsageSlotStat[]
+    rangedWeapon?: AbyssUsageSlotStat[]
+    pet?: AbyssUsageSlotStat[]
+}
+
+export interface AbyssUsageLevelStat {
+    level: number
+    submissionCount: number
+}
+
 export interface UsersUpdateInput {
     name?: string
     qq?: string
@@ -460,4 +544,30 @@ export interface ActivityUpdateInput {
     name: string
     icon: string
     desc: string
+}
+
+export interface AbyssOwnedCharInput {
+    charId: number
+    gradeLevel: number
+}
+
+export interface AbyssOwnedWeaponInput {
+    weaponId: number
+    skillLevel: number
+}
+
+export interface AbyssUsageSubmissionInput {
+    uidSha256: string
+    level?: number
+    charId: number
+    meleeId: number
+    rangedId: number
+    support1: number
+    supportWeapon1: number
+    support2: number
+    supportWeapon2: number
+    stars: number
+    petId?: number
+    ownedChars?: AbyssOwnedCharInput[]
+    ownedWeapons?: AbyssOwnedWeaponInput[]
 }

@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { petMap } from "@/data/d"
 import regionData, { mapOffsets, type Region, regionMap } from "@/data/d/region.data"
+import { resourceData, resourceMap } from "@/data/d/resource.data"
 import { type SubRegion, subRegionData, type TeleportPoint } from "@/data/d/subregion.data"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
 
@@ -117,11 +119,37 @@ interface ProjectedSubRegionPoint {
     tpPointCount: number
 }
 
+interface TeleportIconFilterOption {
+    icon: string
+}
+
+interface ResourceFilterOption {
+    id: number
+    name: string
+    icon: string
+}
+
 interface HoverCoordinateInfo {
     mapX: number
     mapY: number
     worldX: number
     worldY: number
+}
+
+interface RoutePointInfo {
+    name: string
+    x: number
+    y: number
+    iconUrl: string
+}
+
+interface MapPointInfo {
+    worldX: number
+    worldY: number
+    mapX: number
+    mapY: number
+    name: string
+    iconUrl: string
 }
 
 interface RegionProjectionRuntimeConfig {
@@ -146,6 +174,24 @@ interface MapLocalRouteTarget {
     subRegionId: number | null
     rcId: number | null
     rcIndex: number | null
+    rid: number | null
+    pointName: string | null
+    pointX: number | null
+    pointY: number | null
+    pointIcon: string | null
+}
+
+interface ResourceMapPointInfo {
+    resourceId: number
+    resourceName: string
+    srId: number
+    subRegionId: number
+    subRegionName: string
+    regionName: string
+    worldX: number
+    worldY: number
+    mapX: number
+    mapY: number
 }
 
 /**
@@ -162,6 +208,7 @@ function resolveMapMappingOffset(mapping: { name: string; pos: number[] }): [num
 const containerRef = ref<HTMLElement>()
 const canvasRef = ref<HTMLCanvasElement>()
 const route = useRoute()
+const router = useRouter()
 
 /**
  * 基于 region.data 生成本地分层地图配置。
@@ -197,7 +244,8 @@ if (!firstProfile) {
     throw new Error("mapLocalProfiles 不能为空")
 }
 
-const selectedRegionId = ref<number>(firstProfile.regionId)
+const routeRegionId = useSearchParam<number>("regionId", firstProfile.regionId)
+const selectedRegionId = ref<number>(routeRegionId.value)
 const activeLayerIds = ref<Set<string>>(new Set())
 const selectedSingleLayerByGroup = ref<Map<string, string>>(new Map())
 const focusedLayerId = ref<string | null>(null)
@@ -209,6 +257,17 @@ const zoom = ref(1)
 const minZoom = 0.12
 const maxZoom = 6
 const panOffset = ref({ x: 0, y: 0 })
+const pointFocusAnimationFrameId = ref(0)
+const pointFocusOverlayVisible = ref(false)
+const pointFocusOverlayCanvasRef = ref<HTMLCanvasElement>()
+const pointFocusAnimationState = ref<{
+    snapshotCanvas: HTMLCanvasElement
+    snapshotZoom: number
+    snapshotPan: { x: number; y: number }
+    centerX: number
+    centerY: number
+    dpr: number
+} | null>(null)
 
 const isDragging = ref(false)
 const dragDistance = ref(0)
@@ -217,8 +276,32 @@ const lastPointerPosition = ref({ x: 0, y: 0 })
 const selectedSubRegionId = ref<number | null>(null)
 const hoveredSubRegionId = ref<number | null>(null)
 const selectedRcState = ref<{ subRegionId: number; rcId: number; rcIndex: number } | null>(null)
+const selectedMapPoint = ref<MapPointInfo | null>(null)
+const routeMapPoint = ref<MapPointInfo | null>(null)
+const pendingMapPointFocus = ref<{ worldX: number; worldY: number; name: string; iconUrl: string } | null>(null)
+const resourceMapPoints = ref<ResourceMapPointInfo[]>([])
+const hoveredTeleportPointKey = ref<string | null>(null)
 const hoverCoordinateInfo = ref<HoverCoordinateInfo | null>(null)
 const showTeleportPoints = ref(true)
+const selectedTeleportIcons = ref<Set<string>>(new Set())
+const isSidebarCollapsed = ref(false)
+const pendingRoutePointFocusTimerId = ref(0)
+const routePointInfo = computed<RoutePointInfo | null>(() => {
+    const target = mapLocalRouteTarget.value
+    if (target.pointX === null || target.pointY === null) return null
+    return {
+        name: target.pointName || "藏宝点",
+        x: target.pointX,
+        y: target.pointY,
+        iconUrl: target.pointIcon ? `/imgs/res/${target.pointIcon}.webp` : "",
+    }
+})
+
+/**
+ * 统一当前应展示的地图点信息。
+ * 优先使用路由传入的持久点位，避免被其他点位点击覆盖。
+ */
+const currentMapPointInfo = computed<MapPointInfo | null>(() => routeMapPoint.value)
 
 let resizeObserver: ResizeObserver | null = null
 let drawRaf = 0
@@ -807,11 +890,229 @@ const projectedSubRegions = computed<ProjectedSubRegionPoint[]>(() => {
     return result
 })
 const totalTeleportPointCount = computed(() => projectedSubRegions.value.reduce((sum, subRegion) => sum + subRegion.tpPointCount, 0))
-
+const resourceOptions = computed<ResourceFilterOption[]>(() => {
+    const regionId = currentProfile.value.regionId
+    return resourceData
+        .filter(resource =>
+            (resource.source || []).some(source =>
+                subRegionData.some(subRegion => subRegion.id === source.srId && subRegion.rid === regionId)
+            )
+        )
+        .map(resource => ({ id: resource.id, name: resource.name, icon: resource.icon }))
+        .sort((a, b) => a.id - b.id)
+})
+const selectedResourceIds = ref<Set<number>>(new Set())
+const isResourceSectionCollapsed = ref(true)
+const isResourceFilterActive = computed(
+    () => selectedResourceIds.value.size > 0 && selectedResourceIds.value.size === resourceOptions.value.length
+)
+const teleportIconOptions = computed<TeleportIconFilterOption[]>(() => {
+    const icons = new Set<string>()
+    for (const subRegion of projectedSubRegions.value) {
+        for (const tpPoint of subRegion.tpPoints) {
+            if (tpPoint.icon) {
+                icons.add(tpPoint.icon)
+            }
+        }
+    }
+    return [...icons].sort((a, b) => a.localeCompare(b)).map(icon => ({ icon }))
+})
+const isTeleportPointFilterActive = computed(
+    () => selectedTeleportIcons.value.size > 0 && selectedTeleportIcons.value.size === teleportIconOptions.value.length
+)
+const visibleTeleportPointCount = computed(() => {
+    if (!showTeleportPoints.value) return 0
+    if (isTeleportPointFilterActive.value) return totalTeleportPointCount.value
+    let count = 0
+    for (const subRegion of projectedSubRegions.value) {
+        count += subRegion.tpPoints.filter(tpPoint => selectedTeleportIcons.value.has(tpPoint.icon)).length
+    }
+    return count
+})
 const selectedSubRegion = computed(() => {
     if (selectedSubRegionId.value === null) return null
     return projectedSubRegions.value.find(item => item.id === selectedSubRegionId.value) ?? null
 })
+/**
+ * 选中并聚焦任意地图坐标点。
+ * @param worldX 世界坐标 X
+ * @param worldY 世界坐标 Y
+ * @param name 点位名称
+ */
+function focusMapPoint(worldX: number, worldY: number, name: string) {
+    const iconUrl = mapLocalRouteTarget.value.pointIcon ? `/imgs/res/${mapLocalRouteTarget.value.pointIcon}.webp` : ""
+    const mapped = projectWorldToMap(worldX, worldY)
+    selectedMapPoint.value = { worldX, worldY, mapX: mapped.x, mapY: mapped.y, name, iconUrl }
+    const container = containerRef.value
+    if (!container) {
+        pendingMapPointFocus.value = { worldX, worldY, name, iconUrl }
+        requestDraw()
+        return
+    }
+    pendingMapPointFocus.value = null
+    animatePointFocus(mapped.x, mapped.y)
+}
+
+/**
+ * 处理尚未就绪时排队的点位聚焦。
+ */
+function flushPendingMapPointFocus() {
+    const pending = pendingMapPointFocus.value
+    const container = containerRef.value
+    if (!pending || !container) return
+    pendingMapPointFocus.value = null
+    const mapped = projectWorldToMap(pending.worldX, pending.worldY)
+    selectedMapPoint.value = {
+        worldX: pending.worldX,
+        worldY: pending.worldY,
+        mapX: mapped.x,
+        mapY: mapped.y,
+        name: pending.name,
+        iconUrl: pending.iconUrl,
+    }
+    animatePointFocus(mapped.x, mapped.y)
+}
+
+/**
+ * 取消点位聚焦动画。
+ */
+function cancelPointFocusAnimation() {
+    if (!pointFocusAnimationFrameId.value) return
+    cancelAnimationFrame(pointFocusAnimationFrameId.value)
+    pointFocusAnimationFrameId.value = 0
+    pointFocusOverlayVisible.value = false
+    pointFocusAnimationState.value = null
+}
+
+/**
+ * 在覆盖层上绘制点位动画快照。
+ * @param currentZoom 当前缩放值
+ * @param currentPan 当前平移值
+ */
+function drawPointFocusSnapshot(currentZoom: number, currentPan: { x: number; y: number }) {
+    const state = pointFocusAnimationState.value
+    const overlayCanvas = pointFocusOverlayCanvasRef.value
+    if (!state || !overlayCanvas) return
+
+    const overlayCtx = overlayCanvas.getContext("2d")
+    if (!overlayCtx) return
+
+    const scale = currentZoom / Math.max(state.snapshotZoom, 1e-6)
+    overlayCtx.setTransform(1, 0, 0, 1, 0, 0)
+    overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height)
+    overlayCtx.save()
+    overlayCtx.translate(currentPan.x * state.dpr, currentPan.y * state.dpr)
+    overlayCtx.scale(scale, scale)
+    overlayCtx.translate(-state.snapshotPan.x * state.dpr, -state.snapshotPan.y * state.dpr)
+    overlayCtx.drawImage(state.snapshotCanvas, 0, 0)
+    overlayCtx.restore()
+    pointFocusOverlayVisible.value = true
+}
+
+/**
+ * 记录当前主画布为动画快照。
+ * @param mainCanvas 主画布
+ */
+function capturePointFocusSnapshot(mainCanvas: HTMLCanvasElement) {
+    const overlayCanvas = pointFocusOverlayCanvasRef.value
+    if (!overlayCanvas) return
+
+    const state = pointFocusAnimationState.value
+    if (!state) return
+
+    const snapshotCanvas = state.snapshotCanvas
+    snapshotCanvas.width = mainCanvas.width
+    snapshotCanvas.height = mainCanvas.height
+    const snapshotCtx = snapshotCanvas.getContext("2d")
+    if (!snapshotCtx) return
+    snapshotCtx.setTransform(1, 0, 0, 1, 0, 0)
+    snapshotCtx.clearRect(0, 0, snapshotCanvas.width, snapshotCanvas.height)
+    snapshotCtx.drawImage(mainCanvas, 0, 0)
+}
+
+/**
+ * 播放传入点位的缩放聚焦动画。
+ * @param targetMapX 目标地图 X
+ * @param targetMapY 目标地图 Y
+ */
+function animatePointFocus(targetMapX: number, targetMapY: number) {
+    const container = containerRef.value
+    const mainCanvas = canvasRef.value
+    const overlayCanvas = pointFocusOverlayCanvasRef.value
+    if (!container || !mainCanvas || !overlayCanvas) return
+
+    cancelPointFocusAnimation()
+    const startZoom = zoom.value
+    const endZoom = Math.min(maxZoom, Math.max(startZoom * 1.6, 1.4))
+    const startPan = { ...panOffset.value }
+    const endPan = {
+        x: container.clientWidth / 2 - targetMapX * endZoom,
+        y: container.clientHeight / 2 - targetMapY * endZoom,
+    }
+    const snapshotCanvas = document.createElement("canvas")
+    const dpr = window.devicePixelRatio || 1
+    const duration = 420
+    const renderInterval = 50
+    const startTime = performance.now()
+    let lastRenderTime = -renderInterval
+
+    pointFocusAnimationState.value = {
+        snapshotCanvas,
+        snapshotZoom: startZoom,
+        snapshotPan: startPan,
+        centerX: container.clientWidth / 2,
+        centerY: container.clientHeight / 2,
+        dpr,
+    }
+    capturePointFocusSnapshot(mainCanvas)
+
+    const step = (now: number) => {
+        const t = Math.min(1, (now - startTime) / duration)
+        const eased = 1 - Math.pow(1 - t, 3)
+        const currentZoom = startZoom + (endZoom - startZoom) * eased
+        const currentPan = {
+            x: startPan.x + (endPan.x - startPan.x) * eased,
+            y: startPan.y + (endPan.y - startPan.y) * eased,
+        }
+        drawPointFocusSnapshot(currentZoom, currentPan)
+
+        if (t < 1) {
+            if (now - lastRenderTime >= renderInterval) {
+                zoom.value = currentZoom
+                panOffset.value = currentPan
+                drawScene()
+                capturePointFocusSnapshot(mainCanvas)
+                pointFocusAnimationState.value = {
+                    snapshotCanvas,
+                    snapshotZoom: currentZoom,
+                    snapshotPan: currentPan,
+                    centerX: container.clientWidth / 2,
+                    centerY: container.clientHeight / 2,
+                    dpr,
+                }
+                lastRenderTime = now
+            }
+
+            pointFocusAnimationFrameId.value = requestAnimationFrame(step)
+            return
+        }
+
+        pointFocusAnimationFrameId.value = 0
+        zoom.value = endZoom
+        panOffset.value = endPan
+        drawScene()
+        pointFocusOverlayVisible.value = false
+        pointFocusAnimationState.value = null
+        const overlayCtx = overlayCanvas.getContext("2d")
+        if (overlayCtx) {
+            overlayCtx.setTransform(1, 0, 0, 1, 0, 0)
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height)
+        }
+        requestDraw()
+    }
+
+    pointFocusAnimationFrameId.value = requestAnimationFrame(step)
+}
 const hoveredSubRegion = computed(() => {
     if (hoveredSubRegionId.value === null) return null
     return projectedSubRegions.value.find(item => item.id === hoveredSubRegionId.value) ?? null
@@ -828,9 +1129,35 @@ const mapLocalRouteTarget = computed<MapLocalRouteTarget>(() => ({
     subRegionId: parseRouteQueryNumber(route.query.subRegionId),
     rcId: parseRouteQueryNumber(route.query.rcId),
     rcIndex: parseRouteQueryNumber(route.query.rcIndex),
+    rid: parseRouteQueryNumber(route.query.rid),
+    pointName:
+        typeof route.query.pointName === "string"
+            ? route.query.pointName
+            : Array.isArray(route.query.pointName)
+              ? (route.query.pointName[0] ?? null)
+              : null,
+    pointX: parseRouteQueryNumber(route.query.pointX),
+    pointY: parseRouteQueryNumber(route.query.pointY),
+    pointIcon:
+        typeof route.query.pointIcon === "string"
+            ? route.query.pointIcon
+            : Array.isArray(route.query.pointIcon)
+              ? (route.query.pointIcon[0] ?? null)
+              : null,
 }))
+
 const mapLocalRouteTargetToken = computed(() =>
-    [mapLocalRouteTarget.value.regionId, mapLocalRouteTarget.value.subRegionId, mapLocalRouteTarget.value.rcId, mapLocalRouteTarget.value.rcIndex]
+    [
+        mapLocalRouteTarget.value.regionId,
+        mapLocalRouteTarget.value.subRegionId,
+        mapLocalRouteTarget.value.rcId,
+        mapLocalRouteTarget.value.rcIndex,
+        mapLocalRouteTarget.value.rid,
+        mapLocalRouteTarget.value.pointName,
+        mapLocalRouteTarget.value.pointX,
+        mapLocalRouteTarget.value.pointY,
+        mapLocalRouteTarget.value.pointIcon,
+    ]
         .map(value => (value === null ? "" : String(value)))
         .join("|")
 )
@@ -844,6 +1171,8 @@ const rcIconImageCache = new Map<string, HTMLImageElement>()
 const rcIconPromiseCache = new Map<string, Promise<HTMLImageElement>>()
 const tpIconImageCache = new Map<string, HTMLImageElement>()
 const tpIconPromiseCache = new Map<string, Promise<HTMLImageElement>>()
+const mapPointIconImageCache = new Map<string, HTMLImageElement>()
+const mapPointIconPromiseCache = new Map<string, Promise<HTMLImageElement>>()
 function loadLayerImage(fileName: string): Promise<HTMLImageElement> {
     const cacheKey = `/imgs/world/${fileName}`
     const cached = imagePromiseCache.get(cacheKey)
@@ -919,6 +1248,117 @@ function ensureTpIconImageLoaded(iconUrl: string): HTMLImageElement | null {
 }
 
 /**
+ * 确保地图点位图标已开始加载。
+ */
+function ensureMapPointIconImageLoaded(iconUrl: string): HTMLImageElement | null {
+    if (!iconUrl) return null
+    const cached = mapPointIconImageCache.get(iconUrl)
+    if (cached) return cached
+
+    if (!mapPointIconPromiseCache.has(iconUrl)) {
+        const promise = new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image()
+            image.onload = () => resolve(image)
+            image.onerror = () => reject(new Error(`加载地图点位图标失败: ${iconUrl}`))
+            image.src = iconUrl
+        })
+        mapPointIconPromiseCache.set(iconUrl, promise)
+        promise
+            .then(image => {
+                mapPointIconImageCache.set(iconUrl, image)
+                requestDraw()
+            })
+            .catch(() => {
+                mapPointIconPromiseCache.delete(iconUrl)
+            })
+    }
+
+    return null
+}
+
+/**
+ * 判断传送点是否应该显示。
+ */
+function isTeleportPointVisible(tpPoint: ProjectedTeleportPoint): boolean {
+    if (!showTeleportPoints.value) return false
+    if (isTeleportPointFilterActive.value) return true
+    return selectedTeleportIcons.value.has(tpPoint.icon)
+}
+
+/**
+ * 切换单个传送点图标类型的显示状态。
+ */
+function toggleTeleportIcon(icon: string, checked: boolean) {
+    const next = new Set(selectedTeleportIcons.value)
+    if (checked) {
+        next.add(icon)
+    } else {
+        next.delete(icon)
+    }
+    selectedTeleportIcons.value = next
+}
+
+/**
+ * 设置全部传送点图标类型为显示或隐藏。
+ */
+function setAllTeleportIcons(checked: boolean) {
+    selectedTeleportIcons.value = checked ? new Set(teleportIconOptions.value.map(option => option.icon)) : new Set()
+}
+
+/**
+ * 判断传送点图标类型是否处于全选状态。
+ */
+function isAllTeleportIconsSelected(): boolean {
+    return isTeleportPointFilterActive.value
+}
+
+/**
+ * 处理“全部”开关，统一控制 TP 显示和图标筛选状态。
+ */
+function handleTeleportPointsAllChange(checked: boolean) {
+    showTeleportPoints.value = checked
+    setAllTeleportIcons(checked)
+}
+
+/**
+ * 切换单个资源筛选项。
+ * @param resourceId 资源 ID
+ * @param checked 是否选中
+ */
+function toggleResourceFilter(resourceId: number, checked: boolean) {
+    const next = new Set(selectedResourceIds.value)
+    if (checked) {
+        next.add(resourceId)
+    } else {
+        next.delete(resourceId)
+    }
+    selectedResourceIds.value = next
+}
+
+/**
+ * 设置所有资源筛选项。
+ * @param checked 是否全选
+ */
+function setAllResourceFilters(checked: boolean) {
+    selectedResourceIds.value = checked ? new Set(resourceOptions.value.map(option => option.id)) : new Set()
+}
+
+/**
+ * 处理资源筛选“全部”开关。
+ * @param checked 是否显示全部
+ */
+function handleResourceFiltersAllChange(checked: boolean) {
+    setAllResourceFilters(checked)
+}
+
+/**
+ * 切换资源面板折叠状态。
+ */
+function toggleResourceSection() {
+    isResourceSectionCollapsed.value = !isResourceSectionCollapsed.value
+}
+
+/**
  * 将传送点 icon 映射到本地静态资源路径。
  */
 function resolveTeleportPointIconUrl(icon: string): string {
@@ -988,6 +1428,19 @@ function initializeActiveLayers(profile: LocalMapProfile) {
 }
 
 /**
+ * 切换地图时重置所有依赖当前区域的选中状态。
+ */
+function resetRegionSelectionState() {
+    selectedSubRegionId.value = null
+    hoveredSubRegionId.value = null
+    selectedRcState.value = null
+    hoveredTeleportPointKey.value = null
+    hoverCoordinateInfo.value = null
+    selectedTeleportIcons.value = new Set(teleportIconOptions.value.map(option => option.icon))
+    selectedResourceIds.value = new Set()
+}
+
+/**
  * 获取单选分组当前选中层。
  */
 function isSingleLayerSelected(groupId: string, layerId: string) {
@@ -1041,6 +1494,7 @@ function screenToMap(screenX: number, screenY: number) {
 function resetView() {
     const container = containerRef.value
     if (!container) return
+    cancelPointFocusAnimation()
     const fitZoom = Math.min(container.clientWidth / renderSize.value.width, container.clientHeight / renderSize.value.height)
     zoom.value = Math.max(minZoom, Math.min(maxZoom, fitZoom))
     panOffset.value = {
@@ -1076,11 +1530,141 @@ function selectRc(subRegionId: number, rcId: number, rcIndex: number) {
 }
 
 /**
+ * 生成 TP 点的高亮键，避免不同子区域中同 id 点位互相干扰。
+ */
+function getTeleportPointKey(subRegionId: number, tpPointId: number) {
+    return `${subRegionId}:${tpPointId}`
+}
+
+/**
+ * 聚焦到指定 TP 点，并同步选中其所属子区域。
+ */
+function focusTeleportPoint(subRegionId: number, tpPoint: ProjectedTeleportPoint) {
+    selectedSubRegionId.value = subRegionId
+    selectedRcState.value = null
+    hoveredTeleportPointKey.value = getTeleportPointKey(subRegionId, tpPoint.id)
+    const container = containerRef.value
+    if (!container) {
+        requestDraw()
+        return
+    }
+    panOffset.value = { x: container.clientWidth / 2 - tpPoint.x * zoom.value, y: container.clientHeight / 2 - tpPoint.y * zoom.value }
+    requestDraw()
+}
+
+/**
+ * 悬停指定 TP 点，仅更新高亮态。
+ */
+function hoverTeleportPoint(subRegionId: number, tpPointId: number) {
+    hoveredTeleportPointKey.value = getTeleportPointKey(subRegionId, tpPointId)
+    requestDraw()
+}
+
+/**
+ * 清除 TP 点高亮。
+ */
+function clearHoveredTeleportPoint() {
+    hoveredTeleportPointKey.value = null
+    requestDraw()
+}
+
+/**
+ * 同步路由中的持久地图点位到本地状态。
+ */
+function syncRouteMapPoint() {
+    const routePoint = routePointInfo.value
+    if (!routePoint) {
+        routeMapPoint.value = null
+        requestDraw()
+        return
+    }
+
+    const mapped = projectWorldToMap(routePoint.x, routePoint.y)
+    routeMapPoint.value = {
+        worldX: routePoint.x,
+        worldY: routePoint.y,
+        mapX: mapped.x,
+        mapY: mapped.y,
+        name: routePoint.name,
+        iconUrl: routePoint.iconUrl,
+    }
+    pendingMapPointFocus.value = {
+        worldX: routePoint.x,
+        worldY: routePoint.y,
+        name: routePoint.name,
+        iconUrl: routePoint.iconUrl,
+    }
+    requestDraw()
+}
+
+/**
+ * 基于资源 ID 重建本地地图点位列表。
+ * @param resourceId 资源 ID
+ */
+function syncResourceMapPoints() {
+    const regionId = currentProfile.value.regionId
+    const points: ResourceMapPointInfo[] = []
+
+    for (const resource of resourceData) {
+        for (const source of resource.source || []) {
+            const subRegion = subRegionData.find(item => item.id === source.srId)
+            if (!subRegion || subRegion.rid !== regionId) continue
+            const region = regionMap.get(subRegion.rid)
+            if (!region) continue
+
+            for (const [worldX, worldY] of source.pos) {
+                if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) continue
+                const mapped = projectWorldToMap(worldX, worldY)
+                points.push({
+                    resourceId: resource.id,
+                    resourceName: resource.name,
+                    srId: source.srId,
+                    subRegionId: subRegion.id,
+                    subRegionName: subRegion.name,
+                    regionName: region.name,
+                    worldX,
+                    worldY,
+                    mapX: mapped.x,
+                    mapY: mapped.y,
+                })
+            }
+        }
+    }
+
+    resourceMapPoints.value = points
+    requestDraw()
+}
+
+/**
+ * 按当前路由资源 ID 同步资源面板展开状态与默认选中项。
+ */
+function syncResourcePanelState() {
+    if (mapLocalRouteTarget.value.rid !== null) {
+        isResourceSectionCollapsed.value = false
+        selectedResourceIds.value = resourceOptions.value.some(option => option.id === mapLocalRouteTarget.value.rid)
+            ? new Set([mapLocalRouteTarget.value.rid])
+            : new Set()
+        return
+    }
+
+    isResourceSectionCollapsed.value = true
+    selectedResourceIds.value = new Set()
+}
+
+/**
  * 按路由 query 自动定位到区域/子区域/RC。
  */
 function applyRouteTargetSelection() {
     const target = mapLocalRouteTarget.value
-    if (target.regionId === null && target.subRegionId === null && target.rcId === null) return
+    if (
+        target.regionId === null &&
+        target.subRegionId === null &&
+        target.rcId === null &&
+        target.rid === null &&
+        target.pointX === null &&
+        target.pointY === null
+    )
+        return
     const token = mapLocalRouteTargetToken.value
     if (consumedRouteTargetToken.value === token) return
 
@@ -1088,43 +1672,98 @@ function applyRouteTargetSelection() {
         const hasRegion = mapLocalProfiles.some(profile => profile.regionId === target.regionId)
         if (hasRegion) {
             selectedRegionId.value = target.regionId
+            consumedRouteTargetToken.value = token
         } else {
             consumedRouteTargetToken.value = token
         }
         return
     }
 
-    if (target.subRegionId === null) {
-        consumedRouteTargetToken.value = token
-        return
-    }
-    const subRegion = projectedSubRegions.value.find(item => item.id === target.subRegionId)
-    if (!subRegion) {
-        consumedRouteTargetToken.value = token
-        return
+    let targetSubRegion: ProjectedSubRegionPoint | null = null
+    if (target.subRegionId !== null) {
+        targetSubRegion = projectedSubRegions.value.find(item => item.id === target.subRegionId) ?? null
+        if (!targetSubRegion) {
+            consumedRouteTargetToken.value = token
+            return
+        }
+
+        if (selectedSubRegionId.value !== targetSubRegion.id) {
+            focusSubRegion(targetSubRegion.id)
+        }
+
+        if (target.rcId !== null) {
+            const targetRc =
+                targetSubRegion.rcInfos.find(rc => rc.rcId === target.rcId && (target.rcIndex === null || rc.rcIndex === target.rcIndex)) ||
+                null
+            if (!targetRc) {
+                consumedRouteTargetToken.value = token
+                return
+            }
+
+            const current = selectedRcState.value
+            if (
+                !current ||
+                current.subRegionId !== targetSubRegion.id ||
+                current.rcId !== targetRc.rcId ||
+                current.rcIndex !== targetRc.rcIndex
+            ) {
+                selectedRcState.value = { subRegionId: targetSubRegion.id, rcId: targetRc.rcId, rcIndex: targetRc.rcIndex }
+                requestDraw()
+            }
+        }
     }
 
-    if (selectedSubRegionId.value !== subRegion.id) {
-        focusSubRegion(subRegion.id)
+    if (target.pointX !== null && target.pointY !== null) {
+        focusMapPoint(target.pointX, target.pointY, target.pointName || "藏宝点")
     }
-
-    if (target.rcId === null) {
-        consumedRouteTargetToken.value = token
-        return
-    }
-    const targetRc =
-        subRegion.rcInfos.find(rc => rc.rcId === target.rcId && (target.rcIndex === null || rc.rcIndex === target.rcIndex)) || null
-    if (!targetRc) {
-        consumedRouteTargetToken.value = token
-        return
-    }
-
-    const current = selectedRcState.value
-    if (!current || current.subRegionId !== subRegion.id || current.rcId !== targetRc.rcId || current.rcIndex !== targetRc.rcIndex) {
-        selectedRcState.value = { subRegionId: subRegion.id, rcId: targetRc.rcId, rcIndex: targetRc.rcIndex }
-        requestDraw()
+    if (target.rid !== null) {
+        selectedResourceIds.value = new Set(resourceOptions.value.some(option => option.id === target.rid) ? [target.rid] : [])
+    } else {
+        selectedResourceIds.value = new Set()
     }
     consumedRouteTargetToken.value = token
+}
+
+/**
+ * 同步路由中的区域选择到本地选中状态。
+ * 路由驱动切换时保留传入点位，由后续路由消费逻辑继续处理。
+ */
+function syncRouteRegionSelection() {
+    const nextRegionId = routeRegionId.value
+    if (selectedRegionId.value !== nextRegionId) {
+        selectedRegionId.value = nextRegionId
+    }
+}
+
+/**
+ * 手动切换区域时先清理点位 query，再更新 regionId。
+ * @param event 选择框事件
+ */
+async function handleRegionChange(event: Event) {
+    const nextRegionId = Number((event.target as HTMLSelectElement).value)
+    const nextQuery = { ...route.query }
+    delete nextQuery.pointName
+    delete nextQuery.pointX
+    delete nextQuery.pointY
+    delete nextQuery.pointIcon
+    nextQuery.regionId = String(nextRegionId)
+    await router.replace({ query: nextQuery })
+}
+
+/**
+ * 清除当前传入的路由点位参数。
+ */
+async function clearRouteMapPoint() {
+    routeMapPoint.value = null
+    selectedMapPoint.value = null
+    pendingMapPointFocus.value = null
+    requestDraw()
+    const nextQuery = { ...route.query }
+    delete nextQuery.pointName
+    delete nextQuery.pointX
+    delete nextQuery.pointY
+    delete nextQuery.pointIcon
+    await router.replace({ query: nextQuery })
 }
 
 /**
@@ -1174,7 +1813,10 @@ function pickRcPointByScreenPosition(screenX: number, screenY: number): { subReg
 /**
  * 按点击位置命中传送点，并返回其所属子区域。
  */
-function pickTeleportPointByScreenPosition(screenX: number, screenY: number): { subRegionId: number; tpPoint: ProjectedTeleportPoint } | null {
+function pickTeleportPointByScreenPosition(
+    screenX: number,
+    screenY: number
+): { subRegionId: number; tpPoint: ProjectedTeleportPoint } | null {
     const mapPoint = screenToMap(screenX, screenY)
     const threshold = 18 / zoom.value
 
@@ -1344,6 +1986,7 @@ function drawHighlightedRcPoints(ctx: CanvasRenderingContext2D) {
  */
 function drawTeleportPoints(ctx: CanvasRenderingContext2D) {
     if (projectedSubRegions.value.length === 0) return
+    const hoveredKey = hoveredTeleportPointKey.value
 
     ctx.save()
     const normalRadius = 5 / zoom.value
@@ -1358,20 +2001,32 @@ function drawTeleportPoints(ctx: CanvasRenderingContext2D) {
     ctx.font = `${10 / zoom.value}px sans-serif`
 
     for (const subRegion of projectedSubRegions.value) {
-        if (subRegion.tpPoints.length === 0) continue
+        const visibleTpPoints = subRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint))
+        if (visibleTpPoints.length === 0) continue
 
-        for (const tpPoint of subRegion.tpPoints) {
+        for (const tpPoint of visibleTpPoints) {
             const iconUrl = resolveTeleportPointIconUrl(tpPoint.icon)
             const iconImage = ensureTpIconImageLoaded(iconUrl)
+            const isHovered = hoveredKey === getTeleportPointKey(subRegion.id, tpPoint.id)
+            const highlightRadius = 12 / zoom.value
 
             ctx.save()
-            ctx.globalAlpha = 1
+            ctx.globalAlpha = isHovered ? 1 : 0.92
+            if (isHovered) {
+                ctx.beginPath()
+                ctx.arc(tpPoint.x, tpPoint.y, highlightRadius, 0, Math.PI * 2)
+                ctx.fillStyle = "rgba(250, 204, 21, 0.18)"
+                ctx.fill()
+                ctx.lineWidth = 2 / zoom.value
+                ctx.strokeStyle = "rgba(250, 204, 21, 0.95)"
+                ctx.stroke()
+            }
             if (iconImage) {
                 ctx.drawImage(iconImage, tpPoint.x - iconSize / 2, tpPoint.y - iconSize / 2, iconSize, iconSize)
             } else {
                 ctx.beginPath()
                 ctx.arc(tpPoint.x, tpPoint.y, normalRadius, 0, Math.PI * 2)
-                ctx.fillStyle = "rgba(45, 212, 191, 0.95)"
+                ctx.fillStyle = isHovered ? "rgba(250, 204, 21, 0.95)" : "rgba(45, 212, 191, 0.95)"
                 ctx.fill()
             }
 
@@ -1379,9 +2034,9 @@ function drawTeleportPoints(ctx: CanvasRenderingContext2D) {
             const textWidth = ctx.measureText(tag).width
             const labelX = tpPoint.x + normalRadius + labelOffsetX
             const labelY = tpPoint.y - normalRadius - labelOffsetY
-            ctx.fillStyle = "rgba(0, 0, 0, 0.66)"
+            ctx.fillStyle = isHovered ? "rgba(0, 0, 0, 0.82)" : "rgba(0, 0, 0, 0.66)"
             ctx.fillRect(labelX - labelPaddingX, labelY - labelPaddingY, textWidth + labelPaddingX * 2, labelHeight)
-            ctx.fillStyle = "rgba(255, 255, 255, 0.95)"
+            ctx.fillStyle = isHovered ? "rgba(255, 248, 196, 1)" : "rgba(255, 255, 255, 0.95)"
             ctx.fillText(tag, labelX, labelY)
             ctx.restore()
         }
@@ -1454,6 +2109,98 @@ function drawSubRegionPoints(ctx: CanvasRenderingContext2D) {
         ctx.fillStyle = "rgba(255, 255, 255, 0.95)"
         ctx.fillText(text, labelX, labelY + 1 / zoom.value)
     })
+
+    if (currentMapPointInfo.value) {
+        const point = currentMapPointInfo.value
+        const radius = 7 / zoom.value
+        const iconSize = 24 / zoom.value
+        const labelPaddingX = 3 / zoom.value
+        const labelPaddingY = 1 / zoom.value
+        const labelHeight = 16 / zoom.value
+        const labelOffsetX = 4 / zoom.value
+        const labelOffsetY = 2 / zoom.value
+        const text = formatSubRegionLabel(point.name)
+        const textWidth = ctx.measureText(text).width
+        const labelX = point.mapX + radius + labelOffsetX
+        const labelY = point.mapY - radius - labelOffsetY
+        const iconImage = ensureMapPointIconImageLoaded(point.iconUrl)
+
+        ctx.beginPath()
+        ctx.arc(point.mapX, point.mapY, 12 / zoom.value, 0, Math.PI * 2)
+        ctx.fillStyle = "rgba(255, 214, 102, 0.18)"
+        ctx.fill()
+        ctx.lineWidth = 2 / zoom.value
+        ctx.strokeStyle = "rgba(255, 214, 102, 0.95)"
+        ctx.stroke()
+
+        if (iconImage) {
+            ctx.save()
+            ctx.beginPath()
+            ctx.arc(point.mapX, point.mapY, iconSize / 2, 0, Math.PI * 2)
+            ctx.clip()
+            ctx.drawImage(iconImage, point.mapX - iconSize / 2, point.mapY - iconSize / 2, iconSize, iconSize)
+            ctx.restore()
+        } else {
+            ctx.beginPath()
+            ctx.arc(point.mapX, point.mapY, radius, 0, Math.PI * 2)
+            ctx.fillStyle = "rgba(255, 70, 70, 0.95)"
+            ctx.fill()
+        }
+
+        ctx.beginPath()
+        ctx.arc(point.mapX, point.mapY, iconImage ? iconSize / 2 : radius, 0, Math.PI * 2)
+        ctx.lineWidth = 2 / zoom.value
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.98)"
+        ctx.stroke()
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)"
+        ctx.fillRect(labelX - labelPaddingX, labelY - labelPaddingY, textWidth + labelPaddingX * 2, labelHeight)
+        ctx.fillStyle = "rgba(255, 255, 255, 0.98)"
+        ctx.fillText(text, labelX, labelY + 1 / zoom.value)
+    }
+
+    const visibleResourcePoints = isResourceFilterActive.value
+        ? resourceMapPoints.value
+        : resourceMapPoints.value.filter(point => selectedResourceIds.value.has(point.resourceId))
+
+    if (visibleResourcePoints.length) {
+        ctx.save()
+        const radius = 6 / zoom.value
+        const iconSize = 24 / zoom.value
+        ctx.font = `${12 / zoom.value}px sans-serif`
+        ctx.textBaseline = "top"
+
+        for (const point of visibleResourcePoints) {
+            const text = formatSubRegionLabel(point.resourceName)
+            const textWidth = ctx.measureText(text).width
+            const labelX = point.mapX + radius + 4 / zoom.value
+            const labelY = point.mapY - radius - 2 / zoom.value
+            ctx.beginPath()
+            ctx.arc(point.mapX, point.mapY, 10 / zoom.value, 0, Math.PI * 2)
+            ctx.fillStyle = "rgba(74, 222, 128, 0.15)"
+            ctx.fill()
+            ctx.lineWidth = 2 / zoom.value
+            ctx.strokeStyle = "rgba(74, 222, 128, 0.92)"
+            ctx.stroke()
+
+            const iconUrl = point.resourceId ? `/imgs/res/${resourceMap.get(point.resourceId)?.icon || ""}.webp` : ""
+            const iconImage = ensureMapPointIconImageLoaded(iconUrl)
+            if (iconImage) {
+                ctx.save()
+                ctx.beginPath()
+                ctx.arc(point.mapX, point.mapY, iconSize / 2, 0, Math.PI * 2)
+                ctx.clip()
+                ctx.drawImage(iconImage, point.mapX - iconSize / 2, point.mapY - iconSize / 2, iconSize, iconSize)
+                ctx.restore()
+            }
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.66)"
+            ctx.fillRect(labelX - 3 / zoom.value, labelY - 1 / zoom.value, textWidth + 6 / zoom.value, 16 / zoom.value)
+            ctx.fillStyle = "rgba(255, 255, 255, 0.98)"
+            ctx.fillText(text, labelX, labelY + 1 / zoom.value)
+        }
+        ctx.restore()
+    }
 }
 
 /**
@@ -1473,6 +2220,12 @@ function drawScene() {
     if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
         canvas.width = targetWidth
         canvas.height = targetHeight
+    }
+
+    const overlayCanvas = pointFocusOverlayCanvasRef.value
+    if (overlayCanvas && (overlayCanvas.width !== targetWidth || overlayCanvas.height !== targetHeight)) {
+        overlayCanvas.width = targetWidth
+        overlayCanvas.height = targetHeight
     }
 
     const ctx = canvas.getContext("2d")
@@ -1640,14 +2393,24 @@ function handleCanvasClick(event: MouseEvent) {
 }
 
 watch(
-    () => currentProfile.value.regionId,
+    () => routeRegionId.value,
+    () => {
+        syncRouteRegionSelection()
+    },
+    { immediate: true }
+)
+
+watch(
+    () => selectedRegionId.value,
     async () => {
+        selectedMapPoint.value = null
+        pendingMapPointFocus.value = null
+        requestDraw()
         initializeActiveLayers(currentProfile.value)
-        selectedSubRegionId.value = null
-        hoveredSubRegionId.value = null
-        selectedRcState.value = null
-        hoverCoordinateInfo.value = null
+        resetRegionSelectionState()
         await loadCurrentProfileImages()
+        syncResourceMapPoints()
+        syncResourcePanelState()
         await nextTick()
         resetView()
         applyRouteTargetSelection()
@@ -1656,15 +2419,13 @@ watch(
 )
 
 watch(
-    () => [
-        mapLocalRouteTarget.value.regionId ?? -1,
-        mapLocalRouteTarget.value.subRegionId ?? -1,
-        mapLocalRouteTarget.value.rcId ?? -1,
-        mapLocalRouteTarget.value.rcIndex ?? -1,
-        currentProfile.value.regionId,
-        projectedSubRegions.value.length,
-    ],
-    () => applyRouteTargetSelection(),
+    () => [mapLocalRouteTargetToken.value, currentProfile.value.regionId, projectedSubRegions.value.length, resourceOptions.value.length],
+    () => {
+        syncRouteMapPoint()
+        applyRouteTargetSelection()
+        syncResourcePanelState()
+        requestDraw()
+    },
     { immediate: true }
 )
 
@@ -1672,9 +2433,13 @@ watch(
     () => [
         activeLayers.value.map(layer => layer.id).join("|"),
         showTeleportPoints.value ? 1 : 0,
+        [...selectedTeleportIcons.value].sort().join("|"),
+        resourceMapPoints.value.map(point => `${point.resourceId}:${point.srId}:${point.worldX}:${point.worldY}`).join("|"),
+        [...selectedResourceIds.value].sort((a, b) => a - b).join("|"),
         projectedSubRegions.value.length,
         selectedSubRegionId.value ?? -1,
         hoveredSubRegionId.value ?? -1,
+        hoveredTeleportPointKey.value ?? "",
         selectedRcState.value?.subRegionId ?? -1,
         selectedRcState.value?.rcId ?? -1,
         selectedRcState.value?.rcIndex ?? -1,
@@ -1691,147 +2456,283 @@ onMounted(() => {
     if (!container) return
     resizeObserver = new ResizeObserver(() => requestDraw())
     resizeObserver.observe(container)
+    syncRouteMapPoint()
     requestDraw()
+    if (pendingMapPointFocus.value) {
+        pendingRoutePointFocusTimerId.value = window.setTimeout(() => {
+            pendingRoutePointFocusTimerId.value = 0
+            flushPendingMapPointFocus()
+        }, 500)
+    }
 })
 
 onUnmounted(() => {
+    if (pendingRoutePointFocusTimerId.value) {
+        clearTimeout(pendingRoutePointFocusTimerId.value)
+        pendingRoutePointFocusTimerId.value = 0
+    }
     if (drawRaf) {
         cancelAnimationFrame(drawRaf)
         drawRaf = 0
     }
     resizeObserver?.disconnect()
     resizeObserver = null
+    pointFocusOverlayVisible.value = false
+    pointFocusAnimationState.value = null
 })
 </script>
 
 <template>
     <div class="h-full flex min-h-0 bg-base-100">
-        <aside class="w-80 max-w-[48vw] border-r border-base-300 bg-base-200/70 p-3 flex flex-col gap-3 overflow-y-auto">
-            <div class="space-y-2">
-                <div class="text-xs opacity-70">区域</div>
-                <select v-model.number="selectedRegionId" class="select select-bordered select-sm w-full">
-                    <option v-for="region in regionOptions" :key="region.id" :value="region.id">{{ region.id }} - {{ region.name }}</option>
-                </select>
-            </div>
-
-            <div class="space-y-2">
-                <div class="text-xs opacity-70">图层</div>
-                <div v-for="group in layerGroups" :key="group.id" class="rounded-md border border-base-300 p-2 space-y-2 bg-base-100/70">
-                    <div class="font-medium text-sm">{{ group.name }}</div>
-                    <div class="space-y-1">
-                        <label
-                            v-for="layer in group.layers"
-                            :key="layer.id"
-                            class="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200"
-                        >
-                            <input
-                                v-if="group.selectMode === 'single'"
-                                :checked="isSingleLayerSelected(group.id, layer.id)"
-                                type="radio"
-                                :name="`layer-group-${group.id}`"
-                                class="radio radio-xs"
-                                @change="selectSingleLayer(group.id, layer.id)"
-                            />
-                            <input
-                                v-else
-                                :checked="isLayerActive(layer.id)"
-                                type="checkbox"
-                                class="checkbox checkbox-xs"
-                                @change="toggleMultiLayer(layer.id, ($event.target as HTMLInputElement).checked)"
-                            />
-                            <span>{{ layer.name }}</span>
-                            <span class="ml-auto text-xs opacity-60">z{{ layer.slot.zOrder }}</span>
-                        </label>
-                    </div>
-                </div>
-                <label class="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200">
-                    <input v-model="showTeleportPoints" type="checkbox" class="checkbox checkbox-xs" />
-                    <span>显示TP点</span>
-                </label>
-            </div>
-
-            <div class="space-y-2">
-                <div class="text-xs opacity-70">子区域</div>
-                <div class="rounded-md border border-base-300 bg-base-100/70 max-h-[40vh] overflow-y-auto">
-                    <button
-                        v-for="point in projectedSubRegions"
-                        :key="point.id"
-                        class="w-full text-left p-2 border-b last:border-b-0 border-base-300 hover:bg-base-200 transition-colors"
-                        :class="{ 'bg-primary/15': selectedSubRegionId === point.id, 'bg-warning/15': hoveredSubRegionId === point.id }"
-                        @mouseenter="hoveredSubRegionId = point.id"
-                        @mouseleave="hoveredSubRegionId = null"
-                        @click="focusSubRegion(point.id)"
-                    >
-                        <div class="font-medium text-sm">{{ point.name }}</div>
-                    </button>
-                    <div v-if="projectedSubRegions.length === 0" class="p-3 text-sm opacity-70">当前区域没有可显示的 subregion 坐标</div>
-                </div>
-            </div>
-
-            <div v-if="selectedSubRegion" class="mt-auto rounded-md border border-base-300 bg-base-100/92 p-3 text-sm shadow">
-                <div class="font-medium">{{ selectedSubRegion.name }}</div>
-
-                <div class="mt-2 border-t border-base-300/80 pt-2">
-                    <div class="text-xs opacity-70 mb-1">RC 列表（点击可查看详情）</div>
-                    <div class="max-h-28 overflow-y-auto flex flex-wrap gap-1">
-                        <button
-                            v-for="rcInfo in selectedSubRegion.rcInfos"
-                            :key="`${selectedSubRegion.id}-${rcInfo.rcId}-${rcInfo.rcIndex}`"
-                            class="rounded border border-base-300 px-2 py-1 text-xs hover:bg-base-200 transition-colors"
-                            :class="{
-                                'border-primary/70 bg-primary/10':
-                                    selectedRcState?.subRegionId === selectedSubRegion.id &&
-                                    selectedRcState?.rcId === rcInfo.rcId &&
-                                    selectedRcState?.rcIndex === rcInfo.rcIndex,
-                            }"
-                            @click="selectRc(selectedSubRegion.id, rcInfo.rcId, rcInfo.rcIndex)"
-                        >
-                            RC {{ rcInfo.rcId }}
-                        </button>
-                        <div v-if="selectedSubRegion.rcInfos.length === 0" class="text-xs opacity-70 w-full">当前子区域无 RC 配置</div>
-                    </div>
-                </div>
-
-                <div v-if="selectedRcInfo" class="mt-2 rounded border border-base-300 bg-base-100/85 p-2 text-xs space-y-1">
-                    <div class="font-medium">RC {{ selectedRcInfo.rcId }} 详情</div>
-                    <div class="opacity-70">
-                        刷新数量 {{ selectedRcInfo.count }} | 总权重 {{ selectedRcInfo.totalWeight }} | 点位
-                        {{ selectedRcInfo.points.length }}
-                    </div>
-                    <div v-if="selectedRcInfo.rarestPet" class="opacity-70">
-                        最稀有魔灵: {{ selectedRcInfo.rarestPet.petName }} ({{ (selectedRcInfo.rarestPet.ratio * 100).toFixed(2) }}%)
-                    </div>
-                    <div class="opacity-70 pt-1">魔灵概率：</div>
-                    <div class="space-y-0.5">
-                        <div v-for="petRate in selectedRcInfo.petRates" :key="`${selectedRcInfo.rcId}-${petRate.petId}`" class="opacity-90">
-                            {{ petRate.petName }}: {{ petRate.weight }}/{{ petRate.totalWeight }} ({{ (petRate.ratio * 100).toFixed(2) }}%)
+        <aside
+            class="shrink-0 border-r border-base-300 bg-base-200/70 overflow-hidden h-full transition-all duration-200 ease-in-out"
+            :class="isSidebarCollapsed ? 'w-0 border-r-0 p-0 opacity-0 pointer-events-none' : 'w-80 max-w-[48vw] p-3 opacity-100'"
+        >
+            <ScrollArea class="h-full">
+                <div class="flex flex-col gap-3">
+                    <div v-if="currentMapPointInfo" class="rounded-md border border-base-300 bg-base-100/70 p-2 text-xs space-y-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="font-medium">当前地图点</div>
+                            <button class="btn btn-ghost btn-xs" type="button" @click="clearRouteMapPoint">清除</button>
                         </div>
-                        <div v-if="selectedRcInfo.petRates.length === 0" class="opacity-70">无 pet.data 可识别魔灵</div>
+                        <div>{{ currentMapPointInfo.name }}</div>
+                        <div>World: {{ currentMapPointInfo.worldX.toFixed(2) }}, {{ currentMapPointInfo.worldY.toFixed(2) }}</div>
                     </div>
-                    <div v-if="selectedRcInfo.unknownRates.length > 0" class="pt-1">
-                        <div class="opacity-70">未识别实体：</div>
+
+                    <div class="space-y-2">
+                        <div class="text-xs opacity-70">区域</div>
+                        <select :value="selectedRegionId" class="select select-bordered select-sm w-full" @change="handleRegionChange">
+                            <option v-for="region in regionOptions" :key="region.id" :value="region.id">
+                                {{ region.id }} - {{ region.name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="text-xs opacity-70">图层</div>
                         <div
-                            v-for="unknownRate in selectedRcInfo.unknownRates"
-                            :key="`${selectedRcInfo.rcId}-${unknownRate.entityId}`"
-                            class="opacity-80"
+                            v-for="group in layerGroups"
+                            :key="group.id"
+                            class="rounded-md border border-base-300 p-2 space-y-2 bg-base-100/70"
                         >
-                            ID {{ unknownRate.entityId }}: {{ unknownRate.weight }}/{{ unknownRate.totalWeight }} ({{
-                                (unknownRate.ratio * 100).toFixed(2)
-                            }}%)
+                            <div class="font-medium text-sm">{{ group.name }}</div>
+                            <div class="space-y-1">
+                                <label
+                                    v-for="layer in group.layers"
+                                    :key="layer.id"
+                                    class="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200"
+                                >
+                                    <input
+                                        v-if="group.selectMode === 'single'"
+                                        :checked="isSingleLayerSelected(group.id, layer.id)"
+                                        type="radio"
+                                        :name="`layer-group-${group.id}`"
+                                        class="radio radio-xs"
+                                        @change="selectSingleLayer(group.id, layer.id)"
+                                    />
+                                    <input
+                                        v-else
+                                        :checked="isLayerActive(layer.id)"
+                                        type="checkbox"
+                                        class="checkbox checkbox-xs"
+                                        @change="toggleMultiLayer(layer.id, ($event.target as HTMLInputElement).checked)"
+                                    />
+                                    <span>{{ layer.name }}</span>
+                                    <span class="ml-auto text-xs opacity-60">z{{ layer.slot.zOrder }}</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="rounded-md border border-base-300 p-2 space-y-2 bg-base-100/70">
+                            <label class="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200">
+                                <input
+                                    :checked="showTeleportPoints && isAllTeleportIconsSelected()"
+                                    type="checkbox"
+                                    class="checkbox checkbox-xs"
+                                    @change="handleTeleportPointsAllChange(($event.target as HTMLInputElement).checked)"
+                                />
+                                <span>全部</span>
+                            </label>
+                            <div v-if="showTeleportPoints" class="flex flex-wrap gap-2">
+                                <label
+                                    v-for="option in teleportIconOptions"
+                                    :key="option.icon"
+                                    class="inline-flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200"
+                                >
+                                    <input
+                                        :checked="showTeleportPoints && selectedTeleportIcons.has(option.icon)"
+                                        type="checkbox"
+                                        class="checkbox checkbox-xs"
+                                        @change="toggleTeleportIcon(option.icon, ($event.target as HTMLInputElement).checked)"
+                                    />
+                                    <img
+                                        :src="resolveTeleportPointIconUrl(option.icon)"
+                                        :alt="option.icon"
+                                        class="inline-block size-6 shrink-0"
+                                    />
+                                </label>
+                            </div>
+                        </div>
+                        <div class="rounded-md border border-base-300 p-2 space-y-2 bg-base-100/70">
+                            <button
+                                class="flex w-full items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200"
+                                type="button"
+                                @click="toggleResourceSection"
+                            >
+                                <input :checked="!isResourceSectionCollapsed" type="checkbox" class="checkbox checkbox-xs" />
+                                <span>资源</span>
+                            </button>
+                            <div v-if="!isResourceSectionCollapsed" class="space-y-2">
+                                <label class="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200">
+                                    <input
+                                        :checked="isResourceFilterActive"
+                                        type="checkbox"
+                                        class="checkbox checkbox-xs"
+                                        @change="handleResourceFiltersAllChange(($event.target as HTMLInputElement).checked)"
+                                    />
+                                    <span>全部</span>
+                                </label>
+                                <div class="flex flex-wrap gap-2">
+                                    <label
+                                        v-for="option in resourceOptions"
+                                        :key="option.id"
+                                        class="inline-flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-base-200"
+                                    >
+                                        <input
+                                            :checked="selectedResourceIds.has(option.id)"
+                                            type="checkbox"
+                                            class="checkbox checkbox-xs"
+                                            @change="toggleResourceFilter(option.id, ($event.target as HTMLInputElement).checked)"
+                                        />
+                                        <img
+                                            :src="option.icon ? `/imgs/res/${option.icon}.webp` : '/imgs/webp/T_Head_Empty.webp'"
+                                            :alt="option.name"
+                                            class="inline-block size-6 shrink-0"
+                                        />
+                                        <span>{{ option.name }}</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div v-if="selectedSubRegion.tpPoints.length > 0" class="mt-2 rounded border border-base-300 bg-base-100/85 p-2 text-xs space-y-1">
-                    <div class="font-medium">TP 点位</div>
-                    <div class="grid gap-1">
-                        <div v-for="tpPoint in selectedSubRegion.tpPoints" :key="tpPoint.id" class="flex items-center gap-2 opacity-90">
-                            <img :src="resolveTeleportPointIconUrl(tpPoint.icon)" :alt="tpPoint.name" class="size-4 shrink-0" />
-                            <span class="min-w-0 truncate">{{ tpPoint.name }}</span>
+                    <div class="space-y-2">
+                        <div class="text-xs opacity-70">子区域</div>
+                        <div class="rounded-md border border-base-300 bg-base-100/70 max-h-[40vh] overflow-y-auto">
+                            <button
+                                v-for="point in projectedSubRegions"
+                                :key="point.id"
+                                class="w-full text-left p-2 border-b last:border-b-0 border-base-300 hover:bg-base-200 transition-colors duration-200"
+                                :class="{
+                                    'bg-primary/15': selectedSubRegionId === point.id,
+                                    'bg-warning/15': hoveredSubRegionId === point.id,
+                                }"
+                                @mouseenter="hoveredSubRegionId = point.id"
+                                @mouseleave="hoveredSubRegionId = null"
+                                @click="focusSubRegion(point.id)"
+                            >
+                                <div class="font-medium text-sm">{{ point.name }}</div>
+                            </button>
+                            <div v-if="projectedSubRegions.length === 0" class="p-3 text-sm opacity-70">
+                                当前区域没有可显示的 subregion 坐标
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="selectedSubRegion" class="mt-auto rounded-md border border-base-300 bg-base-100/92 p-3 text-sm shadow">
+                        <div class="font-medium">{{ selectedSubRegion.name }}</div>
+
+                        <div class="mt-2 border-t border-base-300/80 pt-2">
+                            <div class="text-xs opacity-70 mb-1">RC 列表（点击可查看详情）</div>
+                            <div class="max-h-28 overflow-y-auto flex flex-wrap gap-1">
+                                <button
+                                    v-for="rcInfo in selectedSubRegion.rcInfos"
+                                    :key="`${selectedSubRegion.id}-${rcInfo.rcId}-${rcInfo.rcIndex}`"
+                                    class="rounded border border-base-300 px-2 py-1 text-xs hover:bg-base-200 transition-colors duration-200"
+                                    :class="{
+                                        'border-primary/70 bg-primary/10':
+                                            selectedRcState?.subRegionId === selectedSubRegion.id &&
+                                            selectedRcState?.rcId === rcInfo.rcId &&
+                                            selectedRcState?.rcIndex === rcInfo.rcIndex,
+                                    }"
+                                    @click="selectRc(selectedSubRegion.id, rcInfo.rcId, rcInfo.rcIndex)"
+                                >
+                                    RC {{ rcInfo.rcId }}
+                                </button>
+                                <div v-if="selectedSubRegion.rcInfos.length === 0" class="text-xs opacity-70 w-full">
+                                    当前子区域无 RC 配置
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="selectedRcInfo" class="mt-2 rounded border border-base-300 bg-base-100/85 p-2 text-xs space-y-1">
+                            <div class="font-medium">RC {{ selectedRcInfo.rcId }} 详情</div>
+                            <div class="opacity-70">
+                                刷新数量 {{ selectedRcInfo.count }} | 总权重 {{ selectedRcInfo.totalWeight }} | 点位
+                                {{ selectedRcInfo.points.length }}
+                            </div>
+                            <div v-if="selectedRcInfo.rarestPet" class="opacity-70">
+                                最稀有魔灵: {{ selectedRcInfo.rarestPet.petName }} ({{
+                                    (selectedRcInfo.rarestPet.ratio * 100).toFixed(2)
+                                }}%)
+                            </div>
+                            <div class="opacity-70 pt-1">魔灵概率：</div>
+                            <div class="space-y-0.5">
+                                <div
+                                    v-for="petRate in selectedRcInfo.petRates"
+                                    :key="`${selectedRcInfo.rcId}-${petRate.petId}`"
+                                    class="opacity-90"
+                                >
+                                    {{ petRate.petName }}: {{ petRate.weight }}/{{ petRate.totalWeight }} ({{
+                                        (petRate.ratio * 100).toFixed(2)
+                                    }}%)
+                                </div>
+                                <div v-if="selectedRcInfo.petRates.length === 0" class="opacity-70">无 pet.data 可识别魔灵</div>
+                            </div>
+                            <div v-if="selectedRcInfo.unknownRates.length > 0" class="pt-1">
+                                <div class="opacity-70">未识别实体：</div>
+                                <div
+                                    v-for="unknownRate in selectedRcInfo.unknownRates"
+                                    :key="`${selectedRcInfo.rcId}-${unknownRate.entityId}`"
+                                    class="opacity-80"
+                                >
+                                    ID {{ unknownRate.entityId }}: {{ unknownRate.weight }}/{{ unknownRate.totalWeight }} ({{
+                                        (unknownRate.ratio * 100).toFixed(2)
+                                    }}%)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            v-if="selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint)).length > 0"
+                            class="mt-2 rounded border border-base-300 bg-base-100/85 p-2 text-xs space-y-1"
+                        >
+                            <div class="font-medium">TP 点位</div>
+                            <div class="grid gap-1">
+                                <div
+                                    v-for="tpPoint in selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint))"
+                                    :key="tpPoint.id"
+                                    class="flex items-center gap-2 opacity-90"
+                                >
+                                    <button
+                                        type="button"
+                                        class="flex min-w-0 flex-1 items-center gap-2 rounded px-1 py-0.5 text-left hover:bg-base-200"
+                                        @mouseenter="hoverTeleportPoint(selectedSubRegion.id, tpPoint.id)"
+                                        @mouseleave="clearHoveredTeleportPoint"
+                                        @click="focusTeleportPoint(selectedSubRegion.id, tpPoint)"
+                                    >
+                                        <img
+                                            :src="resolveTeleportPointIconUrl(tpPoint.icon)"
+                                            :alt="tpPoint.name"
+                                            class="inline-block size-6 shrink-0"
+                                        />
+                                        <span class="min-w-0 truncate">{{ tpPoint.name }}</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </ScrollArea>
         </aside>
 
         <section ref="containerRef" class="relative flex-1 min-w-0 overflow-hidden bg-base-300">
@@ -1846,8 +2747,21 @@ onUnmounted(() => {
                 @wheel="handleWheel"
                 @click="handleCanvasClick"
             />
+            <canvas
+                ref="pointFocusOverlayCanvasRef"
+                class="pointer-events-none absolute inset-0 h-full w-full db-map-local-canvas"
+                :class="pointFocusOverlayVisible ? 'block' : 'hidden'"
+            />
 
             <div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                <button
+                    class="btn btn-circle btn-sm"
+                    :title="isSidebarCollapsed ? '展开侧栏' : '折叠侧栏'"
+                    :aria-expanded="!isSidebarCollapsed"
+                    @click="isSidebarCollapsed = !isSidebarCollapsed"
+                >
+                    <Icon :icon="isSidebarCollapsed ? 'tabler:arrow-bar-to-right' : 'tabler:arrow-bar-to-left'" />
+                </button>
                 <button class="btn btn-circle btn-sm" title="放大" @click="zoomIn"><Icon icon="ri:add-line" /></button>
                 <button class="btn btn-circle btn-sm" title="缩小" @click="zoomOut"><Icon icon="ri:subtract-line" /></button>
                 <button class="btn btn-circle btn-sm" title="重置视图" @click="resetView"><Icon icon="ri:crosshair-line" /></button>
@@ -1856,7 +2770,7 @@ onUnmounted(() => {
             <div class="absolute top-3 right-3 z-10 space-y-2 max-w-90">
                 <div class="badge badge-neutral badge-lg">
                     缩放 {{ (zoom * 100).toFixed(0) }}% | 图层 {{ activeLayers.length }} | 点位 {{ projectedSubRegions.length }} | TP
-                    {{ totalTeleportPointCount }}
+                    {{ visibleTeleportPointCount }}
                 </div>
                 <div v-if="hoverCoordinateInfo" class="rounded-md border border-base-300 bg-base-100/90 px-3 py-2 text-xs leading-5 shadow">
                     <div>Map: {{ hoverCoordinateInfo.mapX.toFixed(2) }}, {{ hoverCoordinateInfo.mapY.toFixed(2) }}</div>

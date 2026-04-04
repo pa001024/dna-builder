@@ -11,6 +11,7 @@ import dungeonData from "@/data/d/dungeon.data"
 import dynQuestData from "@/data/d/dynquest.data"
 import { fishingSpots, fishs } from "@/data/d/fish.data"
 import { hardBossMap } from "@/data/d/hardboss.data"
+import { headSculptureData } from "@/data/d/headsculpture.data"
 import modData from "@/data/d/mod.data"
 import monsterData from "@/data/d/monster.data"
 import { monsterTagData } from "@/data/d/monstertag.data"
@@ -20,6 +21,7 @@ import petData, { petEntrys } from "@/data/d/pet.data"
 import questChainData from "@/data/d/questchain.data"
 import { RaidDungeon } from "@/data/d/raid.data"
 import { regionMap } from "@/data/d/region.data"
+import resourceData from "@/data/d/resource.data"
 import shopData from "@/data/d/shop.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import titleData from "@/data/d/title.data"
@@ -88,18 +90,6 @@ export class GlobalSearchService {
      */
     private cleanParts(parts: Array<string | number | undefined | null>): string[] {
         return parts.filter(v => v !== undefined && v !== null && String(v).trim() !== "").map(v => String(v))
-    }
-
-    /**
-     * 为长文本生成可索引摘要，避免索引体积过大。
-     */
-    private createSearchSnippet(text: string | undefined, maxLength = 200): string {
-        if (!text) {
-            return ""
-        }
-
-        const normalizedText = text.replace(/\s+/g, " ").trim()
-        return normalizedText.length > maxLength ? normalizedText.slice(0, maxLength) : normalizedText
     }
 
     /**
@@ -194,6 +184,21 @@ export class GlobalSearchService {
                         path: `/db/accessory/headframe/${accessory.id}`,
                     },
                     [accessory.id, accessory.name, accessory.desc, accessory.access, accessory.icon]
+                )
+            )
+        )
+
+        entries.push(
+            ...headSculptureData.map(accessory =>
+                this.buildSearchEntry(
+                    {
+                        id: `head:${accessory.id}`,
+                        title: accessory.name,
+                        subtitle: `头像 ID: ${accessory.id} | 头像`,
+                        typeLabel: t("database.accessory"),
+                        path: `/db/accessory/head/${accessory.id}`,
+                    },
+                    [accessory.id, accessory.name, accessory.desc, accessory.icon]
                 )
             )
         )
@@ -400,7 +405,7 @@ export class GlobalSearchService {
                         typeLabel: t("database.walnut"),
                         path: `/db/walnut/${walnut.id}`,
                     },
-                    [walnut.id, walnut.类型, walnut.稀有度, ...(walnut.获取途径 || [])]
+                    [walnut.id, walnut.类型]
                 )
             )
         )
@@ -425,7 +430,7 @@ export class GlobalSearchService {
                 const regionIds = Array.from(
                     new Set(
                         book.res
-                            .map(resource => subRegionMap.get(resource.srId)?.rid)
+                            .map(resource => (resource.srId ? subRegionMap.get(resource.srId)?.rid : undefined))
                             .filter((regionId): regionId is number => regionId !== undefined)
                     )
                 )
@@ -439,16 +444,7 @@ export class GlobalSearchService {
                         typeLabel: t("database.book"),
                         path: `/db/book/${book.id}`,
                     },
-                    [
-                        book.id,
-                        book.name,
-                        book.desc,
-                        book.icon,
-                        ...regionIds,
-                        ...regionNames,
-                        ...book.res.map(resource => resource.id),
-                        ...book.res.map(resource => resource.name),
-                    ]
+                    [book.id, book.desc, book.icon, ...regionNames]
                 )
             })
         )
@@ -456,8 +452,6 @@ export class GlobalSearchService {
         entries.push(
             ...booksData.flatMap(book =>
                 book.res.map(resource => {
-                    const subRegion = subRegionMap.get(resource.srId)
-                    const region = subRegion ? regionMap.get(subRegion.rid) : undefined
                     const displayName = resource.name || book.name
                     const displayDesc = resource.desc || book.desc
 
@@ -469,20 +463,7 @@ export class GlobalSearchService {
                             typeLabel: t("database.book"),
                             path: `/db/book/${book.id}?resId=${resource.id}`,
                         },
-                        [
-                            book.id,
-                            book.name,
-                            resource.id,
-                            resource.type,
-                            displayName,
-                            displayDesc,
-                            resource.srId,
-                            subRegion?.name,
-                            subRegion?.rid,
-                            region?.name,
-                            resource.mId,
-                            this.createSearchSnippet(resource.text),
-                        ]
+                        [book.id, book.name, resource.id, resource.type, displayName, displayDesc]
                     )
                 })
             )
@@ -519,6 +500,75 @@ export class GlobalSearchService {
         )
 
         entries.push(
+            this.buildSearchEntry(
+                {
+                    id: "damage:list",
+                    title: t("database.damage"),
+                    subtitle: "伤害计算器",
+                    typeLabel: t("database.damage"),
+                    path: "/db/damage",
+                },
+                ["伤害", "damage"]
+            )
+        )
+
+        entries.push(
+            this.buildSearchEntry(
+                {
+                    id: "map-local:list",
+                    title: "魔灵地图",
+                    subtitle: "地图点位与刷新查看",
+                    typeLabel: t("database.map"),
+                    path: "/db/map-local",
+                },
+                ["魔灵地图", "地图", "刷新点位", "map-local"]
+            )
+        )
+
+        entries.push(
+            this.buildSearchEntry(
+                {
+                    id: "reputation:list",
+                    title: t("database.reputation"),
+                    subtitle: "区域声名列表",
+                    typeLabel: t("database.reputation"),
+                    path: "/db/reputation",
+                },
+                ["区域声名", "reputation"]
+            )
+        )
+
+        entries.push(
+            this.buildSearchEntry(
+                {
+                    id: "resource:list",
+                    title: "资源",
+                    subtitle: `资源列表 | 共 ${resourceData.length} 项`,
+                    typeLabel: t("database.resource"),
+                    path: "/db/resource",
+                },
+                [resourceData.length, "资源列表", "resource"]
+            )
+        )
+
+        entries.push(
+            ...resourceData.map(resource => {
+                const sourceCount = resource.source?.length ?? 0
+
+                return this.buildSearchEntry(
+                    {
+                        id: `resource:${resource.id}`,
+                        title: resource.name,
+                        subtitle: `资源 ID: ${resource.id} | 来源:${sourceCount || "-"}个`,
+                        typeLabel: t("database.resource"),
+                        path: `/db/resource/${resource.id}`,
+                    },
+                    [resource.id]
+                )
+            })
+        )
+
+        entries.push(
             ...shopData.map(shop =>
                 this.buildSearchEntry(
                     {
@@ -550,7 +600,7 @@ export class GlobalSearchService {
                         typeLabel: t("database.dynquest"),
                         path: `/db/dynquest/${quest.id}`,
                     },
-                    [quest.id, regionName, subRegionName, quest.chance, ...(quest.level || []), quest.completeNum]
+                    [quest.id, regionName, subRegionName]
                 )
             })
         )
@@ -565,7 +615,7 @@ export class GlobalSearchService {
                         typeLabel: t("database.hard_boss"),
                         path: `/db/hardboss/${boss.id}`,
                     },
-                    [boss.id, boss.desc, ...boss.diff.map(v => v.lv)]
+                    [boss.id, boss.desc]
                 )
             )
         )
@@ -580,7 +630,7 @@ export class GlobalSearchService {
                         typeLabel: t("database.questchain"),
                         path: `/db/questchain/${questChain.id}`,
                     },
-                    [questChain.id, questChain.chapterName, questChain.chapterNumber, questChain.episode, questChain.type, questChain.main]
+                    [questChain.id, questChain.chapterName, questChain.chapterNumber, questChain.episode]
                 )
             )
         )
@@ -588,9 +638,6 @@ export class GlobalSearchService {
         entries.push(
             ...partyTopicData.map(partyTopic => {
                 const charName = charMap.get(partyTopic.charId)?.名称
-                const conditionQuestChain = partyTopic.conditionId
-                    ? questChainData.find(questChain => questChain.id === partyTopic.conditionId)
-                    : undefined
 
                 return this.buildSearchEntry(
                     {
@@ -600,19 +647,7 @@ export class GlobalSearchService {
                         typeLabel: t("database.partytopic"),
                         path: `/db/partytopic/${partyTopic.id}`,
                     },
-                    [
-                        partyTopic.id,
-                        partyTopic.charId,
-                        partyTopic.name,
-                        partyTopic.desc,
-                        partyTopic.memoryName,
-                        partyTopic.memoryDesc,
-                        partyTopic.reward,
-                        partyTopic.conditionId,
-                        charName,
-                        conditionQuestChain?.name,
-                        ...Object.keys(partyTopic.consume || {}),
-                    ]
+                    [partyTopic.id, partyTopic.desc, partyTopic.memoryName, partyTopic.memoryDesc]
                 )
             })
         )
@@ -627,34 +662,10 @@ export class GlobalSearchService {
                         typeLabel: t("database.achievement"),
                         path: `/db/achievement/${achievement.id}`,
                     },
-                    [
-                        achievement.id,
-                        achievement.名称,
-                        achievement.描述,
-                        achievement.分类,
-                        achievement.版本,
-                        ...Object.keys(achievement.奖励),
-                    ]
+                    [achievement.id, achievement.名称, achievement.描述]
                 )
             )
         )
-
-        // entries.push(
-        //     ...npcData
-        //         .filter(npc => npc.name)
-        //         .map(npc =>
-        //             this.buildSearchEntry(
-        //                 {
-        //                     id: `npc:${npc.id}`,
-        //                     title: npc.name || `NPC ${npc.id}`,
-        //                     subtitle: `ID:${npc.id}${npc.camp ? ` | 阵营:${npc.camp}` : ""}${npc.type ? ` | 类型:${npc.type}` : ""}`,
-        //                     typeLabel: "NPC",
-        //                     path: `/db/npc/${npc.id}`,
-        //                 },
-        //                 [npc.id, npc.camp, npc.type, npc.charId, npc.icon]
-        //             )
-        //         )
-        // )
 
         return entries
     }

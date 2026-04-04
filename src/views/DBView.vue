@@ -30,6 +30,13 @@ const databaseItems = [
         color: "from-violet-500/20 to-purple-600/20 text-violet-500",
     },
     {
+        name: "database.resource",
+        path: "/db/resource",
+        desc: "database.resource_desc",
+        icon: "M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4ZM7 8H17V10H7V8ZM7 12H17V14H7V12ZM7 16H13V18H7V16Z",
+        color: "from-slate-500/20 to-zinc-600/20 text-slate-500",
+    },
+    {
         name: "database.mod",
         path: "/db/mod",
         desc: "database.mod_desc",
@@ -105,6 +112,13 @@ const databaseItems = [
         desc: "database.map_desc",
         icon: "M2 5L9 2L15 5L21.303 2.2987C21.5569 2.18992 21.8508 2.30749 21.9596 2.56131C21.9862 2.62355 22 2.69056 22 2.75827V19L15 22L9 19L2.69696 21.7013C2.44314 21.8101 2.14921 21.6925 2.04043 21.4387C2.01375 21.3765 2 21.3094 2 21.2417V5ZM16 19.3955L20 17.6812V5.03308L16 6.74736V19.3955ZM14 19.2639V6.73607L10 4.73607V17.2639L14 19.2639ZM8 17.2526V4.60451L4 6.31879V18.9669L8 17.2526Z",
         color: "from-green-500/20 to-emerald-600/20 text-green-500",
+    },
+    {
+        name: "database.event",
+        path: "/db/event",
+        desc: "database.event_desc",
+        icon: "M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM11 6H13V13H11V6ZM11 15H13V17H11V15Z",
+        color: "from-rose-500/20 to-orange-600/20 text-rose-500",
     },
     {
         name: "魔灵地图",
@@ -220,7 +234,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "围绕角色培养、装备搭配与养成素材，适合从 Build 视角快速定位核心资料。",
         badge: "Build",
         accentClass: "bg-violet-500",
-        paths: ["/db/char", "/db/weapon", "/db/mod", "/db/damage", "/db/draft", "/db/pet", "/db/accessory"],
+        paths: ["/db/char", "/db/weapon", "/db/resource", "/db/mod", "/db/damage", "/db/draft", "/db/pet", "/db/accessory"],
     },
     {
         id: "explore",
@@ -228,7 +242,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "聚合区域、副本、刷新点位与采集相关资料，优先服务跑图、采集和副本路线查询。",
         badge: "Explore",
         accentClass: "bg-emerald-500",
-        paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/walnut"],
+        paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/event", "/db/walnut"],
     },
     {
         id: "world",

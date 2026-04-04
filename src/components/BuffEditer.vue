@@ -122,7 +122,6 @@ const selectedBuffs = computed(() => {
     const query = searchKeyword.value.trim()
     return props.buffOptions.filter(buff => props.selectedBuffs.some(v => v.名称 === buff.label) && matchBuffOptionQuery(buff, query))
 })
-
 </script>
 <template>
     <div class="space-y-3">
@@ -136,31 +135,31 @@ const selectedBuffs = computed(() => {
             </button>
         </div>
         <ScrollArea class="h-80">
-        <transition-group name="list" tag="div" class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
-            <!-- 已选择的BUFF -->
-            <BuffCell
-                v-for="buff in selectedBuffs"
-                :key="buff.label"
-                :title="buff.label"
-                :buff="buff.value"
-                :lv="buff.lv"
-                selected
-                :income="charBuild?.calcIncome(buff.value, true) || 0"
-                @set-buff-lv="setBuffLv"
-                @click="toggleBuff(buff.value)"
-            />
-            <!-- 未选择的BUFF -->
-            <BuffCell
-                v-for="buff in sortedBuffs"
-                :key="buff.label"
-                :title="buff.label"
-                :buff="buff.value"
-                :lv="buff.lv"
-                :income="charBuild?.calcIncome(buff.value, false) || 0"
-                @set-buff-lv="setBuffLv"
-                @click="toggleBuff(buff.value)"
-            />
-        </transition-group>
+            <transition-group name="list" tag="div" class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
+                <!-- 已选择的BUFF -->
+                <BuffCell
+                    v-for="buff in selectedBuffs"
+                    :key="buff.label"
+                    :title="buff.label"
+                    :buff="buff.value"
+                    :lv="buff.lv"
+                    selected
+                    :income="charBuild?.calcIncome(buff.value, true) || 0"
+                    @set-buff-lv="setBuffLv"
+                    @click="toggleBuff(buff.value)"
+                />
+                <!-- 未选择的BUFF -->
+                <BuffCell
+                    v-for="buff in sortedBuffs"
+                    :key="buff.label"
+                    :title="buff.label"
+                    :buff="buff.value"
+                    :lv="buff.lv"
+                    :income="charBuild?.calcIncome(buff.value, false) || 0"
+                    @set-buff-lv="setBuffLv"
+                    @click="toggleBuff(buff.value)"
+                />
+            </transition-group>
         </ScrollArea>
     </div>
 </template>

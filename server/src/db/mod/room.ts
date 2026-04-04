@@ -193,7 +193,7 @@ export const resolvers = {
     Mutation: {
         createRoom: async (_parent, { data: { name, type, maxUsers } }, context, info) => {
             const user = context.user
-            if (!user || !user.roles?.includes("admin")) return createGraphQLError("无权限")
+            if (!user?.roles?.includes("admin")) return createGraphQLError("无权限")
             const rst = (
                 await db
                     .insert(schema.rooms)
@@ -249,7 +249,7 @@ export const resolvers = {
         },
         deleteRoom: async (_parent, { id }, context) => {
             const user = context.user
-            if (!user || !user.roles?.includes("admin")) return false
+            if (!user?.roles?.includes("admin")) return false
             const room = await db.query.rooms.findFirst({
                 where: eq(schema.rooms.id, id),
                 with: { owner: true },
@@ -262,7 +262,7 @@ export const resolvers = {
         },
         updateRoom: async (_parent, { id, data: { name, type, maxUsers } }, context) => {
             const user = context.user
-            if (!user || !user.roles?.includes("admin")) {
+            if (!user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
 

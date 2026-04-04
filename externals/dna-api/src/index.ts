@@ -115,7 +115,7 @@ export class DNAAPI extends DNABaseAPI {
         return await this.home.getPostList(forumId, pageIndex, pageSize, searchType, timeType)
     }
 
-    async getPostDetail(postId: string | number) {
+    async getPostDetail(postId: string) {
         return await this.home.getPostDetail(postId)
     }
 
@@ -157,16 +157,16 @@ export class DNAAPI extends DNABaseAPI {
         return await this.profile.roleManager()
     }
 
-    async adminAdjustScore(postId: number, gameForumId: number, weight: string) {
+    async adminAdjustScore(postId: string, gameForumId: number, weight: string) {
         return await this.home.adminAdjustScore(postId, gameForumId, weight)
     }
 
-    async adminDelete(post: { postId: number; gameId?: number; gameForumId: number }, content: string, reasonCode: number) {
+    async adminDelete(post: { postId: string; gameId?: number; gameForumId: number }, content: string, reasonCode: number) {
         return await this.home.adminDelete(post, content, reasonCode)
     }
 
     async adminMovePost(
-        post: { postId: number; gameId?: number; gameForumId: number },
+        post: { postId: string; gameId?: number; gameForumId: number },
         newGameId: number,
         newForumId: number,
         newTopicIdStr: string
@@ -174,7 +174,7 @@ export class DNAAPI extends DNABaseAPI {
         return await this.home.adminMovePost(post, newGameId, newForumId, newTopicIdStr)
     }
 
-    async adminRefreshTime(post: { postId: number; gameId?: number; gameForumId: number }, refresh: number) {
+    async adminRefreshTime(post: { postId: string; gameId?: number; gameForumId: number }, refresh: number) {
         return await this.home.adminRefreshTime(post, refresh)
     }
 
@@ -182,11 +182,11 @@ export class DNAAPI extends DNABaseAPI {
         return await this.home.blockList()
     }
 
-    async blockOther(blockPostId: number, blockUserId: string, type: number) {
+    async blockOther(blockPostId: string, blockUserId: string, type: number) {
         return await this.home.blockOther(blockPostId, blockUserId, type)
     }
 
-    async collect(postId: number, toUserId: string, operateType = 1) {
+    async collect(postId: string, toUserId: string, operateType = 1) {
         return await this.home.collect(postId, toUserId, operateType)
     }
 
@@ -238,7 +238,7 @@ export class DNAAPI extends DNABaseAPI {
         return await this.home.getGameBanner(gameId)
     }
 
-    async getPostCommentList(postId: number, pageIndex = 1, pageSize = 20, isOnlyPublisher = 0) {
+    async getPostCommentList(postId: string, pageIndex = 1, pageSize = 20, isOnlyPublisher = 0) {
         return await this.home.getPostCommentList(postId, pageIndex, pageSize, isOnlyPublisher)
     }
 
@@ -250,7 +250,7 @@ export class DNAAPI extends DNABaseAPI {
         return await this.home.getRecommendPosts(gameId, pageIndex, pageSize)
     }
 
-    async getReplyList(postId: number, postCommentId: number, pageIndex = 1, pageSize = 20) {
+    async getReplyList(postId: string, postCommentId: number, pageIndex = 1, pageSize = 20) {
         return await this.home.getReplyList(postId, postCommentId, pageIndex, pageSize)
     }
 
@@ -278,23 +278,23 @@ export class DNAAPI extends DNABaseAPI {
         return await this.home.like(post)
     }
 
-    async lockPost(post: { postId: number; gameId?: number; gameForumId: number }, operateType: number) {
+    async lockPost(post: { postId: string; gameId?: number; gameForumId: number }, operateType: number) {
         return await this.home.lockPost(post, operateType)
     }
 
-    async postDownOrUp(post: { postId: number; gameId?: number; gameForumId: number }, operateType: number) {
+    async postDownOrUp(post: { postId: string; gameId?: number; gameForumId: number }, operateType: number) {
         return await this.home.postDownOrUp(post, operateType)
     }
 
-    async postElite(post: { postId: number; gameId?: number; gameForumId: number }, operateType: number) {
+    async postElite(post: { postId: string; gameId?: number; gameForumId: number }, operateType: number) {
         return await this.home.postElite(post, operateType)
     }
 
-    async postHide(post: { postId: number; gameId?: number; gameForumId: number }, operateType: number) {
+    async postHide(post: { postId: string; gameId?: number; gameForumId: number }, operateType: number) {
         return await this.home.postHide(post, operateType)
     }
 
-    async reRank(post: { postId: number; gameId?: number; gameForumId: number }, weight: number) {
+    async reRank(post: { postId: string; gameId?: number; gameForumId: number }, weight: number) {
         return await this.home.reRank(post, weight)
     }
 
@@ -330,7 +330,7 @@ export class DNAAPI extends DNABaseAPI {
         return await this.home.shareTask()
     }
 
-    async strongRecommend(post: { postId: number; gameId?: number; gameForumId: number }, operateType = 1) {
+    async strongRecommend(post: { postId: string; gameId?: number; gameForumId: number }, operateType = 1) {
         return await this.home.strongRecommend(post, operateType)
     }
 
@@ -338,7 +338,7 @@ export class DNAAPI extends DNABaseAPI {
         return await this.home.viewCommunity()
     }
 
-    async viewCount(postId: number, gameId = DNA_GAME_ID) {
+    async viewCount(postId: string, gameId = DNA_GAME_ID) {
         return await this.home.viewCount(postId, gameId)
     }
     //#endregion
@@ -606,7 +606,7 @@ export class DNAAPI extends DNABaseAPI {
         operateType: number
         postCommentId: number
         postCommentReplyId: number
-        postId: number
+        postId: string
         postType: number
         toUserId: string
     }) {

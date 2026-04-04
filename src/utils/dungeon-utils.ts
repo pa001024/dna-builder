@@ -24,8 +24,10 @@ export function getDungeonType(type: string): { t: string; label: string; color:
         Survival: { t: "Survival", label: "探险", color: "bg-lime-500" },
         SurvivalMini: { t: "SurvivalMini", label: "探险+", color: "bg-lime-500" },
         SurvivalMiniPro: { t: "SurvivalMiniPro", label: "避险", color: "bg-lime-500" },
+        SurvivalUltra: { t: "SurvivalUltra", label: "探险U", color: "bg-lime-500" },
         SurvivalPro: { t: "SurvivalPro", label: "避险+", color: "bg-lime-500" },
         Synthesis: { t: "Synthesis", label: "竞逐", color: "bg-violet-500" },
+        SynthesisII: { t: "SynthesisII", label: "争衡", color: "bg-violet-500" },
     }
     return typeMap[type] || { t: type, label: type, color: "bg-gray-500" }
 }

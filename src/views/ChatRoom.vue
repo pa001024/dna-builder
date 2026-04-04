@@ -254,9 +254,6 @@ useSubscription<{ newMessage: Msg }>(
                             name
                             qq
                             level
-                            currentTitleText
-                            currentTitleClass
-                            nameEffectClass
                         }
                     }
                     reactions {
@@ -311,9 +308,6 @@ useSubscription<{ msgEdited: Msg }>({
                         name
                         qq
                         level
-                        currentTitleText
-                        currentTitleClass
-                        nameEffectClass
                     }
                 }
             }
@@ -553,7 +547,12 @@ function cancelReply() {
                     @loadref="r => (el = r)"
                 >
                     <!-- 消息列表 -->
-                    <div v-for="item in msgs.filter(msg => !isUserBlocked(msg.user?.id))" v-if="msgs" :key="item.id" class="group flex items-start gap-2">
+                    <div
+                        v-for="item in msgs.filter(msg => !isUserBlocked(msg.user?.id))"
+                        v-if="msgs"
+                        :key="item.id"
+                        class="group flex items-start gap-2"
+                    >
                         <div v-if="!item.content && editId !== item.id" class="text-xs text-base-content/60 m-auto">
                             {{
                                 $t("chat.retractedAMessage", {
@@ -634,15 +633,8 @@ function cancelReply() {
                                     >
                                         LV{{ item.replyTo.user.level }}
                                     </span>
-                                    <span class="font-medium" :class="item.replyTo.user?.nameEffectClass || ''">
+                                    <span class="font-medium">
                                         {{ item.replyTo.user?.name || $t("chat.you") }}
-                                    </span>
-                                    <span
-                                        v-if="user.id !== item.replyTo.user?.id && item.replyTo.user?.currentTitleText"
-                                        class="ml-1 align-middle"
-                                        :class="item.replyTo.user?.currentTitleClass || ''"
-                                    >
-                                        {{ item.replyTo.user.currentTitleText }}
                                     </span>
                                     <span class="mx-1">:</span>
                                     <span>{{ getMessagePreview(item.replyTo.content || "") }}</span>

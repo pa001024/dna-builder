@@ -233,7 +233,7 @@ const isSignFinished = computed(() => {
                             <div
                                 v-for="dayInfo in calendarDays"
                                 :key="dayInfo.day"
-                                class="aspect-square flex flex-col items-center justify-center rounded-lg p-2 transition-colors"
+                                class="aspect-square flex flex-col items-center justify-center rounded-lg p-2 transition-colors duration-200"
                                 :class="{
                                     'bg-primary/50 text-primary-content': dayInfo.isSigned,
                                     'bg-base-300 opacity-70': dayInfo.isMissed,

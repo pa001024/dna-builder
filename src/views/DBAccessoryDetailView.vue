@@ -1,9 +1,18 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { headSculptureData } from "@/data/d/headsculpture.data"
 
-type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "headframe"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head"
+type AccessoryDetailItem =
+    | ((typeof charAccessoryData)[number] & { accessoryType: "char" })
+    | ((typeof weaponAccessoryData)[number] & { accessoryType: "weapon" })
+    | ((typeof skinData)[number] & { accessoryType: "skin" })
+    | ((typeof weaponSkinData)[number] & { accessoryType: "weaponskin" })
+    | ((typeof hairData)[number] & { accessoryType: "hair" })
+    | ((typeof headFrameData)[number] & { accessoryType: "headframe" })
+    | ((typeof headSculptureData)[number] & { accessoryType: "head" })
 
 const route = useRoute()
 
@@ -18,8 +27,14 @@ const accessoryType = computed(() => {
     if (value === "headframe") {
         return "headframe"
     }
+    if (value === "head") {
+        return "head"
+    }
     if (value === "weaponskin") {
         return "weaponskin"
+    }
+    if (value === "hair") {
+        return "hair"
     }
     return value === "skin" ? "skin" : "char"
 })
@@ -38,11 +53,13 @@ const accessory = computed(() => {
         weapon: weaponAccessoryData,
         skin: skinData,
         weaponskin: weaponSkinData,
+        hair: hairData,
         headframe: headFrameData,
+        head: headSculptureData,
     }
     const source = sourceMap[accessoryType.value]
     const item = source.find(v => v.id === accessoryId.value)
-    return item ? { ...item, accessoryType: accessoryType.value as AccessoryType } : null
+    return item ? ({ ...item, accessoryType: accessoryType.value as AccessoryType } as AccessoryDetailItem) : null
 })
 </script>
 

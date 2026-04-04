@@ -975,7 +975,7 @@ defineExpose({
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, index) in propFlowList" :key="index" class="transition-colors hover:bg-base-300">
+                                <tr v-for="(item, index) in propFlowList" :key="index" class="transition-colors duration-200 hover:bg-base-300">
                                     <td>{{ new Date(item.time * 1000).toLocaleString() }}</td>
                                     <td class="font-medium">{{ item.prop_name }}</td>
                                     <td>{{ item.category_name }}</td>

@@ -20,4 +20,3 @@ const monsterTag = computed(() => {
         <DBMonsterTagDetailItem :monster-tag="monsterTag" />
     </ScrollArea>
 </template>
-

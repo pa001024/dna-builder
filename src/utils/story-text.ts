@@ -9,7 +9,7 @@ export interface StoryTextConfig {
 
 export interface StoryTextSegment {
     text: string
-    tone: "normal" | "highlight" | "warning"
+    tone: "normal" | "highlight" | "warning" | "title"
 }
 
 export const DEFAULT_STORY_TEXT_CONFIG: StoryTextConfig = {
@@ -51,7 +51,7 @@ export function parseStoryTextSegments(input: string, config: StoryTextConfig): 
         return []
     }
 
-    const segmentRegex = /<(H|W)>([\s\S]*?)<\/>/g
+    const segmentRegex = /<(H|W|highlight|Title)>([\s\S]*?)<\/>/g
     const segments: StoryTextSegment[] = []
     let lastIndex = 0
 
@@ -71,7 +71,7 @@ export function parseStoryTextSegments(input: string, config: StoryTextConfig): 
 
         segments.push({
             text: content,
-            tone: tagName === "H" ? "highlight" : "warning",
+            tone: tagName === "Title" ? "title" : tagName === "H" || tagName === "highlight" ? "highlight" : "warning",
         })
         lastIndex = endIndex
     }

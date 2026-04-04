@@ -129,12 +129,19 @@ export function getRewardDetails(
             if (item.child && item.child.length > 0) {
                 const childTotalP = item.child.reduce((sum, child) => sum + child.p, 0)
                 if (currentDropMode === "Sequence") item.totalP = childTotalP
+                if (childTotalP <= 0) {
+                    item.child.forEach(child => {
+                        child.pp = 0
+                        calculatePP(child, 0)
+                    })
+                    return
+                }
                 item.child.forEach(child => {
                     child.pp = parentPP * (child.p / childTotalP)
                     calculatePP(child, child.pp!)
                 })
             } else {
-                item.times = 1 / parentPP
+                item.times = parentPP > 0 ? 1 / parentPP : undefined
             }
         }
         if (result.child) {

@@ -13,6 +13,10 @@ interface InitialScrollToSelectedItemOptions {
      * 滚动行为。
      */
     behavior?: ScrollBehavior
+    /**
+     * 找到目标后额外等待的时间（毫秒）。
+     */
+    delayMs?: number
 }
 
 /**
@@ -24,10 +28,12 @@ export function useInitialScrollToSelectedItem(options: InitialScrollToSelectedI
     const selectedSelector = options.selectedSelector ?? ".cursor-pointer.bg-primary\\/90.hover\\:bg-primary"
     const maxWaitMs = options.maxWaitMs ?? 3000
     const behavior = options.behavior ?? "auto"
+    const delayMs = options.delayMs ?? 0
 
     let stopped = false
     let observer: MutationObserver | null = null
     let timeoutId: ReturnType<typeof setTimeout> | null = null
+    let delayTimeoutId: ReturnType<typeof setTimeout> | null = null
 
     /**
      * 清理观察器与定时器。
@@ -41,6 +47,11 @@ export function useInitialScrollToSelectedItem(options: InitialScrollToSelectedI
         if (timeoutId) {
             clearTimeout(timeoutId)
             timeoutId = null
+        }
+
+        if (delayTimeoutId) {
+            clearTimeout(delayTimeoutId)
+            delayTimeoutId = null
         }
     }
 
@@ -56,6 +67,27 @@ export function useInitialScrollToSelectedItem(options: InitialScrollToSelectedI
         const selectedElement = document.querySelector<HTMLElement>(selectedSelector)
         if (!selectedElement) {
             return false
+        }
+
+        if (delayMs > 0) {
+            if (delayTimeoutId) {
+                clearTimeout(delayTimeoutId)
+            }
+            delayTimeoutId = setTimeout(() => {
+                if (stopped) {
+                    return
+                }
+
+                selectedElement.scrollIntoView({
+                    behavior,
+                    block: "center",
+                    inline: "nearest",
+                })
+
+                stopped = true
+                cleanup()
+            }, delayMs)
+            return true
         }
 
         selectedElement.scrollIntoView({

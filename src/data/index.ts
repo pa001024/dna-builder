@@ -28,6 +28,10 @@ import effectData from "./d/effect.data"
 
 export { effectData }
 
+import { eventData } from "./d/event.data"
+
+export { eventData }
+
 import achievementData from "./d/achievement.data"
 
 export * from "./d"

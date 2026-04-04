@@ -165,7 +165,7 @@ function handleMouseUp(event: MouseEvent) {
 </script>
 <template>
     <div
-        class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors cursor-pointer group"
+        class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors duration-200 cursor-pointer group"
         :class="[mod ? getQualityColor(mod.品质) : 'border-dashed border-gray-600', getQualityHoverBorder(mod?.品质!)]"
         :style="dragStyle"
         :data-index="index"
@@ -246,7 +246,7 @@ function handleMouseUp(event: MouseEvent) {
                     <!-- 删除按钮 -->
                     <button
                         v-if="!noremove"
-                        class="absolute cursor-pointer -top-2 -right-2 w-5 h-5 bg-red-400 bg-opacity-50 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                        class="absolute cursor-pointer -top-2 -right-2 w-5 h-5 bg-red-400 bg-opacity-50 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors duration-200"
                         @click.stop="emit('removeMod')"
                     >
                         <span class="text-white text-xs">×</span>

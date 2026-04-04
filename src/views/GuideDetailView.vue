@@ -162,7 +162,7 @@ onMounted(async () => {
                             <Icon icon="ri:eye-line" class="w-4 h-4" />
                             <span>{{ guide.views }}</span>
                         </div>
-                        <button class="flex items-center gap-1 hover:scale-110 transition-transform" @click="handleLike">
+                        <button class="flex items-center gap-1 hover:scale-110 transition-transform duration-200" @click="handleLike">
                             <Icon
                                 :icon="guide.isLiked ? 'ri:heart-fill' : 'ri:heart-line'"
                                 class="w-4 h-4"
@@ -186,11 +186,11 @@ onMounted(async () => {
                             class="relative group cursor-pointer"
                             @click="handleImageClick(index)"
                         >
-                            <img :src="image" class="w-full rounded-lg transition-transform group-hover:scale-105" />
+                            <img :src="image" class="w-full rounded-lg transition-transform duration-200 group-hover:scale-105" />
                             <div
-                                class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg flex items-center justify-center"
+                                class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 rounded-lg flex items-center justify-center"
                             >
-                                <div class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                     <Icon icon="ri:search-line" class="w-8 h-8" />
                                 </div>
                             </div>

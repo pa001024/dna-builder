@@ -2189,9 +2189,22 @@ export class CharBuild {
                                 [localBuild.skillWeapon.伤害类型, localBuild.skillWeapon.类别].includes(v.限定))) &&
                         !selectedExclusiveNames[key].has(v.名称) &&
                         !selectedExclusiveSeries[key].has(v.系列 === "囚狼" && v.id > 100000 ? "囚狼1" : v.系列) &&
-                        (selectedModCount.get(v.id) || 0) < v.count
+                        (selectedModCount.get(v.id) || 0) < (v.count || Number.POSITIVE_INFINITY)
                 )
                 .map(v => ({ mod: v, income: localBuild.calcIncome(v) }))
+        }
+
+        /**
+         * 统计候选 MOD 的有效属性数量，用于同收益时优先选择属性更完整的项。
+         * @param mod 候选 MOD
+         * @returns 有效属性数量
+         */
+        function countModProperties(mod: LeveledMod) {
+            return mod.baseProperties.filter(prop => {
+                if (prop === "id") return false
+                const value = mod[prop]
+                return typeof value === "number" && value !== 0
+            }).length
         }
 
         /**
@@ -2203,11 +2216,11 @@ export class CharBuild {
         function findMaxMod(key: ModTypeKey, polarity?: "D" | "O" | "V" | "A") {
             const mapped = getModCandidates(key, polarity)
             if (mapped.length === 0) return { mod: null, income: 0 }
-            mapped.sort((a, b) => b.income - a.income)
-            const firstIncome = mapped[0].income
-            const lastSameIncome = mapped.findLastIndex(v => v.income === firstIncome)
-            // 从相同收益中随机选择一个
-            return mapped[Math.floor(Math.random() * (lastSameIncome + 1))]
+            const maxIncome = Math.max(...mapped.map(v => v.income))
+            const topIncome = mapped.filter(v => v.income === maxIncome)
+            const maxPropertyCount = Math.max(...topIncome.map(v => countModProperties(v.mod)))
+            const topPropertyCount = topIncome.filter(v => countModProperties(v.mod) === maxPropertyCount)
+            return topPropertyCount[Math.floor(Math.random() * topPropertyCount.length)] || topIncome[0]
         }
 
         /**
@@ -2235,68 +2248,129 @@ export class CharBuild {
          */
         function getConditionPolarityCount(polarity: "D" | "O" | "V" | "A", conditionMods: LeveledMod[], mod: LeveledMod) {
             const baseCount = conditionMods.filter(v => v.极性 === polarity).length
-            if (mod.极性 === polarity && !conditionMods.includes(mod)) {
+            const hasSameModId = conditionMods.some(v => v.id === mod.id)
+            if (mod.极性 === polarity && !hasSameModId) {
                 return baseCount + 1
             }
             return baseCount
         }
 
         /**
-         * 条件预热：当存在趋向条件MOD时，先补齐对应极性再进入常规收益迭代
+         * 收集当前所有可用候选中的条件MOD。
+         * @returns 按槽位类型分组的条件候选
+         */
+        function getConditionalCandidates() {
+            return includeTypes.flatMap(key =>
+                getModCandidates(key).map(v => ({
+                    key,
+                    mod: v.mod,
+                }))
+            )
+        }
+
+        /**
+         * 判断当前条件MOD在现有构筑下还差多少才能生效。
+         * @param mod 条件MOD
+         * @returns 缺口列表
+         */
+        function getConditionDeficits(mod: LeveledMod) {
+            const attrs = localBuild.calculateAttributes()
+            const conditionMods = localBuild.charModsWithAura
+            const deficits: { kind: "attr" | "polarity"; attr: string; missing: number }[] = []
+
+            ;(mod.生效?.条件 || []).forEach(([attr, op, value]: [string, string, number]) => {
+                const parsedPolarity = parsePolarityCondition([attr, op, value])
+                if (parsedPolarity) {
+                    const current = getConditionPolarityCount(parsedPolarity.polarity, conditionMods, mod)
+                    const missing = parsedPolarity.required - current
+                    if (missing > 0) {
+                        deficits.push({
+                            kind: "polarity",
+                            attr: parsedPolarity.polarity,
+                            missing,
+                        })
+                    }
+                    return
+                }
+
+                const currentValue = attrs[attr as keyof CharAttr]
+                if (typeof currentValue !== "number") return
+
+                const selfValue = typeof mod[attr] === "number" ? mod[attr] : 0
+                const effectiveValue = currentValue + selfValue
+                const required = op === ">" ? value + Number.EPSILON : value
+                const missing = required - effectiveValue
+                if (missing > 0) {
+                    deficits.push({
+                        kind: "attr",
+                        attr,
+                        missing,
+                    })
+                }
+            })
+
+            return deficits
+        }
+
+        /**
+         * 条件预热：先用可用的普通MOD补齐条件，再让常规收益迭代继续跑。
          * @param iter 当前迭代轮次
          * @returns 是否发生变化
          */
         function prioritizeConditionMods(iter: number) {
-            if (!includeTypes.includes("charMods")) return false
-            if (localBuild.charMods.length >= ModTypeMaxSlot.charMods) return false
-
             let changed = false
-            while (localBuild.charMods.length < ModTypeMaxSlot.charMods) {
-                const needs = new Map<"D" | "O" | "V" | "A", number>()
+            while (true) {
+                const conditionalCandidates = getConditionalCandidates()
+                    .filter(({ mod }) => mod.生效?.条件?.length)
+                    .filter(({ mod }) => !localBuild.checkModEffective(mod)?.isEffective)
 
-                /**
-                 * 条件来源MOD（显式包含 auraMod）
-                 */
-                const conditionMods = localBuild.charMods.filter((mod): mod is LeveledMod => mod !== null)
-                if (localBuild.auraMod) {
-                    conditionMods.push(localBuild.auraMod)
-                }
+                if (!conditionalCandidates.length) break
 
-                conditionMods.forEach(mod => {
-                    const conditions = (mod.生效?.条件 || []) as [string, string, number][]
-                    conditions.forEach(rawCondition => {
-                        const condition = parsePolarityCondition(rawCondition)
-                        if (!condition) return
-                        const current = getConditionPolarityCount(condition.polarity, conditionMods, mod)
-                        const missing = condition.required - current
-                        if (missing <= 0) return
-                        const exists = needs.get(condition.polarity) || 0
-                        needs.set(condition.polarity, Math.max(exists, missing))
+                const targetNeeds = conditionalCandidates
+                    .map(({ mod }) => ({
+                        mod,
+                        deficits: getConditionDeficits(mod),
+                    }))
+                    .filter(item => item.deficits.length > 0)
+
+                if (!targetNeeds.length) break
+
+                const needMap = new Map<string, number>()
+                targetNeeds.forEach(({ deficits }) => {
+                    deficits.forEach(deficit => {
+                        needMap.set(deficit.attr, (needMap.get(deficit.attr) || 0) + deficit.missing)
                     })
                 })
 
-                if (!needs.size) break
-
-                let best: { mod: LeveledMod; income: number; polarity: "D" | "O" | "V" | "A"; missing: number } | null = null
-                for (const [polarity, missing] of needs.entries()) {
-                    const candidate = findMaxMod("charMods", polarity)
-                    if (!candidate.mod) continue
-                    if (!best || missing > best.missing || (missing === best.missing && candidate.income > best.income)) {
-                        best = {
-                            mod: candidate.mod,
-                            income: candidate.income,
-                            polarity,
-                            missing,
+                let best: { key: ModTypeKey; mod: LeveledMod; score: number } | null = null
+                for (const key of includeTypes) {
+                    for (const candidate of getModCandidates(key).map(v => v.mod)) {
+                        if (candidate.生效?.条件?.length && !localBuild.checkModEffective(candidate)?.isEffective) continue
+                        let score = 0
+                        needMap.forEach((missing, attr) => {
+                            if (attr === candidate.极性 && candidate.极性) {
+                                score += missing
+                                return
+                            }
+                            if (attr in candidate && typeof candidate[attr] === "number") {
+                                score += Math.min(candidate[attr], missing)
+                            }
+                        })
+                        if (!score && candidate.生效?.条件?.length) {
+                            const candidateDeficits = getConditionDeficits(candidate)
+                            score = candidateDeficits.reduce((sum, deficit) => sum + deficit.missing, 0)
+                        }
+                        if (score <= 0) continue
+                        if (!best || score > best.score) {
+                            best = { key, mod: candidate, score }
                         }
                     }
                 }
 
                 if (!best) break
-                addMod("charMods", best.mod)
+                addMod(best.key, best.mod)
                 changed = true
-                log(
-                    `第${iter}次迭代: 条件优先添加角色(${localBuild.charMods.length}/${ModTypeMaxSlot.charMods})>>> ${best.mod.名称}(${best.polarity}趋向)`
-                )
+                log(`第${iter}次迭代: 条件优先添加${ModTypeMap[best.key]}>>> ${best.mod.名称}`)
             }
 
             return changed

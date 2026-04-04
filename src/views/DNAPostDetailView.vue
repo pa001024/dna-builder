@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DNAAPI, DNAPostDetailResponse } from "dna-api"
+import { DNAAPI, type DNAPostCommentListBean, type DNAPostDetailResponse } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useSettingStore } from "../store/setting"
@@ -12,9 +12,13 @@ const router = useRouter()
 const route = useRoute()
 
 const postRes = ref<DNAPostDetailResponse | null>(null)
+const comments = ref<DNAPostCommentListBean[]>([])
 const loading = ref(true)
+const moreLoading = ref(false)
 const commentLoading = ref(false)
 const commentContent = ref("")
+const commentPageIndex = ref(1)
+const commentHasNext = ref(false)
 
 const postId = computed(() => route.params.postId as string)
 
@@ -36,6 +40,9 @@ async function loadPostDetail(softReload = false) {
         const res = await api.getPostDetail(postId.value)
         if (res.is_success && res.data) {
             postRes.value = res.data
+            comments.value = res.data.comment || []
+            commentHasNext.value = res.data.hasNext === 1
+            commentPageIndex.value = 1
         } else {
             ui.showErrorMessage(res.msg || "获取帖子详情失败")
         }
@@ -43,6 +50,31 @@ async function loadPostDetail(softReload = false) {
         ui.showErrorMessage("获取帖子详情失败", e)
     } finally {
         loading.value = false
+    }
+}
+
+/**
+ * 加载更多评论。
+ */
+async function loadMoreComments() {
+    if (!api || moreLoading.value || !commentHasNext.value) {
+        return
+    }
+    try {
+        moreLoading.value = true
+        const nextPage = commentPageIndex.value + 1
+        const res = await api.getPostCommentList(postId.value, nextPage, 20, 0)
+        if (res.is_success && res.data) {
+            comments.value = [...comments.value, ...(res.data.postCommentList || [])]
+            commentPageIndex.value = nextPage
+            commentHasNext.value = res.data.hasNext === 1
+        } else {
+            ui.showErrorMessage(res.msg || "加载更多评论失败")
+        }
+    } catch (e) {
+        ui.showErrorMessage("加载更多评论失败", e)
+    } finally {
+        moreLoading.value = false
     }
 }
 
@@ -176,11 +208,11 @@ async function submitComment() {
                 <!-- 评论区 -->
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body">
-                        <h3 class="card-title text-xl mb-4">评论 ({{ postRes.comment.length }})</h3>
+                        <h3 class="card-title text-xl mb-4">评论 ({{ comments.length }})</h3>
 
                         <!-- 评论列表 -->
                         <div class="space-y-4">
-                            <div v-for="comment in postRes.comment" :key="comment.commentId" class="p-4 bg-base-200 rounded-lg">
+                            <div v-for="comment in comments" :key="comment.commentId" class="p-4 bg-base-200 rounded-lg">
                                 <!-- 评论头部 -->
                                 <div class="flex items-center gap-3 mb-2">
                                     <SRouterLink :to="`/dna/mine/${comment.userId}`" class="cursor-pointer">
@@ -212,13 +244,13 @@ async function submitComment() {
 
                                 <!-- 评论操作 -->
                                 <div class="flex items-center gap-4 text-sm text-base-content/70">
-                                    <button class="flex items-center gap-1 hover:text-primary transition-colors">
+                                    <button class="flex items-center gap-1 hover:text-primary transition-colors duration-200">
                                         <span>
                                             <Icon icon="ri:heart-line" />
                                         </span>
                                         <span>{{ comment.likeCount }}</span>
                                     </button>
-                                    <button class="flex items-center gap-1 hover:text-primary transition-colors">
+                                    <button class="flex items-center gap-1 hover:text-primary transition-colors duration-200">
                                         <span>
                                             <Icon icon="ri:message-2-line" />
                                         </span>
@@ -245,15 +277,18 @@ async function submitComment() {
                             </div>
 
                             <!-- 无评论提示 -->
-                            <div v-if="postRes.comment.length === 0" class="text-center py-8">
+                            <div v-if="comments.length === 0" class="text-center py-8">
                                 <p class="text-base-content/60 mb-2">暂无评论</p>
                                 <p class="text-xs text-base-content/40">成为第一个评论的人吧</p>
                             </div>
                         </div>
 
                         <!-- 加载更多按钮 -->
-                        <div v-if="postRes.hasNext === 1" class="flex justify-center mt-6">
-                            <button class="btn btn-outline">加载更多</button>
+                        <div v-if="commentHasNext" class="flex justify-center mt-6">
+                            <button class="btn btn-outline" :disabled="moreLoading" @click="loadMoreComments">
+                                <span v-if="moreLoading" class="loading loading-spinner loading-xs mr-2" />
+                                加载更多
+                            </button>
                         </div>
 
                         <!-- 发表评论 -->

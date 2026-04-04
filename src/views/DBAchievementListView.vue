@@ -100,27 +100,40 @@ useInitialScrollToSelectedItem()
 <template>
     <div class="h-full flex flex-col bg-base-100">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden"
-                :class="{ 'border-r border-base-200': selectedAchievement }">
+            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedAchievement }">
                 <div class="p-3 border-b border-base-200">
-                    <input v-model="searchKeyword" type="text" placeholder="搜索成就 ID/名称/描述（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all" />
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索成就 ID/名称/描述（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+                    />
                 </div>
 
                 <div class="p-2 border-b border-base-200 space-y-2">
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">分类</div>
                         <div class="flex flex-wrap gap-1">
-                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all" :class="selectedCategory === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                " @click="selectedCategory = ''">
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                                :class="
+                                    selectedCategory === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedCategory = ''"
+                            >
                                 全部
                             </button>
-                            <button v-for="category in categoryOptions" :key="category"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="selectedCategory === category
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
-                                    " @click="selectedCategory = category">
+                            <button
+                                v-for="category in categoryOptions"
+                                :key="category"
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                                :class="
+                                    selectedCategory === category
+                                        ? 'bg-primary text-white'
+                                        : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedCategory = category"
+                            >
                                 {{ $t(category) }}
                             </button>
                         </div>
@@ -129,16 +142,26 @@ useInitialScrollToSelectedItem()
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">版本</div>
                         <div class="flex flex-wrap gap-1">
-                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all" :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                " @click="selectedVersion = ''">
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                                :class="
+                                    selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedVersion = ''"
+                            >
                                 全部
                             </button>
-                            <button v-for="version in versionOptions" :key="version"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="selectedVersion === version
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
-                                    " @click="selectedVersion = version">
+                            <button
+                                v-for="version in versionOptions"
+                                :key="version"
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                                :class="
+                                    selectedVersion === version
+                                        ? 'bg-primary text-white'
+                                        : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedVersion = version"
+                            >
                                 {{ version }}
                             </button>
                         </div>
@@ -147,16 +170,26 @@ useInitialScrollToSelectedItem()
                     <div>
                         <div class="text-xs text-base-content/70 mb-1">品质</div>
                         <div class="flex flex-wrap gap-1">
-                            <button class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all" :class="selectedQuality === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                " @click="selectedQuality = ''">
+                            <button
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                                :class="
+                                    selectedQuality === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedQuality = ''"
+                            >
                                 全部
                             </button>
-                            <button v-for="quality in qualityOptions" :key="quality"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
-                                :class="selectedQuality === quality
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
-                                    " @click="selectedQuality = quality">
+                            <button
+                                v-for="quality in qualityOptions"
+                                :key="quality"
+                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                                :class="
+                                    selectedQuality === quality
+                                        ? 'bg-primary text-white'
+                                        : 'bg-base-200 text-base-content hover:bg-base-300'
+                                "
+                                @click="selectedQuality = quality"
+                            >
                                 {{ getQualityLabel(quality) }}
                             </button>
                         </div>
@@ -165,10 +198,13 @@ useInitialScrollToSelectedItem()
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div v-for="achievement in filteredAchievements" :key="achievement.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                        <div
+                            v-for="achievement in filteredAchievements"
+                            :key="achievement.id"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedAchievementId === achievement.id }"
-                            @click="selectAchievement(achievement.id)">
+                            @click="selectAchievement(achievement.id)"
+                        >
                             <div class="flex items-start justify-between gap-2">
                                 <div class="min-w-0 flex-1">
                                     <div class="font-medium truncate">{{ $t(achievement.名称) }}</div>
@@ -179,11 +215,18 @@ useInitialScrollToSelectedItem()
                                     </div>
                                 </div>
                                 <div class="shrink-0 flex flex-col items-end gap-1">
-                                    <img v-if="achievement.品质"
+                                    <img
+                                        v-if="achievement.品质"
                                         :src="`/imgs/webp/Icon_Achievement_${['Copper', 'Silver', 'Gold'][achievement.品质 - 1]}.webp`"
-                                        alt="品质" class="w-5 h-5" />
-                                    <img v-if="getAchievementIcon(achievement.分类)"
-                                        :src="getAchievementIcon(achievement.分类)" alt="分类" class="w-6 h-6" />
+                                        alt="品质"
+                                        class="w-5 h-5"
+                                    />
+                                    <img
+                                        v-if="getAchievementIcon(achievement.分类)"
+                                        :src="getAchievementIcon(achievement.分类)"
+                                        alt="分类"
+                                        class="w-6 h-6"
+                                    />
                                     <span class="text-xs opacity-70">ID: {{ achievement.id }}</span>
                                 </div>
                             </div>
@@ -196,9 +239,11 @@ useInitialScrollToSelectedItem()
                 </div>
             </div>
 
-            <div v-if="selectedAchievement"
+            <div
+                v-if="selectedAchievement"
                 class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedAchievementId = 0">
+                @click="selectedAchievementId = 0"
+            >
                 <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
 
@@ -208,5 +253,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

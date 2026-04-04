@@ -61,6 +61,12 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "inventory", path: "/inventory", component: InventoryEdit, beforeEnter: () => setMinSize(600, 600) },
     { name: "achievement", path: "/achievement", component: AchievementList, beforeEnter: () => setMinSize(600, 600) },
     {
+        name: "abyss-usage",
+        path: "/abyss-usage",
+        component: () => import("./views/AbyssUsageView.vue"),
+        beforeEnter: () => setMinSize(900, 700),
+    },
+    {
         name: "game-launcher",
         path: "/game-launcher",
         component: env.isApp ? () => import("./views/GameLauncher.vue") : () => undefined,
@@ -284,6 +290,32 @@ const routes: readonly RouteRecordRaw[] = [
                 name: "weapon-detail",
                 path: "weapon/:id",
                 component: () => import("./views/DBWeaponDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "event-list",
+                path: "event",
+                component: () => import("./views/DBEventListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "event-detail",
+                path: "event/:id",
+                component: () => import("./views/DBEventDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "resource-list",
+                path: "resource",
+                component: () => import("./views/DBResourceListView.vue"),
+                meta: { title: "resource-list.title" },
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "resource-detail",
+                path: "resource/:id",
+                component: () => import("./views/DBResourceDetailView.vue"),
+                meta: { title: "resource-detail.title" },
                 beforeEnter: () => setMinSize(320, 360),
             },
             {

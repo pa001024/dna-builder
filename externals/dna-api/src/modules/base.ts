@@ -102,7 +102,6 @@ export class DNABaseAPI {
     updateHeaders() {
         if (this.mode === "android") {
             this.baseHeaders = {
-                "log-header": "I am the log request header.",
                 countrycode: "CN",
                 version: this.server === "cn" ? "1.2.2" : "1.1.1",
                 versioncode: this.server === "cn" ? "9" : "5",
@@ -113,7 +112,6 @@ export class DNABaseAPI {
             }
         } else {
             this.baseHeaders = {
-                "log-header": "I am the log request header.",
                 countrycode: "CN",
                 version: this.server === "cn" ? "1.2.0" : "1.1.1",
                 versioncode: this.server === "cn" ? "7" : "5",
@@ -221,9 +219,10 @@ export class DNABaseAPI {
                         const { tn, sa } = build_signature122(pk, payload, token)
 
                         // 更新 headers
-                        // headers.rk = rk
-                        headers.tn = tn
-                        headers.sa = sa
+                        if (options?.token) {
+                            headers.tn = tn
+                            headers.sa = sa
+                        }
                     } else {
                         const { tn, sa, rk } = build_signature120(pk, payload, token)
 

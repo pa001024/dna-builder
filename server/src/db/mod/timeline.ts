@@ -442,7 +442,7 @@ export const resolvers = {
             }
         },
         recommendTimeline: async (_parent, args, context, info) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
 
@@ -496,7 +496,7 @@ export const resolvers = {
             }
         },
         pinTimeline: async (_parent, args, context, info) => {
-            if (!context.user || !context.user.roles?.includes("admin")) {
+            if (!context.user?.roles?.includes("admin")) {
                 throw createGraphQLError("无权限")
             }
 

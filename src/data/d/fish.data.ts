@@ -1,11 +1,12 @@
 export interface Fish {
     id: number
     name: string
+    rid: number
     level: number // 等级 直接显示为Lv. 几
     type: number // 1 普通鱼 3 稀有鱼
     rarity: number // 稀有度 显示为颜色区别 2绿 3蓝 4紫 5金
     length: number[] // 长度范围
-    icon: string // 对应/imgs/webp/T_Fish_${icon}.webp
+    icon: string // 对应/imgs/res/T_Fish_${icon}.webp
     price: number[] // 价格 只取第一个值
     appear: number[] // 出现时间 1=上午 2=下午 3=夜晚
     s2b?: number // 授渔以鱼id
@@ -33,6 +34,7 @@ export const fishs: Fish[] = [
     {
         id: 1101,
         name: "洄游鱼",
+        rid: 5011010,
         level: 2,
         type: 1,
         rarity: 2,
@@ -46,6 +48,7 @@ export const fishs: Fish[] = [
     {
         id: 1102,
         name: "多彩棘刺",
+        rid: 5011020,
         level: 1,
         type: 1,
         rarity: 2,
@@ -59,6 +62,7 @@ export const fishs: Fish[] = [
     {
         id: 1103,
         name: "银条鱼",
+        rid: 5011030,
         level: 1,
         type: 1,
         rarity: 3,
@@ -72,6 +76,7 @@ export const fishs: Fish[] = [
     {
         id: 1201,
         name: "长须翁",
+        rid: 5012010,
         level: 1,
         type: 1,
         rarity: 3,
@@ -85,6 +90,7 @@ export const fishs: Fish[] = [
     {
         id: 1202,
         name: "斑点狗鱼",
+        rid: 5012020,
         level: 1,
         type: 1,
         rarity: 2,
@@ -98,6 +104,7 @@ export const fishs: Fish[] = [
     {
         id: 1203,
         name: "鳌虾",
+        rid: 5012030,
         level: 1,
         type: 1,
         rarity: 2,
@@ -111,6 +118,7 @@ export const fishs: Fish[] = [
     {
         id: 1301,
         name: "利齿侏儒",
+        rid: 5013010,
         level: 2,
         type: 1,
         rarity: 3,
@@ -124,6 +132,7 @@ export const fishs: Fish[] = [
     {
         id: 1302,
         name: "吧唧吧唧鱼",
+        rid: 5013020,
         level: 1,
         type: 1,
         rarity: 2,
@@ -137,6 +146,7 @@ export const fishs: Fish[] = [
     {
         id: 1303,
         name: "长腿先生",
+        rid: 5013030,
         level: 1,
         type: 1,
         rarity: 2,
@@ -150,6 +160,7 @@ export const fishs: Fish[] = [
     {
         id: 2101,
         name: "永恒灯塔",
+        rid: 5021010,
         level: 2,
         type: 1,
         rarity: 3,
@@ -164,6 +175,7 @@ export const fishs: Fish[] = [
     {
         id: 2102,
         name: "逐汐鱼",
+        rid: 5021020,
         level: 3,
         type: 1,
         rarity: 3,
@@ -177,6 +189,7 @@ export const fishs: Fish[] = [
     {
         id: 2103,
         name: "洋面飞鸟",
+        rid: 5021030,
         level: 4,
         type: 1,
         rarity: 4,
@@ -191,6 +204,7 @@ export const fishs: Fish[] = [
     {
         id: 2104,
         name: "海洋宝宝",
+        rid: 5021040,
         level: 5,
         type: 1,
         rarity: 4,
@@ -204,6 +218,7 @@ export const fishs: Fish[] = [
     {
         id: 2105,
         name: "繁叶银鲛",
+        rid: 5021050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -217,6 +232,7 @@ export const fishs: Fish[] = [
     {
         id: 2201,
         name: "珠纹扁扁鲨",
+        rid: 5022010,
         level: 5,
         type: 1,
         rarity: 4,
@@ -230,6 +246,7 @@ export const fishs: Fish[] = [
     {
         id: 2202,
         name: "齿轮钟螺蟹",
+        rid: 5022020,
         level: 4,
         type: 1,
         rarity: 3,
@@ -244,6 +261,7 @@ export const fishs: Fish[] = [
     {
         id: 2203,
         name: "悬珠鱼",
+        rid: 5022030,
         level: 5,
         type: 1,
         rarity: 4,
@@ -258,6 +276,7 @@ export const fishs: Fish[] = [
     {
         id: 2204,
         name: "蜮",
+        rid: 5022040,
         level: 4,
         type: 1,
         rarity: 3,
@@ -271,6 +290,7 @@ export const fishs: Fish[] = [
     {
         id: 2205,
         name: "双髻鲨",
+        rid: 5022050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -284,6 +304,7 @@ export const fishs: Fish[] = [
     {
         id: 2301,
         name: "月牙鱼",
+        rid: 5023010,
         level: 2,
         type: 1,
         rarity: 3,
@@ -297,6 +318,7 @@ export const fishs: Fish[] = [
     {
         id: 2302,
         name: "湖中夫人",
+        rid: 5023020,
         level: 2,
         type: 1,
         rarity: 3,
@@ -311,6 +333,7 @@ export const fishs: Fish[] = [
     {
         id: 2303,
         name: "泪湖鱼",
+        rid: 5023030,
         level: 3,
         type: 1,
         rarity: 4,
@@ -325,6 +348,7 @@ export const fishs: Fish[] = [
     {
         id: 2304,
         name: "洗衣槌鱼",
+        rid: 5023040,
         level: 3,
         type: 1,
         rarity: 4,
@@ -338,6 +362,7 @@ export const fishs: Fish[] = [
     {
         id: 2305,
         name: "光椎鱼",
+        rid: 5023050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -351,6 +376,7 @@ export const fishs: Fish[] = [
     {
         id: 2401,
         name: "斑斓舞衣",
+        rid: 5024010,
         level: 4,
         type: 1,
         rarity: 3,
@@ -364,6 +390,7 @@ export const fishs: Fish[] = [
     {
         id: 2402,
         name: "寿星乌贼",
+        rid: 5024020,
         level: 4,
         type: 1,
         rarity: 3,
@@ -378,6 +405,7 @@ export const fishs: Fish[] = [
     {
         id: 2403,
         name: "负荆鲀",
+        rid: 5024030,
         level: 5,
         type: 1,
         rarity: 4,
@@ -392,6 +420,7 @@ export const fishs: Fish[] = [
     {
         id: 2404,
         name: "荷包鲤",
+        rid: 5024040,
         level: 5,
         type: 1,
         rarity: 4,
@@ -405,6 +434,7 @@ export const fishs: Fish[] = [
     {
         id: 2405,
         name: "水龙王",
+        rid: 5024050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -418,6 +448,7 @@ export const fishs: Fish[] = [
     {
         id: 2501,
         name: "鼠鼠鱼",
+        rid: 5025010,
         level: 3,
         type: 1,
         rarity: 3,
@@ -432,6 +463,7 @@ export const fishs: Fish[] = [
     {
         id: 2502,
         name: "啮骨鳗",
+        rid: 5025020,
         level: 4,
         type: 1,
         rarity: 3,
@@ -445,6 +477,7 @@ export const fishs: Fish[] = [
     {
         id: 2503,
         name: "水中骷髅",
+        rid: 5025030,
         level: 5,
         type: 1,
         rarity: 4,
@@ -459,6 +492,7 @@ export const fishs: Fish[] = [
     {
         id: 2504,
         name: "惊声尖笑兽",
+        rid: 5025040,
         level: 5,
         type: 1,
         rarity: 4,
@@ -472,6 +506,7 @@ export const fishs: Fish[] = [
     {
         id: 2505,
         name: "水蠊",
+        rid: 5025050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -485,6 +520,7 @@ export const fishs: Fish[] = [
     {
         id: 2601,
         name: "石磨比目",
+        rid: 5026010,
         level: 4,
         type: 1,
         rarity: 3,
@@ -499,6 +535,7 @@ export const fishs: Fish[] = [
     {
         id: 2602,
         name: "兰蟹",
+        rid: 5026020,
         level: 4,
         type: 1,
         rarity: 3,
@@ -512,6 +549,7 @@ export const fishs: Fish[] = [
     {
         id: 2603,
         name: "海星",
+        rid: 5026030,
         level: 5,
         type: 1,
         rarity: 4,
@@ -526,6 +564,7 @@ export const fishs: Fish[] = [
     {
         id: 2604,
         name: "小炮仗",
+        rid: 5026040,
         level: 5,
         type: 1,
         rarity: 4,
@@ -539,6 +578,7 @@ export const fishs: Fish[] = [
     {
         id: 2605,
         name: "沧浪鲲",
+        rid: 5026050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -552,6 +592,7 @@ export const fishs: Fish[] = [
     {
         id: 2701,
         name: "刀鱼",
+        rid: 5027010,
         level: 4,
         type: 1,
         rarity: 3,
@@ -566,6 +607,7 @@ export const fishs: Fish[] = [
     {
         id: 2702,
         name: "桃花鳜",
+        rid: 5027020,
         level: 4,
         type: 1,
         rarity: 3,
@@ -580,6 +622,7 @@ export const fishs: Fish[] = [
     {
         id: 2703,
         name: "四腮鲈鱼",
+        rid: 5027030,
         level: 5,
         type: 1,
         rarity: 4,
@@ -593,6 +636,7 @@ export const fishs: Fish[] = [
     {
         id: 2704,
         name: "凤凰鱼",
+        rid: 5027040,
         level: 5,
         type: 1,
         rarity: 4,
@@ -606,6 +650,7 @@ export const fishs: Fish[] = [
     {
         id: 2705,
         name: "帝王之征",
+        rid: 5027050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -619,6 +664,7 @@ export const fishs: Fish[] = [
     {
         id: 2801,
         name: "乌睛",
+        rid: 5028010,
         level: 4,
         type: 1,
         rarity: 3,
@@ -633,6 +679,7 @@ export const fishs: Fish[] = [
     {
         id: 2802,
         name: "泥雀",
+        rid: 5028020,
         level: 4,
         type: 1,
         rarity: 3,
@@ -647,6 +694,7 @@ export const fishs: Fish[] = [
     {
         id: 2803,
         name: "无明鱼",
+        rid: 5028030,
         level: 5,
         type: 1,
         rarity: 4,
@@ -660,6 +708,7 @@ export const fishs: Fish[] = [
     {
         id: 2804,
         name: "蟾蜍",
+        rid: 5028040,
         level: 5,
         type: 1,
         rarity: 4,
@@ -673,6 +722,7 @@ export const fishs: Fish[] = [
     {
         id: 2805,
         name: "扑棱鱼",
+        rid: 5028050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -686,6 +736,7 @@ export const fishs: Fish[] = [
     {
         id: 2901,
         name: "星斑鲈鱼",
+        rid: 5029010,
         level: 4,
         type: 1,
         rarity: 3,
@@ -700,6 +751,7 @@ export const fishs: Fish[] = [
     {
         id: 2902,
         name: "蛟毒鲶",
+        rid: 5029020,
         level: 4,
         type: 1,
         rarity: 3,
@@ -714,6 +766,7 @@ export const fishs: Fish[] = [
     {
         id: 2903,
         name: "宝石海马",
+        rid: 5029030,
         level: 5,
         type: 1,
         rarity: 4,
@@ -727,6 +780,7 @@ export const fishs: Fish[] = [
     {
         id: 2904,
         name: "玉鱼",
+        rid: 5029040,
         level: 5,
         type: 1,
         rarity: 4,
@@ -740,6 +794,7 @@ export const fishs: Fish[] = [
     {
         id: 2905,
         name: "黄大鲜",
+        rid: 5029050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -753,6 +808,7 @@ export const fishs: Fish[] = [
     {
         id: 3001,
         name: "皓京大闸蟹",
+        rid: 5030010,
         level: 4,
         type: 1,
         rarity: 3,
@@ -766,6 +822,7 @@ export const fishs: Fish[] = [
     {
         id: 3002,
         name: "瓜鲫",
+        rid: 5030020,
         level: 4,
         type: 1,
         rarity: 3,
@@ -780,6 +837,7 @@ export const fishs: Fish[] = [
     {
         id: 3003,
         name: "荷叶鱼",
+        rid: 5030030,
         level: 5,
         type: 1,
         rarity: 4,
@@ -794,6 +852,7 @@ export const fishs: Fish[] = [
     {
         id: 3004,
         name: "铜鼓鱼",
+        rid: 5030040,
         level: 5,
         type: 1,
         rarity: 4,
@@ -807,6 +866,7 @@ export const fishs: Fish[] = [
     {
         id: 3005,
         name: "红面具",
+        rid: 5030050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -820,6 +880,7 @@ export const fishs: Fish[] = [
     {
         id: 3101,
         name: "臭臭鱼",
+        rid: 5031010,
         level: 4,
         type: 1,
         rarity: 3,
@@ -833,6 +894,7 @@ export const fishs: Fish[] = [
     {
         id: 3102,
         name: "芋泥贝",
+        rid: 5031020,
         level: 4,
         type: 1,
         rarity: 3,
@@ -847,6 +909,7 @@ export const fishs: Fish[] = [
     {
         id: 3103,
         name: "水肠虫",
+        rid: 5031030,
         level: 5,
         type: 1,
         rarity: 4,
@@ -861,6 +924,7 @@ export const fishs: Fish[] = [
     {
         id: 3104,
         name: "铜铃眼",
+        rid: 5031040,
         level: 5,
         type: 1,
         rarity: 4,
@@ -874,6 +938,7 @@ export const fishs: Fish[] = [
     {
         id: 3105,
         name: "沉鲨",
+        rid: 5031050,
         level: 6,
         type: 3,
         rarity: 5,
@@ -887,6 +952,7 @@ export const fishs: Fish[] = [
     {
         id: 110101,
         name: "洄游鱼·异种",
+        rid: 5011011,
         level: 2,
         type: 2,
         rarity: 2,
@@ -898,6 +964,7 @@ export const fishs: Fish[] = [
     {
         id: 110201,
         name: "多彩棘刺·异种",
+        rid: 5011021,
         level: 1,
         type: 2,
         rarity: 2,
@@ -909,6 +976,7 @@ export const fishs: Fish[] = [
     {
         id: 110301,
         name: "银条鱼·异种",
+        rid: 5011031,
         level: 1,
         type: 2,
         rarity: 3,
@@ -920,6 +988,7 @@ export const fishs: Fish[] = [
     {
         id: 120101,
         name: "长须翁·异种",
+        rid: 5012011,
         level: 1,
         type: 2,
         rarity: 3,
@@ -931,6 +1000,7 @@ export const fishs: Fish[] = [
     {
         id: 120201,
         name: "斑点狗鱼·异种",
+        rid: 5012021,
         level: 1,
         type: 2,
         rarity: 2,
@@ -942,6 +1012,7 @@ export const fishs: Fish[] = [
     {
         id: 120301,
         name: "鳌虾·异种",
+        rid: 5012031,
         level: 1,
         type: 2,
         rarity: 2,
@@ -953,6 +1024,7 @@ export const fishs: Fish[] = [
     {
         id: 130101,
         name: "利齿侏儒·异种",
+        rid: 5013011,
         level: 2,
         type: 2,
         rarity: 3,
@@ -964,6 +1036,7 @@ export const fishs: Fish[] = [
     {
         id: 130201,
         name: "吧唧吧唧鱼·异种",
+        rid: 5013021,
         level: 1,
         type: 2,
         rarity: 2,
@@ -975,6 +1048,7 @@ export const fishs: Fish[] = [
     {
         id: 130301,
         name: "长腿先生·异种",
+        rid: 5013031,
         level: 1,
         type: 2,
         rarity: 2,
@@ -986,6 +1060,7 @@ export const fishs: Fish[] = [
     {
         id: 210101,
         name: "永恒灯塔·异种",
+        rid: 5021011,
         level: 2,
         type: 2,
         rarity: 3,
@@ -998,6 +1073,7 @@ export const fishs: Fish[] = [
     {
         id: 210201,
         name: "逐汐鱼·异种",
+        rid: 5021021,
         level: 3,
         type: 2,
         rarity: 3,
@@ -1009,6 +1085,7 @@ export const fishs: Fish[] = [
     {
         id: 210301,
         name: "洋面飞鸟·异种",
+        rid: 5021031,
         level: 4,
         type: 2,
         rarity: 4,
@@ -1021,6 +1098,7 @@ export const fishs: Fish[] = [
     {
         id: 210401,
         name: "海洋宝宝·异种",
+        rid: 5021041,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1032,6 +1110,7 @@ export const fishs: Fish[] = [
     {
         id: 210501,
         name: "繁叶银鲛·异种",
+        rid: 5021051,
         level: 6,
         type: 4,
         rarity: 5,
@@ -1043,6 +1122,7 @@ export const fishs: Fish[] = [
     {
         id: 220101,
         name: "珠纹扁扁鲨·异种",
+        rid: 5022011,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1054,6 +1134,7 @@ export const fishs: Fish[] = [
     {
         id: 220201,
         name: "齿轮钟螺蟹·异种",
+        rid: 5022021,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1066,6 +1147,7 @@ export const fishs: Fish[] = [
     {
         id: 220301,
         name: "悬珠鱼·异种",
+        rid: 5022031,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1078,6 +1160,7 @@ export const fishs: Fish[] = [
     {
         id: 220401,
         name: "蜮·异种",
+        rid: 5022041,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1089,6 +1172,7 @@ export const fishs: Fish[] = [
     {
         id: 220501,
         name: "双髻鲨·异种",
+        rid: 5022051,
         level: 6,
         type: 4,
         rarity: 5,
@@ -1100,6 +1184,7 @@ export const fishs: Fish[] = [
     {
         id: 230101,
         name: "月牙鱼·异种",
+        rid: 5023011,
         level: 2,
         type: 2,
         rarity: 3,
@@ -1111,6 +1196,7 @@ export const fishs: Fish[] = [
     {
         id: 230201,
         name: "湖中夫人·异种",
+        rid: 5023021,
         level: 2,
         type: 2,
         rarity: 3,
@@ -1123,6 +1209,7 @@ export const fishs: Fish[] = [
     {
         id: 230301,
         name: "泪湖鱼·异种",
+        rid: 5023031,
         level: 3,
         type: 2,
         rarity: 4,
@@ -1135,6 +1222,7 @@ export const fishs: Fish[] = [
     {
         id: 230401,
         name: "洗衣槌鱼·异种",
+        rid: 5023041,
         level: 3,
         type: 2,
         rarity: 4,
@@ -1146,6 +1234,7 @@ export const fishs: Fish[] = [
     {
         id: 230501,
         name: "光椎鱼·异种",
+        rid: 5023051,
         level: 6,
         type: 4,
         rarity: 5,
@@ -1157,6 +1246,7 @@ export const fishs: Fish[] = [
     {
         id: 240101,
         name: "斑斓舞衣·异种",
+        rid: 5024011,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1168,6 +1258,7 @@ export const fishs: Fish[] = [
     {
         id: 240201,
         name: "寿星乌贼·异种",
+        rid: 5024021,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1180,6 +1271,7 @@ export const fishs: Fish[] = [
     {
         id: 240301,
         name: "负荆鲀·异种",
+        rid: 5024031,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1192,6 +1284,7 @@ export const fishs: Fish[] = [
     {
         id: 240401,
         name: "荷包鲤·异种",
+        rid: 5024041,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1203,6 +1296,7 @@ export const fishs: Fish[] = [
     {
         id: 240501,
         name: "水龙王·异种",
+        rid: 5024051,
         level: 6,
         type: 4,
         rarity: 5,
@@ -1214,6 +1308,7 @@ export const fishs: Fish[] = [
     {
         id: 250101,
         name: "鼠鼠鱼·异种",
+        rid: 5025011,
         level: 3,
         type: 2,
         rarity: 3,
@@ -1226,6 +1321,7 @@ export const fishs: Fish[] = [
     {
         id: 250201,
         name: "啮骨鳗·异种",
+        rid: 5025021,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1237,6 +1333,7 @@ export const fishs: Fish[] = [
     {
         id: 250301,
         name: "水中骷髅·异种",
+        rid: 5025031,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1249,6 +1346,7 @@ export const fishs: Fish[] = [
     {
         id: 250401,
         name: "惊声尖笑兽·异种",
+        rid: 5025041,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1260,6 +1358,7 @@ export const fishs: Fish[] = [
     {
         id: 250501,
         name: "水蠊·异种",
+        rid: 5025051,
         level: 6,
         type: 4,
         rarity: 5,
@@ -1271,6 +1370,7 @@ export const fishs: Fish[] = [
     {
         id: 260101,
         name: "石磨比目·异种",
+        rid: 5026011,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1283,6 +1383,7 @@ export const fishs: Fish[] = [
     {
         id: 260201,
         name: "兰蟹·异种",
+        rid: 5026021,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1294,6 +1395,7 @@ export const fishs: Fish[] = [
     {
         id: 260301,
         name: "海星·异种",
+        rid: 5026031,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1306,6 +1408,7 @@ export const fishs: Fish[] = [
     {
         id: 260401,
         name: "小炮仗·异种",
+        rid: 5026041,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1317,6 +1420,7 @@ export const fishs: Fish[] = [
     {
         id: 260501,
         name: "沧浪鲲·异种",
+        rid: 5026051,
         level: 6,
         type: 4,
         rarity: 5,
@@ -1328,6 +1432,7 @@ export const fishs: Fish[] = [
     {
         id: 270101,
         name: "刀鱼·异种",
+        rid: 5027011,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1340,6 +1445,7 @@ export const fishs: Fish[] = [
     {
         id: 270201,
         name: "桃花鳜·异种",
+        rid: 5027021,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1352,6 +1458,7 @@ export const fishs: Fish[] = [
     {
         id: 270301,
         name: "四腮鲈鱼·异种",
+        rid: 5027031,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1363,6 +1470,7 @@ export const fishs: Fish[] = [
     {
         id: 270401,
         name: "凤凰鱼·异种",
+        rid: 5027041,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1374,6 +1482,7 @@ export const fishs: Fish[] = [
     {
         id: 270501,
         name: "帝王之征·异种",
+        rid: 5027051,
         level: 6,
         type: 4,
         rarity: 5,
@@ -1385,6 +1494,7 @@ export const fishs: Fish[] = [
     {
         id: 280101,
         name: "乌睛·异种",
+        rid: 5028011,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1397,6 +1507,7 @@ export const fishs: Fish[] = [
     {
         id: 280201,
         name: "泥雀·异种",
+        rid: 5028021,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1409,6 +1520,7 @@ export const fishs: Fish[] = [
     {
         id: 280301,
         name: "无明鱼·异种",
+        rid: 5028031,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1420,6 +1532,7 @@ export const fishs: Fish[] = [
     {
         id: 280401,
         name: "蟾蜍·异种",
+        rid: 5028041,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1431,6 +1544,7 @@ export const fishs: Fish[] = [
     {
         id: 280501,
         name: "扑棱鱼·异种",
+        rid: 5028051,
         level: 6,
         type: 4,
         rarity: 5,
@@ -1442,6 +1556,7 @@ export const fishs: Fish[] = [
     {
         id: 290101,
         name: "星斑鲈鱼·异种",
+        rid: 5029011,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1454,6 +1569,7 @@ export const fishs: Fish[] = [
     {
         id: 290201,
         name: "蛟毒鲶·异种",
+        rid: 5029021,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1466,6 +1582,7 @@ export const fishs: Fish[] = [
     {
         id: 290301,
         name: "宝石海马·异种",
+        rid: 5029031,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1477,6 +1594,7 @@ export const fishs: Fish[] = [
     {
         id: 290401,
         name: "玉鱼·异种",
+        rid: 5029041,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1488,6 +1606,7 @@ export const fishs: Fish[] = [
     {
         id: 290501,
         name: "黄大鲜·异种",
+        rid: 5029051,
         level: 6,
         type: 4,
         rarity: 5,
@@ -1499,6 +1618,7 @@ export const fishs: Fish[] = [
     {
         id: 300101,
         name: "皓京大闸蟹·异种",
+        rid: 5030011,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1510,6 +1630,7 @@ export const fishs: Fish[] = [
     {
         id: 300201,
         name: "瓜鲫·异种",
+        rid: 5030021,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1522,6 +1643,7 @@ export const fishs: Fish[] = [
     {
         id: 300301,
         name: "荷叶鱼·异种",
+        rid: 5030031,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1534,6 +1656,7 @@ export const fishs: Fish[] = [
     {
         id: 300401,
         name: "铜鼓鱼·异种",
+        rid: 5030041,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1545,6 +1668,7 @@ export const fishs: Fish[] = [
     {
         id: 300501,
         name: "红面具·异种",
+        rid: 5030051,
         level: 6,
         type: 4,
         rarity: 5,
@@ -1556,6 +1680,7 @@ export const fishs: Fish[] = [
     {
         id: 310101,
         name: "臭臭鱼·异种",
+        rid: 5031011,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1567,6 +1692,7 @@ export const fishs: Fish[] = [
     {
         id: 310201,
         name: "芋泥贝·异种",
+        rid: 5031021,
         level: 4,
         type: 2,
         rarity: 3,
@@ -1579,6 +1705,7 @@ export const fishs: Fish[] = [
     {
         id: 310301,
         name: "水肠虫·异种",
+        rid: 5031031,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1591,6 +1718,7 @@ export const fishs: Fish[] = [
     {
         id: 310401,
         name: "铜铃眼·异种",
+        rid: 5031041,
         level: 5,
         type: 2,
         rarity: 4,
@@ -1602,6 +1730,7 @@ export const fishs: Fish[] = [
     {
         id: 310501,
         name: "沉鲨·异种",
+        rid: 5031051,
         level: 6,
         type: 4,
         rarity: 5,

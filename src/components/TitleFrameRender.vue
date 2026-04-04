@@ -61,7 +61,7 @@ const props = withDefaults(
     }>(),
     {
         playing: true,
-    },
+    }
 )
 
 const frameKey = computed<TitleFrameKey>(() => {
@@ -116,7 +116,7 @@ watch(
         } else {
             stopClock()
         }
-    },
+    }
 )
 
 watch(frameKey, () => {
@@ -171,11 +171,7 @@ function sampleCurve(points: readonly CurvePoint[] | undefined, timeMs: number, 
 /**
  * 按真实轨道数据合成 CSS transform。
  */
-function buildTransform(
-    animation: LayerAnimation | undefined,
-    timeMs: number,
-    loopMs: number,
-) {
+function buildTransform(animation: LayerAnimation | undefined, timeMs: number, loopMs: number) {
     const transform = animation?.transform
     if (!transform) return ""
 
@@ -194,7 +190,9 @@ function buildTransform(
  * 给每个图层生成运行时样式。
  */
 function layerStyle(layer: FrameLayer): CSSProperties {
-    const animation = props.playing ? layer.animations.loop ?? layer.animations.normal : layer.animations.normal ?? layer.animations.loop
+    const animation = props.playing
+        ? (layer.animations.loop ?? layer.animations.normal)
+        : (layer.animations.normal ?? layer.animations.loop)
     const style: CSSProperties = {
         zIndex: layer.zIndex,
     }

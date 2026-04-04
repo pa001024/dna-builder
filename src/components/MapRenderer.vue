@@ -456,12 +456,12 @@ onUnmounted(() => {
         >
             <div class="relative flex h-8 w-8 items-center justify-center">
                 <div
-                    class="absolute inset-0 rounded-full ring-2 ring-primary/0 transition-all"
+                    class="absolute inset-0 rounded-full ring-2 ring-primary/0 transition-all duration-200"
                     :class="{ 'ring-primary ring-offset-2 ring-opacity-100': selectedMarkerId === marker.id }"
                 />
                 <div
                     v-if="marker.icon"
-                    class="h-8 w-8 transition-transform hover:scale-125 relative"
+                    class="h-8 w-8 transition-transform duration-200 hover:scale-125 relative"
                     :class="{ 'drop-shadow-lg': marker.isUserMarker }"
                 >
                     <div v-if="marker.isUserMarker" class="absolute inset-0 bg-accent rounded-full opacity-50" />
@@ -469,13 +469,13 @@ onUnmounted(() => {
                 </div>
                 <div
                     v-else
-                    class="h-8 w-8 rounded-full bg-primary/90 text-white text-xs flex items-center justify-center shadow-lg transition-transform hover:scale-125"
+                    class="h-8 w-8 rounded-full bg-primary/90 text-white text-xs flex items-center justify-center shadow-lg transition-transform duration-200 hover:scale-125"
                     :class="{ 'drop-shadow-lg': marker.isUserMarker }"
                 >
                     {{ marker.name.charAt(0) }}
                 </div>
                 <div
-                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-base-300 px-2 py-1 text-xs text-base-content opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none"
+                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-base-300 px-2 py-1 text-xs text-base-content opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none"
                 >
                     {{ marker.name }}
                 </div>

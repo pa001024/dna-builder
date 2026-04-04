@@ -61,6 +61,7 @@ function getBookRegionIds(book: Book): number[] {
     const regionIdSet = new Set<number>()
 
     for (const resource of book.res) {
+        if (!resource.srId) continue
         const subRegion = subRegionMap.get(resource.srId)
         if (subRegion) {
             regionIdSet.add(subRegion.rid)
@@ -154,7 +155,7 @@ useInitialScrollToSelectedItem()
                         v-model="searchKeyword"
                         type="text"
                         :placeholder="showFullTextSearch ? '搜索读物ID/名称/描述/正文...' : '搜索读物ID/名称/描述（支持拼音）...'"
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
                     />
                 </div>
 
@@ -166,7 +167,7 @@ useInitialScrollToSelectedItem()
 
                     <div class="flex flex-wrap gap-1">
                         <button
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedRegionId === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedRegionId = 0"
                         >
@@ -175,7 +176,7 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="region in allRegions"
                             :key="region.id"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all cursor-pointer"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
                             :class="
                                 selectedRegionId === region.id ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
                             "
@@ -191,7 +192,7 @@ useInitialScrollToSelectedItem()
                         <div
                             v-for="book in filteredBooks"
                             :key="book.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedBookId === book.id }"
                             @click="selectBook(book)"
                         >
@@ -238,5 +239,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

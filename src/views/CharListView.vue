@@ -68,7 +68,7 @@ const getAnimationDelay = (index: number) => {
                     v-model="searchQuery"
                     type="text"
                     :placeholder="$t('搜索角色名称、别名、阵营（支持拼音）...')"
-                    class="input input-bordered w-full pl-10 pr-4 focus:input-primary transition-all"
+                    class="input input-bordered w-full pl-10 pr-4 focus:input-primary transition-all duration-200"
                 />
                 <Icon icon="ri:search-line" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 w-5 h-5" />
             </div>
@@ -151,7 +151,7 @@ const getAnimationDelay = (index: number) => {
                             <span
                                 v-for="tag in (char.标签 || []).slice(0, 2)"
                                 :key="tag"
-                                class="badge badge-ghost badge-xs opacity-70 group-hover:opacity-100 transition-opacity"
+                                class="badge badge-ghost badge-xs opacity-70 group-hover:opacity-100 transition-opacity duration-200"
                             >
                                 {{ $t(tag) }}
                             </span>
@@ -165,11 +165,11 @@ const getAnimationDelay = (index: number) => {
 
                         <!-- 底部属性条 -->
                         <div class="grid grid-cols-2 gap-1 pt-2 border-t border-base-200">
-                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-primary transition-colors">
+                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-primary transition-colors duration-200">
                                 <span>⚔️</span>
                                 <span>{{ char.基础攻击 }}</span>
                             </div>
-                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-success transition-colors">
+                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-success transition-colors duration-200">
                                 <span>❤️</span>
                                 <span>{{ char.基础生命 }}</span>
                             </div>

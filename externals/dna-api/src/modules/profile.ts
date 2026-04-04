@@ -24,7 +24,7 @@ export class ProfileAPI extends DNASubModule {
         return await this._dna_request("user/cleanFansNew", { type, userFollowId })
     }
 
-    async collect(postId: number, toUserId: string, operateType = 1) {
+    async collect(postId: string, toUserId: string, operateType = 1) {
         return await this._dna_request("forum/collect", { operateType, postId, toUserId })
     }
 
@@ -94,7 +94,7 @@ export class ProfileAPI extends DNASubModule {
         operateType: number
         postCommentId: number
         postCommentReplyId: number
-        postId: number
+        postId: string
         postType: number
         toUserId: string
     }) {

@@ -3128,7 +3128,6 @@ export const npcData: NPC[] = [
             {
                 id: 90270302,
                 content: "我没有忘记，缺钱的时候确实很困难。",
-                voice: "char/Kami/vo_topic_03_2",
                 npc: 100001,
                 next: 90270303,
             },
@@ -3149,7 +3148,7 @@ export const npcData: NPC[] = [
                 id: 90270303,
                 content:
                     "只要积累财富，即使无法改变出身，也会获得勇气对抗命运，即使周遭都是风雨，也能给自己买上一瓶酒暖暖身子，甚至能给别人分上一口，赚个人情。",
-                voice: "char/Kami/vo_topic_03_3",
+                voice: "char/Kami/vo_topic_03_2",
                 npc: 83202,
                 next: 90270304,
             },
@@ -3169,6 +3168,7 @@ export const npcData: NPC[] = [
             {
                 id: 90270304,
                 content: "你说，钱是不是很重要？",
+                voice: "char/Kami/vo_topic_03_3",
                 npc: 83202,
                 options: [
                     {
@@ -6044,7 +6044,6 @@ export const npcData: NPC[] = [
             {
                 id: 90270302,
                 content: "我没有忘记，缺钱的时候确实很困难。",
-                voice: "char/Kami/vo_topic_03_2",
                 npc: 100001,
                 next: 90270303,
             },
@@ -6065,7 +6064,7 @@ export const npcData: NPC[] = [
                 id: 90270303,
                 content:
                     "只要积累财富，即使无法改变出身，也会获得勇气对抗命运，即使周遭都是风雨，也能给自己买上一瓶酒暖暖身子，甚至能给别人分上一口，赚个人情。",
-                voice: "char/Kami/vo_topic_03_3",
+                voice: "char/Kami/vo_topic_03_2",
                 npc: 83202,
                 next: 90270304,
             },
@@ -6085,6 +6084,7 @@ export const npcData: NPC[] = [
             {
                 id: 90270304,
                 content: "你说，钱是不是很重要？",
+                voice: "char/Kami/vo_topic_03_3",
                 npc: 83202,
                 options: [
                     {
@@ -12181,20 +12181,20 @@ export const npcData: NPC[] = [
     },
     {
         id: 240107,
-        name: "路人少女",
+        name: "苏乙",
         camp: "NPC",
         type: "Normal",
         talks: [
             {
                 id: 12048809,
                 content: "没问题，包在我身上！本姑娘刚刚看你尝试，早就手痒了~",
-                npc: 200026,
+                npc: 240026,
                 next: 12048810,
             },
             {
                 id: 12048810,
                 content: "不过话说回来，{nickname}，你回去后可得好好从头补起机枢知识呢。让我想想，从哪里开始呢，不如就从……",
-                npc: 200026,
+                npc: 240026,
                 next: 12048811,
             },
             {
@@ -12207,20 +12207,20 @@ export const npcData: NPC[] = [
     },
     {
         id: 240108,
-        name: "路人少女",
+        name: "苏乙",
         camp: "NPC",
         type: "Normal",
         talks: [
             {
                 id: 12048809,
                 content: "没问题，包在我身上！本姑娘刚刚看你尝试，早就手痒了~",
-                npc: 200026,
+                npc: 240026,
                 next: 12048810,
             },
             {
                 id: 12048810,
                 content: "不过话说回来，{nickname}，你回去后可得好好从头补起机枢知识呢。让我想想，从哪里开始呢，不如就从……",
-                npc: 200026,
+                npc: 240026,
                 next: 12048811,
             },
             {
@@ -12233,20 +12233,20 @@ export const npcData: NPC[] = [
     },
     {
         id: 240109,
-        name: "路人少女",
+        name: "苏乙",
         camp: "NPC",
         type: "Normal",
         talks: [
             {
                 id: 12048809,
                 content: "没问题，包在我身上！本姑娘刚刚看你尝试，早就手痒了~",
-                npc: 200026,
+                npc: 240026,
                 next: 12048810,
             },
             {
                 id: 12048810,
                 content: "不过话说回来，{nickname}，你回去后可得好好从头补起机枢知识呢。让我想想，从哪里开始呢，不如就从……",
-                npc: 200026,
+                npc: 240026,
                 next: 12048811,
             },
             {
@@ -12256,6 +12256,48 @@ export const npcData: NPC[] = [
                 next: 12048812,
             },
         ],
+    },
+    {
+        id: 240110,
+        name: "逍遥生",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240111,
+        name: "刻舟",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240112,
+        name: "煜明",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240113,
+        name: "白",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240114,
+        name: "太皓",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240115,
+        name: "守卫",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 240116,
+        name: "守卫",
+        camp: "NPC",
+        type: "Normal",
     },
     {
         id: 250001,
@@ -44672,7 +44714,6 @@ export const npcData: NPC[] = [
             {
                 id: 90270302,
                 content: "我没有忘记，缺钱的时候确实很困难。",
-                voice: "char/Kami/vo_topic_03_2",
                 npc: 100001,
                 next: 90270303,
             },
@@ -44693,7 +44734,7 @@ export const npcData: NPC[] = [
                 id: 90270303,
                 content:
                     "只要积累财富，即使无法改变出身，也会获得勇气对抗命运，即使周遭都是风雨，也能给自己买上一瓶酒暖暖身子，甚至能给别人分上一口，赚个人情。",
-                voice: "char/Kami/vo_topic_03_3",
+                voice: "char/Kami/vo_topic_03_2",
                 npc: 83202,
                 next: 90270304,
             },
@@ -44713,6 +44754,7 @@ export const npcData: NPC[] = [
             {
                 id: 90270304,
                 content: "你说，钱是不是很重要？",
+                voice: "char/Kami/vo_topic_03_3",
                 npc: 83202,
                 options: [
                     {

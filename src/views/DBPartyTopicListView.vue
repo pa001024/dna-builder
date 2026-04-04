@@ -146,7 +146,7 @@ useInitialScrollToSelectedItem()
                         v-model="searchKeyword"
                         type="text"
                         placeholder="搜索光阴集 ID/名称/角色（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all"
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
                     />
 
                     <div class="flex items-center gap-2 text-xs">
@@ -172,7 +172,7 @@ useInitialScrollToSelectedItem()
                         <div
                             v-for="partyTopic in filteredPartyTopics"
                             :key="partyTopic.id"
-                            class="p-3 rounded cursor-pointer transition-colors bg-base-200 hover:bg-base-300"
+                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPartyTopicId === partyTopic.id }"
                             @click="selectPartyTopic(partyTopic)"
                         >
@@ -216,5 +216,3 @@ useInitialScrollToSelectedItem()
         </div>
     </div>
 </template>
-
-

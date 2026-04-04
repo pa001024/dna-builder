@@ -293,6 +293,12 @@ const questDetails = computed<QuestDetailItem[]>(() => {
 })
 
 /**
+ * 获取任务链版本号。
+ * @returns 版本号
+ */
+const questChainVersion = computed(() => props.questChain.版本 || "")
+
+/**
  * 获取子区域名称。
  * @param subRegionId 子区域 ID
  * @returns 子区域名称
@@ -318,7 +324,10 @@ function getSubRegionName(subRegionId: number): string {
                     <SRouterLink :to="`/db/questchain/${questChain.id}`" class="text-lg font-bold link link-primary">
                         {{ questChain.name }}
                     </SRouterLink>
-                    <div class="text-sm text-base-content/70">ID: {{ questChain.id }}</div>
+                    <div class="text-sm text-base-content/70 flex flex-wrap items-center gap-2">
+                        <span>ID: {{ questChain.id }}</span>
+                        <span v-if="questChainVersion">v{{ questChainVersion }}</span>
+                    </div>
                 </div>
             </div>
 
@@ -431,7 +440,7 @@ function getSubRegionName(subRegionId: number): string {
                             <span class="text-primary">→</span>
                             <button
                                 type="button"
-                                class="cursor-pointer rounded border border-primary/30 bg-primary/5 px-1.5 py-0.5 text-primary/80 hover:bg-primary/10 hover:border-primary/50 transition-colors"
+                                class="cursor-pointer rounded border border-primary/30 bg-primary/5 px-1.5 py-0.5 text-primary/80 hover:bg-primary/10 hover:border-primary/50 transition-colors duration-200"
                                 @click="jumpToQuest(nextOption.targetId)"
                             >
                                 <span v-if="quest.hasBranchNext" class="mr-1 text-base-content/70">{{ nextOption.condition }}:</span>
@@ -464,7 +473,7 @@ function getSubRegionName(subRegionId: number): string {
                         .map(id => getRewardDetails(id))
                         .filter((rewardItem): rewardItem is RewardItemType => !!rewardItem)"
                     :key="reward.id"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors"
+                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                 >
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-sm font-medium">#{{ index + 1 }} 奖励组 {{ reward.id }}</span>

@@ -1,0 +1,3020 @@
+{
+    "version": "6",
+    "dialect": "sqlite",
+    "id": "19048d36-e7be-4c2e-86cc-60748a3f0d02",
+    "prevId": "09e764ec-8667-4969-b819-d0dadc95f139",
+    "tables": {
+        "abyss_usage_role_participants": {
+            "name": "abyss_usage_role_participants",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "submission_id": {
+                    "name": "submission_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "season_id": {
+                    "name": "season_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "role_type": {
+                    "name": "role_type",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "char_id": {
+                    "name": "char_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "grade_level": {
+                    "name": "grade_level",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "abyss_usage_role_participants_season_id_idx": {
+                    "name": "abyss_usage_role_participants_season_id_idx",
+                    "columns": ["season_id"],
+                    "isUnique": false
+                },
+                "abyss_usage_role_participants_submission_id_idx": {
+                    "name": "abyss_usage_role_participants_submission_id_idx",
+                    "columns": ["submission_id"],
+                    "isUnique": false
+                },
+                "abyss_usage_role_participants_char_id_idx": {
+                    "name": "abyss_usage_role_participants_char_id_idx",
+                    "columns": ["char_id"],
+                    "isUnique": false
+                },
+                "abyss_usage_role_participants_role_type_idx": {
+                    "name": "abyss_usage_role_participants_role_type_idx",
+                    "columns": ["role_type"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "abyss_usage_role_participants_submission_id_abyss_usage_submissions_id_fk": {
+                    "name": "abyss_usage_role_participants_submission_id_abyss_usage_submissions_id_fk",
+                    "tableFrom": "abyss_usage_role_participants",
+                    "tableTo": "abyss_usage_submissions",
+                    "columnsFrom": ["submission_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "abyss_usage_submissions": {
+            "name": "abyss_usage_submissions",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "uid_sha256": {
+                    "name": "uid_sha256",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "season_id": {
+                    "name": "season_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "level": {
+                    "name": "level",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "char_id": {
+                    "name": "char_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "melee_id": {
+                    "name": "melee_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "ranged_id": {
+                    "name": "ranged_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "support_1": {
+                    "name": "support_1",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "support_weapon_1": {
+                    "name": "support_weapon_1",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "support_2": {
+                    "name": "support_2",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "support_weapon_2": {
+                    "name": "support_weapon_2",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "pet_id": {
+                    "name": "pet_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "stars": {
+                    "name": "stars",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "abyss_usage_submissions_season_uid_idx": {
+                    "name": "abyss_usage_submissions_season_uid_idx",
+                    "columns": ["uid_sha256", "season_id"],
+                    "isUnique": true
+                },
+                "abyss_usage_submissions_season_id_idx": {
+                    "name": "abyss_usage_submissions_season_id_idx",
+                    "columns": ["season_id"],
+                    "isUnique": false
+                },
+                "abyss_usage_submissions_lineup_idx": {
+                    "name": "abyss_usage_submissions_lineup_idx",
+                    "columns": [
+                        "season_id",
+                        "char_id",
+                        "melee_id",
+                        "ranged_id",
+                        "support_1",
+                        "support_weapon_1",
+                        "support_2",
+                        "support_weapon_2",
+                        "pet_id"
+                    ],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "abyss_usage_weapon_participants": {
+            "name": "abyss_usage_weapon_participants",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "submission_id": {
+                    "name": "submission_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "season_id": {
+                    "name": "season_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "role_type": {
+                    "name": "role_type",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "weapon_id": {
+                    "name": "weapon_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "skill_level": {
+                    "name": "skill_level",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "abyss_usage_weapon_participants_season_id_idx": {
+                    "name": "abyss_usage_weapon_participants_season_id_idx",
+                    "columns": ["season_id"],
+                    "isUnique": false
+                },
+                "abyss_usage_weapon_participants_submission_id_idx": {
+                    "name": "abyss_usage_weapon_participants_submission_id_idx",
+                    "columns": ["submission_id"],
+                    "isUnique": false
+                },
+                "abyss_usage_weapon_participants_weapon_id_idx": {
+                    "name": "abyss_usage_weapon_participants_weapon_id_idx",
+                    "columns": ["weapon_id"],
+                    "isUnique": false
+                },
+                "abyss_usage_weapon_participants_role_type_idx": {
+                    "name": "abyss_usage_weapon_participants_role_type_idx",
+                    "columns": ["role_type"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "abyss_usage_weapon_participants_submission_id_abyss_usage_submissions_id_fk": {
+                    "name": "abyss_usage_weapon_participants_submission_id_abyss_usage_submissions_id_fk",
+                    "tableFrom": "abyss_usage_weapon_participants",
+                    "tableTo": "abyss_usage_submissions",
+                    "columnsFrom": ["submission_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "activities_ingame": {
+            "name": "activities_ingame",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "server": {
+                    "name": "server",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "post_id": {
+                    "name": "post_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "start_time": {
+                    "name": "start_time",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "end_time": {
+                    "name": "end_time",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "icon": {
+                    "name": "icon",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "desc": {
+                    "name": "desc",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "activities_ingame_server_id_idx": {
+                    "name": "activities_ingame_server_id_idx",
+                    "columns": ["server", "id"],
+                    "isUnique": true
+                },
+                "activities_ingame_server_start_time_idx": {
+                    "name": "activities_ingame_server_start_time_idx",
+                    "columns": ["server", "start_time"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "build_likes": {
+            "name": "build_likes",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "build_id": {
+                    "name": "build_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "build_like_idx": {
+                    "name": "build_like_idx",
+                    "columns": ["user_id", "build_id"],
+                    "isUnique": true
+                },
+                "build_like_build_idx": {
+                    "name": "build_like_build_idx",
+                    "columns": ["build_id"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "build_likes_build_id_builds_id_fk": {
+                    "name": "build_likes_build_id_builds_id_fk",
+                    "tableFrom": "build_likes",
+                    "tableTo": "builds",
+                    "columnsFrom": ["build_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "build_likes_user_id_users_id_fk": {
+                    "name": "build_likes_user_id_users_id_fk",
+                    "tableFrom": "build_likes",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "builds": {
+            "name": "builds",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "title": {
+                    "name": "title",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "desc": {
+                    "name": "desc",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "char_id": {
+                    "name": "char_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "char_settings": {
+                    "name": "char_settings",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "views": {
+                    "name": "views",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": 0
+                },
+                "likes": {
+                    "name": "likes",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": 0
+                },
+                "is_recommended": {
+                    "name": "is_recommended",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": false
+                },
+                "is_pinned": {
+                    "name": "is_pinned",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "builds_char_id_idx": {
+                    "name": "builds_char_id_idx",
+                    "columns": ["char_id"],
+                    "isUnique": false
+                },
+                "builds_user_id_idx": {
+                    "name": "builds_user_id_idx",
+                    "columns": ["user_id"],
+                    "isUnique": false
+                },
+                "builds_is_recommended_idx": {
+                    "name": "builds_is_recommended_idx",
+                    "columns": ["is_recommended"],
+                    "isUnique": false
+                },
+                "builds_char_id_update_at_idx": {
+                    "name": "builds_char_id_update_at_idx",
+                    "columns": ["char_id", "update_at"],
+                    "isUnique": false
+                },
+                "builds_char_id_views_idx": {
+                    "name": "builds_char_id_views_idx",
+                    "columns": ["char_id", "views"],
+                    "isUnique": false
+                },
+                "builds_update_at_idx": {
+                    "name": "builds_update_at_idx",
+                    "columns": ["update_at"],
+                    "isUnique": false
+                },
+                "builds_views_idx": {
+                    "name": "builds_views_idx",
+                    "columns": ["views"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "builds_user_id_users_id_fk": {
+                    "name": "builds_user_id_users_id_fk",
+                    "tableFrom": "builds",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "dna_auth_sessions": {
+            "name": "dna_auth_sessions",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "code": {
+                    "name": "code",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "image_url": {
+                    "name": "image_url",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "dna_uid": {
+                    "name": "dna_uid",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "expires_at": {
+                    "name": "expires_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "dna_auth_sessions_code_unique": {
+                    "name": "dna_auth_sessions_code_unique",
+                    "columns": ["code"],
+                    "isUnique": true
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "dna_user_bindings": {
+            "name": "dna_user_bindings",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "dna_uid": {
+                    "name": "dna_uid",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "dna_user_bindings_dna_uid_unique": {
+                    "name": "dna_user_bindings_dna_uid_unique",
+                    "columns": ["dna_uid"],
+                    "isUnique": true
+                },
+                "dna_user_binding_idx": {
+                    "name": "dna_user_binding_idx",
+                    "columns": ["user_id", "dna_uid"],
+                    "isUnique": true
+                }
+            },
+            "foreignKeys": {
+                "dna_user_bindings_user_id_users_id_fk": {
+                    "name": "dna_user_bindings_user_id_users_id_fk",
+                    "tableFrom": "dna_user_bindings",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "dps": {
+            "name": "dps",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "char_id": {
+                    "name": "char_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "build_id": {
+                    "name": "build_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "timeline_id": {
+                    "name": "timeline_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "dps_value": {
+                    "name": "dps_value",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "details": {
+                    "name": "details",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "dps_char_id_idx": {
+                    "name": "dps_char_id_idx",
+                    "columns": ["char_id"],
+                    "isUnique": false
+                },
+                "dps_build_id_idx": {
+                    "name": "dps_build_id_idx",
+                    "columns": ["build_id"],
+                    "isUnique": false
+                },
+                "dps_timeline_id_idx": {
+                    "name": "dps_timeline_id_idx",
+                    "columns": ["timeline_id"],
+                    "isUnique": false
+                },
+                "dps_dps_value_idx": {
+                    "name": "dps_dps_value_idx",
+                    "columns": ["dps_value"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "dps_build_id_builds_id_fk": {
+                    "name": "dps_build_id_builds_id_fk",
+                    "tableFrom": "dps",
+                    "tableTo": "builds",
+                    "columnsFrom": ["build_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "dps_timeline_id_timelines_id_fk": {
+                    "name": "dps_timeline_id_timelines_id_fk",
+                    "tableFrom": "dps",
+                    "tableTo": "timelines",
+                    "columnsFrom": ["timeline_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "dps_user_id_users_id_fk": {
+                    "name": "dps_user_id_users_id_fk",
+                    "tableFrom": "dps",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "guide_likes": {
+            "name": "guide_likes",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "guide_id": {
+                    "name": "guide_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "guide_like_idx": {
+                    "name": "guide_like_idx",
+                    "columns": ["user_id", "guide_id"],
+                    "isUnique": true
+                },
+                "guide_like_guide_idx": {
+                    "name": "guide_like_guide_idx",
+                    "columns": ["guide_id"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "guide_likes_guide_id_guides_id_fk": {
+                    "name": "guide_likes_guide_id_guides_id_fk",
+                    "tableFrom": "guide_likes",
+                    "tableTo": "guides",
+                    "columnsFrom": ["guide_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "guide_likes_user_id_users_id_fk": {
+                    "name": "guide_likes_user_id_users_id_fk",
+                    "tableFrom": "guide_likes",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "guides": {
+            "name": "guides",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "title": {
+                    "name": "title",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "type": {
+                    "name": "type",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "content": {
+                    "name": "content",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "images": {
+                    "name": "images",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "char_id": {
+                    "name": "char_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "build_id": {
+                    "name": "build_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "views": {
+                    "name": "views",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "likes": {
+                    "name": "likes",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "is_recommended": {
+                    "name": "is_recommended",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "is_pinned": {
+                    "name": "is_pinned",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "guides_type_idx": {
+                    "name": "guides_type_idx",
+                    "columns": ["type"],
+                    "isUnique": false
+                },
+                "guides_char_id_idx": {
+                    "name": "guides_char_id_idx",
+                    "columns": ["char_id"],
+                    "isUnique": false
+                },
+                "guides_user_id_idx": {
+                    "name": "guides_user_id_idx",
+                    "columns": ["user_id"],
+                    "isUnique": false
+                },
+                "guides_build_id_idx": {
+                    "name": "guides_build_id_idx",
+                    "columns": ["build_id"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "guides_user_id_users_id_fk": {
+                    "name": "guides_user_id_users_id_fk",
+                    "tableFrom": "guides",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "guides_build_id_builds_id_fk": {
+                    "name": "guides_build_id_builds_id_fk",
+                    "tableFrom": "guides",
+                    "tableTo": "builds",
+                    "columnsFrom": ["build_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "logins": {
+            "name": "logins",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "ip": {
+                    "name": "ip",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "ua": {
+                    "name": "ua",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "logins_user_id_users_id_fk": {
+                    "name": "logins_user_id_users_id_fk",
+                    "tableFrom": "logins",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "missions_ingame": {
+            "name": "missions_ingame",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "integer",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": true
+                },
+                "server": {
+                    "name": "server",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "missions": {
+                    "name": "missions",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "missions_ingame_server_idx": {
+                    "name": "missions_ingame_server_idx",
+                    "columns": ["server"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "msgs": {
+            "name": "msgs",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "room_id": {
+                    "name": "room_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "reply_to_msg_id": {
+                    "name": "reply_to_msg_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "reply_to_user_id": {
+                    "name": "reply_to_user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "content": {
+                    "name": "content",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "edited": {
+                    "name": "edited",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "msg_room_id_idx": {
+                    "name": "msg_room_id_idx",
+                    "columns": ["room_id"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "msgs_room_id_rooms_id_fk": {
+                    "name": "msgs_room_id_rooms_id_fk",
+                    "tableFrom": "msgs",
+                    "tableTo": "rooms",
+                    "columnsFrom": ["room_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "msgs_user_id_users_id_fk": {
+                    "name": "msgs_user_id_users_id_fk",
+                    "tableFrom": "msgs",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "msgs_reply_to_msg_id_msgs_id_fk": {
+                    "name": "msgs_reply_to_msg_id_msgs_id_fk",
+                    "tableFrom": "msgs",
+                    "tableTo": "msgs",
+                    "columnsFrom": ["reply_to_msg_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "set null",
+                    "onUpdate": "no action"
+                },
+                "msgs_reply_to_user_id_users_id_fk": {
+                    "name": "msgs_reply_to_user_id_users_id_fk",
+                    "tableFrom": "msgs",
+                    "tableTo": "users",
+                    "columnsFrom": ["reply_to_user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "set null",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "notifications": {
+            "name": "notifications",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "type": {
+                    "name": "type",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "content": {
+                    "name": "content",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "is_read": {
+                    "name": "is_read",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "notifications_user_id_users_id_fk": {
+                    "name": "notifications_user_id_users_id_fk",
+                    "tableFrom": "notifications",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "password_resets": {
+            "name": "password_resets",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "token": {
+                    "name": "token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "expires_at": {
+                    "name": "expires_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "password_resets_user_id_unique": {
+                    "name": "password_resets_user_id_unique",
+                    "columns": ["user_id"],
+                    "isUnique": true
+                }
+            },
+            "foreignKeys": {
+                "password_resets_user_id_users_id_fk": {
+                    "name": "password_resets_user_id_users_id_fk",
+                    "tableFrom": "password_resets",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "passwords": {
+            "name": "passwords",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "hash": {
+                    "name": "hash",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "passwords_user_id_users_id_fk": {
+                    "name": "passwords_user_id_users_id_fk",
+                    "tableFrom": "passwords",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "reactions": {
+            "name": "reactions",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "msg_id": {
+                    "name": "msg_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "content": {
+                    "name": "content",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "reactions_msg_id_msgs_id_fk": {
+                    "name": "reactions_msg_id_msgs_id_fk",
+                    "tableFrom": "reactions",
+                    "tableTo": "msgs",
+                    "columnsFrom": ["msg_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "rooms": {
+            "name": "rooms",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "type": {
+                    "name": "type",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "owner_id": {
+                    "name": "owner_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "max_users": {
+                    "name": "max_users",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "rooms_owner_id_users_id_fk": {
+                    "name": "rooms_owner_id_users_id_fk",
+                    "tableFrom": "rooms",
+                    "tableTo": "users",
+                    "columnsFrom": ["owner_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "schedules": {
+            "name": "schedules",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "start_time": {
+                    "name": "start_time",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "end_time": {
+                    "name": "end_time",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "repeat_type": {
+                    "name": "repeat_type",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "repeat_interval": {
+                    "name": "repeat_interval",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "repeat_count": {
+                    "name": "repeat_count",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "schedules_user_id_users_id_fk": {
+                    "name": "schedules_user_id_users_id_fk",
+                    "tableFrom": "schedules",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "script_categories": {
+            "name": "script_categories",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "script_categories_name_idx": {
+                    "name": "script_categories_name_idx",
+                    "columns": ["name"],
+                    "isUnique": true
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "script_likes": {
+            "name": "script_likes",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "script_id": {
+                    "name": "script_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "script_like_idx": {
+                    "name": "script_like_idx",
+                    "columns": ["user_id", "script_id"],
+                    "isUnique": true
+                },
+                "script_like_script_idx": {
+                    "name": "script_like_script_idx",
+                    "columns": ["script_id"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "script_likes_script_id_scripts_id_fk": {
+                    "name": "script_likes_script_id_scripts_id_fk",
+                    "tableFrom": "script_likes",
+                    "tableTo": "scripts",
+                    "columnsFrom": ["script_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "script_likes_user_id_users_id_fk": {
+                    "name": "script_likes_user_id_users_id_fk",
+                    "tableFrom": "script_likes",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "scripts": {
+            "name": "scripts",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "title": {
+                    "name": "title",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "desc": {
+                    "name": "desc",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "content": {
+                    "name": "content",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "category": {
+                    "name": "category",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "views": {
+                    "name": "views",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": 0
+                },
+                "likes": {
+                    "name": "likes",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": 0
+                },
+                "is_recommended": {
+                    "name": "is_recommended",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": false
+                },
+                "is_pinned": {
+                    "name": "is_pinned",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "scripts_category_idx": {
+                    "name": "scripts_category_idx",
+                    "columns": ["category"],
+                    "isUnique": false
+                },
+                "scripts_user_id_idx": {
+                    "name": "scripts_user_id_idx",
+                    "columns": ["user_id"],
+                    "isUnique": false
+                },
+                "scripts_is_recommended_idx": {
+                    "name": "scripts_is_recommended_idx",
+                    "columns": ["is_recommended"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "scripts_user_id_users_id_fk": {
+                    "name": "scripts_user_id_users_id_fk",
+                    "tableFrom": "scripts",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "shop_assets": {
+            "name": "shop_assets",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "reward_type": {
+                    "name": "reward_type",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "reward_key": {
+                    "name": "reward_key",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "reward_name": {
+                    "name": "reward_name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "display_class": {
+                    "name": "display_class",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "display_css": {
+                    "name": "display_css",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "shop_assets_reward_key_unique_idx": {
+                    "name": "shop_assets_reward_key_unique_idx",
+                    "columns": ["reward_type", "reward_key"],
+                    "isUnique": true
+                },
+                "shop_assets_reward_type_idx": {
+                    "name": "shop_assets_reward_type_idx",
+                    "columns": ["reward_type"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "shop_products": {
+            "name": "shop_products",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "asset_id": {
+                    "name": "asset_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "points_cost": {
+                    "name": "points_cost",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "sort_order": {
+                    "name": "sort_order",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "is_active": {
+                    "name": "is_active",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "start_time": {
+                    "name": "start_time",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "end_time": {
+                    "name": "end_time",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "shop_products_asset_idx": {
+                    "name": "shop_products_asset_idx",
+                    "columns": ["asset_id"],
+                    "isUnique": false
+                },
+                "shop_products_active_sort_idx": {
+                    "name": "shop_products_active_sort_idx",
+                    "columns": ["is_active", "sort_order"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "shop_products_asset_id_shop_assets_id_fk": {
+                    "name": "shop_products_asset_id_shop_assets_id_fk",
+                    "tableFrom": "shop_products",
+                    "tableTo": "shop_assets",
+                    "columnsFrom": ["asset_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "shop_redemptions": {
+            "name": "shop_redemptions",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "product_id": {
+                    "name": "product_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "asset_id": {
+                    "name": "asset_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "points_cost": {
+                    "name": "points_cost",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "shop_redemptions_user_idx": {
+                    "name": "shop_redemptions_user_idx",
+                    "columns": ["user_id"],
+                    "isUnique": false
+                },
+                "shop_redemptions_product_idx": {
+                    "name": "shop_redemptions_product_idx",
+                    "columns": ["product_id"],
+                    "isUnique": false
+                },
+                "shop_redemptions_asset_idx": {
+                    "name": "shop_redemptions_asset_idx",
+                    "columns": ["asset_id"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "shop_redemptions_user_id_users_id_fk": {
+                    "name": "shop_redemptions_user_id_users_id_fk",
+                    "tableFrom": "shop_redemptions",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "shop_redemptions_product_id_shop_products_id_fk": {
+                    "name": "shop_redemptions_product_id_shop_products_id_fk",
+                    "tableFrom": "shop_redemptions",
+                    "tableTo": "shop_products",
+                    "columnsFrom": ["product_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "shop_redemptions_asset_id_shop_assets_id_fk": {
+                    "name": "shop_redemptions_asset_id_shop_assets_id_fk",
+                    "tableFrom": "shop_redemptions",
+                    "tableTo": "shop_assets",
+                    "columnsFrom": ["asset_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "tasks": {
+            "name": "tasks",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "desc": {
+                    "name": "desc",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "start_time": {
+                    "name": "start_time",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "end_time": {
+                    "name": "end_time",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "max_user": {
+                    "name": "max_user",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "max_age": {
+                    "name": "max_age",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "user_list": {
+                    "name": "user_list",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "room_id": {
+                    "name": "room_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "tasks_room_id_rooms_id_fk": {
+                    "name": "tasks_room_id_rooms_id_fk",
+                    "tableFrom": "tasks",
+                    "tableTo": "rooms",
+                    "columnsFrom": ["room_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "tasks_user_id_users_id_fk": {
+                    "name": "tasks_user_id_users_id_fk",
+                    "tableFrom": "tasks",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "timeline_likes": {
+            "name": "timeline_likes",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "timeline_id": {
+                    "name": "timeline_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "timeline_like_idx": {
+                    "name": "timeline_like_idx",
+                    "columns": ["user_id", "timeline_id"],
+                    "isUnique": true
+                },
+                "timeline_like_timeline_idx": {
+                    "name": "timeline_like_timeline_idx",
+                    "columns": ["timeline_id"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "timeline_likes_timeline_id_timelines_id_fk": {
+                    "name": "timeline_likes_timeline_id_timelines_id_fk",
+                    "tableFrom": "timeline_likes",
+                    "tableTo": "timelines",
+                    "columnsFrom": ["timeline_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "timeline_likes_user_id_users_id_fk": {
+                    "name": "timeline_likes_user_id_users_id_fk",
+                    "tableFrom": "timeline_likes",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "timelines": {
+            "name": "timelines",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "title": {
+                    "name": "title",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "char_id": {
+                    "name": "char_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "char_name": {
+                    "name": "char_name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "tracks": {
+                    "name": "tracks",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "items": {
+                    "name": "items",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "views": {
+                    "name": "views",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": 0
+                },
+                "likes": {
+                    "name": "likes",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": 0
+                },
+                "is_recommended": {
+                    "name": "is_recommended",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": false
+                },
+                "is_pinned": {
+                    "name": "is_pinned",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false,
+                    "default": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "timelines_char_id_idx": {
+                    "name": "timelines_char_id_idx",
+                    "columns": ["char_id"],
+                    "isUnique": false
+                },
+                "timelines_user_id_idx": {
+                    "name": "timelines_user_id_idx",
+                    "columns": ["user_id"],
+                    "isUnique": false
+                },
+                "timelines_is_recommended_idx": {
+                    "name": "timelines_is_recommended_idx",
+                    "columns": ["is_recommended"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "timelines_user_id_users_id_fk": {
+                    "name": "timelines_user_id_users_id_fk",
+                    "tableFrom": "timelines",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "todo_completions": {
+            "name": "todo_completions",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "todo_id": {
+                    "name": "todo_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "completed_at": {
+                    "name": "completed_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "todo_completion_idx": {
+                    "name": "todo_completion_idx",
+                    "columns": ["todo_id", "user_id"],
+                    "isUnique": true
+                }
+            },
+            "foreignKeys": {
+                "todo_completions_todo_id_todos_id_fk": {
+                    "name": "todo_completions_todo_id_todos_id_fk",
+                    "tableFrom": "todo_completions",
+                    "tableTo": "todos",
+                    "columnsFrom": ["todo_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "todo_completions_user_id_users_id_fk": {
+                    "name": "todo_completions_user_id_users_id_fk",
+                    "tableFrom": "todo_completions",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "todos": {
+            "name": "todos",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "title": {
+                    "name": "title",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "desc": {
+                    "name": "desc",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "start_time": {
+                    "name": "start_time",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "end_time": {
+                    "name": "end_time",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "type": {
+                    "name": "type",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "todos_user_id_idx": {
+                    "name": "todos_user_id_idx",
+                    "columns": ["user_id"],
+                    "isUnique": false
+                },
+                "todos_type_idx": {
+                    "name": "todos_type_idx",
+                    "columns": ["type"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "todos_user_id_users_id_fk": {
+                    "name": "todos_user_id_users_id_fk",
+                    "tableFrom": "todos",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "user_experience_rewards": {
+            "name": "user_experience_rewards",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "source": {
+                    "name": "source",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "date_key": {
+                    "name": "date_key",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "awarded_exp": {
+                    "name": "awarded_exp",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "user_experience_reward_unique_idx": {
+                    "name": "user_experience_reward_unique_idx",
+                    "columns": ["user_id", "source", "date_key"],
+                    "isUnique": true
+                },
+                "user_experience_reward_user_idx": {
+                    "name": "user_experience_reward_user_idx",
+                    "columns": ["user_id"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "user_experience_rewards_user_id_users_id_fk": {
+                    "name": "user_experience_rewards_user_id_users_id_fk",
+                    "tableFrom": "user_experience_rewards",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "user_reactions": {
+            "name": "user_reactions",
+            "columns": {
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "reaction_id": {
+                    "name": "reaction_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "user_reaction_idx": {
+                    "name": "user_reaction_idx",
+                    "columns": ["user_id", "reaction_id"],
+                    "isUnique": true
+                }
+            },
+            "foreignKeys": {
+                "user_reactions_user_id_users_id_fk": {
+                    "name": "user_reactions_user_id_users_id_fk",
+                    "tableFrom": "user_reactions",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "user_reactions_reaction_id_reactions_id_fk": {
+                    "name": "user_reactions_reaction_id_reactions_id_fk",
+                    "tableFrom": "user_reactions",
+                    "tableTo": "reactions",
+                    "columnsFrom": ["reaction_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "user_shop_items": {
+            "name": "user_shop_items",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "asset_id": {
+                    "name": "asset_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "user_shop_item_unique_idx": {
+                    "name": "user_shop_item_unique_idx",
+                    "columns": ["user_id", "asset_id"],
+                    "isUnique": true
+                },
+                "user_shop_item_user_idx": {
+                    "name": "user_shop_item_user_idx",
+                    "columns": ["user_id"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "user_shop_items_user_id_users_id_fk": {
+                    "name": "user_shop_items_user_id_users_id_fk",
+                    "tableFrom": "user_shop_items",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "user_shop_items_asset_id_shop_assets_id_fk": {
+                    "name": "user_shop_items_asset_id_shop_assets_id_fk",
+                    "tableFrom": "user_shop_items",
+                    "tableTo": "shop_assets",
+                    "columnsFrom": ["asset_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "users": {
+            "name": "users",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "email": {
+                    "name": "email",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "qq": {
+                    "name": "qq",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "pic": {
+                    "name": "pic",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "uid": {
+                    "name": "uid",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "roles": {
+                    "name": "roles",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "experience": {
+                    "name": "experience",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "points": {
+                    "name": "points",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "level": {
+                    "name": "level",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "selected_title_asset_id": {
+                    "name": "selected_title_asset_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "selected_name_card_asset_id": {
+                    "name": "selected_name_card_asset_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "update_at": {
+                    "name": "update_at",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "users_email_unique": {
+                    "name": "users_email_unique",
+                    "columns": ["email"],
+                    "isUnique": true
+                },
+                "email_idx": {
+                    "name": "email_idx",
+                    "columns": ["email"],
+                    "isUnique": true
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        }
+    },
+    "views": {},
+    "enums": {},
+    "_meta": {
+        "schemas": {},
+        "tables": {},
+        "columns": {}
+    },
+    "internal": {
+        "indexes": {}
+    }
+}

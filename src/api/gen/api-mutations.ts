@@ -61,7 +61,6 @@ export const claimDailyLaunchExperienceMutation = typedMutation<Types.UserExperi
             source
             awardedExp
             retryAfterMs
-            token
             user {
                 id
                 name
@@ -87,7 +86,6 @@ export const claimDailyOnlineExperienceMutation = typedMutation<Types.UserExperi
             source
             awardedExp
             retryAfterMs
-            token
             user {
                 id
                 name
@@ -988,3 +986,25 @@ export const upsertActivitiesIngameMutation = typedMutation<
         }
     }
 `)
+
+export const submitAbyssUsageMutation = typedMutation<Types.AbyssUsageSubmission, { input: Types.AbyssUsageSubmissionInput }>(
+    /* GraphQL */ `
+        mutation ($input: AbyssUsageSubmissionInput!) {
+            submitAbyssUsage(input: $input) {
+                id
+                level
+                reward {
+                    success
+                    message
+                    source
+                    awardedExp
+                    awardedPoints
+                    retryAfterMs
+                    user {
+                        id
+                    }
+                }
+            }
+        }
+    `
+)

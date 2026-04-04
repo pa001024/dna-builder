@@ -6,12 +6,15 @@ import cutoffData from "./cutoff.data"
 import draftData from "./draft.data"
 import dungeonData from "./dungeon.data"
 import effectData from "./effect.data"
+
+export { eventData } from "./event.data"
+
 import modData from "./mod.data"
 import monsterData, { monsterMap } from "./monster.data"
 import rewardData from "./reward.data"
 import weaponData from "./weapon.data"
 
-export { headFrameData } from "./accessory.data"
+export { hairData, headFrameData } from "./accessory.data"
 
 // 将静态表转换为Map，提高查找效率
 export const charMap = new Map<number | string, Char>()
@@ -175,5 +178,6 @@ fishingSpots.forEach(v =>
     })
 )
 
+export { AbyssMonsterLevelLimit, MonsterLevelUpperLimit } from "./const.data"
 export { type Resource, resourceData, resourceMap } from "./resource.data"
 export type { Fish, FishingSpot }

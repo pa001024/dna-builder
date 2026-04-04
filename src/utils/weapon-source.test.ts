@@ -58,8 +58,15 @@ describe("weapon-source", () => {
         const text = formatWeaponSourceTimeRange({
             key: "shop-test",
             type: "shop",
+            itemId: 1,
             timeStart: 1672545600,
             detail: "商店购买",
+            shopId: "Shop",
+            subTabId: 1802,
+            shopName: "商店",
+            price: 10,
+            priceName: "铜币",
+            num: 1,
         })
 
         expect(text).toContain("至今")

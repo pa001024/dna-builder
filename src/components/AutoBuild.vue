@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { computed } from "vue"
-import { CharBuild, ModTypeKey } from "../data"
+import { CharBuild, ModTypeKey, ModTypeMap } from "../data"
 import { useInvStore } from "../store/inv"
 
 // 用户库存
@@ -113,7 +113,7 @@ const autoBuild = computed(() => (props.update ? ((lastBuild = buildMods()), emi
                     v-for="(mod, index) in autoBuild.newBuild[key]"
                     :key="index"
                     :mod="mod"
-                    :income="mod ? autoBuild.newBuild.calcIncome(mod, true) : 0"
+                    :income="mod ? autoBuild.newBuild.calcEquippedModIncome(ModTypeMap[key], index) : 0"
                     noremove
                 />
             </div>

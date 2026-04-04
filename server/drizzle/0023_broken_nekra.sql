@@ -1,0 +1,1 @@
+CREATE INDEX `abyss_usage_submissions_season_id_level_idx` ON `abyss_usage_submissions` (`season_id`,`level`);
