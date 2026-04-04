@@ -663,7 +663,7 @@ export const builds = sqliteTable(
         isRecommended: integer("is_recommended", { mode: "boolean" }).default(false),
         isPinned: integer("is_pinned", { mode: "boolean" }).default(false),
         createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        updateAt: text("update_at"),
     },
     builds => [
         index("builds_char_id_idx").on(builds.charId),

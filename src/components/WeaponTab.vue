@@ -277,7 +277,7 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
                         </FullTooltip>
                     </div>
                     <div class="text-primary font-bold text-sm font-orbitron">
-                        {{ formatWeaponProp(["攻速", "多重", "弹匣", "装填", "最大弹药"].includes(key) ? "基础攻击" : key, val) }}
+                        {{ formatWeaponProp(["攻速", "多重", "弹匣", "装填", "弹药"].includes(key) ? "基础攻击" : key, val) }}
                     </div>
                 </div>
             </FullTooltip>
