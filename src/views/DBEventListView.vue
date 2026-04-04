@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useLocalStorage } from "@vueuse/core"
 import { computed, watch } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
@@ -11,7 +12,8 @@ import { formatDateTime, formatTimeRange } from "@/utils/time"
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedEventId = useSearchParam<number>("id", 0)
 const selectedTimePointIndex = useSearchParam<number>("ti", 0)
-const timeFilterEnabled = useSearchParam("tf", true)
+const showVersionFilter = useLocalStorage("event.showVersionFilter", true)
+const showTimeFilter = useLocalStorage("event.showTimeFilter", true)
 const diffOnlyEnabled = useSearchParam("td", false)
 const selectedVersion = useSearchParam<string>("ver", "")
 
@@ -138,10 +140,10 @@ const visibleEventCount = computed(() => {
  */
 /**
  * 当前时间过滤使用的时间戳。
- * 未启用时返回 null。
+ * 未显示时间筛选时返回 null。
  */
 const activeFilterTimestamp = computed(() => {
-    if (!timeFilterEnabled.value) {
+    if (!showTimeFilter.value) {
         return null
     }
     return selectedTimePoint.value
@@ -200,6 +202,32 @@ watch(
     { immediate: true }
 )
 
+/**
+ * 关闭版本筛选时清空版本条件。
+ */
+watch(
+    showVersionFilter,
+    show => {
+        if (!show) {
+            selectedVersion.value = ""
+        }
+    },
+    { immediate: true }
+)
+
+/**
+ * 关闭时间筛选时关闭差异模式。
+ */
+watch(
+    showTimeFilter,
+    show => {
+        if (!show) {
+            diffOnlyEnabled.value = false
+        }
+    },
+    { immediate: true }
+)
+
 const selectedEvent = computed(() => {
     return selectedEventId.value ? filteredEvents.value.find(item => item.id === selectedEventId.value) || null : null
 })
@@ -248,7 +276,7 @@ watch(
 watch(
     currentTimePointIndex,
     index => {
-        if (timeFilterEnabled.value && selectedTimePointIndex.value !== index) {
+        if (showTimeFilter.value && selectedTimePointIndex.value !== index) {
             selectedTimePointIndex.value = index
         }
     },
@@ -256,7 +284,7 @@ watch(
 )
 
 watch(
-    [timeFilterEnabled, diffOnlyEnabled, selectedTimePointIndex, eventTimePoints],
+    [showTimeFilter, diffOnlyEnabled, selectedTimePointIndex, eventTimePoints],
     ([timeFilter, diffOnly, currentIndex, timePoints]) => {
         if (!diffOnly) {
             return
@@ -276,56 +304,25 @@ useInitialScrollToSelectedItem()
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedEvent }">
                 <div class="p-3 border-b border-base-200 space-y-3">
-                    <div v-if="hasTimePoints" class="rounded-lg border border-base-200 bg-base-100 p-3 space-y-3">
-                        <div class="flex flex-wrap items-start justify-between gap-3">
-                            <div class="space-y-1" />
-                            <div class="flex flex-wrap items-center gap-2">
-                                <button type="button" class="btn btn-xs btn-ghost" @click="resetToCurrentTimePoint">重置到当前</button>
-                                <label class="label cursor-pointer gap-2 p-0">
-                                    <span class="text-sm">仅显示当前</span>
-                                    <input v-model="timeFilterEnabled" type="checkbox" class="toggle toggle-primary toggle-sm" />
-                                </label>
-                                <label class="label cursor-pointer gap-2 p-0">
-                                    <span class="text-sm">仅显示差异</span>
-                                    <input
-                                        v-model="diffOnlyEnabled"
-                                        type="checkbox"
-                                        class="toggle toggle-success toggle-sm"
-                                        :disabled="!timeFilterEnabled"
-                                    />
-                                </label>
-                            </div>
-                        </div>
+                    <input
+                        v-model="searchKeyword"
+                        type="text"
+                        placeholder="搜索活动ID/名称/描述（支持拼音）..."
+                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+                    />
 
-                        <div class="flex items-center gap-3">
-                            <span class="w-12 shrink-0 text-[11px] text-base-content/60">{{
-                                formatEventTimePoint(eventTimePoints[0] ?? null)
-                            }}</span>
-                            <input
-                                v-model.number="selectedTimePointIndex"
-                                type="range"
-                                class="range range-primary range-xs grow"
-                                :min="0"
-                                :max="Math.max(eventTimePoints.length - 1, 0)"
-                                step="1"
-                                :disabled="!timeFilterEnabled"
-                            />
-                            <span class="w-12 shrink-0 text-right text-[11px] text-base-content/60">{{
-                                formatEventTimePoint(eventTimePoints.at(-1) ?? null)
-                            }}</span>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/70">
-                            <span>当前时间点：{{ formatEventTimePoint(eventTimePoints[currentTimePointIndex] ?? null) }}</span>
-                            <span v-if="selectedTimePoint">选中时间点：{{ formatEventTimePoint(selectedTimePoint) }}</span>
-                            <span v-if="diffOnlyEnabled && previousSelectedTimePoint"
-                                >对比上一时间点：{{ formatEventTimePoint(previousSelectedTimePoint) }}</span
-                            >
-                            <span class="badge badge-ghost badge-sm">{{ eventTimePoints.length }} 个时间点</span>
-                            <span class="badge badge-primary badge-sm">{{ visibleEventCount }} 个活动</span>
-                        </div>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input v-model="showVersionFilter" type="checkbox" class="checkbox checkbox-xs" />
+                            <span class="text-xs text-base-content/70">版本</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input v-model="showTimeFilter" type="checkbox" class="checkbox checkbox-xs" />
+                            <span class="text-xs text-base-content/70">时间点</span>
+                        </label>
                     </div>
 
-                    <div class="flex flex-wrap gap-1">
+                    <div v-show="showVersionFilter" class="flex flex-wrap gap-1">
                         <button
                             class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
@@ -346,12 +343,41 @@ useInitialScrollToSelectedItem()
                         </button>
                     </div>
 
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索活动ID/名称/描述（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
+                    <div v-if="hasTimePoints" v-show="showTimeFilter" class="rounded-lg border border-base-200 bg-base-100 p-3 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <button type="button" class="btn btn-xs btn-ghost" @click="resetToCurrentTimePoint">重置到当前</button>
+                            <label class="label cursor-pointer gap-2 p-0">
+                                <span class="text-sm">仅显示差异</span>
+                                <input v-model="diffOnlyEnabled" type="checkbox" class="checkbox checkbox-success checkbox-sm" />
+                            </label>
+                        </div>
+
+                            <div class="flex items-center gap-3">
+                                <span class="w-12 shrink-0 text-[11px] text-base-content/60">{{
+                                    formatEventTimePoint(eventTimePoints[0] ?? null)
+                                }}</span>
+                                <input
+                                    v-model.number="selectedTimePointIndex"
+                                    type="range"
+                                    class="range range-primary range-xs grow"
+                                    :min="0"
+                                    :max="Math.max(eventTimePoints.length - 1, 0)"
+                                    step="1"
+                                />
+                                <span class="w-12 shrink-0 text-right text-[11px] text-base-content/60">{{
+                                    formatEventTimePoint(eventTimePoints.at(-1) ?? null)
+                                }}</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/70">
+                                <span>当前时间点：{{ formatEventTimePoint(eventTimePoints[currentTimePointIndex] ?? null) }}</span>
+                                <span v-if="selectedTimePoint">选中时间点：{{ formatEventTimePoint(selectedTimePoint) }}</span>
+                                <span v-if="diffOnlyEnabled && previousSelectedTimePoint"
+                                    >对比上一时间点：{{ formatEventTimePoint(previousSelectedTimePoint) }}</span
+                                >
+                                <span class="badge badge-ghost badge-sm">{{ eventTimePoints.length }} 个时间点</span>
+                                <span class="badge badge-primary badge-sm">{{ visibleEventCount }} 个活动</span>
+                            </div>
+                    </div>
                 </div>
 
                 <ScrollArea class="flex-1">
