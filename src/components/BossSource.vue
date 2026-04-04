@@ -7,8 +7,8 @@ const props = defineProps<{
 }>()
 
 /**
- * 获取高难 Boss 图标。
- * @param hardbossId Boss ID
+ * 获取梦魇残声图标。
+ * @param hardbossId 梦魇残声 ID
  * @returns 图标路径
  */
 function getHardbossIcon(hardbossId?: number) {

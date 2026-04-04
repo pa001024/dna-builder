@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
+import { fishMap } from "@/data"
+import { booksData } from "@/data/d/book.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { collectResourceDraftSources } from "@/utils/draft-source"
 import { getRarityBadgeClass } from "@/utils/rarity-utils"
-import { collectResourceDungeonSources, collectResourceShopSources } from "@/utils/resource-source"
+import { collectResourceDungeonSources, collectResourceHardbossSources, collectResourceShopSources } from "@/utils/resource-source"
 import type { Resource } from "../data/d/resource.data"
 
 interface ResourceSourceGroup {
@@ -23,7 +25,57 @@ const props = defineProps<{
 const rarityText = computed(() => ["白", "绿", "蓝", "紫", "金"][props.resource.rarity - 1] || "白")
 const draftSources = computed(() => collectResourceDraftSources(props.resource))
 const dungeonSources = computed(() => collectResourceDungeonSources(props.resource))
+const hardbossSources = computed(() => collectResourceHardbossSources(props.resource))
 const shopSources = computed(() => collectResourceShopSources(props.resource))
+const bookTarget = computed(() => {
+    for (const book of booksData) {
+        if (!book.res.some(resource => resource.id === props.resource.id)) {
+            continue
+        }
+
+        return book
+    }
+
+    return null
+})
+const bookLink = computed<RouteLocationRaw | null>(() => {
+    if (!bookTarget.value) {
+        return null
+    }
+
+    return {
+        name: "book-detail",
+        params: {
+            id: String(bookTarget.value.id),
+        },
+        query: {
+            resId: String(props.resource.id),
+        },
+    }
+})
+const fishTarget = computed(() => {
+    for (const fish of fishMap.values()) {
+        if (fish.rid !== props.resource.id) {
+            continue
+        }
+
+        return fish
+    }
+
+    return null
+})
+const fishLink = computed<RouteLocationRaw | null>(() => {
+    if (!fishTarget.value) {
+        return null
+    }
+
+    return {
+        name: "fish-detail",
+        params: {
+            id: String(fishTarget.value.id),
+        },
+    }
+})
 const mapSources = computed<ResourceSourceGroup[]>(() => {
     const grouped = new Map<number, ResourceSourceGroup>()
 
@@ -95,11 +147,32 @@ function getResourceIconUrl(icon: string): string {
             </div>
         </div>
 
-        <div class="p-3 bg-base-200 rounded" v-if="draftSources.length || dungeonSources.length || shopSources.length">
+        <div v-if="bookLink" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">所属读物</div>
+            <div class="flex items-center gap-2">
+                <SRouterLink :to="bookLink" class="link link-primary wrap-break-word">
+                    {{ bookTarget?.name }}
+                </SRouterLink>
+                <span class="text-xs text-base-content/70">ID: {{ bookTarget?.id }}</span>
+            </div>
+        </div>
+
+        <div v-if="fishLink" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">所属鱼类</div>
+            <div class="flex items-center gap-2">
+                <SRouterLink :to="fishLink" class="link link-primary wrap-break-word">
+                    {{ fishTarget?.name }}
+                </SRouterLink>
+                <span class="text-xs text-base-content/70">ID: {{ fishTarget?.id }}</span>
+            </div>
+        </div>
+
+        <div class="p-3 bg-base-200 rounded" v-if="draftSources.length || dungeonSources.length || hardbossSources.length || shopSources.length">
             <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.source") }}</div>
             <div class="space-y-3">
                 <DraftSource :draft-sources="draftSources" />
                 <DungeonSource :dungeon-sources="dungeonSources" />
+                <BossSource :boss-sources="hardbossSources" />
                 <ShopSource :shop-sources="shopSources" />
             </div>
         </div>

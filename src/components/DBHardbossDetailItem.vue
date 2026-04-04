@@ -469,7 +469,7 @@ function getHardbossIcon(boss: HardBoss): string {
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="space-y-1">
                     <div class="font-medium">时间过滤</div>
-                    <div class="text-xs text-base-content/70">按离散时间点查看高难 Boss 奖励，也可只看相对上一时间点的变化。</div>
+                    <div class="text-xs text-base-content/70">按离散时间点查看梦魇残声奖励，也可只看相对上一时间点的变化。</div>
                 </div>
                 <div class="flex flex-wrap items-center gap-4">
                     <button type="button" class="btn btn-xs btn-ghost" @click="resetToCurrentTimePoint">重置到当前</button>

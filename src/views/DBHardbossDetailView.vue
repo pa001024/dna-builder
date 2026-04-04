@@ -12,7 +12,7 @@ const boss = computed(() => hardBossMap.get(bossId.value))
 <template>
     <ScrollArea class="h-full">
         <template v-if="boss">
-            <!-- 使用 HardbossDetailItem 组件显示Boss详情 -->
+            <!-- 使用 HardbossDetailItem 组件显示梦魇残声详情 -->
             <DBHardbossDetailItem :boss="boss" />
         </template>
 

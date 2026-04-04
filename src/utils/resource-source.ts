@@ -1,9 +1,10 @@
 import { dungeonMap, rewardMap } from "@/data"
+import { getHardBossDetail, hardBossMap } from "@/data/d/hardboss.data"
 import type { Resource } from "@/data/d/resource.data"
 import shopData from "@/data/d/shop.data"
 import { walnutMap } from "@/data/d/walnut.data"
 import { findInRewardTree, getRewardDetails } from "@/utils/reward-utils"
-import type { ShopSourceInfo } from "@/utils/weapon-source"
+import type { ShopSourceInfo, WeaponHardbossSourceInfo } from "@/utils/weapon-source"
 
 export interface ResourceDungeonSourceInfo {
     key: string
@@ -14,6 +15,73 @@ export interface ResourceDungeonSourceInfo {
     rewardId: number
     pp?: number
     times?: number
+}
+
+/**
+ * 扫描梦魇残声奖励表，反查资源对应的来源。
+ * @param resource 资源数据
+ * @returns 梦魇残声来源列表
+ */
+export function collectResourceHardbossSources(resource: Resource): WeaponHardbossSourceInfo[] {
+    const sources: WeaponHardbossSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+    const matchedWalnutIds = [...walnutMap.values()]
+        .filter(walnut => walnut.奖励?.some(reward => reward.type === "Resource" && reward.id === resource.id))
+        .map(walnut => walnut.id)
+
+    hardBossMap.forEach(boss => {
+        const bossDetail = getHardBossDetail(boss.id)
+        if (!bossDetail) {
+            return
+        }
+
+        bossDetail.diff.forEach(diff => {
+            diff.dr.forEach(dr => {
+                const reward = getRewardDetails(dr.RewardView)
+                const directMatched = findInRewardTree(reward, resource.id, "Resource")
+                if (directMatched) {
+                    const key = `resource-hardboss-${boss.id}-${diff.id}-${dr.DynamicRewardId}-${dr.Index}-resource-${resource.id}`
+                    if (!sourceKeySet.has(key)) {
+                        sourceKeySet.add(key)
+                        sources.push({
+                            key,
+                            type: "hardboss",
+                            timeStart: dr.StartTime,
+                            timeEnd: dr.EndTime,
+                            hardbossName: boss.name,
+                            hardbossLv: diff.lv,
+                            hardbossId: boss.id,
+                        })
+                    }
+                }
+
+                matchedWalnutIds.forEach(walnutId => {
+                    if (!findInRewardTree(reward, walnutId, "Walnut")) {
+                        return
+                    }
+
+                    const key = `resource-hardboss-${boss.id}-${diff.id}-${dr.DynamicRewardId}-${dr.Index}-walnut-${walnutId}`
+                    if (sourceKeySet.has(key)) {
+                        return
+                    }
+
+                    sourceKeySet.add(key)
+                    sources.push({
+                        key,
+                        type: "hardboss",
+                        timeStart: dr.StartTime,
+                        timeEnd: dr.EndTime,
+                        hardbossName: boss.name,
+                        hardbossLv: diff.lv,
+                        walnutId,
+                        hardbossId: boss.id,
+                    })
+                })
+            })
+        })
+    })
+
+    return sources
 }
 
 /**
