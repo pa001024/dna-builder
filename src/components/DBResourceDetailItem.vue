@@ -7,7 +7,12 @@ import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { collectResourceDraftSources } from "@/utils/draft-source"
 import { getRarityBadgeClass } from "@/utils/rarity-utils"
-import { collectResourceDungeonSources, collectResourceHardbossSources, collectResourceShopSources } from "@/utils/resource-source"
+import {
+    collectResourceDungeonSources,
+    collectResourceHardbossSources,
+    collectResourceQuestSources,
+    collectResourceShopSources,
+} from "@/utils/resource-source"
 import type { Resource } from "../data/d/resource.data"
 
 interface ResourceSourceGroup {
@@ -26,6 +31,7 @@ const rarityText = computed(() => ["白", "绿", "蓝", "紫", "金"][props.reso
 const draftSources = computed(() => collectResourceDraftSources(props.resource))
 const dungeonSources = computed(() => collectResourceDungeonSources(props.resource))
 const hardbossSources = computed(() => collectResourceHardbossSources(props.resource))
+const questSources = computed(() => collectResourceQuestSources(props.resource))
 const shopSources = computed(() => collectResourceShopSources(props.resource))
 const bookTarget = computed(() => {
     for (const book of booksData) {
@@ -167,12 +173,16 @@ function getResourceIconUrl(icon: string): string {
             </div>
         </div>
 
-        <div class="p-3 bg-base-200 rounded" v-if="draftSources.length || dungeonSources.length || hardbossSources.length || shopSources.length">
+        <div
+            class="p-3 bg-base-200 rounded"
+            v-if="draftSources.length || dungeonSources.length || hardbossSources.length || questSources.length || shopSources.length"
+        >
             <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.source") }}</div>
             <div class="space-y-3">
                 <DraftSource :draft-sources="draftSources" />
                 <DungeonSource :dungeon-sources="dungeonSources" />
                 <BossSource :boss-sources="hardbossSources" />
+                <QuestSource :quest-sources="questSources" :resource-id="resource.id" />
                 <ShopSource :shop-sources="shopSources" />
             </div>
         </div>

@@ -1,5 +1,6 @@
 import { dungeonMap, rewardMap } from "@/data"
 import { getHardBossDetail, hardBossMap } from "@/data/d/hardboss.data"
+import { questChainData } from "@/data/d/questchain.data"
 import type { Resource } from "@/data/d/resource.data"
 import shopData from "@/data/d/shop.data"
 import { walnutMap } from "@/data/d/walnut.data"
@@ -15,6 +16,18 @@ export interface ResourceDungeonSourceInfo {
     rewardId: number
     pp?: number
     times?: number
+}
+
+export interface ResourceQuestSourceInfo {
+    key: string
+    questChainId: number
+    questChainName: string
+    chapterName: string
+    episode: string
+    rewardId: number
+    num?: number
+    timeStart?: number
+    timeEnd?: number
 }
 
 /**
@@ -122,6 +135,47 @@ export function collectResourceDungeonSources(resource: Resource): ResourceDunge
                 rewardId,
                 pp: matched.pp,
                 times: matched.times,
+            })
+        })
+    })
+
+    return sources
+}
+
+/**
+ * 扫描任务链奖励表，反查资源对应的任务来源。
+ * @param resource 资源数据
+ * @returns 任务来源列表
+ */
+export function collectResourceQuestSources(resource: Resource): ResourceQuestSourceInfo[] {
+    const sources: ResourceQuestSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    questChainData.forEach(questChain => {
+        const rewardIds = [...(questChain.reward || []), ...Object.values(questChain.questReward || {})]
+        rewardIds.forEach(rewardId => {
+            const rewardDetails = getRewardDetails(rewardId)
+            const matched = findInRewardTree(rewardDetails, resource.id, "Resource")
+            if (!matched) {
+                return
+            }
+
+            const key = `quest-${questChain.id}-${rewardId}-${resource.id}`
+            if (sourceKeySet.has(key)) {
+                return
+            }
+
+            sourceKeySet.add(key)
+            sources.push({
+                key,
+                questChainId: questChain.id,
+                questChainName: questChain.name,
+                chapterName: questChain.chapterName,
+                episode: questChain.episode,
+                rewardId,
+                num: matched.num,
+                timeStart: questChain.startTime,
+                timeEnd: questChain.endTime,
             })
         })
     })
