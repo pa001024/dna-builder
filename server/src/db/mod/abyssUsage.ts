@@ -85,29 +85,18 @@ function getAbyssUsageFilterKey(seasonId?: number | null, minLevel?: number | nu
     return `${getAbyssUsageCacheKey(seasonId)}|lv:${minLevel ?? "min"}-${maxLevel ?? "max"}`
 }
 
-function buildLevelWhere(minLevel?: number | null, maxLevel?: number | null) {
-    const hasMin = Number.isInteger(minLevel as number) && (minLevel as number) > 0
-    const hasMax = Number.isInteger(maxLevel as number) && (maxLevel as number) > 0
-    if (!hasMin && !hasMax) {
-        return undefined
-    }
-    const conditions = []
-    if (hasMin) {
-        conditions.push(gte(schema.abyssUsageSubmissions.level, minLevel as number))
-    }
-    if (hasMax) {
-        conditions.push(lte(schema.abyssUsageSubmissions.level, maxLevel as number))
-    }
-    return and(...conditions)
-}
-
 /**
- * 构建提交表的等级筛选条件。
+ * 构建等级筛选条件。
  * @param minLevel 最小等级。
  * @param maxLevel 最大等级。
- * @returns 提交表等级条件。
+ * @param column 等级列。
+ * @returns 等级条件。
  */
-function buildSubmissionLevelWhere(minLevel?: number | null, maxLevel?: number | null) {
+function buildLevelWhere(
+    minLevel: number | null | undefined,
+    maxLevel: number | null | undefined,
+    column: typeof schema.abyssUsageSubmissions.level
+) {
     const hasMin = Number.isInteger(minLevel as number) && (minLevel as number) > 0
     const hasMax = Number.isInteger(maxLevel as number) && (maxLevel as number) > 0
     if (!hasMin && !hasMax) {
@@ -115,10 +104,10 @@ function buildSubmissionLevelWhere(minLevel?: number | null, maxLevel?: number |
     }
     const conditions = []
     if (hasMin) {
-        conditions.push(gte(schema.abyssUsageSubmissions.level, minLevel as number))
+        conditions.push(gte(column, minLevel as number))
     }
     if (hasMax) {
-        conditions.push(lte(schema.abyssUsageSubmissions.level, maxLevel as number))
+        conditions.push(lte(column, maxLevel as number))
     }
     return and(...conditions)
 }
@@ -560,7 +549,7 @@ async function loadAbyssParticipantRows(seasonId?: number | null, minLevel?: num
     if (cached) return await cached
 
     const promise = (async () => {
-        const levelWhere = buildSubmissionLevelWhere(minLevel, maxLevel)
+        const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
         const roleWhere =
             seasonId && levelWhere
                 ? and(eq(schema.abyssUsageRoleParticipants.seasonId, seasonId), levelWhere)
@@ -623,7 +612,7 @@ async function loadAbyssParticipantRows(seasonId?: number | null, minLevel?: num
  * @returns 分组后的单项出现次数统计。
  */
 async function loadSlotStats(seasonId?: number | null, minLevel?: number | null, maxLevel?: number | null) {
-    const levelWhere = buildSubmissionLevelWhere(minLevel, maxLevel)
+    const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
     const where =
         seasonId && levelWhere
             ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
@@ -746,7 +735,7 @@ async function loadLineupStatRows(
     minLevel?: number | null,
     maxLevel?: number | null
 ) {
-    const levelWhere = buildSubmissionLevelWhere(minLevel, maxLevel)
+    const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
     const seasonWhere =
         seasonId && levelWhere
             ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
@@ -818,7 +807,7 @@ async function loadAbyssUsageSubmissionBundle(
     if (cached) return await cached
 
     const promise = (async () => {
-        const levelWhere = buildLevelWhere(minLevel, maxLevel)
+        const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
         const countWhere =
             seasonId && levelWhere
                 ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
@@ -848,7 +837,7 @@ async function loadAbyssUsageSubmissionBundle(
  * @returns 按 level 排序的分布统计。
  */
 async function loadLevelStats(seasonId?: number | null, minLevel?: number | null, maxLevel?: number | null) {
-    const levelWhere = buildLevelWhere(minLevel, maxLevel)
+    const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
     const where =
         seasonId && levelWhere
             ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)

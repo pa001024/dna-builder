@@ -159,6 +159,13 @@ const currentLevelRange = computed(() => {
     return { minLevel, maxLevel }
 })
 
+const levelRangeLabel = computed(() => {
+    if (currentLevelRange.value.minLevel == null || currentLevelRange.value.maxLevel == null) {
+        return "全部等级"
+    }
+    return `Lv.${currentLevelRange.value.minLevel} - Lv.${currentLevelRange.value.maxLevel}`
+})
+
 const levelStatItems = computed<LevelStatItem[]>(() => {
     const total = levelStats.value.reduce((sum, item) => sum + (item.submissionCount || 0), 0)
     return levelStats.value.map(item => ({
@@ -1117,9 +1124,7 @@ onMounted(async () => {
                         <div>
                             <h2 class="text-xl font-bold">历练等级分布</h2>
                         </div>
-                        <div class="text-sm opacity-60">
-                            Lv.{{ currentLevelRange.minLevel }} - Lv.{{ currentLevelRange.maxLevel }} · {{ abyssSubmissionsCount }} 次提交
-                        </div>
+                        <div class="text-sm opacity-60">{{ levelRangeLabel }} · {{ abyssSubmissionsCount }} 次提交</div>
                     </div>
                     <div v-if="levelStatItems.length" class="space-y-3">
                         <div
