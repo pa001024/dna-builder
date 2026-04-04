@@ -15,6 +15,7 @@ export interface User {
     currentTitleClass?: string
     nameEffectClass?: string
     dailyExperienceStatus?: UserDailyExperienceStatus
+    abyssUsageUploadStatus?: UserAbyssUsageUploadStatus
     createdAt?: string
     updateAt?: string
 }
@@ -29,6 +30,10 @@ export interface UserDailyExperienceStatus {
     dailyMessageProgress: number
     dailyMessageLimit: number
     dailyOnlineHourRetryAfterMs?: number
+}
+
+export interface UserAbyssUsageUploadStatus {
+    uploadedThisSeason: boolean
 }
 
 export interface UserLoginResult {
@@ -382,6 +387,7 @@ export interface AbyssUsageSubmission {
     updateAt?: string
     roleParticipants?: AbyssUsageRoleParticipant[]
     weaponParticipants?: AbyssUsageWeaponParticipant[]
+    reward?: UserExperienceRewardResult
 }
 
 export interface AbyssUsageRoleParticipant {

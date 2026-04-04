@@ -15,12 +15,14 @@ import { LeveledWeapon } from "../data/leveled/LeveledWeapon"
 import { useInvStore } from "../store/inv"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
+import { useUserStore } from "../store/user"
 
 defineProps<{
     nobtn?: boolean
 }>()
 const setting = useSettingStore()
 const ui = useUIStore()
+const user = useUserStore()
 const router = useRouter()
 const inv = useInvStore()
 
@@ -211,8 +213,11 @@ async function uploadAbyssUsage() {
         if (!result) {
             throw new Error("上传结果为空")
         }
+        await user.refreshProfile()
+        const awardedExp = result.reward?.awardedExp ?? 0
+        const awardedPoints = result.reward?.awardedPoints ?? 0
+        ui.showSuccessMessage(awardedExp > 0 ? `深渊数据上传成功，经验+${awardedExp}，积分+${awardedPoints}` : "深渊数据上传成功")
         abyssUploadId.value = result.id
-        ui.showSuccessMessage("深渊数据上传成功")
     } catch (error) {
         ui.showErrorMessage("深渊数据上传失败", error instanceof Error ? error.message : String(error))
     } finally {

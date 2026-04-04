@@ -25,6 +25,9 @@ export const meQuery = typedQuery(
                     dailyMessageLimit
                     dailyOnlineHourRetryAfterMs
                 }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
                 createdAt
                 updateAt
             }

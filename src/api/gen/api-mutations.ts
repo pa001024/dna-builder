@@ -992,6 +992,17 @@ export const submitAbyssUsageMutation = typedMutation<Types.AbyssUsageSubmission
         mutation ($input: AbyssUsageSubmissionInput!) {
             submitAbyssUsage(input: $input) {
                 id
+                reward {
+                    success
+                    message
+                    source
+                    awardedExp
+                    awardedPoints
+                    retryAfterMs
+                    user {
+                        id
+                    }
+                }
             }
         }
     `

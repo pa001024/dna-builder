@@ -22,6 +22,7 @@ import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { buildAbyssUploadPayload, getCurrentAbyssSeason } from "@/utils/abyss-upload"
+import { ABYSS_DUNGEON_ELEMENT_KEYS, getAbyssDungeonGroup } from "@/utils/dungeon-utils"
 import { formatTimeRange } from "@/utils/time"
 
 type LineupSlot = {
@@ -87,6 +88,16 @@ const seasonRoleIcon = computed(() => {
     return charId ? LeveledChar.idToUrl(charId) : ""
 })
 
+const seasonDungeonElementKeys = computed(() => {
+    const dungeon = seasonDungeon.value
+    const mb = dungeon?.mb
+    if (!mb) {
+        return []
+    }
+
+    return ABYSS_DUNGEON_ELEMENT_KEYS.filter(key => mb[key] > 0)
+})
+
 const seasonRangeText = computed(() => {
     if (!seasonInfo.value) {
         return ""
@@ -109,7 +120,7 @@ const seasonDungeon = computed(() => {
     }
     return (
         Array.from(abyssDungeonMap.values())
-            .filter(dungeon => dungeon.sid === seasonId && dungeon.art === "奖励进度·不朽剧目")
+            .filter(dungeon => dungeon.sid === seasonId && getAbyssDungeonGroup(dungeon) === "不朽剧目")
             .sort((left, right) => left.id - right.id)[0] || null
     )
 })
@@ -319,7 +330,10 @@ async function uploadAbyssUsage() {
         if (!result) {
             throw new Error("上传结果为空")
         }
-        ui.showSuccessMessage("深渊数据上传成功")
+        await user.refreshProfile()
+        const awardedExp = result.reward?.awardedExp ?? 0
+        const awardedPoints = result.reward?.awardedPoints ?? 0
+        ui.showSuccessMessage(awardedExp > 0 ? `深渊数据上传成功，经验+${awardedExp}，积分+${awardedPoints}` : "深渊数据上传成功")
     } catch (error) {
         ui.showErrorMessage("深渊数据上传失败", error instanceof Error ? error.message : String(error))
     } finally {
@@ -793,7 +807,18 @@ onMounted(async () => {
                                 <span>{{ seasonRangeText }}</span>
                             </div>
                             <div class="space-y-1">
-                                <h1 class="text-3xl font-black tracking-tight">沉浸式戏剧</h1>
+                                <h1 class="flex items-center gap-2 text-3xl font-black tracking-tight">
+                                    <span>沉浸式戏剧</span>
+                                    <span class="inline-flex items-center gap-1">
+                                        <img
+                                            v-for="key in seasonDungeonElementKeys"
+                                            :key="key"
+                                            :src="LeveledChar.elementUrl(key)"
+                                            alt=""
+                                            class="h-8 inline-block"
+                                        />
+                                    </span>
+                                </h1>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 self-start md:self-auto">

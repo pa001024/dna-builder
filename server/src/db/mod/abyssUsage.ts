@@ -4,6 +4,12 @@ import { createGraphQLError } from "graphql-yoga"
 import { abyssDungeons } from "../../../../src/data/d/abyss.data"
 import { db, schema } from ".."
 import type { Context } from "../yoga"
+import {
+    getAbyssUsageUploadRewardDateKey,
+    grantUserExperienceByDateKeyInTx,
+    USER_EXPERIENCE_SOURCES,
+    type UserExperienceGrantResult,
+} from "./userExperience"
 
 type AbyssUsageSubmissionInput = {
     uidSha256: string
@@ -92,6 +98,7 @@ export const typeDefs = /* GraphQL */ `
         updateAt: String
         roleParticipants: [AbyssUsageRoleParticipant!]!
         weaponParticipants: [AbyssUsageWeaponParticipant!]!
+        reward: UserExperienceRewardResult
     }
 
     type AbyssUsageRoleParticipant {
@@ -807,7 +814,7 @@ export const resolvers = {
         },
     },
     Mutation: {
-        submitAbyssUsage: async (_parent, args) => {
+        submitAbyssUsage: async (_parent, args, context) => {
             const input = args?.input as AbyssUsageSubmissionInput | undefined
             if (!input) throw createGraphQLError("非法请求")
             if (!input.uidSha256.trim()) throw createGraphQLError("uidSha256 不能为空")
@@ -886,6 +893,16 @@ export const resolvers = {
                     .insert(schema.abyssUsageWeaponParticipants)
                     .values([...buildOwnedWeaponParticipantRows(submission.id, seasonId, ownedWeapons), ...usageResult.weaponParticipants])
 
+                let reward: UserExperienceGrantResult | null = null
+                if (context.user) {
+                    reward = await grantUserExperienceByDateKeyInTx(
+                        tx,
+                        context.user.id,
+                        USER_EXPERIENCE_SOURCES.ABYSS_USAGE_UPLOAD,
+                        getAbyssUsageUploadRewardDateKey(seasonId)
+                    )
+                }
+
                 invalidateAbyssUsageCaches()
                 return {
                     ...serializeSubmission(submission),
@@ -897,6 +914,23 @@ export const resolvers = {
                         ...buildOwnedWeaponParticipantRows(submission.id, seasonId, ownedWeapons),
                         ...usageResult.weaponParticipants,
                     ],
+                    reward: reward
+                        ? {
+                              success: true,
+                              message: reward.alreadyClaimed ? "深渊上传奖励已领取" : "深渊上传奖励领取成功",
+                              source: USER_EXPERIENCE_SOURCES.ABYSS_USAGE_UPLOAD,
+                              awardedExp: reward.awardedExp,
+                              awardedPoints: reward.awardedPoints,
+                              retryAfterMs: 0,
+                          }
+                        : {
+                              success: false,
+                              message: "Unauthorized",
+                              source: USER_EXPERIENCE_SOURCES.ABYSS_USAGE_UPLOAD,
+                              awardedExp: 0,
+                              awardedPoints: 0,
+                              retryAfterMs: null,
+                          },
                 }
             })
         },

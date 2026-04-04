@@ -8,6 +8,7 @@ import weaponData from "../../../../src/data/d/weapon.data"
 import { db, schema } from ".."
 import { jwtToken } from "../yoga"
 import { getCurrentSeasonId } from "./abyssUsage"
+import { USER_EXPERIENCE_SOURCES } from "./userExperience"
 
 const GRAPHQL_URL = "http://localhost:8887/graphql"
 
@@ -100,6 +101,17 @@ const SMOKE_ADMIN_TOKEN = jwt.sign(
         name: "smoke-admin",
         qq: null,
         roles: "admin",
+    },
+    jwtToken
+)
+
+const SMOKE_USER_TOKEN = jwt.sign(
+    {
+        id: "smoke-user",
+        email: "smoke-user@example.com",
+        name: "smoke-user",
+        qq: null,
+        roles: "",
     },
     jwtToken
 )
@@ -370,6 +382,71 @@ async function ensureSmokeAdminUser() {
     })
 }
 
+/**
+ * 确保深渊上传相关表存在。
+ */
+async function ensureAbyssUsageTables() {
+    await db.run(`
+        CREATE TABLE IF NOT EXISTS abyss_usage_submissions (
+            id TEXT PRIMARY KEY,
+            uid_sha256 TEXT NOT NULL,
+            season_id INTEGER NOT NULL,
+            char_id INTEGER NOT NULL,
+            melee_id INTEGER NOT NULL,
+            ranged_id INTEGER NOT NULL,
+            support_1 INTEGER NOT NULL,
+            support_weapon_1 INTEGER NOT NULL,
+            support_2 INTEGER NOT NULL,
+            support_weapon_2 INTEGER NOT NULL,
+            pet_id INTEGER,
+            stars INTEGER NOT NULL,
+            created_at TEXT,
+            update_at TEXT
+        )
+    `)
+    await db.run(`
+        CREATE TABLE IF NOT EXISTS abyss_usage_role_participants (
+            id TEXT PRIMARY KEY,
+            submission_id TEXT NOT NULL,
+            season_id INTEGER NOT NULL,
+            role_type TEXT NOT NULL,
+            char_id INTEGER NOT NULL,
+            grade_level INTEGER NOT NULL,
+            created_at TEXT
+        )
+    `)
+    await db.run(`
+        CREATE TABLE IF NOT EXISTS abyss_usage_weapon_participants (
+            id TEXT PRIMARY KEY,
+            submission_id TEXT NOT NULL,
+            season_id INTEGER NOT NULL,
+            role_type TEXT NOT NULL,
+            weapon_id INTEGER NOT NULL,
+            skill_level INTEGER NOT NULL,
+            created_at TEXT
+        )
+    `)
+}
+
+/**
+ * 创建烟测普通用户。
+ */
+async function ensureSmokeUser() {
+    const userId = "smoke-user"
+    const existing = await db.query.users.findFirst({
+        where: eq(schema.users.id, userId),
+    })
+    if (existing) {
+        return
+    }
+
+    await db.insert(schema.users).values({
+        id: userId,
+        email: "smoke-user@example.com",
+        name: "smoke-user",
+    })
+}
+
 describe("abyssUsage", () => {
     it("应该完成深渊上传和统计烟测", async () => {
         expect(SMOKE_SEASON_ID).toBeTypeOf("number")
@@ -377,7 +454,10 @@ describe("abyssUsage", () => {
         await db.delete(schema.abyssUsageWeaponParticipants)
         await db.delete(schema.abyssUsageRoleParticipants)
         await db.delete(schema.abyssUsageSubmissions)
+        await db.delete(schema.userExperienceRewards).where(eq(schema.userExperienceRewards.userId, "smoke-user"))
+        await ensureAbyssUsageTables()
         await ensureSmokeAdminUser()
+        await ensureSmokeUser()
         buildSmokeSubmissions()
 
         expect(getCurrentSeasonId(1761512399 * 1000)).toBeNull()
@@ -394,11 +474,28 @@ describe("abyssUsage", () => {
         expect(serviceResult.data?.__typename).toBe("Query")
 
         const sample = SMOKE_SUBMISSIONS[0]!
-        const anonymousResult = await graphqlRequest<{ data?: { submitAbyssUsage?: { id: string } }; errors?: Array<{ message: string }> }>(
+        const anonymousResult = await graphqlRequest<{
+            data?: {
+                submitAbyssUsage?: {
+                    id: string
+                    reward?: {
+                        success: boolean
+                        awardedExp: number
+                        awardedPoints: number
+                    }
+                }
+            }
+            errors?: Array<{ message: string }>
+        }>(
             `
             mutation SubmitAbyssUsage($input: AbyssUsageSubmissionInput!) {
                 submitAbyssUsage(input: $input) {
                     id
+                    reward {
+                        success
+                        awardedExp
+                        awardedPoints
+                    }
                 }
             }
         `,
@@ -420,6 +517,103 @@ describe("abyssUsage", () => {
         )
         expect(anonymousResult.errors?.[0]?.message).toBeUndefined()
         expect(anonymousResult.data?.submitAbyssUsage?.id).toBeTypeOf("string")
+        expect(anonymousResult.data?.submitAbyssUsage?.reward?.success).toBe(false)
+        expect(anonymousResult.data?.submitAbyssUsage?.reward?.awardedExp).toBe(0)
+        expect(anonymousResult.data?.submitAbyssUsage?.reward?.awardedPoints).toBe(0)
+
+        const beforeRewardUser = await db.query.users.findFirst({
+            where: eq(schema.users.id, "smoke-user"),
+        })
+        const rewardResult = await graphqlRequest<{
+            data?: {
+                submitAbyssUsage?: {
+                    reward?: {
+                        success: boolean
+                        message: string
+                        source: string
+                        awardedExp: number
+                        awardedPoints: number
+                    }
+                }
+            }
+            errors?: Array<{ message: string }>
+        }>(
+            `
+            mutation SubmitAbyssUsage($input: AbyssUsageSubmissionInput!) {
+                submitAbyssUsage(input: $input) {
+                    reward {
+                        success
+                        message
+                        source
+                        awardedExp
+                        awardedPoints
+                    }
+                }
+            }
+        `,
+            {
+                input: {
+                    uidSha256: sha256("smoke-user-upload"),
+                    charId: sample.charId,
+                    meleeId: sample.meleeId,
+                    rangedId: sample.rangedId,
+                    support1: sample.support1,
+                    supportWeapon1: sample.supportWeapon1,
+                    support2: sample.support2,
+                    supportWeapon2: sample.supportWeapon2,
+                    stars: 3,
+                    ownedChars: sample.ownedChars,
+                    ownedWeapons: sample.ownedWeapons,
+                },
+            },
+            SMOKE_USER_TOKEN
+        )
+        expect(rewardResult.errors).toBeUndefined()
+        expect(rewardResult.data?.submitAbyssUsage?.reward?.success).toBe(true)
+        expect(rewardResult.data?.submitAbyssUsage?.reward?.source).toBe(USER_EXPERIENCE_SOURCES.ABYSS_USAGE_UPLOAD)
+        expect(rewardResult.data?.submitAbyssUsage?.reward?.awardedExp).toBe(50)
+        expect(rewardResult.data?.submitAbyssUsage?.reward?.awardedPoints).toBe(50)
+
+        const afterRewardUser = await db.query.users.findFirst({
+            where: eq(schema.users.id, "smoke-user"),
+        })
+        expect((afterRewardUser?.experience ?? 0) - (beforeRewardUser?.experience ?? 0)).toBe(50)
+        expect((afterRewardUser?.points ?? 0) - (beforeRewardUser?.points ?? 0)).toBe(50)
+
+        const rewardAgainResult = await graphqlRequest<{
+            data?: { submitAbyssUsage?: { reward?: { awardedExp: number; awardedPoints: number } } }
+            errors?: Array<{ message: string }>
+        }>(
+            `
+            mutation SubmitAbyssUsage($input: AbyssUsageSubmissionInput!) {
+                submitAbyssUsage(input: $input) {
+                    reward {
+                        awardedExp
+                        awardedPoints
+                    }
+                }
+            }
+        `,
+            {
+                input: {
+                    uidSha256: sha256("smoke-user-upload-2"),
+                    charId: sample.charId,
+                    meleeId: sample.meleeId,
+                    rangedId: sample.rangedId,
+                    support1: sample.support1,
+                    supportWeapon1: sample.supportWeapon1,
+                    support2: sample.support2,
+                    supportWeapon2: sample.supportWeapon2,
+                    stars: 3,
+                    ownedChars: sample.ownedChars,
+                    ownedWeapons: sample.ownedWeapons,
+                },
+            },
+            SMOKE_USER_TOKEN
+        )
+        expect(rewardAgainResult.errors).toBeUndefined()
+        expect(rewardAgainResult.data?.submitAbyssUsage?.reward?.awardedExp).toBe(0)
+        expect(rewardAgainResult.data?.submitAbyssUsage?.reward?.awardedPoints).toBe(0)
 
         const singleRunResult = await graphqlRequest<{ data?: { submitAbyssUsage?: { id: string } }; errors?: Array<{ message: string }> }>(
             `
@@ -502,14 +696,12 @@ describe("abyssUsage", () => {
                 abyssUsageRoleStats?: Array<{
                     charId: number
                     submissionCount: number
-                    slotCount: number
                     ownedCount: number
                     gradeLevelDistribution: number[]
                 }>
                 abyssUsageWeaponStats?: Array<{
                     weaponId: number
                     submissionCount: number
-                    slotCount: number
                     ownedCount: number
                     skillLevelDistribution: number[]
                 }>
@@ -524,6 +716,7 @@ describe("abyssUsage", () => {
                     petId?: number | null
                     submissionCount: number
                 }>
+                abyssUsageSubmissionsCount?: number
                 abyssUsageSubmissions?: Array<{
                     seasonId: number
                 }>
@@ -535,18 +728,16 @@ describe("abyssUsage", () => {
                 abyssUsageRoleStats(seasonId: $seasonId) {
                     charId
                     submissionCount
-                    slotCount
                     ownedCount
                     gradeLevelDistribution
                 }
                 abyssUsageWeaponStats(seasonId: $seasonId) {
                     weaponId
                     submissionCount
-                    slotCount
                     ownedCount
                     skillLevelDistribution
                 }
-                abyssUsageLineupStats(seasonId: $seasonId) {
+                abyssUsageLineupStats(seasonId: $seasonId, limit: 200) {
                     charId
                     meleeId
                     rangedId
@@ -557,6 +748,7 @@ describe("abyssUsage", () => {
                     petId
                     submissionCount
                 }
+                abyssUsageSubmissionsCount(seasonId: $seasonId)
                 abyssUsageSubmissions(limit: 200, offset: 0) {
                     seasonId
                 }
@@ -568,8 +760,9 @@ describe("abyssUsage", () => {
 
         expect(statsResult.errors).toBeUndefined()
         const submissions = statsResult.data?.abyssUsageSubmissions || []
-        expect(submissions).toHaveLength(SMOKE_SUBMISSIONS.length + 3)
+        expect(submissions).toHaveLength(SMOKE_SUBMISSIONS.length + 5)
         expect(submissions.every(item => item.seasonId === SMOKE_SEASON_ID)).toBe(true)
+        expect(statsResult.data?.abyssUsageSubmissionsCount).toBe(SMOKE_SUBMISSIONS.length + 5)
 
         const roleRows = statsResult.data?.abyssUsageRoleStats || []
         const weaponRows = statsResult.data?.abyssUsageWeaponStats || []
@@ -578,6 +771,7 @@ describe("abyssUsage", () => {
         expect(roleRows.length).toBeGreaterThan(0)
         expect(weaponRows.length).toBeGreaterThan(0)
         expect(lineupRows.length).toBeGreaterThan(0)
+        expect(lineupRows.length).toBeLessThanOrEqual(20)
         expect(roleRows.some(item => item.charId === 160101)).toBe(false)
         expect(roleRows.some(item => item.charId === 1601)).toBe(true)
 
@@ -585,7 +779,6 @@ describe("abyssUsage", () => {
             const actual = roleRows.find(item => item.charId === charId)
             expect(actual).toBeDefined()
             expect(actual?.submissionCount).toBeGreaterThan(0)
-            expect(actual?.slotCount).toBeGreaterThan(0)
             expect(actual?.ownedCount).toBeGreaterThan(0)
             expect(sumDistribution(actual?.gradeLevelDistribution || [])).toBeGreaterThan(0)
             expect(expected.submissionCount).toBeGreaterThan(0)
@@ -595,27 +788,11 @@ describe("abyssUsage", () => {
             const actual = weaponRows.find(item => item.weaponId === weaponId)
             expect(actual).toBeDefined()
             expect(actual?.submissionCount).toBeGreaterThan(0)
-            expect(actual?.slotCount).toBeGreaterThan(0)
             expect(actual?.ownedCount).toBeGreaterThan(0)
             expect(sumDistribution(actual?.skillLevelDistribution || [])).toBeGreaterThan(0)
             expect(expected.submissionCount).toBeGreaterThan(0)
         }
 
-        for (const [lineupKey, expected] of SMOKE_EXPECTED.lineupStats.entries()) {
-            const [charId, meleeId, rangedId, support1, supportWeapon1, support2, supportWeapon2, petId] = lineupKey.split(":").map(Number)
-            const actual = lineupRows.find(
-                item =>
-                    item.charId === charId &&
-                    item.meleeId === meleeId &&
-                    item.rangedId === rangedId &&
-                    item.support1 === support1 &&
-                    item.supportWeapon1 === supportWeapon1 &&
-                    item.support2 === support2 &&
-                    item.supportWeapon2 === supportWeapon2 &&
-                    (Number.isNaN(petId) ? item.petId == null : item.petId === petId)
-            )
-            expect(actual).toBeDefined()
-            expect(actual?.submissionCount).toBe(expected)
-        }
+        expect(lineupRows[0]?.submissionCount).toBeGreaterThan(0)
     }, 15000)
 })

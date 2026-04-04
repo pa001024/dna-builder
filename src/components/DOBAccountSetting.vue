@@ -50,7 +50,22 @@ const nameEdit = reactive({
 
 const levelProgress = computed(() => getUserLevelProgress(user.experience, user.level))
 
-const dailyExperienceStatus = ref<NonNullable<NonNullable<Awaited<ReturnType<typeof meQuery>>>["dailyExperienceStatus"]> | null>(null)
+type MeQueryResult = NonNullable<Awaited<ReturnType<typeof meQuery>>>
+
+const dailyExperienceStatus = ref<MeQueryResult["dailyExperienceStatus"] | null>(null)
+const abyssUsageUploadStatus = ref<MeQueryResult["abyssUsageUploadStatus"] | null>(null)
+
+/**
+ * @description 将进度数值裁剪到安全范围，供 tooltip 进度条使用。
+ * @param current 当前进度。
+ * @param total 总量。
+ * @returns 归一化后的进度值。
+ */
+function clampProgress(current: number | null | undefined, total: number | null | undefined): number {
+    const safeTotal = Math.max(1, total ?? 0)
+    const safeCurrent = Math.max(0, current ?? 0)
+    return Math.min(safeCurrent, safeTotal)
+}
 
 /**
  * @description 拉取当前用户每日经验状态，用于等级提示 tooltip。
@@ -62,11 +77,40 @@ async function refreshDailyExperienceStatus(): Promise<void> {
     }
 
     try {
-        dailyExperienceStatus.value = (await meQuery(undefined, { requestPolicy: "network-only" }))?.dailyExperienceStatus ?? null
+        dailyExperienceStatus.value = (await refreshMeStatus())?.dailyExperienceStatus ?? null
     } catch (error) {
         console.error("拉取每日经验状态失败:", error)
         dailyExperienceStatus.value = null
     }
+}
+
+/**
+ * @description 拉取当前用户本赛季深渊上传状态，用于设置页 tooltip 展示。
+ */
+async function refreshAbyssUsageUploadStatus(): Promise<void> {
+    if (!user.jwtToken) {
+        abyssUsageUploadStatus.value = null
+        return
+    }
+
+    try {
+        abyssUsageUploadStatus.value = (await refreshMeStatus())?.abyssUsageUploadStatus ?? null
+    } catch (error) {
+        console.error("拉取深渊上传状态失败:", error)
+        abyssUsageUploadStatus.value = null
+    }
+}
+
+/**
+ * @description 拉取一次当前用户资料，供多个设置项复用。
+ * @returns 当前用户资料；失败时抛出错误。
+ */
+async function refreshMeStatus(): Promise<MeQueryResult | null> {
+    if (!user.jwtToken) {
+        return null
+    }
+
+    return (await meQuery(undefined, { requestPolicy: "network-only" })) ?? null
 }
 
 /**
@@ -122,6 +166,7 @@ watch(
     () => {
         refreshShopSummary()
         refreshDailyExperienceStatus()
+        refreshAbyssUsageUploadStatus()
     },
     { immediate: true }
 )
@@ -369,51 +414,127 @@ async function startNameEdit() {
                                     <template #tooltip>
                                         <div class="w-72 space-y-2 text-xs leading-5 text-base-content">
                                             <div class="font-semibold">每日经验进度</div>
-                                            <div v-if="dailyExperienceStatus">
-                                                今日已获得 {{ dailyExperienceStatus.todayAwardedExp }}/{{
-                                                    dailyExperienceStatus.totalAvailableExp
-                                                }}
-                                                经验
-                                            </div>
-                                            <div v-else>今日进度暂不可用</div>
-                                            <div class="border-t border-base-300/70 pt-2 space-y-1.5">
-                                                <div class="font-semibold">来源</div>
-                                                <div>
-                                                    打开软件 +2：
-                                                    {{ dailyExperienceStatus?.dailyLaunchProgress ?? 0 }}/{{
-                                                        dailyExperienceStatus?.dailyLaunchLimit ?? 1
-                                                    }}
-                                                </div>
-                                                <div>
-                                                    在线满1小时 +3：
-                                                    {{
-                                                        `${dailyExperienceStatus?.dailyOnlineHourProgress ?? 0}/${
-                                                            dailyExperienceStatus?.dailyOnlineHourLimit ?? 1
-                                                        }`
-                                                    }}
-                                                    <span
-                                                        v-if="
-                                                            (dailyExperienceStatus?.dailyOnlineHourProgress ?? 0) <
-                                                            (dailyExperienceStatus?.dailyOnlineHourLimit ?? 1)
-                                                        "
-                                                    >
-                                                        <span
-                                                            v-if="
-                                                                formatRemainingDuration(dailyExperienceStatus?.dailyOnlineHourRetryAfterMs)
-                                                            "
-                                                        >
-                                                            （{{
-                                                                formatRemainingDuration(dailyExperienceStatus?.dailyOnlineHourRetryAfterMs)
-                                                            }}）
-                                                        </span>
+                                            <div v-if="dailyExperienceStatus" class="space-y-2">
+                                                <div class="flex items-center justify-between gap-3">
+                                                    <span>今日已获得</span>
+                                                    <span class="tabular-nums">
+                                                        {{ dailyExperienceStatus.todayAwardedExp }}/{{
+                                                            dailyExperienceStatus.totalAvailableExp
+                                                        }}
                                                     </span>
                                                 </div>
-                                                <div>
-                                                    今日首条聊天消息 +1：
-                                                    {{ dailyExperienceStatus?.dailyMessageProgress ?? 0 }}/{{
-                                                        dailyExperienceStatus?.dailyMessageLimit ?? 1
-                                                    }}
+                                                <progress
+                                                    class="progress progress-primary w-full h-2"
+                                                    :value="dailyExperienceStatus.todayAwardedExp"
+                                                    :max="dailyExperienceStatus.totalAvailableExp"
+                                                />
+                                                <div class="border-t border-base-300/70 pt-2 space-y-2">
+                                                    <div class="space-y-1">
+                                                        <div class="flex items-center justify-between gap-3">
+                                                            <span>打开软件 +2</span>
+                                                            <span class="tabular-nums">
+                                                                {{
+                                                                    clampProgress(
+                                                                        dailyExperienceStatus.dailyLaunchProgress,
+                                                                        dailyExperienceStatus.dailyLaunchLimit
+                                                                    )
+                                                                }}/{{ dailyExperienceStatus.dailyLaunchLimit }}
+                                                            </span>
+                                                        </div>
+                                                        <progress
+                                                            class="progress progress-secondary w-full h-2"
+                                                            :value="
+                                                                clampProgress(
+                                                                    dailyExperienceStatus.dailyLaunchProgress,
+                                                                    dailyExperienceStatus.dailyLaunchLimit
+                                                                )
+                                                            "
+                                                            :max="dailyExperienceStatus.dailyLaunchLimit"
+                                                        />
+                                                    </div>
+                                                    <div class="space-y-1">
+                                                        <div class="flex items-center justify-between gap-3">
+                                                            <span>在线满1小时 +3</span>
+                                                            <span class="tabular-nums">
+                                                                {{
+                                                                    clampProgress(
+                                                                        dailyExperienceStatus.dailyOnlineHourProgress,
+                                                                        dailyExperienceStatus.dailyOnlineHourLimit
+                                                                    )
+                                                                }}/{{ dailyExperienceStatus.dailyOnlineHourLimit }}
+                                                            </span>
+                                                        </div>
+                                                        <progress
+                                                            class="progress progress-secondary w-full h-2"
+                                                            :value="
+                                                                clampProgress(
+                                                                    dailyExperienceStatus.dailyOnlineHourProgress,
+                                                                    dailyExperienceStatus.dailyOnlineHourLimit
+                                                                )
+                                                            "
+                                                            :max="dailyExperienceStatus.dailyOnlineHourLimit"
+                                                        />
+                                                        <div
+                                                            v-if="
+                                                                (dailyExperienceStatus.dailyOnlineHourProgress ?? 0) <
+                                                                (dailyExperienceStatus.dailyOnlineHourLimit ?? 1)
+                                                            "
+                                                            class="text-[11px] text-base-content/50"
+                                                        >
+                                                            <span
+                                                                v-if="
+                                                                    formatRemainingDuration(
+                                                                        dailyExperienceStatus.dailyOnlineHourRetryAfterMs
+                                                                    )
+                                                                "
+                                                            >
+                                                                还需
+                                                                {{
+                                                                    formatRemainingDuration(
+                                                                        dailyExperienceStatus.dailyOnlineHourRetryAfterMs
+                                                                    )
+                                                                }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="space-y-1">
+                                                        <div class="flex items-center justify-between gap-3">
+                                                            <span>今日首条聊天消息 +1</span>
+                                                            <span class="tabular-nums">
+                                                                {{
+                                                                    clampProgress(
+                                                                        dailyExperienceStatus.dailyMessageProgress,
+                                                                        dailyExperienceStatus.dailyMessageLimit
+                                                                    )
+                                                                }}/{{ dailyExperienceStatus.dailyMessageLimit }}
+                                                            </span>
+                                                        </div>
+                                                        <progress
+                                                            class="progress progress-secondary w-full h-2"
+                                                            :value="
+                                                                clampProgress(
+                                                                    dailyExperienceStatus.dailyMessageProgress,
+                                                                    dailyExperienceStatus.dailyMessageLimit
+                                                                )
+                                                            "
+                                                            :max="dailyExperienceStatus.dailyMessageLimit"
+                                                        />
+                                                    </div>
                                                 </div>
+                                            </div>
+                                            <div v-else class="text-base-content/60">今日进度暂不可用</div>
+                                            <div class="border-t border-base-300/70 pt-2 space-y-2">
+                                                <div class="flex items-center justify-between gap-3">
+                                                    <span>本赛季深渊上传 +50</span>
+                                                    <span class="tabular-nums">
+                                                        {{ abyssUsageUploadStatus?.uploadedThisSeason ? "1/1" : "0/1" }}
+                                                    </span>
+                                                </div>
+                                                <progress
+                                                    class="progress progress-primary w-full h-2"
+                                                    :value="abyssUsageUploadStatus?.uploadedThisSeason ? 1 : 0"
+                                                    :max="1"
+                                                />
                                             </div>
                                         </div>
                                     </template>
