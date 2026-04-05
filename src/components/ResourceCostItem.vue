@@ -429,7 +429,12 @@ function handleCardClick() {
     >
         <div class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200" v-bind="$attrs" @click="handleCardClick">
             <span class="font-medium truncate">
-                <img :src="weapon.url" :alt="weapon.名称" class="size-8 inline-block mr-2 rounded" />
+                <img
+                    :src="weapon.url"
+                    :alt="weapon.名称"
+                    class="size-8 inline-block mr-2 bg-linear-45 rounded"
+                    :class="getRarityGradientClass(5)"
+                />
                 <SRouterLink :to="`/db/weapon/${weapon.id}`" stop class="hover:underline">
                     {{ $t(weapon.名称) }}
                 </SRouterLink>
@@ -447,7 +452,12 @@ function handleCardClick() {
     >
         <div class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200" v-bind="$attrs" @click="handleCardClick">
             <span class="font-medium truncate">
-                <img :src="char.url" :alt="char.名称" class="size-8 inline-block mr-2 rounded" />
+                <img
+                    :src="char.url"
+                    :alt="char.名称"
+                    class="size-8 inline-block mr-2 bg-linear-45 rounded"
+                    :class="getRarityGradientClass(5)"
+                />
                 <SRouterLink :to="`/db/char/${char.id}`" stop class="hover:underline">
                     {{ $t(char.名称) }}
                 </SRouterLink>

@@ -27,6 +27,7 @@ export interface ResourceQuestSourceInfo {
     episode: string
     rewardId: number
     num?: number
+    d?: 1
     timeStart?: number
     timeEnd?: number
 }
@@ -221,6 +222,7 @@ export function collectResourceQuestSources(resource: Resource): ResourceQuestSo
                 episode: questChain.episode,
                 rewardId,
                 num: matched.num,
+                d: matched.d,
                 timeStart: questChain.startTime,
                 timeEnd: questChain.endTime,
             })

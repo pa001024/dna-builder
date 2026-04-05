@@ -172,13 +172,13 @@ export function findInRewardTree(
     reward: RewardItem | null,
     id: number,
     type = "Mod"
-): { pp?: number; times?: number; num?: number } | null {
+): { pp?: number; times?: number; num?: number; d?: 1; n?: string } | null {
     if (!reward) return null
 
     if (reward.child) {
         for (const child of reward.child) {
             if (child.t === type && child.id === id) {
-                return { pp: child.pp, times: child.times, num: child.c ?? 1 }
+                return { pp: child.pp, times: child.times, num: child.c ?? 1, d: child.d, n: child.n }
             } else {
                 const result = findInRewardTree(child, id, type)
                 if (result) return result

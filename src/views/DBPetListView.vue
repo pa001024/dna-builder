@@ -145,7 +145,7 @@ useInitialScrollToSelectedItem()
     <div class="h-full flex flex-col bg-base-100">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedPet }">
-                <div class="p-3 border-b border-base-200">
+                <div class="p-2">
                     <input
                         v-model="searchKeyword"
                         type="text"
@@ -154,9 +154,8 @@ useInitialScrollToSelectedItem()
                     />
                 </div>
 
-                <div class="p-2 border-b border-base-200 space-y-2">
+                <div class="p-2 space-y-2">
                     <div>
-                        <div class="text-xs text-base-content/70 mb-1">{{ $t("char-build.enemy_type") }}</div>
                         <div class="flex flex-wrap gap-1 pb-1">
                             <button
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
@@ -178,7 +177,6 @@ useInitialScrollToSelectedItem()
                     </div>
 
                     <div>
-                        <div class="text-xs text-base-content/70 mb-1">{{ $t("char-build.quality") }}</div>
                         <div class="flex flex-wrap gap-1 pb-1">
                             <button
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"

@@ -398,7 +398,7 @@ function attachAmmoToPlacements(state: SolverState, ammoGroup: AmmoGroup | null,
         if (gunItem.type !== "Gun") {
             continue
         }
-        let remainingCapacity = Math.max(0, (gunItem.maxAmmo ?? 0) - (gunItem.currentAmmo ?? 0))
+        const remainingCapacity = Math.max(0, (gunItem.maxAmmo ?? 0) - (gunItem.currentAmmo ?? 0))
         const attachedRounds = Math.min(remainingCapacity, remainingRounds)
         if (attachedRounds <= 0) {
             continue

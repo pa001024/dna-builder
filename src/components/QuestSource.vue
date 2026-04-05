@@ -40,7 +40,7 @@ const sourceIconUrl = computed(() => {
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
                             <img :src="sourceIconUrl" class="w-4 h-4 object-cover rounded" :alt="sourceName" />
-                            <span class="text-xs text-base-content/70 truncate max-w-24">{{ sourceName }}</span>
+                            <span class="text-xs text-base-content/70">{{ source.d ? `图纸: ${sourceName}` : sourceName }}</span>
                             <span class="text-sm text-base-content/70">{{ source.num ?? 1 }}</span>
                         </div>
                     </div>

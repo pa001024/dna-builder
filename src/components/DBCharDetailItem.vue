@@ -33,7 +33,7 @@ function getTraceOrdinal(index: number): string {
 const currentLevel = ref(80) // 默认80级
 // 当前技能等级
 const currentSkillLevel = ref(12)
-const activeBottomTab = ref<"profile" | "skin" | "voice">("profile")
+const activeBottomTab = ref<"profile" | "skin" | "voice">("skin")
 const currentVoiceId = ref<number | null>(null)
 const isVoicePlaying = ref(false)
 const voiceAudioRef = ref<HTMLAudioElement | null>(null)
@@ -486,7 +486,7 @@ function handleVoiceEnded(): void {
 watch(
     () => props.char.id,
     () => {
-        activeBottomTab.value = "profile"
+        activeBottomTab.value = "skin"
         stopVoicePlayback()
     }
 )
@@ -724,25 +724,16 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="p-3 bg-base-200 rounded space-y-3">
-            <div class="flex flex-wrap gap-1 pb-1">
-                <span
-                    class="text-sm px-2 py-1 rounded cursor-pointer transition-colors duration-200 hover:bg-base-300"
-                    :class="{ 'bg-primary text-white hover:bg-primary': activeBottomTab === 'profile' }"
-                    @click="activeBottomTab = 'profile'"
-                    >{{ $t("档案") }}</span
-                >
-                <span
-                    class="text-sm px-2 py-1 rounded cursor-pointer transition-colors duration-200 hover:bg-base-300"
-                    :class="{ 'bg-primary text-white hover:bg-primary': activeBottomTab === 'skin' }"
-                    @click="activeBottomTab = 'skin'"
-                    >{{ $t("皮肤") }}</span
-                >
-                <span
-                    class="text-sm px-2 py-1 rounded cursor-pointer transition-colors duration-200 hover:bg-base-300"
-                    :class="{ 'bg-primary text-white hover:bg-primary': activeBottomTab === 'voice' }"
-                    @click="activeBottomTab = 'voice'"
-                    >{{ $t("语音") }}</span
-                >
+            <div class="tabs tabs-box">
+                <span class="tab" :class="{ 'tab-active ': activeBottomTab === 'skin' }" @click="activeBottomTab = 'skin'">{{
+                    $t("皮肤")
+                }}</span>
+                <span class="tab" :class="{ 'tab-active': activeBottomTab === 'profile' }" @click="activeBottomTab = 'profile'">{{
+                    $t("档案")
+                }}</span>
+                <span class="tab" :class="{ 'tab-active': activeBottomTab === 'voice' }" @click="activeBottomTab = 'voice'">{{
+                    $t("语音")
+                }}</span>
             </div>
 
             <div v-if="activeBottomTab === 'profile'" class="space-y-3">
@@ -778,7 +769,13 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
-                        <div v-if="skin.tag" class="text-xs text-base-content/70">{{ skin.tag }}</div>
+                        <div v-if="skin.icon.startsWith('T_Head_') && skin.icon !== 'T_Head_Nvzhu'" class="space-y-2">
+                            <div class="text-xs text-base-content/70">立绘</div>
+                            <ImagePreview
+                                :thumb-url="`/imgs/bust/${skin.icon.replace('_Head', '_Bust')}.webp`"
+                                :full-url="`https://cdn.dna-builder.cn/img/res/${skin.icon.replace('_Head', '_Bust')}.webp`"
+                            />
+                        </div>
 
                         <div v-if="skin.defaultItem && Object.keys(skin.defaultItem).length > 0" class="space-y-2">
                             <div class="text-xs text-base-content/70">默认奖励</div>

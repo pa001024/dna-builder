@@ -2,10 +2,10 @@
 import { computed, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { monsterMap } from "@/data"
-import { charMap, weaponNameMap } from "@/data/d"
+import { charMap, weaponMap } from "@/data/d"
 import type { HardBoss, HardBossDetail } from "@/data/d/hardboss.data"
 import { getHardBossDetail } from "@/data/d/hardboss.data"
-import { walnutMap } from "@/data/d/walnut.data"
+import { type Walnut, walnutMap } from "@/data/d/walnut.data"
 import { getDropModeText, getRewardDetails } from "@/utils/reward-utils"
 
 interface DynamicRewardEntry {
@@ -43,6 +43,13 @@ interface HardbossRewardCost {
     key: string
     name: string
     value: [string, number, "Char" | "Weapon"]
+    diffState?: HardbossRewardDiffState
+}
+
+interface WalnutRewardInfo {
+    id: number
+    name: string
+    type: "Char" | "Weapon"
 }
 
 const props = defineProps<{
@@ -222,6 +229,10 @@ const activeFilterTimestamp = computed(() => {
     return selectedTimePoint.value?.timestamp ?? null
 })
 
+const effectiveDiffOnlyEnabled = computed(() => {
+    return timeFilterEnabled.value && diffOnlyEnabled.value
+})
+
 /**
  * 当前 Boss 的过滤后奖励视图。
  * @returns 各等级奖励的过滤后视图
@@ -236,7 +247,7 @@ const filteredDiffs = computed<HardbossDiffView[]>(() => {
                     diff.dr,
                     activeFilterTimestamp.value,
                     previousSelectedTimePoint.value?.timestamp ?? null,
-                    diffOnlyEnabled.value
+                    effectiveDiffOnlyEnabled.value
                 ),
                 activeRewardCount: countActiveRewardsByTimestamp(diff.dr, activeFilterTimestamp.value),
                 changedRewardCount: countChangedRewardsByTimestamp(
@@ -245,7 +256,7 @@ const filteredDiffs = computed<HardbossDiffView[]>(() => {
                     previousSelectedTimePoint.value?.timestamp ?? null
                 ),
             }))
-            ?.filter(diff => !diffOnlyEnabled.value || diff.changedRewardCount > 0) ?? []
+            ?.filter(diff => !effectiveDiffOnlyEnabled.value || diff.changedRewardCount > 0) ?? []
     )
 })
 
@@ -270,19 +281,12 @@ const hardbossWalnutRewardCosts = computed<HardbossRewardCost[]>(() => {
                     return
                 }
 
-                const rewardType = walnut.类型 === 1 ? "Char" : walnut.类型 === 2 ? "Weapon" : null
-                if (!rewardType) {
+                const rewardInfo = getWalnutRewardInfo(walnut)
+                if (!rewardInfo) {
                     return
                 }
 
-                const rewardName = walnut.名称.replace(/^密函：/, "")
-                const reward = rewardType === "Char" ? charMap.get(rewardName) : weaponNameMap.get(rewardName)
-                const rewardId = reward?.id
-                if (!rewardId) {
-                    return
-                }
-
-                const key = `${dr.RewardView}-${item.id}-${rewardType}-${rewardId}`
+                const key = `${dr.RewardView}-${item.id}-${rewardInfo.type}-${rewardInfo.id}`
                 if (seen.has(key)) {
                     return
                 }
@@ -290,8 +294,9 @@ const hardbossWalnutRewardCosts = computed<HardbossRewardCost[]>(() => {
 
                 costs.push({
                     key,
-                    name: rewardName,
-                    value: [`Lv.${diff.lv}`, rewardId, rewardType],
+                    name: rewardInfo.name,
+                    value: [`Lv.${diff.lv}`, rewardInfo.id, rewardInfo.type],
+                    diffState: dr.diffState,
                 })
             })
         })
@@ -378,6 +383,47 @@ function countChangedRewardsByTimestamp(rewards: DynamicRewardEntry[], timestamp
         const wasPreviousActive = previousTimestamp == null ? false : isRewardAvailableAtTime(reward, previousTimestamp)
         return isCurrentActive !== wasPreviousActive
     }).length
+}
+
+/**
+ * 从密函数据中解析可展示的角色或武器奖励信息。
+ * @param walnut 密函数据
+ * @returns 角色或武器奖励信息；无法解析则返回 null
+ */
+function getWalnutRewardInfo(walnut: Walnut): WalnutRewardInfo | null {
+    const reward = walnut.奖励[0]
+    if (!reward) {
+        return null
+    }
+
+    if (walnut.类型 === 1) {
+        const charName = reward.name.replace(/^思绪片段·/, "")
+        const char = charMap.get(charName)
+        if (!char) {
+            return null
+        }
+
+        return {
+            id: char.id,
+            name: char.名称,
+            type: "Char",
+        }
+    }
+
+    if (walnut.类型 === 2) {
+        const weapon = weaponMap.get(reward.id)
+        if (!weapon) {
+            return null
+        }
+
+        return {
+            id: weapon.id,
+            name: weapon.名称,
+            type: "Weapon",
+        }
+    }
+
+    return null
 }
 
 /**
@@ -469,7 +515,6 @@ function getHardbossIcon(boss: HardBoss): string {
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="space-y-1">
                     <div class="font-medium">时间过滤</div>
-                    <div class="text-xs text-base-content/70">按离散时间点查看梦魇残声奖励，也可只看相对上一时间点的变化。</div>
                 </div>
                 <div class="flex flex-wrap items-center gap-4">
                     <button type="button" class="btn btn-xs btn-ghost" @click="resetToCurrentTimePoint">重置到当前</button>
@@ -493,11 +538,13 @@ function getHardbossIcon(boss: HardBoss): string {
                 <span class="rounded bg-base-200 px-2 py-1">{{ hardbossTimePoints.length }} 个时间点</span>
                 <span v-if="selectedTimePoint">当前时间点：{{ selectedTimePoint.label }}</span>
                 <span v-if="selectedTimePoint">生效奖励 {{ selectedTimePoint.activeRewardCount }} 组</span>
-                <span v-if="diffOnlyEnabled && previousSelectedTimePoint">对比上一时间点：{{ previousSelectedTimePoint.label }}</span>
+                <span v-if="effectiveDiffOnlyEnabled && previousSelectedTimePoint"
+                    >对比上一时间点：{{ previousSelectedTimePoint.label }}</span
+                >
                 <span v-if="selectedTimePoint?.isCurrent" class="rounded bg-primary px-2 py-1 text-primary-content">当前</span>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div v-if="timeFilterEnabled" class="flex items-center gap-3">
                 <span class="w-12 shrink-0 text-[11px] text-base-content/60">{{ hardbossTimePoints[0]?.shortLabel }}</span>
                 <input
                     v-model.number="selectedTimePointIndex"
@@ -514,13 +561,16 @@ function getHardbossIcon(boss: HardBoss): string {
         <div v-if="hardbossWalnutRewardCosts.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
             <h3 class="font-bold mb-2">{{ $t("game-launcher.preview") }}</h3>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-                <ResourceCostItem
-                    v-for="cost in hardbossWalnutRewardCosts"
-                    :key="cost.key"
-                    :name="cost.name"
-                    :value="cost.value"
-                    class="bg-base-200"
-                />
+                <div v-for="cost in hardbossWalnutRewardCosts" :key="cost.key" class="relative">
+                    <span
+                        v-if="effectiveDiffOnlyEnabled && cost.diffState"
+                        class="absolute left-1 top-1 z-10 inline-flex size-4 items-center justify-center rounded text-xs font-bold"
+                        :class="cost.diffState === 'added' ? 'bg-success text-success-content' : 'bg-error text-error-content'"
+                    >
+                        {{ cost.diffState === "added" ? "+" : "-" }}
+                    </span>
+                    <ResourceCostItem :name="cost.name" :value="cost.value" class="bg-base-200" />
+                </div>
             </div>
         </div>
 
@@ -530,7 +580,7 @@ function getHardbossIcon(boss: HardBoss): string {
                 等级奖励
                 <span class="text-sm font-normal text-base-content/70 ml-2">Lv.{{ diff.lv }}</span>
                 <span v-if="timeFilterEnabled" class="ml-2 text-xs font-normal text-base-content/60">
-                    <template v-if="diffOnlyEnabled">{{ diff.changedRewardCount }} 组变化奖励</template>
+                    <template v-if="effectiveDiffOnlyEnabled">{{ diff.changedRewardCount }} 组变化奖励</template>
                     <template v-else>{{ diff.activeRewardCount }} 组当前奖励</template>
                 </span>
             </h3>
@@ -573,7 +623,7 @@ function getHardbossIcon(boss: HardBoss): string {
                 </div>
             </div>
             <div v-else class="rounded bg-base-200 px-3 py-6 text-center text-sm text-base-content/60">
-                {{ diffOnlyEnabled ? "与上一时间点相比没有变化奖励" : "当前时间点下没有生效奖励" }}
+                {{ effectiveDiffOnlyEnabled ? "与上一时间点相比没有变化奖励" : "当前时间点下没有生效奖励" }}
             </div>
         </div>
     </div>

@@ -31,16 +31,25 @@ describe("resource-source", () => {
     })
 
     it("应该从任务奖励组中反查资源来源", () => {
-        const resource = resourceMap.get(120002)
+        const resource = resourceMap.get(10012)
         expect(resource).toBeTruthy()
 
         const sources = collectResourceQuestSources(resource!)
 
-        const matchedSource = sources.find(source => source.questChainId === 400123 && source.rewardId === 50616)
+        const matchedSource = sources.find(source => source.rewardId === 4000022)
         expect(matchedSource).toBeTruthy()
         expect(matchedSource?.num).toBe(1)
-        expect(matchedSource?.timeStart).toBe(1775854800)
-        expect(matchedSource?.timeEnd).toBe(1776718800)
+        expect(matchedSource?.d).toBe(1)
+    })
+
+    it("应该保留任务奖励中的图纸标记", () => {
+        const resource = resourceMap.get(10012)
+        expect(resource).toBeTruthy()
+
+        const sources = collectResourceQuestSources(resource!)
+        const matchedSource = sources.find(source => source.rewardId === 4000022)
+
+        expect(matchedSource?.d).toBe(1)
     })
 
     it("应该从任务奖励组中反查魔之楔来源", () => {
