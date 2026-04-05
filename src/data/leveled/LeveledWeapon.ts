@@ -110,7 +110,7 @@ export class LeveledWeapon {
                     描述: v.描述,
                 }
                 if (v.字段) skill.字段 = v.字段
-                if (v.创造物) skill.创造物 = v.创造物
+                if (v.实体) skill.实体 = v.实体
                 return skill
             })
             this.技能 = skills.map(skill => new LeveledSkill(skill, undefined, weaponData.名称))

@@ -545,6 +545,13 @@ function resetToCurrentTimePoint(): void {
 }
 
 /**
+ * 收起活动详情面板。
+ */
+function closeSelectedEvent(): void {
+    selectedEventId.value = 0
+}
+
+/**
  * 格式化离散时间点显示文本。
  * @param timestamp 时间戳
  * @returns 时间文本
@@ -708,7 +715,10 @@ useInitialScrollToSelectedItem()
                             <div class="text-xs opacity-70 mt-2 line-clamp-2 whitespace-pre-wrap break-all">
                                 {{ item.desc }}
                             </div>
-                            <div v-if="searchKeyword.trim()" class="mt-2 text-xs leading-relaxed opacity-85">
+                            <div
+                                v-if="showFullTextSearch && searchKeyword.trim() && getEventSnippet(item)?.segments?.length"
+                                class="mt-2 text-xs leading-relaxed opacity-85"
+                            >
                                 <span class="opacity-65">匹配：</span>
                                 <span v-if="getEventSnippet(item)?.prefixEllipsis">...</span>
                                 <template v-for="(segment, index) in getEventSnippet(item)?.segments || []" :key="`${item.id}-${index}`">
@@ -735,11 +745,17 @@ useInitialScrollToSelectedItem()
                 </div>
             </div>
 
-            <div v-if="selectedEvent" class="flex-1 overflow-hidden">
-                <ScrollArea class="h-full">
-                    <DBEventDetailItem :event="selectedEvent" class="flex-1" />
-                </ScrollArea>
+            <div
+                v-if="selectedEvent"
+                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                @click="closeSelectedEvent"
+            >
+                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
+
+            <ScrollArea v-if="selectedEvent" class="flex-2">
+                <DBEventDetailItem :event="selectedEvent" class="flex-1" />
+            </ScrollArea>
         </div>
     </div>
 </template>

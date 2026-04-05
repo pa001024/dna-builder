@@ -3,6 +3,8 @@ import { env } from "./env"
 const VERCOUT_ENDPOINT = "https://events.vercount.one/api/v2/log"
 const VERCOUT_TIMEOUT_MS = 5000
 const FIXED_REPORT_HOST = "dna-builder.cn"
+let visitorCountRequestPromise: Promise<VisitorCountData | null> | null = null
+let visitorCountRequestHref: string | null = null
 
 export interface VisitorCountData {
     site_uv: number
@@ -88,30 +90,49 @@ export async function postVisitorCount(href: string = window.location.href): Pro
     const reportUrl = buildFixedDomainHref(href)
     if (!reportUrl) return null
 
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), VERCOUT_TIMEOUT_MS)
-    try {
-        const response = await fetch(VERCOUT_ENDPOINT, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: reportUrl }),
-            signal: controller.signal,
-        })
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`)
-        }
-        const payload = (await response.json()) as VercountPayload
-        console.debug(`${reportUrl} TPV: ${payload.data?.page_pv} PV:${payload.data?.site_pv} UV:${payload.data?.site_uv}`)
-        return normalizeVercountPayload(payload)
-    } catch (error) {
-        const err = error as Error & { name?: string }
-        if (err?.name === "AbortError") {
-            console.warn("Vercount request timeout")
-        } else {
-            console.warn("Vercount request failed:", err?.message || err)
-        }
-        return null
-    } finally {
-        clearTimeout(timeoutId)
+    /**
+     * 同一页面在请求进行中时复用同一个 Promise，避免重复上报。
+     */
+    if (visitorCountRequestPromise && visitorCountRequestHref === reportUrl) {
+        return visitorCountRequestPromise
     }
+
+    const requestPromise = (async () => {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), VERCOUT_TIMEOUT_MS)
+        try {
+            const response = await fetch(VERCOUT_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: reportUrl }),
+                signal: controller.signal,
+            })
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`)
+            }
+            const payload = (await response.json()) as VercountPayload
+            console.debug(`${reportUrl} TPV: ${payload.data?.page_pv} PV:${payload.data?.site_pv} UV:${payload.data?.site_uv}`)
+            return normalizeVercountPayload(payload)
+        } catch (error) {
+            const err = error as Error & { name?: string }
+            if (err?.name === "AbortError") {
+                console.warn("Vercount request timeout")
+            } else {
+                console.warn("Vercount request failed:", err?.message || err)
+            }
+            return null
+        } finally {
+            clearTimeout(timeoutId)
+        }
+    })()
+
+    visitorCountRequestHref = reportUrl
+    visitorCountRequestPromise = requestPromise.finally(() => {
+        if (visitorCountRequestHref === reportUrl) {
+            visitorCountRequestHref = null
+            visitorCountRequestPromise = null
+        }
+    })
+
+    return visitorCountRequestPromise
 }

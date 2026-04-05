@@ -29,6 +29,13 @@ const filteredResources = computed(() => {
 })
 
 useInitialScrollToSelectedItem()
+
+/**
+ * 收起资源详情面板。
+ */
+function closeSelectedResource(): void {
+    selectedResourceId.value = 0
+}
 </script>
 
 <template>
@@ -72,11 +79,17 @@ useInitialScrollToSelectedItem()
                 </ScrollArea>
             </div>
 
-            <div v-if="selectedResource" class="flex-1 overflow-hidden">
-                <ScrollArea class="h-full">
-                    <DBResourceDetailItem :resource="selectedResource" class="flex-1" />
-                </ScrollArea>
+            <div
+                v-if="selectedResource"
+                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                @click="closeSelectedResource"
+            >
+                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
+
+            <ScrollArea v-if="selectedResource" class="flex-1">
+                <DBResourceDetailItem :resource="selectedResource" class="flex-1" />
+            </ScrollArea>
         </div>
     </div>
 </template>

@@ -1,11 +1,9 @@
 <script lang="ts" setup>
 import { useLocalStorage } from "@vueuse/core"
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
-import DBQuestStoryNodes from "@/components/DBQuestStoryNodes.vue"
 import type { QuestItem, QuestStory } from "@/data/d/quest.data"
 import type { QuestChain } from "@/data/d/questchain.data"
 import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
-import { subRegionMap } from "@/data/d/subregion.data"
 import { useSettingStore } from "@/store/setting"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
@@ -297,16 +295,6 @@ const questDetails = computed<QuestDetailItem[]>(() => {
  * @returns 版本号
  */
 const questChainVersion = computed(() => props.questChain.版本 || "")
-
-/**
- * 获取子区域名称。
- * @param subRegionId 子区域 ID
- * @returns 子区域名称
- */
-function getSubRegionName(subRegionId: number): string {
-    const subRegion = subRegionMap.get(subRegionId)
-    return subRegion ? subRegion.name : `子区域${subRegionId}`
-}
 </script>
 
 <template>
@@ -423,7 +411,10 @@ function getSubRegionName(subRegionId: number): string {
                         <span class="font-medium"
                             >任务: {{ formatStoryText(quest.details?.name || "?") }}
                             <span class="text-sm text-base-content/70">ID: {{ quest.id }}</span>
-                            <span class="text-sm text-base-content/70 ml-2" v-if="quest.sr">区域: {{ getSubRegionName(quest.sr) }}</span>
+                            <span v-if="quest.sr" class="text-sm text-base-content/70 ml-2 inline-flex items-center gap-1">
+                                <span>子区域:</span>
+                                <SubRegionLink :sub-region-id="quest.sr" />
+                            </span>
                         </span>
                     </div>
 

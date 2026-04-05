@@ -65,6 +65,8 @@ function parseEventText(text?: string): StoryTextSegment[] {
             </div>
         </div>
 
+        <BackpackPuzzle v-if="event.id === 103015" :event-id="event.id" />
+
         <div v-if="event.boxDrop" class="rounded-md bg-base-200 p-3">
             <BoxDropItem :box-drop="event.boxDrop" />
         </div>

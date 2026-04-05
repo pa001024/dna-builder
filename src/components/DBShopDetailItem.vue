@@ -274,6 +274,7 @@ watch(
 onMounted(async () => {
     await nextTick()
     resetToCurrentTimePoint()
+    applyRouteSubTab()
 })
 
 // 将商品列表转换为树形结构

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import DBQuestStoryNodes from "@/components/DBQuestStoryNodes.vue"
+import SubRegionLink from "@/components/SubRegionLink.vue"
 import type { DynQuest } from "@/data/d/dynquest.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
@@ -47,24 +48,6 @@ function formatStoryText(text: string | undefined): string {
 function getRegionInfo(regionId: number) {
     const region = regionMap.get(regionId)
     return region || { id: regionId, name: `区域${regionId}`, type: null, mapId: null }
-}
-
-/**
- * 获取子区域信息。
- * @param subRegionId 子区域 ID
- * @returns 子区域信息
- */
-function getSubRegionInfo(subRegionId: number) {
-    const subRegion = subRegionMap.get(subRegionId)
-    return (
-        subRegion || {
-            id: subRegionId,
-            rid: 0,
-            name: `子区域${subRegionId}`,
-            desc: "",
-            map: "",
-        }
-    )
 }
 
 /**
@@ -138,16 +121,12 @@ const questNodes = computed(() => {
             <h3 class="font-bold mb-2">子区域信息</h3>
             <div class="grid grid-cols-1 gap-2 text-sm">
                 <div class="flex justify-between">
-                    <span class="text-base-content/70">子区域 ID</span>
-                    <span>{{ quest.subRegionId }}</span>
+                    <span class="text-base-content/70">子区域</span>
+                    <SubRegionLink :sub-region-id="quest.subRegionId" />
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">子区域名称</span>
-                    <span>{{ getSubRegionInfo(quest.subRegionId).name }}</span>
-                </div>
-                <div v-if="getSubRegionInfo(quest.subRegionId).map" class="flex justify-between">
+                <div v-if="subRegionMap.get(quest.subRegionId)?.map" class="flex justify-between">
                     <span class="text-base-content/70">地图</span>
-                    <span>{{ getSubRegionInfo(quest.subRegionId).map }}</span>
+                    <span>{{ subRegionMap.get(quest.subRegionId)?.map }}</span>
                 </div>
             </div>
         </div>

@@ -328,6 +328,25 @@ function parseRouteQueryNumber(value: unknown): number | null {
 }
 
 /**
+ * 安排一次延迟的点位聚焦。
+ * @param worldX 世界坐标 X
+ * @param worldY 世界坐标 Y
+ * @param name 点位名称
+ * @param iconUrl 点位图标
+ */
+function queuePendingMapPointFocus(worldX: number, worldY: number, name: string, iconUrl: string) {
+    pendingMapPointFocus.value = { worldX, worldY, name, iconUrl }
+    if (pendingRoutePointFocusTimerId.value !== 0) {
+        return
+    }
+
+    pendingRoutePointFocusTimerId.value = window.setTimeout(() => {
+        pendingRoutePointFocusTimerId.value = 0
+        flushPendingMapPointFocus()
+    }, 500)
+}
+
+/**
  * 解析子区域中心点：优先 pos，缺失时回退 range.center。
  */
 function resolveSubRegionCenter(subRegion: SubRegion): { point: [number, number]; source: "pos" | "range.center" } | null {
@@ -945,7 +964,7 @@ function focusMapPoint(worldX: number, worldY: number, name: string) {
     selectedMapPoint.value = { worldX, worldY, mapX: mapped.x, mapY: mapped.y, name, iconUrl }
     const container = containerRef.value
     if (!container) {
-        pendingMapPointFocus.value = { worldX, worldY, name, iconUrl }
+        queuePendingMapPointFocus(worldX, worldY, name, iconUrl)
         requestDraw()
         return
     }
@@ -1588,12 +1607,7 @@ function syncRouteMapPoint() {
         name: routePoint.name,
         iconUrl: routePoint.iconUrl,
     }
-    pendingMapPointFocus.value = {
-        worldX: routePoint.x,
-        worldY: routePoint.y,
-        name: routePoint.name,
-        iconUrl: routePoint.iconUrl,
-    }
+    queuePendingMapPointFocus(routePoint.x, routePoint.y, routePoint.name, routePoint.iconUrl)
     requestDraw()
 }
 
@@ -1672,10 +1686,9 @@ function applyRouteTargetSelection() {
         const hasRegion = mapLocalProfiles.some(profile => profile.regionId === target.regionId)
         if (hasRegion) {
             selectedRegionId.value = target.regionId
-            consumedRouteTargetToken.value = token
-        } else {
-            consumedRouteTargetToken.value = token
+            return
         }
+        consumedRouteTargetToken.value = token
         return
     }
 
@@ -1688,7 +1701,7 @@ function applyRouteTargetSelection() {
         }
 
         if (selectedSubRegionId.value !== targetSubRegion.id) {
-            focusSubRegion(targetSubRegion.id)
+            selectedSubRegionId.value = targetSubRegion.id
         }
 
         if (target.rcId !== null) {
@@ -1710,6 +1723,8 @@ function applyRouteTargetSelection() {
                 selectedRcState.value = { subRegionId: targetSubRegion.id, rcId: targetRc.rcId, rcIndex: targetRc.rcIndex }
                 requestDraw()
             }
+        } else if (target.pointX === null && target.pointY === null && target.rid === null) {
+            queuePendingMapPointFocus(targetSubRegion.worldX, targetSubRegion.worldY, targetSubRegion.name, "")
         }
     }
 
@@ -2458,7 +2473,7 @@ onMounted(() => {
     resizeObserver.observe(container)
     syncRouteMapPoint()
     requestDraw()
-    if (pendingMapPointFocus.value) {
+    if (pendingMapPointFocus.value && pendingRoutePointFocusTimerId.value === 0) {
         pendingRoutePointFocusTimerId.value = window.setTimeout(() => {
             pendingRoutePointFocusTimerId.value = 0
             flushPendingMapPointFocus()

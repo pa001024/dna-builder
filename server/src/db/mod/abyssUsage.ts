@@ -619,41 +619,49 @@ async function loadSlotStats(seasonId?: number | null, minLevel?: number | null,
             : seasonId
               ? eq(schema.abyssUsageSubmissions.seasonId, seasonId)
               : levelWhere
-    const submissions = await db.query.abyssUsageSubmissions.findMany({
-        where,
-        columns: {
-            support1: true,
-            support2: true,
-            meleeId: true,
-            rangedId: true,
-            petId: true,
-        },
-    })
-    const rows: AbyssUsageSlotStatRow[] = []
-    for (const item of submissions) {
-        if (item.support1 > 0) rows.push({ kind: "support", id: item.support1, submissionCount: 1 })
-        if (item.support2 > 0) rows.push({ kind: "support", id: item.support2, submissionCount: 1 })
-        if (item.meleeId > 0) rows.push({ kind: "meleeWeapon", id: item.meleeId, submissionCount: 1 })
-        if (item.rangedId > 0) rows.push({ kind: "rangedWeapon", id: item.rangedId, submissionCount: 1 })
-        if (item.petId != null && item.petId > 0) rows.push({ kind: "pet", id: item.petId, submissionCount: 1 })
-    }
+    const rows = await db.all<{
+        kind: AbyssUsageSlotStatRow["kind"]
+        id: number
+        submissionCount: number
+    }>(sql`
+        with filtered_submissions as (
+            select support_1 as support1, support_2 as support2, melee_id as meleeId, ranged_id as rangedId, pet_id as petId
+            from ${schema.abyssUsageSubmissions}
+            ${where ? sql`where ${where}` : sql``}
+        ),
+        slot_rows as (
+            select 'support' as kind, support1 as id
+            from filtered_submissions
+            where support1 > 0
+            union all
+            select 'support' as kind, support2 as id
+            from filtered_submissions
+            where support2 > 0
+            union all
+            select 'meleeWeapon' as kind, meleeId as id
+            from filtered_submissions
+            where meleeId > 0
+            union all
+            select 'rangedWeapon' as kind, rangedId as id
+            from filtered_submissions
+            where rangedId > 0
+            union all
+            select 'pet' as kind, petId as id
+            from filtered_submissions
+            where petId > 0
+        )
+        select kind, id, count(*) as submissionCount
+        from slot_rows
+        group by kind, id
+        order by kind, submissionCount desc, id asc
+    `)
     const result: AbyssUsageSlotStats = {
         support: [],
         meleeWeapon: [],
         rangedWeapon: [],
         pet: [],
     }
-    const grouped = new Map<string, { kind: AbyssUsageSlotStatRow["kind"]; id: number; submissionCount: number }>()
     for (const row of rows) {
-        const key = `${row.kind}:${row.id}`
-        const current = grouped.get(key)
-        if (current) {
-            current.submissionCount += row.submissionCount
-        } else {
-            grouped.set(key, { kind: row.kind, id: row.id!, submissionCount: row.submissionCount })
-        }
-    }
-    for (const row of grouped.values()) {
         result[row.kind].push({ id: row.id, submissionCount: row.submissionCount })
     }
     return result

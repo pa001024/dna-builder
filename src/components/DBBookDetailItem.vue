@@ -243,13 +243,11 @@ function selectResource(resourceId: number): void {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mt-3">
-                    <div class="flex items-start justify-between gap-2">
-                        <template v-if="selectedResourceLocation">
-                            <span class="text-base-content/70">子区域</span>
-                            <span class="text-right wrap-break-word"
-                                >{{ selectedResourceLocation.subRegionName }} ({{ selectedResource.srId }})</span
-                            >
-                        </template>
+                    <div v-if="selectedResourceLocation && selectedResource.srId" class="flex items-start justify-between gap-2">
+                        <span class="text-base-content/70">子区域</span>
+                        <div class="text-right">
+                            <SubRegionLink :sub-region-id="selectedResource.srId" />
+                        </div>
                     </div>
 
                     <div v-if="selectedResourceLocation" class="flex items-start justify-between gap-2">

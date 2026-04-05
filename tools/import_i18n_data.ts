@@ -21,6 +21,8 @@ const MAPPINGS: Mapping[] = [
     { source: "AbyssBuff", targetStem: "abyss", targetVar: "abyssBuffs", locales: ["cn"] },
     { source: "AbyssDungeon", targetStem: "abyss", targetVar: "abyssDungeons", locales: ["cn"] },
     { source: "Achievement", targetStem: "achievement", targetVar: "t", locales: ["cn"] },
+    { source: "BackpackPuzzleItem", targetStem: "backpackpuzzle", targetVar: "backpackPuzzleItems", locales: ["cn"] },
+    { source: "BackpackPuzzleLevel", targetStem: "backpackpuzzle", targetVar: "backpackPuzzleLevels", locales: ["cn"] },
     { source: "BookSeriesArchive", targetStem: "book", targetVar: "booksData", locales: ["cn"] },
     { source: "Char", targetStem: "char", targetVar: "t", locales: ["cn"] },
     { source: "CharAccessory", targetStem: "accessory", targetVar: "charAccessoryData", locales: ["cn"] },

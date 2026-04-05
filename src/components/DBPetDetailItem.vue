@@ -432,13 +432,11 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                     class="p-2 rounded bg-base-100 border border-base-300/60"
                 >
                     <div class="flex items-center justify-between gap-2">
-                        <span class="text-sm font-medium">{{ location.subRegionName }}</span>
+                        <SubRegionLink :sub-region-id="location.subRegionId" />
                         <span class="text-xs text-base-content/70">{{ $t("pet_detail.spot_count") }}: {{ location.rcWeights.length }}</span>
                     </div>
                     <div class="text-xs text-base-content/60 mt-1">
                         <span>{{ location.regionName }}</span>
-                        <span class="mx-1">·</span>
-                        <span>ID: {{ location.subRegionId }}</span>
                     </div>
                     <div class="flex flex-wrap gap-1 mt-2">
                         <SRouterLink
@@ -467,7 +465,11 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
 
         <div v-if="petShopSources.length > 0" class="space-y-2">
             <div class="text-xs text-base-content/60">{{ $t("pet_detail.shop_purchase") }}</div>
-            <div v-for="source in petShopSources" :key="source.key" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
+            <div
+                v-for="source in petShopSources"
+                :key="source.key"
+                class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+            >
                 <div class="flex justify-between items-center gap-2 mb-2">
                     <div class="flex items-center gap-2 min-w-0">
                         <SRouterLink :to="`/db/shop/${source.shopId}/${source.subTabId}`" class="hover:underline min-w-0 truncate">

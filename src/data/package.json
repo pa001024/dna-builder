@@ -1,6 +1,6 @@
 {
     "name": "dna-builder-data",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "description": "DNA Builder game data models and utilities",
     "type": "module",
     "bin": "./dist/mcp/index.js",

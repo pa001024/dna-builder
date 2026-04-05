@@ -7,6 +7,16 @@ import draftData from "./draft.data"
 import dungeonData from "./dungeon.data"
 import effectData from "./effect.data"
 
+export {
+    type BackpackPuzzleItem,
+    type BackpackPuzzleLevel,
+    type BackpackPuzzlePlacementPreset,
+    type BackpackPuzzleSolutionPreset,
+    backpackPuzzleItems,
+    backpackPuzzleLevels,
+    backpackPuzzleSolutionPresets,
+} from "./backpackpuzzle.data"
+
 export { eventData } from "./event.data"
 
 import modData from "./mod.data"
