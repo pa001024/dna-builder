@@ -443,12 +443,14 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "dynquest",
                 component: () => import("./views/DBDynQuestListView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
+                meta: { title: "database.dynquest" },
             },
             {
                 name: "dynquest-detail",
                 path: "dynquest/:questId",
                 component: () => import("./views/DBDynQuestDetailView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
+                meta: { title: "database.dynquest" },
             },
             {
                 name: "partytopic-list",

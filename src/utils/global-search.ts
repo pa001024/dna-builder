@@ -590,18 +590,15 @@ export class GlobalSearchService {
 
         entries.push(
             ...dynQuestData.map(quest => {
-                const regionName = regionMap.get(quest.regionId)?.name
-                const subRegionName = subRegionMap.get(quest.subRegionId)?.name
-
                 return this.buildSearchEntry(
                     {
                         id: `dynquest:${quest.id}`,
                         title: quest.name,
-                        subtitle: `委托 ID: ${quest.id}`,
+                        subtitle: quest.desc,
                         typeLabel: t("database.dynquest"),
                         path: `/db/dynquest/${quest.id}`,
                     },
-                    [quest.id, regionName, subRegionName]
+                    [quest.id, quest.desc]
                 )
             })
         )

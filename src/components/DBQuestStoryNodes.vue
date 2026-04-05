@@ -513,16 +513,18 @@ function selectOption(scopeKey: string, dialogueId: number, optionId: number) {
 }
 
 /**
- * 提取选项中的印象变化条目。
- * @param option 对话选项
+ * 提取条目中的印象变化条目。
+ * @param entry 对话或选项条目
  * @returns 印象变化条目列表
  */
-function getImpressionEntries(option: DialogueOption): Array<{ regionId: number; typeLabel: string; value: number }> {
-    if (!option.impr) {
+function getImpressionEntries(entry: {
+    impr?: [number, Parameters<typeof getImprType>[0], number]
+}): Array<{ regionId: number; typeLabel: string; value: number }> {
+    if (!entry.impr) {
         return []
     }
 
-    const [regionId, imprType, value] = option.impr
+    const [regionId, imprType, value] = entry.impr
     if (typeof value !== "number" || value === 0) {
         return []
     }
@@ -1098,6 +1100,21 @@ watch(flattenedDialogueChain, () => {
                             </button>
                         </div>
                         <TypewriterText :text="item.dialogue.content" :trigger-key="`${questId}-${node.id}-${item.dialogue.id}`" />
+                        <div v-if="getImpressionEntries(item.dialogue).length" class="mt-1 flex flex-wrap gap-1.5">
+                            <span
+                                v-for="impression in getImpressionEntries(item.dialogue)"
+                                :key="`${item.dialogue.id}-${impression.regionId}-${impression.typeLabel}-dialogue-impr`"
+                                class="rounded border px-1.5 py-0.5 text-xs leading-none"
+                                :class="
+                                    impression.value > 0
+                                        ? 'border-success/40 bg-success/10 text-success'
+                                        : 'border-error/40 bg-error/10 text-error'
+                                "
+                            >
+                                {{ $t(getRegionType(impression.regionId)) }}·{{ impression.typeLabel }}
+                                {{ impression.value > 0 ? `+${impression.value}` : impression.value }}
+                            </span>
+                        </div>
                     </div>
 
                     <div v-if="item.dialogue.options?.length" class="space-y-2">
@@ -1105,11 +1122,9 @@ watch(flattenedDialogueChain, () => {
                             v-for="(option, optionIndex) in item.dialogue.options"
                             :key="option.id"
                             type="button"
-                            class="group w-full rounded-lg border px-2.5 py-1.5 text-left text-xs transition-all duration-200"
+                            class="group w-full rounded px-2.5 py-1.5 text-left text-xs transition-all duration-200"
                             :class="
-                                item.selectedOption?.id === option.id
-                                    ? 'border-primary/80 bg-primary/8 shadow-sm'
-                                    : 'border-base-300/90 bg-base-100/60 hover:border-primary/40 hover:bg-base-100/80'
+                                item.selectedOption?.id === option.id ? 'bg-primary/80 shadow-sm' : 'bg-base-100/60  hover:bg-base-100/80'
                             "
                             @click="selectOption(getQuestNodeScopeKey(questId, node.id), item.dialogue.id, option.id)"
                         >
@@ -1119,7 +1134,7 @@ watch(flattenedDialogueChain, () => {
                                     :class="
                                         item.selectedOption?.id === option.id
                                             ? 'border-primary bg-primary text-primary-content'
-                                            : 'border-base-300 text-base-content/70 group-hover:border-primary/40'
+                                            : 'border-base-300 text-base-content/70 '
                                     "
                                 >
                                     {{ optionIndex + 1 }}
@@ -1235,7 +1250,7 @@ watch(flattenedDialogueChain, () => {
 
 .dialogue-card:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-base-content) 16%, transparent);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--color-base-content) 8%, transparent);
 }
 
 .dialogue-card-playing {

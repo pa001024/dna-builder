@@ -52,7 +52,7 @@ const MAPPINGS: Mapping[] = [
     },
     { source: "Draft", targetStem: "draft", targetVar: "t", locales: ["cn"] },
     { source: "Dungeon", targetStem: "dungeon", targetVar: "dungeonsData", locales: ["cn"] },
-    { source: "DynQuest", targetStem: "dynquest", targetVar: "t", locales: ["cn"] },
+    { source: "Dispatch", targetStem: "dynquest", targetVar: "t", locales: ["cn"] },
     { source: "Cutoff", targetStem: "cutoff", targetVar: "cutoffData", locales: ["cn"] },
     { source: "Event", targetStem: "event", targetVar: "eventData", locales: ["cn"] },
     { source: "Fish", targetStem: "fish", targetVar: "fishs", locales: ["cn"] },

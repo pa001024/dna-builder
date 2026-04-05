@@ -13,6 +13,8 @@ export const DATA_TYPE_INTERFACE_DEFINITION_MAP = {
     Draft: 'export interface Draft {\n    id: number\n    /** 名称 */\n    n: string\n    /** 稀有度 1-5 */\n    r: number\n    /** 版本 */\n    v: string\n    /** 产物类型 */\n    t: "Mod" | "Resource" | "CharAccessory" | "Weapon"\n    /** 产物数量 */\n    c: number\n    /** 产物ID */\n    p: number\n    /** 铸造时间 */\n    d: number\n    /** 批量制造 */\n    b?: 1\n    /** 无限制造 */\n    i?: 1\n    /** 是否可见 */\n    s?: 1\n    /** 消耗资源 {id,数量,类型,名称}[] */\n    x: { id: number; c: number; t: "Resource" | "Mod" | "CharAccessory" | "Weapon"; n: string }[]\n    /** 消耗铜币 */\n    m: number\n}',
     Dungeon:
         "export interface Dungeon {\n    id: number\n    n: string\n    t: string\n    e?: string\n    ts?: string\n    lv: number\n    rd: number\n    desc?: string\n    m: number[]\n    r: number[]\n    win: number\n    sm?: number[]\n    sr?: number[]\n    spawn?: SpawnInfo[][]\n}",
+    DynQuest:
+        "export interface DynQuest {\n    id: number\n    name: string\n    desc: string\n    regionId: number\n    subRegionId: number\n    cd: number\n    person: number\n    type: DynQuestType\n    rarity: number\n    ttk: number\n    weight: number\n    pos: [number, number]\n    nodes?: QuestNode[]\n    startIds?: string[]\n    levels: DynQuestLevel[]\n}",
     HardBoss:
         "export interface HardBoss {\n    id: number\n    name: string\n    icon: string\n    desc: string\n    diff: Diff[]\n    mid: number[]\n}",
     Jargon: "export interface Jargon {\n    name: string\n    alias?: string[]\n    desc: string\n    type: string[]\n    /** 参考数据表 */\n    ref?: string\n}",

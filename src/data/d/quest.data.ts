@@ -41,6 +41,7 @@ export interface Dialogue {
     voice?: string
     npc?: number
     next?: number
+    impr?: [number, ImprType, number]
     options?: DialogueOption[]
 }
 

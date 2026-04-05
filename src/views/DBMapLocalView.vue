@@ -152,6 +152,16 @@ interface MapPointInfo {
     iconUrl: string
 }
 
+/**
+ * 解析地图点位图标地址。
+ * @param icon 图标资源名
+ * @returns 图标地址
+ */
+function resolveMapPointIconUrl(icon: string | null): string {
+    if (!icon) return ""
+    return `/imgs/res/${icon}.webp`
+}
+
 interface RegionProjectionRuntimeConfig {
     center: [number, number]
     mapRotationDeg: number
@@ -293,7 +303,7 @@ const routePointInfo = computed<RoutePointInfo | null>(() => {
         name: target.pointName || "藏宝点",
         x: target.pointX,
         y: target.pointY,
-        iconUrl: target.pointIcon ? `/imgs/res/${target.pointIcon}.webp` : "",
+        iconUrl: resolveMapPointIconUrl(target.pointIcon),
     }
 })
 
@@ -959,7 +969,7 @@ const selectedSubRegion = computed(() => {
  * @param name 点位名称
  */
 function focusMapPoint(worldX: number, worldY: number, name: string) {
-    const iconUrl = mapLocalRouteTarget.value.pointIcon ? `/imgs/res/${mapLocalRouteTarget.value.pointIcon}.webp` : ""
+    const iconUrl = resolveMapPointIconUrl(mapLocalRouteTarget.value.pointIcon)
     const mapped = projectWorldToMap(worldX, worldY)
     selectedMapPoint.value = { worldX, worldY, mapX: mapped.x, mapY: mapped.y, name, iconUrl }
     const container = containerRef.value
@@ -2510,7 +2520,15 @@ onUnmounted(() => {
                             <div class="font-medium">当前地图点</div>
                             <button class="btn btn-ghost btn-xs" type="button" @click="clearRouteMapPoint">清除</button>
                         </div>
-                        <div>{{ currentMapPointInfo.name }}</div>
+                        <div class="flex items-center gap-2">
+                            <img
+                                v-if="currentMapPointInfo.iconUrl"
+                                :src="currentMapPointInfo.iconUrl"
+                                :alt="currentMapPointInfo.name"
+                                class="size-5 shrink-0"
+                            />
+                            <span>{{ currentMapPointInfo.name }}</span>
+                        </div>
                         <div>World: {{ currentMapPointInfo.worldX.toFixed(2) }}, {{ currentMapPointInfo.worldY.toFixed(2) }}</div>
                     </div>
 

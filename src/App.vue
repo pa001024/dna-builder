@@ -43,9 +43,7 @@ function getLocalDateKey() {
  * @description 确保经验奖励 mutation 返回的用户资料会同步回本地状态。
  * @param result 奖励接口返回值。
  */
-function applyExperienceRewardResult(
-    result?: { user?: any; retryAfterMs?: number; source?: string; success?: boolean } | null
-) {
+function applyExperienceRewardResult(result?: { user?: any; retryAfterMs?: number; source?: string; success?: boolean } | null) {
     if (!result) return
     if (result.user) {
         user.setProfile(result.user)
@@ -301,7 +299,9 @@ onBeforeUnmount(() => {
     <Updater />
     <ResizeableWindow
         id="main-window"
-        :title="ui.title || $t(`${String($route.name)}.title`, '')"
+        :title="
+            ui.title || $t((typeof $route.meta?.title === 'string' ? $route.meta?.title : undefined) || `${String($route.name)}.title`, '')
+        "
         darkable
         pinable
         :class="{ 'is-app': env.isApp }"
