@@ -112,6 +112,19 @@ function buildLevelWhere(
     return and(...conditions)
 }
 
+/**
+ * 构建深渊星数筛选条件。
+ * @param minStars 最小星数。
+ * @param column 星数列。
+ * @returns 星数条件。
+ */
+function buildStarsWhere(minStars: number | null | undefined, column: typeof schema.abyssUsageSubmissions.stars) {
+    if (!Number.isInteger(minStars as number) || (minStars as number) <= 0) {
+        return undefined
+    }
+    return gte(column, minStars as number)
+}
+
 export const typeDefs = /* GraphQL */ `
     type AbyssUsageSubmission {
         id: String!
@@ -549,19 +562,9 @@ async function loadAbyssParticipantRows(seasonId?: number | null, minLevel?: num
     if (cached) return await cached
 
     const promise = (async () => {
-        const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
-        const roleWhere =
-            seasonId && levelWhere
-                ? and(eq(schema.abyssUsageRoleParticipants.seasonId, seasonId), levelWhere)
-                : seasonId
-                  ? eq(schema.abyssUsageRoleParticipants.seasonId, seasonId)
-                  : levelWhere
-        const weaponWhere =
-            seasonId && levelWhere
-                ? and(eq(schema.abyssUsageWeaponParticipants.seasonId, seasonId), levelWhere)
-                : seasonId
-                  ? eq(schema.abyssUsageWeaponParticipants.seasonId, seasonId)
-                  : levelWhere
+        const submissionWhere = buildAbyssUsageWhere(seasonId, minLevel, maxLevel, 160)
+        const roleWhere = submissionWhere
+        const weaponWhere = submissionWhere
         const roleRows = await db
             .select({
                 submissionId: schema.abyssUsageRoleParticipants.submissionId,
@@ -607,18 +610,39 @@ async function loadAbyssParticipantRows(seasonId?: number | null, minLevel?: num
 }
 
 /**
+ * 计算深渊查询统一过滤条件。
+ * @param seasonId 赛季 ID。
+ * @param minLevel 最小等级。
+ * @param maxLevel 最大等级。
+ * @param minStars 最小星数。
+ * @returns 统一过滤条件。
+ */
+function buildAbyssUsageWhere(seasonId?: number | null, minLevel?: number | null, maxLevel?: number | null, minStars?: number | null) {
+    const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
+    const starsWhere = buildStarsWhere(minStars, schema.abyssUsageSubmissions.stars)
+    const conditions = []
+    if (seasonId) {
+        conditions.push(eq(schema.abyssUsageSubmissions.seasonId, seasonId))
+    }
+    if (levelWhere) {
+        conditions.push(levelWhere)
+    }
+    if (starsWhere) {
+        conditions.push(starsWhere)
+    }
+    if (!conditions.length) {
+        return undefined
+    }
+    return and(...conditions)
+}
+
+/**
  * 按赛季一次性聚合四类单项出现次数。
  * @param seasonId 赛季 ID。
  * @returns 分组后的单项出现次数统计。
  */
 async function loadSlotStats(seasonId?: number | null, minLevel?: number | null, maxLevel?: number | null) {
-    const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
-    const where =
-        seasonId && levelWhere
-            ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
-            : seasonId
-              ? eq(schema.abyssUsageSubmissions.seasonId, seasonId)
-              : levelWhere
+    const where = buildAbyssUsageWhere(seasonId, minLevel, maxLevel, 160)
     const rows = await db.all<{
         kind: AbyssUsageSlotStatRow["kind"]
         id: number
@@ -743,13 +767,7 @@ async function loadLineupStatRows(
     minLevel?: number | null,
     maxLevel?: number | null
 ) {
-    const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
-    const seasonWhere =
-        seasonId && levelWhere
-            ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
-            : seasonId
-              ? eq(schema.abyssUsageSubmissions.seasonId, seasonId)
-              : levelWhere
+    const seasonWhere = buildAbyssUsageWhere(seasonId, minLevel, maxLevel, 160)
     const charWhere =
         charId && charId > 0
             ? mainOnly
@@ -815,13 +833,7 @@ async function loadAbyssUsageSubmissionBundle(
     if (cached) return await cached
 
     const promise = (async () => {
-        const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
-        const countWhere =
-            seasonId && levelWhere
-                ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
-                : seasonId
-                  ? eq(schema.abyssUsageSubmissions.seasonId, seasonId)
-                  : levelWhere
+        const countWhere = buildAbyssUsageWhere(seasonId, minLevel, maxLevel, 160)
         const countRows = await db.select({ count: sql<number>`count(*)` }).from(schema.abyssUsageSubmissions).where(countWhere)
         const [lineupRows, slotStats] = await Promise.all([
             loadLineupStatRows(seasonId, charId, mainOnly, limit, minLevel, maxLevel),
@@ -845,13 +857,7 @@ async function loadAbyssUsageSubmissionBundle(
  * @returns 按 level 排序的分布统计。
  */
 async function loadLevelStats(seasonId?: number | null, minLevel?: number | null, maxLevel?: number | null) {
-    const levelWhere = buildLevelWhere(minLevel, maxLevel, schema.abyssUsageSubmissions.level)
-    const where =
-        seasonId && levelWhere
-            ? and(eq(schema.abyssUsageSubmissions.seasonId, seasonId), levelWhere)
-            : seasonId
-              ? eq(schema.abyssUsageSubmissions.seasonId, seasonId)
-              : levelWhere
+    const where = buildAbyssUsageWhere(seasonId, minLevel, maxLevel, 160)
     const rows = await db
         .select({
             level: schema.abyssUsageSubmissions.level,
@@ -877,10 +883,12 @@ export const resolvers = {
             }
             const limit = args?.limit ?? 20
             const offset = args?.offset ?? 0
+            const where = buildAbyssUsageWhere(args?.seasonId, undefined, undefined, 160)
             const items = await db.query.abyssUsageSubmissions.findMany({
                 orderBy: [desc(schema.abyssUsageSubmissions.createdAt)],
                 limit,
                 offset,
+                where,
             })
             const grouped = await loadParticipantsBySubmissionIds(items.map(item => item.id))
             return items.map(item => ({
@@ -954,7 +962,7 @@ export const resolvers = {
             if (!Number.isInteger(input.supportWeapon1) || input.supportWeapon1 < 0) throw createGraphQLError("supportWeapon1 非法")
             if (!Number.isInteger(input.support2) || input.support2 < 0) throw createGraphQLError("support2 非法")
             if (!Number.isInteger(input.supportWeapon2) || input.supportWeapon2 < 0) throw createGraphQLError("supportWeapon2 非法")
-            if (!Number.isInteger(input.stars) || input.stars < 0) throw createGraphQLError("stars 非法")
+            if (!Number.isInteger(input.stars) || input.stars < 160) throw createGraphQLError("stars 非法")
 
             const uidSha256 = input.uidSha256.trim()
             const seasonId = getCurrentSeasonId()

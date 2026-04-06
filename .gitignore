@@ -55,3 +55,4 @@ tools/radix-icons/
 mcp_server/target/
 test-results/
 tools/deploy_server.sh
+.omx/

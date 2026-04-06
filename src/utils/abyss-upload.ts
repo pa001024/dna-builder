@@ -199,7 +199,7 @@ export async function buildAbyssUploadPayload(roleInfo: DNARoleEntity): Promise<
 
     const starsValue = String(roleInfo.roleInfo.abyssInfo!.stars).split("/")[0]
     const stars = Number(starsValue)
-    if (!Number.isInteger(stars) || stars < 0) {
+    if (!Number.isInteger(stars) || stars < 160) {
         throw new Error("stars 非法")
     }
 

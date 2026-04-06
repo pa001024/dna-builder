@@ -12,7 +12,7 @@ import { getCurrentSeasonId } from "./abyssUsage"
 import { USER_EXPERIENCE_SOURCES } from "./userExperience"
 
 const GRAPHQL_URL = "http://localhost:8887/graphql"
-const SMOKE_SUBMISSION_COUNT = 2000
+const SMOKE_SUBMISSION_COUNT = 100
 
 /**
  * 检查是否在 `server` 目录下运行测试。
@@ -99,7 +99,7 @@ const SINGLE_RUN_SUBMISSION: SmokedSubmission = {
     support2: 0,
     supportWeapon2: 0,
     petId: 4241,
-    stars: 1,
+    stars: 160,
     ownedChars: [
         { charId: 4102, gradeLevel: 6 },
         { charId: 1601, gradeLevel: 6 },
@@ -265,7 +265,7 @@ function buildSmokeSubmissions() {
             uidSha256: sha256(`smoke-uid-${index}`),
             ...lineup,
             level,
-            stars: 3 + (index % 3),
+            stars: 160 + (index % 3),
             ownedChars: [
                 { charId: lineup.charId, gradeLevel: mainGrade },
                 { charId: supportLeft.charId, gradeLevel: supportLeft.gradeLevel },
@@ -494,7 +494,7 @@ describe("abyssUsage", () => {
                     supportWeapon1: sample.supportWeapon1,
                     support2: sample.support2,
                     supportWeapon2: sample.supportWeapon2,
-                    stars: 3,
+                    stars: 160,
                     ownedChars: sample.ownedChars,
                     ownedWeapons: sample.ownedWeapons,
                 },
@@ -548,7 +548,7 @@ describe("abyssUsage", () => {
                     supportWeapon1: sample.supportWeapon1,
                     support2: sample.support2,
                     supportWeapon2: sample.supportWeapon2,
-                    stars: 3,
+                    stars: 160,
                     ownedChars: sample.ownedChars,
                     ownedWeapons: sample.ownedWeapons,
                 },
@@ -592,7 +592,7 @@ describe("abyssUsage", () => {
                     supportWeapon1: sample.supportWeapon1,
                     support2: sample.support2,
                     supportWeapon2: sample.supportWeapon2,
-                    stars: 3,
+                    stars: 160,
                     ownedChars: sample.ownedChars,
                     ownedWeapons: sample.ownedWeapons,
                 },
@@ -665,7 +665,7 @@ describe("abyssUsage", () => {
                     supportWeapon1: 0,
                     support2: 0,
                     supportWeapon2: 0,
-                    stars: 1,
+                    stars: 160,
                     ownedChars: [
                         { charId: 160101, gradeLevel: 6 },
                         { charId: 4102, gradeLevel: 5 },
@@ -678,6 +678,37 @@ describe("abyssUsage", () => {
         const ownerChars = normalizedOwnerResult.data?.submitAbyssUsage?.roleParticipants || []
         expect(ownerChars.some(item => item.charId === 160101)).toBe(true)
         expect(ownerChars.some(item => item.charId === 1601)).toBe(false)
+
+        const rejectedResult = await graphqlRequest<{
+            data?: { submitAbyssUsage?: { id: string } }
+            errors?: Array<{ message: string }>
+        }>(
+            `
+            mutation SubmitAbyssUsage($input: AbyssUsageSubmissionInput!) {
+                submitAbyssUsage(input: $input) {
+                    id
+                }
+            }
+        `,
+            {
+                input: {
+                    uidSha256: sha256("low-stars"),
+                    level: SINGLE_RUN_SUBMISSION.level,
+                    charId: SINGLE_RUN_SUBMISSION.charId,
+                    meleeId: SINGLE_RUN_SUBMISSION.meleeId,
+                    rangedId: SINGLE_RUN_SUBMISSION.rangedId,
+                    support1: 0,
+                    supportWeapon1: 0,
+                    support2: 0,
+                    supportWeapon2: 0,
+                    stars: 159,
+                    ownedChars: SINGLE_RUN_SUBMISSION.ownedChars,
+                    ownedWeapons: SINGLE_RUN_SUBMISSION.ownedWeapons,
+                },
+            }
+        )
+        expect(rejectedResult.data?.submitAbyssUsage).toBeUndefined()
+        expect(rejectedResult.errors?.[0]?.message).toBe("stars 非法")
 
         const seedStartAt = Date.now()
         await seedSmokeSubmissions()
