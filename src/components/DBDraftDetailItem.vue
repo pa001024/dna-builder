@@ -40,19 +40,19 @@ const product = computed(() => {
 
 // 获取当前图纸的掉落来源
 const draftDungeons = computed(() => {
-    return (draftDungeonMap.get(props.draft.p) || []).map(
-        dungeon =>
-            ({
-                key: `draft-dungeon-${props.draft.id}-${dungeon.id}`,
-                dungeonId: dungeon.id,
-                dungeonName: dungeon.n,
-                dungeonType: dungeon.t,
-                dungeonLv: dungeon.lv,
-                rewardId: props.draft.id,
-                pp: getDraftDropInfo(dungeon, props.draft.id).pp,
-                times: getDraftDropInfo(dungeon, props.draft.id).times,
-            }) satisfies ResourceDungeonSourceInfo
-    )
+    return (draftDungeonMap.get(props.draft.p) || []).map(dungeon => {
+        const dropInfo = getDraftDropInfo(dungeon, props.draft.p)
+
+        return {
+            key: `draft-dungeon-${props.draft.p}-${dungeon.id}`,
+            dungeonId: dungeon.id,
+            dungeonName: dungeon.n,
+            dungeonType: dungeon.t,
+            dungeonLv: dungeon.lv,
+            rewardId: props.draft.p,
+            ...dropInfo,
+        } satisfies ResourceDungeonSourceInfo
+    })
 })
 
 const draftShopSource = computed(() => {
@@ -82,7 +82,7 @@ const productDisplay = computed(() => {
     <div class="space-y-3">
         <div class="p-3 flex items-center gap-3">
             <SRouterLink :to="`/db/draft/${draft.id}`" class="text-lg font-bold link link-primary"> 图纸: {{ draft.n }} </SRouterLink>
-            <div class="text-xs opacity-70">ID: {{ draft.id }}</div>
+            <CopyID :id="draft.id" />
         </div>
 
         <div class="p-3 bg-base-200 rounded">

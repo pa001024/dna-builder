@@ -175,9 +175,17 @@ export function findInRewardTree(
 ): { pp?: number; times?: number; num?: number; d?: 1; n?: string } | null {
     if (!reward) return null
 
+    const isMatchedItem = (item: RewardItem): boolean => {
+        if (type === "Draft") {
+            return item.t === "Mod" && item.id === id && item.d === 1
+        }
+
+        return item.t === type && item.id === id
+    }
+
     if (reward.child) {
         for (const child of reward.child) {
-            if (child.t === type && child.id === id) {
+            if (isMatchedItem(child)) {
                 return { pp: child.pp, times: child.times, num: child.c ?? 1, d: child.d, n: child.n }
             } else {
                 const result = findInRewardTree(child, id, type)

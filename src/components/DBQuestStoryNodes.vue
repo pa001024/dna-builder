@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
-import TypewriterText from "@/components/TypewriterText.vue"
 import { npcMap } from "@/data/d/npc.data"
 import {
     type DetectiveAnswer,

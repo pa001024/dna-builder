@@ -45,7 +45,10 @@ interface FilteredShopMainTab extends Omit<ShopMainTab, "subTabs"> {
     subTabs: FilteredShopSubTab[]
 }
 
-const shopTabs = computed(() => props.shop.mainTabs.map(t => t.name))
+/**
+ * 商店主标签展示项。
+ */
+const shopTabs = computed(() => props.shop.mainTabs.map(tab => ({ label: tab.name, value: tab.name })))
 const selectedShop = useSearchParam("tab", props.shop.mainTabs[0].name || "")
 const timeFilterEnabled = useSearchParam("tf", true)
 const selectedTimePointIndex = useSearchParam("ti", 0)
@@ -236,8 +239,8 @@ watch(
         selectedTimePointIndex.value = currentTimePointIndex.value
         diffOnlyEnabled.value = false
         applyRouteSubTab()
-        if (!shopTabs.value.includes(selectedShop.value)) {
-            selectedShop.value = shopTabs.value[0]
+        if (!shopTabs.value.some(v => v.value === selectedShop.value)) {
+            selectedShop.value = shopTabs.value[0].value
         }
     },
     { immediate: true }
@@ -502,21 +505,10 @@ function formatShopTimeShort(timestamp: number): string {
                     <h2 class="text-lg font-bold">{{ shop.name }}</h2>
                 </SRouterLink>
             </span>
-            <span class="text-xs px-2 py-1 rounded bg-primary text-white">
-                {{ shop.id }}
-            </span>
+            <CopyID :id="shop.id" />
         </div>
 
-        <div class="flex flex-wrap gap-1 pb-1">
-            <span
-                v-for="tab in shopTabs"
-                :key="tab"
-                class="text-sm px-2 py-1 rounded cursor-pointer transition-colors duration-200 hover:bg-base-200"
-                :class="{ 'bg-primary text-white hover:bg-primary': tab === selectedShop }"
-                @click="selectedShop = tab"
-                >{{ tab }}</span
-            >
-        </div>
+        <AniTabs v-model="selectedShop" :tabs="shopTabs" />
 
         <div v-if="shopTimePoints.length > 0" class="rounded-lg border border-base-200 bg-base-100 p-3 space-y-3">
             <div class="flex flex-wrap items-start justify-between gap-3">

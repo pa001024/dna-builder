@@ -284,6 +284,7 @@ const dragDistance = ref(0)
 const lastPointerPosition = ref({ x: 0, y: 0 })
 
 const selectedSubRegionId = ref<number | null>(null)
+const isAllSubRegionsSelected = ref(false)
 const hoveredSubRegionId = ref<number | null>(null)
 const selectedRcState = ref<{ subRegionId: number; rcId: number; rcIndex: number } | null>(null)
 const selectedMapPoint = ref<MapPointInfo | null>(null)
@@ -1461,6 +1462,7 @@ function initializeActiveLayers(profile: LocalMapProfile) {
  */
 function resetRegionSelectionState() {
     selectedSubRegionId.value = null
+    isAllSubRegionsSelected.value = false
     hoveredSubRegionId.value = null
     selectedRcState.value = null
     hoveredTeleportPointKey.value = null
@@ -1474,6 +1476,28 @@ function resetRegionSelectionState() {
  */
 function isSingleLayerSelected(groupId: string, layerId: string) {
     return selectedSingleLayerByGroup.value.get(groupId) === layerId
+}
+
+/**
+ * 判断子区域是否处于选中态。
+ * @param subRegionId 子区域 ID
+ * @returns 是否选中
+ */
+function isSubRegionSelected(subRegionId: number) {
+    return isAllSubRegionsSelected.value || selectedSubRegionId.value === subRegionId
+}
+
+/**
+ * 切换全部子区域选中态。
+ * @param checked 是否全选
+ */
+function handleSubRegionAllChange(checked: boolean) {
+    isAllSubRegionsSelected.value = checked
+    if (checked) {
+        selectedSubRegionId.value = null
+        selectedRcState.value = null
+    }
+    requestDraw()
 }
 
 /**
@@ -1537,6 +1561,7 @@ function resetView() {
  * 聚焦到指定子区域点。
  */
 function focusSubRegion(subRegionId: number) {
+    isAllSubRegionsSelected.value = false
     selectedSubRegionId.value = subRegionId
     selectedRcState.value = null
     const target = projectedSubRegions.value.find(item => item.id === subRegionId)
@@ -1553,6 +1578,7 @@ function focusSubRegion(subRegionId: number) {
  * 选中指定子区域内的 RC，用于展示详细权重与点位归属。
  */
 function selectRc(subRegionId: number, rcId: number, rcIndex: number) {
+    isAllSubRegionsSelected.value = false
     selectedSubRegionId.value = subRegionId
     selectedRcState.value = { subRegionId, rcId, rcIndex }
     requestDraw()
@@ -1569,6 +1595,7 @@ function getTeleportPointKey(subRegionId: number, tpPointId: number) {
  * 聚焦到指定 TP 点，并同步选中其所属子区域。
  */
 function focusTeleportPoint(subRegionId: number, tpPoint: ProjectedTeleportPoint) {
+    isAllSubRegionsSelected.value = false
     selectedSubRegionId.value = subRegionId
     selectedRcState.value = null
     hoveredTeleportPointKey.value = getTeleportPointKey(subRegionId, tpPoint.id)
@@ -1932,7 +1959,8 @@ function drawHoveredRangeOutline(ctx: CanvasRenderingContext2D) {
  * 绘制高亮子区域（hover 优先，其次 selected）的 rc 刷新点。
  */
 function drawHighlightedRcPoints(ctx: CanvasRenderingContext2D) {
-    const highlightedSubRegionId = hoveredSubRegion.value?.id ?? selectedSubRegion.value?.id ?? null
+    const isAllSelected = isAllSubRegionsSelected.value
+    const highlightedSubRegionId = isAllSelected ? null : hoveredSubRegion.value?.id ?? selectedSubRegion.value?.id ?? null
     if (projectedSubRegions.value.length === 0) return
 
     ctx.save()
@@ -1949,16 +1977,16 @@ function drawHighlightedRcPoints(ctx: CanvasRenderingContext2D) {
 
     for (const subRegion of projectedSubRegions.value) {
         if (subRegion.rcInfos.length === 0) continue
-        const isSubRegionHighlighted = highlightedSubRegionId !== null && subRegion.id === highlightedSubRegionId
-        const unselectedSubRegionAlpha = highlightedSubRegionId === null ? 0.55 : 0.28
+        const isSubRegionHighlighted = isAllSelected || (highlightedSubRegionId !== null && subRegion.id === highlightedSubRegionId)
+        const unselectedSubRegionAlpha = isAllSelected ? 1 : highlightedSubRegionId === null ? 0.55 : 0.28
 
         for (const rcInfo of subRegion.rcInfos) {
             const isActiveRc =
                 selectedRcState.value?.subRegionId === subRegion.id &&
                 selectedRcState.value?.rcId === rcInfo.rcId &&
                 selectedRcState.value?.rcIndex === rcInfo.rcIndex
-            const displayAlpha = isSubRegionHighlighted ? 1 : isActiveRc ? 1 : unselectedSubRegionAlpha
-            const showLabel = isActiveRc || isSubRegionHighlighted
+            const displayAlpha = isAllSelected ? 1 : isSubRegionHighlighted ? 1 : isActiveRc ? 1 : unselectedSubRegionAlpha
+            const showLabel = isAllSelected || isActiveRc || isSubRegionHighlighted
 
             const fillColor = isActiveRc ? "rgba(255, 90, 90, 0.96)" : "rgba(255, 178, 41, 0.95)"
             const strokeColor = isActiveRc ? "rgba(255, 255, 255, 0.96)" : "rgba(0, 0, 0, 0.72)"
@@ -2112,7 +2140,7 @@ function drawSubRegionPoints(ctx: CanvasRenderingContext2D) {
     ctx.font = `${baseFontPx}px sans-serif`
     ctx.textBaseline = "top"
     projectedSubRegions.value.forEach(point => {
-        const isSelected = point.id === selectedSubRegionId.value
+        const isSelected = isSubRegionSelected(point.id)
         const isHovered = point.id === hoveredSubRegionId.value
         const radius = (isSelected ? 7 : isHovered ? 6 : 5) / zoom.value
 
@@ -2412,6 +2440,7 @@ function handleCanvasClick(event: MouseEvent) {
         return
     }
     const hit = pickSubRegionByScreenPosition(event.clientX - rect.left, event.clientY - rect.top)
+    isAllSubRegionsSelected.value = false
     selectedSubRegionId.value = hit ? hit.id : null
     selectedRcState.value = null
     requestDraw()
@@ -2651,12 +2680,21 @@ onUnmounted(() => {
                     <div class="space-y-2">
                         <div class="text-xs opacity-70">子区域</div>
                         <div class="rounded-md border border-base-300 bg-base-100/70 max-h-[40vh] overflow-y-auto">
+                            <label class="flex items-center gap-2 p-2 border-b border-base-300 text-sm cursor-pointer hover:bg-base-200">
+                                <input
+                                    :checked="isAllSubRegionsSelected"
+                                    type="checkbox"
+                                    class="checkbox checkbox-xs"
+                                    @change="handleSubRegionAllChange(($event.target as HTMLInputElement).checked)"
+                                />
+                                <span>全部</span>
+                            </label>
                             <button
                                 v-for="point in projectedSubRegions"
                                 :key="point.id"
                                 class="w-full text-left p-2 border-b last:border-b-0 border-base-300 hover:bg-base-200 transition-colors duration-200"
                                 :class="{
-                                    'bg-primary/15': selectedSubRegionId === point.id,
+                                    'bg-primary/15': isSubRegionSelected(point.id),
                                     'bg-warning/15': hoveredSubRegionId === point.id,
                                 }"
                                 @mouseenter="hoveredSubRegionId = point.id"

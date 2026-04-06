@@ -5,16 +5,18 @@ import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import dynQuestData, {
+    DYN_QUEST_TYPE_ICON_MAP,
     type DynQuest,
     formatDynQuestDemand,
     formatDynQuestLevelRange,
     getDynQuestLevelKey,
     getDynQuestTypeLabel,
 } from "@/data/d/dynquest.data"
-import type { DialogueOption } from "@/data/d/quest.data"
+import type { Dialogue, DialogueOption } from "@/data/d/quest.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 interface DynQuestSnippetSegment {
     text: string
@@ -94,6 +96,15 @@ function getSubRegionName(subRegionId: number): string {
 }
 
 /**
+ * 获取动态委托图标地址。
+ * @param quest 委托数据
+ * @returns 图标地址
+ */
+function getDynQuestIconUrl(quest: DynQuest): string {
+    return `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[quest.type]}.webp`
+}
+
+/**
  * 根据筛选键生成等级范围显示文本。
  * @param levelKey 等级范围键
  * @returns 显示文本
@@ -129,16 +140,16 @@ function getQuestLevelGroups(levels: DynQuest["levels"]): DynQuestLevelGroup[] {
 }
 
 /**
- * 判断单个对话选项是否包含印象增加。
- * @param option 对话选项
+ * 判断单个对话是否包含印象增加。
+ * @param dialogue 对话节点
  * @returns 是否包含印象增加
  */
-function hasDialogueOptionImprIncrease(option: DialogueOption): boolean {
-    if (option.impr && option.impr[2] > 0) {
+function hasDialogueImprIncrease(dialogue: Pick<Dialogue, "impr" | "options"> | Pick<DialogueOption, "impr" | "options">): boolean {
+    if (dialogue.impr && dialogue.impr[2] > 0) {
         return true
     }
 
-    return option.options?.some(childOption => hasDialogueOptionImprIncrease(childOption)) ?? false
+    return dialogue.options?.some(childOption => hasDialogueImprIncrease(childOption)) ?? false
 }
 
 /**
@@ -152,7 +163,7 @@ function buildDynQuestImprIncreaseIdSet(quests: DynQuest[]): Set<number> {
     for (const quest of quests) {
         const hasImprIncrease = quest.nodes?.some(node => {
             return node.dialogues?.some(dialogue => {
-                return dialogue.options?.some(option => hasDialogueOptionImprIncrease(option))
+                return hasDialogueImprIncrease(dialogue)
             })
         })
 
@@ -798,19 +809,48 @@ useInitialScrollToSelectedItem()
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedQuestId === questResult.quest.id }"
                             @click="selectQuest(questResult.quest)"
                         >
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <div class="font-medium">
-                                        {{ questResult.quest.name }}
-                                        <span class="text-xs opacity-70">ID: {{ questResult.quest.id }}</span>
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start gap-3">
+                                        <ImageFallback
+                                            :src="getDynQuestIconUrl(questResult.quest)"
+                                            :alt="questResult.quest.name"
+                                            class="size-14 shrink-0 rounded"
+                                            :class="`bg-linear-15 ${getRarityGradientClass(questResult.quest.rarity + 1)}`"
+                                        >
+                                            <img
+                                                src="/imgs/webp/T_Head_Empty.webp"
+                                                :alt="questResult.quest.name"
+                                                class="size-14 shrink-0 rounded"
+                                            />
+                                        </ImageFallback>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-medium wrap-break-word">
+                                                {{ questResult.quest.name }}
+                                                <span class="text-xs opacity-70">ID: {{ questResult.quest.id }}</span>
+                                            </div>
+                                            <div class="text-xs opacity-70 mt-1 flex flex-wrap items-center gap-1.5">
+                                                <span>{{ getDynQuestTypeLabel(questResult.quest.type) }}</span>
+                                                <span
+                                                    v-if="hasDynQuestImprIncrease(questResult.quest.id)"
+                                                    class="text-xs px-2 py-0.5 rounded bg-success text-white"
+                                                >
+                                                    印象增加
+                                                </span>
+                                                <span>冷却 {{ questResult.quest.cd }}m</span>
+                                                <span>人数 {{ questResult.quest.person }}</span>
+                                                <span>权重 {{ questResult.quest.weight }}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="text-xs opacity-70 mt-1 flex flex-wrap items-center gap-1.5">
-                                        <span>{{ getDynQuestTypeLabel(questResult.quest.type) }}</span>
-                                        <span v-if="hasDynQuestImprIncrease(questResult.quest.id)" class="badge badge-success badge-sm">
-                                            印象增加
+                                    <div class="mt-2 flex flex-wrap gap-1">
+                                        <span
+                                            v-for="level in questResult.levelGroups"
+                                            :key="`${questResult.quest.id}-${level.key}`"
+                                            class="px-1.5 py-0.5 text-[11px] rounded bg-base-300/80"
+                                        >
+                                            {{ level.label }}
                                         </span>
-                                        <span>冷却 {{ questResult.quest.cd }}m</span>
-                                        <span>人数 {{ questResult.quest.person }}</span> <span>权重 {{ questResult.quest.weight }}</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
@@ -820,15 +860,6 @@ useInitialScrollToSelectedItem()
                                     </span>
                                     <span class="text-xs opacity-70">ID: {{ questResult.quest.id }}</span>
                                 </div>
-                            </div>
-                            <div class="mt-2 flex flex-wrap gap-1">
-                                <span
-                                    v-for="level in questResult.levelGroups"
-                                    :key="`${questResult.quest.id}-${level.key}`"
-                                    class="px-1.5 py-0.5 text-[11px] rounded bg-base-300/80"
-                                >
-                                    {{ level.label }}
-                                </span>
                             </div>
 
                             <div

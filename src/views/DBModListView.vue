@@ -3,6 +3,7 @@ import { useLocalStorage } from "@vueuse/core"
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { LeveledMod } from "../data"
 import { modMap } from "../data/d"
 import { modConvertData } from "../data/d/convert.data"
@@ -113,18 +114,6 @@ const filteredMods = computed(() => {
         return matchKeyword && matchType && matchSeries && matchQuality && matchElem && matchVersion
     })
 })
-
-// 根据品质获取颜色
-function getQualityColor(quality: string): string {
-    const colorMap: Record<string, string> = {
-        白: "bg-gray-200 text-gray-800",
-        绿: "bg-green-200 text-green-800",
-        蓝: "bg-blue-200 text-blue-800",
-        紫: "bg-purple-200 text-purple-800",
-        金: "bg-yellow-200 text-yellow-800",
-    }
-    return colorMap[quality] || "bg-base-200 text-base-content"
-}
 
 // 切换过滤选项显示
 function toggleFilter(filterName: string, show: boolean) {
@@ -324,16 +313,15 @@ useInitialScrollToSelectedItem()
                         >
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 overflow-hidden rounded-full">
-                                        <img :src="LeveledMod.url(mod.icon)" class="w-full h-full object-cover" />
-                                    </div>
+                                    <img
+                                        :src="LeveledMod.url(mod.icon)"
+                                        class="size-12 object-cover rounded bg-linear-15"
+                                        :class="getRarityGradientClass(mod.品质)"
+                                    />
                                     <div>
                                         <div class="font-medium flex gap-2 items-center">
                                             {{ $t(mod.系列) }}{{ $t(mod.名称) }}
-                                            <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(mod.品质)">
-                                                {{ $t(mod.品质) }}
-                                            </span>
-                                            <span class="text-xs opacity-70">ID: {{ mod.id }}</span>
+                                            <CopyID :id="mod.id" />
                                         </div>
                                         <div class="text-xs opacity-70 mt-1 flex gap-2 items-center">
                                             <span>{{ $t(mod.类型) }}</span>

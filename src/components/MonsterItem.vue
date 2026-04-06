@@ -58,7 +58,7 @@ const monsterLevelText = computed(() => {
                     {{ $t(displayMonster.n) }}
                 </SRouterLink>
                 <span class="shrink-0 rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/70">{{ monsterLevelText }}</span>
-                <span class="shrink-0 text-xs text-base-content/60">ID: {{ displayMonster.id }}</span>
+                <CopyID :id="displayMonster.id" />
             </div>
             <div class="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-xs sm:grid-cols-4">
                 <span>攻击 {{ formatBigNumber(displayMonster.atk) }}</span>

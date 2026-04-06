@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { useLocalStorage } from "@vueuse/core"
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
-import TypewriterText from "@/components/TypewriterText.vue"
 import { charMap, LeveledChar } from "@/data"
 import { npcMap } from "@/data/d/npc.data"
 import type { PartyTopic } from "@/data/d/partytopic.data"
@@ -879,7 +878,7 @@ onBeforeUnmount(() => {
                     <SRouterLink :to="`/db/partytopic/${partyTopic.id}`" class="text-lg font-bold link link-primary line-clamp-1">
                         {{ formatStoryText(partyTopic.name) }}
                     </SRouterLink>
-                    <div class="text-sm text-base-content/70">ID: {{ partyTopic.id }}</div>
+                    <CopyID :id="partyTopic.id" />
                 </div>
             </div>
 

@@ -12,6 +12,13 @@ const props = defineProps<{
 }>()
 
 const displayQuestSources = computed(() => props.questSources)
+/**
+ * 统计任务来源的合计数量。
+ * @returns 任务来源数量总和
+ */
+const totalQuestSourceNum = computed(() => {
+    return displayQuestSources.value.reduce((total, source) => total + (source.num ?? 0), 0)
+})
 
 const resourceTarget = computed(() => (props.resourceId ? resourceMap.get(props.resourceId) || null : null))
 const modTarget = computed(() => (props.modId ? modMap.get(props.modId) || null : null))
@@ -48,6 +55,14 @@ const sourceIconUrl = computed(() => {
                         {{ formatTimeRange(source.timeStart, source.timeEnd, $t("database.until_now")) }}
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="flex items-center justify-end gap-3">
+            <div class="text-xs text-base-content/60">合计</div>
+            <div class="flex items-center gap-1 shrink-0">
+                <img :src="sourceIconUrl" class="w-4 h-4 object-cover rounded" :alt="sourceName" />
+                <span class="text-xs text-base-content/70">{{ sourceName }}</span>
+                <span class="text-sm text-base-content/70">{{ totalQuestSourceNum }}</span>
             </div>
         </div>
     </div>

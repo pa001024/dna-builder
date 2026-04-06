@@ -3,7 +3,6 @@ import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
-import { copyText } from "@/util"
 
 const props = defineProps<{
     subRegionId: number
@@ -46,13 +45,6 @@ const mapLocalLink = computed<RouteLocationRaw | null>(() => {
         },
     }
 })
-
-/**
- * 复制子区域 ID 到剪贴板。
- */
-async function copySubRegionId() {
-    await copyText(String(props.subRegionId))
-}
 </script>
 
 <template>
@@ -61,13 +53,6 @@ async function copySubRegionId() {
             {{ subRegionInfo?.subRegionName || `子区域${subRegionId}` }}
         </SRouterLink>
         <span v-else>{{ subRegionInfo?.subRegionName || `子区域${subRegionId}` }}</span>
-        <button
-            type="button"
-            class="px-1.5 py-0.5 cursor-pointer rounded bg-base-300 text-xs hover:bg-primary/20 transition-colors duration-200"
-            :title="`点击复制ID`"
-            @click="copySubRegionId"
-        >
-            ID {{ subRegionId }}
-        </button>
+        <CopyID :id="subRegionId" />
     </span>
 </template>

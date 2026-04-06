@@ -72,15 +72,6 @@ function getBookRegionIds(book: Book): number[] {
 }
 
 /**
- * 获取读物覆盖的地区名称列表。
- * @param book 读物
- * @returns 地区名称
- */
-function getBookRegionNames(book: Book): string[] {
-    return getBookRegionIds(book).map(regionId => regionMap.get(regionId)?.name || `地区${regionId}`)
-}
-
-/**
  * 判断读物是否符合当前地区筛选条件。
  * @param book 读物
  * @returns 是否通过筛选
@@ -188,33 +179,29 @@ useInitialScrollToSelectedItem()
                 </div>
 
                 <ScrollArea class="flex-1">
-                    <div class="p-2 space-y-2">
+                    <div class="p-2 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
                         <div
                             v-for="book in filteredBooks"
                             :key="book.id"
-                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
+                            class="relative min-h-40 p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300 overflow-hidden"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedBookId === book.id }"
                             @click="selectBook(book)"
                         >
-                            <div class="flex items-start justify-between gap-2">
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-medium wrap-break-word">{{ book.name }}</div>
-                                    <div class="text-xs opacity-70 mt-1">ID: {{ book.id }} | 条目 {{ book.res.length }} 条</div>
-                                </div>
-                            </div>
-
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span
-                                    v-for="regionName in getBookRegionNames(book)"
-                                    :key="`${book.id}-${regionName}`"
-                                    class="px-1.5 py-0.5 text-xs rounded bg-base-300/80"
+                            <div class="flex h-full flex-col items-center justify-center gap-2 text-center pb-10">
+                                <ImageFallback
+                                    :src="`/imgs/res/${book.icon}.webp`"
+                                    :alt="book.name"
+                                    class="size-24 rounded shrink-0 object-cover"
                                 >
-                                    {{ regionName }}
-                                </span>
+                                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="book.name" class="size-24 rounded shrink-0" />
+                                </ImageFallback>
                             </div>
-
-                            <div class="text-xs opacity-70 mt-2 line-clamp-2">
-                                {{ book.desc }}
+                            <div class="absolute inset-x-2 bottom-2 text-center">
+                                <div class="font-medium text-sm leading-tight whitespace-normal wrap-break-word">{{ book.name }}</div>
+                                <div class="text-xs opacity-70 mt-1">
+                                    <span> ID: {{ book.id }} </span>
+                                    <span> x{{ book.res.length }} </span>
+                                </div>
                             </div>
                         </div>
                     </div>

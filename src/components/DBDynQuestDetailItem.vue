@@ -1,9 +1,5 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
-import type { RouteLocationRaw } from "vue-router"
-import DBQuestStoryNodes from "@/components/DBQuestStoryNodes.vue"
-import RewardItem from "@/components/RewardItem.vue"
-import SubRegionLink from "@/components/SubRegionLink.vue"
 import type { DynQuest, DynQuestLevel } from "@/data/d/dynquest.data"
 import { DYN_QUEST_TYPE_ICON_MAP, formatDynQuestDemand, formatDynQuestLevelRange, getDynQuestTypeLabel } from "@/data/d/dynquest.data"
 import { regionMap } from "@/data/d/region.data"
@@ -116,23 +112,6 @@ watch(
 )
 
 /**
- * 生成坐标跳转到本地地图的路由。
- */
-const questMapLink = computed<RouteLocationRaw>(() => {
-    return {
-        name: "map-local",
-        query: {
-            regionId: String(props.quest.regionId),
-            subRegionId: String(props.quest.subRegionId),
-            pointName: props.quest.name,
-            pointX: String(props.quest.pos[0]),
-            pointY: String(props.quest.pos[1]),
-            pointIcon: DYN_QUEST_TYPE_ICON_MAP[props.quest.type],
-        },
-    }
-})
-
-/**
  * 获取动态委托类型图标地址。
  * @returns 图标地址
  */
@@ -152,7 +131,7 @@ const questTypeIconUrl = computed(() => `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[pro
                 <SRouterLink :to="`/db/dynquest/${quest.id}`" class="text-lg font-bold link link-primary wrap-break-word">
                     {{ formatStoryText(quest.name) }}
                 </SRouterLink>
-                <div class="text-sm text-base-content/70 mt-1">ID: {{ quest.id }} | {{ getDynQuestTypeLabel(quest.type) }}</div>
+                <div class="text-sm text-base-content/70 mt-1"><CopyID :id="quest.id" /> | {{ getDynQuestTypeLabel(quest.type) }}</div>
             </div>
         </div>
 
@@ -169,7 +148,7 @@ const questTypeIconUrl = computed(() => `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[pro
                 </div>
                 <div class="flex justify-between gap-2">
                     <span class="text-base-content/70">冷却</span>
-                    <span>{{ quest.cd }}s</span>
+                    <span>{{ quest.cd }}m</span>
                 </div>
                 <div class="flex justify-between gap-2">
                     <span class="text-base-content/70">人数</span>
@@ -185,10 +164,12 @@ const questTypeIconUrl = computed(() => `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[pro
                 </div>
                 <div class="flex justify-between gap-2">
                     <span class="text-base-content/70">坐标</span>
-                    <div class="flex items-center gap-2">
-                        <span>{{ quest.pos[0] }}, {{ quest.pos[1] }}</span>
-                        <SRouterLink :to="questMapLink" class="link link-primary">跳转</SRouterLink>
-                    </div>
+                    <MapPosLink
+                        :sub-region-id="quest.subRegionId"
+                        :point="quest.pos"
+                        :point-name="quest.name"
+                        :point-icon="DYN_QUEST_TYPE_ICON_MAP[quest.type]"
+                    />
                 </div>
             </div>
         </div>

@@ -467,7 +467,7 @@ watch(
                 <SRouterLink :to="`/db/dungeon/${dungeon.id}`" class="text-lg font-bold link link-primary">
                     {{ dungeon.n }}
                 </SRouterLink>
-                <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
+                <CopyID :id="dungeon.id" />
                 <div class="flex-1"></div>
                 <span class="text-xs px-2 py-1 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">
                     Lv.{{ dungeon.lv }} {{ dungeon.t }}

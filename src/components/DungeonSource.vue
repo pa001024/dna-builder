@@ -44,7 +44,7 @@ const displayDungeonSources = computed(() => {
                                 {{ getDungeonName(source.dungeon) }}
                             </SRouterLink>
                             <span v-if="source.dungeonLv" class="text-xs text-base-content/70">Lv.{{ source.dungeonLv }}</span>
-                            <span class="text-xs text-base-content/70">ID: {{ source.dungeonId }}</span>
+                            <CopyID :id="source.dungeonId" />
                         </div>
                         <Icon
                             :icon="expandedDungeonId === source.dungeonId ? 'radix-icons:chevron-up' : 'radix-icons:chevron-down'"

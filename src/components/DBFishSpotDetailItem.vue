@@ -337,7 +337,7 @@ function clearHistory() {
                                     <SRouterLink :to="`/db/fishspot/${spot.id}`" class="font-medium text-lg link link-primary">{{
                                         spot.name
                                     }}</SRouterLink>
-                                    <div class="text-sm text-base-content/70">ID: {{ spot.id }}</div>
+                                    <CopyID :id="spot.id" />
                                 </div>
                             </div>
 
@@ -402,7 +402,7 @@ function clearHistory() {
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium">{{ fish.name }}</span>
-                                            <span class="text-xs text-base-content/70">ID: {{ fish.id }}</span>
+                                            <CopyID :id="fish.id" />
                                             <span class="text-xs px-1.5 py-0.5 rounded" :class="getRarityColor(fish.rarity)">
                                                 {{ getRarityName(fish.rarity) }}
                                             </span>

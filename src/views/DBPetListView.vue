@@ -6,6 +6,7 @@ import { petMap } from "../data/d"
 import petData, { type Pet, type PetEntry, petEntrys } from "../data/d/pet.data"
 import { LeveledPet } from "../data/leveled/LeveledPet"
 import { matchPinyin } from "../utils/pinyin-utils"
+import { getRarityGradientClass } from "../utils/rarity-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedPetId = useSearchParam<number>("id", 0)
@@ -109,17 +110,6 @@ function getTypeName(type: number): string {
     return typeMap[type] || type.toString()
 }
 
-function getQualityColor(quality: number): string {
-    const colorMap: Record<number, string> = {
-        1: "bg-gray-200 text-gray-800",
-        2: "bg-green-200 text-green-800",
-        3: "bg-blue-200 text-blue-800",
-        4: "bg-purple-200 text-purple-800",
-        5: "bg-yellow-200 text-yellow-800",
-    }
-    return colorMap[quality] || "bg-base-200 text-base-content"
-}
-
 function getQualityName(quality: number): string {
     const qualityMap: Record<number, string> = {
         1: "白",
@@ -136,6 +126,19 @@ function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
     const skill = type === "主动" ? leveledPet.主动 : leveledPet.被动
     if (!skill) return ""
     return skill.描述
+}
+
+/**
+ * 获取魔灵列表图标的稀有度背景。
+ * @param item 魔灵或潜质条目
+ * @returns 稀有度背景类名
+ */
+function getPetIconGradientClass(item: Pet | PetEntry): string {
+    if ("名称" in item) {
+        return getRarityGradientClass(item.品质)
+    }
+
+    return getRarityGradientClass(item.r)
 }
 
 useInitialScrollToSelectedItem()
@@ -212,7 +215,10 @@ useInitialScrollToSelectedItem()
                             @click="selectedPetId = (item as Pet | PetEntry).id"
                         >
                             <div class="flex items-start gap-2">
-                                <div class="w-12 h-12 overflow-hidden rounded-full">
+                                <div
+                                    class="w-12 h-12 overflow-hidden rounded bg-linear-15"
+                                    :class="getPetIconGradientClass(item as Pet | PetEntry)"
+                                >
                                     <!-- 显示潜质图标 -->
                                     <template v-if="selectedType === 999 && 'icon' in item">
                                         <img :src="`/imgs/webp/T_Armory_Pet_Attr_${item.icon}.webp`" class="w-full h-full object-cover" />
@@ -227,9 +233,6 @@ useInitialScrollToSelectedItem()
                                     <template v-if="selectedType === 999 && 'name' in item">
                                         <div class="font-medium flex gap-2 items-center">
                                             {{ $t(item.name) }}
-                                            <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(item.r)">
-                                                {{ $t(getQualityName(item.r)) }}
-                                            </span>
                                         </div>
                                         <div class="text-xs opacity-70 mt-1">
                                             <span>{{ item.desc }}</span>
@@ -239,9 +242,6 @@ useInitialScrollToSelectedItem()
                                     <template v-else-if="'名称' in item">
                                         <div class="font-medium flex gap-2 items-center">
                                             {{ $t(item.名称) }}
-                                            <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(item.品质)">
-                                                {{ $t(getQualityName(item.品质)) }}
-                                            </span>
                                         </div>
                                         <div class="text-xs opacity-70 mt-1 flex gap-2">
                                             <span>{{ $t(getTypeName(item.类型)) }}</span>

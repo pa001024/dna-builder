@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { computed, reactive } from "vue"
-import TypewriterText from "@/components/TypewriterText.vue"
 import type { NPC } from "@/data/d/npc.data"
 import { type Dialogue, type DialogueOption, getImprType, getRegionType } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
@@ -251,7 +250,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                 <SRouterLink :to="`/db/npc/${npc.id}`" class="text-lg font-bold link link-primary">
                     {{ formatStoryText(npc.name || `NPC ${npc.id}`) }}
                 </SRouterLink>
-                <div class="text-sm text-base-content/70">ID: {{ npc.id }}</div>
+                <CopyID :id="npc.id" />
             </div>
         </div>
 

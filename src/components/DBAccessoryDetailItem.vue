@@ -463,7 +463,7 @@ const accessoryUnlock = computed(() => {
                             {{ accessoryVersionText }}
                         </span>
                     </div>
-                    <div class="text-xs text-base-content/70 mt-1">ID: {{ accessory.id }}</div>
+                    <CopyID :id="accessory.id" />
                 </div>
             </div>
             <span

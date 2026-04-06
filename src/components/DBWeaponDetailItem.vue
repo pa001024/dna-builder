@@ -244,46 +244,40 @@ watch(
 
 <template>
     <div class="p-3 space-y-3">
-        <div class="p-3">
-            <div class="flex items-center gap-3 mb-3">
-                <SRouterLink :to="`/db/weapon/${weapon.id}`" class="text-lg font-bold link link-primary">
-                    {{ $t(weapon.名称) }}
-                </SRouterLink>
-                <span class="text-xs text-base-content/70">ID: {{ weapon.id }}</span>
+        <div class="flex items-center">
+            <div class="size-24 shrink-0 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(5)">
+                <ImageFallback :src="leveledWeapon.url" :alt="weapon.名称" class="w-full h-full object-cover">
+                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="weapon.名称" class="w-full h-full object-cover" />
+                </ImageFallback>
             </div>
+            <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-3 px-3 py-2">
+                    <SRouterLink :to="`/db/weapon/${weapon.id}`" class="text-lg font-bold link link-primary">
+                        {{ $t(weapon.名称) }}
+                    </SRouterLink>
+                    <CopyID :id="weapon.id" />
+                </div>
 
-            <div class="flex justify-center items-center mb-3">
-                <img :src="leveledWeapon.url" class="w-24 object-cover rounded" />
-            </div>
-
-            <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
-                <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
-                <span>
-                    {{ $t(weapon.伤害类型) }}
-                </span>
-                <span v-if="weapon.版本">v{{ weapon.版本 }}</span>
-            </div>
-
-            <div v-if="weapon.描述" class="text-sm text-base-content/70 mb-3">
-                {{ weapon.描述 }}
+                <div class="flex flex-col gap-2 justify-end text-xs text-base-content/80 px-3 py-2 h-14">
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span>{{ $t(weapon.伤害类型) }}</span>
+                        <span v-if="weapon.版本">v{{ weapon.版本 }}</span>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <div v-if="weapon.描述" class="text-sm text-base-content/70 p-3 bg-base-200 rounded">
+            {{ weapon.描述 }}
+        </div>
+
         <div class="p-3">
-            <div class="flex items-center gap-4 mb-3">
-                <span class="text-sm min-w-20 flex-none grid grid-cols-2">
-                    <span> Lv. </span>
-                    <span> {{ currentLevel }} </span>
-                </span>
-                <input
-                    :key="leveledWeapon.id"
-                    v-model.number="currentLevel"
-                    type="range"
-                    class="range range-primary range-xs grow"
-                    :min="1"
-                    :max="80"
-                    step="1"
-                />
+            <div class="flex items-center gap-4">
+                <span class="text-sm min-w-20">Lv. <input v-model.number="currentLevel" type="text" class="w-12 text-center" /> </span>
+                <input v-model.number="currentLevel" type="range" class="range range-primary range-xs grow" :min="1" :max="80" step="1" />
             </div>
             <div class="flex items-center gap-4">
                 <span class="text-sm min-w-20 flex-none grid grid-cols-2">
@@ -432,7 +426,7 @@ watch(
                                             {{ $t(item.mod.系列) }}{{ $t(item.mod.名称) }}
                                         </SRouterLink>
                                         <div class="text-xs opacity-70 flex flex-wrap gap-x-3 gap-y-1">
-                                            <span>ID: {{ item.mod.id }}</span>
+                                            <CopyID :id="item.mod.id" />
                                             <span v-if="item.mod.版本">v{{ item.mod.版本 }}</span>
                                             <span v-if="item.mod.耐受" class="inline-flex items-center gap-1">
                                                 {{ $t("耐受") }}

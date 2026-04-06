@@ -136,7 +136,7 @@ const groupedEntryPetSources = computed<EntryPetSourceGroup[]>(() => {
     <div class="p-3 space-y-3">
         <div class="flex items-center gap-3">
             <span class="text-lg font-bold">{{ $t(entry.name) }}</span>
-            <span class="text-xs text-base-content/70">ID: {{ entry.id }}</span>
+            <CopyID :id="entry.id" />
             <span class="text-xs text-base-content/70">{{ $t("pet_detail.base_id") }}: {{ entry.bid }}</span>
             <span class="text-xs px-2 py-0.5 rounded" :class="getQualityColor(entry.r)">
                 {{ $t(getQualityName(entry.r)) }}
@@ -165,7 +165,7 @@ const groupedEntryPetSources = computed<EntryPetSourceGroup[]>(() => {
                 <SRouterLink :to="`/db/pet/${entry.upid}`" class="hover:underline">
                     {{ $t(entry.name) }}
                 </SRouterLink>
-                <span class="text-xs text-base-content/70">ID: {{ entry.upid }}</span>
+                <CopyID :id="entry.upid" />
             </div>
         </div>
 

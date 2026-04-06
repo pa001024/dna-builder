@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
-import type { RouteLocationRaw } from "vue-router"
 import type { Book, BookResource } from "@/data/d/book.data"
 import { convertRegionMapIdToDBMapId } from "@/data/d/map.data"
 import { regionMap } from "@/data/d/region.data"
@@ -60,37 +59,6 @@ const selectedResourceLocation = computed<BookLocationInfo | null>(() => {
 
     return getBookLocationInfo(selectedResource.value)
 })
-
-/**
- * 当前条目的地图跳转目标。
- * @param resource 读物条目
- * @param target 目标坐标字段
- * @returns 路由对象或 null
- */
-function getMapLocalLink(resource: BookResource, target: "pos" | "treasurePos"): RouteLocationRaw | null {
-    const point = resource[target]
-    if (!resource.srId) return null
-    const subRegion = subRegionMap.get(resource.srId)
-    const region = subRegion ? regionMap.get(subRegion.rid) : undefined
-    if (!point || !subRegion || !region?.mapMapping?.length) return null
-
-    return {
-        name: "map-local",
-        query: {
-            regionId: String(subRegion.rid),
-            subRegionId: String(resource.srId),
-            pointName: target === "pos" ? `${getResourceDisplayName(resource)}` : `${getResourceDisplayName(resource)} 藏宝点`,
-            pointX: String(point[0]),
-            pointY: String(point[1]),
-            pointIcon: props.book.icon,
-        },
-    }
-}
-
-const selectedResourcePosLink = computed(() => (selectedResource.value ? getMapLocalLink(selectedResource.value, "pos") : null))
-const selectedResourceTreasureLink = computed(() =>
-    selectedResource.value ? getMapLocalLink(selectedResource.value, "treasurePos") : null
-)
 
 /**
  * 当前条目文本对应的可渲染片段。
@@ -189,6 +157,14 @@ function parseBookTextSegments(text: string | undefined) {
 function selectResource(resourceId: number): void {
     selectedResourceId.value = resourceId
 }
+
+/**
+ * 读物条目切换标签。
+ */
+const bookTabItems = computed(() => props.book.res.map(resource => ({
+    label: getResourceDisplayName(resource),
+    value: resource.id,
+})))
 </script>
 
 <template>
@@ -204,8 +180,7 @@ function selectResource(resourceId: number): void {
                 <SRouterLink :to="`/db/book/${book.id}`" class="text-lg font-bold link link-primary wrap-break-word">
                     {{ book.name }}
                 </SRouterLink>
-                <div class="text-sm text-base-content/70 mt-1">ID: {{ book.id }}</div>
-                <div class="text-xs text-base-content/70 mt-1">条目数: {{ book.res.length }}</div>
+                <div class="text-sm text-base-content/70 mt-1"><CopyID :id="book.id" /> 条目数: {{ book.res.length }}</div>
             </div>
         </div>
 
@@ -215,34 +190,20 @@ function selectResource(resourceId: number): void {
         </div>
 
         <div class="card bg-base-100 border border-base-200 rounded p-3 space-y-3">
-            <div class="flex items-center gap-2 overflow-x-auto pb-1">
-                <button
-                    v-for="resource in book.res"
-                    :key="resource.id"
-                    type="button"
-                    class="shrink-0 rounded-full border px-3 py-1 text-sm transition-colors duration-200"
-                    :class="{
-                        'border-primary bg-primary text-primary-content': selectedResource?.id === resource.id,
-                        'border-base-300 bg-base-200 hover:bg-base-300': selectedResource?.id !== resource.id,
-                    }"
-                    @click="selectResource(resource.id)"
-                >
-                    {{ getResourceDisplayName(resource) }}
-                </button>
-            </div>
+            <AniTabs v-model="selectedResourceId" :tabs="bookTabItems" />
 
             <div v-if="selectedResource" class="space-y-3">
                 <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0">
+                    <div class="flex gap-2">
                         <div class="text-base font-semibold wrap-break-word">{{ getResourceDisplayName(selectedResource) }}</div>
-                        <div class="text-xs text-base-content/70 mt-1">条目 ID: {{ selectedResource.id }}</div>
+                        <CopyID :id="selectedResource.id" />
                     </div>
                     <span class="text-xs px-2 py-0.5 rounded bg-primary text-primary-content shrink-0">
                         {{ getResourceTypeLabel(selectedResource.type) }}
                     </span>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mt-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mt-2">
                     <div v-if="selectedResourceLocation && selectedResource.srId" class="flex items-start justify-between gap-2">
                         <span class="text-base-content/70">子区域</span>
                         <div class="text-right">
@@ -262,26 +223,22 @@ function selectResource(resourceId: number): void {
 
                     <div v-if="selectedResource.srId && selectedResource.pos" class="flex items-start justify-between gap-2">
                         <span class="text-base-content/70">坐标点</span>
-                        <div class="flex items-center gap-2">
-                            <span class="text-right"
-                                >({{ selectedResource.pos[0].toFixed(2) }}, {{ selectedResource.pos[1].toFixed(2) }})</span
-                            >
-                            <SRouterLink v-if="selectedResourcePosLink" :to="selectedResourcePosLink!" class="link link-primary">
-                                跳转
-                            </SRouterLink>
-                        </div>
+                        <MapPosLink
+                            :sub-region-id="selectedResource.srId"
+                            :point="selectedResource.pos"
+                            :point-name="getResourceDisplayName(selectedResource)"
+                            :point-icon="book.icon"
+                        />
                     </div>
 
                     <div v-if="selectedResource.srId && selectedResource.treasurePos" class="flex items-start justify-between gap-2">
                         <span class="text-base-content/70">藏宝点</span>
-                        <div class="flex items-center gap-2">
-                            <span class="text-right"
-                                >({{ selectedResource.treasurePos[0].toFixed(2) }}, {{ selectedResource.treasurePos[1].toFixed(2) }})</span
-                            >
-                            <SRouterLink v-if="selectedResourceTreasureLink" :to="selectedResourceTreasureLink!" class="link link-primary">
-                                跳转
-                            </SRouterLink>
-                        </div>
+                        <MapPosLink
+                            :sub-region-id="selectedResource.srId"
+                            :point="selectedResource.treasurePos"
+                            :point-name="`${getResourceDisplayName(selectedResource)} 藏宝点`"
+                            :point-icon="book.icon"
+                        />
                     </div>
                 </div>
 

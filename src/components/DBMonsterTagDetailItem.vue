@@ -145,7 +145,7 @@ function formatBonusValue(value: number): string {
             <SRouterLink :to="`/db/monstertag/${monsterTag.id}`" class="text-lg font-bold link link-primary">
                 {{ monsterTag.name }}
             </SRouterLink>
-            <span class="text-sm text-base-content/70">ID: {{ monsterTag.id }}</span>
+            <CopyID :id="monsterTag.id" />
         </div>
 
         <div class="p-3 bg-base-200 rounded">

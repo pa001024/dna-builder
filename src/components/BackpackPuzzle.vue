@@ -1713,7 +1713,7 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                     <div class="text-lg font-bold">{{ selectedLevel.name }}</div>
                     <div class="text-sm text-base-content/70">{{ selectedLevel.desc }}</div>
                 </div>
-                <span class="text-sm text-base-content/70">ID: {{ selectedLevel.id }}</span>
+                <CopyID :id="selectedLevel.id" />
             </div>
         </div>
 

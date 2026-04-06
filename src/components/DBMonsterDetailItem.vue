@@ -341,7 +341,7 @@ function getFactionName(faction: number | undefined): string {
             <SRouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">
                 {{ $t(monster.n) }}
             </SRouterLink>
-            <span class="text-sm text-base-content/70">ID: {{ monster.id }}</span>
+            <CopyID :id="monster.id" />
             <div class="text-sm text-base-content/70 flex items-center gap-2">
                 <span class="px-1.5 py-0.5 rounded bg-base-200 text-xs">
                     {{ $t(getFactionName(monster.f)) }}
@@ -353,42 +353,17 @@ function getFactionName(faction: number | undefined): string {
             </label>
         </div>
 
-        <div v-if="monsterTagGroups.length" class="p-3 bg-base-200 rounded space-y-3">
-            <div class="text-xs text-base-content/70">号令者信息</div>
-            <div v-for="monsterTagGroup in monsterTagGroups" :key="monsterTagGroup.primaryTag.id" class="rounded bg-base-100 p-3 space-y-2">
-                <div class="flex items-center justify-between gap-2">
-                    <div class="text-sm font-medium">{{ monsterTagGroup.name }}</div>
-                    <SRouterLink :to="`/db/monstertag/${monsterTagGroup.primaryTag.id}`" class="text-xs link link-primary">
-                        查看详情
-                    </SRouterLink>
-                </div>
-                <div class="text-sm whitespace-pre-line">
-                    {{ monsterTagGroup.primaryTag.desc }}
-                </div>
-                <div v-if="monsterTagGroup.tags.length > 1" class="flex flex-wrap gap-2">
-                    <SRouterLink
-                        v-for="tag in monsterTagGroup.tags"
-                        :key="tag.id"
-                        :to="`/db/monstertag/${tag.id}`"
-                        class="text-xs px-2 py-1 rounded bg-base-200 hover:bg-base-300 transition-colors duration-200"
-                    >
-                        {{ tag.id }}
-                    </SRouterLink>
-                </div>
-            </div>
-        </div>
-
         <div v-if="leveledMonster" class="flex justify-center items-center">
             <img :src="leveledMonster.url" class="w-24 object-cover rounded" />
         </div>
 
         <div class="flex items-center gap-4">
-            <span class="text-sm min-w-12">Lv. {{ currentLevel }}</span>
+            <span class="text-sm min-w-20">Lv. <input v-model.number="currentLevel" type="text" class="w-12 text-center" /> </span>
             <input
                 v-model.number="currentLevel"
                 type="range"
                 class="range range-primary range-xs grow"
-                min="1"
+                :min="1"
                 :max="MAX_MONSTER_LEVEL"
                 step="1"
             />
@@ -439,6 +414,31 @@ function getFactionName(faction: number | undefined): string {
             </div>
         </div>
 
+        <div v-if="monsterTagGroups.length">
+            <div class="text-xs text-base-content/70 mb-1">号令者信息</div>
+            <div v-for="monsterTagGroup in monsterTagGroups" :key="monsterTagGroup.primaryTag.id" class="rounded bg-base-200 p-3 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="text-sm font-medium">{{ monsterTagGroup.name }}</div>
+                    <SRouterLink :to="`/db/monstertag/${monsterTagGroup.primaryTag.id}`" class="text-xs link link-primary">
+                        查看详情
+                    </SRouterLink>
+                </div>
+                <div class="text-sm whitespace-pre-line">
+                    {{ monsterTagGroup.primaryTag.desc }}
+                </div>
+                <div v-if="monsterTagGroup.tags.length > 1" class="flex flex-wrap gap-2">
+                    <SRouterLink
+                        v-for="tag in monsterTagGroup.tags"
+                        :key="tag.id"
+                        :to="`/db/monstertag/${tag.id}`"
+                        class="text-xs px-2 py-1 rounded bg-base-200 hover:bg-base-300 transition-colors duration-200"
+                    >
+                        {{ tag.id }}
+                    </SRouterLink>
+                </div>
+            </div>
+        </div>
+
         <div v-if="leveledMonster">
             <div class="text-xs text-base-content/70 mb-1">等级成长预览</div>
             <div ref="levelTrendChartRef" class="w-full h-72 rounded bg-base-200/40" />
@@ -478,7 +478,7 @@ function getFactionName(faction: number | undefined): string {
                         <span class="font-medium">{{ dungeon.n }}</span>
                         <div class="flex flex-col items-end">
                             <span class="text-xs text-base-content/70">Lv.{{ dungeon.lv }}</span>
-                            <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
+                            <CopyID :id="dungeon.id" />
                         </div>
                     </div>
                     <div class="text-xs text-base-content/70 mt-1">
@@ -504,7 +504,7 @@ function getFactionName(faction: number | undefined): string {
                             {{ dungeon.cname }} {{ $t(getAbyssDungeonGroup(dungeon)) }} #{{ getAbyssDungeonLevel(dungeon) }}</span
                         >
                         <div class="flex flex-col items-end">
-                            <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
+                            <CopyID :id="dungeon.id" />
                         </div>
                     </div>
                 </div>

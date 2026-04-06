@@ -25,7 +25,7 @@ const questions = [
         answer: String(DNA_SAFE_VERSION_LIMIT),
     },
     {
-        question: "What is the game server opening time? (8-digit number)",
+        question: "What is the game server opening date? (8-digit number)",
         answer: "20251028",
     },
     {

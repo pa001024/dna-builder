@@ -8,6 +8,7 @@ import { subRegionData } from "@/data/d/subregion.data"
 import { petEntrys, petToEntey } from "../data/d/pet.data"
 import type { Pet } from "../data/data-types"
 import { LeveledPet } from "../data/leveled/LeveledPet"
+import { getRarityGradientClass } from "../utils/rarity-utils"
 
 const props = defineProps<{
     pet: Pet
@@ -159,38 +160,6 @@ watch(
         enableFourthLevel.value = false
     }
 )
-
-/**
- * 根据品质值获取标签颜色样式。
- * @param quality 品质值
- * @returns 颜色样式类名
- */
-function getQualityColor(quality: number): string {
-    const colorMap: Record<number, string> = {
-        1: "bg-gray-200 text-gray-800",
-        2: "bg-green-200 text-green-800",
-        3: "bg-blue-200 text-blue-800",
-        4: "bg-purple-200 text-purple-800",
-        5: "bg-yellow-200 text-yellow-800",
-    }
-    return colorMap[quality] || "bg-base-200 text-base-content"
-}
-
-/**
- * 根据品质值获取品质名称。
- * @param quality 品质值
- * @returns 品质名称
- */
-function getQualityName(quality: number): string {
-    const qualityMap: Record<number, string> = {
-        1: "白",
-        2: "绿",
-        3: "蓝",
-        4: "紫",
-        5: "金",
-    }
-    return qualityMap[quality] || quality.toString()
-}
 
 /**
  * 根据类型值获取魔灵类型名称。
@@ -345,28 +314,31 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-center gap-3">
-            <SRouterLink :to="`/db/pet/${pet.id}`" class="text-lg font-bold link link-primary">
-                {{ $t(pet.名称) }}
-            </SRouterLink>
-            <span class="text-xs text-base-content/70">ID: {{ pet.id }}</span>
-            <div class="text-sm text-base-content/70 flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded" :class="getQualityColor(pet.品质)">
-                    {{ $t(getQualityName(pet.品质)) }}
-                </span>
-                <span class="px-1.5 py-0.5 rounded bg-base-300">{{ $t(getTypeName(pet.类型)) }}</span>
+    <div class="p-3 space-y-4">
+        <div class="flex items-center">
+            <div class="size-24 shrink-0 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(pet.品质)">
+                <ImageFallback :src="leveledPet.url" :alt="pet.名称" class="w-full h-full object-cover">
+                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="pet.名称" class="w-full h-full object-cover" />
+                </ImageFallback>
             </div>
-        </div>
-
-        <div class="flex justify-center items-center">
-            <img :src="leveledPet.url" class="w-24 object-cover rounded" />
-        </div>
-
-        <div class="flex flex-wrap gap-2 text-sm opacity-70">
-            <span>{{ $t("pet_detail.max_level") }}: {{ pet.最大等级 }}</span>
-            <span>{{ $t("pet_detail.capture_exp") }}: {{ pet.捕获经验 }}</span>
-            <span>{{ $t("pet_detail.exp") }}: {{ displayedExperience }}</span>
+            <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-3 px-3 py-2">
+                    <SRouterLink :to="`/db/pet/${pet.id}`" class="text-lg font-bold link link-primary">
+                        {{ $t(pet.名称) }}
+                    </SRouterLink>
+                    <CopyID :id="pet.id" />
+                    <div class="ml-auto text-sm text-base-content/70 flex items-center gap-2">
+                        <span class="px-1.5 py-0.5 rounded bg-base-300">{{ $t(getTypeName(pet.类型)) }}</span>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2 justify-end text-xs text-base-content/80 px-3 py-2 h-14">
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span>{{ $t("pet_detail.max_level") }}: {{ pet.最大等级 }}</span>
+                        <span>{{ $t("pet_detail.capture_exp") }}: {{ pet.捕获经验 }}</span>
+                        <span>{{ $t("pet_detail.exp") }}: {{ displayedExperience }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div v-if="pet.描述" class="p-3 bg-base-200 rounded">

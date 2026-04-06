@@ -6,7 +6,7 @@ import { booksData } from "@/data/d/book.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { collectResourceDraftSources } from "@/utils/draft-source"
-import { getRarityBadgeClass } from "@/utils/rarity-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import {
     collectResourceDungeonSources,
     collectResourceHardbossSources,
@@ -27,7 +27,6 @@ const props = defineProps<{
     resource: Resource
 }>()
 
-const rarityText = computed(() => ["白", "绿", "蓝", "紫", "金"][props.resource.rarity - 1] || "白")
 const draftSources = computed(() => collectResourceDraftSources(props.resource))
 const dungeonSources = computed(() => collectResourceDungeonSources(props.resource))
 const hardbossSources = computed(() => collectResourceHardbossSources(props.resource))
@@ -119,57 +118,72 @@ function getMapLocalLink(regionId: number): RouteLocationRaw {
     }
 }
 
+const sourceCounts = computed(
+    () =>
+        draftSources.value.length +
+        dungeonSources.value.length +
+        hardbossSources.value.length +
+        questSources.value.length +
+        shopSources.value.length
+)
 function getResourceIconUrl(icon: string): string {
     return icon ? `/imgs/res/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
 }
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div>
-            <div class="flex items-center gap-3 mb-3">
-                <SRouterLink :to="`/db/resource/${resource.id}`" class="text-lg font-bold link link-primary">
-                    {{ resource.name }}
-                </SRouterLink>
-                <span class="text-xs text-base-content/70">{{ $t("resource.id") }}: {{ resource.id }}</span>
-                <div class="flex-1"></div>
-                <div class="text-xs px-2 py-0.5 rounded" :class="getRarityBadgeClass(resource.rarity)">{{ rarityText }}</div>
-            </div>
-
-            <div class="flex justify-center items-center mb-3">
-                <ImageFallback :src="getResourceIconUrl(resource.icon)" :alt="resource.name" class="w-24 object-cover rounded">
-                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="resource.name" class="w-24 object-cover rounded" />
+    <div class="p-3 space-y-4">
+        <div class="flex items-center">
+            <div class="size-24 shrink-0 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(resource.rarity)">
+                <ImageFallback :src="getResourceIconUrl(resource.icon)" :alt="resource.name" class="w-full h-full object-cover">
+                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="resource.name" class="w-full h-full object-cover" />
                 </ImageFallback>
             </div>
-
-            <div v-if="resource.desc" class="p-3 bg-base-200 rounded mb-3">
-                <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.description") }}</div>
-                <div class="text-sm leading-6 whitespace-pre-wrap">{{ resource.desc }}</div>
-            </div>
-
-            <div v-if="resource.desc2" class="p-3 bg-base-200 rounded mb-3">
-                <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.background") }}</div>
-                <div class="text-sm leading-6 whitespace-pre-wrap">{{ resource.desc2 }}</div>
+            <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-3 p-3">
+                    <SRouterLink :to="`/db/resource/${resource.id}`" class="text-lg font-bold link link-primary">
+                        {{ resource.name }}
+                    </SRouterLink>
+                    <CopyID :id="resource.id" />
+                </div>
+                <div class="flex flex-wrap gap-3 text-sm opacity-70 p-3 h-12">
+                    <span v-if="sourceCounts">
+                        来源 <span class="text-primary">{{ sourceCounts }}</span>
+                    </span>
+                    <span v-if="resource.source?.length">
+                        地图点位 <span class="text-primary">{{ resource.source.length }}</span>
+                    </span>
+                </div>
             </div>
         </div>
 
-        <div v-if="bookLink" class="p-3 bg-base-200 rounded">
+        <div v-if="resource.desc" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.description") }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap">{{ resource.desc }}</div>
+        </div>
+
+        <div v-if="resource.desc2" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.background") }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap">{{ resource.desc2 }}</div>
+        </div>
+
+        <div v-if="bookLink && bookTarget" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">所属读物</div>
             <div class="flex items-center gap-2">
                 <SRouterLink :to="bookLink" class="link link-primary wrap-break-word">
-                    {{ bookTarget?.name }}
+                    {{ bookTarget.name }}
                 </SRouterLink>
-                <span class="text-xs text-base-content/70">ID: {{ bookTarget?.id }}</span>
+                <CopyID :id="bookTarget.id" />
             </div>
         </div>
 
-        <div v-if="fishLink" class="p-3 bg-base-200 rounded">
+        <div v-if="fishLink && fishTarget" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">所属鱼类</div>
             <div class="flex items-center gap-2">
                 <SRouterLink :to="fishLink" class="link link-primary wrap-break-word">
-                    {{ fishTarget?.name }}
+                    {{ fishTarget.name }}
                 </SRouterLink>
-                <span class="text-xs text-base-content/70">ID: {{ fishTarget?.id }}</span>
+                <CopyID :id="fishTarget.id" />
             </div>
         </div>
 
@@ -188,8 +202,8 @@ function getResourceIconUrl(icon: string): string {
         </div>
 
         <div v-if="mapSources.length" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">地图点位</div>
-            <div class="space-y-2">
+            <div class="text-xs text-base-content/70 mb-2">地图点位 (点击跳转)</div>
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
                 <div v-for="source in mapSources" :key="source.srId" class="p-2 bg-base-100 rounded border border-base-200">
                     <div class="flex items-center justify-between gap-2">
                         <div class="min-w-0">

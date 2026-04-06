@@ -4,6 +4,7 @@ import { LeveledSkill } from "@/data"
 import { modConvertData } from "@/data/d/convert.data"
 import shopData from "@/data/d/shop.data"
 import weaponData from "@/data/d/weapon.data"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { collectModCharBreakthroughSources, collectModQuestSources } from "@/utils/resource-source"
 import { getModDropInfo } from "@/utils/reward-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
@@ -47,18 +48,6 @@ watch(
     }
 )
 
-// 根据品质获取颜色
-function getQualityColor(quality: string): string {
-    const colorMap: Record<string, string> = {
-        白: "bg-gray-200 text-gray-800",
-        绿: "bg-green-200 text-green-800",
-        蓝: "bg-blue-200 text-blue-800",
-        紫: "bg-purple-200 text-purple-800",
-        金: "bg-yellow-200 text-yellow-800",
-    }
-    return colorMap[quality] || "bg-base-200 text-base-content"
-}
-
 // 处理效果描述中的极性
 const formatEffDesc = (desc: string) => {
     const po = desc.match(/([DVOA])趋向/)
@@ -79,22 +68,20 @@ const modDraft = computed<Draft | undefined>(() => {
  * @returns 副本来源列表
  */
 const modDungeonSources = computed(() => {
-    return (modDungeonMap.get(props.mod.id) || []).map(
-        dungeon => {
-            const dropInfo = getModDropInfo(dungeon, props.mod.id)
+    return (modDungeonMap.get(props.mod.id) || []).map(dungeon => {
+        const dropInfo = getModDropInfo(dungeon, props.mod.id)
 
-            return {
-                key: `mod-dungeon-${props.mod.id}-${dungeon.id}`,
-                dungeonId: dungeon.id,
-                dungeonName: dungeon.n,
-                dungeonType: dungeon.t,
-                dungeonLv: dungeon.lv,
-                rewardId: props.mod.id,
-                pp: dropInfo.pp,
-                times: dropInfo.times,
-            }
+        return {
+            key: `mod-dungeon-${props.mod.id}-${dungeon.id}`,
+            dungeonId: dungeon.id,
+            dungeonName: dungeon.n,
+            dungeonType: dungeon.t,
+            dungeonLv: dungeon.lv,
+            rewardId: props.mod.id,
+            pp: dropInfo.pp,
+            times: dropInfo.times,
         }
-    )
+    })
 })
 const modQuestSources = computed(() => collectModQuestSources(props.mod.id))
 const modCharBreakthroughSources = computed(() => collectModCharBreakthroughSources(props.mod.id))
@@ -284,31 +271,26 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
 
 <template>
     <div class="p-3 space-y-4">
-        <div class="flex items-center gap-3 p-3">
-            <SRouterLink :to="`/db/mod/${mod.id}`" class="text-lg font-bold link link-primary">
-                {{ $t(mod.系列) }}{{ $t(mod.名称) }}
-            </SRouterLink>
-            <span class="text-xs text-base-content/70">ID: {{ mod.id }}</span>
-            <div class="text-sm text-base-content/70 flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded" :class="getQualityColor(leveledMod.品质)">
-                    {{ $t(leveledMod.品质) }}
-                </span>
-                <div v-if="mod.极性 || mod.耐受" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
-                    {{ leveledMod.耐受 }}
-                    <Icon v-if="mod.极性" :icon="`po-${mod.极性}`" />
+        <div class="flex items-center">
+            <img :src="leveledMod.url" class="w-24 object-cover rounded bg-linear-15" :class="getRarityGradientClass(mod.品质)" />
+            <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-3 p-3">
+                    <SRouterLink :to="`/db/mod/${mod.id}`" class="text-lg font-bold link link-primary">
+                        {{ $t(mod.系列) }}{{ $t(mod.名称) }}
+                    </SRouterLink>
+                    <CopyID :id="mod.id" />
+                    <div v-if="mod.极性 || mod.耐受" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
+                        {{ leveledMod.耐受 }}
+                        <Icon v-if="mod.极性" :icon="`po-${mod.极性}`" />
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3 text-sm opacity-70 p-3">
+                    <span>{{ $t(leveledMod.类型) }}</span>
+                    <span v-if="leveledMod.属性">{{ $t(`${leveledMod.属性}属性`) }}</span>
+                    <span v-if="leveledMod.限定">{{ $t(leveledMod.限定) }}</span>
+                    <span v-if="mod.版本">v{{ mod.版本 }}</span>
                 </div>
             </div>
-        </div>
-
-        <div class="flex justify-center items-center">
-            <img :src="leveledMod.url" class="w-24 object-cover rounded" />
-        </div>
-
-        <div class="flex flex-wrap gap-2 text-sm opacity-70 p-3">
-            <span>{{ $t(leveledMod.类型) }}</span>
-            <span v-if="leveledMod.属性">{{ $t(`${leveledMod.属性}属性`) }}</span>
-            <span v-if="leveledMod.限定">{{ $t(leveledMod.限定) }}</span>
-            <span v-if="mod.版本">v{{ mod.版本 }}</span>
         </div>
 
         <!-- 等级调整 -->
@@ -403,7 +385,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                                 <div class="font-medium">
                                     {{ group.sourceSkill ? $t(group.sourceSkill.名称) : `ID: ${group.sourceSkillId}` }}
                                 </div>
-                                <span class="text-xs opacity-70">ID: {{ group.sourceSkillId }}</span>
+                                <CopyID :id="group.sourceSkillId" />
                             </div>
                             <SkillFields v-if="group.sourceSkill" :skill="group.sourceSkill" />
                         </div>
@@ -415,7 +397,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                                 <div class="font-medium">
                                     {{ $t(group.replaceSkill.名称) }}
                                 </div>
-                                <span class="text-xs opacity-70">ID: {{ group.replaceSkillId }}</span>
+                                <CopyID :id="group.replaceSkillId" />
                             </div>
                             <SkillFields :skill="group.replaceSkill" />
                         </div>
@@ -463,12 +445,18 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
         </div>
 
         <!-- 图纸信息 -->
-        <div v-if="modDraft" class="bg-base-200 rounded">
+        <div v-if="modDraft" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">图纸信息</div>
             <DBDraftDetailItem :draft="modDraft" />
         </div>
 
         <div
-            v-if="modDungeonSources.length > 0 || modShopSources.length > 0 || modQuestSources.length > 0 || modCharBreakthroughSources.length > 0"
+            v-if="
+                modDungeonSources.length > 0 ||
+                modShopSources.length > 0 ||
+                modQuestSources.length > 0 ||
+                modCharBreakthroughSources.length > 0
+            "
             class="p-3 bg-base-200 rounded"
         >
             <div class="text-xs text-base-content/70 mb-2">来源</div>

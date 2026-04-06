@@ -490,7 +490,7 @@ function getHardbossIcon(boss: HardBoss): string {
                     <SRouterLink :to="`/db/hardboss/${boss.id}`" class="text-lg font-bold link link-primary min-w-0 truncate">
                         {{ boss.name }}
                     </SRouterLink>
-                    <span class="text-sm text-base-content/70 shrink-0">ID: {{ boss.id }}</span>
+                    <CopyID :id="boss.id" />
                 </div>
                 <div class="text-sm text-base-content/70">
                     {{ boss.desc }}

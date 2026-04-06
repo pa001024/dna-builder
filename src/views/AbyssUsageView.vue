@@ -15,7 +15,6 @@ import type {
     AbyssWeaponUsageStat,
 } from "@/api/gen/api-types"
 import { abyssUsageLineupStatsQuery, abyssUsageSubmissionsQuery, submitAbyssUsageMutation } from "@/api/graphql"
-import RangeSelector from "@/components/RangeSelector.vue"
 import { abyssDungeonMap, charMap, petMap, weaponMap } from "@/data"
 import { LeveledChar } from "@/data/leveled/LeveledChar"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
@@ -546,10 +545,10 @@ async function loadAssistantLineups(charId: number | null) {
         return
     }
     const { minLevel, maxLevel } = currentLevelRange.value
-        const result = await abyssUsageLineupStatsQuery(
-            { seasonId, charId: charId || undefined, mainOnly: assistantMainOnly.value || undefined, limit: 6, minLevel, maxLevel },
-            { requestPolicy: "network-only" }
-        )
+    const result = await abyssUsageLineupStatsQuery(
+        { seasonId, charId: charId || undefined, mainOnly: assistantMainOnly.value || undefined, limit: 6, minLevel, maxLevel },
+        { requestPolicy: "network-only" }
+    )
     assistantLineupStats.value = result ?? []
 }
 
@@ -667,10 +666,7 @@ async function loadAllAbyssSubmissions() {
     const submissions: AbyssUsageSubmission[] = []
     const { minLevel, maxLevel } = currentLevelRange.value
     for (let offset = 0; ; offset += pageSize) {
-        const page = await abyssUsageSubmissionsQuery(
-            { limit: pageSize, offset, minLevel, maxLevel },
-            { requestPolicy: "network-only" }
-        )
+        const page = await abyssUsageSubmissionsQuery({ limit: pageSize, offset, minLevel, maxLevel }, { requestPolicy: "network-only" })
         submissions.push(...(page || []))
         if (!page || page.length < pageSize) {
             break

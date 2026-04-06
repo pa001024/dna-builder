@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { getDropModeText, getRewardDetails, getRewardTypeText, type RewardItem } from "./reward-utils"
+import { findInRewardTree, getDropModeText, getRewardDetails, getRewardTypeText, type RewardItem } from "./reward-utils"
 
 describe("getRewardTypeText", () => {
     it("应该正确翻译 Hair 类型", () => {
@@ -139,6 +139,16 @@ describe("getRewardDetails", () => {
         }
 
         validateStructure(result)
+    })
+
+    it("应该正确找到图纸掉落信息", () => {
+        const dungeon = getRewardDetails(138012)
+        expect(dungeon).not.toBeNull()
+
+        const draftInfo = findInRewardTree(dungeon, 56162, "Draft")
+        expect(draftInfo).not.toBeNull()
+        expect(draftInfo?.pp).toBeCloseTo(0.1, 6)
+        expect(draftInfo?.times).toBeCloseTo(10, 6)
     })
 
     it("应该正确计算归一化的pp值", () => {

@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useSettingStore } from "@/store/setting"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { getRewardTypeText } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 import { LeveledChar, LeveledSkillWeapon } from "../data"
@@ -530,32 +531,38 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="p-3 space-y-4">
-        <div class="flex items-center gap-3 p-3">
-            <SRouterLink :to="`/db/char/${char.id}`" class="text-lg font-bold link link-primary">
-                {{ $t(char.名称) }}
-            </SRouterLink>
-            <span class="text-xs text-base-content/70">ID: {{ char.id }}</span>
-            <div class="text-sm text-base-content/70 flex items-center gap-2">
-                <div class="px-1.5 py-0.5 rounded bg-base-200 text-base-content">
-                    {{ $t(`${char.属性}属性`) }}
+        <div class="flex items-center">
+            <div class="size-24 shrink-0 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(5)">
+                <ImageFallback :src="leveledChar.url" :alt="char.名称" class="w-full h-full object-cover object-top">
+                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="char.名称" class="w-full h-full object-cover object-top" />
+                </ImageFallback>
+            </div>
+            <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-3 px-3 py-2">
+                    <SRouterLink :to="`/db/char/${char.id}`" class="text-lg font-bold link link-primary">
+                        {{ $t(char.名称) }}
+                    </SRouterLink>
+                    <CopyID :id="char.id" />
+                    <div class="ml-auto text-sm text-base-content/70 flex items-center gap-2">
+                        <img class="size-8" :src="LeveledChar.elementUrl(char.属性)" :alt="$t(`${char.属性}属性`)" />
+                        <div v-if="char.阵营" class="text-xs text-base-content/70">
+                            {{ $t(char.阵营) }}
+                        </div>
+                    </div>
                 </div>
-                <div v-if="char.阵营" class="ml-auto text-xs text-base-content/70">
-                    {{ $t(char.阵营) }}
+                <div class="flex flex-col gap-2 justify-end text-xs text-base-content/80 px-3 py-2 h-14">
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span v-if="char.别名">{{ $t(char.别名) }}</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span v-if="char.版本">v{{ char.版本 }}</span>
+                        <span>{{ char.精通.map(m => $t(m)).join("、") }}</span>
+                        <span v-if="char.出生地">{{ $t("出生地") }}：{{ $t(char.出生地) }}</span>
+                        <span v-if="char.势力">{{ $t("势力") }}：{{ $t(char.势力) }}</span>
+                        <span v-if="char.生日">{{ $t("生日") }}：{{ char.生日 }}</span>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="flex justify-center items-center">
-            <img :src="leveledChar.url" class="w-28 object-cover rounded" />
-        </div>
-
-        <div class="px-3 pt-0 pb-1 flex flex-wrap gap-2 text-xs text-base-content/80">
-            <span v-if="char.版本" class="px-2 py-1 rounded bg-base-200">v{{ char.版本 }}</span>
-            <span class="px-2 py-1 rounded bg-base-200">{{ char.精通.map(m => $t(m)).join("、") }}</span>
-            <span v-if="char.别名" class="px-2 py-1 rounded bg-base-200">{{ $t(char.别名) }}</span>
-            <span v-if="char.出生地" class="px-2 py-1 rounded bg-base-200">{{ $t("出生地") }}：{{ $t(char.出生地) }}</span>
-            <span v-if="char.势力" class="px-2 py-1 rounded bg-base-200">{{ $t("势力") }}：{{ $t(char.势力) }}</span>
-            <span v-if="char.生日" class="px-2 py-1 rounded bg-base-200">{{ $t("生日") }}：{{ char.生日 }}</span>
         </div>
 
         <!-- 等级调整 -->
@@ -724,17 +731,14 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="p-3 bg-base-200 rounded space-y-3">
-            <div class="tabs tabs-box">
-                <span class="tab" :class="{ 'tab-active ': activeBottomTab === 'skin' }" @click="activeBottomTab = 'skin'">{{
-                    $t("皮肤")
-                }}</span>
-                <span class="tab" :class="{ 'tab-active': activeBottomTab === 'profile' }" @click="activeBottomTab = 'profile'">{{
-                    $t("档案")
-                }}</span>
-                <span class="tab" :class="{ 'tab-active': activeBottomTab === 'voice' }" @click="activeBottomTab = 'voice'">{{
-                    $t("语音")
-                }}</span>
-            </div>
+            <AniTabs
+                v-model="activeBottomTab"
+                :tabs="[
+                    { label: $t('皮肤'), value: 'skin' },
+                    { label: $t('档案'), value: 'profile' },
+                    { label: $t('语音'), value: 'voice' },
+                ]"
+            />
 
             <div v-if="activeBottomTab === 'profile'" class="space-y-3">
                 <div v-if="charExtList.length === 0" class="text-sm text-base-content/70">暂无角色档案数据</div>

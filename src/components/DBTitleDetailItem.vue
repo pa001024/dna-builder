@@ -22,7 +22,7 @@ const titlePreview = computed(() => {
             <img src="/imgs/webp/T_Icon_Random_Title.webp" alt="title-icon" class="w-12 h-12 object-cover rounded" />
             <div>
                 <h2 class="text-lg font-bold">{{ title.name }}</h2>
-                <p class="text-sm text-base-content/70">ID: {{ title.id }}</p>
+                <CopyID :id="title.id" />
             </div>
             <span class="ml-auto badge badge-primary">{{ titleTypeLabel }}</span>
         </div>

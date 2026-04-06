@@ -138,7 +138,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     <span v-if="dungeon.cid">{{ $t(getCharName(dungeon.cid)) }}</span>
                     #{{ getAbyssDungeonLevel(dungeon) }}
                 </SRouterLink>
-                <div class="text-sm text-base-content/70">ID: {{ dungeon.id }}</div>
+                <CopyID :id="dungeon.id" />
             </div>
         </div>
 
@@ -180,7 +180,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     <SRouterLink :to="`/char/${char.id}`" class="font-medium link link-primary">
                         {{ char.名称 }}
                     </SRouterLink>
-                    <span class="text-xs text-base-content/70">ID: {{ char.id }}</span>
+                    <CopyID :id="char.id" />
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <div class="flex justify-between">
@@ -216,14 +216,17 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
         <div v-if="dungeon.buff?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
             <h3 class="font-bold mb-2">BUFF列表 ({{ dungeon.buff.length }}个)</h3>
             <div class="space-y-2">
-                <div v-for="buff in dungeon.buff" :key="buff.id" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
+                <div
+                    v-for="buff in dungeon.buff"
+                    :key="buff.id"
+                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                >
                     <div class="flex items-start gap-2">
                         <img :src="`/imgs/webp/T_Abyss_Buff_${buff.icon}.webp`" class="h-10 inline-block rounded" />
                         <div class="flex-1">
                             <div class="font-medium text-sm">
                                 {{ buff.n }}
-
-                                <span class="text-xs text-base-content/70">ID: {{ buff.id }}</span>
+                                <CopyID :id="buff.id" />
                             </div>
                             <div class="text-xs text-base-content/70 mt-1">
                                 {{ buff.d }}
@@ -246,7 +249,11 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                 <div v-if="dungeon.art" class="text-sm font-medium mb-2">
                     {{ dungeon.art }}
                 </div>
-                <div v-for="item in dungeon.arl" :key="item.lv" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
+                <div
+                    v-for="item in dungeon.arl"
+                    :key="item.lv"
+                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                >
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-sm font-medium">
                             <img src="/imgs/res/T_Abyss_Star02.webp" alt="图标" class="w-6 h-6 inline-block align-middle mr-1" />

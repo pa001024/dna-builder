@@ -313,7 +313,7 @@ const questChainVersion = computed(() => props.questChain.版本 || "")
                         {{ questChain.name }}
                     </SRouterLink>
                     <div class="text-sm text-base-content/70 flex flex-wrap items-center gap-2">
-                        <span>ID: {{ questChain.id }}</span>
+                        <CopyID :id="questChain.id" />
                         <span v-if="questChainVersion">v{{ questChainVersion }}</span>
                     </div>
                 </div>
@@ -410,7 +410,7 @@ const questChainVersion = computed(() => props.questChain.版本 || "")
                     <div class="flex items-center justify-between mb-1">
                         <span class="font-medium"
                             >任务: {{ formatStoryText(quest.details?.name || "?") }}
-                            <span class="text-sm text-base-content/70">ID: {{ quest.id }}</span>
+                            <CopyID :id="quest.id" />
                             <span v-if="quest.sr" class="text-sm text-base-content/70 ml-2 inline-flex items-center gap-1">
                                 <span>子区域:</span>
                                 <SubRegionLink :sub-region-id="quest.sr" />
