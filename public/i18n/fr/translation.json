@@ -5436,6 +5436,7 @@
         "modPreview": "Aperçu du MOD",
         "noMod": "Aucun MOD",
         "noPreviewPic": "Aucune image de prévisualisation",
+        "noTitlebar": "Sans barre de titre",
         "openDirFailed": "Échec d'ouverture du dossier : {{ error }}",
         "openGameDir": "Ouvrir le dossier du jeu",
         "params": "Paramètres",

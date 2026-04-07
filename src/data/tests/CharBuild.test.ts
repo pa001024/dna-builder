@@ -1106,6 +1106,74 @@ describe("CharBuild类测试", () => {
         })
     })
 
+    describe("E2E", () => {
+        it("clone 的计算结果应该相同", () => {
+            const build = CharBuild.fromCharSetting("苏乙", {
+                charLevel: 80,
+                baseName: "射击",
+                hpPercent: 1,
+                resonanceGain: 3,
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                isRouge: false,
+                targetFunction: "DPS/0.71*1.71",
+                charSkillLevel: 12,
+                meleeWeapon: 10601,
+                meleeWeaponLevel: 80,
+                meleeWeaponRefine: 5,
+                rangedWeapon: 20101,
+                rangedWeaponLevel: 80,
+                rangedWeaponRefine: 5,
+                auraMod: 51765,
+                imbalance: false,
+                charMods: [
+                    [51463, 10],
+                    [51961, 10],
+                    [56164, 10],
+                    [51336, 10],
+                    [51763, 10],
+                    [51761, 10],
+                    [51761, 10],
+                    [51761, 10],
+                ],
+                meleeMods: [null, null, null, null, null, null, null, null],
+                rangedMods: [
+                    [53005, 10],
+                    [53012, 10],
+                    [43002, 5],
+                    [53011, 10],
+                    [53009, 10],
+                    [53010, 10],
+                    [43343, 5],
+                    [33332, 5],
+                ],
+                skillWeaponMods: [null, null, null, null],
+                buffs: [
+                    ["菲娜Q", 12],
+                    ["菲娜被动+1溯", 1],
+                    ["全盛·振奋", 10],
+                    ["激扬寒波", 10],
+                    ["菲娜6溯", 5],
+                    ["菲娜4溯", 1],
+                    ["菲娜助战", 1],
+                    ["菲娜被动(自身)", 1],
+                    ["羽翼·鼓舞·专注(光/暗)", 10],
+                    ["色散成霓", 10],
+                ],
+                customBuff: [],
+                team1: "-",
+                team1Weapon: "-",
+                team2: "-",
+                team2Weapon: "-",
+                timelineDPS: false,
+                actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
+            })
+            const cloned = build.clone()
+            expect(build.calculate()).toBe(cloned.calculate())
+        })
+    })
+
     // 性能测试
     describe("性能测试", () => {
         it("应该能够快速计算多次", () => {

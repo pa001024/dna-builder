@@ -5470,6 +5470,7 @@
         "modPreview": "MOD預覽",
         "noMod": "不使用MOD",
         "noPreviewPic": "暫無預覽圖片",
+        "noTitlebar": "無標題欄",
         "openDirFailed": "開啟目錄失敗: {{ error }}",
         "openGameDir": "開啟遊戲目錄",
         "params": "參數",

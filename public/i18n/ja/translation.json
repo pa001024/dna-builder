@@ -5505,6 +5505,7 @@
         "modPreview": "MODプレビュー",
         "noMod": "MODなし",
         "noPreviewPic": "プレビュー画像なし",
+        "noTitlebar": "タイトルバーなし",
         "openDirFailed": "ディレクトリのオープンに失敗しました: {{ error }}",
         "openGameDir": "ゲームディレクトリを開く",
         "params": "パラメータ",

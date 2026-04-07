@@ -2070,6 +2070,7 @@ const monsterData: Monster[] = [
         def: 0,
         hp: 2000,
         tn: 4500,
+        icon: "Boss_Shenpan",
     },
     {
         id: 8514601,

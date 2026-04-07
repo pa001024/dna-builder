@@ -408,31 +408,31 @@ export class CharBuild {
 
     static fromCharSetting(
         selectedChar: string,
-        inv: ReturnType<typeof import("../store/inv").useInvStore>,
         charSettings: typeof import("../composables/useCharSettings").defaultCharSettings,
+        inv?: ReturnType<typeof import("../store/inv").useInvStore>,
         timeline?: CharBuildTimeline
     ) {
         const char = new LeveledChar(selectedChar, charSettings.charLevel)
         return new CharBuild({
             char,
             auraMod: new LeveledMod(charSettings.auraMod),
-            charMods: charSettings.charMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
-            meleeMods: charSettings.meleeMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
-            rangedMods: charSettings.rangedMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
-            skillMods: charSettings.skillWeaponMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
+            charMods: charSettings.charMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
+            meleeMods: charSettings.meleeMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
+            rangedMods: charSettings.rangedMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
+            skillMods: charSettings.skillWeaponMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
             skillLevel: charSettings.charSkillLevel,
             buffs: charSettings.buffs.map(v => new LeveledBuff(v[0], v[1])),
             melee: new LeveledWeapon(
                 charSettings.meleeWeapon,
                 charSettings.meleeWeaponRefine,
                 charSettings.meleeWeaponLevel,
-                inv.getWBuffLv(charSettings.meleeWeapon, char.属性)
+                inv?.getWBuffLv(charSettings.meleeWeapon, char.属性)
             ),
             ranged: new LeveledWeapon(
                 charSettings.rangedWeapon,
                 charSettings.rangedWeaponRefine,
                 charSettings.rangedWeaponLevel,
-                inv.getWBuffLv(charSettings.rangedWeapon, char.属性)
+                inv?.getWBuffLv(charSettings.rangedWeapon, char.属性)
             ),
             baseName: charSettings.baseName,
             imbalance: charSettings.imbalance,
@@ -1281,6 +1281,8 @@ export class CharBuild {
             return weaponAttrs.get(key)
         }
         const skillAttrs = new Map(this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)]))
+        skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
+        skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
         const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
         const getSkillAttr = (fieldName: string, base?: string) =>
             skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
@@ -1883,16 +1885,16 @@ export class CharBuild {
          */
         switch (resolvedType) {
             case "角色":
-                copyBuild.charMods.splice(index, 1)
+                copyBuild.charMods[index] = null
                 break
             case "近战":
-                copyBuild.meleeMods.splice(index, 1)
+                copyBuild.meleeMods[index] = null
                 break
             case "远程":
-                copyBuild.rangedMods.splice(index, 1)
+                copyBuild.rangedMods[index] = null
                 break
             case "同律":
-                copyBuild.skillMods.splice(index, 1)
+                copyBuild.skillMods[index] = null
                 break
             default:
                 return 0
@@ -1902,12 +1904,12 @@ export class CharBuild {
         if (!removedValue) {
             return 0
         }
-
+        // console.log(JSON.stringify(this), JSON.stringify(copyBuild))
         return baseValue / removedValue - 1
     }
 
     clone() {
-        return new CharBuild({
+        const cloned = new CharBuild({
             char: new LeveledChar(this.char.名称, this.char.等级),
             hpPercent: this.hpPercent,
             resonanceGain: this.resonanceGain,
@@ -1917,7 +1919,7 @@ export class CharBuild {
             meleeMods: this.meleeMods.map(m => (m ? m.clone() : null)),
             rangedMods: this.rangedMods.map(m => (m ? m.clone() : null)),
             skillMods: this.skillMods.map(m => (m ? m.clone() : null)),
-            buffs: this.buffs.map(b => new LeveledBuff(b.名称, b.等级)),
+            buffs: [...this.buffs, ...this.dynamicBuffs].map(b => new LeveledBuff(b.名称, b.等级)),
             melee: this.meleeWeapon.clone(),
             ranged: this.rangedWeapon.clone(),
             baseName: this.baseName,
@@ -1930,6 +1932,7 @@ export class CharBuild {
             timelineDPS: this.timelineDPS,
             teamWeaponCategories: [...this.teamWeaponCategories],
         })
+        return cloned
     }
     getMods(charTab: string) {
         if (charTab === "同律" && this.skillWeapon?.inherit) {

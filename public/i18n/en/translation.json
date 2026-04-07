@@ -5512,6 +5512,7 @@
         "modPreview": "MOD Preview",
         "noMod": "No MOD",
         "noPreviewPic": "No preview image",
+        "noTitlebar": "No title bar",
         "openDirFailed": "Failed to open directory: {{ error }}",
         "openGameDir": "Open Game Directory",
         "params": "Parameters",

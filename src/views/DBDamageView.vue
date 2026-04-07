@@ -512,7 +512,7 @@ function createBuildFromCurrentCharView(): CharBuild {
         baseName,
     }
     const timeline = resolveTimelineFromCurrentBuild(charName, baseName, normalizedSettings.actions)
-    return CharBuild.fromCharSetting(charName, inv, normalizedSettings, timeline)
+    return CharBuild.fromCharSetting(charName, normalizedSettings, inv, timeline)
 }
 
 /**

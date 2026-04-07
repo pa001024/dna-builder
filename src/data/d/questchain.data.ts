@@ -6696,7 +6696,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·第一缕风",
         type: 5,
         reward: [50615],
-        startTime: 1775768400,
+        startTime: 1775786400,
         endTime: 1776718800,
         quests: [
             {
@@ -6712,7 +6712,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·坚冰中绽放",
         type: 5,
         reward: [50616],
-        startTime: 1775854800,
+        startTime: 1775872800,
         endTime: 1776718800,
         quests: [
             {
@@ -6728,7 +6728,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·无光的舞台",
         type: 5,
         reward: [50617],
-        startTime: 1775941200,
+        startTime: 1775959200,
         endTime: 1776718800,
         quests: [
             {
@@ -6744,7 +6744,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·璀璨终曲",
         type: 5,
         reward: [50618],
-        startTime: 1776027600,
+        startTime: 1776045600,
         endTime: 1776718800,
         quests: [
             {
@@ -6760,7 +6760,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·织星撷香",
         type: 5,
         reward: [50619],
-        startTime: 1776114000,
+        startTime: 1776132000,
         endTime: 1776718800,
         quests: [
             {
@@ -6776,7 +6776,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·神阙弈天",
         type: 5,
         reward: [50620],
-        startTime: 1776200400,
+        startTime: 1776218400,
         endTime: 1776718800,
         quests: [
             {
@@ -6822,7 +6822,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·后日谈",
         type: 5,
         reward: [50613],
-        startTime: 1776200400,
+        startTime: 1776218400,
         endTime: 1776718800,
         quests: [
             {

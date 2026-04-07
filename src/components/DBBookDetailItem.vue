@@ -151,20 +151,14 @@ function parseBookTextSegments(text: string | undefined) {
 }
 
 /**
- * 选中指定读物条目。
- * @param resourceId 条目 ID
- */
-function selectResource(resourceId: number): void {
-    selectedResourceId.value = resourceId
-}
-
-/**
  * 读物条目切换标签。
  */
-const bookTabItems = computed(() => props.book.res.map(resource => ({
-    label: getResourceDisplayName(resource),
-    value: resource.id,
-})))
+const bookTabItems = computed(() =>
+    props.book.res.map(resource => ({
+        label: getResourceDisplayName(resource),
+        value: resource.id,
+    }))
+)
 </script>
 
 <template>

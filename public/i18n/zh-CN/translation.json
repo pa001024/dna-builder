@@ -609,6 +609,7 @@
         "modPreview": "MOD预览",
         "noMod": "不使用MOD",
         "noPreviewPic": "暂无预览图片",
+        "noTitlebar": "无标题栏",
         "openDirFailed": "打开目录失败: {{ error }}",
         "openGameDir": "打开游戏目录",
         "params": "参数",

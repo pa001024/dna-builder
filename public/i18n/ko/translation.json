@@ -5512,6 +5512,7 @@
         "modPreview": "MOD 미리보기",
         "noMod": "MOD 없음",
         "noPreviewPic": "미리보기 이미지 없음",
+        "noTitlebar": "제목 표시줄 없음",
         "openDirFailed": "디렉토리 열기 실패: {{ error }}",
         "openGameDir": "게임 디렉토리 열기",
         "params": "매개변수",

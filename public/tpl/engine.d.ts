@@ -500,10 +500,17 @@ declare function findWindow(title: string): number
 
 /**
  * 根据进程名获取窗口句柄
- * @param process_name 进程名
+ * @param processName 进程名
  * @returns 窗口句柄或0
  */
-declare function getWindowByProcessName(process_name: string): number
+declare function getWindowByProcessName(processName: string): number
+
+/**
+ * 根据进程名获取窗口句柄
+ * @param processName 进程名
+ * @returns 窗口句柄或报错
+ */
+declare function get_window_by_process_name(processName: string): Promise<number>
 
 /**
  * 设置前台窗口
@@ -530,6 +537,15 @@ declare function checkSize(hwnd: number, w?: number, h?: number): boolean
  * @returns 是否成功
  */
 declare function moveWindow(hwnd: number, x: number, y: number, w?: number, h?: number): boolean
+
+/**
+ * 修改指定窗口样式
+ * @param hwnd 窗口句柄
+ * @param style GWL_STYLE 完整位掩码，或形如 `+WS_CAPTION -WS_THICKFRAME` 的表达式
+ * @param exStyle 可选的 GWL_EXSTYLE 完整位掩码，仅在数值路径下使用
+ * @returns 是否修改成功
+ */
+declare function setWindowStyle(hwnd: number, style: number | string, exStyle?: number): boolean
 
 /**
  * 获取前台窗口句柄

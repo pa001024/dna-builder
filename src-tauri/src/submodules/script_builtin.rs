@@ -63,7 +63,10 @@ use crate::submodules::{
     util::{
         capture_window, capture_window_roi, capture_window_wgc, capture_window_wgc_roi, check_size,
     },
-    win::{find_window, get_window_by_process_name, move_window, win_get_client_pos},
+    win::{
+        apply_window_style_expression, find_window, get_window_by_process_name, move_window,
+        set_window_style, win_get_client_pos,
+    },
 };
 use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 
@@ -2075,6 +2078,57 @@ fn _move_window(
     }
     let result = move_window(hwnd, x, y, w, h);
     Ok(JsValue::new(result))
+}
+
+/// 修改窗口样式函数。
+fn _set_window_style(
+    hwnd: Option<JsValue>,
+    style: Option<JsValue>,
+    ex_style: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    let hwnd = hwnd
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_number(ctx)? as isize as *mut std::ffi::c_void;
+    let hwnd = HWND(hwnd);
+    if hwnd.is_invalid() {
+        return Ok(JsValue::new(false));
+    }
+
+    let (style, ex_style) = match style {
+        Some(style) if style.is_string() => {
+            if ex_style.is_some() {
+                return Err(JsNativeError::typ()
+                    .with_message("setWindowStyle 传入字符串样式时不允许提供第三个参数")
+                    .into());
+            }
+            let expression = style.to_string(ctx)?.to_std_string_lossy();
+            let (style, ex_style) =
+                apply_window_style_expression(hwnd, &expression).map_err(|message| {
+                    boa_engine::JsError::from(JsNativeError::typ().with_message(message))
+                })?;
+            (style, Some(ex_style))
+        }
+        Some(style) => {
+            let style = style.to_number(ctx)? as i32;
+            let ex_style = match ex_style {
+                Some(ex_style) if !ex_style.is_undefined() && !ex_style.is_null() => {
+                    Some(ex_style.to_number(ctx)? as i32)
+                }
+                _ => None,
+            };
+            (style, ex_style)
+        }
+        None => {
+            return Err(JsNativeError::typ()
+                .with_message("setWindowStyle 需要第二个参数")
+                .into());
+        }
+    };
+    match set_window_style(hwnd, style, ex_style) {
+        Ok(_) => Ok(JsValue::new(true)),
+        Err(message) => Err(JsNativeError::error().with_message(message).into()),
+    }
 }
 
 /// 解析可选 ROI 数值参数。
@@ -5429,6 +5483,10 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 设置前景窗口
     let f = _set_foreground_window.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("setForegroundWindow"), 1, f)?;
+
+    // 修改窗口样式
+    let f = _set_window_style.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("setWindowStyle"), 3, f)?;
 
     // 检查窗口大小
     let f = _check_size.into_js_function_copied(context);

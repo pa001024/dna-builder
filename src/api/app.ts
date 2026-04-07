@@ -7,6 +7,24 @@ export async function applyMaterial(material: (typeof MATERIALS)[number]) {
     return (await invoke("apply_material", { material })) as string
 }
 
+/**
+ * 修改指定窗口样式。
+ * @param hwnd 窗口句柄
+ * @param style GWL_STYLE 完整位掩码，或形如 `+WS_CAPTION -WS_THICKFRAME` 的表达式
+ * @param exStyle 可选的 GWL_EXSTYLE 完整位掩码，仅在数值路径下使用
+ */
+export async function setWindowStyle(hwnd: number, style: number | string, exStyle?: number) {
+    return await invoke("set_window_style", { hwnd, style, exStyle })
+}
+
+/**
+ * 根据进程名获取窗口句柄。
+ * @param processName 进程名
+ */
+export async function getWindowByProcessName(processName: string) {
+    return await invoke<number>("get_window_by_process_name", { processName })
+}
+
 export async function getOSVersion() {
     return await invoke<string>("get_os_version")
 }
@@ -166,10 +184,11 @@ export async function renameFile(oldPath: string, newPath: string) {
 /**
  * 删除文件
  * @param filePath 文件路径
+ * @param force 是否直接删除，不进入回收站
  * @returns 成功消息
  */
-export async function deleteFile(filePath: string) {
-    return await invoke<string>("delete_file", { filePath })
+export async function deleteFile(filePath: string, force?: boolean) {
+    return await invoke<string>("delete_file", { filePath, force })
 }
 
 /**

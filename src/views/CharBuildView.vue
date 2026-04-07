@@ -1507,6 +1507,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         </div>
                         <div class="mt-4">
                             <CharHPCurve :desperate="attributes.背水" :boost="attributes.昂扬" />
+                            <CharHPCurveConv :desperate="attributes.背水" :boost="attributes.昂扬" />
                         </div>
                     </CollapsibleSection>
 

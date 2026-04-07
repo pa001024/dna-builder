@@ -16,6 +16,8 @@ use tauri::{Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 use zip::ZipArchive;
 mod util;
 
+use crate::submodules::win;
+
 // 全局HTTP客户端，用于复用连接
 lazy_static! {
     static ref HTTP_CLIENT: Arc<reqwest::Client> = Arc::new(
@@ -124,6 +126,14 @@ struct CloudGamePageLoadPayload {
 struct CloudGameBridgeEventPayload {
     event_type: String,
     payload: Option<serde_json::Value>,
+}
+
+/// 窗口样式参数。
+#[derive(Debug, Clone, Deserialize)]
+#[serde(untagged)]
+enum WindowStyleArg {
+    Number(i32),
+    Text(String),
 }
 
 // #[macro_use]
@@ -2042,10 +2052,18 @@ async fn rename_file(old_path: String, new_path: String) -> Result<String, Strin
     Ok(format!("文件已重命名: {} -> {}", old_path, new_path))
 }
 
-/// 删除文件（移动到回收站）
+/// 删除文件。
 #[tauri::command]
-async fn delete_file(file_path: String) -> Result<String, String> {
+async fn delete_file(file_path: String, force: Option<bool>) -> Result<String, String> {
     let path = Path::new(&file_path);
+
+    if force.unwrap_or(false) {
+        if !path.exists() {
+            return Ok(format!("文件不存在: {}", file_path));
+        }
+        fs::remove_file(path).map_err(|e| format!("删除文件失败: {}", e))?;
+        return Ok(format!("文件已删除: {}", file_path));
+    }
 
     if !path.exists() {
         return Err(format!("文件不存在: {}", file_path));
@@ -2741,6 +2759,36 @@ fn eval_cloudgame_window(app_handle: tauri::AppHandle, script: String) -> Result
         .map_err(|error| format!("执行云游戏脚本失败: {error}"))
 }
 
+/// 修改指定窗口样式。
+#[tauri::command]
+fn set_window_style(
+    hwnd: isize,
+    style: WindowStyleArg,
+    ex_style: Option<i32>,
+) -> Result<(), String> {
+    let hwnd = windows::Win32::Foundation::HWND(hwnd as *mut std::ffi::c_void);
+    match style {
+        WindowStyleArg::Number(style) => {
+            win::set_window_style(hwnd, style, ex_style).map_err(|error| error.to_string())
+        }
+        WindowStyleArg::Text(expression) => {
+            if ex_style.is_some() {
+                return Err("setWindowStyle 传入字符串样式时不允许提供第三个参数".to_string());
+            }
+            let (style, ex_style) = win::apply_window_style_expression(hwnd, &expression)?;
+            win::set_window_style(hwnd, style, Some(ex_style)).map_err(|error| error.to_string())
+        }
+    }
+}
+
+/// 根据进程名获取窗口句柄。
+#[tauri::command]
+fn get_window_by_process_name(process_name: String) -> Result<isize, String> {
+    win::get_window_by_process_name(&process_name)
+        .map(|hwnd| hwnd.0 as isize)
+        .ok_or_else(|| format!("未找到进程对应窗口: {process_name}"))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut app = tauri::Builder::default()
@@ -2938,6 +2986,8 @@ pub fn run() {
         navigate_cloudgame_window,
         dispatch_cloudgame_command,
         eval_cloudgame_window,
+        set_window_style,
+        get_window_by_process_name,
         get_documents_dir,
         rename_file,
         delete_file,
