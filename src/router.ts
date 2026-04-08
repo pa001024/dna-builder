@@ -73,6 +73,7 @@ const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(800, 700),
     },
     { name: "game-accounts", path: "/game-accounts", component: UserManager, beforeEnter: () => setMinSize(600, 600) },
+    { name: "unpack", path: "/unpack", component: () => import("./views/UnpackView.vue"), beforeEnter: () => setMinSize(900, 700) },
     {
         name: "more",
         path: "/more",

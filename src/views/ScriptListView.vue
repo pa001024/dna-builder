@@ -2993,8 +2993,9 @@ async function initFileChangeListener() {
     try {
         unlistenFileChangedFn = await listen<string>("file-changed", event => {
             const filePath = event.payload
-            const fileName = filePath.split("\\").pop() || ""
-            reloadFileContent(fileName)
+            const fileName = filePath.split(/[\\/]/).pop() || ""
+            if (!fileName) return
+            void reloadFileContent(fileName)
         })
     } catch (error) {
         console.error("监听文件变化事件失败", error)
@@ -3308,6 +3309,15 @@ async function startWatchingFile(fileName: string) {
 }
 
 /**
+ * 根据文件名查找已打开的本地脚本标签。
+ * @param fileName 脚本文件名
+ * @returns 匹配的标签页，未找到则返回 null
+ */
+function findLocalTabByName(fileName: string) {
+    return openedTabs.value.find(tab => tab.type === "local" && tab.name === fileName) ?? null
+}
+
+/**
  * 停止监听文件变化
  */
 async function stopWatchingFile(fileName: string) {
@@ -3332,16 +3342,18 @@ function onCodeEditorUpdate(code: string) {
  * 重新加载文件内容
  */
 async function reloadFileContent(fileName: string) {
-    const tab = openedTabs.value.find(t => t.type === "local" && t.name === fileName)
+    const tab = findLocalTabByName(fileName)
     if (!tab) return
 
     try {
         const content = await loadLocalScriptContent(fileName)
         tab.content = content
         tab.modified = false
-        nextTick(() => {
-            codeEditor.value?.safeUpdate(content)
-        })
+        if (tab.id === activeTabId.value) {
+            nextTick(() => {
+                codeEditor.value?.safeUpdate(content)
+            })
+        }
     } catch (error) {
         console.error("重新加载文件失败", error)
     }

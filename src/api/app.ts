@@ -162,6 +162,76 @@ export async function listDirectories(dirPath: string) {
 }
 
 /**
+ * 递归枚举目录中的所有 pak 文件。
+ * @param rootPath 根目录路径
+ * @returns pak 文件路径列表
+ */
+export async function enumeratePakFiles(rootPath: string) {
+    return await invoke<string[]>("enumerate_pak_files", { rootPath })
+}
+
+/**
+ * 递归枚举目录中的所有 pak 文件，并按 AES key 过滤无效包。
+ * @param rootPath 根目录路径
+ * @param aesKey AES key
+ * @returns pak 文件路径列表
+ */
+export async function enumerateValidPakFiles(rootPath: string, aesKey?: string | null) {
+    return await invoke<string[]>("enumerate_pak_files", { rootPath, aesKey })
+}
+
+/**
+ * 列出多个 pak 文件内的文件列表。
+ * @param pakPaths pak 文件路径列表
+ * @param aesKey AES key
+ * @returns pak 内文件列表
+ */
+export async function listPakFiles(pakPaths: string[], aesKey?: string | null): Promise<{ pakPath: string; files: string[] }[]> {
+    return await invoke("list_pak_files", { pakPaths, aesKey })
+}
+
+/**
+ * 导出 pak 文件中的指定文件。
+ * @param pakFiles pak 文件名和目标文件名列表
+ * @param aesKey AES key
+ * @param targetPath 目标目录
+ * @returns 导出结果
+ */
+export async function exportPakFiles(
+    pakFiles: Record<string, string[]>,
+    aesKey: string | null | undefined,
+    targetPath: string
+): Promise<{ pakPath: string; exportedFiles: string[] }[]> {
+    return await invoke("export_pak_files", { pakFiles, aesKey, targetPath })
+}
+
+export interface LuaDecompileResult {
+    inputFile: string
+    outputFile: string
+}
+
+export interface LuaDecompileBatchResult {
+    succeededFiles: LuaDecompileResult[]
+    failedFiles: string[]
+}
+
+/**
+ * 使用 unluac 反编译 Lua 字节码文件。
+ * @param inputFiles 输入文件路径列表
+ * @param unluacPath unluac jar 路径
+ * @param outputDir 输出目录
+ * @returns 反编译结果
+ */
+export async function decompileLuaBytecodeFiles(
+    inputFiles: string[],
+    sourceRoot: string,
+    unluacPath: string,
+    outputDir: string
+): Promise<LuaDecompileBatchResult> {
+    return await invoke("decompile_lua_bytecode_files", { inputFiles, sourceRoot, unluacPath, outputDir })
+}
+
+/**
  * 提取游戏资产
  * @param zipPath 压缩包路径
  * @param targetDir 目标目录

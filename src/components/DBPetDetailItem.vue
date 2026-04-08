@@ -24,6 +24,8 @@ interface PetSpawnLocation {
     regionId: number
     regionName: string
     totalWeight: number
+    spotCount: number
+    refreshCount: number
     rcWeights: { rcId: number; rcIndex: number; petWeight: number; totalWeight: number; ratio: number }[]
 }
 
@@ -86,9 +88,12 @@ const petSpawnLocations = computed<PetSpawnLocation[]>(() => {
 
         const rcWeights: { rcId: number; rcIndex: number; petWeight: number; totalWeight: number; ratio: number }[] = []
         let totalWeight = 0
+        let spotCount = 0
+        let refreshCount = 0
 
         for (const [rcIndex, randomCreator] of subRegion.rc.entries()) {
             const rcTotalWeight = randomCreator.info.reduce((sum, randomInfo) => sum + randomInfo.w, 0)
+            const rcSpotCount = randomCreator.pos?.length || 0
             let petWeight = 0
             for (const randomInfo of randomCreator.info) {
                 if (randomInfo.id === props.pet.id) {
@@ -105,6 +110,8 @@ const petSpawnLocations = computed<PetSpawnLocation[]>(() => {
                     ratio: petWeight / rcTotalWeight,
                 })
                 totalWeight += petWeight
+                spotCount += rcSpotCount
+                refreshCount += randomCreator.count
             }
         }
 
@@ -118,6 +125,8 @@ const petSpawnLocations = computed<PetSpawnLocation[]>(() => {
             regionId: subRegion.rid,
             regionName: regionMap.get(subRegion.rid)?.name || t("pet_detail.region_fallback", { id: subRegion.rid }),
             totalWeight,
+            spotCount,
+            refreshCount,
             rcWeights,
         })
     }
@@ -397,7 +406,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
 
         <div class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.spawn_area") }}</div>
-            <div v-if="petSpawnLocations.length" class="space-y-2">
+            <div v-if="petSpawnLocations.length" class="grid grid-cols-[repeat(auto-fill,minmax(500px,1fr))] gap-2">
                 <div
                     v-for="location in petSpawnLocations"
                     :key="location.subRegionId"
@@ -405,10 +414,14 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                 >
                     <div class="flex items-center justify-between gap-2">
                         <SubRegionLink :sub-region-id="location.subRegionId" />
-                        <span class="text-xs text-base-content/70">{{ $t("pet_detail.spot_count") }}: {{ location.rcWeights.length }}</span>
-                    </div>
-                    <div class="text-xs text-base-content/60 mt-1">
-                        <span>{{ location.regionName }}</span>
+                        <div class="text-xs text-base-content/60">
+                            <span>{{ location.regionName }}</span>
+                        </div>
+                        <div class="flex-1"></div>
+                        <span class="text-xs text-base-content/70">
+                            {{ $t("pet_detail.spot_count") }}: {{ location.spotCount }} | {{ $t("pet_detail.refresh_count") }}:
+                            {{ location.refreshCount }}
+                        </span>
                     </div>
                     <div class="flex flex-wrap gap-1 mt-2">
                         <SRouterLink

@@ -98,6 +98,12 @@ const items = [
         icon: "ri:user-line",
         show: env.isApp,
     },
+    {
+        name: "unpack",
+        path: "/unpack",
+        icon: "ri:file-zip-line",
+        show: env.isApp && !setting.safeMode,
+    },
 ] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[]
 // 卡片进入动画延迟
 const getAnimationDelay = (index: number) => {

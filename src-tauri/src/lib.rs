@@ -16,7 +16,7 @@ use tauri::{Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 use zip::ZipArchive;
 mod util;
 
-use crate::submodules::win;
+use crate::submodules::{repak_tools, win};
 
 // 全局HTTP客户端，用于复用连接
 lazy_static! {
@@ -1220,6 +1220,50 @@ async fn write_text_file(file_path: String, content: String) -> Result<String, S
 
     fs::write(path, content).map_err(|e| format!("写入文件失败: {}", e))?;
     Ok(format!("文件已保存: {}", file_path))
+}
+
+/// 递归枚举目录中的所有 `.pak` 文件。
+#[tauri::command]
+async fn enumerate_pak_files(
+    root_path: String,
+    aes_key: Option<String>,
+) -> Result<Vec<String>, String> {
+    repak_tools::enumerate_pak_files(Path::new(&root_path), aes_key.as_deref())
+}
+
+/// 列出多个 pak 文件内的文件列表。
+#[tauri::command]
+async fn list_pak_files(
+    pak_paths: Vec<String>,
+    aes_key: Option<String>,
+) -> Result<Vec<repak_tools::PakFileListResult>, String> {
+    repak_tools::list_pak_files(&pak_paths, aes_key.as_deref())
+}
+
+/// 导出指定 pak 内的文件，并将 Lua 字节码反编译后直接落盘为 `.lua`。
+#[tauri::command]
+async fn export_pak_files(
+    pak_files: std::collections::BTreeMap<String, Vec<String>>,
+    aes_key: Option<String>,
+    target_path: String,
+) -> Result<Vec<repak_tools::PakExportResult>, String> {
+    repak_tools::export_pak_files(&pak_files, aes_key.as_deref(), Path::new(&target_path))
+}
+
+/// 使用 unluac 反编译 Lua 字节码文件。
+#[tauri::command]
+async fn decompile_lua_bytecode_files(
+    input_files: Vec<String>,
+    source_root: String,
+    unluac_path: String,
+    output_dir: String,
+) -> Result<repak_tools::LuaDecompileBatchResult, String> {
+    repak_tools::decompile_lua_bytecode_files(
+        &input_files,
+        Path::new(&source_root),
+        Path::new(&unluac_path),
+        Path::new(&output_dir),
+    )
 }
 
 /// 获取文档目录路径
@@ -2949,6 +2993,10 @@ pub fn run() {
         list_script_files,
         read_text_file,
         write_text_file,
+        enumerate_pak_files,
+        list_pak_files,
+        export_pak_files,
+        decompile_lua_bytecode_files,
         export_binary_file,
         start_heartbeat,
         stop_heartbeat,

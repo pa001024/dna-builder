@@ -282,6 +282,7 @@ const monsterData: Monster[] = [
         def: 200,
         hp: 3450,
         tn: 300,
+        icon: "Boss_04_Lizhan",
     },
     {
         id: 6004012,
@@ -369,6 +370,7 @@ const monsterData: Monster[] = [
         def: 130,
         hp: 40,
         tn: 150,
+        icon: "GR_Banyun",
     },
     {
         id: 6007001,
@@ -784,6 +786,7 @@ const monsterData: Monster[] = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "Jt_Juji",
     },
     {
         id: 7001011,
@@ -906,6 +909,7 @@ const monsterData: Monster[] = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "Jt_Pizhuo",
     },
     {
         id: 7002011,
@@ -1325,6 +1329,7 @@ const monsterData: Monster[] = [
         es: 34,
         hp: 47,
         tn: 150,
+        icon: "Jt_Pizhuo_C01",
     },
     {
         id: 7012601,
@@ -1801,6 +1806,7 @@ const monsterData: Monster[] = [
         def: 300,
         hp: 1530,
         tn: 1000,
+        icon: "Boss_04_Lizhan",
     },
     {
         id: 8501601,
@@ -1940,6 +1946,7 @@ const monsterData: Monster[] = [
         def: 300,
         hp: 6000,
         tn: 3000,
+        icon: "Boss_Tuosi",
     },
     {
         id: 8510001,

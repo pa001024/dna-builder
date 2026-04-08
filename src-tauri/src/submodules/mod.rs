@@ -14,6 +14,7 @@ pub mod logger;
 pub mod mono_depth;
 pub mod ocr;
 pub mod predict_rotation;
+pub mod repak_tools;
 pub mod route;
 pub mod script;
 pub mod script_builtin;

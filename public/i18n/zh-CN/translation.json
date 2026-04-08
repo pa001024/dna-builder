@@ -866,6 +866,7 @@
         "pet_entry": "魔灵潜质",
         "rarity": "品质",
         "rc_label": "RC",
+        "refresh_count": "刷新数",
         "region_fallback": "区域{{id}}",
         "shop_purchase": "商店购买",
         "spawn_area": "出现区域",
@@ -1195,6 +1196,10 @@
         "target_function": "设置伤害计算目标函数，如伤害、DPS等",
         "top_actions": "使用顶部按钮分享配置、自动构筑、保存项目等",
         "weapon_select": "点击这里更换武器/设置精炼"
+    },
+    "unpack": {
+        "desc": "读取并导出 pak 文件",
+        "title": "解包"
     },
     "updater": {
         "newVersionFound": "发现新版本 v{{version}}",

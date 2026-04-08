@@ -1,6 +1,6 @@
 [package]
 name = "dna-builder"
-version = "0.15.5"
+version = "0.15.6"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
@@ -49,6 +49,7 @@ widestring = "1"
 zip = { version = "0.6", default-features = false, features = ["deflate"] }
 base64 = "0.22.1"
 sevenz-rust2 = "0.20.1"
+aes = "0.8"
 reqwest = { version = "0.12", default-features = false, features = [
     "json",
     "multipart",
@@ -66,6 +67,7 @@ http = "1.1.0"
 scopeguard = "1.2.0"
 regex = "1.11.1"
 md5 = "0.8.0"
+repak = { git = "https://github.com/trumank/repak", features = ["oodle"] }
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.
