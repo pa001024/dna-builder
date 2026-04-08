@@ -1,8 +1,19 @@
 <script lang="ts" setup>
-import type { DNAMapMatterCategorizeOption, DNAMatterCategorizeList } from "dna-api"
+import type { DNAMapMatterCategorizeOption } from "dna-api"
 import { computed, onMounted, ref, watch } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
-import { type DBMap, type DBMapMarker, mapCache, mapLocalData } from "../data/d/map.data"
+import { getMapAPI } from "../api/app"
+import {
+    buildDBMapList,
+    buildDBMapMarkers,
+    type DBMap,
+    type DBMapMarker,
+    loadMapCategorizeListWithCache,
+    loadMapDetailWithCache,
+} from "../data/d/map.data"
+import { env } from "../env"
+
+const dnaApi = getMapAPI()
 
 const searchKeyword = ref("")
 const selectedMap = ref<DBMap | null>(null)
@@ -13,29 +24,11 @@ const markers = ref<DBMapMarker[]>([])
 const categories = ref<DNAMapMatterCategorizeOption[]>([])
 const loading = ref(false)
 
-function loadMapList() {
+async function loadMapList() {
     loading.value = true
     try {
-        const MAP_SIZE = 4096
-        const TILE_SIZE = 256
-
-        const allMaps: DBMap[] = []
-        mapLocalData.forEach((category: DNAMatterCategorizeList) => {
-            category.maps.forEach(map => {
-                allMaps.push({
-                    id: map.id,
-                    n: map.name,
-                    name: map.name,
-                    desc: category.name,
-                    mapUrl: "", // 需要从地图详情中获取
-                    width: MAP_SIZE,
-                    height: MAP_SIZE,
-                    tileSize: TILE_SIZE,
-                })
-            })
-        })
-
-        maps.value = allMaps
+        const categorizeList = await loadMapCategorizeListWithCache(dnaApi, env.isApp)
+        maps.value = buildDBMapList(categorizeList)
     } catch (error) {
         console.error("加载地图列表失败:", error)
     } finally {
@@ -63,11 +56,11 @@ function selectMap(map: DBMap | null) {
     }
 }
 
-function loadMapData() {
+async function loadMapData() {
     if (!selectedMap.value) return
 
     try {
-        const mapDetail = mapCache[selectedMap.value.id]
+        const mapDetail = await loadMapDetailWithCache(dnaApi, selectedMap.value.id, env.isApp)
         if (!mapDetail) {
             categories.value = []
             markers.value = []
@@ -91,26 +84,7 @@ function loadMapData() {
             selectedMap.value.currentFloorIndex = 0
         }
 
-        markers.value = []
-        matterCategorizes.forEach(category => {
-            category.matters.forEach(matter => {
-                matter.sites.forEach((site: any) => {
-                    if (site.mapId === selectedMap.value!.id) {
-                        markers.value.push({
-                            id: site.id,
-                            mapId: site.mapId,
-                            x: site.x,
-                            y: site.y,
-                            name: matter.name,
-                            desc: site.isHide ? "隐藏点" : undefined,
-                            icon: matter.icon,
-                            categoryId: category.id,
-                            isUserMarker: false,
-                        })
-                    }
-                })
-            })
-        })
+        markers.value = buildDBMapMarkers(selectedMap.value.id, mapDetail)
     } catch (error) {
         console.error("加载地图数据失败:", error)
     }
@@ -118,7 +92,7 @@ function loadMapData() {
 
 watch(selectedMap, () => {
     if (selectedMap.value) {
-        loadMapData()
+        void loadMapData()
     }
 })
 
@@ -141,7 +115,7 @@ function handleMarkerDelete(id: number) {
 }
 
 onMounted(() => {
-    loadMapList()
+    void loadMapList()
 })
 
 useInitialScrollToSelectedItem()
