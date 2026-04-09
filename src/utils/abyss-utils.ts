@@ -1,10 +1,24 @@
-import type { AbyssDungeon } from "@/data"
-import { AbyssMonsterLevelLimit } from "@/data"
+import type { AbyssDungeon } from "@/data/d/abyss.data"
+import { defaultImmortalSeasonId, type ImmortalMonsterLevelRule, immortalMonsterLevelRules } from "@/data/d/abyss.data"
+import { AbyssMonsterLevelLimit } from "@/data/d/const.data"
 import { getRewardDetails, type RewardItem } from "./reward-utils"
 
 interface RewardBucket {
     reward: RewardItem
     count: number
+}
+
+/**
+ * 获取不朽剧目使用的真实等级表。
+ * @param abyssSeasonId 赛季ID，对应 AbyssSeason.AbyssSeasonId
+ * @returns 当前赛季的真实等级表
+ */
+function getImmortalMonsterLevelRule(abyssSeasonId?: number): ImmortalMonsterLevelRule {
+    if (abyssSeasonId && immortalMonsterLevelRules[abyssSeasonId]) {
+        return immortalMonsterLevelRules[abyssSeasonId]
+    }
+
+    return immortalMonsterLevelRules[defaultImmortalSeasonId]
 }
 
 /**
@@ -18,32 +32,21 @@ export function getAbyssStarCountByActCount(actCount: number): number {
 
 /**
  * 根据不朽剧目的幕数计算怪物等级。
+ * 逻辑对齐 BP_AbyssComponent_C:GetAbyssDifficulty：
+ * 先按赛季取真实的 AbyssLevel 序列，再按完整轮次叠加 LevelAddOn。
  * @param actCount 幕数
+ * @param abyssSeasonId 赛季ID，对应 AbyssSeason.AbyssSeasonId
  * @returns 怪物等级
  */
-export function getImmortalMonsterLevelByActCount(actCount: number): number {
-    const act = Math.max(1, Math.trunc(actCount))
+export function getImmortalMonsterLevelByActCount(actCount: number, abyssSeasonId?: number): number {
+    const rule = getImmortalMonsterLevelRule(abyssSeasonId)
+    const abyssLevelIndex = Math.max(1, Math.trunc(actCount))
+    const sequenceLength = rule.initLevels.length
+    const loopTime = Math.trunc((abyssLevelIndex - 1) / sequenceLength)
+    const realIndex = (abyssLevelIndex - 1) % sequenceLength
+    const baseLevel = rule.initLevels[realIndex]
 
-    if (act <= 5) {
-        return 90 + (act - 1) * 2
-    }
-
-    let level = 105
-    for (let currentAct = 7; currentAct <= act; currentAct++) {
-        if (currentAct % 6 === 0) {
-            level += 7
-            continue
-        }
-
-        if (currentAct % 6 === 1) {
-            level += 3
-            continue
-        }
-
-        level += 2
-    }
-
-    return Math.min(level, AbyssMonsterLevelLimit)
+    return Math.min(baseLevel + rule.levelAddOn * loopTime, AbyssMonsterLevelLimit)
 }
 
 /**

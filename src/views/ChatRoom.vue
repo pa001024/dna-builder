@@ -693,10 +693,15 @@ function cancelReply() {
                                     </ContextMenuItem>
                                 </template>
                             </ContextMenu>
-                            <div v-if="item.edited" class="text-xs text-base-content/60 self-end">{{ $t("chat.edited") }}</div>
                             <div class="flex-1"></div>
-                            <div class="hidden group-hover:block p-1 text-xs text-base-content/60 whitespace-nowrap">
-                                {{ item.createdAt }}
+                            <div class="flex flex-col h-full" :class="{ 'items-end': user.id === item.user!.id }">
+                                <div class="hidden group-hover:block p-1 text-xs text-base-content/60 whitespace-nowrap">
+                                    {{ item.createdAt }}
+                                </div>
+                                <div class="flex-1"></div>
+                                <div v-if="item.edited" class="text-xs text-base-content/60 whitespace-nowrap">
+                                    {{ $t("chat.edited") }}
+                                </div>
                             </div>
                         </div>
                     </div>

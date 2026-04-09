@@ -275,7 +275,15 @@ function isAccessoryCostType(type: string): type is "CharAccessory" | "WeaponAcc
  */
 function getFashionIcon(type: FashionCostType, id: number | string) {
     const meta = getFashionMeta(type, id)
-    return meta?.icon ? resolveSkinIconUrl(meta.icon) : "/imgs/webp/T_Head_Empty.webp"
+    if (!meta?.icon) {
+        return "/imgs/webp/T_Head_Empty.webp"
+    }
+
+    if (type === "HeadSculpture" || type === "HeadFrame") {
+        return type === "HeadFrame" ? `/imgs/headframe/${meta.icon}.webp` : `/imgs/webp/${meta.icon}.webp`
+    }
+
+    return resolveSkinIconUrl(meta.icon)
 }
 
 /**

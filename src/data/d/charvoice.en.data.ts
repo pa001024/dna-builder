@@ -6369,7 +6369,7 @@ export const charVoiceData_en: CharVoice[] = [
         charId: 1504,
         name: "Chitchat: About Her TitleⅡ",
         res: "char_Suyi_vo_topic_02_2",
-        text: "I got lucky — my teacher was my aunt, and she was way up in the sect. So yeah, that still bumps me up too. (bright, explanatory)",
+        text: "I got lucky — my teacher was my aunt, and she was way up in the sect. So yeah, that still bumps me up too.",
     },
     {
         id: 10969,

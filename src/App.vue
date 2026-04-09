@@ -5,6 +5,7 @@ import { useRoute } from "vue-router"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
 import { env } from "./env"
 import { useMihanNotify } from "./store/mihan"
+import { useScriptRuntimeStore } from "./store/scriptRuntime"
 import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
 import { useUserStore } from "./store/user"
@@ -13,6 +14,7 @@ import { postVisitorCount } from "./vercount"
 const setting = useSettingStore()
 const ui = useUIStore()
 const mihanNotify = useMihanNotify()
+const scriptRuntime = useScriptRuntimeStore()
 const route = useRoute()
 const user = useUserStore()
 const ONLINE_EXPERIENCE_TICK_MS = 60 * 1000
@@ -165,6 +167,11 @@ if (env.isApp) {
     void setting.syncLaunchAtStartup().catch(error => {
         console.error("同步开机启动状态失败:", error)
     })
+    if (setting.initScriptHotkeysAtStartup) {
+        void scriptRuntime.initRuntimeTracking().catch(error => {
+            console.error("初始化脚本热键失败:", error)
+        })
+    }
 } else {
     onMounted(() => {
         if (!setting.windowTrasnparent) return

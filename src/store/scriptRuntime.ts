@@ -71,6 +71,7 @@ let consoleListenerReady = false
 let statusListenerReady = false
 let readConfigListenerReady = false
 let setConfigListenerReady = false
+let runtimeTrackingInitPromise: Promise<void> | null = null
 
 /**
  * 从脚本路径中提取文件名。
@@ -635,64 +636,78 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          */
         async initRuntimeTracking(options: InitRuntimeTrackingOptions = {}) {
             const includeConfigListeners = options.includeConfigListeners !== false
-            if (includeConfigListeners) {
-                this.loadScriptConfigItems()
+            if (runtimeTrackingInitPromise) {
+                await runtimeTrackingInitPromise
+                if (includeConfigListeners) {
+                    this.loadScriptConfigItems()
+                }
+                return
             }
-            if (runtimeListenerReady) {
+
+            runtimeTrackingInitPromise = (async () => {
+                if (includeConfigListeners) {
+                    this.loadScriptConfigItems()
+                }
+                if (!runtimeListenerReady) {
+                    runtimeUnlistenFn = await listen<ScriptRuntimeInfo>("script-runtime-updated", event => {
+                        if (!event?.payload) return
+                        this.applyBackendRuntimeInfo(event.payload)
+                    })
+                    runtimeListenerReady = true
+                }
                 await this.syncRunningStateFromBackend()
-            } else {
-                runtimeUnlistenFn = await listen<ScriptRuntimeInfo>("script-runtime-updated", event => {
-                    if (!event?.payload) return
-                    this.applyBackendRuntimeInfo(event.payload)
-                })
-                runtimeListenerReady = true
-                await this.syncRunningStateFromBackend()
-            }
 
-            if (!consoleListenerReady) {
-                consoleUnlistenFn = await listen<{ scope?: string; level?: string; message?: string }>("script-console", event => {
-                    if (!event?.payload) return
-                    this.appendConsoleEvent(event.payload)
-                })
-                consoleListenerReady = true
-            }
+                if (!consoleListenerReady) {
+                    consoleUnlistenFn = await listen<{ scope?: string; level?: string; message?: string }>("script-console", event => {
+                        if (!event?.payload) return
+                        this.appendConsoleEvent(event.payload)
+                    })
+                    consoleListenerReady = true
+                }
 
-            if (!statusListenerReady) {
-                statusUnlistenFn = await listen<{
-                    scope?: string
-                    action?: "upsert" | "remove"
-                    title?: string
-                    text?: string
-                    image?: string
-                    images?: string[]
-                    timestamp?: number
-                }>("script-status", event => {
-                    if (!event?.payload) return
-                    this.applyScriptStatusEvent(event.payload)
-                })
-                statusListenerReady = true
-            }
+                if (!statusListenerReady) {
+                    statusUnlistenFn = await listen<{
+                        scope?: string
+                        action?: "upsert" | "remove"
+                        title?: string
+                        text?: string
+                        image?: string
+                        images?: string[]
+                        timestamp?: number
+                    }>("script-status", event => {
+                        if (!event?.payload) return
+                        this.applyScriptStatusEvent(event.payload)
+                    })
+                    statusListenerReady = true
+                }
 
-            if (includeConfigListeners && !readConfigListenerReady) {
-                readConfigUnlistenFn = await listen<ScriptReadConfigPayload>("script-read-config", async event => {
-                    const payload = event.payload
-                    if (!payload?.requestId || !payload?.name) return
-                    const value = this.upsertScriptConfigFromRequest(payload)
-                    try {
-                        await resolveScriptConfigRequest(payload.requestId, value)
-                    } catch (error) {
-                        console.error("回传脚本配置失败", error)
-                    }
-                })
-                readConfigListenerReady = true
-            }
+                if (includeConfigListeners && !readConfigListenerReady) {
+                    readConfigUnlistenFn = await listen<ScriptReadConfigPayload>("script-read-config", async event => {
+                        const payload = event.payload
+                        if (!payload?.requestId || !payload?.name) return
+                        const value = this.upsertScriptConfigFromRequest(payload)
+                        try {
+                            await resolveScriptConfigRequest(payload.requestId, value)
+                        } catch (error) {
+                            console.error("回传脚本配置失败", error)
+                        }
+                    })
+                    readConfigListenerReady = true
+                }
 
-            if (includeConfigListeners && !setConfigListenerReady) {
-                setConfigUnlistenFn = await listen<ScriptSetConfigPayload>("script-set-config", event => {
-                    if (!event?.payload?.name) return
-                    this.applyScriptSetConfigFromEvent(event.payload)
-                })
-                setConfigListenerReady = true
+                if (includeConfigListeners && !setConfigListenerReady) {
+                    setConfigUnlistenFn = await listen<ScriptSetConfigPayload>("script-set-config", event => {
+                        if (!event?.payload?.name) return
+                        this.applyScriptSetConfigFromEvent(event.payload)
+                    })
+                    setConfigListenerReady = true
+                }
+            })()
+
+            try {
+                await runtimeTrackingInitPromise
+            } finally {
+                runtimeTrackingInitPromise = null
             }
         },
 

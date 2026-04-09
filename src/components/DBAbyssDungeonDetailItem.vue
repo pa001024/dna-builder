@@ -11,7 +11,7 @@ const props = defineProps<{
 }>()
 
 const currentMonsterLevel = ref(AbyssMonsterLevelLimit)
-const currentActMode = ref<"12" | "36" | "custom">("12")
+const currentActMode = ref<"12" | "36" | "50" | "custom">("12")
 const currentActCount = ref(12)
 
 const isImmortalPlay = computed(() => getAbyssDungeonGroup(props.dungeon) === "不朽剧目")
@@ -19,7 +19,7 @@ const currentStarCount = computed(() => getAbyssStarCountByActCount(currentActCo
 
 const monsterDisplayLevel = computed(() => {
     if (isImmortalPlay.value) {
-        return getImmortalMonsterLevelByActCount(currentActCount.value)
+        return getImmortalMonsterLevelByActCount(currentActCount.value, props.dungeon.sid)
     }
 
     return currentMonsterLevel.value
@@ -30,12 +30,15 @@ const monsterDisplayLevel = computed(() => {
  * @param actCount 幕数
  * @returns 对应的 tab
  */
-function getActModeByCount(actCount: number): "12" | "36" | "custom" {
+function getActModeByCount(actCount: number): "12" | "36" | "50" | "custom" {
     if (actCount === 12) {
         return "12"
     }
     if (actCount === 36) {
         return "36"
+    }
+    if (actCount === 50) {
+        return "50"
     }
 
     return "custom"
@@ -45,7 +48,7 @@ function getActModeByCount(actCount: number): "12" | "36" | "custom" {
  * 切换累计奖励幕数预设。
  * @param mode 预设模式
  */
-function setActMode(mode: "12" | "36" | "custom"): void {
+function setActMode(mode: "12" | "36" | "50" | "custom"): void {
     currentActMode.value = mode
     if (mode === "12") {
         currentActCount.value = 12
@@ -53,6 +56,10 @@ function setActMode(mode: "12" | "36" | "custom"): void {
     }
     if (mode === "36") {
         currentActCount.value = 36
+        return
+    }
+    if (mode === "50") {
+        currentActCount.value = 50
     }
 }
 
@@ -297,6 +304,14 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     @click="setActMode('36')"
                 >
                     36
+                </button>
+                <button
+                    type="button"
+                    class="rounded px-3 py-1 transition-colors duration-200"
+                    :class="currentActMode === '50' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                    @click="setActMode('50')"
+                >
+                    50
                 </button>
                 <button
                     type="button"

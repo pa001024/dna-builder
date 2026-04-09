@@ -116,6 +116,68 @@ export interface MonsterBuff {
     光?: number
 }
 
+export interface ImmortalMonsterLevelRule {
+    abyssId: number
+    levelIds: readonly number[]
+    initLevels: readonly number[]
+    levelAddOn: number
+}
+
+/** 不朽剧目怪物等级表，由 importdata 从 out 自动写入。 */
+export const immortalMonsterLevelRules: Record<number, ImmortalMonsterLevelRule> = {
+    "1001": {
+        abyssId: 1013,
+        levelIds: [1301, 1302, 1303, 1304, 1305, 1306],
+        initLevels: [70, 72, 74, 76, 78, 80],
+        levelAddOn: 12,
+    },
+    "1002": {
+        abyssId: 1015,
+        levelIds: [2301, 2302, 2303, 2304, 2305, 2306],
+        initLevels: [70, 72, 74, 76, 78, 80],
+        levelAddOn: 12,
+    },
+    "1003": {
+        abyssId: 1112,
+        levelIds: [11031, 11032, 11033, 11034, 11035, 11036],
+        initLevels: [90, 92, 94, 96, 98, 105],
+        levelAddOn: 18,
+    },
+    "1004": {
+        abyssId: 1114,
+        levelIds: [11131, 11132, 11133, 11134, 11135, 11136],
+        initLevels: [90, 92, 94, 96, 98, 105],
+        levelAddOn: 18,
+    },
+    "1005": {
+        abyssId: 1212,
+        levelIds: [12031, 12032, 12033, 12034, 12035, 12036],
+        initLevels: [90, 92, 94, 96, 98, 105],
+        levelAddOn: 18,
+    },
+    "1006": {
+        abyssId: 1214,
+        levelIds: [12131, 12132, 12133, 12134, 12135, 12136],
+        initLevels: [90, 92, 94, 96, 98, 105],
+        levelAddOn: 18,
+    },
+    "1007": {
+        abyssId: 1312,
+        levelIds: [13031, 13032, 13033, 13034, 13035, 13036],
+        initLevels: [90, 92, 94, 96, 98, 104],
+        levelAddOn: 16,
+    },
+    "1008": {
+        abyssId: 1314,
+        levelIds: [13131, 13132, 13133, 13134, 13135, 13136],
+        initLevels: [90, 92, 94, 96, 98, 104],
+        levelAddOn: 16,
+    },
+}
+
+/** 默认使用的最新不朽剧目赛季。 */
+export const defaultImmortalSeasonId = 1008
+
 export const abyssDungeons: AbyssDungeon[] = [
     {
         id: 2011011,
