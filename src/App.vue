@@ -168,8 +168,8 @@ if (env.isApp) {
         console.error("同步开机启动状态失败:", error)
     })
     if (setting.initScriptHotkeysAtStartup) {
-        void scriptRuntime.initRuntimeTracking().catch(error => {
-            console.error("初始化脚本热键失败:", error)
+        void scriptRuntime.initScriptHotkeysAtStartup().catch(error => {
+            console.error("启动时注册脚本热键失败:", error)
         })
     }
 } else {

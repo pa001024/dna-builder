@@ -23,7 +23,7 @@ import {
     todosQuery,
     usersCountQuery,
     usersQuery,
-} from "../graphql"
+} from "../gen/api-queries"
 import { combinedQuery } from "../query"
 
 export const buildsWithCountQuery = combinedQuery(buildsQuery, buildsCountQuery)

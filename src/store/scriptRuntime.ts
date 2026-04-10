@@ -1,6 +1,14 @@
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { defineStore } from "pinia"
-import { getScriptRuntimeInfo, resolveScriptConfigRequest, type ScriptRuntimeInfo, stopScript, stopScriptByPath } from "@/api/app"
+import {
+    getDocumentsDir,
+    getScriptRuntimeInfo,
+    listScriptFiles,
+    resolveScriptConfigRequest,
+    type ScriptRuntimeInfo,
+    stopScript,
+    stopScriptByPath,
+} from "@/api/app"
 
 type ScriptRunningMode = "single" | "scheduler" | null
 type ScriptConfigKind = "number" | "string" | "select" | "multi-select" | "boolean"
@@ -38,6 +46,14 @@ interface ScriptConfigItem {
 }
 
 const SCRIPT_CONFIG_STORAGE_KEY = "script-runtime-config-v1"
+const SCRIPT_HOTKEY_STORAGE_KEY = "script-hotkey-bindings-v1"
+
+interface ScriptHotkeyConfig {
+    hotkey: string
+    hotIfWinActive: string
+    holdToLoop: boolean
+    enabled: boolean
+}
 
 /**
  * 脚本控制台日志项。
@@ -176,6 +192,85 @@ function normalizeScriptConfigValue(
     return text
 }
 
+/**
+ * 规范化热键文本。
+ * @param hotkey 输入热键
+ * @returns 去首尾空白后的热键
+ */
+function normalizeScriptHotkeyValue(hotkey: string): string {
+    return String(hotkey ?? "").trim()
+}
+
+/**
+ * 规范化热键生效条件。
+ * @param value 用户输入
+ * @returns 去首尾空白后的条件字符串
+ */
+function normalizeScriptHotIfWinActiveValue(value: string): string {
+    return String(value ?? "").trim()
+}
+
+/**
+ * 规范化“按住循环”配置值。
+ * @param value 原始值
+ * @returns 布尔值
+ */
+function normalizeScriptHotkeyHoldToLoopValue(value: unknown): boolean {
+    return Boolean(value)
+}
+
+/**
+ * 规范化热键启用状态。
+ * @param value 原始值
+ * @returns 布尔值（默认启用）
+ */
+function normalizeScriptHotkeyEnabledValue(value: unknown): boolean {
+    if (typeof value === "boolean") return value
+    return true
+}
+
+/**
+ * 规范化热键配置对象（兼容旧版仅字符串热键格式）。
+ * @param raw 原始配置
+ * @returns 规范化后的配置；无效时返回 null
+ */
+function normalizeScriptHotkeyConfig(raw: unknown): ScriptHotkeyConfig | null {
+    if (typeof raw === "string") {
+        const hotkey = normalizeScriptHotkeyValue(raw)
+        if (!hotkey) return null
+        return {
+            hotkey,
+            hotIfWinActive: "",
+            holdToLoop: false,
+            enabled: true,
+        }
+    }
+
+    if (!raw || typeof raw !== "object") return null
+    const maybeConfig = raw as Partial<ScriptHotkeyConfig>
+    const hotkey = normalizeScriptHotkeyValue(maybeConfig.hotkey ?? "")
+    if (!hotkey) return null
+    return {
+        hotkey,
+        hotIfWinActive: normalizeScriptHotIfWinActiveValue(maybeConfig.hotIfWinActive ?? ""),
+        holdToLoop: normalizeScriptHotkeyHoldToLoopValue(maybeConfig.holdToLoop),
+        enabled: normalizeScriptHotkeyEnabledValue((maybeConfig as { enabled?: unknown }).enabled),
+    }
+}
+
+/**
+ * 解析脚本目录路径。
+ * @returns 脚本目录路径
+ */
+async function resolveScriptDirectory(): Promise<string> {
+    try {
+        return `${await getDocumentsDir()}\\dob-scripts`
+    } catch (error) {
+        console.error("解析脚本目录失败", error)
+        return "C:\\Users\\Public\\Documents\\dob-scripts"
+    }
+}
+
 export const useScriptRuntimeStore = defineStore("script-runtime", {
     state: () => ({
         isRunning: false,
@@ -193,6 +288,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         lastEventAt: 0,
         activeConfigScope: "",
         scriptConfigStore: {} as Record<string, Record<string, ScriptConfigItem>>,
+        scriptHotkeyStore: {} as Record<string, ScriptHotkeyConfig>,
     }),
     actions: {
         /**
@@ -200,6 +296,226 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          */
         touchScriptEvent() {
             this.lastEventAt = Date.now()
+        },
+
+        /**
+         * 持久化脚本热键绑定。
+         */
+        persistScriptHotkeys() {
+            localStorage.setItem(SCRIPT_HOTKEY_STORAGE_KEY, JSON.stringify(this.scriptHotkeyStore))
+        },
+
+        /**
+         * 加载本地持久化的脚本热键绑定。
+         */
+        loadScriptHotkeys() {
+            const stored = localStorage.getItem(SCRIPT_HOTKEY_STORAGE_KEY)
+            if (!stored) {
+                this.scriptHotkeyStore = {}
+                return
+            }
+            try {
+                const parsed = JSON.parse(stored) as Record<string, unknown>
+                const normalized: Record<string, ScriptHotkeyConfig> = {}
+                for (const [scriptName, rawConfig] of Object.entries(parsed ?? {})) {
+                    const normalizedScriptName = String(scriptName ?? "").trim()
+                    const normalizedConfig = normalizeScriptHotkeyConfig(rawConfig)
+                    if (!normalizedScriptName || !normalizedConfig) continue
+                    normalized[normalizedScriptName] = normalizedConfig
+                }
+                this.scriptHotkeyStore = normalized
+            } catch (error) {
+                console.error("加载脚本热键失败", error)
+                this.scriptHotkeyStore = {}
+            }
+        },
+
+        /**
+         * 在应用启动时加载并同步脚本热键到后端。
+         */
+        async initScriptHotkeysAtStartup() {
+            this.loadScriptHotkeys()
+            try {
+                const scriptsDir = await resolveScriptDirectory()
+                const localScripts = await listScriptFiles(scriptsDir)
+                await this.syncScriptHotkeysWithBackend(localScripts, scriptsDir)
+            } catch (error) {
+                console.error("启动时同步脚本热键失败", error)
+            }
+        },
+
+        /**
+         * 规范化热键展示文本。
+         * @param config 热键配置
+         * @returns 展示文本
+         */
+        formatScriptHotkeyBadgeText(config?: ScriptHotkeyConfig) {
+            if (!config) return ""
+            const base = normalizeScriptHotkeyValue(config.hotkey)
+            if (!base) return ""
+            if (!config.enabled) {
+                return `${base} [已禁用]`
+            }
+            if (config.holdToLoop) {
+                return `${base} [按住循环]`
+            }
+            return base
+        },
+
+        /**
+         * 构建后端热键同步载荷（仅同步当前本地脚本列表中存在的绑定）。
+         * @param localScripts 当前本地脚本列表
+         * @param scriptsDir 脚本目录
+         * @returns 后端热键绑定载荷
+         */
+        buildScriptHotkeyBindingsPayload(localScripts: string[], scriptsDir: string) {
+            const payload: Array<{
+                scriptPath: string
+                hotkey: string
+                hotIfWinActive: string
+                holdToLoop: boolean
+            }> = []
+            const localScriptSet = new Set(localScripts)
+            for (const [scriptName, config] of Object.entries(this.scriptHotkeyStore)) {
+                if (!localScriptSet.has(scriptName)) continue
+                if (!config.enabled) continue
+                const normalizedHotkey = normalizeScriptHotkeyValue(config.hotkey)
+                if (!normalizedHotkey) continue
+                payload.push({
+                    scriptPath: `${scriptsDir}\\${scriptName}`,
+                    hotkey: normalizedHotkey,
+                    hotIfWinActive: normalizeScriptHotIfWinActiveValue(config.hotIfWinActive),
+                    holdToLoop: normalizeScriptHotkeyHoldToLoopValue(config.holdToLoop),
+                })
+            }
+            return payload
+        },
+
+        /**
+         * 同步脚本热键到后端并清理已删除脚本的脏绑定。
+         * @param localScripts 当前本地脚本列表
+         * @param scriptsDir 脚本目录
+         */
+        async syncScriptHotkeysWithBackend(localScripts: string[], scriptsDir: string) {
+            const localScriptSet = new Set(localScripts)
+            let changed = false
+            for (const scriptName of Object.keys(this.scriptHotkeyStore)) {
+                if (localScriptSet.has(scriptName)) continue
+                delete this.scriptHotkeyStore[scriptName]
+                changed = true
+            }
+            if (changed) {
+                this.persistScriptHotkeys()
+            }
+            const payload = this.buildScriptHotkeyBindingsPayload(localScripts, scriptsDir)
+            const { syncScriptHotkeyBindings } = await import("@/api/app")
+            await syncScriptHotkeyBindings(payload)
+        },
+
+        /**
+         * 切换单个脚本热键启用状态。
+         * @param scriptName 本地脚本名
+         * @param localScripts 当前本地脚本列表
+         * @param scriptsDir 脚本目录
+         */
+        async toggleScriptHotkeyEnabled(scriptName: string, localScripts: string[], scriptsDir: string) {
+            const previousConfig = this.scriptHotkeyStore[scriptName]
+            if (!previousConfig) return
+            const nextConfig: ScriptHotkeyConfig = {
+                ...previousConfig,
+                enabled: !previousConfig.enabled,
+            }
+            this.scriptHotkeyStore[scriptName] = nextConfig
+            try {
+                await this.syncScriptHotkeysWithBackend(localScripts, scriptsDir)
+                this.persistScriptHotkeys()
+                return nextConfig
+            } catch (error) {
+                this.scriptHotkeyStore[scriptName] = previousConfig
+                throw error
+            }
+        },
+
+        /**
+         * 保存当前脚本热键绑定。
+         * @param scriptName 本地脚本名
+         * @param config 热键配置
+         * @param localScripts 当前本地脚本列表
+         * @param scriptsDir 脚本目录
+         */
+        async saveScriptHotkeyBinding(
+            scriptName: string,
+            config: {
+                hotkey: string
+                hotIfWinActive: string
+                holdToLoop: boolean
+                enabled?: boolean
+            },
+            localScripts: string[],
+            scriptsDir: string
+        ) {
+            const previousConfig = this.scriptHotkeyStore[scriptName] ? { ...this.scriptHotkeyStore[scriptName] } : null
+            const hotkey = normalizeScriptHotkeyValue(config.hotkey)
+            if (!hotkey) {
+                return null
+            }
+
+            const enabled = config.enabled ?? previousConfig?.enabled ?? true
+            this.scriptHotkeyStore[scriptName] = {
+                hotkey,
+                hotIfWinActive: normalizeScriptHotIfWinActiveValue(config.hotIfWinActive),
+                holdToLoop: normalizeScriptHotkeyHoldToLoopValue(config.holdToLoop),
+                enabled,
+            }
+
+            try {
+                await this.syncScriptHotkeysWithBackend(localScripts, scriptsDir)
+                this.persistScriptHotkeys()
+                return this.scriptHotkeyStore[scriptName]
+            } catch (error) {
+                if (previousConfig) {
+                    this.scriptHotkeyStore[scriptName] = previousConfig
+                } else {
+                    delete this.scriptHotkeyStore[scriptName]
+                }
+                throw error
+            }
+        },
+
+        /**
+         * 清除指定脚本的热键绑定。
+         * @param scriptName 本地脚本名
+         * @param localScripts 当前本地脚本列表
+         * @param scriptsDir 脚本目录
+         */
+        async clearScriptHotkeyBinding(scriptName: string, localScripts: string[], scriptsDir: string) {
+            if (!this.scriptHotkeyStore[scriptName]) return
+            const previousConfig = { ...this.scriptHotkeyStore[scriptName] }
+            try {
+                delete this.scriptHotkeyStore[scriptName]
+                await this.syncScriptHotkeysWithBackend(localScripts, scriptsDir)
+                this.persistScriptHotkeys()
+                return previousConfig
+            } catch (error) {
+                this.scriptHotkeyStore[scriptName] = previousConfig
+                throw error
+            }
+        },
+
+        /**
+         * 重命名脚本时迁移热键绑定。
+         * @param oldFileName 旧脚本名
+         * @param newFileName 新脚本名
+         * @param localScripts 当前本地脚本列表
+         * @param scriptsDir 脚本目录
+         */
+        async renameScriptHotkeyBinding(oldFileName: string, newFileName: string, localScripts: string[], scriptsDir: string) {
+            const oldHotkey = this.scriptHotkeyStore[oldFileName]
+            if (!oldHotkey) return
+            delete this.scriptHotkeyStore[oldFileName]
+            this.scriptHotkeyStore[newFileName] = oldHotkey
+            await this.syncScriptHotkeysWithBackend(localScripts, scriptsDir)
+            this.persistScriptHotkeys()
         },
 
         /**

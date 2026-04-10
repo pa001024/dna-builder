@@ -104,6 +104,19 @@ describe("CharBuild类测试", () => {
         expect(attrs2.独立增伤).toBe(0)
     })
 
+    // 测试武器独立增伤不应作用于角色
+    it("武器MOD的独立增伤不应影响角色属性", () => {
+        const charBuild = createCharBuild()
+        charBuild.mods = [new LeveledMod(43604)]
+        charBuild.baseName = "射击"
+
+        const attrs = charBuild.calculateAttributes()
+        const weaponAttrs = charBuild.calculateWeaponAttributes().weapon
+
+        expect(attrs.独立增伤).toBe(0)
+        expect(weaponAttrs?.独立增伤).toBe(-0.6)
+    })
+
     // 测试武器属性计算
     it("应该能够正确计算武器属性", () => {
         const charBuild = createCharBuild()

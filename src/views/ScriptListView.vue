@@ -19,10 +19,8 @@ import {
     runAsAdmin,
     runScript,
     type ScriptHelpResponse,
-    type ScriptHotkeyBinding,
     type ScriptMcpServerState,
     setScriptMcpServerEnabled,
-    syncScriptHotkeyBindings,
     unwatchFile,
     watchFile,
     writeTextFile,
@@ -206,13 +204,6 @@ interface OpenLocalScriptOptions {
     preferConfigPanel?: boolean
 }
 
-interface ScriptHotkeyConfig {
-    hotkey: string
-    hotIfWinActive: string
-    holdToLoop: boolean
-    enabled: boolean
-}
-
 const openedTabs = ref<OpenedTab[]>([])
 const activeTabId = ref<string | null>(null)
 
@@ -346,7 +337,6 @@ const schedulerDraftStepOptions = computed(() =>
         label: `${index + 1}. ${step.scriptName || "未选择脚本"}`,
     }))
 )
-const SCRIPT_HOTKEY_STORAGE_KEY = "script-hotkey-bindings-v1"
 const SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS = 30
 const SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME = "运行超时"
 const SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_DESC = "运行超时秒数，脚本运行中长时间未检测到事件时自动重启，0 表示关闭。"
@@ -356,7 +346,6 @@ const scriptConfigStore = computed({
         scriptRuntime.scriptConfigStore = value as typeof scriptRuntime.scriptConfigStore
     },
 })
-const scriptHotkeyStore = ref<Record<string, ScriptHotkeyConfig>>({})
 const showScriptHotkeyDialog = ref(false)
 const editingHotkeyScriptName = ref("")
 const editingHotkeyValue = ref("")
@@ -505,7 +494,7 @@ async function fetchLocalScripts() {
             await refreshOnlineScriptUpdateMap()
         }
         try {
-            await syncScriptHotkeysWithBackend()
+            await scriptRuntime.syncScriptHotkeysWithBackend(localScripts.value, scriptsDir.value)
         } catch (error) {
             console.error("同步脚本热键失败", error)
             ui.showErrorMessage(`同步脚本热键失败: ${error}`)
@@ -1023,103 +1012,6 @@ async function runScheduler() {
 }
 
 /**
- * 规范化热键文本。
- * @param hotkey 输入热键
- * @returns 去首尾空白后的热键
- */
-function normalizeScriptHotkeyValue(hotkey: string): string {
-    return String(hotkey ?? "").trim()
-}
-
-/**
- * 规范化热键生效条件（对应 `#HotIf WinActive("WinTitle")` 的 WinTitle 字符串）。
- * @param value 用户输入
- * @returns 去首尾空白后的条件字符串
- */
-function normalizeScriptHotIfWinActiveValue(value: string): string {
-    return String(value ?? "").trim()
-}
-
-/**
- * 规范化“按住循环”配置值。
- * @param value 原始值
- * @returns 布尔值
- */
-function normalizeScriptHotkeyHoldToLoopValue(value: unknown): boolean {
-    return Boolean(value)
-}
-
-/**
- * 规范化热键启用状态。
- * @param value 原始值
- * @returns 布尔值（默认启用）
- */
-function normalizeScriptHotkeyEnabledValue(value: unknown): boolean {
-    if (typeof value === "boolean") return value
-    return true
-}
-
-/**
- * 构造默认热键配置。
- * @returns 默认配置对象
- */
-function createDefaultScriptHotkeyConfig(): ScriptHotkeyConfig {
-    return {
-        hotkey: "",
-        hotIfWinActive: "",
-        holdToLoop: false,
-        enabled: true,
-    }
-}
-
-/**
- * 规范化热键配置对象（兼容旧版仅字符串热键格式）。
- * @param raw 原始配置
- * @returns 规范化后的配置；无效时返回 null
- */
-function normalizeScriptHotkeyConfig(raw: unknown): ScriptHotkeyConfig | null {
-    if (typeof raw === "string") {
-        const hotkey = normalizeScriptHotkeyValue(raw)
-        if (!hotkey) return null
-        return {
-            hotkey,
-            hotIfWinActive: "",
-            holdToLoop: false,
-            enabled: true,
-        }
-    }
-
-    if (!raw || typeof raw !== "object") return null
-    const maybeConfig = raw as Partial<ScriptHotkeyConfig>
-    const hotkey = normalizeScriptHotkeyValue(maybeConfig.hotkey ?? "")
-    if (!hotkey) return null
-    return {
-        hotkey,
-        hotIfWinActive: normalizeScriptHotIfWinActiveValue(maybeConfig.hotIfWinActive ?? ""),
-        holdToLoop: normalizeScriptHotkeyHoldToLoopValue(maybeConfig.holdToLoop),
-        enabled: normalizeScriptHotkeyEnabledValue((maybeConfig as { enabled?: unknown }).enabled),
-    }
-}
-
-/**
- * 构造用于列表展示的热键标签文本。
- * @param config 热键配置
- * @returns 展示文本
- */
-function formatScriptHotkeyBadgeText(config?: ScriptHotkeyConfig): string {
-    if (!config) return ""
-    const base = normalizeScriptHotkeyValue(config.hotkey)
-    if (!base) return ""
-    if (!config.enabled) {
-        return `${base} [已禁用]`
-    }
-    if (config.holdToLoop) {
-        return `${base} [按住循环]`
-    }
-    return base
-}
-
-/**
  * 规范化脚本运行超时秒数（0 表示关闭自动重启）。
  * @param value 原始值
  * @returns 非负整数秒
@@ -1137,6 +1029,88 @@ function normalizeScriptRuntimeTimeoutSeconds(value: unknown): number {
  */
 function touchScriptRuntimeEvent() {
     lastScriptEventAt = Date.now()
+}
+
+/**
+ * 打开脚本热键编辑弹窗。
+ * @param scriptName 脚本名称
+ */
+function openScriptHotkeyDialog(scriptName: string) {
+    editingHotkeyScriptName.value = scriptName
+    const existing = scriptRuntime.scriptHotkeyStore[scriptName]
+    editingHotkeyValue.value = existing?.hotkey ?? ""
+    editingHotkeyWinActive.value = existing?.hotIfWinActive ?? ""
+    editingHotkeyHoldToLoop.value = existing?.holdToLoop ?? false
+    showScriptHotkeyDialog.value = true
+}
+
+/**
+ * 切换单个脚本热键启用状态。
+ * @param scriptName 脚本名称
+ */
+async function toggleScriptHotkeyEnabled(scriptName: string) {
+    try {
+        const nextConfig = await scriptRuntime.toggleScriptHotkeyEnabled(scriptName, localScripts.value, scriptsDir.value)
+        if (nextConfig) {
+            ui.showSuccessMessage(
+                nextConfig.enabled
+                    ? t("script-list.hotkey_enabled", { name: scriptName })
+                    : t("script-list.hotkey_disabled", { name: scriptName })
+            )
+        }
+    } catch (error) {
+        console.error("切换脚本热键状态失败", error)
+        ui.showErrorMessage(t("script-list.toggle_hotkey_failed"), error)
+    }
+}
+
+/**
+ * 保存当前脚本热键绑定。
+ */
+async function saveScriptHotkeyBinding() {
+    const scriptName = editingHotkeyScriptName.value
+    if (!scriptName) return
+    const hotkey = String(editingHotkeyValue.value ?? "").trim()
+    if (!hotkey) {
+        ui.showErrorMessage(t("script-list.hotkey_required"))
+        return
+    }
+
+    try {
+        await scriptRuntime.saveScriptHotkeyBinding(
+            scriptName,
+            {
+                hotkey,
+                hotIfWinActive: String(editingHotkeyWinActive.value ?? "").trim(),
+                holdToLoop: Boolean(editingHotkeyHoldToLoop.value),
+                enabled: scriptRuntime.scriptHotkeyStore[scriptName]?.enabled ?? true,
+            },
+            localScripts.value,
+            scriptsDir.value
+        )
+        showScriptHotkeyDialog.value = false
+        ui.showSuccessMessage(t("script-list.hotkey_bound", { name: scriptName, hotkey }))
+    } catch (error) {
+        console.error("保存脚本热键失败", error)
+        ui.showErrorMessage(t("script-list.save_hotkey_failed"), error)
+    }
+}
+
+/**
+ * 清除指定脚本的热键绑定。
+ * @param scriptName 脚本名称
+ * @param silent 是否静默
+ */
+async function clearScriptHotkeyBinding(scriptName: string, silent = false) {
+    try {
+        const cleared = await scriptRuntime.clearScriptHotkeyBinding(scriptName, localScripts.value, scriptsDir.value)
+        if (!silent && cleared) {
+            ui.showSuccessMessage(t("script-list.hotkey_cleared", { name: scriptName }))
+        }
+    } catch (error) {
+        console.error("清除脚本热键失败", error)
+        ui.showErrorMessage(t("script-list.clear_hotkey_failed"), error)
+    }
 }
 
 /**
@@ -1256,176 +1230,6 @@ function stopScriptRuntimeWatchdog() {
     if (!scriptRuntimeWatchdogTimer) return
     clearInterval(scriptRuntimeWatchdogTimer)
     scriptRuntimeWatchdogTimer = null
-}
-
-/**
- * 持久化脚本热键绑定。
- */
-function persistScriptHotkeys() {
-    localStorage.setItem(SCRIPT_HOTKEY_STORAGE_KEY, JSON.stringify(scriptHotkeyStore.value))
-}
-
-/**
- * 加载本地持久化的脚本热键绑定。
- */
-function loadScriptHotkeys() {
-    const stored = localStorage.getItem(SCRIPT_HOTKEY_STORAGE_KEY)
-    if (!stored) {
-        scriptHotkeyStore.value = {}
-        return
-    }
-    try {
-        const parsed = JSON.parse(stored) as Record<string, unknown>
-        const normalized: Record<string, ScriptHotkeyConfig> = {}
-        for (const [scriptName, rawConfig] of Object.entries(parsed ?? {})) {
-            const normalizedScriptName = String(scriptName ?? "").trim()
-            const normalizedConfig = normalizeScriptHotkeyConfig(rawConfig)
-            if (!normalizedScriptName || !normalizedConfig) continue
-            normalized[normalizedScriptName] = normalizedConfig
-        }
-        scriptHotkeyStore.value = normalized
-    } catch (error) {
-        console.error("加载脚本热键失败", error)
-        scriptHotkeyStore.value = {}
-    }
-}
-
-/**
- * 构建后端热键同步载荷（仅同步当前本地脚本列表中存在的绑定）。
- * @returns 后端热键绑定载荷
- */
-function buildScriptHotkeyBindingsPayload(): ScriptHotkeyBinding[] {
-    const payload: ScriptHotkeyBinding[] = []
-    const localScriptSet = new Set(localScripts.value)
-    for (const [scriptName, config] of Object.entries(scriptHotkeyStore.value)) {
-        if (!localScriptSet.has(scriptName)) continue
-        if (!config.enabled) continue
-        const normalizedHotkey = normalizeScriptHotkeyValue(config.hotkey)
-        if (!normalizedHotkey) continue
-        payload.push({
-            scriptPath: `${scriptsDir.value}\\${scriptName}`,
-            hotkey: normalizedHotkey,
-            hotIfWinActive: normalizeScriptHotIfWinActiveValue(config.hotIfWinActive),
-            holdToLoop: normalizeScriptHotkeyHoldToLoopValue(config.holdToLoop),
-        })
-    }
-    return payload
-}
-
-/**
- * 同步脚本热键到后端并清理已删除脚本的脏绑定。
- */
-async function syncScriptHotkeysWithBackend() {
-    const localScriptSet = new Set(localScripts.value)
-    let changed = false
-    for (const scriptName of Object.keys(scriptHotkeyStore.value)) {
-        if (localScriptSet.has(scriptName)) continue
-        delete scriptHotkeyStore.value[scriptName]
-        changed = true
-    }
-    if (changed) {
-        persistScriptHotkeys()
-    }
-    const payload = buildScriptHotkeyBindingsPayload()
-    await syncScriptHotkeyBindings(payload)
-}
-
-/**
- * 切换单个脚本热键启用状态。
- * @param scriptName 本地脚本名
- */
-async function toggleScriptHotkeyEnabled(scriptName: string) {
-    const previousConfig = scriptHotkeyStore.value[scriptName]
-    if (!previousConfig) return
-    const nextConfig: ScriptHotkeyConfig = {
-        ...previousConfig,
-        enabled: !previousConfig.enabled,
-    }
-    scriptHotkeyStore.value[scriptName] = nextConfig
-    try {
-        await syncScriptHotkeysWithBackend()
-        persistScriptHotkeys()
-        ui.showSuccessMessage(
-            nextConfig.enabled
-                ? t("script-list.hotkey_enabled", { name: scriptName })
-                : t("script-list.hotkey_disabled", { name: scriptName })
-        )
-    } catch (error) {
-        scriptHotkeyStore.value[scriptName] = previousConfig
-        console.error("切换脚本热键状态失败", error)
-        ui.showErrorMessage(t("script-list.toggle_hotkey_failed"), error)
-    }
-}
-
-/**
- * 打开热键绑定弹窗。
- * @param scriptName 本地脚本名
- */
-function openScriptHotkeyDialog(scriptName: string) {
-    editingHotkeyScriptName.value = scriptName
-    const existing = scriptHotkeyStore.value[scriptName] ?? createDefaultScriptHotkeyConfig()
-    editingHotkeyValue.value = existing.hotkey
-    editingHotkeyWinActive.value = existing.hotIfWinActive
-    editingHotkeyHoldToLoop.value = existing.holdToLoop
-    showScriptHotkeyDialog.value = true
-}
-
-/**
- * 保存当前脚本热键绑定。
- */
-async function saveScriptHotkeyBinding() {
-    const scriptName = editingHotkeyScriptName.value
-    if (!scriptName) return
-    const previousConfig = scriptHotkeyStore.value[scriptName] ? { ...scriptHotkeyStore.value[scriptName] } : null
-    const hotkey = normalizeScriptHotkeyValue(editingHotkeyValue.value)
-    if (!hotkey) {
-        ui.showErrorMessage(t("script-list.hotkey_required"))
-        return
-    }
-
-    try {
-        const enabled = previousConfig?.enabled ?? true
-        scriptHotkeyStore.value[scriptName] = {
-            hotkey,
-            hotIfWinActive: normalizeScriptHotIfWinActiveValue(editingHotkeyWinActive.value),
-            holdToLoop: normalizeScriptHotkeyHoldToLoopValue(editingHotkeyHoldToLoop.value),
-            enabled,
-        }
-        await syncScriptHotkeysWithBackend()
-        persistScriptHotkeys()
-        showScriptHotkeyDialog.value = false
-        ui.showSuccessMessage(t("script-list.hotkey_bound", { name: scriptName, hotkey }))
-    } catch (error) {
-        if (previousConfig) {
-            scriptHotkeyStore.value[scriptName] = previousConfig
-        } else {
-            delete scriptHotkeyStore.value[scriptName]
-        }
-        console.error("保存脚本热键失败", error)
-        ui.showErrorMessage(t("script-list.save_hotkey_failed"), error)
-    }
-}
-
-/**
- * 清除指定脚本的热键绑定。
- * @param scriptName 本地脚本名
- * @param silent 是否静默（不提示）
- */
-async function clearScriptHotkeyBinding(scriptName: string, silent = false) {
-    if (!scriptHotkeyStore.value[scriptName]) return
-    const previousConfig = { ...scriptHotkeyStore.value[scriptName] }
-    try {
-        delete scriptHotkeyStore.value[scriptName]
-        await syncScriptHotkeysWithBackend()
-        persistScriptHotkeys()
-        if (!silent) {
-            ui.showSuccessMessage(t("script-list.hotkey_cleared", { name: scriptName }))
-        }
-    } catch (error) {
-        scriptHotkeyStore.value[scriptName] = previousConfig
-        console.error("清除脚本热键失败", error)
-        ui.showErrorMessage(t("script-list.clear_hotkey_failed"), error)
-    }
 }
 
 /**
@@ -3067,13 +2871,7 @@ async function confirmRenameScript() {
         }
 
         // 同步热键绑定（旧文件名迁移到新文件名）。
-        const oldHotkey = scriptHotkeyStore.value[oldFileName]
-        if (oldHotkey) {
-            delete scriptHotkeyStore.value[oldFileName]
-            scriptHotkeyStore.value[newFileName] = oldHotkey
-            await syncScriptHotkeysWithBackend()
-            persistScriptHotkeys()
-        }
+        await scriptRuntime.renameScriptHotkeyBinding(oldFileName, newFileName, localScripts.value, scriptsDir.value)
 
         await fetchLocalScripts()
     } catch (error) {
@@ -3126,7 +2924,7 @@ async function deleteScript(fileName: string) {
 
         await deleteFile(filePath)
         removeScriptConfigScope(fileName)
-        await clearScriptHotkeyBinding(fileName, true)
+        await scriptRuntime.clearScriptHotkeyBinding(fileName, localScripts.value, scriptsDir.value)
         ui.showSuccessMessage(t("script-list.file_moved_to_recycle_bin"))
         await fetchLocalScripts()
     } catch (error) {
@@ -3566,7 +3364,7 @@ onMounted(async () => {
     loadSchedulerConfig()
     loadScriptMcpPortConfig()
     loadScriptConfigItems()
-    loadScriptHotkeys()
+    scriptRuntime.loadScriptHotkeys()
     await fetchLocalScripts()
     document.addEventListener("keydown", handleKeyDown)
     await initFileChangeListener()
@@ -3714,8 +3512,8 @@ onUnmounted(async () => {
                                         <Icon v-else icon="ri:file-line" class="w-4 h-4 shrink-0" />
                                         <div v-if="editingScript !== script" class="flex-1 min-w-0 flex items-center gap-2">
                                             <span class="truncate">{{ script }}</span>
-                                            <span v-if="scriptHotkeyStore[script]" class="badge badge-outline badge-xs shrink-0">
-                                                {{ formatScriptHotkeyBadgeText(scriptHotkeyStore[script]) }}
+                                            <span v-if="scriptRuntime.scriptHotkeyStore[script]" class="badge badge-outline badge-xs shrink-0">
+                                                {{ scriptRuntime.formatScriptHotkeyBadgeText(scriptRuntime.scriptHotkeyStore[script]) }}
                                             </span>
                                         </div>
                                         <input
@@ -3756,13 +3554,13 @@ onUnmounted(async () => {
                                             >
                                                 <Icon icon="ri:edit-line" class="w-4 h-4 mr-2" />
                                                 {{
-                                                    scriptHotkeyStore[script]
+                                                    scriptRuntime.scriptHotkeyStore[script]
                                                         ? $t("script-list.edit_hotkey")
                                                         : $t("script-list.save_hotkey")
                                                 }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
-                                                v-if="scriptHotkeyStore[script]"
+                                                v-if="scriptRuntime.scriptHotkeyStore[script]"
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-warning data-highlighted:text-base-100"
                                                 @click="clearScriptHotkeyBinding(script)"
                                             >
@@ -3770,13 +3568,13 @@ onUnmounted(async () => {
                                                 {{ $t("script-list.clear_hotkey") }}
                                             </ContextMenuItem>
                                             <ContextMenuItem
-                                                v-if="scriptHotkeyStore[script]"
+                                                v-if="scriptRuntime.scriptHotkeyStore[script]"
                                                 class="text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none data-highlighted:bg-primary data-highlighted:text-base-100"
                                                 @click="toggleScriptHotkeyEnabled(script)"
                                             >
                                                 <Icon icon="ri:stop-circle-line" class="w-4 h-4 mr-2" />
                                                 {{
-                                                    scriptHotkeyStore[script].enabled
+                                                    scriptRuntime.scriptHotkeyStore[script].enabled
                                                         ? $t("script-list.disable_hotkey")
                                                         : $t("script-list.enable_hotkey")
                                                 }}
@@ -4425,7 +4223,7 @@ onUnmounted(async () => {
                 <div class="flex justify-end gap-2 mt-4">
                     <button class="btn btn-ghost" @click="showScriptHotkeyDialog = false">{{ $t("setting.cancel") }}</button>
                     <button
-                        v-if="scriptHotkeyStore[editingHotkeyScriptName]"
+                        v-if="scriptRuntime.scriptHotkeyStore[editingHotkeyScriptName]"
                         class="btn btn-warning"
                         @click="(clearScriptHotkeyBinding(editingHotkeyScriptName), (showScriptHotkeyDialog = false))"
                     >

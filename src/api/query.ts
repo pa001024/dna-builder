@@ -1,5 +1,5 @@
 import { type AnyVariables, type OperationContext, gql as urqlGql } from "@urql/vue"
-import { gqClient } from "./graphql"
+import { gqClient } from "./client"
 
 // ==========================================
 // 1. 深度修复的类型解析器
