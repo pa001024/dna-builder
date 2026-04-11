@@ -334,6 +334,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          * 在应用启动时加载并同步脚本热键到后端。
          */
         async initScriptHotkeysAtStartup() {
+            await this.initRuntimeTracking()
             this.loadScriptHotkeys()
             try {
                 const scriptsDir = await resolveScriptDirectory()

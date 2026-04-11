@@ -104,22 +104,23 @@ const chartData = computed(() => {
     }
 })
 
-const highestExtremePoint = computed(() => {
-    let maxIndex = 0
-    let maxValue = chartData.value.highestValues[0] ?? 0
-
-    chartData.value.highestValues.forEach((value, index) => {
-        if (value > maxValue) {
-            maxValue = value
-            maxIndex = index
-        }
-    })
-
-    return {
-        conversion: chartData.value.conversionValues[maxIndex] ?? 0,
-        value: maxValue,
+/**
+ * 计算当前输入对应的转换比。
+ * @returns 当前转换比
+ */
+const currentConversionRatio = computed(() => {
+    if (totalWeight.value <= 0) {
+        return 0
     }
+
+    return Math.max(0, Math.min(1, (props.desperate * 3) / totalWeight.value))
 })
+
+/**
+ * 计算当前输入在曲线上的标记点。
+ * @returns 当前点位
+ */
+const currentPoint = computed(() => calculateHighestPointByRatio(currentConversionRatio.value))
 
 const chartOption = computed<echarts.EChartsOption>(() => {
     return {
@@ -258,10 +259,10 @@ const chartOption = computed<echarts.EChartsOption>(() => {
                     },
                     data: [
                         {
-                            name: "极值点",
-                            value: Number(highestExtremePoint.value.value.toFixed(3)),
-                            xAxis: highestExtremePoint.value.conversion,
-                            yAxis: highestExtremePoint.value.value,
+                            name: "当前",
+                            value: Number(currentPoint.value.value.toFixed(3)),
+                            xAxis: currentConversionRatio.value,
+                            yAxis: currentPoint.value.value,
                         },
                     ],
                 },
