@@ -529,7 +529,7 @@ export class CharBuild {
         const skillMultiplier = this.getTotalBonusMul("技能倍率乘数")
 
         // 应用MOD属性加成
-        const modAttributeBonus = this.getTotalBonus("MOD属性")
+        const modAttributeBonus = this.getTotalBonus(`${this.char.属性}MOD属性`)
         if (modAttributeBonus > 0) {
             // 计算狮鹫百首契约者MOD属性加成
             const modsBySeries = this.charMods.filter((mod): mod is LeveledMod => mod !== null && CharBuild.elmSeries.includes(mod.系列))
@@ -686,10 +686,20 @@ export class CharBuild {
             let reloadTimeBonus = this.getTotalBonus(`${prefix}装填`, prefix) + this.getTotalBonus(`装填`, prefix)
             let magazineBonus = this.getTotalBonus(`${prefix}弹匣`, prefix) + this.getTotalBonus(`弹匣`, prefix)
             let ammoBonus = this.getTotalBonus(`${prefix}弹药`, prefix) + this.getTotalBonus(`弹药`, prefix)
-            const additionalDamage = this.getTotalBonus("追加伤害")
+            let additionalDamage = this.getTotalBonus("追加伤害")
             let weaponDamageMul = this.getTotalBonus(`${prefix}武器倍率`, prefix) + this.getTotalBonus(`武器倍率`, prefix)
             let independentDamageIncrease =
                 (1 + this.getTotalBonusMul(`${prefix}独立增伤`, prefix)) * (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
+
+            // 应用MOD属性加成
+            const modAttributeBonus = this.getTotalBonus(`${this.char.属性}MOD属性`)
+            if (modAttributeBonus > 0) {
+                // 计算狮鹫百首契约者MOD属性加成
+                const modsBySeries = this.charMods.filter(
+                    (mod): mod is LeveledMod => mod !== null && CharBuild.elmSeries.includes(mod.系列)
+                )
+                additionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "追加伤害")
+            }
 
             if (prefix.startsWith("同律")) {
                 const lowerPrefix = prefix.substring(2)

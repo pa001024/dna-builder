@@ -1,6 +1,6 @@
 [package]
 name = "dna-builder"
-version = "0.15.7"
+version = "0.15.8"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
@@ -135,3 +135,4 @@ hotwatch = "0.5.0"
 tauri-plugin-global-shortcut = "2"
 ndarray = "0.17"
 ort = { version = "2.0.0-rc.12", features = ["directml"] }
+clipper2-rust = "1.0.3"

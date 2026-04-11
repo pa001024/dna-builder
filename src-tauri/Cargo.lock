@@ -830,6 +830,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "clipper2-rust"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "119b9306cc17492f50224736a2b2595543665c3095ba40c04c5c5181d53678bc"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "combine"
 version = "4.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1253,7 +1262,7 @@ dependencies = [
 
 [[package]]
 name = "dna-builder"
-version = "0.15.7"
+version = "0.15.8"
 dependencies = [
  "aes",
  "arboard",
@@ -1262,6 +1271,7 @@ dependencies = [
  "boa_engine",
  "boa_gc",
  "boa_runtime",
+ "clipper2-rust",
  "futures-concurrency",
  "futures-lite",
  "futures-util",

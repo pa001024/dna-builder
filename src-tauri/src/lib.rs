@@ -890,12 +890,6 @@ fn import_pic(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn predict_font_ocr(image_path: String) -> Result<submodules::font_ocr::FontOcrPrediction, String> {
-    let path = PathBuf::from(image_path);
-    submodules::font_ocr::predict_font_ocr(path.as_path(), true)
-}
-
-#[tauri::command]
 fn get_game_install() -> String {
     #[cfg(target_os = "windows")]
     {
@@ -2987,7 +2981,6 @@ pub fn run() {
         import_mod,
         enable_mod,
         import_pic,
-        predict_font_ocr,
         fetch,
         get_local_qq,
         list_script_files,
