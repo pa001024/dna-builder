@@ -62147,11 +62147,11 @@ const t: import("../data-types").Reward[] = [
                 n: "叛逆风尚",
             },
             {
-                id: 30118,
+                id: 30120,
                 t: "HeadSculpture",
                 c: 1,
                 p: 1,
-                n: "星耀巡游",
+                n: "星耀纪念",
             },
             {
                 id: 10090,
