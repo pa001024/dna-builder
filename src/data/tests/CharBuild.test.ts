@@ -280,6 +280,22 @@ describe("CharBuild类测试", () => {
         expect(charBuild.calculateDefenseMultiplier(attrs)).toBeCloseTo(0.69, 1)
     })
 
+    // 测试高级等级减伤乘区
+    it("怪物等级大于等于200时应该启用高级等级减伤乘区", () => {
+        const charBuild = createCharBuild()
+        const attrs = charBuild.calculateAttributes()
+
+        charBuild.enemyLevel = 200
+        const level200Multiplier = charBuild.calculateDefenseMultiplier(attrs)
+
+        charBuild.enemyLevel = 201
+        const level201Multiplier = charBuild.calculateDefenseMultiplier(attrs)
+
+        const level200Rate = 1 / (1 + (200 - 190) * 0.05)
+        const level201Rate = 1 / (1 + (201 - 190) * 0.05)
+        expect(level201Multiplier).toBeCloseTo(level200Multiplier * (level201Rate / level200Rate), 6)
+    })
+
     // 测试主要计算方法
     it("应该能够正确执行主要计算方法", () => {
         const charBuild = createCharBuild()

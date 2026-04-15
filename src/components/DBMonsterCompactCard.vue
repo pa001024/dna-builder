@@ -63,6 +63,33 @@ const monsterLevel = computed(() => {
 })
 
 /**
+ * 计算当前卡片展示的等级减伤乘区。
+ * 怪物等级大于等于 200 时生效。
+ */
+const levelReduceRate = computed(() => {
+    const level = monsterLevel.value || 1
+
+    if (level < 200) {
+        return 1
+    }
+
+    return 1 / (1 + (level - 190) * 0.05)
+})
+
+/**
+ * 计算卡片上的有效生命。
+ */
+const effectiveHealth = computed(() => {
+    const monster = displayMonster.value
+    if (!monster) {
+        return 0
+    }
+
+    const defenseMultiplier = Math.max(1 - monster.def / (300 + monster.def), 0.000001)
+    return (monster.hp / defenseMultiplier + (monster.es || 0)) / Math.max(levelReduceRate.value, 0.000001)
+})
+
+/**
  * 获取怪物头像地址。
  */
 const monsterAvatarUrl = computed(() => {
@@ -139,20 +166,20 @@ function handleClickMonsterCard(): void {
 
         <div class="mt-2 grid grid-cols-2 gap-1.5 text-[11px] sm:grid-cols-4">
             <div class="rounded bg-base-300/90 px-1.5 py-1">
-                <div class="text-[10px] text-base-content/65">攻击</div>
-                <div class="font-semibold text-primary">{{ formatBigNumber(displayMonster.atk) }}</div>
+                <div class="text-[10px] text-base-content/65">生命</div>
+                <div class="font-semibold text-error">{{ formatBigNumber(displayMonster.hp) }}</div>
             </div>
             <div class="rounded bg-base-300/90 px-1.5 py-1">
                 <div class="text-[10px] text-base-content/65">防御</div>
                 <div class="font-semibold text-success">{{ formatBigNumber(displayMonster.def) }}</div>
             </div>
             <div class="rounded bg-base-300/90 px-1.5 py-1">
-                <div class="text-[10px] text-base-content/65">生命</div>
-                <div class="font-semibold text-error">{{ formatBigNumber(displayMonster.hp) }}</div>
-            </div>
-            <div class="rounded bg-base-300/90 px-1.5 py-1">
                 <div class="text-[10px] text-base-content/65">护盾</div>
                 <div class="font-semibold text-info">{{ formatBigNumber(displayMonster.es || 0) }}</div>
+            </div>
+            <div class="rounded bg-base-300/90 px-1.5 py-1">
+                <div class="text-[10px] text-base-content/65">有效生命</div>
+                <div class="font-semibold text-accent">{{ formatBigNumber(effectiveHealth) }}</div>
             </div>
         </div>
     </div>

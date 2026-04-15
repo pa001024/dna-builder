@@ -7,6 +7,7 @@ import { cloneDeep, debounce, groupBy } from "lodash-es"
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
+import { MaxMonsterLevelLimit } from "@/data/d/const.data"
 import { env } from "@/env"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 import { CharSettings, createDefaultCharSettings, normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
@@ -1463,17 +1464,10 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             </div>
                             <!-- 敌人等级 -->
                             <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1">
-                                    {{ $t("char-build.enemy_level") }} (Lv. {{ charSettings.enemyLevel }})
+                                <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">
+                                    {{ $t("char-build.enemy_level") }}
                                 </div>
-                                <input
-                                    v-model.number="charSettings.enemyLevel"
-                                    type="range"
-                                    class="range range-primary range-xs w-full"
-                                    min="1"
-                                    max="180"
-                                    step="1"
-                                />
+                                <LevelSlider v-model="charSettings.enemyLevel" :max="MaxMonsterLevelLimit" />
                             </div>
                             <!-- 敌人信息 -->
                             <div class="space-y-3">

@@ -986,21 +986,34 @@ export class CharBuild {
     }
 
     /**
+     * 计算高等级减伤乘区。
+     * 怪物等级大于等于 200 时生效。
+     * @param enemyLevel 怪物等级
+     */
+    private calculateLevelReduceRate(enemyLevel: number): number {
+        if (enemyLevel < 200) {
+            return 1
+        }
+
+        return 1 / (1 + (enemyLevel - 190) * 0.05)
+    }
+
+    /**
      * 计算防御乘区
      * @param attrs 属性
      * @param finalDef 可选, 最终防御值
      * @returns 防御乘区
      */
     public calculateDefenseMultiplier(attrs: ReturnType<typeof this.calculateAttributes>, finalDef?: number, isSkill = false): number {
-        if (this.enemy.currentShield > 0) return 1
+        const enemyLevel = this.enemy.等级 || 80
+        if (this.enemy.currentShield > 0) return this.calculateLevelReduceRate(enemyLevel)
         // 确保等级和敌方等级都是有效的数字
         const charLevel = this.char.等级 || 80
-        const enemyLevel = this.enemy.等级 || 80
 
         const levelDiff = Math.max(0, Math.min(20, Math.min(80, enemyLevel) - charLevel))
         const def = finalDef ?? this.enemy.def * (1 - (isSkill ? attrs.技能无视防御 + attrs.无视防御 : attrs.无视防御))
         const dmgReduce = def / (300 + def - levelDiff * 10) // 减伤率
-        const defenseMultiplier = 1 - dmgReduce
+        const defenseMultiplier = (1 - dmgReduce) * this.calculateLevelReduceRate(enemyLevel)
         return Math.max(0, Math.min(1, defenseMultiplier))
     }
 

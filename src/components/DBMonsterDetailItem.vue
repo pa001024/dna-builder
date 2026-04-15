@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import * as echarts from "echarts"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
+import { MaxMonsterLevelLimit } from "@/data/d/const.data"
 import { format100, formatBigNumber } from "@/util"
 import { abyssDungeonMap, Faction, Monster } from "../data"
 import dungeonData from "../data/d/dungeon.data"
@@ -13,7 +14,6 @@ const props = defineProps<{
     defaultLevel?: number
 }>()
 
-const MAX_MONSTER_LEVEL = 240
 const currentLevel = ref(props.defaultLevel || 180)
 const showRougeStats = ref(false)
 const levelTrendChartRef = ref<HTMLElement | null>(null)
@@ -111,19 +111,38 @@ const defenseDamageReductionRate = computed(() => {
 })
 
 /**
- * 计算怪物有效生命（生命受防御减伤增益后叠加护盾）。
+ * 计算高等级减伤乘区。
+ * 怪物等级大于等于 200 时生效。
+ */
+const levelReduceRate = computed(() => {
+    if (!leveledMonster.value) {
+        return 1
+    }
+
+    if (currentLevel.value < 200) {
+        return 1
+    }
+
+    return 1 / (1 + (currentLevel.value - 190) * 0.05)
+})
+
+/**
+ * 计算等级减伤率。
+ * 表格展示使用 1 - 乘区 的形式。
+ */
+const levelDamageReductionRate = computed(() => 1 - levelReduceRate.value)
+
+/**
+ * 计算怪物有效生命（防御先算 EHP，再额外乘等级减伤）。
  */
 const effectiveHealth = computed(() => {
     if (!leveledMonster.value) {
         return 0
     }
 
-    const defenseMultiplier = 1 - defenseDamageReductionRate.value
-    if (defenseMultiplier <= 0) {
-        return leveledMonster.value.hp + (leveledMonster.value.es || 0)
-    }
-
-    return leveledMonster.value.hp / defenseMultiplier + (leveledMonster.value.es || 0)
+    const defenseMultiplier = Math.max(1 - defenseDamageReductionRate.value, 0.000001)
+    const levelMultiplier = Math.max(levelReduceRate.value, 0.000001)
+    return (leveledMonster.value.hp / defenseMultiplier + (leveledMonster.value.es || 0)) / levelMultiplier
 })
 
 /**
@@ -136,6 +155,7 @@ const levelTrendData = computed(() => {
             hp: [] as number[],
             shield: [] as number[],
             effectiveHealth: [] as number[],
+            levelDamageReductionRate: [] as number[],
         }
     }
 
@@ -143,18 +163,23 @@ const levelTrendData = computed(() => {
     const hp: number[] = []
     const shield: number[] = []
     const effectiveHealthList: number[] = []
+    const levelDamageReductionRateList: number[] = []
 
-    for (let level = 1; level <= MAX_MONSTER_LEVEL; level++) {
+    for (let level = 1; level <= MaxMonsterLevelLimit; level++) {
         const leveled = new LeveledMonster(props.monster, level, showRougeStats.value)
         const currentHP = leveled.hp
         const currentShield = leveled.es || 0
         const currentDefenseDamageReductionRate = leveled.def / (300 + leveled.def)
-        const defenseMultiplier = Math.max(1 - currentDefenseDamageReductionRate, 0.000001)
+        const currentLevelReduceRate = level >= 200 ? 1 / (1 + (level - 190) * 0.05) : 1
+        const currentDefenseMultiplier = Math.max(1 - currentDefenseDamageReductionRate, 0.000001)
 
         levels.push(level)
         hp.push(currentHP)
         shield.push(currentShield)
-        effectiveHealthList.push(Math.round(currentHP / defenseMultiplier + currentShield))
+        effectiveHealthList.push(
+            Math.round((currentHP / currentDefenseMultiplier + currentShield) / Math.max(currentLevelReduceRate, 0.000001))
+        )
+        levelDamageReductionRateList.push(1 - currentLevelReduceRate)
     }
 
     return {
@@ -162,6 +187,7 @@ const levelTrendData = computed(() => {
         hp,
         shield,
         effectiveHealth: effectiveHealthList,
+        levelDamageReductionRate: levelDamageReductionRateList,
     }
 })
 
@@ -192,11 +218,11 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
         },
         legend: {
             top: 6,
-            data: ["生命", "护盾", "有效生命"],
+            data: ["生命", "护盾", "有效生命", "等级减伤率"],
         },
         grid: {
             left: 16,
-            right: 16,
+            right: 56,
             top: 46,
             bottom: 56,
             containLabel: true,
@@ -205,34 +231,49 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
             type: "value",
             name: "等级",
             min: 1,
-            max: MAX_MONSTER_LEVEL,
+            max: MaxMonsterLevelLimit,
             boundaryGap: [0, 0],
             axisLabel: {
                 formatter: value => `Lv.${Number(value)}`,
             },
         },
-        yAxis: {
-            type: "value",
-            name: "数值",
-            scale: true,
-            axisLabel: {
-                formatter: value => formatBigNumber(Number(value)),
+        yAxis: [
+            {
+                type: "value",
+                name: "数值",
+                scale: true,
+                axisLabel: {
+                    formatter: value => formatBigNumber(Number(value)),
+                },
             },
-        },
+            {
+                type: "value",
+                name: "等级减伤率",
+                position: "right",
+                min: 0,
+                max: 1,
+                axisLabel: {
+                    formatter: value => `${Math.round(Number(value) * 100)}%`,
+                },
+                splitLine: {
+                    show: false,
+                },
+            },
+        ],
         dataZoom: [
             {
                 type: "inside",
                 xAxisIndex: 0,
                 filterMode: "filter",
                 startValue: 1,
-                endValue: MAX_MONSTER_LEVEL,
+                endValue: MaxMonsterLevelLimit,
             },
             {
                 type: "slider",
                 xAxisIndex: 0,
                 filterMode: "filter",
                 startValue: 1,
-                endValue: MAX_MONSTER_LEVEL,
+                endValue: MaxMonsterLevelLimit,
                 height: 16,
                 bottom: 8,
                 labelFormatter: value => `Lv.${Math.round(Number(value))}`,
@@ -280,6 +321,21 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
                     color: "#a855f7",
                 },
                 data: levelTrendData.value.levels.map((level, index) => [level, levelTrendData.value.effectiveHealth[index]]),
+            },
+            {
+                name: "等级减伤率",
+                type: "line",
+                yAxisIndex: 1,
+                smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    width: 2,
+                    color: "#f59e0b",
+                },
+                itemStyle: {
+                    color: "#f59e0b",
+                },
+                data: levelTrendData.value.levels.map((level, index) => [level, levelTrendData.value.levelDamageReductionRate[index]]),
             },
         ],
     }
@@ -356,18 +412,7 @@ function getFactionName(faction: number | undefined): string {
         <div v-if="leveledMonster" class="flex justify-center items-center">
             <img :src="leveledMonster.url" class="w-24 object-cover rounded" />
         </div>
-
-        <div class="flex items-center gap-4">
-            <span class="text-sm min-w-20">Lv. <input v-model.number="currentLevel" type="text" class="w-12 text-center" /> </span>
-            <input
-                v-model.number="currentLevel"
-                type="range"
-                class="range range-primary range-xs grow"
-                :min="1"
-                :max="MAX_MONSTER_LEVEL"
-                step="1"
-            />
-        </div>
+        <LevelSlider v-model="currentLevel" :max="MaxMonsterLevelLimit" />
 
         <div v-if="leveledMonster" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
             <div class="bg-base-200 rounded p-2 text-center">
@@ -404,6 +449,12 @@ function getFactionName(faction: number | undefined): string {
                 <div class="text-xs text-base-content/70 mb-1">防御减伤率</div>
                 <div class="font-bold text-warning">
                     {{ format100(defenseDamageReductionRate, 2) }}
+                </div>
+            </div>
+            <div class="bg-base-200 rounded p-2 text-center" v-if="levelDamageReductionRate > 0">
+                <div class="text-xs text-base-content/70 mb-1">等级减伤率</div>
+                <div class="font-bold text-warning">
+                    {{ format100(levelDamageReductionRate, 2) }}
                 </div>
             </div>
             <div class="bg-base-200 rounded p-2 text-center">

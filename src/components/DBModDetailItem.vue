@@ -295,18 +295,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
 
         <!-- 等级调整 -->
         <div class="mb-3 p-3">
-            <div class="flex items-center gap-4">
-                <span class="text-sm min-w-12">Lv. <input v-model.number="currentLevel" type="text" class="w-12 text-center" /> </span>
-                <input
-                    :key="leveledMod.id"
-                    v-model.number="currentLevel"
-                    type="range"
-                    class="range range-primary range-xs grow"
-                    :min="0"
-                    :max="leveledMod.maxLevel"
-                    step="1"
-                />
-            </div>
+            <LevelSlider v-model="currentLevel" :step="1" :min="0" :max="leveledMod.maxLevel" />
         </div>
 
         <div v-if="leveledMod.效果" class="p-3 bg-base-200 rounded">

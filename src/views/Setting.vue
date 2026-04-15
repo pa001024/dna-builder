@@ -405,9 +405,7 @@ function resetAiSettings() {
                         />
                     </div>
                     <div v-if="!setting.safeMode" class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            启动时初始化脚本热键
-                        </span>
+                        <span class="label-text"> 启动时初始化脚本热键 </span>
                         <input v-model="setting.initScriptHotkeysAtStartup" type="checkbox" class="toggle toggle-secondary" />
                     </div>
                 </div>

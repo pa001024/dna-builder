@@ -710,7 +710,7 @@ useInitialScrollToSelectedItem()
                                         >
                                     </div>
                                 </div>
-                                <div class="text-xs text-right opacity-70 whitespace-nowrap">ID: {{ item.id }}</div>
+                                <CopyID :id="item.id" />
                             </div>
                             <div class="text-xs opacity-70 mt-2 line-clamp-2 whitespace-pre-wrap break-all">
                                 {{ item.desc }}

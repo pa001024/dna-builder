@@ -1190,6 +1190,7 @@ export const subRegionData: SubRegion[] = [
         name: "军团要塞",
         desc: "军团要塞描述",
         map: "Chapter01_Mee",
+        pos: [-24.999977, 64.99997],
     },
     {
         id: 101105,
@@ -1209,6 +1210,7 @@ export const subRegionData: SubRegion[] = [
         name: "“修普诺斯之家”",
         desc: "疗养院描述",
         map: "Chapter01_Sanatorium",
+        pos: [6161.333333, 143.333333],
     },
     {
         id: 101107,
@@ -1216,6 +1218,7 @@ export const subRegionData: SubRegion[] = [
         name: "“水仙平原”",
         desc: "酒馆描述",
         map: "Chapter01_Tavern",
+        pos: [277.272013, -7412.181967],
     },
     {
         id: 101108,
@@ -1223,6 +1226,7 @@ export const subRegionData: SubRegion[] = [
         name: "费西尔秘密基地",
         desc: "UI_SUBREGION_DES_101108",
         map: "Chapter01_Secr",
+        pos: [38011.5, 12072.261],
     },
     {
         id: 101110,
@@ -1230,6 +1234,7 @@ export const subRegionData: SubRegion[] = [
         name: "军团医院",
         desc: "病房描述",
         map: "Chapter01_Sick",
+        pos: [0, 70],
     },
     {
         id: 101111,
@@ -1332,6 +1337,7 @@ export const subRegionData: SubRegion[] = [
         name: "矿洞三",
         desc: "矿洞三描述",
         map: "Chapter01_Kuangkeng_Part_03",
+        pos: [10369.978, 30499.994],
         rc: [
             {
                 id: 9020601,
@@ -1487,6 +1493,7 @@ export const subRegionData: SubRegion[] = [
         name: "矿洞二",
         desc: "UI_SUBREGION_DES_101305",
         map: "Chapter01_Kuangkeng_Part_02",
+        pos: [3405.64, 21681.512],
         rc: [
             {
                 id: 9020501,
@@ -4103,6 +4110,7 @@ export const subRegionData: SubRegion[] = [
         name: "UI_SUBREGION_NAME_200101",
         desc: "UI_SUBREGION_DES_200101",
         map: "Invite_Yeer",
+        pos: [0, 70],
     },
     {
         id: 210101,
@@ -4110,6 +4118,7 @@ export const subRegionData: SubRegion[] = [
         name: "休憩之所",
         desc: "休憩之所描述",
         map: "HomeBase",
+        pos: [-52.430472, 3756.029917],
     },
     {
         id: 999701,

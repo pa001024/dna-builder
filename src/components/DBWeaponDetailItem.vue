@@ -275,10 +275,7 @@ watch(
         </div>
 
         <div class="p-3">
-            <div class="flex items-center gap-4">
-                <span class="text-sm min-w-20">Lv. <input v-model.number="currentLevel" type="text" class="w-12 text-center" /> </span>
-                <input v-model.number="currentLevel" type="range" class="range range-primary range-xs grow" :min="1" :max="80" step="1" />
-            </div>
+            <LevelSlider v-model="currentLevel" />
             <div class="flex items-center gap-4">
                 <span class="text-sm min-w-20 flex-none grid grid-cols-2">
                     <span> 熔炼: </span>

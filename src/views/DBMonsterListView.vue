@@ -255,7 +255,10 @@ useInitialScrollToSelectedItem()
 
                 <!-- 列表 -->
                 <ScrollArea class="flex-1">
-                    <div class="p-2 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
+                    <div
+                        class="p-2 grid gap-2"
+                        :class="{ 'grid-cols-[repeat(auto-fill,minmax(120px,1fr))]': normalizedSelectedType !== 'monsterTag' }"
+                    >
                         <template v-if="normalizedSelectedType !== 'monsterTag'">
                             <div
                                 v-for="monster in filteredMonsters"

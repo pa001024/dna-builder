@@ -40826,7 +40826,7 @@ export const questData_tc: QuestStory[] = [
                             },
                             {
                                 id: 12044424,
-                                content: "……竟然……",
+                                content: "......",
                                 voice: "story/1204/120418/1E2537FA",
                                 npc: 240035,
                                 next: 12044405,
