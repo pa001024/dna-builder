@@ -9,6 +9,7 @@ import questChainData, { type QuestChain } from "@/data/d/questchain.data"
 import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import { useSettingStore } from "@/store/setting"
 import { matchPinyin } from "@/utils/pinyin-utils"
+import { getQuestTypeDisplay } from "@/utils/quest-utils"
 
 interface QuestChainSnippetSegment {
     text: string
@@ -42,9 +43,26 @@ const showImprCheckOnly = useSearchParam<boolean>("ico", false)
 const showImprIncreaseOnly = useSearchParam<boolean>("iio", false)
 const showFullTextSearch = useSearchParam<boolean>("fts", false)
 const selectedVersion = useSearchParam<string>("ver", "")
+const selectedType = useSearchParam<number>("tp", 0)
 const settingStore = useSettingStore()
 const localizedQuestData = ref<QuestStory[]>([])
 const showVersionFilter = useLocalStorage("questchain.showVersionFilter", false)
+const showTypeFilter = useLocalStorage("questchain.showTypeFilter", false)
+
+interface QuestTypeFilterOption {
+    value: number
+    rawTypes: number[]
+    display: ReturnType<typeof getQuestTypeDisplay>
+}
+
+const QUEST_TYPE_GROUP_MAP: Record<number, number> = {
+    1: 1,
+    2: 1,
+    3: 3,
+    4: 3,
+    5: 5,
+    6: 6,
+}
 
 /**
  * 异步加载当前语言任务剧情数据，并忽略过期结果。
@@ -114,7 +132,7 @@ function collectQuestChainSnippets(questChain: QuestChain, itemMap: Map<number, 
             snippets.push(questItem.desc)
         }
 
-        for (const node of questItem.nodes) {
+        for (const node of questItem.nodes ?? []) {
             if (node.name) {
                 snippets.push(node.name)
             }
@@ -193,7 +211,7 @@ function buildQuestImprCheckIdSet(questStories: QuestStory[]): Set<number> {
 
     for (const questStory of questStories) {
         for (const questItem of questStory.quests) {
-            const hasImprCheck = questItem.nodes.some(node => {
+            const hasImprCheck = (questItem.nodes ?? []).some(node => {
                 return node.dialogues?.some(dialogue => dialogue.options?.some(option => !!option.imprCheck))
             })
 
@@ -216,7 +234,7 @@ function buildQuestImprIncreaseIdSet(questStories: QuestStory[]): Set<number> {
 
     for (const questStory of questStories) {
         for (const questItem of questStory.quests) {
-            const hasImprIncrease = questItem.nodes.some(node => {
+            const hasImprIncrease = (questItem.nodes ?? []).some(node => {
                 return node.dialogues?.some(dialogue => {
                     return dialogue.options?.some(option => {
                         return !!option.impr && option.impr[2] > 0
@@ -250,6 +268,48 @@ function buildQuestChainIdSetByQuestIds(questIdSet: Set<number>): Set<number> {
 
     return questChainIdSet
 }
+
+/**
+ * 汇总任务链类型列表。
+ * @returns 类型列表
+ */
+const questTypeOptions = computed<QuestTypeFilterOption[]>(() => {
+    const groupedTypes = new Map<number, number[]>()
+
+    for (const questChain of questChainData) {
+        if (!questChain.type) {
+            continue
+        }
+
+        const groupType = QUEST_TYPE_GROUP_MAP[questChain.type] || questChain.type
+        const current = groupedTypes.get(groupType) || []
+        if (!current.includes(questChain.type)) {
+            current.push(questChain.type)
+        }
+        groupedTypes.set(groupType, current)
+    }
+
+    return Array.from(groupedTypes.entries())
+        .sort(([left], [right]) => left - right)
+        .map(([value, rawTypes]) => ({
+            value,
+            rawTypes,
+            display: getQuestTypeDisplay(value),
+        }))
+})
+
+/**
+ * 解析当前选中的任务类型组。
+ * @returns 当前类型组
+ */
+const selectedTypeGroup = computed<number>({
+    get() {
+        return QUEST_TYPE_GROUP_MAP[selectedType.value] || selectedType.value
+    },
+    set(value) {
+        selectedType.value = value
+    },
+})
 
 /**
  * 当前语言对应的任务详情映射。
@@ -331,6 +391,13 @@ function hasQuestChainImprIncrease(questChainId: number): boolean {
  * @returns 是否满足条件
  */
 function passesQuestChainSwitchFilters(questChain: QuestChain): boolean {
+    if (selectedTypeGroup.value !== 0) {
+        const currentOption = questTypeOptions.value.find(option => option.value === selectedTypeGroup.value)
+        if (!currentOption || !currentOption.rawTypes.includes(questChain.type)) {
+            return false
+        }
+    }
+
     if (showImprCheckOnly.value && !hasQuestChainImprCheck(questChain.id)) {
         return false
     }
@@ -344,6 +411,19 @@ function passesQuestChainSwitchFilters(questChain: QuestChain): boolean {
     }
 
     return true
+}
+
+/**
+ * 处理筛选项显示开关变化。
+ * @param filterName 筛选项名称
+ * @param show 是否显示
+ */
+function toggleFilter(filterName: "type", show: boolean) {
+    if (!show) {
+        if (filterName === "type") {
+            selectedType.value = 0
+        }
+    }
 }
 
 /**
@@ -575,6 +655,15 @@ function selectQuestChain(questChain: QuestChain | null) {
     selectedQuestChainId.value = questChain?.id || 0
 }
 
+/**
+ * 获取任务链类型显示信息。
+ * @param questChain 任务链
+ * @returns 类型显示信息
+ */
+function getQuestChainTypeDisplay(questChain: QuestChain) {
+    return getQuestTypeDisplay(questChain.type)
+}
+
 useInitialScrollToSelectedItem()
 </script>
 
@@ -591,6 +680,16 @@ useInitialScrollToSelectedItem()
                     />
 
                     <div class="mt-2 flex items-center gap-4 text-xs text-base-content/80 flex-wrap">
+                        <label class="flex items-center gap-2 select-none cursor-pointer">
+                            <input
+                                v-model="showTypeFilter"
+                                type="checkbox"
+                                class="checkbox checkbox-xs"
+                                @change="toggleFilter('type', showTypeFilter)"
+                            />
+                            <span>类型</span>
+                        </label>
+
                         <label class="flex items-center gap-2 select-none cursor-pointer">
                             <input v-model="showImprCheckOnly" type="checkbox" class="checkbox checkbox-xs" />
                             <span>印象检定</span>
@@ -610,6 +709,29 @@ useInitialScrollToSelectedItem()
                             <input v-model="showVersionFilter" type="checkbox" class="checkbox checkbox-xs" />
                             <span>{{ $t("char-build.version") }}</span>
                         </label>
+                    </div>
+
+                    <div v-show="showTypeFilter" class="mt-2 flex flex-wrap gap-1 pb-1">
+                        <button
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                            :class="selectedTypeGroup === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            @click="selectedTypeGroup = 0"
+                        >
+                            全部
+                        </button>
+                        <button
+                            v-for="type in questTypeOptions"
+                            :key="type.value"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            :class="
+                                selectedTypeGroup === type.value
+                                    ? 'bg-primary text-white'
+                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                            "
+                            @click="selectedTypeGroup = type.value"
+                        >
+                            {{ type.display.name }}
+                        </button>
                     </div>
 
                     <div v-show="showVersionFilter" class="mt-2 flex flex-wrap gap-1">
@@ -646,8 +768,17 @@ useInitialScrollToSelectedItem()
                             }"
                             @click="selectQuestChain(questChainResult.questChain)"
                         >
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
+                            <div class="flex items-start gap-3">
+                                <div class="shrink-0">
+                                    <img
+                                        :src="`/imgs/tp/${getQuestChainTypeDisplay(questChainResult.questChain).icon}.webp`"
+                                        :alt="getQuestChainTypeDisplay(questChainResult.questChain).name"
+                                        class="size-12 object-contain"
+                                        loading="lazy"
+                                    />
+                                </div>
+
+                                <div class="min-w-0 flex-1">
                                     <div class="font-medium">{{ $t(questChainResult.questChain.name) }}</div>
 
                                     <div class="text-xs opacity-70 mt-1 flex flex-wrap items-center gap-2">
@@ -655,11 +786,11 @@ useInitialScrollToSelectedItem()
                                             >{{ $t(questChainResult.questChain.chapterName) }}
                                             {{ $t(questChainResult.questChain.chapterNumber || "") }}</span
                                         >
-                                        <span
-                                            v-if="questChainResult.questChain.main"
-                                            class="px-1.5 py-0.5 rounded bg-info text-info-content"
-                                            >主线</span
-                                        >
+                                        <span>{{ $t(questChainResult.questChain.episode) }}</span>
+                                        <span v-if="questChainResult.questChain.type" class="inline-flex items-center gap-1">
+                                            <span>{{ getQuestChainTypeDisplay(questChainResult.questChain).name }}</span>
+                                        </span>
+                                        <span v-if="questChainResult.questChain.版本">v{{ questChainResult.questChain.版本 }}</span>
                                         <span
                                             v-if="hasQuestChainImprCheck(questChainResult.questChain.id)"
                                             class="px-1.5 py-0.5 rounded bg-secondary text-secondary-content"
@@ -675,15 +806,9 @@ useInitialScrollToSelectedItem()
                                     </div>
                                 </div>
 
-                                <div class="flex flex-col items-end gap-1">
+                                <div class="flex flex-col items-end gap-1 shrink-0">
                                     <span class="text-xs opacity-70">ID: {{ questChainResult.questChain.id }}</span>
                                 </div>
-                            </div>
-
-                            <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>{{ $t(questChainResult.questChain.episode) }}</span>
-                                <span v-if="questChainResult.questChain.type">类型: {{ questChainResult.questChain.type }}</span>
-                                <span v-if="questChainResult.questChain.版本">v{{ questChainResult.questChain.版本 }}</span>
                             </div>
 
                             <div

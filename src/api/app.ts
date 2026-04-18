@@ -289,6 +289,17 @@ export async function runScript(scriptPath: string) {
 }
 
 /**
+ * 执行临时脚本源码。
+ * @param script 脚本源码
+ * @param scope 可选作用域
+ * @param timeoutMs 可选超时时间
+ * @returns 脚本返回值字符串（无返回值时为空字符串）
+ */
+export async function execScript(script: string, scope?: string, timeoutMs?: number) {
+    return await invoke<string>("exec_script", { script, scope, timeoutMs })
+}
+
+/**
  * 响应脚本配置读取请求
  * @param requestId 请求 ID
  * @param value 配置值（string/number/boolean/string[]）

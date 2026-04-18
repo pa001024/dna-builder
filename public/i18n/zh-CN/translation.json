@@ -455,6 +455,8 @@
         "fish_desc": "钓鱼点详细收益计算",
         "hardboss": "梦魇残声",
         "hardboss_desc": "查看梦魇残声信息和奖励",
+        "impr": "印象",
+        "impr_desc": "查看任务、NPC、派遣委托的印象增加信息",
         "map": "地图",
         "map_desc": "查看地图标点",
         "mod": "魔之楔",

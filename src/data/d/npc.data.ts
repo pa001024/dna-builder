@@ -7,6 +7,8 @@ export interface NPC {
     type?: string
     charId?: number
     icon?: string
+    srId?: number
+    pos?: [number, number]
     talks?: Dialogue[]
 }
 
@@ -254,6 +256,8 @@ export const npcData: NPC[] = [
         charId: 1103,
         type: "Show",
         icon: "Tuosi",
+        srId: 102102,
+        pos: [-10847, -21542],
         talks: [
             {
                 id: 90200001,
@@ -571,6 +575,8 @@ export const npcData: NPC[] = [
         charId: 1501,
         type: "Show",
         icon: "Baonu",
+        srId: 210101,
+        pos: [-395, 4710],
         talks: [
             {
                 id: 90250001,
@@ -772,6 +778,8 @@ export const npcData: NPC[] = [
         charId: 1502,
         type: "Show",
         icon: "Nifu",
+        srId: 210101,
+        pos: [-12, 5126],
         talks: [
             {
                 id: 90220001,
@@ -1079,6 +1087,8 @@ export const npcData: NPC[] = [
         charId: 1503,
         type: "Show",
         icon: "Kezhou",
+        srId: 210101,
+        pos: [-224, 4952],
         talks: [
             {
                 id: 90240001,
@@ -1819,6 +1829,8 @@ export const npcData: NPC[] = [
         charId: 2101,
         type: "Show",
         icon: "Shuimu",
+        srId: 210101,
+        pos: [328, 3196],
         talks: [
             {
                 id: 90040001,
@@ -2037,6 +2049,8 @@ export const npcData: NPC[] = [
         charId: 2301,
         type: "Show",
         icon: "Zhangyu",
+        srId: 210101,
+        pos: [466, 2475],
         talks: [
             {
                 id: 90050001,
@@ -2433,6 +2447,8 @@ export const npcData: NPC[] = [
         charId: 3101,
         type: "Show",
         icon: "Linen",
+        srId: 210101,
+        pos: [9, 5079],
         talks: [
             {
                 id: 90130001,
@@ -2613,6 +2629,8 @@ export const npcData: NPC[] = [
         charId: 3103,
         type: "Show",
         icon: "Yeer",
+        srId: 210101,
+        pos: [350, 2833],
         talks: [
             {
                 id: 90180001,
@@ -4211,6 +4229,8 @@ export const npcData: NPC[] = [
         charId: 4202,
         type: "Show",
         icon: "Landi",
+        srId: 210101,
+        pos: [67, 5081],
         talks: [
             {
                 id: 90080001,
@@ -4564,6 +4584,8 @@ export const npcData: NPC[] = [
         charId: 5101,
         type: "Show",
         icon: "Songlu",
+        srId: 210101,
+        pos: [340, 3052],
         talks: [
             {
                 id: 90120001,
@@ -6687,6 +6709,8 @@ export const npcData: NPC[] = [
         id: 100366,
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [45, -3573],
     },
     {
         id: 100367,
@@ -6702,6 +6726,8 @@ export const npcData: NPC[] = [
         id: 100369,
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-670, -4300],
     },
     {
         id: 100370,
@@ -6899,6 +6925,8 @@ export const npcData: NPC[] = [
         name: "卡嘉",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [938, 7185],
         talks: [
             {
                 id: 11012501,
@@ -7398,6 +7426,8 @@ export const npcData: NPC[] = [
         name: "阿瓦尔",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [630, 7268],
         talks: [
             {
                 id: 11017901,
@@ -7599,6 +7629,8 @@ export const npcData: NPC[] = [
         name: "卡嘉",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [938, 7185],
         talks: [
             {
                 id: 11011841,
@@ -7703,6 +7735,8 @@ export const npcData: NPC[] = [
         name: "莱昂",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [1159, 7140],
         talks: [
             {
                 id: 11011841,
@@ -7759,6 +7793,8 @@ export const npcData: NPC[] = [
         name: "尤里安",
         camp: "NPC",
         type: "Normal",
+        srId: 102101,
+        pos: [30364, -37358],
         talks: [
             {
                 id: 11010401,
@@ -7862,6 +7898,8 @@ export const npcData: NPC[] = [
         name: "阿妮塔",
         camp: "NPC",
         type: "Normal",
+        srId: 102101,
+        pos: [29176, -38586],
         talks: [
             {
                 id: 11010501,
@@ -7938,6 +7976,8 @@ export const npcData: NPC[] = [
         name: "卡嘉",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [938, 7185],
         talks: [
             {
                 id: 11012501,
@@ -8625,6 +8665,8 @@ export const npcData: NPC[] = [
         name: "卡米拉",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-16120, -5434],
         talks: [
             {
                 id: 51002901,
@@ -8701,6 +8743,7 @@ export const npcData: NPC[] = [
                         id: 510029101,
                         content: "省略巴克先生层层叠叠的修辞手法，再将关键词重新组合，或许能听懂他在说些什么。",
                         next: 51002912,
+                        imprCheck: [1011, "Wisdom", 55],
                     },
                 ],
             },
@@ -8980,16 +9023,19 @@ export const npcData: NPC[] = [
                         id: 510019911,
                         content: "威尔斯先生没你说的不堪，别太过分了。",
                         next: 51001918,
+                        imprCheck: [1011, "Empathy", 70],
                     },
                     {
                         id: 510019912,
                         content: "桂冠卡戎对我们没有任何吸引力，别拿你浅薄的认知定义所有人。",
                         next: 51001918,
+                        imprCheck: [1011, "Benefit", 80],
                     },
                     {
                         id: 510019913,
                         content: "嘴巴放干净点。不然今天像狗一样被打一顿的，就是另一个“威尔斯先生”了。",
                         next: 51001918,
+                        imprCheck: [1011, "Chaos", 75],
                     },
                 ],
             },
@@ -9559,16 +9605,19 @@ export const npcData: NPC[] = [
                         id: 510019911,
                         content: "威尔斯先生没你说的不堪，别太过分了。",
                         next: 51001918,
+                        imprCheck: [1011, "Empathy", 70],
                     },
                     {
                         id: 510019912,
                         content: "桂冠卡戎对我们没有任何吸引力，别拿你浅薄的认知定义所有人。",
                         next: 51001918,
+                        imprCheck: [1011, "Benefit", 80],
                     },
                     {
                         id: 510019913,
                         content: "嘴巴放干净点。不然今天像狗一样被打一顿的，就是另一个“威尔斯先生”了。",
                         next: 51001918,
+                        imprCheck: [1011, "Chaos", 75],
                     },
                 ],
             },
@@ -9744,6 +9793,8 @@ export const npcData: NPC[] = [
         name: "松露",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [340, 3052],
         talks: [
             {
                 id: 20005501,
@@ -9818,6 +9869,8 @@ export const npcData: NPC[] = [
         name: "挖掘",
         camp: "NPC",
         type: "Normal",
+        srId: 101103,
+        pos: [-41433, 26183],
         talks: [
             {
                 id: 51007930,
@@ -10120,6 +10173,8 @@ export const npcData: NPC[] = [
         name: "悬衡派香官",
         camp: "NPC",
         type: "Normal",
+        srId: 104110,
+        pos: [34248, -1012],
         talks: [
             {
                 id: 12010616,
@@ -10792,6 +10847,8 @@ export const npcData: NPC[] = [
         name: "虬先生",
         camp: "NPC",
         type: "Normal",
+        srId: 104901,
+        pos: [-27790, 6762],
         talks: [
             {
                 id: 12025801,
@@ -10949,6 +11006,8 @@ export const npcData: NPC[] = [
         name: "无由生",
         camp: "NPC",
         type: "Normal",
+        srId: 105001,
+        pos: [-7174, 7158],
         talks: [
             {
                 id: 12026401,
@@ -10962,6 +11021,8 @@ export const npcData: NPC[] = [
         name: "无由生",
         camp: "NPC",
         type: "Normal",
+        srId: 105001,
+        pos: [-7174, 7158],
         talks: [
             {
                 id: 12026501,
@@ -11001,6 +11062,8 @@ export const npcData: NPC[] = [
         name: "不会说话的无由生",
         camp: "NPC",
         type: "Normal",
+        srId: 105001,
+        pos: [28300, -19750],
         talks: [
             {
                 id: 12026701,
@@ -11045,6 +11108,8 @@ export const npcData: NPC[] = [
         name: "菱生",
         camp: "NPC",
         type: "Normal",
+        srId: 104106,
+        pos: [17135, -33158],
         talks: [
             {
                 id: 12027101,
@@ -11332,6 +11397,8 @@ export const npcData: NPC[] = [
         name: "白鸟先生",
         camp: "NPC",
         type: "Normal",
+        srId: 101105,
+        pos: [-333, 21269],
         talks: [
             {
                 id: 12035310,
@@ -12310,6 +12377,8 @@ export const npcData: NPC[] = [
         name: "刻舟",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [-224, 4952],
         talks: [
             {
                 id: 12062340,
@@ -12407,6 +12476,8 @@ export const npcData: NPC[] = [
         name: "塔比瑟",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [466, 2475],
         talks: [
             {
                 id: 12061135,
@@ -12625,6 +12696,8 @@ export const npcData: NPC[] = [
         name: "科农",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-12111, 7813],
         talks: [
             {
                 id: 51001201,
@@ -12739,6 +12812,8 @@ export const npcData: NPC[] = [
         name: "爱丽丝",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-670, -4300],
         talks: [
             {
                 id: 51000812,
@@ -12752,6 +12827,8 @@ export const npcData: NPC[] = [
         name: "爱尔莎",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [273, -4561],
         talks: [
             {
                 id: 51000409,
@@ -12776,6 +12853,8 @@ export const npcData: NPC[] = [
         name: "哈兰",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-5233, -6545],
         talks: [
             {
                 id: 51011001,
@@ -12839,7 +12918,7 @@ export const npcData: NPC[] = [
                         id: 51011011,
                         content: "我就想要这件，要不你先穿上让我参考一下。",
                         next: 51011013,
-                        imprCheck: [1011, "Wisdom", 20],
+                        imprCheck: [1011, "Chaos", 20],
                     },
                 ],
             },
@@ -12986,6 +13065,8 @@ export const npcData: NPC[] = [
         name: "瓦伦",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-4903, -6403],
         talks: [
             {
                 id: 51010901,
@@ -13057,7 +13138,7 @@ export const npcData: NPC[] = [
                         id: 51010911,
                         content: "有心仪的人选吗？",
                         next: 51010914,
-                        imprCheck: [1011, "Morality", 20],
+                        imprCheck: [1011, "Empathy", 20],
                     },
                 ],
             },
@@ -13175,6 +13256,8 @@ export const npcData: NPC[] = [
         name: "露娜",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-2491, -4946],
         talks: [
             {
                 id: 51002031,
@@ -13222,12 +13305,16 @@ export const npcData: NPC[] = [
         name: "费伊",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-5334, 10058],
     },
     {
         id: 700013,
         name: "莱娜",
         camp: "NPC",
         type: "Normal",
+        srId: 101106,
+        pos: [19710, 1010],
         talks: [
             {
                 id: 51005001,
@@ -13302,7 +13389,7 @@ export const npcData: NPC[] = [
                         id: 510050121,
                         content: "现在所有人都当这里是鬼宅，但您似乎并不意外，也并不抵触。",
                         next: 51005015,
-                        imprCheck: [1011, "Wisdom", 10],
+                        imprCheck: [1011, "Empathy", 105],
                     },
                 ],
             },
@@ -13425,7 +13512,7 @@ export const npcData: NPC[] = [
                         id: 510050261,
                         content: "（你看见莱娜女士捧在手里的钥匙，一种熟悉感涌上心头。）",
                         next: 51005028,
-                        imprCheck: [1011, "Empathy", 10],
+                        imprCheck: [1011, "Wisdom", 110],
                     },
                 ],
             },
@@ -13522,16 +13609,19 @@ export const npcData: NPC[] = [
                         id: 510013041,
                         content: "不，卡米拉是一位值得信赖的朋友，她帮过我忙。",
                         next: 51001306,
+                        imprCheck: [1011, "Benefit", 50],
                     },
                     {
                         id: 510013042,
                         content: "你不用多费唇舌，卡米拉为人怎么样，我相信自己的判断。",
                         next: 51001306,
+                        imprCheck: [1011, "Morality", 50],
                     },
                     {
                         id: 510013043,
                         content: "所以你是向卡米拉推销酒水不成，着急了。",
                         next: 51001306,
+                        imprCheck: [1011, "Wisdom", 50],
                     },
                 ],
             },
@@ -13733,6 +13823,8 @@ export const npcData: NPC[] = [
         name: "巴克",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [1260, -10877],
         talks: [
             {
                 id: 51003001,
@@ -13965,7 +14057,7 @@ export const npcData: NPC[] = [
                         id: 510035061,
                         content: "你觉得我像是会泄密的人吗？",
                         next: 51003508,
-                        imprCheck: [1011, "Any", 10],
+                        imprCheck: [1011, "Morality", 60],
                     },
                 ],
             },
@@ -14096,6 +14188,7 @@ export const npcData: NPC[] = [
                         id: 510014061,
                         content: "才不是呢，你教会了孩子可贵的纯真与浪漫。",
                         next: 51001409,
+                        imprCheck: [1011, "Empathy", 60],
                     },
                 ],
             },
@@ -14176,6 +14269,8 @@ export const npcData: NPC[] = [
         name: "阿尔加尔",
         camp: "NPC",
         type: "Normal",
+        srId: 101103,
+        pos: [-14249, -2289],
     },
     {
         id: 700019,
@@ -14267,16 +14362,19 @@ export const npcData: NPC[] = [
                         id: 510003054,
                         content: "（询问她是不是遇到了什么烦心事。付一些报酬的话，可以考虑帮忙解决。）",
                         next: 51000307,
+                        imprCheck: [1011, "Benefit", 65],
                     },
                     {
                         id: 510003055,
                         content: "（询问她是否在找什么人，也许日后出城的时候可以帮她留意一下。）",
                         next: 51000307,
+                        imprCheck: [1011, "Wisdom", 65],
                     },
                     {
                         id: 510003056,
                         content: "（询问她是不是有什么困难，或许能提供一些帮助。）",
                         next: 51000307,
+                        imprCheck: [1011, "Empathy", 65],
                     },
                 ],
             },
@@ -14395,6 +14493,8 @@ export const npcData: NPC[] = [
         name: "有同情心的青年",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [45, -3573],
     },
     {
         id: 700024,
@@ -14442,6 +14542,8 @@ export const npcData: NPC[] = [
         name: "失忆的少女",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-670, -4300],
         talks: [
             {
                 id: 51000707,
@@ -14558,6 +14660,8 @@ export const npcData: NPC[] = [
         id: 700035,
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [45, -3573],
     },
     {
         id: 700036,
@@ -14625,6 +14729,8 @@ export const npcData: NPC[] = [
         name: "布鲁内托",
         camp: "NPC",
         type: "Normal",
+        srId: 100101,
+        pos: [9706, 9735],
         talks: [
             {
                 id: 51002201,
@@ -14783,12 +14889,16 @@ export const npcData: NPC[] = [
         name: "里奥拉",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-11140, -6090],
     },
     {
         id: 700068,
         name: "海诺",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [458, -919],
         talks: [
             {
                 id: 51001601,
@@ -14898,6 +15008,7 @@ export const npcData: NPC[] = [
                         id: 510016121,
                         content: "我可以看看您的“桂冠卡戎”奖章吗？",
                         next: 51001613,
+                        imprCheck: [1011, "Wisdom", 60],
                     },
                 ],
             },
@@ -15013,6 +15124,8 @@ export const npcData: NPC[] = [
         name: "达顿",
         camp: "NPC",
         type: "Normal",
+        srId: 101701,
+        pos: [-15960, -6490],
         talks: [
             {
                 id: 51007930,
@@ -15026,6 +15139,8 @@ export const npcData: NPC[] = [
         name: "奥尔多",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [270, -400],
     },
     {
         id: 700071,
@@ -15050,6 +15165,8 @@ export const npcData: NPC[] = [
         name: "南希",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-1923, -8825],
     },
     {
         id: 700075,
@@ -15229,7 +15346,7 @@ export const npcData: NPC[] = [
                         id: 51007315,
                         content: "也许你缺一个合适的向导。",
                         next: 510073152,
-                        imprCheck: [1011, "Benefit", 50],
+                        imprCheck: [1011, "Morality", 55],
                     },
                 ],
             },
@@ -15408,7 +15525,7 @@ export const npcData: NPC[] = [
                         id: 510033141,
                         content: "你并不怨恨他，也没有偷窃他家的财物，让我来猜猜看你为什么要半夜闯空门吧。",
                         next: 51003316,
-                        imprCheck: [1011, "Benefit", 10],
+                        imprCheck: [1011, "Wisdom", 65],
                     },
                 ],
             },
@@ -15455,6 +15572,8 @@ export const npcData: NPC[] = [
         name: "贝琳达",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-5470, -13149],
         talks: [
             {
                 id: 51003604,
@@ -15561,7 +15680,7 @@ export const npcData: NPC[] = [
                         id: 510036161,
                         content: "贝琳达似乎意有所指……",
                         next: 51003618,
-                        imprCheck: [1011, "Morality", 10],
+                        imprCheck: [1011, "Wisdom", 65],
                     },
                 ],
             },
@@ -15702,6 +15821,8 @@ export const npcData: NPC[] = [
         name: "巴克",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [1260, -10877],
         talks: [
             {
                 id: 510034141,
@@ -15867,11 +15988,13 @@ export const npcData: NPC[] = [
                         id: 510042171,
                         content: "（如果它流到不法之人手里……）",
                         next: 51004219,
+                        imprCheck: [1011, "Morality", 70],
                     },
                     {
                         id: 510042172,
                         content: "（它看起来很好用，得搞到手……）",
                         next: 51004219,
+                        imprCheck: [1011, "Benefit", 70],
                     },
                 ],
             },
@@ -15927,6 +16050,8 @@ export const npcData: NPC[] = [
         name: "莱娜",
         camp: "NPC",
         type: "Normal",
+        srId: 101106,
+        pos: [19710, 1010],
         talks: [
             {
                 id: 510034141,
@@ -15974,6 +16099,8 @@ export const npcData: NPC[] = [
         name: "费伊",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-5334, 10058],
         talks: [
             {
                 id: 51003901,
@@ -15983,6 +16110,7 @@ export const npcData: NPC[] = [
                         id: 510039011,
                         content: "（尝试向她搭话。）",
                         next: 51003903,
+                        imprCheck: [1011, "Empathy", 100],
                     },
                 ],
             },
@@ -16128,6 +16256,8 @@ export const npcData: NPC[] = [
         name: "费伊",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-5334, 10058],
         talks: [
             {
                 id: 51004107,
@@ -16193,6 +16323,7 @@ export const npcData: NPC[] = [
                         id: 510041141,
                         content: "（尝试说服费伊。）",
                         next: 51004116,
+                        imprCheck: [1011, "Wisdom", 100],
                     },
                 ],
             },
@@ -16553,7 +16684,7 @@ export const npcData: NPC[] = [
                         id: 510026031,
                         content: "凯文，冰湖城有人在违规售卖月石。",
                         next: 51002605,
-                        imprCheck: [1011, "Chaos", 10],
+                        imprCheck: [1011, "Chaos", 110],
                     },
                 ],
             },
@@ -16625,7 +16756,7 @@ export const npcData: NPC[] = [
                         id: 51010509,
                         content: "（按理说只要有人说出这种话，就会有意外发生。）",
                         next: 51010511,
-                        imprCheck: [1011, "Benefit", 20],
+                        imprCheck: [1011, "Chaos", 20],
                     },
                 ],
             },
@@ -16804,6 +16935,8 @@ export const npcData: NPC[] = [
         name: "维克多",
         camp: "NPC",
         type: "Normal",
+        srId: 101106,
+        pos: [22280, 1109],
     },
     {
         id: 700130,
@@ -16897,6 +17030,8 @@ export const npcData: NPC[] = [
         name: "酒馆侍者",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [1990, -10540],
         talks: [
             {
                 id: 51006734,
@@ -16946,6 +17081,8 @@ export const npcData: NPC[] = [
         name: "异国的商人",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-15782, -8746],
         talks: [
             {
                 id: 51007001,
@@ -16991,7 +17128,7 @@ export const npcData: NPC[] = [
                         id: 510070051,
                         content: "让一下，我有办法让她好好说话。",
                         next: 51007007,
-                        imprCheck: [1011, "Any", 50],
+                        imprCheck: [1011, "Wisdom", 130],
                     },
                 ],
             },
@@ -17007,6 +17144,8 @@ export const npcData: NPC[] = [
         name: "妮弗尔夫人",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [-12, 5126],
         talks: [
             {
                 id: 51006841,
@@ -17190,6 +17329,8 @@ export const npcData: NPC[] = [
         name: "达顿",
         camp: "NPC",
         type: "Normal",
+        srId: 101701,
+        pos: [-15960, -6490],
         talks: [
             {
                 id: 51007415,
@@ -17506,6 +17647,8 @@ export const npcData: NPC[] = [
         id: 700235,
         name: "埃莉诺",
         camp: "NPC",
+        srId: 101103,
+        pos: [-34304, 9334],
         talks: [
             {
                 id: 51000433,
@@ -17583,6 +17726,8 @@ export const npcData: NPC[] = [
         name: "安妮",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-670, -4300],
         talks: [
             {
                 id: 51000812,
@@ -17639,6 +17784,8 @@ export const npcData: NPC[] = [
         name: "赫斯特",
         camp: "NPC",
         type: "Normal",
+        srId: 101111,
+        pos: [46, -380],
         talks: [
             {
                 id: 51009301,
@@ -17863,6 +18010,7 @@ export const npcData: NPC[] = [
                         id: 51009339,
                         content: "（提醒她卡戎人的习俗。）",
                         next: 51009341,
+                        imprCheck: [1011, "Wisdom", 70],
                     },
                 ],
             },
@@ -18503,6 +18651,7 @@ export const npcData: NPC[] = [
                         id: 51011109,
                         content: "（询问空空皎皎致富秘诀。）",
                         next: 51011111,
+                        imprCheck: [1011, "Benefit", 20],
                     },
                 ],
             },
@@ -18547,6 +18696,8 @@ export const npcData: NPC[] = [
         name: "悲观皎皎",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [580, -11430],
         talks: [
             {
                 id: 51010701,
@@ -19079,6 +19230,8 @@ export const npcData: NPC[] = [
         name: "认真的吟游诗人",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [10, 155],
         talks: [
             {
                 id: 51010426,
@@ -19695,6 +19848,8 @@ export const npcData: NPC[] = [
         name: "认真的吟游诗人",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [10, 155],
         talks: [
             {
                 id: 51010426,
@@ -20682,13 +20837,13 @@ export const npcData: NPC[] = [
                         id: 51105932,
                         content: "世外高人向来放荡不羁，看他也是个奇人，教他两招又如何！",
                         next: 51105934,
-                        imprCheck: [1041, "Empathy", 40],
+                        imprCheck: [1041, "Chaos", 50],
                     },
                     {
                         id: 51105941,
                         content: "该让他回到现实了！",
                         next: 51105943,
-                        imprCheck: [1041, "Chaos", 40],
+                        imprCheck: [1041, "Morality", 50],
                     },
                 ],
             },
@@ -20793,6 +20948,8 @@ export const npcData: NPC[] = [
         name: "笃平",
         camp: "NPC",
         type: "Normal",
+        srId: 104102,
+        pos: [-43250, 3727],
         talks: [
             {
                 id: 51106000,
@@ -20864,7 +21021,7 @@ export const npcData: NPC[] = [
                         id: 51106011,
                         content: "这里发生过什么……似乎某人曾和你提及过。",
                         next: 51106013,
-                        imprCheck: [1041, "All", 40],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -21047,6 +21204,8 @@ export const npcData: NPC[] = [
         name: "饴生",
         camp: "NPC",
         type: "Normal",
+        srId: 104104,
+        pos: [5431, -4377],
         talks: [
             {
                 id: 51107000,
@@ -21128,7 +21287,7 @@ export const npcData: NPC[] = [
                         id: 51107013,
                         content: "你想起包里似乎剩着一些之前没有吃完的饴糖，或许可以分给它一些。",
                         next: 51107015,
-                        imprCheck: [1041, "Any", 50],
+                        imprCheck: [1041, "Morality", 50],
                     },
                 ],
             },
@@ -21278,6 +21437,8 @@ export const npcData: NPC[] = [
         name: "拉蒙",
         camp: "NPC",
         type: "Normal",
+        srId: 104108,
+        pos: [33321, 60817],
         talks: [
             {
                 id: 51108000,
@@ -21298,7 +21459,7 @@ export const npcData: NPC[] = [
                         id: 51108003,
                         content: "回应这位热情的男人。",
                         next: 51108005,
-                        imprCheck: [1041, "Benefit", 50],
+                        imprCheck: [1041, "Empathy", 50],
                     },
                 ],
             },
@@ -21559,6 +21720,8 @@ export const npcData: NPC[] = [
         name: "程老头",
         camp: "NPC",
         type: "Normal",
+        srId: 104110,
+        pos: [34399, -5022],
         talks: [
             {
                 id: 51109000,
@@ -21600,7 +21763,7 @@ export const npcData: NPC[] = [
                         id: 51109006,
                         content: "（狴犴，华胥的守护者，它是来自……）",
                         next: 51109008,
-                        imprCheck: [1041, "Morality", 50],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -21757,6 +21920,8 @@ export const npcData: NPC[] = [
         name: "蒋正义",
         camp: "NPC",
         type: "Normal",
+        srId: 104110,
+        pos: [27472, 750],
         talks: [
             {
                 id: 51110000,
@@ -21792,7 +21957,7 @@ export const npcData: NPC[] = [
                         id: 51110005,
                         content: "你……不是有龙氏吧，抟土氏是做不成狴犴的。",
                         next: 51110008,
-                        imprCheck: [1041, "Wisdom", 50],
+                        imprCheck: [1041, "Morality", 50],
                     },
                 ],
             },
@@ -21937,6 +22102,8 @@ export const npcData: NPC[] = [
         name: "萨米",
         camp: "NPC",
         type: "Normal",
+        srId: 104108,
+        pos: [35516, 51823],
         talks: [
             {
                 id: 51111000,
@@ -22052,6 +22219,8 @@ export const npcData: NPC[] = [
         name: "李什",
         camp: "NPC",
         type: "Normal",
+        srId: 104109,
+        pos: [-27801, 10381],
         talks: [
             {
                 id: 51112000,
@@ -22119,7 +22288,7 @@ export const npcData: NPC[] = [
                         id: 51112011,
                         content: "所以……你要带着这一帮人去报复别人？",
                         next: 51112013,
-                        imprCheck: [1041, "Empathy", 50],
+                        imprCheck: [1041, "Morality", 50],
                     },
                 ],
             },
@@ -22386,6 +22555,8 @@ export const npcData: NPC[] = [
         name: "筱云",
         camp: "NPC",
         type: "Normal",
+        srId: 104110,
+        pos: [33339, -9665],
         talks: [
             {
                 id: 51115000,
@@ -22704,6 +22875,8 @@ export const npcData: NPC[] = [
         name: "具睦",
         camp: "NPC",
         type: "Normal",
+        srId: 104107,
+        pos: [14471, 35162],
         talks: [
             {
                 id: 51116000,
@@ -22775,7 +22948,7 @@ export const npcData: NPC[] = [
                         id: 51116011,
                         content: "那好吧，我想想办法。",
                         next: 51116013,
-                        imprCheck: [1041, "All", 50],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -23028,7 +23201,7 @@ export const npcData: NPC[] = [
                         id: 51117018,
                         content: "（白色影子吗……会是什么呢？）",
                         next: 51117020,
-                        imprCheck: [1041, "Chaos", 20],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -23424,6 +23597,8 @@ export const npcData: NPC[] = [
         name: "黄药师",
         camp: "NPC",
         type: "Normal",
+        srId: 104109,
+        pos: [-19389, 7493],
         talks: [
             {
                 id: 51120000,
@@ -23737,7 +23912,7 @@ export const npcData: NPC[] = [
                         id: 51121015,
                         content: "试试劝架吧。",
                         next: 51121017,
-                        imprCheck: [1041, "Benefit", 20],
+                        imprCheck: [1041, "Morality", 50],
                     },
                 ],
             },
@@ -23908,6 +24083,8 @@ export const npcData: NPC[] = [
         name: "酒瓢子",
         camp: "NPC",
         type: "Normal",
+        srId: 104110,
+        pos: [32937, -5064],
         talks: [
             {
                 id: 51122000,
@@ -24030,7 +24207,7 @@ export const npcData: NPC[] = [
                         id: 51122019,
                         content: "（你从他手中接过酒水，试探性抿了一口。）",
                         next: 51122021,
-                        imprCheck: [1041, "Morality", 20],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -24087,6 +24264,8 @@ export const npcData: NPC[] = [
         name: "丰登",
         camp: "NPC",
         type: "Normal",
+        srId: 104107,
+        pos: [24137, 19956],
         talks: [
             {
                 id: 51123000,
@@ -24103,7 +24282,7 @@ export const npcData: NPC[] = [
                         id: 51123002,
                         content: "帮他想想。",
                         next: 51123004,
-                        imprCheck: [1041, "Wisdom", 20],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -24234,6 +24413,8 @@ export const npcData: NPC[] = [
         name: "灵异皎皎",
         camp: "NPC",
         type: "Normal",
+        srId: 104104,
+        pos: [-3061, -947],
         talks: [
             {
                 id: 51124000,
@@ -24341,6 +24522,7 @@ export const npcData: NPC[] = [
                         id: 51124018,
                         content: "（所以这只皎皎吓人的目的是……）",
                         next: 51124020,
+                        imprCheck: [1041, "Empathy", 50],
                     },
                 ],
             },
@@ -24354,6 +24536,7 @@ export const npcData: NPC[] = [
                         id: 51124018,
                         content: "（所以这只皎皎吓人的目的是……）",
                         next: 51124020,
+                        imprCheck: [1041, "Empathy", 50],
                     },
                 ],
             },
@@ -28180,12 +28363,16 @@ export const npcData: NPC[] = [
         name: "陈老爹",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-25530, -64659],
     },
     {
         id: 701113,
         name: "汀兰",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [46091, -26177],
         talks: [
             {
                 id: 51156024,
@@ -28343,6 +28530,8 @@ export const npcData: NPC[] = [
         name: "诸葛陶",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [49284, -26468],
         talks: [
             {
                 id: 51156114,
@@ -28644,6 +28833,8 @@ export const npcData: NPC[] = [
         name: "月痕",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43279, -20891],
         talks: [
             {
                 id: 50107205,
@@ -28840,6 +29031,8 @@ export const npcData: NPC[] = [
         name: "离砚",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43931, -21958],
         talks: [
             {
                 id: 51156606,
@@ -28889,6 +29082,8 @@ export const npcData: NPC[] = [
         name: "沈禾",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43315, -21511],
         talks: [
             {
                 id: 51156718,
@@ -29011,6 +29206,8 @@ export const npcData: NPC[] = [
         name: "韩菱",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [44305, -25939],
         talks: [
             {
                 id: 51156801,
@@ -29088,6 +29285,8 @@ export const npcData: NPC[] = [
         name: "璎珞",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [48594, -26639],
         talks: [
             {
                 id: 51156928,
@@ -29264,6 +29463,8 @@ export const npcData: NPC[] = [
         name: "琳琅",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [52437, -27937],
         talks: [
             {
                 id: 51157014,
@@ -29352,6 +29553,8 @@ export const npcData: NPC[] = [
         name: "桂棹",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [44916, -22919],
         talks: [
             {
                 id: 51157625,
@@ -29509,6 +29712,8 @@ export const npcData: NPC[] = [
         name: "方朔",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [46310, -19972],
         talks: [
             {
                 id: 51157901,
@@ -29701,6 +29906,8 @@ export const npcData: NPC[] = [
         name: "云裳",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [49823, -25850],
         talks: [
             {
                 id: 51158010,
@@ -29768,6 +29975,8 @@ export const npcData: NPC[] = [
         name: "同福饭馆店小二",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43961, -26906],
         talks: [
             {
                 id: 51158322,
@@ -29800,6 +30009,8 @@ export const npcData: NPC[] = [
         name: "禾穗",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43521, -25041],
         talks: [
             {
                 id: 51158112,
@@ -30079,6 +30290,8 @@ export const npcData: NPC[] = [
         name: "孙枕石",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [36395, -24922],
         talks: [
             {
                 id: 51158411,
@@ -30204,6 +30417,8 @@ export const npcData: NPC[] = [
         name: "方晴川",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [55282, -26772],
         talks: [
             {
                 id: 51158616,
@@ -30306,6 +30521,8 @@ export const npcData: NPC[] = [
         name: "陆瑶光",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [54168, -24296],
         talks: [
             {
                 id: 51158812,
@@ -30494,6 +30711,8 @@ export const npcData: NPC[] = [
         name: "何道微",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [45206, -30314],
         talks: [
             {
                 id: 51159013,
@@ -30577,6 +30796,8 @@ export const npcData: NPC[] = [
         name: "褚家",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [38149, -18323],
         talks: [
             {
                 id: 51159111,
@@ -30649,6 +30870,8 @@ export const npcData: NPC[] = [
         name: "周伯远",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [15836, -30319],
         talks: [
             {
                 id: 51159225,
@@ -30796,6 +31019,8 @@ export const npcData: NPC[] = [
         name: "长庚",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [15047, -29601],
         talks: [
             {
                 id: 51159301,
@@ -30947,6 +31172,8 @@ export const npcData: NPC[] = [
         name: "周砚秋",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [17454, -30578],
         talks: [
             {
                 id: 51159428,
@@ -31127,6 +31354,8 @@ export const npcData: NPC[] = [
         name: "张老丈",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [13764, -35049],
         talks: [
             {
                 id: 51159501,
@@ -31269,6 +31498,8 @@ export const npcData: NPC[] = [
         name: "刘婆婆",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [13807, -27580],
         talks: [
             {
                 id: 51159621,
@@ -31370,6 +31601,8 @@ export const npcData: NPC[] = [
         name: "渡风",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [20277, -18159],
         talks: [
             {
                 id: 51159713,
@@ -31460,6 +31693,8 @@ export const npcData: NPC[] = [
         name: "林德昌",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [20851, -29636],
         talks: [
             {
                 id: 51159801,
@@ -31539,6 +31774,8 @@ export const npcData: NPC[] = [
         name: "阿菀",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [10977, -33737],
         talks: [
             {
                 id: 51159923,
@@ -31681,6 +31918,8 @@ export const npcData: NPC[] = [
         name: "寻鹤",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [9928, -33755],
         talks: [
             {
                 id: 51160116,
@@ -31732,6 +31971,8 @@ export const npcData: NPC[] = [
         name: "建业",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [12292, -33546],
         talks: [
             {
                 id: 51160108,
@@ -31788,6 +32029,8 @@ export const npcData: NPC[] = [
         name: "小棠",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [16138, -18963],
         talks: [
             {
                 id: 51160201,
@@ -31933,6 +32176,8 @@ export const npcData: NPC[] = [
         name: "时风",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [17179, -19059],
         talks: [
             {
                 id: 51160301,
@@ -32121,6 +32366,8 @@ export const npcData: NPC[] = [
         name: "秦执",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [-11353, -23972],
         talks: [
             {
                 id: 51160401,
@@ -32161,6 +32408,8 @@ export const npcData: NPC[] = [
         name: "王伯公",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [16157, -24336],
         talks: [
             {
                 id: 51160501,
@@ -32232,6 +32481,8 @@ export const npcData: NPC[] = [
         name: "李某某",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [13828, -24734],
         talks: [
             {
                 id: 51160626,
@@ -32398,6 +32649,8 @@ export const npcData: NPC[] = [
         name: "马老丈",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [17522, -15553],
         talks: [
             {
                 id: 51160801,
@@ -32477,6 +32730,8 @@ export const npcData: NPC[] = [
         name: "孙兰芝",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [15976, -13755],
         talks: [
             {
                 id: 51160909,
@@ -32534,6 +32789,8 @@ export const npcData: NPC[] = [
         name: "孟巧娘",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [18214, -26523],
         talks: [
             {
                 id: 51161035,
@@ -32834,6 +33091,8 @@ export const npcData: NPC[] = [
         name: "文博",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [9699, -42337],
         talks: [
             {
                 id: 51161322,
@@ -32975,6 +33234,8 @@ export const npcData: NPC[] = [
         name: "吴章知",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [9499, -47366],
         talks: [
             {
                 id: 51161401,
@@ -33065,6 +33326,8 @@ export const npcData: NPC[] = [
         name: "晚月",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [14230, -46249],
         talks: [
             {
                 id: 51161507,
@@ -33111,6 +33374,8 @@ export const npcData: NPC[] = [
         name: "安永",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [11835, -44335],
         talks: [
             {
                 id: 51161601,
@@ -33216,6 +33481,8 @@ export const npcData: NPC[] = [
         name: "卢静薇",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [12035, -46377],
         talks: [
             {
                 id: 51161706,
@@ -33258,6 +33525,8 @@ export const npcData: NPC[] = [
         name: "文彬",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [9894, -38321],
         talks: [
             {
                 id: 51161829,
@@ -33372,6 +33641,8 @@ export const npcData: NPC[] = [
         name: "景和",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [14850, -41114],
         talks: [
             {
                 id: 51162005,
@@ -33407,6 +33678,8 @@ export const npcData: NPC[] = [
         name: "裴德厚",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [12057, -38747],
         talks: [
             {
                 id: 51162101,
@@ -33491,6 +33764,8 @@ export const npcData: NPC[] = [
         name: "温玉笙",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [12215, -40705],
         talks: [
             {
                 id: 51162201,
@@ -33554,6 +33829,8 @@ export const npcData: NPC[] = [
         name: "清鸢",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [16063, -7329],
         talks: [
             {
                 id: 51162219,
@@ -33612,6 +33889,8 @@ export const npcData: NPC[] = [
         name: "灵月",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [14497, -8500],
         talks: [
             {
                 id: 51162323,
@@ -33759,6 +34038,8 @@ export const npcData: NPC[] = [
         name: "元祯",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [10199, -6370],
         talks: [
             {
                 id: 51162412,
@@ -33836,6 +34117,8 @@ export const npcData: NPC[] = [
         name: "白灵汐",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [12823, -10093],
         talks: [
             {
                 id: 51162501,
@@ -33976,6 +34259,8 @@ export const npcData: NPC[] = [
         name: "朱鹤龄",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [20321, -5288],
         talks: [
             {
                 id: 51162632,
@@ -34180,6 +34465,8 @@ export const npcData: NPC[] = [
         name: "魏青娥",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [22097, -16889],
         talks: [
             {
                 id: 51162726,
@@ -34360,6 +34647,8 @@ export const npcData: NPC[] = [
         name: "任清欢",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [9245, -1776],
         talks: [
             {
                 id: 51162801,
@@ -34504,6 +34793,8 @@ export const npcData: NPC[] = [
         name: "明玥",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [7631, -7398],
         talks: [
             {
                 id: 51162908,
@@ -34612,6 +34903,8 @@ export const npcData: NPC[] = [
         name: "时茂",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [11698, -13771],
         talks: [
             {
                 id: 51167101,
@@ -34713,6 +35006,8 @@ export const npcData: NPC[] = [
         name: "何子瑜",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [-1294, -9332],
         talks: [
             {
                 id: 51167201,
@@ -34853,6 +35148,8 @@ export const npcData: NPC[] = [
         name: "邵临起",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [-2611, -9993],
         talks: [
             {
                 id: 51167301,
@@ -34894,6 +35191,8 @@ export const npcData: NPC[] = [
         name: "陈川",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [322, -6208],
         talks: [
             {
                 id: 51167401,
@@ -35152,6 +35451,8 @@ export const npcData: NPC[] = [
         name: "阿舟",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [1034, -2481],
         talks: [
             {
                 id: 51167538,
@@ -35392,6 +35693,8 @@ export const npcData: NPC[] = [
         name: "郭老叟",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [5300, -8622],
         talks: [
             {
                 id: 51167601,
@@ -35495,6 +35798,8 @@ export const npcData: NPC[] = [
         name: "梁思远",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [5967, -8115],
         talks: [
             {
                 id: 51167710,
@@ -35557,6 +35862,8 @@ export const npcData: NPC[] = [
         name: "同叔",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [18225, -3755],
         talks: [
             {
                 id: 51167810,
@@ -35975,6 +36282,8 @@ export const npcData: NPC[] = [
         name: "玉芬",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [29503, -40601],
         talks: [
             {
                 id: 51168201,
@@ -36037,6 +36346,8 @@ export const npcData: NPC[] = [
         name: "大将军",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [33058, -47454],
         talks: [
             {
                 id: 51168301,
@@ -36121,6 +36432,8 @@ export const npcData: NPC[] = [
         name: "马景岐",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [37070, -73873],
         talks: [
             {
                 id: 51168417,
@@ -36316,6 +36629,8 @@ export const npcData: NPC[] = [
         name: "守拙",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [32023, -85296],
         talks: [
             {
                 id: 51169312,
@@ -36387,6 +36702,8 @@ export const npcData: NPC[] = [
         name: "雨桐",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [31390, -43949],
         talks: [
             {
                 id: 51169401,
@@ -36522,6 +36839,8 @@ export const npcData: NPC[] = [
         name: "小川",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [40300, -78937],
         talks: [
             {
                 id: 51169501,
@@ -36638,6 +36957,8 @@ export const npcData: NPC[] = [
         name: "洛奇",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [40136, -77401],
         talks: [
             {
                 id: 51169619,
@@ -36755,6 +37076,8 @@ export const npcData: NPC[] = [
         name: "韩老爹",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [27958, -83789],
         talks: [
             {
                 id: 51169701,
@@ -36979,6 +37302,8 @@ export const npcData: NPC[] = [
         name: "韩安世",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [26946, -81984],
         talks: [
             {
                 id: 51169901,
@@ -37167,6 +37492,8 @@ export const npcData: NPC[] = [
         name: "郭文昭",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [28670, -77111],
         talks: [
             {
                 id: 51170001,
@@ -37246,6 +37573,8 @@ export const npcData: NPC[] = [
         name: "砚北",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [46543, -36266],
         talks: [
             {
                 id: 51170101,
@@ -37378,6 +37707,8 @@ export const npcData: NPC[] = [
         name: "韩忠",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [41708, -39332],
         talks: [
             {
                 id: 51170201,
@@ -37644,6 +37975,8 @@ export const npcData: NPC[] = [
         name: "孟守诚",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [39325, -37406],
         talks: [
             {
                 id: 51170401,
@@ -37721,6 +38054,8 @@ export const npcData: NPC[] = [
         name: "李礼一",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [37226, -37704],
         talks: [
             {
                 id: 51170501,
@@ -37916,6 +38251,8 @@ export const npcData: NPC[] = [
         name: "思晴",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43560, -38892],
         talks: [
             {
                 id: 51170701,
@@ -37960,6 +38297,8 @@ export const npcData: NPC[] = [
         name: "沐阳",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [42719, -34330],
         talks: [
             {
                 id: 51174601,
@@ -38006,6 +38345,8 @@ export const npcData: NPC[] = [
         name: "承泽",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [41391, -34599],
         talks: [
             {
                 id: 51170801,
@@ -38096,6 +38437,8 @@ export const npcData: NPC[] = [
         name: "章景行",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [44889, -40247],
         talks: [
             {
                 id: 51170919,
@@ -38222,6 +38565,8 @@ export const npcData: NPC[] = [
         name: "柳明正",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [42471, -36093],
         talks: [
             {
                 id: 51171001,
@@ -38408,6 +38753,8 @@ export const npcData: NPC[] = [
         name: "郑景",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [42194, -32464],
         talks: [
             {
                 id: 51171102,
@@ -38464,6 +38811,8 @@ export const npcData: NPC[] = [
         name: "裴云",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [41407, -33653],
         talks: [
             {
                 id: 51171201,
@@ -38646,6 +38995,8 @@ export const npcData: NPC[] = [
         name: "卫德舆",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [42458, -33558],
         talks: [
             {
                 id: 51171301,
@@ -38735,6 +39086,8 @@ export const npcData: NPC[] = [
         name: "沈惠兰",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [25061, -60385],
         talks: [
             {
                 id: 51171402,
@@ -38787,6 +39140,8 @@ export const npcData: NPC[] = [
         name: "书瑶",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [25504, -53036],
         talks: [
             {
                 id: 51171501,
@@ -38867,6 +39222,8 @@ export const npcData: NPC[] = [
         name: "时川",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [28296, -62623],
         talks: [
             {
                 id: 51171601,
@@ -39036,6 +39393,8 @@ export const npcData: NPC[] = [
         name: "时川",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [24815, -59573],
         talks: [
             {
                 id: 51171701,
@@ -39181,6 +39540,8 @@ export const npcData: NPC[] = [
         name: "方寻",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [27779, -59753],
         talks: [
             {
                 id: 51171801,
@@ -39411,6 +39772,8 @@ export const npcData: NPC[] = [
         name: "章景曜",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [31971, -61343],
         talks: [
             {
                 id: 51172001,
@@ -39452,6 +39815,8 @@ export const npcData: NPC[] = [
         name: "清岚",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [30839, -55937],
         talks: [
             {
                 id: 51172101,
@@ -39601,6 +39966,8 @@ export const npcData: NPC[] = [
         name: "林甫",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [26959, -56807],
         talks: [
             {
                 id: 51172201,
@@ -39736,6 +40103,8 @@ export const npcData: NPC[] = [
         name: "明哲",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [26276, -64497],
         talks: [
             {
                 id: 51172301,
@@ -39834,6 +40203,8 @@ export const npcData: NPC[] = [
         name: "周晓棠",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [21104, -60538],
         talks: [
             {
                 id: 51172401,
@@ -39958,6 +40329,8 @@ export const npcData: NPC[] = [
         name: "陈岐",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [23682, -55041],
         talks: [
             {
                 id: 51172501,
@@ -40004,6 +40377,8 @@ export const npcData: NPC[] = [
         name: "伯渊",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [38347, -59565],
         talks: [
             {
                 id: 51172601,
@@ -40062,6 +40437,8 @@ export const npcData: NPC[] = [
         name: "芷柔",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [38072, -62443],
         talks: [
             {
                 id: 51172701,
@@ -40153,6 +40530,8 @@ export const npcData: NPC[] = [
         name: "张敬之",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [39350, -61148],
         talks: [
             {
                 id: 51174901,
@@ -40305,6 +40684,8 @@ export const npcData: NPC[] = [
         name: "景铄",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [38104, -56469],
         talks: [
             {
                 id: 51175001,
@@ -40464,6 +40845,8 @@ export const npcData: NPC[] = [
         name: "小瑜",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [43852, -59080],
         talks: [
             {
                 id: 51175101,
@@ -40542,6 +40925,8 @@ export const npcData: NPC[] = [
         name: "章老翁",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [39703, -55311],
         talks: [
             {
                 id: 50107124,
@@ -40806,6 +41191,8 @@ export const npcData: NPC[] = [
         name: "张大婶",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-22041, -55489],
         talks: [
             {
                 id: 51173102,
@@ -40854,6 +41241,8 @@ export const npcData: NPC[] = [
         name: "无愈",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-17881, -52197],
         talks: [
             {
                 id: 51173202,
@@ -40905,6 +41294,8 @@ export const npcData: NPC[] = [
         name: "长歌",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-17042, -53269],
         talks: [
             {
                 id: 51173301,
@@ -40952,6 +41343,8 @@ export const npcData: NPC[] = [
         name: "张远",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-19616, -56317],
         talks: [
             {
                 id: 51173402,
@@ -41118,6 +41511,8 @@ export const npcData: NPC[] = [
         name: "阿乔",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-22231, -51341],
         talks: [
             {
                 id: 51174702,
@@ -41170,6 +41565,8 @@ export const npcData: NPC[] = [
         name: "方慕声",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-23064, -54380],
         talks: [
             {
                 id: 51173502,
@@ -41257,6 +41654,8 @@ export const npcData: NPC[] = [
         name: "冬雪",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-20419, -51477],
         talks: [
             {
                 id: 51173602,
@@ -41437,6 +41836,8 @@ export const npcData: NPC[] = [
         name: "汪洋",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [4110, 4650],
         talks: [
             {
                 id: 51173801,
@@ -41503,6 +41904,8 @@ export const npcData: NPC[] = [
         name: "婉婉",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [3470, 15810],
         talks: [
             {
                 id: 51173902,
@@ -41564,6 +41967,8 @@ export const npcData: NPC[] = [
         name: "史基",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [9230, 9340],
         talks: [
             {
                 id: 51174002,
@@ -41609,6 +42014,8 @@ export const npcData: NPC[] = [
         name: "桂北发",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [4480, 15550],
         talks: [
             {
                 id: 51174102,
@@ -41692,6 +42099,8 @@ export const npcData: NPC[] = [
         name: "竞天",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [17090, 4160],
         talks: [
             {
                 id: 51174202,
@@ -42003,6 +42412,8 @@ export const npcData: NPC[] = [
         name: "相生",
         camp: "NPC",
         type: "Normal",
+        srId: 105001,
+        pos: [-8510, 6413],
         talks: [
             {
                 id: 51174502,
@@ -42114,6 +42525,8 @@ export const npcData: NPC[] = [
         name: "星遥",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [54086, -22843],
         talks: [
             {
                 id: 51158711,
@@ -42239,6 +42652,8 @@ export const npcData: NPC[] = [
         name: "李大嘴",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [44376, -25098],
         talks: [
             {
                 id: 51175601,
@@ -42305,6 +42720,7 @@ export const npcData: NPC[] = [
                         id: 51175611,
                         content: "香料做的食物吗？你倒是略有耳闻，教他几道也无妨。",
                         next: 51175612,
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -42342,6 +42758,7 @@ export const npcData: NPC[] = [
                         id: 51175617,
                         content: "你想想……",
                         next: 51175618,
+                        imprCheck: [1041, "Wisdom", 50],
                     },
                 ],
             },
@@ -42373,6 +42790,7 @@ export const npcData: NPC[] = [
                         id: 51175622,
                         content: "称呼已经是前辈了吗，你再想想……",
                         next: 51175623,
+                        imprCheck: [1041, "Wisdom", 60],
                     },
                 ],
             },
@@ -42404,6 +42822,7 @@ export const npcData: NPC[] = [
                         id: 51175627,
                         content: "浓香吗，你得好好想想……",
                         next: 51175628,
+                        imprCheck: [1041, "Wisdom", 70],
                     },
                 ],
             },
@@ -42466,6 +42885,8 @@ export const npcData: NPC[] = [
         name: "花留情",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [34749, -48619],
         talks: [
             {
                 id: 51175702,
@@ -42608,6 +43029,7 @@ export const npcData: NPC[] = [
                         id: 51175726,
                         content: "（这家伙简直是疯子……正常的方法想必没法打发走他，不如另辟蹊径？）",
                         next: 51175728,
+                        imprCheck: [1041, "Chaos", 40],
                     },
                 ],
             },
@@ -42851,6 +43273,8 @@ export const npcData: NPC[] = [
         name: "天通君子",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [16852, -33802],
         talks: [
             {
                 id: 51175802,
@@ -43082,11 +43506,13 @@ export const npcData: NPC[] = [
                         id: 51175840,
                         content: "（他既然已经有了这样的想法，我为什么不顺着他的意思呢？）",
                         next: 51175842,
+                        imprCheck: [1041, "Chaos", 40],
                     },
                     {
                         id: 51175844,
                         content: "（既然是精心创作的话本，肯定希望读者印象深刻吧？）",
                         next: 51175846,
+                        imprCheck: [1041, "Benefit", 40],
                     },
                 ],
             },
@@ -43099,11 +43525,13 @@ export const npcData: NPC[] = [
                         id: 51175851,
                         content: "（既然是精心创作的话本，肯定希望能得到良好的回馈吧？）",
                         next: 51175853,
+                        imprCheck: [1041, "Morality", 40],
                     },
                     {
                         id: 51175856,
                         content: "（即使是一个虚拟角色，不也倾注了他的心血吗？）",
                         next: 51175858,
+                        imprCheck: [1041, "Empathy", 40],
                     },
                 ],
             },
@@ -43203,6 +43631,8 @@ export const npcData: NPC[] = [
         name: "罗汉",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [19129, -23402],
         talks: [
             {
                 id: 51175902,
@@ -43314,6 +43744,7 @@ export const npcData: NPC[] = [
                         id: 51175920,
                         content: "（踏青是什么特殊的活动吗？你开始在脑中思索自己曾经看过的华胥书籍。）",
                         next: 51175922,
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -43454,6 +43885,8 @@ export const npcData: NPC[] = [
         name: "贺仙姑",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [42537, -12061],
         talks: [
             {
                 id: 51176002,
@@ -43734,6 +44167,8 @@ export const npcData: NPC[] = [
         name: "乐观皎皎",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [46667, -28741],
         talks: [
             {
                 id: 51177002,
@@ -43888,6 +44323,8 @@ export const npcData: NPC[] = [
         name: "砚台清",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [45799, -36881],
         talks: [
             {
                 id: 51178002,
@@ -43981,6 +44418,7 @@ export const npcData: NPC[] = [
                         id: 51178017,
                         content: "（你不由开始思索起自己的才智究竟能不能承托起这场莫名其妙的辩论。）",
                         next: 51178020,
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -44256,6 +44694,8 @@ export const npcData: NPC[] = [
         name: "萍姐",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [32925, -40244],
         talks: [
             {
                 id: 51178102,
@@ -44346,6 +44786,7 @@ export const npcData: NPC[] = [
                         id: 51178117,
                         content: "（有什么不会被惩罚的恶作剧吗……）",
                         next: 51178119,
+                        imprCheck: [1041, "Chaos", 40],
                     },
                 ],
             },
@@ -44639,6 +45080,8 @@ export const npcData: NPC[] = [
         name: "程宫",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [38451, -37010],
         talks: [
             {
                 id: 51178202,
@@ -44684,6 +45127,7 @@ export const npcData: NPC[] = [
                         id: 51178209,
                         content: "（说点什么来反驳他。）",
                         next: 51178211,
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -44844,6 +45288,8 @@ export const npcData: NPC[] = [
         name: "诸葛明",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [36562, -56775],
         talks: [
             {
                 id: 51178302,
@@ -44902,6 +45348,7 @@ export const npcData: NPC[] = [
                         id: 51178311,
                         content: "（你挑起来的，还是安慰安慰他吧。）",
                         next: 51178313,
+                        imprCheck: [1041, "Empathy", 40],
                     },
                 ],
             },
@@ -45045,6 +45492,8 @@ export const npcData: NPC[] = [
         name: "香官皎皎",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [28151, -57462],
         talks: [
             {
                 id: 51178402,
@@ -45206,6 +45655,8 @@ export const npcData: NPC[] = [
         name: "因何生",
         camp: "NPC",
         type: "Normal",
+        srId: 105501,
+        pos: [19039, -589],
         talks: [
             {
                 id: 51178502,
@@ -45400,6 +45851,7 @@ export const npcData: NPC[] = [
                         id: 51178533,
                         content: "（他说的话听起来有些耳熟，你隐约想起了……）",
                         next: 51178535,
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -45490,6 +45942,8 @@ export const npcData: NPC[] = [
         name: "空庭老人",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [1742, 3657],
         talks: [
             {
                 id: 51178602,
@@ -45859,6 +46313,8 @@ export const npcData: NPC[] = [
         name: "詹姆斯",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [1227, -11269],
         talks: [
             {
                 id: 51001332,
@@ -45884,6 +46340,8 @@ export const npcData: NPC[] = [
         name: "杰克",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [-511, -8859],
         talks: [
             {
                 id: 51001335,
@@ -45909,6 +46367,8 @@ export const npcData: NPC[] = [
         name: "艾米莉",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [-259, -9336],
         talks: [
             {
                 id: 51001338,
@@ -47098,12 +47558,16 @@ export const npcData: NPC[] = [
         name: "傲气的机枢派师傅",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [13918, -35055],
     },
     {
         id: 840003,
         name: "头疼的店员",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [10199, -6370],
     },
     {
         id: 840004,
@@ -47116,12 +47580,16 @@ export const npcData: NPC[] = [
         name: "馋嘴的孩子",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43560, -38892],
     },
     {
         id: 840006,
         name: "热情的妇人",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [13807, -27580],
     },
     {
         id: 888888,
@@ -47141,6 +47609,8 @@ export const npcData: NPC[] = [
         camp: "NPC",
         type: "Normal",
         icon: "TieJiangJJ",
+        srId: 210101,
+        pos: [-383, 2829],
         talks: [
             {
                 id: 90010201,
@@ -47160,6 +47630,8 @@ export const npcData: NPC[] = [
         name: "侍者皎皎",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [547, 2861],
         talks: [
             {
                 id: 90020201,
@@ -49165,6 +49637,8 @@ export const npcData: NPC[] = [
         name: "中年男",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-15782, -8746],
         talks: [
             {
                 id: 741147055,
@@ -49503,6 +49977,8 @@ export const npcData: NPC[] = [
         name: "青年男",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [1260, -10877],
         talks: [
             {
                 id: 741147109,
@@ -50106,6 +50582,8 @@ export const npcData: NPC[] = [
         name: "阿瓦尔",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [630, 7268],
         talks: [
             {
                 id: 741147190,
@@ -50270,6 +50748,8 @@ export const npcData: NPC[] = [
         name: "维吉尔",
         camp: "NPC",
         type: "Normal",
+        srId: 101901,
+        pos: [23006, 9824],
         talks: [
             {
                 id: 741147215,
@@ -50755,6 +51235,8 @@ export const npcData: NPC[] = [
         name: "卡嘉",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [938, 7185],
         talks: [
             {
                 id: 741147290,
@@ -50816,6 +51298,8 @@ export const npcData: NPC[] = [
         name: "兰迪",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [67, 5081],
         talks: [
             {
                 id: 741147299,
@@ -51408,6 +51892,8 @@ export const npcData: NPC[] = [
         name: "琳恩",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [9, 5079],
         talks: [
             {
                 id: 741147420,
@@ -52289,6 +52775,8 @@ export const npcData: NPC[] = [
         name: "耶尔",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [350, 2833],
         talks: [
             {
                 id: 741147901,
@@ -52464,6 +52952,8 @@ export const npcData: NPC[] = [
         name: "松露",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [340, 3052],
         talks: [
             {
                 id: 741148001,
@@ -52639,6 +53129,8 @@ export const npcData: NPC[] = [
         name: "塔比瑟",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [466, 2475],
         talks: [
             {
                 id: 741148101,
@@ -52814,6 +53306,8 @@ export const npcData: NPC[] = [
         name: "卡米拉",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-16120, -5434],
         talks: [
             {
                 id: 741148201,
@@ -53020,11 +53514,13 @@ export const npcData: NPC[] = [
                         id: 7411482301,
                         content: "选项一",
                         next: 741148231,
+                        imprCheck: [1011, "Benefit", 40],
                     },
                     {
                         id: 7411482302,
                         content: "选项二",
                         next: 741148231,
+                        imprCheck: [1011, "Morality", 40],
                     },
                 ],
             },
@@ -53174,11 +53670,13 @@ export const npcData: NPC[] = [
                         id: 7411482301,
                         content: "选项一",
                         next: 741148231,
+                        imprCheck: [1011, "Benefit", 40],
                     },
                     {
                         id: 7411482302,
                         content: "选项二",
                         next: 741148231,
+                        imprCheck: [1011, "Morality", 40],
                     },
                 ],
             },
@@ -53561,6 +54059,8 @@ export const npcData: NPC[] = [
         name: "丽蓓卡",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [328, 3196],
         talks: [
             {
                 id: 741148501,
@@ -53911,6 +54411,8 @@ export const npcData: NPC[] = [
         name: "幻景",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [-10847, -21542],
         talks: [
             {
                 id: 741148801,
@@ -54261,6 +54763,8 @@ export const npcData: NPC[] = [
         name: "希尔妲",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [31, 5110],
         talks: [
             {
                 id: 741149001,
@@ -54436,6 +54940,8 @@ export const npcData: NPC[] = [
         name: "刻舟",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [-224, 4952],
         talks: [
             {
                 id: 741149101,
@@ -54611,6 +55117,8 @@ export const npcData: NPC[] = [
         name: "松露",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [340, 3052],
         talks: [
             {
                 id: 741149201,
@@ -55136,6 +55644,8 @@ export const npcData: NPC[] = [
         name: "妮弗尔夫人",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [-12, 5126],
         talks: [
             {
                 id: 741149501,
@@ -55512,6 +56022,8 @@ export const npcData: NPC[] = [
         name: "Wuyou01",
         camp: "NPC",
         type: "Normal",
+        srId: 105001,
+        pos: [28300, -19750],
         talks: [
             {
                 id: 760000101,

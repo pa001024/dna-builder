@@ -5280,6 +5280,8 @@
         "fish_desc": "Calcul détaillé du rendement des points de pêche",
         "hardboss": "Restes du Cauchemar",
         "hardboss_desc": "Voir les informations sur les restes du Cauchemar et les récompenses",
+        "impr": "",
+        "impr_desc": "",
         "map": "Carte",
         "map_desc": "Voir les marqueurs de carte",
         "mod": "Mod",

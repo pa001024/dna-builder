@@ -46,7 +46,7 @@ const displayPointText = computed(() => {
         return ""
     }
 
-    return `(${props.point[0].toFixed(2)}, ${props.point[1].toFixed(2)})`
+    return `(${props.point[0].toFixed(0)}, ${props.point[1].toFixed(0)})`
 })
 </script>
 
@@ -55,8 +55,6 @@ const displayPointText = computed(() => {
         <span class="text-right wrap-break-word">
             <slot>{{ displayPointText }}</slot>
         </span>
-        <SRouterLink v-if="mapLocalLink" :to="mapLocalLink" class="link link-primary">
-            跳转
-        </SRouterLink>
+        <SRouterLink v-if="mapLocalLink" :to="mapLocalLink" class="link link-primary"> 跳转 </SRouterLink>
     </span>
 </template>

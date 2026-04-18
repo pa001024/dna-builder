@@ -5354,6 +5354,8 @@
         "fish_desc": "Detailed fishing spot yield calculation",
         "hardboss": "Nightmare Remnants",
         "hardboss_desc": "View nightmare remnant information and rewards",
+        "impr": "Impression",
+        "impr_desc": "View impression increase information for quests, NPCs, and dispatch quests",
         "map": "Map",
         "map_desc": "View Map Markers",
         "mod": "Mod",

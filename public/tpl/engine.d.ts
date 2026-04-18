@@ -692,6 +692,13 @@ declare function captureWindow(hwnd: number, x?: number, y?: number, w?: number,
 declare function captureWindowWGC(hwnd: number, x?: number, y?: number, w?: number, h?: number): Mat
 
 /**
+ * 获取窗口客户区位置与尺寸。
+ * @param hwnd 窗口句柄
+ * @returns [x, y, width, height]
+ */
+declare function winGetClientPos(hwnd: number): ROI | undefined
+
+/**
  * 从文件加载模板Mat对象(有缓存)
  * @param path 模板路径
  * @returns Mat对象

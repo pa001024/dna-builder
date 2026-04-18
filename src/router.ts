@@ -473,7 +473,7 @@ const routes: readonly RouteRecordRaw[] = [
             },
             {
                 name: "questchain-detail",
-                path: "questchain/:questChainId",
+                path: "questchain/:questChainId/:questId?",
                 component: () => import("./views/DBQuestDetailView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
             },
@@ -495,6 +495,13 @@ const routes: readonly RouteRecordRaw[] = [
                 component: () => import("./views/DBNpcListView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
                 meta: { keepAlive: true },
+            },
+            {
+                name: "impr-list",
+                path: "impr",
+                component: () => import("./views/DBImprView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+                meta: { title: "database.impr" },
             },
             {
                 name: "npc-detail",

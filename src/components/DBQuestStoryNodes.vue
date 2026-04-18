@@ -1,15 +1,7 @@
 <script lang="ts" setup>
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
 import { npcMap } from "@/data/d/npc.data"
-import {
-    type DetectiveAnswer,
-    type DetectiveQuestion,
-    type Dialogue,
-    type DialogueOption,
-    getImprType,
-    getRegionType,
-    type QuestNode,
-} from "@/data/d/quest.data"
+import { type DetectiveAnswer, type DetectiveQuestion, type Dialogue, type DialogueOption, type QuestNode } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
@@ -33,6 +25,8 @@ const props = defineProps<{
     nodes: QuestNode[]
     startIds?: string[]
     voiceLanguage?: string
+    questChainIcon?: string
+    questName?: string
 }>()
 
 const settingStore = useSettingStore()
@@ -509,56 +503,6 @@ function getNodeLabel(nodeId: string): string {
  */
 function selectOption(scopeKey: string, dialogueId: number, optionId: number) {
     selectedOptionMap[getOptionStateKey(scopeKey, dialogueId)] = optionId
-}
-
-/**
- * 提取条目中的印象变化条目。
- * @param entry 对话或选项条目
- * @returns 印象变化条目列表
- */
-function getImpressionEntries(entry: {
-    impr?: [number, Parameters<typeof getImprType>[0], number]
-}): Array<{ regionId: number; typeLabel: string; value: number }> {
-    if (!entry.impr) {
-        return []
-    }
-
-    const [regionId, imprType, value] = entry.impr
-    if (typeof value !== "number" || value === 0) {
-        return []
-    }
-
-    return [
-        {
-            regionId,
-            typeLabel: getImprType(imprType),
-            value,
-        },
-    ]
-}
-
-/**
- * 提取选项中的印象检定条目。
- * @param option 对话选项
- * @returns 印象检定条目列表
- */
-function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: number; typeLabel: string; threshold: number }> {
-    if (!option.imprCheck) {
-        return []
-    }
-
-    const [regionId, imprType, threshold] = option.imprCheck
-    if (typeof threshold !== "number") {
-        return []
-    }
-
-    return [
-        {
-            regionId,
-            typeLabel: getImprType(imprType),
-            threshold,
-        },
-    ]
 }
 
 /**
@@ -1059,119 +1003,43 @@ watch(flattenedDialogueChain, () => {
             v-for="node in questNodeChains"
             :key="node.id"
             :ref="element => setQuestNodeElement(getQuestNodeScopeKey(questId, node.id), element)"
-            class="p-2 bg-base-100 rounded border border-base-300 space-y-2 transition-all duration-300"
+            class="bg-base-100 rounded space-y-2 transition-all duration-300"
             :class="{
                 'quest-node-highlight': highlightedQuestNodeMap[getQuestNodeScopeKey(questId, node.id)],
             }"
         >
-            <div class="text-sm text-base-content/70">{{ getNodeLabel(node.id) }} · {{ node.id }}</div>
+            <div class="text-xs text-base-content/70 space-y-1">
+                <div v-if="node.srId || node.pos" class="flex flex-wrap items-center gap-2">
+                    <div>{{ getNodeLabel(node.id) }} · {{ node.id }}</div>
+                    <span v-if="node.srId" class="inline-flex items-center gap-1">
+                        <SubRegionLink :sub-region-id="node.srId" />
+                    </span>
+                    <span v-if="node.srId && node.pos" class="inline-flex items-center gap-1">
+                        <MapPosLink
+                            :sub-region-id="node.srId"
+                            :point="node.pos"
+                            :point-name="formatStoryText(props.questName || getNodeLabel(node.id))"
+                            :point-icon="props.questChainIcon || 'T_Gp_MainMission'"
+                        />
+                    </span>
+                </div>
+            </div>
 
             <TransitionGroup name="dialogue-list" tag="div" v-if="node.chain.length" class="space-y-2">
-                <div
+                <DBDialogueCard
                     v-for="item in node.chain"
                     :key="getQuestDialogueKey(node.id, item.dialogue)"
                     :ref="element => setDialogueElement(getQuestDialogueKey(node.id, item.dialogue), element)"
-                    class="dialogue-card p-2 rounded bg-base-200/80 space-y-1"
-                    :class="{ 'dialogue-card-playing': isVoicePlaying && currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id) }"
-                >
-                    <div class="space-y-1">
-                        <div class="flex items-center gap-2">
-                            <span
-                                class="font-medium text-primary mr-1 min-w-0 truncate"
-                                :title="`ID: ${item.dialogue.npc}`"
-                                v-if="item.dialogue.npc"
-                            >
-                                {{ getNPCName(item.dialogue.npc) }}:
-                            </span>
-                            <button
-                                v-if="item.dialogue.voice"
-                                type="button"
-                                class="btn btn-ghost btn-xs shrink-0 ml-auto"
-                                @click="toggleDialogueVoicePlayback(item.dialogue, node.id)"
-                            >
-                                <Icon
-                                    :icon="
-                                        currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id) && isVoicePlaying
-                                            ? 'ri:pause-circle-line'
-                                            : 'ri:play-circle-line'
-                                    "
-                                />
-                            </button>
-                        </div>
-                        <TypewriterText :text="item.dialogue.content" :trigger-key="`${questId}-${node.id}-${item.dialogue.id}`" />
-                        <div v-if="getImpressionEntries(item.dialogue).length" class="mt-1 flex flex-wrap gap-1.5">
-                            <span
-                                v-for="impression in getImpressionEntries(item.dialogue)"
-                                :key="`${item.dialogue.id}-${impression.regionId}-${impression.typeLabel}-dialogue-impr`"
-                                class="rounded border px-1.5 py-0.5 text-xs leading-none"
-                                :class="
-                                    impression.value > 0
-                                        ? 'border-success/40 bg-success/10 text-success'
-                                        : 'border-error/40 bg-error/10 text-error'
-                                "
-                            >
-                                {{ $t(getRegionType(impression.regionId)) }}·{{ impression.typeLabel }}
-                                {{ impression.value > 0 ? `+${impression.value}` : impression.value }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div v-if="item.dialogue.options?.length" class="space-y-2">
-                        <button
-                            v-for="(option, optionIndex) in item.dialogue.options"
-                            :key="option.id"
-                            type="button"
-                            class="group w-full rounded px-2.5 py-1.5 text-left text-xs transition-all duration-200"
-                            :class="
-                                item.selectedOption?.id === option.id ? 'bg-primary/80 shadow-sm' : 'bg-base-100/60  hover:bg-base-100/80'
-                            "
-                            @click="selectOption(getQuestNodeScopeKey(questId, node.id), item.dialogue.id, option.id)"
-                        >
-                            <div class="flex items-start gap-2">
-                                <span
-                                    class="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[9px] font-semibold"
-                                    :class="
-                                        item.selectedOption?.id === option.id
-                                            ? 'border-primary bg-primary text-primary-content'
-                                            : 'border-base-300 text-base-content/70 '
-                                    "
-                                >
-                                    {{ optionIndex + 1 }}
-                                </span>
-
-                                <div class="min-w-0 flex-1 flex items-center gap-1.5 flex-wrap">
-                                    <span class="leading-4 text-base-content/90 whitespace-normal">
-                                        {{ formatStoryText(option.content) }}
-                                    </span>
-
-                                    <span
-                                        v-for="impression in getImpressionEntries(option)"
-                                        :key="`${option.id}-${impression.regionId}-${impression.typeLabel}-impr`"
-                                        class="rounded border px-1.5 py-0.5 text-xs leading-none"
-                                        :class="
-                                            impression.value > 0
-                                                ? 'border-success/40 bg-success/10 text-success'
-                                                : 'border-error/40 bg-error/10 text-error'
-                                        "
-                                    >
-                                        {{ $t(getRegionType(impression.regionId)) }}·{{ impression.typeLabel }}
-                                        {{ impression.value > 0 ? `+${impression.value}` : impression.value }}
-                                    </span>
-
-                                    <span
-                                        v-for="impressionCheck in getImpressionCheckEntries(option)"
-                                        :key="`${option.id}-${impressionCheck.regionId}-${impressionCheck.typeLabel}-impr-check`"
-                                        class="rounded border border-info/40 bg-info/10 px-1.5 py-0.5 text-xs leading-none text-info"
-                                    >
-                                        印象检定 {{ $t(getRegionType(impressionCheck.regionId)) }}·{{ impressionCheck.typeLabel }}
-                                        ≥
-                                        {{ impressionCheck.threshold }}
-                                    </span>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
-                </div>
+                    :dialogue="item.dialogue"
+                    :selected-option="item.selectedOption"
+                    :trigger-key="`${questId}-${node.id}-${item.dialogue.id}`"
+                    :speaker-name="item.dialogue.npc ? `${getNPCName(item.dialogue.npc)}:` : undefined"
+                    :show-voice-button="!!item.dialogue.voice"
+                    :voice-playing="currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id) && isVoicePlaying"
+                    :playing="isVoicePlaying && currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id)"
+                    @select-option="payload => selectOption(getQuestNodeScopeKey(questId, node.id), payload.dialogueId, payload.optionId)"
+                    @voice-click="toggleDialogueVoicePlayback(item.dialogue, node.id)"
+                />
             </TransitionGroup>
 
             <div v-if="node.questions?.length" class="rounded bg-base-200/60 p-2 space-y-2">
@@ -1239,27 +1107,6 @@ watch(flattenedDialogueChain, () => {
 </template>
 
 <style scoped>
-.dialogue-card {
-    transition:
-        transform 220ms ease,
-        opacity 220ms ease,
-        box-shadow 220ms ease;
-    box-shadow: 0 0 0 transparent;
-}
-
-.dialogue-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 6px color-mix(in srgb, var(--color-base-content) 8%, transparent);
-}
-
-.dialogue-card-playing {
-    border: 1px solid color-mix(in srgb, var(--color-primary) 60%, transparent);
-    background: color-mix(in srgb, var(--color-primary) 8%, var(--color-base-100));
-    box-shadow:
-        0 0 0 1px color-mix(in srgb, var(--color-primary) 24%, transparent),
-        0 10px 24px color-mix(in srgb, var(--color-primary) 18%, transparent);
-}
-
 .dialogue-list-enter-active,
 .dialogue-list-leave-active {
     transition: all 320ms cubic-bezier(0.22, 1, 0.36, 1);

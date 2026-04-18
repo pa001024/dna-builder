@@ -5,6 +5,7 @@ import type { QuestItem, QuestStory } from "@/data/d/quest.data"
 import type { QuestChain } from "@/data/d/questchain.data"
 import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import { useSettingStore } from "@/store/setting"
+import { getQuestTypeDisplay } from "@/utils/quest-utils"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
@@ -26,6 +27,7 @@ interface QuestDetailItem {
 
 const props = defineProps<{
     questChain: QuestChain
+    focusQuestId?: number
 }>()
 
 const settingStore = useSettingStore()
@@ -208,6 +210,24 @@ function jumpToQuest(questId: number) {
     triggerQuestHighlight(questId)
 }
 
+/**
+ * 聚焦到指定任务。
+ * @param questId 目标任务 ID
+ */
+function focusQuest(questId: number) {
+    if (!questId) {
+        return
+    }
+
+    const targetElement = questElementMap.get(questId)
+    if (!targetElement) {
+        return
+    }
+
+    targetElement.scrollIntoView({ behavior: "smooth", block: "center" })
+    triggerQuestHighlight(questId)
+}
+
 onBeforeUnmount(() => {
     document.removeEventListener("pointerdown", handleVoiceSettingsPointerDown)
     for (const timer of questHighlightTimerMap.values()) {
@@ -216,6 +236,20 @@ onBeforeUnmount(() => {
     questHighlightTimerMap.clear()
     questElementMap.clear()
 })
+
+watch(
+    () => props.focusQuestId,
+    questId => {
+        if (!questId) {
+            return
+        }
+
+        void nextTick(() => {
+            focusQuest(questId)
+        })
+    },
+    { immediate: true }
+)
 
 watch(isVoiceSettingsOpen, isOpen => {
     if (isOpen) {
@@ -295,11 +329,12 @@ const questDetails = computed<QuestDetailItem[]>(() => {
  * @returns 版本号
  */
 const questChainVersion = computed(() => props.questChain.版本 || "")
+const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChain.type))
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-center justify-between">
+    <div class="space-y-3">
+        <div class="flex items-center justify-between p-3">
             <div class="flex items-center gap-3">
                 <div
                     v-if="questChain.icon"
@@ -309,12 +344,31 @@ const questChainVersion = computed(() => props.questChain.版本 || "")
                 />
 
                 <div>
-                    <SRouterLink :to="`/db/questchain/${questChain.id}`" class="text-lg font-bold link link-primary">
-                        {{ questChain.name }}
-                    </SRouterLink>
-                    <div class="text-sm text-base-content/70 flex flex-wrap items-center gap-2">
+                    <div class="flex items-center gap-2">
+                        <img
+                            :src="`/imgs/tp/${questChainTypeDisplay.icon}.webp`"
+                            :alt="questChainTypeDisplay.name"
+                            class="size-10 -m-2 shrink-0"
+                            loading="lazy"
+                        />
+                        <SRouterLink :to="`/db/questchain/${questChain.id}`" class="text-lg font-bold link link-primary">
+                            {{ questChain.name }}
+                        </SRouterLink>
                         <CopyID :id="questChain.id" />
+                    </div>
+                    <div class="text-sm text-base-content/70 flex flex-wrap items-center gap-2">
                         <span v-if="questChainVersion">v{{ questChainVersion }}</span>
+                        <span>{{ questChainTypeDisplay.name }}</span>
+                        <span>{{ questChain.episode }}</span>
+                        <span>{{ questChain.chapterName }} {{ questChain.chapterNumber || "" }}</span>
+                        <div v-if="questChain.startTime" class="flex justify-between">
+                            <span class="text-base-content/70">开始时间</span>
+                            <span>{{ new Date(questChain.startTime * 1000).toLocaleString() }}</span>
+                        </div>
+                        <div v-if="questChain.endTime" class="flex justify-between">
+                            <span class="text-base-content/70">结束时间</span>
+                            <span>{{ new Date(questChain.endTime * 1000).toLocaleString() }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -350,61 +404,45 @@ const questChainVersion = computed(() => props.questChain.版本 || "")
             </div>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 rounded p-3">
-            <h3 class="font-bold mb-2">基本信息</h3>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">ID</span>
-                    <span>{{ questChain.id }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">章节</span>
-                    <span>{{ questChain.chapterName }} {{ questChain.chapterNumber || "" }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">剧集</span>
-                    <span>{{ questChain.episode }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">类型</span>
-                    <span>{{ questChain.type }}</span>
-                </div>
-                <div v-if="questChain.main" class="flex justify-between">
-                    <span class="text-base-content/70">主线</span>
-                    <span class="px-2 py-0.5 rounded bg-info text-info-content">是</span>
-                </div>
-                <div v-if="questChain.startTime" class="flex justify-between">
-                    <span class="text-base-content/70">开始时间</span>
-                    <span>{{ new Date(questChain.startTime * 1000).toLocaleString() }}</span>
-                </div>
-                <div v-if="questChain.endTime" class="flex justify-between">
-                    <span class="text-base-content/70">结束时间</span>
-                    <span>{{ new Date(questChain.endTime * 1000).toLocaleString() }}</span>
+        <div v-if="questChain.reward?.length" class="bg-base-100 rounded p-3">
+            <h3 class="font-bold mb-2">奖励信息</h3>
+            <div class="space-y-3">
+                <div
+                    v-for="(reward, index) in questChain.reward
+                        .map(id => getRewardDetails(id))
+                        .filter((rewardItem): rewardItem is RewardItemType => !!rewardItem)"
+                    :key="reward.id"
+                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                >
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium">#{{ index + 1 }} 奖励组 {{ reward.id }}</span>
+
+                        <span
+                            class="text-sm px-1.5 py-0.5 rounded"
+                            :class="
+                                getDropModeText(reward.m || '') === '独立'
+                                    ? 'bg-success text-success-content'
+                                    : 'bg-warning text-warning-content'
+                            "
+                        >
+                            {{ getDropModeText(reward.m || "") }}
+                            <span v-if="reward.totalP"> 总概率 {{ reward.totalP }}</span>
+                        </span>
+                    </div>
+
+                    <RewardItem :reward="reward" />
                 </div>
             </div>
         </div>
 
-        <div v-if="questChain.desc || questChain.detail" class="card bg-base-100 border border-base-200 rounded p-3">
-            <div class="text-sm">
-                <div v-if="questChain.desc" class="mb-2">
-                    <span class="text-base-content/70">描述: </span>
-                    <span>{{ questChain.desc }}</span>
-                </div>
-                <div v-if="questChain.detail">
-                    <span class="text-base-content/70">详情: </span>
-                    <span>{{ questChain.detail }}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="card bg-base-100 border border-base-200 rounded p-3">
+        <div class="bg-base-100 rounded p-3">
             <h3 class="font-bold mb-2">任务列表 ({{ questChain.quests.length }}个)</h3>
             <div class="space-y-3">
                 <div
                     v-for="quest in questDetails"
                     :key="quest.id"
+                    :data-quest-id="quest.id"
                     :ref="element => setQuestElement(quest.id, element)"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-all duration-300"
                     :class="{ 'quest-node-highlight': highlightedQuestMap[quest.id] }"
                 >
                     <div class="flex items-center justify-between mb-1">
@@ -445,6 +483,8 @@ const questChainVersion = computed(() => props.questChain.版本 || "")
                         :quest-id="quest.id"
                         :nodes="quest.details.nodes"
                         :start-ids="quest.details.startIds"
+                        :quest-chain-icon="questChain.icon"
+                        :quest-name="quest.details?.name || questChain.name"
                         :voice-language="selectedVoiceLocale"
                     />
 
@@ -452,37 +492,6 @@ const questChainVersion = computed(() => props.questChain.版本 || "")
                         <div class="text-sm font-medium mb-1">任务奖励:</div>
                         <RewardItem :reward="quest.reward as RewardItemType" />
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div v-if="questChain.reward?.length" class="card bg-base-100 border border-base-200 rounded p-3">
-            <h3 class="font-bold mb-2">奖励信息</h3>
-            <div class="space-y-3">
-                <div
-                    v-for="(reward, index) in questChain.reward
-                        .map(id => getRewardDetails(id))
-                        .filter((rewardItem): rewardItem is RewardItemType => !!rewardItem)"
-                    :key="reward.id"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
-                >
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium">#{{ index + 1 }} 奖励组 {{ reward.id }}</span>
-
-                        <span
-                            class="text-sm px-1.5 py-0.5 rounded"
-                            :class="
-                                getDropModeText(reward.m || '') === '独立'
-                                    ? 'bg-success text-success-content'
-                                    : 'bg-warning text-warning-content'
-                            "
-                        >
-                            {{ getDropModeText(reward.m || "") }}
-                            <span v-if="reward.totalP"> 总概率 {{ reward.totalP }}</span>
-                        </span>
-                    </div>
-
-                    <RewardItem :reward="reward" />
                 </div>
             </div>
         </div>

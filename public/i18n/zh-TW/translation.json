@@ -5314,6 +5314,8 @@
         "fish_desc": "釣魚點詳細收益計算",
         "hardboss": "夢魘殘聲",
         "hardboss_desc": "查看夢魘殘聲信息和獎勵",
+        "impr": "印象",
+        "impr_desc": "查看任務、NPC、派遣委託的印象增加資訊",
         "map": "地圖",
         "map_desc": "查看地圖標點",
         "mod": "魔之楔",
@@ -5344,7 +5346,7 @@
         "walnut": "密函",
         "walnut_desc": "查看密函機率資訊和模擬抽取",
         "weapon": "武器",
-        "weapon_desc": "查看武器信息和屬性"
+        "weapon_desc": "查看武器資訊和屬性"
     },
     "db-damage": {
         "desc": "逐步拆解 CharBuild 傷害公式並支援手動覆蓋",

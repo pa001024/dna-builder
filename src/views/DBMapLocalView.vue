@@ -167,7 +167,7 @@ interface MapPointInfo {
  */
 function resolveMapPointIconUrl(icon: string | null): string {
     if (!icon) return ""
-    return `/imgs/res/${icon}.webp`
+    return icon.startsWith("T_Gp_") ? `/imgs/tp/${icon}.webp` : `/imgs/res/${icon}.webp`
 }
 
 interface RegionProjectionRuntimeConfig {
@@ -367,14 +367,29 @@ function parseRouteQueryNumber(value: unknown): number | null {
  */
 function queuePendingMapPointFocus(worldX: number, worldY: number, name: string, iconUrl: string) {
     pendingMapPointFocus.value = { worldX, worldY, name, iconUrl }
-    if (pendingRoutePointFocusTimerId.value !== 0) {
-        return
-    }
+    schedulePendingMapPointFocus()
+}
+
+/**
+ * 在图片加载完成后启动点位聚焦计时器。
+ */
+function schedulePendingMapPointFocus() {
+    if (isImageLoading.value) return
+    if (!pendingMapPointFocus.value || pendingRoutePointFocusTimerId.value !== 0) return
 
     pendingRoutePointFocusTimerId.value = window.setTimeout(() => {
         pendingRoutePointFocusTimerId.value = 0
         flushPendingMapPointFocus()
     }, 500)
+}
+
+/**
+ * 清理尚未触发的点位聚焦计时器。
+ */
+function clearPendingMapPointFocusTimer() {
+    if (pendingRoutePointFocusTimerId.value === 0) return
+    clearTimeout(pendingRoutePointFocusTimerId.value)
+    pendingRoutePointFocusTimerId.value = 0
 }
 
 /**
@@ -1002,6 +1017,7 @@ function focusMapPoint(worldX: number, worldY: number, name: string) {
         return
     }
     pendingMapPointFocus.value = null
+    clearPendingMapPointFocusTimer()
     animatePointFocus(mapped.x, mapped.y)
 }
 
@@ -1473,6 +1489,7 @@ async function loadCurrentProfileImages() {
     } finally {
         isImageLoading.value = false
         requestDraw()
+        schedulePendingMapPointFocus()
     }
 }
 
@@ -1866,6 +1883,7 @@ async function clearRouteMapPoint() {
     routeMapPoint.value = null
     selectedMapPoint.value = null
     pendingMapPointFocus.value = null
+    clearPendingMapPointFocusTimer()
     requestDraw()
     const nextQuery = { ...route.query }
     delete nextQuery.pointName
@@ -2609,6 +2627,7 @@ watch(
     async () => {
         selectedMapPoint.value = null
         pendingMapPointFocus.value = null
+        clearPendingMapPointFocusTimer()
         requestDraw()
         initializeActiveLayers(currentProfile.value)
         resetRegionSelectionState()
@@ -2618,6 +2637,7 @@ watch(
         await nextTick()
         resetView()
         applyRouteTargetSelection()
+        schedulePendingMapPointFocus()
     },
     { immediate: true }
 )
@@ -2664,19 +2684,11 @@ onMounted(() => {
     resizeObserver.observe(container)
     syncRouteMapPoint()
     requestDraw()
-    if (pendingMapPointFocus.value && pendingRoutePointFocusTimerId.value === 0) {
-        pendingRoutePointFocusTimerId.value = window.setTimeout(() => {
-            pendingRoutePointFocusTimerId.value = 0
-            flushPendingMapPointFocus()
-        }, 500)
-    }
+    schedulePendingMapPointFocus()
 })
 
 onUnmounted(() => {
-    if (pendingRoutePointFocusTimerId.value) {
-        clearTimeout(pendingRoutePointFocusTimerId.value)
-        pendingRoutePointFocusTimerId.value = 0
-    }
+    clearPendingMapPointFocusTimer()
     if (drawRaf) {
         cancelAnimationFrame(drawRaf)
         drawRaf = 0

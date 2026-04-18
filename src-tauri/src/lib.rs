@@ -2168,6 +2168,21 @@ async fn run_script(script_path: String, app_handle: tauri::AppHandle) -> Result
     }
 }
 
+#[tauri::command]
+async fn exec_script(
+    script: String,
+    scope: Option<String>,
+    timeout_ms: Option<u64>,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
+    use submodules::script::exec_script_with_tauri_console;
+    let result = exec_script_with_tauri_console(script, scope, app_handle)
+        .await
+        .map_err(|e| format!("临时脚本执行失败: {}", e))?;
+    let _ = timeout_ms;
+    Ok(result.result)
+}
+
 /// CLI 入口：执行指定脚本文件。
 ///
 /// # 参数
@@ -3000,6 +3015,7 @@ pub fn run() {
         get_file_hash,
         cleanup_temp_dir,
         run_script,
+        exec_script,
         resolve_script_config_request,
         resolve_script_help_request,
         stop_script,
