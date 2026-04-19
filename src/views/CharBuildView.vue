@@ -687,7 +687,7 @@ function handleTourStep(index: number) {
         charTab.value = "近战"
     }
     const scrollArea = document.querySelector(
-        index >= 5 ? "#char-build-scroll2 [data-radix-scroll-area-viewport]" : "#char-build-scroll1 [data-radix-scroll-area-viewport]"
+        index >= 5 ? "#char-build-scroll2 [data-reka-scroll-area-viewport]" : "#char-build-scroll1 [data-reka-scroll-area-viewport]"
     )
     if (!scrollArea) return
     const viewportHeight = scrollArea.clientHeight

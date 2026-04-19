@@ -47,7 +47,7 @@ onMounted(() => {
 </template>
 
 <style lang="css">
-[data-radix-scroll-area-viewport] > div {
+[data-reka-scroll-area-viewport] > div {
     min-height: 100%;
 }
 </style>

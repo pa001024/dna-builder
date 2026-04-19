@@ -134,6 +134,72 @@ function hasMessageInCachedPage(cache: Cache, roomId: string, offset: number, ms
     return cachedPage?.msgs?.some(item => item.id === msgId) ?? false
 }
 
+/**
+ * @description 将新消息同步写入房间元信息和最新消息分页缓存。
+ * @param cache Graphcache 实例。
+ * @param roomId 房间 ID。
+ * @param msg 新消息对象。
+ */
+function updateNewMessageCache(cache: Cache, roomId: string, msg: any) {
+    const roomCache = cache.readFragment<{ id: string; msgCount?: number; lastMsg?: { id?: string } | null }>(ROOM_MSG_META_FRAGMENT, {
+        id: roomId as any,
+    })
+    const hasWrittenAsLastMessage = roomCache?.lastMsg?.id === msg.id
+    const currentCount = roomCache?.msgCount || 0
+    const nextCount = hasWrittenAsLastMessage ? currentCount : currentCount + 1
+    const latestPageOffset = getLatestMsgPageOffset(nextCount)
+    const hasMessageInLatestPage = hasMessageInCachedPage(cache, roomId, latestPageOffset, msg.id)
+
+    cache.writeFragment(ROOM_LAST_MSG_FRAGMENT, {
+        id: roomId,
+        msgCount: nextCount,
+        lastMsg: {
+            __typename: "Msg",
+            id: msg.id,
+            roomId: msg.roomId,
+            userId: msg.userId,
+            edited: msg.edited,
+            content: msg.content,
+            replyToMsgId: msg.replyToMsgId,
+            replyToUserId: msg.replyToUserId,
+            createdAt: msg.createdAt,
+            updateAt: msg.updateAt,
+            user: msg.user && {
+                __typename: "User",
+                id: msg.user.id,
+                name: msg.user.name,
+                qq: msg.user.qq,
+            },
+            replyTo: msg.replyTo && {
+                __typename: "Msg",
+                id: msg.replyTo.id,
+                content: msg.replyTo.content,
+                user: msg.replyTo.user && {
+                    __typename: "User",
+                    id: msg.replyTo.user.id,
+                    name: msg.replyTo.user.name,
+                    qq: msg.replyTo.user.qq,
+                },
+            },
+        },
+    })
+
+    cache.updateQuery(
+        {
+            query: ROOM_MSGS_QUERY,
+            variables: { roomId, limit: CHAT_MSG_PAGE_LIMIT, offset: latestPageOffset },
+        },
+        data => {
+            if (hasMessageInLatestPage) return data
+            if (!data) return { msgs: [msg] }
+            return {
+                ...data,
+                msgs: [...data.msgs, msg],
+            }
+        }
+    )
+}
+
 const cacheExchange = graphcacheExchange({
     keys: {
         UserDailyExperienceStatus: () => null,
@@ -294,69 +360,17 @@ const cacheExchange = graphcacheExchange({
                     }
                 )
             },
+            // newMessage(result: any, args, cache, _info) {
+            //     const msg = result.newMessage
+            //     if (!msg?.id) return
+            //     updateNewMessageCache(cache, args.roomId as string, msg)
+            // },
+        },
+        Subscription: {
             newMessage(result: any, args, cache, _info) {
                 const msg = result.newMessage
                 if (!msg?.id) return
-                const roomId = args.roomId as string
-
-                const roomCache = cache.readFragment<{ id: string; msgCount?: number; lastMsg?: { id?: string } | null }>(
-                    ROOM_MSG_META_FRAGMENT,
-                    { id: roomId as any }
-                )
-                const hasWrittenAsLastMessage = roomCache?.lastMsg?.id === msg.id
-                const currentCount = roomCache?.msgCount || 0
-                const nextCount = hasWrittenAsLastMessage ? currentCount : currentCount + 1
-                const latestPageOffset = getLatestMsgPageOffset(nextCount)
-                const hasMessageInLatestPage = hasMessageInCachedPage(cache, roomId, latestPageOffset, msg.id)
-
-                cache.writeFragment(ROOM_LAST_MSG_FRAGMENT, {
-                    id: roomId,
-                    msgCount: nextCount,
-                    lastMsg: {
-                        __typename: "Msg",
-                        id: msg.id,
-                        roomId: msg.roomId,
-                        userId: msg.userId,
-                        edited: msg.edited,
-                        content: msg.content,
-                        replyToMsgId: msg.replyToMsgId,
-                        replyToUserId: msg.replyToUserId,
-                        createdAt: msg.createdAt,
-                        updateAt: msg.updateAt,
-                        user: msg.user && {
-                            __typename: "User",
-                            id: msg.user.id,
-                            name: msg.user.name,
-                            qq: msg.user.qq,
-                        },
-                        replyTo: msg.replyTo && {
-                            __typename: "Msg",
-                            id: msg.replyTo.id,
-                            content: msg.replyTo.content,
-                            user: msg.replyTo.user && {
-                                __typename: "User",
-                                id: msg.replyTo.user.id,
-                                name: msg.replyTo.user.name,
-                                qq: msg.replyTo.user.qq,
-                            },
-                        },
-                    },
-                })
-
-                cache.updateQuery(
-                    {
-                        query: ROOM_MSGS_QUERY,
-                        variables: { roomId, limit: CHAT_MSG_PAGE_LIMIT, offset: latestPageOffset },
-                    },
-                    data => {
-                        if (hasMessageInLatestPage) return data
-                        if (!data) return { msgs: [msg] }
-                        return {
-                            ...data,
-                            msgs: [...data.msgs, msg],
-                        }
-                    }
-                )
+                updateNewMessageCache(cache, args.roomId as string, msg)
             },
             msgEdited(result: any, _args, cache, _info) {
                 const fragment = gql`
