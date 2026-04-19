@@ -731,9 +731,6 @@ export const msgsQuery = typedQuery(
                         name
                         qq
                         level
-                        currentTitleText
-                        currentTitleClass
-                        nameEffectClass
                     }
                 }
             }
@@ -771,9 +768,6 @@ export const lastMsgsQuery = typedQuery(
                         name
                         qq
                         level
-                        currentTitleText
-                        currentTitleClass
-                        nameEffectClass
                     }
                 }
             }

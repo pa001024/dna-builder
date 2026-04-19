@@ -5,6 +5,7 @@
 >
 import { until, useInfiniteScroll } from "@vueuse/core"
 import { computed, nextTick, onMounted, Ref, ref, watch } from "vue"
+import { sleep } from "@/util"
 
 const props = defineProps<{
     distance?: number
@@ -28,6 +29,7 @@ useInfiniteScroll(el, getNextPage, { distance: props.distance ?? 20, direction: 
 const pages: Ref<{ limit: number; offset: number; loaded: boolean }[]> = ref([])
 const end = ref(true)
 const loading = ref(true)
+const firstLoading = ref(true)
 const fixedOffset = computed(() => {
     const limit = props.limit ?? 10
     const offset = props.offset ?? 0
@@ -66,7 +68,12 @@ async function getNextPage() {
     console.debug(`[GQAutoPage] getNextPage(${props.dataKey}) page=${pages.value.length} offset=${offset}`)
     await until(() => pages.value[pages.value.length - 1].loaded).toBe(true)
     loading.value = false
-    if (isTop && oriHeight) {
+    if (firstLoading.value) {
+        el.value?.scrollTo({
+            top: el.value.scrollHeight,
+            left: 0,
+        })
+    } else if (isTop && oriHeight) {
         await nextTick()
         el.value!.scrollTop = el.value!.scrollHeight - oriHeight
         await nextTick()
@@ -79,7 +86,6 @@ async function ready() {
         el.value?.scrollTo({
             top: el.value.scrollHeight,
             left: 0,
-            // behavior: "smooth",
         })
     }
 }
@@ -92,12 +98,14 @@ async function reload() {
     await nextTick()
     while (!end.value) {
         await getNextPage()
+        await sleep(500)
         if (props.direction === "top") {
             if (pages.value[0].offset === 0) break
         }
         if (el.value!.scrollHeight >= el.value!.offsetHeight) break
     }
     ready()
+    firstLoading.value = false
 }
 
 const emit = defineEmits(["load", "loadref"])
