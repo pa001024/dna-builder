@@ -56,6 +56,8 @@ const showNewScriptDialog = ref(false)
 const newScriptName = ref("")
 const editingScript = ref<string | null>(null)
 const editingScriptName = ref("")
+const useHotkeyRecorder = ref(true)
+const useGameWinActive = ref(false)
 const publishingScript = ref(false)
 const renamingScriptInFlight = ref(false)
 let startEditScriptTimer: ReturnType<typeof setTimeout> | null = null
@@ -1041,6 +1043,8 @@ function openScriptHotkeyDialog(scriptName: string) {
     editingHotkeyValue.value = existing?.hotkey ?? ""
     editingHotkeyWinActive.value = existing?.hotIfWinActive ?? ""
     editingHotkeyHoldToLoop.value = existing?.holdToLoop ?? false
+    useHotkeyRecorder.value = true
+    useGameWinActive.value = editingHotkeyWinActive.value === "ahk_exe EM-Win64-Shipping.exe"
     showScriptHotkeyDialog.value = true
 }
 
@@ -3512,7 +3516,10 @@ onUnmounted(async () => {
                                         <Icon v-else icon="ri:file-line" class="w-4 h-4 shrink-0" />
                                         <div v-if="editingScript !== script" class="flex-1 min-w-0 flex items-center gap-2">
                                             <span class="truncate">{{ script }}</span>
-                                            <span v-if="scriptRuntime.scriptHotkeyStore[script]" class="badge badge-outline badge-xs shrink-0">
+                                            <span
+                                                v-if="scriptRuntime.scriptHotkeyStore[script]"
+                                                class="badge badge-outline badge-xs shrink-0"
+                                            >
                                                 {{ scriptRuntime.formatScriptHotkeyBadgeText(scriptRuntime.scriptHotkeyStore[script]) }}
                                             </span>
                                         </div>
@@ -4194,24 +4201,47 @@ onUnmounted(async () => {
                         <span class="text-base-content/70">{{ $t("script-list.script_name") }}：</span>
                         <span class="font-mono">{{ editingHotkeyScriptName }}</span>
                     </div>
-                    <label class="label block">
-                        <div class="mb-2 text-sm">{{ $t("script-list.ahk_hotkey") }}</div>
-                        <input
-                            v-model="editingHotkeyValue"
-                            type="text"
-                            class="input input-bordered w-full"
-                            :placeholder="$t('script-list.hotkey_example')"
-                        />
-                    </label>
-                    <label class="label block">
-                        <div class="mb-2 text-sm">{{ $t("script-list.hotif_condition") }}</div>
+                    <div class="block">
+                        <div class="mb-2 flex items-center justify-between gap-3 text-sm">
+                            <span>{{ $t("script-list.ahk_hotkey") }}</span>
+                            <label class="label cursor-pointer gap-2 py-0">
+                                <span class="label-text text-xs text-base-content/60">录制</span>
+                                <input v-model="useHotkeyRecorder" type="checkbox" class="toggle toggle-sm toggle-primary" />
+                            </label>
+                        </div>
+                        <template v-if="useHotkeyRecorder">
+                            <HotkeyInput v-model="editingHotkeyValue" size="sm" :placeholder="$t('script-list.hotkey_example')" />
+                        </template>
+                        <template v-else>
+                            <input
+                                v-model="editingHotkeyValue"
+                                type="text"
+                                class="input input-bordered w-full"
+                                :placeholder="$t('script-list.hotkey_example')"
+                            />
+                        </template>
+                    </div>
+                    <div class="block">
+                        <div class="mb-2 flex items-center justify-between gap-3 text-sm">
+                            <span>{{ $t("script-list.hotif_condition") }}</span>
+                            <label class="label cursor-pointer gap-2 py-0">
+                                <span class="label-text text-xs text-base-content/60">游戏内</span>
+                                <input
+                                    v-model="useGameWinActive"
+                                    type="checkbox"
+                                    class="toggle toggle-sm toggle-primary"
+                                    @change="editingHotkeyWinActive = useGameWinActive ? 'ahk_exe EM-Win64-Shipping.exe' : ''"
+                                />
+                            </label>
+                        </div>
                         <input
                             v-model="editingHotkeyWinActive"
                             type="text"
                             class="input input-bordered w-full"
+                            :disabled="useGameWinActive"
                             :placeholder="$t('script-list.hotif_example')"
                         />
-                    </label>
+                    </div>
                     <label class="label cursor-pointer justify-start gap-3">
                         <input v-model="editingHotkeyHoldToLoop" type="checkbox" class="checkbox checkbox-sm" />
                         <span class="label-text text-sm">{{ $t("script-list.hold_to_loop") }}</span>
