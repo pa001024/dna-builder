@@ -32,6 +32,24 @@ let pendingTimer: number | null = null
 const previewSizeClass = computed(() => (props.size === "md" ? "" : `kbd-${props.size}`))
 
 /**
+ * 生成 input 容器尺寸类。
+ */
+const inputSizeClass = computed(() => {
+    switch (props.size) {
+        case "xs":
+            return "input-xs"
+        case "sm":
+            return "input-sm"
+        case "lg":
+            return "input-lg"
+        case "xl":
+            return "input-xl"
+        default:
+            return ""
+    }
+})
+
+/**
  * 生成预览片段。
  */
 const previewTokens = computed(() => tokenizeHotkeyDisplay(recording.value && pendingKey.value ? pendingKey.value : model.value))
@@ -208,13 +226,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="input input-bordered flex w-full items-center px-0 py-0" :class="recording ? 'input-primary' : ''">
+    <div class="input input-bordered flex w-full items-center px-0 py-0" :class="[inputSizeClass, recording ? 'input-primary' : '']">
         <div
-            class="flex min-h-10 flex-1 items-center gap-1 px-3 py-2"
+            class="flex min-h-full flex-1 items-center gap-1 px-3"
             role="button"
             tabindex="0"
-            :aria-disabled="props.disabled ? 'true' : 'false'"
-            :aria-label="props.placeholder || 'Hotkey input'"
+            :aria-disabled="disabled ? 'true' : 'false'"
+            :aria-label="placeholder"
             @click="startRecording"
             @keydown.enter.prevent="startRecording"
             @keydown.space.prevent="startRecording"
@@ -230,12 +248,28 @@ onBeforeUnmount(() => {
         <button
             v-if="model"
             type="button"
-            class="mr-2 inline-flex size-8 shrink-0 items-center justify-center rounded text-error/80 cursor-pointer transition-colors hover:bg-error/20 hover:text-error disabled:cursor-not-allowed disabled:opacity-40"
-            :disabled="props.disabled"
+            class="mr-2 inline-flex shrink-0 items-center justify-center rounded text-error/80 cursor-pointer transition-colors hover:bg-error/20 hover:text-error disabled:cursor-not-allowed disabled:opacity-40"
+            :class="{
+                'size-5': props.size === 'xs',
+                'size-6': props.size === 'sm',
+                'size-8': props.size === 'md',
+                'size-9': props.size === 'lg',
+                'size-10': props.size === 'xl',
+            }"
+            :disabled="disabled"
             aria-label="清除热键"
-            @click="clearHotkey"
+            @click.stop="clearHotkey"
         >
-            <Icon icon="radix-icons:cross2" class="w-4 h-4" />
+            <Icon
+                icon="radix-icons:cross2"
+                :class="{
+                    'w-3 h-3': props.size === 'xs',
+                    'w-3.5 h-3.5': props.size === 'sm',
+                    'w-4 h-4': props.size === 'md',
+                    'w-4.5 h-4.5': props.size === 'lg',
+                    'w-5 h-5': props.size === 'xl',
+                }"
+            />
         </button>
     </div>
 </template>

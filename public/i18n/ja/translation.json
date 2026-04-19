@@ -5298,6 +5298,10 @@
     "common": {
         "delete": "削除"
     },
+    "counter": {
+        "desc": "カウンター",
+        "title": "カウンター"
+    },
     "damageResult": {
         "critDamage": {
             "highCritNoTrigger": "高クリティカル未発動",

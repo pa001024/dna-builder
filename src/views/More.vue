@@ -22,6 +22,11 @@ const items = [
         show: env.isApp && !setting.safeMode,
     },
     {
+        name: "counter",
+        path: "/counter",
+        icon: "ri:bar-chart-line",
+    },
+    {
         name: "build-compare",
         path: "/char-build-compare",
         icon: "ri:table-view",

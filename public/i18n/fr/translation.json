@@ -5229,6 +5229,10 @@
     "common": {
         "delete": "Supprimer"
     },
+    "counter": {
+        "desc": "Compteurs",
+        "title": "Compteur"
+    },
     "damageResult": {
         "critDamage": {
             "highCritNoTrigger": "Critique élevé non déclenché",

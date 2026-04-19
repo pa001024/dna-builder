@@ -5263,6 +5263,10 @@
     "common": {
         "delete": "刪除"
     },
+    "counter": {
+        "desc": "計數器",
+        "title": "計數器"
+    },
     "damageResult": {
         "critDamage": {
             "highCritNoTrigger": "高暴擊未觸發",

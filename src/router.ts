@@ -6,6 +6,7 @@ import CharBuildCompare from "./views/CharBuildCompare.vue"
 import CharBuildView from "./views/CharBuildView.vue"
 import CharBuildViewNew from "./views/CharBuildViewNew.vue"
 import CharListView from "./views/CharListView.vue"
+import CounterView from "./views/CounterView.vue"
 import GuideDetailView from "./views/GuideDetailView.vue"
 import GuideEditView from "./views/GuideEditView.vue"
 import GuideListView from "./views/GuideListView.vue"
@@ -28,6 +29,7 @@ let setMinSize = async (_w: number, _h: number) => {}
 
 const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(360, 430) },
+    { name: "counter", path: "/counter", component: CounterView, beforeEnter: () => setMinSize(360, 430) },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
     {
         name: "points-mall",

@@ -404,6 +404,10 @@
     "common": {
         "delete": "删除"
     },
+    "counter": {
+        "desc": "计数器",
+        "title": "计数器"
+    },
     "damageResult": {
         "critDamage": {
             "highCritNoTrigger": "高暴击未触发",

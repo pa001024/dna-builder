@@ -5303,6 +5303,10 @@
     "common": {
         "delete": "삭제"
     },
+    "counter": {
+        "desc": "카운터",
+        "title": "카운터"
+    },
     "damageResult": {
         "critDamage": {
             "highCritNoTrigger": "고 크리티컬 미발동",
