@@ -19,7 +19,7 @@ const CONFIG = {
     publisher: "CN=C21F0FE3-67AF-43C3-A412-51014CF129FA",
     description: "DNA Builder 应用",
     // 版本
-    version: "1.0.3.0",
+    version: "1.0.4.0",
     // 显示名称
     displayName: "DNA Builder",
     // 发布者显示名称
