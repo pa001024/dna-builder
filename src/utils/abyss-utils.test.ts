@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import type { AbyssDungeon } from "@/data"
-import { abyssDungeons } from "@/data/d/abyss.data"
+import type { AbyssDungeon } from "@/data/d/abyss.data"
+import { abyssDungeons, defaultImmortalSeasonId, immortalMonsterLevelRules } from "@/data/d/abyss.data"
 import {
     getAbyssCumulativeRewardItems,
     getAbyssCumulativeRewardRows,
@@ -10,7 +10,7 @@ import {
 } from "./abyss-utils"
 
 function getImmortalTestDungeon(): AbyssDungeon {
-    const dungeon = abyssDungeons.find(item => item.id === 2013011)
+    const dungeon = abyssDungeons.find((item: AbyssDungeon) => item.id === 2013011)
     if (!dungeon) {
         throw new Error("缺少不朽剧目测试数据")
     }
@@ -25,17 +25,32 @@ describe("abyss-utils", () => {
     })
 
     it("应该按不朽剧目幕数换算怪物等级", () => {
-        expect(getImmortalMonsterLevelByActCount(1)).toBe(90)
-        expect(getImmortalMonsterLevelByActCount(2)).toBe(92)
-        expect(getImmortalMonsterLevelByActCount(3)).toBe(94)
-        expect(getImmortalMonsterLevelByActCount(4)).toBe(96)
-        expect(getImmortalMonsterLevelByActCount(5)).toBe(98)
-        expect(getImmortalMonsterLevelByActCount(6)).toBe(105)
-        expect(getImmortalMonsterLevelByActCount(7)).toBe(108)
-        expect(getImmortalMonsterLevelByActCount(8)).toBe(110)
-        expect(getImmortalMonsterLevelByActCount(9)).toBe(112)
-        expect(getImmortalMonsterLevelByActCount(12)).toBe(123)
-        expect(getImmortalMonsterLevelByActCount(20)).toBe(146)
+        const rule = immortalMonsterLevelRules[1007]
+        const expected = (actCount: number) => {
+            const levelIndex = Math.max(1, Math.trunc(actCount))
+            const loopTime = Math.trunc((levelIndex - 1) / rule.initLevels.length)
+            const realIndex = (levelIndex - 1) % rule.initLevels.length
+            return rule.initLevels[realIndex] + rule.levelAddOn * loopTime
+        }
+
+        expect(rule.abyssId).toBe(1312)
+        expect(rule.levelIds).toEqual([13031, 13032, 13033, 13034, 13035, 13036])
+        expect(rule.initLevels).toEqual([90, 92, 94, 96, 98, 104])
+        expect(rule.levelAddOn).toBe(16)
+        expect(getImmortalMonsterLevelByActCount(1, 1007)).toBe(expected(1))
+        expect(getImmortalMonsterLevelByActCount(2, 1007)).toBe(expected(2))
+        expect(getImmortalMonsterLevelByActCount(3, 1007)).toBe(expected(3))
+        expect(getImmortalMonsterLevelByActCount(4, 1007)).toBe(expected(4))
+        expect(getImmortalMonsterLevelByActCount(5, 1007)).toBe(expected(5))
+        expect(getImmortalMonsterLevelByActCount(6, 1007)).toBe(expected(6))
+        expect(getImmortalMonsterLevelByActCount(7, 1007)).toBe(expected(7))
+        expect(getImmortalMonsterLevelByActCount(8, 1007)).toBe(expected(8))
+        expect(getImmortalMonsterLevelByActCount(9, 1007)).toBe(expected(9))
+        expect(getImmortalMonsterLevelByActCount(12, 1007)).toBe(expected(12))
+        expect(getImmortalMonsterLevelByActCount(13, 1007)).toBe(expected(13))
+        expect(getImmortalMonsterLevelByActCount(18, 1007)).toBe(expected(18))
+        expect(getImmortalMonsterLevelByActCount(24, 1007)).toBe(expected(24))
+        expect(getImmortalMonsterLevelByActCount(24)).toBe(getImmortalMonsterLevelByActCount(24, defaultImmortalSeasonId))
     })
 
     it("应该按阈值顺序推进累计奖励星数", () => {

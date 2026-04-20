@@ -39,7 +39,9 @@ watch([fromValue, toValue], ([newFrom, newTo]) => {
     tempTo.value = newTo
 })
 
-// 确认选择
+/**
+ * 确认当前选择并同步到外部绑定值。
+ */
 const confirmSelection = () => {
     fromValue.value = tempFrom.value
     toValue.value = tempTo.value
@@ -47,7 +49,9 @@ const confirmSelection = () => {
     open.value = false
 }
 
-// 取消选择
+/**
+ * 取消本次编辑，恢复打开面板前的范围。
+ */
 const cancelSelection = () => {
     // 重置为原始值
     tempFrom.value = fromValue.value
@@ -55,18 +59,25 @@ const cancelSelection = () => {
     open.value = false
 }
 
-// 输入验证
+/**
+ * 校验起始值，允许起止值相同。
+ * @param event 输入事件
+ */
 const handleMinInput = (event: Event) => {
     const input = event.target as HTMLInputElement
     let value = parseInt(input.value) || props.min
-    value = Math.max(props.min, Math.min(value, tempTo.value - props.step))
+    value = Math.max(props.min, Math.min(value, tempTo.value))
     tempFrom.value = value
 }
 
+/**
+ * 校验结束值，允许起止值相同。
+ * @param event 输入事件
+ */
 const handleMaxInput = (event: Event) => {
     const input = event.target as HTMLInputElement
     let value = parseInt(input.value) || props.min
-    value = Math.max(tempFrom.value + props.step, Math.min(value, props.max))
+    value = Math.max(tempFrom.value, Math.min(value, props.max))
     tempTo.value = value
 }
 </script>
@@ -103,7 +114,7 @@ const handleMaxInput = (event: Event) => {
                                 @input="handleMinInput"
                                 type="number"
                                 :min="props.min"
-                                :max="tempTo - props.step"
+                                :max="tempTo"
                                 :step="props.step"
                                 class="w-20 text-center font-bold bg-base-200 rounded-lg p-2"
                             />
@@ -112,7 +123,7 @@ const handleMaxInput = (event: Event) => {
                                 v-model.number="tempTo"
                                 @input="handleMaxInput"
                                 type="number"
-                                :min="tempFrom + props.step"
+                                :min="tempFrom"
                                 :max="props.max"
                                 :step="props.step"
                                 class="w-20 text-center font-bold bg-base-200 rounded-lg p-2"
@@ -146,7 +157,7 @@ const handleMaxInput = (event: Event) => {
                                 @input="handleMinInput"
                                 type="number"
                                 :min="props.min"
-                                :max="tempTo - props.step"
+                                :max="tempTo"
                                 :step="props.step"
                                 class="w-24 text-center text-2xl font-bold bg-base-200 rounded-lg p-2"
                             />
@@ -155,7 +166,7 @@ const handleMaxInput = (event: Event) => {
                                 v-model.number="tempTo"
                                 @input="handleMaxInput"
                                 type="number"
-                                :min="tempFrom + props.step"
+                                :min="tempFrom"
                                 :max="props.max"
                                 :step="props.step"
                                 class="w-24 text-center text-2xl font-bold bg-base-200 rounded-lg p-2"

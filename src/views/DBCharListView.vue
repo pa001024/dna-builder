@@ -7,6 +7,7 @@ import { LeveledChar } from "../data"
 import { charMap } from "../data/d"
 import charData from "../data/d/char.data"
 import { matchPinyin } from "../utils/pinyin-utils"
+import { getRarityGradientClass } from "../utils/rarity-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedCharId = useSearchParam<number>("id", 0)
@@ -313,7 +314,7 @@ useInitialScrollToSelectedItem()
                         >
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-10 h-10 overflow-hidden rounded-full border-2 border-base-100">
+                                    <div class="size-12 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(5)">
                                         <img :src="LeveledChar.url(char.icon)" class="w-full h-full object-cover object-top" />
                                     </div>
                                     <div>

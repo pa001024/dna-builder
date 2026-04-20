@@ -27,7 +27,7 @@ function getQualityIcon(quality: number): string {
                 <SRouterLink :to="`/db/achievement/${achievement.id}`" class="text-lg font-bold link link-primary">
                     {{ $t(achievement.名称) }}
                 </SRouterLink>
-                <div class="text-sm text-base-content/70">ID: {{ achievement.id }}</div>
+                <CopyID :id="achievement.id" />
             </div>
             <img
                 v-if="achievement.品质"

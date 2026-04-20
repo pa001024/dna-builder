@@ -9,12 +9,12 @@ import { matchPinyin } from "../utils/pinyin-utils"
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedBossId = useSearchParam<number>("id", 0)
 
-// 根据 ID 获取选中的 Boss
+// 根据 ID 获取选中的梦魇残声
 const selectedBoss = computed(() => {
     return selectedBossId.value ? hardBossMap.get(selectedBossId.value) || null : null
 })
 
-// 按关键词筛选Boss
+// 按关键词筛选梦魇残声
 const filteredBosses = computed(() => {
     return Array.from(hardBossMap.values()).filter((boss: HardBoss) => {
         if (searchKeyword.value === "") {
@@ -77,7 +77,7 @@ useInitialScrollToSelectedItem()
                     />
                 </div>
 
-                <!-- Boss列表 -->
+                <!-- 梦魇残声列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
                         <div

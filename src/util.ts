@@ -49,7 +49,6 @@ const numKeys = new Set([
     "基础弹匣",
     "连击持续时间",
     "子弹爆炸范围",
-    "弹药",
 ])
 export function formatProp(prop: string, val: any): string {
     // 实现属性格式化的逻辑

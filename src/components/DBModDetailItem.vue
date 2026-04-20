@@ -4,12 +4,13 @@ import { LeveledSkill } from "@/data"
 import { modConvertData } from "@/data/d/convert.data"
 import shopData from "@/data/d/shop.data"
 import weaponData from "@/data/d/weapon.data"
-import { getDungeonName } from "@/utils/dungeon-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
+import { collectModCharBreakthroughSources, collectModQuestSources } from "@/utils/resource-source"
 import { getModDropInfo } from "@/utils/reward-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
 import { modDraftMap, modDungeonMap } from "../data/d/index"
 import { walnutMap } from "../data/d/walnut.data"
-import type { Draft, Dungeon, Mod, WeaponSkill } from "../data/data-types"
+import type { Draft, Mod, WeaponSkill } from "../data/data-types"
 import { LeveledMod } from "../data/leveled/LeveledMod"
 import { formatProp } from "../util"
 
@@ -32,14 +33,6 @@ const crimsonPearlCosts = [300, 600, 900, 1200, 1500, 3000, 4500, 6000, 7500, 90
 const goldCosts = [1500, 3000, 4500, 6000, 7500, 15000, 22500, 30000, 37500, 45000] // 1→2, 2→3, 3→4, 4→5
 const modCost = [1, 1, 2, 2, 3]
 
-// 展开的地下城ID
-const expandedDungeonId = ref<number | null>(null)
-
-// 切换地下城展开状态
-function toggleDungeonExpand(dungeonId: number) {
-    expandedDungeonId.value = expandedDungeonId.value === dungeonId ? null : dungeonId
-}
-
 // 创建LeveledMod实例
 const leveledMod = computed(() => {
     return new LeveledMod(props.mod, currentLevel.value, buffLv.value)
@@ -54,18 +47,6 @@ watch(
         buffLv.value = leveledMod.value.buff?.mx ?? 0
     }
 )
-
-// 根据品质获取颜色
-function getQualityColor(quality: string): string {
-    const colorMap: Record<string, string> = {
-        白: "bg-gray-200 text-gray-800",
-        绿: "bg-green-200 text-green-800",
-        蓝: "bg-blue-200 text-blue-800",
-        紫: "bg-purple-200 text-purple-800",
-        金: "bg-yellow-200 text-yellow-800",
-    }
-    return colorMap[quality] || "bg-base-200 text-base-content"
-}
 
 // 处理效果描述中的极性
 const formatEffDesc = (desc: string) => {
@@ -82,10 +63,28 @@ const modDraft = computed<Draft | undefined>(() => {
     return modDraftMap.get(props.mod.id)
 })
 
-// 获取当前mod的掉落来源
-const modDungeons = computed<Dungeon[]>(() => {
-    return modDungeonMap.get(props.mod.id) || []
+/**
+ * 组装当前魔之楔的副本来源信息，交给独立组件渲染。
+ * @returns 副本来源列表
+ */
+const modDungeonSources = computed(() => {
+    return (modDungeonMap.get(props.mod.id) || []).map(dungeon => {
+        const dropInfo = getModDropInfo(dungeon, props.mod.id)
+
+        return {
+            key: `mod-dungeon-${props.mod.id}-${dungeon.id}`,
+            dungeonId: dungeon.id,
+            dungeonName: dungeon.n,
+            dungeonType: dungeon.t,
+            dungeonLv: dungeon.lv,
+            rewardId: props.mod.id,
+            pp: dropInfo.pp,
+            times: dropInfo.times,
+        }
+    })
 })
+const modQuestSources = computed(() => collectModQuestSources(props.mod.id))
+const modCharBreakthroughSources = computed(() => collectModCharBreakthroughSources(props.mod.id))
 
 /**
  * 收集当前魔之楔的商店来源信息。
@@ -272,47 +271,31 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
 
 <template>
     <div class="p-3 space-y-4">
-        <div class="flex items-center gap-3 p-3">
-            <SRouterLink :to="`/db/mod/${mod.id}`" class="text-lg font-bold link link-primary">
-                {{ $t(mod.系列) }}{{ $t(mod.名称) }}
-            </SRouterLink>
-            <span class="text-xs text-base-content/70">ID: {{ mod.id }}</span>
-            <div class="text-sm text-base-content/70 flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded" :class="getQualityColor(leveledMod.品质)">
-                    {{ $t(leveledMod.品质) }}
-                </span>
-                <div v-if="mod.极性 || mod.耐受" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
-                    {{ leveledMod.耐受 }}
-                    <Icon v-if="mod.极性" :icon="`po-${mod.极性}`" />
+        <div class="flex items-center">
+            <img :src="leveledMod.url" class="w-24 object-cover rounded bg-linear-15" :class="getRarityGradientClass(mod.品质)" />
+            <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-3 p-3">
+                    <SRouterLink :to="`/db/mod/${mod.id}`" class="text-lg font-bold link link-primary">
+                        {{ $t(mod.系列) }}{{ $t(mod.名称) }}
+                    </SRouterLink>
+                    <CopyID :id="mod.id" />
+                    <div v-if="mod.极性 || mod.耐受" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
+                        {{ leveledMod.耐受 }}
+                        <Icon v-if="mod.极性" :icon="`po-${mod.极性}`" />
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3 text-sm opacity-70 p-3">
+                    <span>{{ $t(leveledMod.类型) }}</span>
+                    <span v-if="leveledMod.属性">{{ $t(`${leveledMod.属性}属性`) }}</span>
+                    <span v-if="leveledMod.限定">{{ $t(leveledMod.限定) }}</span>
+                    <span v-if="mod.版本">v{{ mod.版本 }}</span>
                 </div>
             </div>
         </div>
 
-        <div class="flex justify-center items-center">
-            <img :src="leveledMod.url" class="w-24 object-cover rounded" />
-        </div>
-
-        <div class="flex flex-wrap gap-2 text-sm opacity-70 p-3">
-            <span>{{ $t(leveledMod.类型) }}</span>
-            <span v-if="leveledMod.属性">{{ $t(`${leveledMod.属性}属性`) }}</span>
-            <span v-if="leveledMod.限定">{{ $t(leveledMod.限定) }}</span>
-            <span v-if="mod.版本">v{{ mod.版本 }}</span>
-        </div>
-
         <!-- 等级调整 -->
         <div class="mb-3 p-3">
-            <div class="flex items-center gap-4">
-                <span class="text-sm min-w-12">Lv. <input v-model.number="currentLevel" type="text" class="w-12 text-center" /> </span>
-                <input
-                    :key="leveledMod.id"
-                    v-model.number="currentLevel"
-                    type="range"
-                    class="range range-primary range-xs grow"
-                    :min="0"
-                    :max="leveledMod.maxLevel"
-                    step="1"
-                />
-            </div>
+            <LevelSlider v-model="currentLevel" :step="1" :min="0" :max="leveledMod.maxLevel" />
         </div>
 
         <div v-if="leveledMod.效果" class="p-3 bg-base-200 rounded">
@@ -391,7 +374,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                                 <div class="font-medium">
                                     {{ group.sourceSkill ? $t(group.sourceSkill.名称) : `ID: ${group.sourceSkillId}` }}
                                 </div>
-                                <span class="text-xs opacity-70">ID: {{ group.sourceSkillId }}</span>
+                                <CopyID :id="group.sourceSkillId" />
                             </div>
                             <SkillFields v-if="group.sourceSkill" :skill="group.sourceSkill" />
                         </div>
@@ -403,7 +386,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                                 <div class="font-medium">
                                     {{ $t(group.replaceSkill.名称) }}
                                 </div>
-                                <span class="text-xs opacity-70">ID: {{ group.replaceSkillId }}</span>
+                                <CopyID :id="group.replaceSkillId" />
                             </div>
                             <SkillFields :skill="group.replaceSkill" />
                         </div>
@@ -451,52 +434,25 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
         </div>
 
         <!-- 图纸信息 -->
-        <div v-if="modDraft" class="bg-base-200 rounded">
+        <div v-if="modDraft" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">图纸信息</div>
             <DBDraftDetailItem :draft="modDraft" />
         </div>
 
-        <div v-if="modDungeons.length > 0 || modShopSources.length > 0" class="p-3 bg-base-200 rounded">
+        <div
+            v-if="
+                modDungeonSources.length > 0 ||
+                modShopSources.length > 0 ||
+                modQuestSources.length > 0 ||
+                modCharBreakthroughSources.length > 0
+            "
+            class="p-3 bg-base-200 rounded"
+        >
             <div class="text-xs text-base-content/70 mb-2">来源</div>
             <div class="space-y-3 text-sm">
-                <div v-if="modDungeons.length > 0" class="space-y-2">
-                    <div class="text-xs text-base-content/60">{{ $t("database.dungeon") }}</div>
-                    <div v-for="dungeon in modDungeons" :key="dungeon.id" class="space-y-2">
-                        <div
-                            @click="toggleDungeonExpand(dungeon.id)"
-                            class="flex flex-col gap-1 p-2 bg-base-300 rounded hover:bg-base-content/10 transition-colors duration-200 cursor-pointer"
-                        >
-                            <div class="flex justify-between items-center">
-                                <div class="flex items-center gap-2 min-w-0">
-                                    <span class="font-medium truncate">{{ getDungeonName(dungeon) }}</span>
-                                    <span v-if="dungeon.e" class="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">{{
-                                        $t(dungeon.e)
-                                    }}</span>
-                                    <span class="text-xs text-base-content/70">ID: {{ dungeon.id }}</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-base-content/70">
-                                    <span v-if="dungeon.lv" class="badge badge-sm badge-neutral">Lv.{{ dungeon.lv }}</span>
-                                    <span class="text-xs">{{ dungeon.t }}</span>
-                                    <Icon
-                                        :icon="expandedDungeonId === dungeon.id ? 'radix-icons:chevron-up' : 'radix-icons:chevron-down'"
-                                        class="text-xs"
-                                    />
-                                </div>
-                            </div>
-                            <div class="text-xs text-base-content/50">
-                                <span v-if="getModDropInfo(dungeon, mod.id).pp" class="mr-2">
-                                    概率: {{ +(getModDropInfo(dungeon, mod.id).pp! * 100).toFixed(2) }}%
-                                </span>
-                                <span v-if="getModDropInfo(dungeon, mod.id).times">
-                                    期望: {{ +getModDropInfo(dungeon, mod.id).times!.toFixed(2) }}次
-                                </span>
-                            </div>
-                        </div>
-                        <div v-if="expandedDungeonId === dungeon.id" class="p-3 bg-base-100 rounded border border-base-200">
-                            <DBDungeonDetailItem :dungeon="dungeon" />
-                        </div>
-                    </div>
-                </div>
-
+                <QuestSource :quest-sources="modQuestSources" :mod-id="mod.id" />
+                <ModCustomSource :custom-sources="modCharBreakthroughSources" />
+                <DungeonSource :dungeon-sources="modDungeonSources" />
                 <ShopSource :shop-sources="modShopSources" />
             </div>
         </div>

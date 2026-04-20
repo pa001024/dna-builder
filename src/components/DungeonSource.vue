@@ -44,7 +44,7 @@ const displayDungeonSources = computed(() => {
                                 {{ getDungeonName(source.dungeon) }}
                             </SRouterLink>
                             <span v-if="source.dungeonLv" class="text-xs text-base-content/70">Lv.{{ source.dungeonLv }}</span>
-                            <span class="text-xs text-base-content/70">ID: {{ source.dungeonId }}</span>
+                            <CopyID :id="source.dungeonId" />
                         </div>
                         <Icon
                             :icon="expandedDungeonId === source.dungeonId ? 'radix-icons:chevron-up' : 'radix-icons:chevron-down'"
@@ -57,9 +57,9 @@ const displayDungeonSources = computed(() => {
                             >期望: {{ +source.times.toFixed(2) }}次</span
                         >
                     </div>
-                </div>
-                <div v-if="expandedDungeonId === source.dungeonId" class="p-3 bg-base-100 rounded border border-base-200">
-                    <DBDungeonDetailItem :dungeon="source.dungeon" />
+                    <div v-if="expandedDungeonId === source.dungeonId">
+                        <DBDungeonDetailItem :dungeon="source.dungeon" />
+                    </div>
                 </div>
             </div>
         </div>

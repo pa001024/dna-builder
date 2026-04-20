@@ -56,7 +56,7 @@ function toReplaceLeveledSkill(replaceSkill: WeaponSkill) {
         类型: replaceSkill.类型,
         描述: replaceSkill.描述,
         字段: replaceSkill.字段,
-        创造物: replaceSkill.创造物,
+        实体: replaceSkill.实体,
     }
     return new LeveledSkill(skillData, 10, leveledWeapon.value.名称)
 }
@@ -244,47 +244,38 @@ watch(
 
 <template>
     <div class="p-3 space-y-3">
-        <div class="p-3">
-            <div class="flex items-center gap-3 mb-3">
-                <SRouterLink :to="`/db/weapon/${weapon.id}`" class="text-lg font-bold link link-primary">
-                    {{ $t(weapon.名称) }}
-                </SRouterLink>
-                <span class="text-xs text-base-content/70">ID: {{ weapon.id }}</span>
+        <div class="flex items-center">
+            <div class="size-24 shrink-0 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(5)">
+                <ImageFallback :src="leveledWeapon.url" :alt="weapon.名称" class="w-full h-full object-cover">
+                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="weapon.名称" class="w-full h-full object-cover" />
+                </ImageFallback>
             </div>
+            <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-3 px-3 py-2">
+                    <SRouterLink :to="`/db/weapon/${weapon.id}`" class="text-lg font-bold link link-primary">
+                        {{ $t(weapon.名称) }}
+                    </SRouterLink>
+                    <CopyID :id="weapon.id" />
+                </div>
 
-            <div class="flex justify-center items-center mb-3">
-                <img :src="leveledWeapon.url" class="w-24 object-cover rounded" />
-            </div>
-
-            <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
-                <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
-                <span>
-                    {{ $t(weapon.伤害类型) }}
-                </span>
-                <span v-if="weapon.版本">v{{ weapon.版本 }}</span>
-            </div>
-
-            <div v-if="weapon.描述" class="text-sm text-base-content/70 mb-3">
-                {{ weapon.描述 }}
+                <div class="flex flex-col gap-2 justify-end text-xs text-base-content/80 px-3 py-2 h-14">
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span>{{ $t(weapon.伤害类型) }}</span>
+                        <span v-if="weapon.版本">v{{ weapon.版本 }}</span>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <div v-if="weapon.描述" class="text-sm text-base-content/70 p-3 bg-base-200 rounded">
+            {{ weapon.描述 }}
+        </div>
+
         <div class="p-3">
-            <div class="flex items-center gap-4 mb-3">
-                <span class="text-sm min-w-20 flex-none grid grid-cols-2">
-                    <span> Lv. </span>
-                    <span> {{ currentLevel }} </span>
-                </span>
-                <input
-                    :key="leveledWeapon.id"
-                    v-model.number="currentLevel"
-                    type="range"
-                    class="range range-primary range-xs grow"
-                    :min="1"
-                    :max="80"
-                    step="1"
-                />
-            </div>
+            <LevelSlider v-model="currentLevel" />
             <div class="flex items-center gap-4">
                 <span class="text-sm min-w-20 flex-none grid grid-cols-2">
                     <span> 熔炼: </span>
@@ -383,14 +374,14 @@ watch(
                         </span>
                     </div>
                     <SkillFields :skill="skill" />
-                    <div v-if="skill.skillData.创造物 && skill.skillData.创造物.length > 0" class="mt-2">
-                        <SkillCreatureCards :creatures="skill.skillData.创造物" />
+                    <div v-if="skill.skillData.实体 && skill.skillData.实体.length > 0" class="mt-2">
+                        <SkillCreatureCards :creatures="skill.skillData.实体" />
                     </div>
                     <div v-if="skill.skillData.子技能 && skill.skillData.子技能.length > 0" class="mt-2 space-y-2">
                         <div v-for="subSkill in skill.skillData.子技能" :key="subSkill.名称 || subSkill.id || ''">
-                            <div v-if="subSkill.创造物 && subSkill.创造物.length > 0">
+                            <div v-if="subSkill.实体 && subSkill.实体.length > 0">
                                 <SkillCreatureCards
-                                    :creatures="subSkill.创造物"
+                                    :creatures="subSkill.实体"
                                     :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`"
                                 />
                             </div>
@@ -432,7 +423,7 @@ watch(
                                             {{ $t(item.mod.系列) }}{{ $t(item.mod.名称) }}
                                         </SRouterLink>
                                         <div class="text-xs opacity-70 flex flex-wrap gap-x-3 gap-y-1">
-                                            <span>ID: {{ item.mod.id }}</span>
+                                            <CopyID :id="item.mod.id" />
                                             <span v-if="item.mod.版本">v{{ item.mod.版本 }}</span>
                                             <span v-if="item.mod.耐受" class="inline-flex items-center gap-1">
                                                 {{ $t("耐受") }}
@@ -461,14 +452,17 @@ watch(
                                 {{ item.mod.效果 }}
                             </div>
                             <SkillFields :skill="item.replaceSkill" />
-                            <div v-if="item.replaceSkill.skillData.创造物 && item.replaceSkill.skillData.创造物.length > 0" class="mt-2">
-                                <SkillCreatureCards :creatures="item.replaceSkill.skillData.创造物" />
+                            <div v-if="item.replaceSkill.skillData.实体 && item.replaceSkill.skillData.实体.length > 0" class="mt-2">
+                                <SkillCreatureCards :creatures="item.replaceSkill.skillData.实体" />
                             </div>
-                            <div v-if="item.replaceSkill.skillData.子技能 && item.replaceSkill.skillData.子技能.length > 0" class="mt-2 space-y-2">
+                            <div
+                                v-if="item.replaceSkill.skillData.子技能 && item.replaceSkill.skillData.子技能.length > 0"
+                                class="mt-2 space-y-2"
+                            >
                                 <div v-for="subSkill in item.replaceSkill.skillData.子技能" :key="subSkill.名称 || subSkill.id || ''">
-                                    <div v-if="subSkill.创造物 && subSkill.创造物.length > 0">
+                                    <div v-if="subSkill.实体 && subSkill.实体.length > 0">
                                         <SkillCreatureCards
-                                            :creatures="subSkill.创造物"
+                                            :creatures="subSkill.实体"
                                             :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`"
                                         />
                                     </div>

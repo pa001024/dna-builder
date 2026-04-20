@@ -108,6 +108,18 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
 
     return sourceMap
 })
+
+const modAttributeBonusSources = computed(() => {
+    const modAttributeBonus = props.charBuild.getTotalBonus(`${props.charBuild.char.属性}MOD属性`)
+
+    if (modAttributeBonus > 0) {
+        const modsBySeries = props.charBuild.charMods.filter(
+            (mod): mod is LeveledMod => mod !== null && CharBuild.elmSeries.includes(mod.系列)
+        )
+        return modsBySeries
+    }
+    return []
+})
 </script>
 <template>
     <!-- 武器 -->
@@ -220,6 +232,14 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
                                 {{ format100r(charBuild.rangedWeapon.buffProps[key]!) }}
                             </li>
                             <li
+                                v-for="(mod, index) in charBuild.charMods.filter((m): m is LeveledMod => m && m[key] && key !== '攻击')"
+                                :key="index"
+                                class="flex justify-between gap-8 text-sm text-primary"
+                            >
+                                <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
+                                {{ format100r(mod[key]!) }}
+                            </li>
+                            <li
                                 v-for="(mod, index) in charBuild[`${baseKey}Mods`].filter((m): m is LeveledMod => m && m[key])"
                                 :key="index"
                                 class="flex justify-between gap-8 text-sm text-primary"
@@ -254,6 +274,23 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
                                 <div class="text-base-content/80">武器精通</div>
                                 *{{ format100(1.2) }}
                             </li>
+                            <li
+                                v-if="
+                                    charBuild.getTotalBonus(`${charBuild.char.属性}MOD属性`) > 0 &&
+                                    modAttributeBonusSources.some(v => v.addAttr[key])
+                                "
+                                v-for="(buff, index) in charBuild.buffs.filter(b => b[`${charBuild.char.属性}MOD属性`])"
+                                :key="index"
+                                class="flex justify-between gap-8 text-sm text-primary"
+                            >
+                                <div class="text-base-content/80">{{ buff.名称 }}</div>
+                                {{
+                                    format100r(
+                                        modAttributeBonusSources.reduce((v, r) => v + (r.addAttr[key] ?? 0), 0) *
+                                            buff[`${charBuild.char.属性}MOD属性`]!
+                                    )
+                                }}
+                            </li>
                         </ul>
                     </div>
                 </template>
@@ -277,7 +314,7 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
                         </FullTooltip>
                     </div>
                     <div class="text-primary font-bold text-sm font-orbitron">
-                        {{ formatWeaponProp(["攻速", "多重", "弹匣", "装填", "最大弹药"].includes(key) ? "基础攻击" : key, val) }}
+                        {{ formatWeaponProp(["攻速", "多重", "弹匣", "装填", "弹药"].includes(key) ? "基础攻击" : key, val) }}
                     </div>
                 </div>
             </FullTooltip>

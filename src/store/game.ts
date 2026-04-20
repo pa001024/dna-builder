@@ -100,6 +100,7 @@ export const useGameStore = defineStore("game", {
     state: () => {
         return {
             dx11Enable: useLocalStorage("game.dx11_enable", false),
+            noTitlebar: useLocalStorage("game.no_titlebar", false),
             modEnable: useLocalStorage("game.mod_enable", false),
             modLoader: useLocalStorage("game.mod_loader", "legacy"),
             pathEnable: useLocalStorage("game.path_enable", true),

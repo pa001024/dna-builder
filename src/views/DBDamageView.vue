@@ -229,6 +229,20 @@ function safeDivide(numerator: number, denominator: number): number {
 }
 
 /**
+ * 计算高等级减伤乘区。
+ * 怪物等级大于等于 200 时生效。
+ * @param enemyLevel 怪物等级
+ * @returns 高等级减伤乘区
+ */
+function calculateLevelReduceRate(enemyLevel: number): number {
+    if (enemyLevel < 200) {
+        return 1
+    }
+
+    return 1 / (1 + (enemyLevel - 190) * 0.05)
+}
+
+/**
  * 统一格式化数值展示，保留小数但去除尾随 0。
  * @param value 数值
  * @param digits 最大小数位
@@ -512,7 +526,7 @@ function createBuildFromCurrentCharView(): CharBuild {
         baseName,
     }
     const timeline = resolveTimelineFromCurrentBuild(charName, baseName, normalizedSettings.actions)
-    return CharBuild.fromCharSetting(charName, inv, normalizedSettings, timeline)
+    return CharBuild.fromCharSetting(charName, normalizedSettings, inv, timeline)
 }
 
 /**
@@ -1031,11 +1045,25 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
                 `${formatNumber(get("finalEnemyDefense"))} / (300 + ${formatNumber(get("finalEnemyDefense"))} - ${formatNumber(get("levelDiff"))} * 10) = ${formatNumber(value)}`,
         },
         {
+            id: "levelReduceRate",
+            title: "高等级减伤乘区",
+            formula: "高等级减伤乘区 = 1 / (1 + (怪物等级 - 190) * 0.05)，仅在怪物等级大于等于 200 时生效",
+            compute: ({ input }) => calculateLevelReduceRate(input.enemyLevel),
+            explain: ({ input }, value) => {
+                const reduceRate = calculateLevelReduceRate(input.enemyLevel)
+                return input.enemyLevel > 200
+                    ? `1 / (1 + (${formatNumber(input.enemyLevel)} - 190) * 0.05) = ${formatNumber(reduceRate)}`
+                    : `Lv.${formatNumber(input.enemyLevel)} <= 200，结果 = ${formatNumber(value)}`
+            },
+        },
+        {
             id: "defenseMultiplier",
             title: "防御乘区",
-            formula: "防御乘区 = 1 - 防御减伤率，并限制在 0~1",
-            compute: ({ get }) => clampNumber(1 - get("defenseDamageReduction"), 0, 1),
-            explain: ({ get }, value) => `1 - ${formatNumber(get("defenseDamageReduction"))} = ${formatNumber(value)}`,
+            formula: "防御乘区 = (1 - 防御减伤率) * 高等级减伤乘区，并限制在 0~1",
+            compute: ({ get, input }) =>
+                clampNumber((1 - get("defenseDamageReduction")) * calculateLevelReduceRate(input.enemyLevel), 0, 1),
+            explain: ({ get, input }, value) =>
+                `(${formatNumber(1 - get("defenseDamageReduction"))}) * ${formatNumber(calculateLevelReduceRate(input.enemyLevel))} = ${formatNumber(value)}`,
         },
         {
             id: "finalDamageAfterDefense",
@@ -1221,11 +1249,25 @@ function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
                 `${formatNumber(get("finalEnemyDefense"))} / (300 + ${formatNumber(get("finalEnemyDefense"))} - ${formatNumber(get("levelDiff"))} * 10) = ${formatNumber(value)}`,
         },
         {
+            id: "levelReduceRate",
+            title: "高等级减伤乘区",
+            formula: "高等级减伤乘区 = 1 / (1 + (怪物等级 - 190) * 0.05)，仅在怪物等级大于等于 200 时生效",
+            compute: ({ input }) => calculateLevelReduceRate(input.enemyLevel),
+            explain: ({ input }, value) => {
+                const reduceRate = calculateLevelReduceRate(input.enemyLevel)
+                return input.enemyLevel > 200
+                    ? `1 / (1 + (${formatNumber(input.enemyLevel)} - 190) * 0.05) = ${formatNumber(reduceRate)}`
+                    : `Lv.${formatNumber(input.enemyLevel)} <= 200，结果 = ${formatNumber(value)}`
+            },
+        },
+        {
             id: "defenseMultiplier",
             title: "防御乘区",
-            formula: "防御乘区 = 1 - 防御减伤率，并限制在 0~1",
-            compute: ({ get }) => clampNumber(1 - get("defenseDamageReduction"), 0, 1),
-            explain: ({ get }, value) => `1 - ${formatNumber(get("defenseDamageReduction"))} = ${formatNumber(value)}`,
+            formula: "防御乘区 = (1 - 防御减伤率) * 高等级减伤乘区，并限制在 0~1",
+            compute: ({ get, input }) =>
+                clampNumber((1 - get("defenseDamageReduction")) * calculateLevelReduceRate(input.enemyLevel), 0, 1),
+            explain: ({ get, input }, value) =>
+                `(${formatNumber(1 - get("defenseDamageReduction"))}) * ${formatNumber(calculateLevelReduceRate(input.enemyLevel))} = ${formatNumber(value)}`,
         },
         {
             id: "finalDamageAfterDefense",
@@ -1353,6 +1395,7 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
             { key: "enemyLevel", label: "怪物等级", step: "1" },
         ],
         outputs: [
+            { label: "高等级减伤乘区", stepId: "levelReduceRate" },
             { label: "防御乘区", stepId: "defenseMultiplier" },
             { label: "防御后最终伤害", stepId: "finalDamageAfterDefense" },
         ],
@@ -1421,6 +1464,7 @@ const skillNumberGroups: NumberFieldGroup<SkillNumberFieldKey, SkillToggleFieldK
             { key: "enemyLevel", label: "怪物等级", step: "1" },
         ],
         outputs: [
+            { label: "高等级减伤乘区", stepId: "levelReduceRate" },
             { label: "防御乘区", stepId: "defenseMultiplier" },
             { label: "防御后最终伤害", stepId: "finalDamageAfterDefense" },
         ],

@@ -89,16 +89,16 @@ watchEffect(() => {
                             CD: {{ subSkill.cd }}s
                         </span>
                     </div>
-                    <div v-if="subSkill.创造物 && subSkill.创造物.length > 0" class="mt-2">
-                        <SkillCreatureCards :creatures="subSkill.创造物" :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`" />
+                    <div v-if="subSkill.实体 && subSkill.实体.length > 0" class="mt-2">
+                        <SkillCreatureCards :creatures="subSkill.实体" :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`" />
                     </div>
                 </div>
             </div>
         </div>
 
-        <div v-if="selectedSkill.skillData.创造物 && selectedSkill.skillData.创造物.length > 0" class="mt-2 p-2">
-            <h3 class="text-base font-semibold">{{ $t("创造物") }}</h3>
-            <SkillCreatureCards :creatures="selectedSkill.skillData.创造物" />
+        <div v-if="selectedSkill.skillData.实体 && selectedSkill.skillData.实体.length > 0" class="mt-2 p-2">
+            <h3 class="text-base font-semibold">{{ $t("实体") }}</h3>
+            <SkillCreatureCards :creatures="selectedSkill.skillData.实体" />
         </div>
 
         <!-- <div class="collapse p-2">

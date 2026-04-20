@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import type { DNAMapMatterCategorizeOption, DNAMapSite } from "dna-api"
+import type { DNAMapMatterCategorizeOption } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRoute } from "vue-router"
 import { getMapAPI } from "../api/app"
-import type { DBMap, DBMapMarker } from "../data/d/map.data"
+import { buildDBMapMarkers, type DBMap, type DBMapMarker, loadMapDetailWithCache } from "../data/d/map.data"
+import { env } from "../env"
 
 const route = useRoute()
 
@@ -26,9 +27,9 @@ const dnaApi = getMapAPI()
 async function loadMapData() {
     loading.value = true
     try {
-        const res = await dnaApi.getMapDetail(mapId.value)
-        if (res.is_success && res.data) {
-            const { matterCategorizes, floors, map: mapInfo } = res.data
+        const mapDetail = await loadMapDetailWithCache(dnaApi, mapId.value, env.isApp)
+        if (mapDetail) {
+            const { matterCategorizes, floors, map: mapInfo } = mapDetail
 
             categories.value = matterCategorizes
 
@@ -39,29 +40,19 @@ async function loadMapData() {
                 map.value.mapUrl = floors[0].pic
                 map.value.floors = floors
                 map.value.currentFloorIndex = 0
+            } else {
+                map.value.mapUrl = ""
+                map.value.floors = []
+                map.value.currentFloorIndex = 0
             }
 
+            markers.value = buildDBMapMarkers(mapId.value, mapDetail)
+        } else {
+            categories.value = []
             markers.value = []
-            matterCategorizes.forEach(category => {
-                category.matters.forEach(matter => {
-                    matter.sites.forEach((site: DNAMapSite) => {
-                        if (site.mapId === mapId.value) {
-                            markers.value.push({
-                                id: site.id,
-                                mapId: site.mapId,
-                                x: site.x,
-                                y: site.y,
-                                name: matter.name,
-                                desc: site.isHide ? "隐藏点" : undefined,
-                                icon: matter.icon,
-                                categoryId: category.id,
-                                isUserMarker: false,
-                                createdAt: undefined,
-                            })
-                        }
-                    })
-                })
-            })
+            map.value.mapUrl = ""
+            map.value.floors = []
+            map.value.currentFloorIndex = 0
         }
     } catch (error) {
         console.error("加载地图数据失败:", error)
@@ -89,7 +80,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-300">
+    <div class="h-full flex flex-col">
         <template v-if="map && map.mapUrl">
             <div class="flex-1 overflow-hidden">
                 <MapRenderer

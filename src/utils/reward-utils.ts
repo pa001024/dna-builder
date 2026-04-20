@@ -130,9 +130,10 @@ export function getRewardDetails(
                 const childTotalP = item.child.reduce((sum, child) => sum + child.p, 0)
                 if (currentDropMode === "Sequence") item.totalP = childTotalP
                 if (childTotalP <= 0) {
+                    const fallbackPP = currentDropMode === "Fixed" ? parentPP : 0
                     item.child.forEach(child => {
-                        child.pp = 0
-                        calculatePP(child, 0)
+                        child.pp = fallbackPP
+                        calculatePP(child, fallbackPP)
                     })
                     return
                 }
@@ -145,6 +146,15 @@ export function getRewardDetails(
             }
         }
         if (result.child) {
+            if (totalP <= 0) {
+                const fallbackPP = currentDropMode === "Fixed" ? 1 : 0
+                result.child.forEach(child => {
+                    child.pp = fallbackPP
+                    calculatePP(child, fallbackPP)
+                })
+                return result
+            }
+
             result.child.forEach(child => {
                 child.pp = child.p / totalP
                 calculatePP(child, child.pp!)
@@ -158,13 +168,25 @@ export function getRewardDetails(
 /**
  * 递归查找奖励树中当前Mod的掉落信息
  */
-export function findInRewardTree(reward: RewardItem | null, id: number, type = "Mod"): { pp?: number; times?: number } | null {
+export function findInRewardTree(
+    reward: RewardItem | null,
+    id: number,
+    type = "Mod"
+): { pp?: number; times?: number; num?: number; d?: 1; n?: string } | null {
     if (!reward) return null
+
+    const isMatchedItem = (item: RewardItem): boolean => {
+        if (type === "Draft") {
+            return item.t === "Mod" && item.id === id && item.d === 1
+        }
+
+        return item.t === type && item.id === id
+    }
 
     if (reward.child) {
         for (const child of reward.child) {
-            if (child.t === type && child.id === id) {
-                return { pp: child.pp, times: child.times }
+            if (isMatchedItem(child)) {
+                return { pp: child.pp, times: child.times, num: child.c ?? 1, d: child.d, n: child.n }
             } else {
                 const result = findInRewardTree(child, id, type)
                 if (result) return result

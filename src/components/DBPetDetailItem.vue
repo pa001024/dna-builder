@@ -8,6 +8,7 @@ import { subRegionData } from "@/data/d/subregion.data"
 import { petEntrys, petToEntey } from "../data/d/pet.data"
 import type { Pet } from "../data/data-types"
 import { LeveledPet } from "../data/leveled/LeveledPet"
+import { getRarityGradientClass } from "../utils/rarity-utils"
 
 const props = defineProps<{
     pet: Pet
@@ -15,14 +16,14 @@ const props = defineProps<{
 
 const { t } = useTranslation()
 
-const PET_BREAKTHROUGH_SLIDER_MAX_LEVEL = 3
-
 interface PetSpawnLocation {
     subRegionId: number
     subRegionName: string
     regionId: number
     regionName: string
     totalWeight: number
+    spotCount: number
+    refreshCount: number
     rcWeights: { rcId: number; rcIndex: number; petWeight: number; totalWeight: number; ratio: number }[]
 }
 
@@ -58,10 +59,7 @@ function formatWeight(weight: number): string {
     return `${weight.toFixed(3)}%`
 }
 
-const currentLevel = ref(props.pet.最大等级 > 1 ? PET_BREAKTHROUGH_SLIDER_MAX_LEVEL : 0)
-const enableFourthLevel = ref(false)
-
-const displayedLevel = computed(() => currentLevel.value + (enableFourthLevel.value ? 1 : 0))
+const currentLevel = ref(props.pet.最大等级 > 1 ? 5 : 0)
 
 /**
  * 经验仅随滑块等级变化，不受“老道”开关影响。
@@ -69,7 +67,7 @@ const displayedLevel = computed(() => currentLevel.value + (enableFourthLevel.va
 const displayedExperience = computed(() => Math.floor(50 * currentLevel.value))
 
 const leveledPet = computed(() => {
-    return new LeveledPet(props.pet, currentLevel.value + (enableFourthLevel.value ? 1 : 0))
+    return new LeveledPet(props.pet, currentLevel.value - 1)
 })
 
 /**
@@ -85,9 +83,12 @@ const petSpawnLocations = computed<PetSpawnLocation[]>(() => {
 
         const rcWeights: { rcId: number; rcIndex: number; petWeight: number; totalWeight: number; ratio: number }[] = []
         let totalWeight = 0
+        let spotCount = 0
+        let refreshCount = 0
 
         for (const [rcIndex, randomCreator] of subRegion.rc.entries()) {
             const rcTotalWeight = randomCreator.info.reduce((sum, randomInfo) => sum + randomInfo.w, 0)
+            const rcSpotCount = randomCreator.pos?.length || 0
             let petWeight = 0
             for (const randomInfo of randomCreator.info) {
                 if (randomInfo.id === props.pet.id) {
@@ -104,6 +105,8 @@ const petSpawnLocations = computed<PetSpawnLocation[]>(() => {
                     ratio: petWeight / rcTotalWeight,
                 })
                 totalWeight += petWeight
+                spotCount += rcSpotCount
+                refreshCount += randomCreator.count
             }
         }
 
@@ -117,6 +120,8 @@ const petSpawnLocations = computed<PetSpawnLocation[]>(() => {
             regionId: subRegion.rid,
             regionName: regionMap.get(subRegion.rid)?.name || t("pet_detail.region_fallback", { id: subRegion.rid }),
             totalWeight,
+            spotCount,
+            refreshCount,
             rcWeights,
         })
     }
@@ -155,42 +160,9 @@ function formatTimeRange(start: number, end?: number) {
 watch(
     () => props.pet,
     () => {
-        currentLevel.value = props.pet.最大等级 > 1 ? PET_BREAKTHROUGH_SLIDER_MAX_LEVEL : 0
-        enableFourthLevel.value = false
+        currentLevel.value = props.pet.最大等级 > 1 ? 5 : 0
     }
 )
-
-/**
- * 根据品质值获取标签颜色样式。
- * @param quality 品质值
- * @returns 颜色样式类名
- */
-function getQualityColor(quality: number): string {
-    const colorMap: Record<number, string> = {
-        1: "bg-gray-200 text-gray-800",
-        2: "bg-green-200 text-green-800",
-        3: "bg-blue-200 text-blue-800",
-        4: "bg-purple-200 text-purple-800",
-        5: "bg-yellow-200 text-yellow-800",
-    }
-    return colorMap[quality] || "bg-base-200 text-base-content"
-}
-
-/**
- * 根据品质值获取品质名称。
- * @param quality 品质值
- * @returns 品质名称
- */
-function getQualityName(quality: number): string {
-    const qualityMap: Record<number, string> = {
-        1: "白",
-        2: "绿",
-        3: "蓝",
-        4: "紫",
-        5: "金",
-    }
-    return qualityMap[quality] || quality.toString()
-}
 
 /**
  * 根据类型值获取魔灵类型名称。
@@ -345,28 +317,31 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-center gap-3">
-            <SRouterLink :to="`/db/pet/${pet.id}`" class="text-lg font-bold link link-primary">
-                {{ $t(pet.名称) }}
-            </SRouterLink>
-            <span class="text-xs text-base-content/70">ID: {{ pet.id }}</span>
-            <div class="text-sm text-base-content/70 flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded" :class="getQualityColor(pet.品质)">
-                    {{ $t(getQualityName(pet.品质)) }}
-                </span>
-                <span class="px-1.5 py-0.5 rounded bg-base-300">{{ $t(getTypeName(pet.类型)) }}</span>
+    <div class="p-3 space-y-4">
+        <div class="flex items-center">
+            <div class="size-24 shrink-0 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(pet.品质)">
+                <ImageFallback :src="leveledPet.url" :alt="pet.名称" class="w-full h-full object-cover">
+                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="pet.名称" class="w-full h-full object-cover" />
+                </ImageFallback>
             </div>
-        </div>
-
-        <div class="flex justify-center items-center">
-            <img :src="leveledPet.url" class="w-24 object-cover rounded" />
-        </div>
-
-        <div class="flex flex-wrap gap-2 text-sm opacity-70">
-            <span>{{ $t("pet_detail.max_level") }}: {{ pet.最大等级 }}</span>
-            <span>{{ $t("pet_detail.capture_exp") }}: {{ pet.捕获经验 }}</span>
-            <span>{{ $t("pet_detail.exp") }}: {{ displayedExperience }}</span>
+            <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-3 px-3 py-2">
+                    <SRouterLink :to="`/db/pet/${pet.id}`" class="text-lg font-bold link link-primary">
+                        {{ $t(pet.名称) }}
+                    </SRouterLink>
+                    <CopyID :id="pet.id" />
+                    <div class="ml-auto text-sm text-base-content/70 flex items-center gap-2">
+                        <span class="px-1.5 py-0.5 rounded bg-base-300">{{ $t(getTypeName(pet.类型)) }}</span>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2 justify-end text-xs text-base-content/80 px-3 py-2 h-14">
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span>{{ $t("pet_detail.max_level") }}: {{ pet.最大等级 }}</span>
+                        <span>{{ $t("pet_detail.capture_exp") }}: {{ pet.捕获经验 }}</span>
+                        <span>{{ $t("pet_detail.exp") }}: {{ displayedExperience }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div v-if="pet.描述" class="p-3 bg-base-200 rounded">
@@ -387,23 +362,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
         </div>
 
         <div v-if="pet.最大等级 > 1">
-            <div class="flex items-center gap-4">
-                <span class="text-sm min-w-12">Lv. {{ displayedLevel }}</span>
-                <input
-                    :key="pet.id"
-                    v-model.number="currentLevel"
-                    type="range"
-                    class="range range-primary range-xs grow"
-                    :min="0"
-                    :max="pet.最大等级 > 1 ? PET_BREAKTHROUGH_SLIDER_MAX_LEVEL : 0"
-                    step="1"
-                />
-                <label class="label cursor-pointer gap-2 px-2 py-0">
-                    <span class="label-text text-xs text-base-content/70 whitespace-nowrap">{{ $t("pet_detail.old_master") }}</span>
-                    <input v-model="enableFourthLevel" type="checkbox" class="toggle toggle-primary toggle-sm" />
-                </label>
-            </div>
-            <div class="text-xs text-base-content/50 mt-1">{{ $t("pet_detail.breakthrough_level_range") }}</div>
+            <LevelSlider v-model="currentLevel" :max="5" :step="1" />
         </div>
 
         <div v-if="leveledPet.主动" class="p-3 bg-base-200 rounded">
@@ -425,20 +384,22 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
 
         <div class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.spawn_area") }}</div>
-            <div v-if="petSpawnLocations.length" class="space-y-2">
+            <div v-if="petSpawnLocations.length" class="grid grid-cols-[repeat(auto-fill,minmax(500px,1fr))] gap-2">
                 <div
                     v-for="location in petSpawnLocations"
                     :key="location.subRegionId"
                     class="p-2 rounded bg-base-100 border border-base-300/60"
                 >
                     <div class="flex items-center justify-between gap-2">
-                        <span class="text-sm font-medium">{{ location.subRegionName }}</span>
-                        <span class="text-xs text-base-content/70">{{ $t("pet_detail.spot_count") }}: {{ location.rcWeights.length }}</span>
-                    </div>
-                    <div class="text-xs text-base-content/60 mt-1">
-                        <span>{{ location.regionName }}</span>
-                        <span class="mx-1">·</span>
-                        <span>ID: {{ location.subRegionId }}</span>
+                        <SubRegionLink :sub-region-id="location.subRegionId" />
+                        <div class="text-xs text-base-content/60">
+                            <span>{{ location.regionName }}</span>
+                        </div>
+                        <div class="flex-1"></div>
+                        <span class="text-xs text-base-content/70">
+                            {{ $t("pet_detail.spot_count") }}: {{ location.spotCount }} | {{ $t("pet_detail.refresh_count") }}:
+                            {{ location.refreshCount }}
+                        </span>
                     </div>
                     <div class="flex flex-wrap gap-1 mt-2">
                         <SRouterLink
@@ -467,7 +428,11 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
 
         <div v-if="petShopSources.length > 0" class="space-y-2">
             <div class="text-xs text-base-content/60">{{ $t("pet_detail.shop_purchase") }}</div>
-            <div v-for="source in petShopSources" :key="source.key" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
+            <div
+                v-for="source in petShopSources"
+                :key="source.key"
+                class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+            >
                 <div class="flex justify-between items-center gap-2 mb-2">
                     <div class="flex items-center gap-2 min-w-0">
                         <SRouterLink :to="`/db/shop/${source.shopId}/${source.subTabId}`" class="hover:underline min-w-0 truncate">

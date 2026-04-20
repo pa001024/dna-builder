@@ -104,6 +104,19 @@ describe("CharBuild类测试", () => {
         expect(attrs2.独立增伤).toBe(0)
     })
 
+    // 测试武器独立增伤不应作用于角色
+    it("武器MOD的独立增伤不应影响角色属性", () => {
+        const charBuild = createCharBuild()
+        charBuild.mods = [new LeveledMod(43604)]
+        charBuild.baseName = "射击"
+
+        const attrs = charBuild.calculateAttributes()
+        const weaponAttrs = charBuild.calculateWeaponAttributes().weapon
+
+        expect(attrs.独立增伤).toBe(0)
+        expect(weaponAttrs?.独立增伤).toBe(-0.6)
+    })
+
     // 测试武器属性计算
     it("应该能够正确计算武器属性", () => {
         const charBuild = createCharBuild()
@@ -265,6 +278,22 @@ describe("CharBuild类测试", () => {
         // 测试护盾类型的敌人
         charBuild.enemyId = 130
         expect(charBuild.calculateDefenseMultiplier(attrs)).toBeCloseTo(0.69, 1)
+    })
+
+    // 测试高级等级减伤乘区
+    it("怪物等级大于等于200时应该启用高级等级减伤乘区", () => {
+        const charBuild = createCharBuild()
+        const attrs = charBuild.calculateAttributes()
+
+        charBuild.enemyLevel = 200
+        const level200Multiplier = charBuild.calculateDefenseMultiplier(attrs)
+
+        charBuild.enemyLevel = 201
+        const level201Multiplier = charBuild.calculateDefenseMultiplier(attrs)
+
+        const level200Rate = 1 / (1 + (200 - 190) * 0.05)
+        const level201Rate = 1 / (1 + (201 - 190) * 0.05)
+        expect(level201Multiplier).toBeCloseTo(level200Multiplier * (level201Rate / level200Rate), 6)
     })
 
     // 测试主要计算方法
@@ -887,6 +916,31 @@ describe("CharBuild类测试", () => {
 
     // 自动构筑测试
     describe("自动构筑测试", () => {
+        it("当初始MOD数量已达上限时不应继续超量添加", () => {
+            const charBuild = createCharBuild()
+            charBuild.mods = [
+                new LeveledMod(41001),
+                new LeveledMod(41002),
+                new LeveledMod(41003),
+                new LeveledMod(41004),
+                new LeveledMod(41007),
+                new LeveledMod(41213),
+                new LeveledMod(41214),
+                new LeveledMod(41311),
+            ]
+            charBuild.buffs = []
+
+            const result = charBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions: [new LeveledModWithCount(41324, undefined, undefined, 5)],
+                enableLog: true,
+            })
+
+            expect(result.newBuild.charMods.length).toBe(8)
+            expect(result.newBuild.charMods.some(mod => mod?.id === 41324)).toBe(false)
+        })
+
         it("应该优先补齐趋向条件再继续常规迭代", () => {
             const charBuild = createCharBuild()
             charBuild.mods = [new LeveledMod(41002), new LeveledMod(41003), new LeveledMod(41746)]
@@ -1078,6 +1132,74 @@ describe("CharBuild类测试", () => {
             const dynamicAttrs = dynamicBuild.calculateWeaponAttributes()
             expect(dynamicAttrs.weapon?.追加伤害).toBe(100)
             expect(dynamicBuild.calculate()).toBeGreaterThan(baseBuild.calculate())
+        })
+    })
+
+    describe("E2E", () => {
+        it("clone 的计算结果应该相同", () => {
+            const build = CharBuild.fromCharSetting("苏乙", {
+                charLevel: 80,
+                baseName: "射击",
+                hpPercent: 1,
+                resonanceGain: 3,
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                isRouge: false,
+                targetFunction: "DPS/0.71*1.71",
+                charSkillLevel: 12,
+                meleeWeapon: 10601,
+                meleeWeaponLevel: 80,
+                meleeWeaponRefine: 5,
+                rangedWeapon: 20101,
+                rangedWeaponLevel: 80,
+                rangedWeaponRefine: 5,
+                auraMod: 51765,
+                imbalance: false,
+                charMods: [
+                    [51463, 10],
+                    [51961, 10],
+                    [56164, 10],
+                    [51336, 10],
+                    [51763, 10],
+                    [51761, 10],
+                    [51761, 10],
+                    [51761, 10],
+                ],
+                meleeMods: [null, null, null, null, null, null, null, null],
+                rangedMods: [
+                    [53005, 10],
+                    [53012, 10],
+                    [43002, 5],
+                    [53011, 10],
+                    [53009, 10],
+                    [53010, 10],
+                    [43343, 5],
+                    [33332, 5],
+                ],
+                skillWeaponMods: [null, null, null, null],
+                buffs: [
+                    ["菲娜Q", 12],
+                    ["菲娜被动+1溯", 1],
+                    ["全盛·振奋", 10],
+                    ["激扬寒波", 10],
+                    ["菲娜6溯", 5],
+                    ["菲娜4溯", 1],
+                    ["菲娜助战", 1],
+                    ["菲娜被动(自身)", 1],
+                    ["羽翼·鼓舞·专注(光/暗)", 10],
+                    ["色散成霓", 10],
+                ],
+                customBuff: [],
+                team1: "-",
+                team1Weapon: "-",
+                team2: "-",
+                team2Weapon: "-",
+                timelineDPS: false,
+                actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
+            })
+            const cloned = build.clone()
+            expect(build.calculate()).toBe(cloned.calculate())
         })
     })
 

@@ -395,26 +395,26 @@ function getRewardTypeColor(index: number): string {
         <!-- 密函基本信息 -->
         <div class="flex items-center gap-3 mb-3">
             <span class="text-lg font-bold">
-                {{ props.walnut.名称 }}
+                {{ walnut.名称 }}
             </span>
-            <span class="text-xs text-base-content/70">ID: {{ props.walnut.id }}</span>
+            <CopyID :id="walnut.id" />
             <div class="text-sm text-base-content/70 flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded bg-base-200"> {{ props.walnut.稀有度 }}星 </span>
+                <span class="px-1.5 py-0.5 rounded bg-base-200"> {{ walnut.稀有度 }}星 </span>
                 <div class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
-                    {{ props.walnut.类型 === 1 ? "角色" : props.walnut.类型 === 2 ? "武器" : "魔之楔" }}
+                    {{ walnut.类型 === 1 ? "角色" : walnut.类型 === 2 ? "武器" : "魔之楔" }}
                 </div>
             </div>
         </div>
 
         <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
-            <span>{{ props.walnut.模式 }}</span>
+            <span>{{ walnut.模式 }}</span>
         </div>
 
         <!-- 获取途径 -->
         <div class="p-3 bg-base-200 rounded mb-3">
             <div class="text-xs text-base-content/70 mb-1">获取途径</div>
             <div class="flex flex-wrap gap-2">
-                <span v-for="way in props.walnut.获取途径" :key="way" class="bg-base-300 px-2 py-0.5 rounded-full text-xs">
+                <span v-for="way in walnut.获取途径" :key="way" class="bg-base-300 px-2 py-0.5 rounded-full text-xs">
                     {{ way }}
                 </span>
             </div>
@@ -444,7 +444,11 @@ function getRewardTypeColor(index: number): string {
                             <td class="py-2 px-3 text-sm">{{ item.reward.id }}</td>
                             <td class="py-2 px-3 text-sm">
                                 <div class="flex items-center gap-2">
-                                    <img :src="item.icon" :alt="item.reward.name" class="size-6 shrink-0 rounded bg-base-300 object-cover" />
+                                    <img
+                                        :src="item.icon"
+                                        :alt="item.reward.name"
+                                        class="size-6 shrink-0 rounded bg-base-300 object-cover"
+                                    />
                                     <template v-if="item.links.length > 0">
                                         <span v-for="(link, linkIndex) in item.links" :key="link.to" class="inline-flex items-center gap-1">
                                             <SRouterLink :to="link.to" class="link link-primary hover:underline">

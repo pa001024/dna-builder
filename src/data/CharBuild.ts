@@ -408,31 +408,31 @@ export class CharBuild {
 
     static fromCharSetting(
         selectedChar: string,
-        inv: ReturnType<typeof import("../store/inv").useInvStore>,
         charSettings: typeof import("../composables/useCharSettings").defaultCharSettings,
+        inv?: ReturnType<typeof import("../store/inv").useInvStore>,
         timeline?: CharBuildTimeline
     ) {
         const char = new LeveledChar(selectedChar, charSettings.charLevel)
         return new CharBuild({
             char,
             auraMod: new LeveledMod(charSettings.auraMod),
-            charMods: charSettings.charMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
-            meleeMods: charSettings.meleeMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
-            rangedMods: charSettings.rangedMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
-            skillMods: charSettings.skillWeaponMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv.getBuffLv(v[0]))),
+            charMods: charSettings.charMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
+            meleeMods: charSettings.meleeMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
+            rangedMods: charSettings.rangedMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
+            skillMods: charSettings.skillWeaponMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
             skillLevel: charSettings.charSkillLevel,
             buffs: charSettings.buffs.map(v => new LeveledBuff(v[0], v[1])),
             melee: new LeveledWeapon(
                 charSettings.meleeWeapon,
                 charSettings.meleeWeaponRefine,
                 charSettings.meleeWeaponLevel,
-                inv.getWBuffLv(charSettings.meleeWeapon, char.属性)
+                inv?.getWBuffLv(charSettings.meleeWeapon, char.属性)
             ),
             ranged: new LeveledWeapon(
                 charSettings.rangedWeapon,
                 charSettings.rangedWeaponRefine,
                 charSettings.rangedWeaponLevel,
-                inv.getWBuffLv(charSettings.rangedWeapon, char.属性)
+                inv?.getWBuffLv(charSettings.rangedWeapon, char.属性)
             ),
             baseName: charSettings.baseName,
             imbalance: charSettings.imbalance,
@@ -529,7 +529,7 @@ export class CharBuild {
         const skillMultiplier = this.getTotalBonusMul("技能倍率乘数")
 
         // 应用MOD属性加成
-        const modAttributeBonus = this.getTotalBonus("MOD属性")
+        const modAttributeBonus = this.getTotalBonus(`${this.char.属性}MOD属性`)
         if (modAttributeBonus > 0) {
             // 计算狮鹫百首契约者MOD属性加成
             const modsBySeries = this.charMods.filter((mod): mod is LeveledMod => mod !== null && CharBuild.elmSeries.includes(mod.系列))
@@ -686,10 +686,20 @@ export class CharBuild {
             let reloadTimeBonus = this.getTotalBonus(`${prefix}装填`, prefix) + this.getTotalBonus(`装填`, prefix)
             let magazineBonus = this.getTotalBonus(`${prefix}弹匣`, prefix) + this.getTotalBonus(`弹匣`, prefix)
             let ammoBonus = this.getTotalBonus(`${prefix}弹药`, prefix) + this.getTotalBonus(`弹药`, prefix)
-            const additionalDamage = this.getTotalBonus("追加伤害")
+            let additionalDamage = this.getTotalBonus("追加伤害")
             let weaponDamageMul = this.getTotalBonus(`${prefix}武器倍率`, prefix) + this.getTotalBonus(`武器倍率`, prefix)
             let independentDamageIncrease =
                 (1 + this.getTotalBonusMul(`${prefix}独立增伤`, prefix)) * (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
+
+            // 应用MOD属性加成
+            const modAttributeBonus = this.getTotalBonus(`${this.char.属性}MOD属性`)
+            if (modAttributeBonus > 0) {
+                // 计算狮鹫百首契约者MOD属性加成
+                const modsBySeries = this.charMods.filter(
+                    (mod): mod is LeveledMod => mod !== null && CharBuild.elmSeries.includes(mod.系列)
+                )
+                additionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "追加伤害")
+            }
 
             if (prefix.startsWith("同律")) {
                 const lowerPrefix = prefix.substring(2)
@@ -922,7 +932,7 @@ export class CharBuild {
         // 添加MOD加成
         if (prefix === "角色" || !attribute.startsWith(prefix))
             this.mods.forEach(mod => {
-                if (prefix !== "角色" && mod.attrType !== prefix) return
+                if (prefix && mod.attrType !== prefix) return
                 if (typeof mod.addAttr[attribute] === "number") {
                     bonus *= 1 + mod.addAttr[attribute]
                 }
@@ -976,21 +986,34 @@ export class CharBuild {
     }
 
     /**
+     * 计算高等级减伤乘区。
+     * 怪物等级大于等于 200 时生效。
+     * @param enemyLevel 怪物等级
+     */
+    private calculateLevelReduceRate(enemyLevel: number): number {
+        if (enemyLevel < 200) {
+            return 1
+        }
+
+        return 1 / (1 + (enemyLevel - 190) * 0.05)
+    }
+
+    /**
      * 计算防御乘区
      * @param attrs 属性
      * @param finalDef 可选, 最终防御值
      * @returns 防御乘区
      */
     public calculateDefenseMultiplier(attrs: ReturnType<typeof this.calculateAttributes>, finalDef?: number, isSkill = false): number {
-        if (this.enemy.currentShield > 0) return 1
+        const enemyLevel = this.enemy.等级 || 80
+        if (this.enemy.currentShield > 0) return this.calculateLevelReduceRate(enemyLevel)
         // 确保等级和敌方等级都是有效的数字
         const charLevel = this.char.等级 || 80
-        const enemyLevel = this.enemy.等级 || 80
 
         const levelDiff = Math.max(0, Math.min(20, Math.min(80, enemyLevel) - charLevel))
         const def = finalDef ?? this.enemy.def * (1 - (isSkill ? attrs.技能无视防御 + attrs.无视防御 : attrs.无视防御))
         const dmgReduce = def / (300 + def - levelDiff * 10) // 减伤率
-        const defenseMultiplier = 1 - dmgReduce
+        const defenseMultiplier = (1 - dmgReduce) * this.calculateLevelReduceRate(enemyLevel)
         return Math.max(0, Math.min(1, defenseMultiplier))
     }
 
@@ -1281,6 +1304,8 @@ export class CharBuild {
             return weaponAttrs.get(key)
         }
         const skillAttrs = new Map(this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)]))
+        skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
+        skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
         const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
         const getSkillAttr = (fieldName: string, base?: string) =>
             skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
@@ -1883,16 +1908,16 @@ export class CharBuild {
          */
         switch (resolvedType) {
             case "角色":
-                copyBuild.charMods.splice(index, 1)
+                copyBuild.charMods[index] = null
                 break
             case "近战":
-                copyBuild.meleeMods.splice(index, 1)
+                copyBuild.meleeMods[index] = null
                 break
             case "远程":
-                copyBuild.rangedMods.splice(index, 1)
+                copyBuild.rangedMods[index] = null
                 break
             case "同律":
-                copyBuild.skillMods.splice(index, 1)
+                copyBuild.skillMods[index] = null
                 break
             default:
                 return 0
@@ -1902,12 +1927,12 @@ export class CharBuild {
         if (!removedValue) {
             return 0
         }
-
+        // console.log(JSON.stringify(this), JSON.stringify(copyBuild))
         return baseValue / removedValue - 1
     }
 
     clone() {
-        return new CharBuild({
+        const cloned = new CharBuild({
             char: new LeveledChar(this.char.名称, this.char.等级),
             hpPercent: this.hpPercent,
             resonanceGain: this.resonanceGain,
@@ -1917,7 +1942,7 @@ export class CharBuild {
             meleeMods: this.meleeMods.map(m => (m ? m.clone() : null)),
             rangedMods: this.rangedMods.map(m => (m ? m.clone() : null)),
             skillMods: this.skillMods.map(m => (m ? m.clone() : null)),
-            buffs: this.buffs.map(b => new LeveledBuff(b.名称, b.等级)),
+            buffs: [...this.buffs, ...this.dynamicBuffs].map(b => new LeveledBuff(b.名称, b.等级)),
             melee: this.meleeWeapon.clone(),
             ranged: this.rangedWeapon.clone(),
             baseName: this.baseName,
@@ -1930,6 +1955,7 @@ export class CharBuild {
             timelineDPS: this.timelineDPS,
             teamWeaponCategories: [...this.teamWeaponCategories],
         })
+        return cloned
     }
     getMods(charTab: string) {
         if (charTab === "同律" && this.skillWeapon?.inherit) {
@@ -2105,7 +2131,16 @@ export class CharBuild {
             if (enableLog) logString += `${msg}\n`
         }
         log(`开始自动构筑`)
+        /**
+         * 判断指定槽位类型是否已经达到上限。
+         * @param key MOD槽位类型
+         * @returns 是否已满
+         */
+        function isTypeFull(key: ModTypeKey) {
+            return localBuild[key].length >= ModTypeMaxSlot[key]
+        }
         function addMod(key: ModTypeKey, mod: LeveledMod) {
+            if (isTypeFull(key)) return false
             localBuild[key].push(mod)
             // 记录互斥系列
             if (CharBuild.exclusiveSeries.includes(mod.系列) || (mod.系列 === "囚狼" && mod.id > 100000)) {
@@ -2117,6 +2152,7 @@ export class CharBuild {
             } else {
                 selectedModCount.set(mod.id, (selectedModCount.get(mod.id) || 0) + 1)
             }
+            return true
         }
         function removeMod(key: ModTypeKey, index: number) {
             const mod = localBuild[key][index]!
@@ -2368,9 +2404,12 @@ export class CharBuild {
                 }
 
                 if (!best) break
-                addMod(best.key, best.mod)
-                changed = true
-                log(`第${iter}次迭代: 条件优先添加${ModTypeMap[best.key]}>>> ${best.mod.名称}`)
+                if (addMod(best.key, best.mod)) {
+                    changed = true
+                    log(`第${iter}次迭代: 条件优先添加${ModTypeMap[best.key]}>>> ${best.mod.名称}`)
+                } else {
+                    break
+                }
             }
 
             return changed
@@ -2445,7 +2484,7 @@ export class CharBuild {
                 while (localBuild[key].length < ModTypeMaxSlot[key]) {
                     // 不添加收益0的MOD
                     if (maxedIncome <= 0) break
-                    addMod(key, maxed)
+                    if (!addMod(key, maxed)) break
                     changed = true
                     log(
                         `第${iter}次迭代: 添加${ModTypeMap[key]}(${localBuild[key].length}/${ModTypeMaxSlot[key]})>>> ${maxed.名称}(+${+(maxedIncome * 100).toFixed(2)}%)`
@@ -2477,8 +2516,11 @@ export class CharBuild {
                         `第${iter}次迭代: ${ModTypeMap[key]}>>> ${maxed.名称} 替换 ${removableMod.名称} (${+(lastIncome * 100).toFixed(2)}% -> ${+(newIncome * 100).toFixed(2)}%)`
                     )
                     removeMod(key, removableIndex)
-                    addMod(key, maxed)
-                    changed = true
+                    if (addMod(key, maxed)) {
+                        changed = true
+                    } else {
+                        addMod(key, removableMod)
+                    }
                 }
             })
             if (!changed) log(`无可替换MOD 结束自动构筑`)

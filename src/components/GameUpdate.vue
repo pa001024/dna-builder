@@ -19,12 +19,10 @@ import {
 import { useGameStore } from "../store/game"
 import {
     CDN_LIST,
+    compareGameVersions,
     type DownloadProgress,
     downloadAssets,
     downloadHotUpdateAssets,
-    type GameAssets,
-    type GameVersionListLocal,
-    type GameVersionListRes,
     type GameVersionListWithPre,
     getBaseVersion,
     getHotUpdatePakFilesInfo,
@@ -35,6 +33,8 @@ import {
     type HotUpdateVersionListRes,
     isLocalFileMatch,
     type OptionalPatchSignsRes,
+    resolveLocalVersions,
+    toLocalBaseVersionFormat,
 } from "../utils/game-download"
 
 // 状态管理
@@ -669,20 +669,6 @@ async function checkHotUpdateStatus() {
     }
 }
 
-/**
- * 兼容本地 BaseVersion.json 的两种结构并提取版本映射
- */
-function resolveLocalVersions(localContent: string): Record<string, GameAssets> | null {
-    const localVersionList = JSON.parse(localContent) as Partial<GameVersionListLocal> & Partial<GameVersionListRes>
-    if (localVersionList.gameVersionList?.["1"]?.gameVersionList) {
-        return localVersionList.gameVersionList["1"].gameVersionList
-    }
-    if (localVersionList.GameVersionList?.["1"]?.GameVersionList) {
-        return localVersionList.GameVersionList["1"].GameVersionList
-    }
-    return null
-}
-
 async function checkForUpdates() {
     const activeChannel = getActiveChannel()
     if (!activeChannel) {
@@ -698,15 +684,11 @@ async function checkForUpdates() {
             throw new Error("Unsupported BaseVersion format")
         }
         if (versionList.value) {
-            const remoteVersions = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
-            let hasUpdate = false
-            let updateSizeBytes = 0
-            for (const [filename, remoteAsset] of Object.entries(remoteVersions)) {
-                if (!localVersions[filename] || remoteAsset.ZipGameVersion !== localVersions[filename].ZipGameVersion) {
-                    hasUpdate = true
-                    updateSizeBytes += remoteAsset.ZipSize
-                }
+            const remoteVersions = resolveLocalVersions(JSON.stringify(versionList.value.gameVersionList))
+            if (!remoteVersions) {
+                throw new Error("Unsupported remote BaseVersion format")
             }
+            const { hasUpdate, updateSizeBytes } = compareGameVersions(localVersions, remoteVersions)
             needUpdate.value = hasUpdate
             updateSize.value = updateSizeBytes
         }
@@ -722,13 +704,7 @@ async function checkForUpdates() {
 async function updateBaseVersionFile() {
     if (!gamePath.value || !versionList.value) return
     try {
-        const localVersionList: GameVersionListRes = {
-            GameVersionList: {
-                "1": {
-                    GameVersionList: versionList.value.gameVersionList.GameVersionList["1"].GameVersionList,
-                },
-            },
-        }
+        const localVersionList = toLocalBaseVersionFormat(versionList.value.gameVersionList.GameVersionList["1"].GameVersionList)
         const content = JSON.stringify(localVersionList, null, 2)
         await writeTextFile(baseVersionPath.value, content)
         ui.showSuccessMessage(t("game-update.update_success"))

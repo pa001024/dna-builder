@@ -9,6 +9,7 @@ import charData from "@/data/d/char.data"
 import draftData from "@/data/d/draft.data"
 import dungeonData from "@/data/d/dungeon.data"
 import dynQuestData from "@/data/d/dynquest.data"
+import { eventData } from "@/data/d/event.data"
 import { fishingSpots, fishs } from "@/data/d/fish.data"
 import { hardBossMap } from "@/data/d/hardboss.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
@@ -589,18 +590,15 @@ export class GlobalSearchService {
 
         entries.push(
             ...dynQuestData.map(quest => {
-                const regionName = regionMap.get(quest.regionId)?.name
-                const subRegionName = subRegionMap.get(quest.subRegionId)?.name
-
                 return this.buildSearchEntry(
                     {
                         id: `dynquest:${quest.id}`,
                         title: quest.name,
-                        subtitle: `委托 ID: ${quest.id}`,
+                        subtitle: quest.desc,
                         typeLabel: t("database.dynquest"),
                         path: `/db/dynquest/${quest.id}`,
                     },
-                    [quest.id, regionName, subRegionName]
+                    [quest.id, quest.desc]
                 )
             })
         )
@@ -663,6 +661,21 @@ export class GlobalSearchService {
                         path: `/db/achievement/${achievement.id}`,
                     },
                     [achievement.id, achievement.名称, achievement.描述]
+                )
+            )
+        )
+
+        entries.push(
+            ...eventData.map(event =>
+                this.buildSearchEntry(
+                    {
+                        id: `event:${event.id}`,
+                        title: event.name,
+                        subtitle: `活动 ID: ${event.id}`,
+                        typeLabel: t("database.event"),
+                        path: `/db/event/${event.id}`,
+                    },
+                    [event.id, event.name, event.desc, event.rule]
                 )
             )
         )

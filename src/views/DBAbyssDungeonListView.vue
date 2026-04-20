@@ -160,7 +160,7 @@ useInitialScrollToSelectedItem({
 
                     <div class="flex flex-wrap gap-1">
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
+                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
                             :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedVersion = ''"
                         >

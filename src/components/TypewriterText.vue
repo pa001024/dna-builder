@@ -2,12 +2,7 @@
 import { type LayoutLine, layoutWithLines, type PreparedTextWithSegments, prepareWithSegments } from "@chenglou/pretext"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useSettingStore } from "@/store/setting"
-import {
-    DEFAULT_STORY_TEXT_CONFIG,
-    parseStoryTextSegments,
-    type StoryTextConfig,
-    type StoryTextSegment,
-} from "@/utils/story-text"
+import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments, type StoryTextConfig, type StoryTextSegment } from "@/utils/story-text"
 
 const props = withDefaults(
     defineProps<{
@@ -37,6 +32,12 @@ interface RenderedStoryLine {
     renderLength: number
     separatorLength: number
     segments: LineSegmentSlice[]
+}
+
+interface RenderedStoryCharacter {
+    text: string
+    tone: StoryTextSegment["tone"]
+    isLastVisible: boolean
 }
 
 interface StoryCursor {
@@ -353,6 +354,43 @@ const visibleStoryLines = computed<RenderedStoryLine[]>(() => {
 })
 
 /**
+ * 当前可见文本中最后一个字符的渲染片段。
+ */
+const lastVisibleCharacter = computed<RenderedStoryCharacter | null>(() => {
+    if (!visibleStoryLines.value.length) {
+        return null
+    }
+
+    const lastLine = visibleStoryLines.value[visibleStoryLines.value.length - 1]
+    if (!lastLine.segments.length) {
+        return null
+    }
+
+    const lastSegment = lastLine.segments[lastLine.segments.length - 1]
+    if (!lastSegment.text) {
+        return null
+    }
+
+    return {
+        text: lastSegment.text.slice(-1),
+        tone: lastSegment.tone,
+        isLastVisible: true,
+    }
+})
+
+/**
+ * 当前文本布局对应的固定高度。
+ */
+const fixedTextHeight = computed(() => {
+    if (!preparedText.value || measuredWidth.value <= 0 || measuredLineHeight.value <= 0) {
+        return null
+    }
+
+    const { height } = layoutWithLines(preparedText.value, measuredWidth.value, measuredLineHeight.value)
+    return height
+})
+
+/**
  * 清理当前打字计时器，避免重复触发。
  */
 function clearTypingTimer() {
@@ -544,11 +582,43 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <span ref="rootElement" class="block w-full whitespace-pre-wrap wrap-break-word">
+    <span
+        ref="rootElement"
+        class="typewriter-text block w-full whitespace-pre-wrap wrap-break-word"
+        :style="fixedTextHeight !== null ? { height: `${fixedTextHeight}px` } : undefined"
+    >
         <template v-if="visibleStoryLines.length">
-            <span v-for="(line, lineIndex) in visibleStoryLines" :key="`${lineIndex}-${line.text}`" class="block whitespace-pre-wrap wrap-break-word">
+            <span
+                v-for="(line, lineIndex) in visibleStoryLines"
+                :key="`${lineIndex}-${line.text}`"
+                class="block whitespace-pre-wrap wrap-break-word"
+            >
                 <template v-for="(segment, index) in line.segments" :key="`${lineIndex}-${index}-${segment.tone}`">
+                    <template
+                        v-if="lineIndex === visibleStoryLines.length - 1 && index === line.segments.length - 1 && lastVisibleCharacter"
+                    >
+                        <span
+                            :class="{
+                                'text-primary font-semibold': segment.tone === 'highlight',
+                                'text-error font-semibold': segment.tone === 'warning',
+                            }"
+                        >
+                            {{ segment.text.slice(0, -1) }}
+                        </span>
+                        <span
+                            :key="`${triggerKey}-${displayedLength}`"
+                            class="typewriter-last-char"
+                            :style="{ animationDuration: `${Math.max(speed, 1)}ms` }"
+                            :class="{
+                                'text-primary font-semibold': lastVisibleCharacter.tone === 'highlight',
+                                'text-error font-semibold': lastVisibleCharacter.tone === 'warning',
+                            }"
+                        >
+                            {{ lastVisibleCharacter.text }}
+                        </span>
+                    </template>
                     <span
+                        v-else
                         :class="{
                             'text-primary font-semibold': segment.tone === 'highlight',
                             'text-error font-semibold': segment.tone === 'warning',
@@ -565,6 +635,14 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.typewriter-last-char {
+    display: inline-block;
+    transform-origin: center bottom;
+    animation-name: last-char-enter;
+    animation-timing-function: ease-out;
+    animation-fill-mode: both;
+}
+
 .typing-caret {
     display: inline-block;
     width: 0.45em;
@@ -583,6 +661,17 @@ onBeforeUnmount(() => {
     }
     50% {
         opacity: 0.15;
+    }
+}
+
+@keyframes last-char-enter {
+    0% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 </style>

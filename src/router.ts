@@ -6,6 +6,7 @@ import CharBuildCompare from "./views/CharBuildCompare.vue"
 import CharBuildView from "./views/CharBuildView.vue"
 import CharBuildViewNew from "./views/CharBuildViewNew.vue"
 import CharListView from "./views/CharListView.vue"
+import CounterView from "./views/CounterView.vue"
 import GuideDetailView from "./views/GuideDetailView.vue"
 import GuideEditView from "./views/GuideEditView.vue"
 import GuideListView from "./views/GuideListView.vue"
@@ -28,6 +29,7 @@ let setMinSize = async (_w: number, _h: number) => {}
 
 const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(360, 430) },
+    { name: "counter", path: "/counter", component: CounterView, beforeEnter: () => setMinSize(360, 430) },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(540, 430) },
     {
         name: "points-mall",
@@ -73,6 +75,7 @@ const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(800, 700),
     },
     { name: "game-accounts", path: "/game-accounts", component: UserManager, beforeEnter: () => setMinSize(600, 600) },
+    { name: "unpack", path: "/unpack", component: () => import("./views/UnpackView.vue"), beforeEnter: () => setMinSize(900, 700) },
     {
         name: "more",
         path: "/more",
@@ -443,12 +446,14 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "dynquest",
                 component: () => import("./views/DBDynQuestListView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
+                meta: { title: "database.dynquest" },
             },
             {
                 name: "dynquest-detail",
                 path: "dynquest/:questId",
                 component: () => import("./views/DBDynQuestDetailView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
+                meta: { title: "database.dynquest" },
             },
             {
                 name: "partytopic-list",
@@ -470,7 +475,7 @@ const routes: readonly RouteRecordRaw[] = [
             },
             {
                 name: "questchain-detail",
-                path: "questchain/:questChainId",
+                path: "questchain/:questChainId/:questId?",
                 component: () => import("./views/DBQuestDetailView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
             },
@@ -492,6 +497,13 @@ const routes: readonly RouteRecordRaw[] = [
                 component: () => import("./views/DBNpcListView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
                 meta: { keepAlive: true },
+            },
+            {
+                name: "impr-list",
+                path: "impr",
+                component: () => import("./views/DBImprView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+                meta: { title: "database.impr" },
             },
             {
                 name: "npc-detail",

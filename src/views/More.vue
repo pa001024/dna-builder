@@ -22,6 +22,11 @@ const items = [
         show: env.isApp && !setting.safeMode,
     },
     {
+        name: "counter",
+        path: "/counter",
+        icon: "ri:bar-chart-line",
+    },
+    {
         name: "build-compare",
         path: "/char-build-compare",
         icon: "ri:table-view",
@@ -97,6 +102,12 @@ const items = [
         path: "/game-accounts",
         icon: "ri:user-line",
         show: env.isApp,
+    },
+    {
+        name: "unpack",
+        path: "/unpack",
+        icon: "ri:file-zip-line",
+        show: env.isApp && !setting.safeMode,
     },
 ] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[]
 // 卡片进入动画延迟

@@ -88,7 +88,7 @@ const formatEffectAttr = (effect: EffectAttr): string => {
     if (effect.Camp) parts.push(`阵营:${effect.Camp}`)
     if (effect.dot) parts.push(`Dot:[${effect.dot.map(d => formatBuffDot(d)).join("; ")}]`)
     if (effect.t) parts.push(`属性:[${formatBuffAttrs(effect.t)}]`)
-    if (effect.cid) parts.push(`创造物ID:[${effect.cid}]`)
+    if (effect.cid) parts.push(`实体ID:[${effect.cid}]`)
     if (effect.si) {
         const shape = effect.si.st
         let shapeName = ""

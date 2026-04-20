@@ -5,6 +5,7 @@ import { useRoute } from "vue-router"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
 import { env } from "./env"
 import { useMihanNotify } from "./store/mihan"
+import { useScriptRuntimeStore } from "./store/scriptRuntime"
 import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
 import { useUserStore } from "./store/user"
@@ -13,6 +14,7 @@ import { postVisitorCount } from "./vercount"
 const setting = useSettingStore()
 const ui = useUIStore()
 const mihanNotify = useMihanNotify()
+const scriptRuntime = useScriptRuntimeStore()
 const route = useRoute()
 const user = useUserStore()
 const ONLINE_EXPERIENCE_TICK_MS = 60 * 1000
@@ -43,9 +45,7 @@ function getLocalDateKey() {
  * @description 确保经验奖励 mutation 返回的用户资料会同步回本地状态。
  * @param result 奖励接口返回值。
  */
-function applyExperienceRewardResult(
-    result?: { user?: any; retryAfterMs?: number; source?: string; success?: boolean } | null
-) {
+function applyExperienceRewardResult(result?: { user?: any; retryAfterMs?: number; source?: string; success?: boolean } | null) {
     if (!result) return
     if (result.user) {
         user.setProfile(result.user)
@@ -167,6 +167,11 @@ if (env.isApp) {
     void setting.syncLaunchAtStartup().catch(error => {
         console.error("同步开机启动状态失败:", error)
     })
+    if (setting.initScriptHotkeysAtStartup) {
+        void scriptRuntime.initScriptHotkeysAtStartup().catch(error => {
+            console.error("启动时注册脚本热键失败:", error)
+        })
+    }
 } else {
     onMounted(() => {
         if (!setting.windowTrasnparent) return
@@ -301,7 +306,9 @@ onBeforeUnmount(() => {
     <Updater />
     <ResizeableWindow
         id="main-window"
-        :title="ui.title || $t(`${String($route.name)}.title`, '')"
+        :title="
+            ui.title || $t((typeof $route.meta?.title === 'string' ? $route.meta?.title : undefined) || `${String($route.name)}.title`, '')
+        "
         darkable
         pinable
         :class="{ 'is-app': env.isApp }"

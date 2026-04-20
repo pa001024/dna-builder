@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import * as dialog from "@tauri-apps/plugin-dialog"
 import { t } from "i18next"
-import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue"
-import { openExplorer } from "../api/app"
+import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from "vue"
+import { deleteFile, getWindowByProcessName, openExplorer, setWindowStyle, writeTextFile } from "../api/app"
 import { charData, LeveledChar, weaponData } from "../data"
 import { env } from "../env"
 import { useCloudGameStore } from "../store/cloudgame"
@@ -16,6 +16,55 @@ const keys = ["path", "beforeGame", "afterGame"] as const
 const tab = ref("update")
 const cloudgame = useCloudGameStore()
 const game = useGameStore()
+const noTitlebarTargetSuffix = "\\EM\\Saved\\PersistentDownloadDir\\Content\\Script\\EMLuaConst.lua"
+
+/**
+ * 将无标题栏配置同步为游戏脚本文件存在与否。
+ */
+watch(
+    [() => game.noTitlebar, () => game.gameDir],
+    async ([enabled, gameDir], oldValue) => {
+        const [, previousGameDir] = (oldValue ?? []) as [boolean | undefined, string | undefined]
+        const currentTarget = gameDir ? `${gameDir}${noTitlebarTargetSuffix}` : ""
+        const previousTarget = previousGameDir ? `${previousGameDir}${noTitlebarTargetSuffix}` : ""
+
+        try {
+            if (!enabled) {
+                if (currentTarget) {
+                    await deleteFile(currentTarget, true)
+                }
+                if (previousTarget && previousTarget !== currentTarget) {
+                    await deleteFile(previousTarget, true)
+                }
+                const hwnd = await getWindowByProcessName("EM-Win64-Shipping.exe")
+                if (hwnd) {
+                    await setWindowStyle(hwnd, "-WS_CAPTION")
+                }
+                return
+            }
+
+            if (previousTarget && previousTarget !== currentTarget) {
+                await deleteFile(previousTarget, true)
+            }
+
+            if (!currentTarget) return
+
+            const response = await fetch("/tpl/EMLuaConst.lua")
+            if (!response.ok) {
+                throw new Error(`读取 EMLuaConst.lua 失败: ${response.statusText}`)
+            }
+            await writeTextFile(currentTarget, await response.text())
+            const hwnd = await getWindowByProcessName("EM-Win64-Shipping.exe")
+            if (hwnd) {
+                await setWindowStyle(hwnd, "+WS_CAPTION +WS_THICKFRAME +WS_SYSMENU +WS_MINIMIZEBOX +WS_MAXIMIZEBOX +WS_SIZEBOX")
+            }
+        } catch (error) {
+            console.error("同步 noTitlebar 文件失败", error)
+        }
+    },
+    { immediate: true }
+)
+
 //#region 启动
 async function selectPath(key: (typeof keys)[number]) {
     const result = await dialog.open({
@@ -512,6 +561,12 @@ onUnmounted(() => {
                             <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
                                 <input v-model="game.dx11Enable" type="checkbox" class="checkbox checkbox-primary" />
                                 <span class="label-text">{{ $t("game-launcher.dx11Enable") }}</span>
+                            </label>
+                        </div>
+                        <div class="p-2 flex flex-row justify-between items-center flex-wrap">
+                            <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
+                                <input v-model="game.noTitlebar" type="checkbox" class="checkbox checkbox-primary" />
+                                <span class="label-text">{{ $t("game-launcher.noTitlebar") }}</span>
                             </label>
                         </div>
                         <div class="p-2 flex flex-row justify-between items-center flex-wrap">

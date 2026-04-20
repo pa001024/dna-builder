@@ -17099,7 +17099,7 @@ export const partyTopicData_jp: PartyTopic[] = [
             },
             {
                 id: 80250108,
-                content: "手短に言う。ちょっとやからしちゃったんだ。助けてくんねえか？（切迫）",
+                content: "手短に言う。ちょっとやからしちゃったんだ。助けてくんねえか？",
                 voice: "inv/Kami/001/14170B48",
                 npc: 790014,
                 next: 80250109,
@@ -17255,7 +17255,7 @@ export const partyTopicData_jp: PartyTopic[] = [
             },
             {
                 id: 80250130,
-                content: "あなたか、家族か。どちらを残るか、決めなさい。",
+                content: "あなたか、家族か。どちらが残るか、決めなさい。",
                 voice: "inv/Kami/001/14170EE4",
                 npc: 790052,
                 next: 80250131,
@@ -17855,7 +17855,7 @@ export const partyTopicData_jp: PartyTopic[] = [
             {
                 id: 80250308,
                 content:
-                    "でもね、昨日と別れなんてできやしないのよ。残るのは酒が抜けた一瞬の罪悪感だけ。日が暮れれば、どうせまた酔い潰れて同じとこに戻ってくるわ。言葉だけで何か変わると思う？",
+                    "でもね、昨日と別れることなんてできやしないのよ。残るのは酒が抜けたあとの後悔だけ。日が暮れれば、どうせまた酔い潰れて同じとこに戻ってくるわ。言葉だけで何か変わると思う？",
                 voice: "inv/Kami/003/14172C18",
                 npc: 790052,
                 next: 80250309,
@@ -17912,7 +17912,7 @@ export const partyTopicData_jp: PartyTopic[] = [
             },
             {
                 id: 80250316,
-                content: "…………（深呼吸、息を止める）",
+                content: "…………",
                 voice: "inv/Kami/003/14172D68",
                 npc: 790014,
                 next: 80250317,
@@ -18108,7 +18108,7 @@ export const partyTopicData_jp: PartyTopic[] = [
             },
             {
                 id: 80250343,
-                content: "はぁ～、その説明だけ、もう高いのがわかるわ。",
+                content: "はぁ～、その説明だけで、もう高いのがわかるわ。",
                 voice: "inv/Kami/003/141731D6",
                 npc: 790014,
                 next: 80250344,
@@ -21188,7 +21188,7 @@ export const partyTopicData_jp: PartyTopic[] = [
             {
                 id: 80230251,
                 content:
-                    '……知ってる？あのシリュウって女、<Default note="text:たいふうきゅうしょう">大風九章</>の誤審で裁かれたことがあるらしいよ。',
+                    '……知ってるか？あのシリュウって女、<Default note="text:たいふうきゅうしょう">大風九章</>の誤審で裁かれたことがあるらしいぞ。',
                 voice: "inv/Zhiliu/002/C8D9178E",
                 npc: 790080,
                 next: 80230252,
@@ -21277,7 +21277,7 @@ export const partyTopicData_jp: PartyTopic[] = [
             },
             {
                 id: 80230306,
-                content: "ずっと以前より、進む道は定まっています。もはや、外のものに心を揺らされることはありません。",
+                content: "ずっと以前より、進む道は定まっています。もはや、外のものに心を揺さぶられることはありません。",
                 voice: "inv/Zhiliu/003/C8D92094",
                 npc: 790076,
                 next: 80230307,
@@ -21382,7 +21382,7 @@ export const partyTopicData_jp: PartyTopic[] = [
             },
             {
                 id: 80230324,
-                content: "（そうだ……そうだ……覚えている必要などない。忘却こそ、何より楽にしてくれる。）",
+                content: "（そうだ……そうだ……覚えている必要などない。忘却こそが、何より楽にしてくれる。）",
                 voice: "inv/Zhiliu/003/C8D92388",
                 next: 80230325,
             },

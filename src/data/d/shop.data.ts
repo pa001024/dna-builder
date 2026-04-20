@@ -15918,7 +15918,7 @@ const shopData_i: Shop[] = [
                                 sequence: 293,
                                 startTime: 1770602400,
                                 endTime: 1776027600,
-                                cond: "获得任意璀璨展示动作解锁",
+                                cond: "获得睥睨山河、悠游水岸、极速定格其中任一展示动作解锁",
                                 isSpPopup: 1,
                             },
                             {
@@ -15935,7 +15935,7 @@ const shopData_i: Shop[] = [
                                 sequence: 292,
                                 startTime: 1770602400,
                                 endTime: 1776027600,
-                                cond: "获得任意璀璨展示动作解锁",
+                                cond: "获得睥睨山河、悠游水岸、极速定格其中任一展示动作解锁",
                                 isSpPopup: 1,
                             },
                             {

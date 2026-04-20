@@ -77,6 +77,7 @@ const DATA_TYPE_ENUM_VALUES = [
     "Dungeon",
     "HardBoss",
     "Jargon",
+    "DynQuest",
     "Mod",
     "NPC",
     "PartyTopic",
@@ -494,6 +495,12 @@ const DATA_TYPE_DEFINITION_META: Record<DataTypeName, DataTypeDefinitionMeta> = 
         interfaceName: "QuestStory",
         moduleIds: ["/local/quest", "/local/quest_en", "/local/quest_fr", "/local/quest_jp", "/local/quest_kr", "/local/quest_tc"],
         description: "任务剧情结构定义",
+    },
+    DynQuest: {
+        filePath: "src/data/d/dynquest.data.ts",
+        interfaceName: "DynQuest",
+        moduleIds: ["/local/dynquest"],
+        description: "动态委托数据结构定义",
     },
     Reward: {
         filePath: "src/data/data-types.ts",

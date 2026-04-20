@@ -7,6 +7,8 @@ export interface NPC {
     type?: string
     charId?: number
     icon?: string
+    srId?: number
+    pos?: [number, number]
     talks?: Dialogue[]
 }
 
@@ -254,6 +256,8 @@ export const npcData: NPC[] = [
         charId: 1103,
         type: "Show",
         icon: "Tuosi",
+        srId: 102102,
+        pos: [-10847, -21542],
         talks: [
             {
                 id: 90200001,
@@ -571,6 +575,8 @@ export const npcData: NPC[] = [
         charId: 1501,
         type: "Show",
         icon: "Baonu",
+        srId: 210101,
+        pos: [-395, 4710],
         talks: [
             {
                 id: 90250001,
@@ -772,6 +778,8 @@ export const npcData: NPC[] = [
         charId: 1502,
         type: "Show",
         icon: "Nifu",
+        srId: 210101,
+        pos: [-12, 5126],
         talks: [
             {
                 id: 90220001,
@@ -1079,6 +1087,8 @@ export const npcData: NPC[] = [
         charId: 1503,
         type: "Show",
         icon: "Kezhou",
+        srId: 210101,
+        pos: [-224, 4952],
         talks: [
             {
                 id: 90240001,
@@ -1819,6 +1829,8 @@ export const npcData: NPC[] = [
         charId: 2101,
         type: "Show",
         icon: "Shuimu",
+        srId: 210101,
+        pos: [328, 3196],
         talks: [
             {
                 id: 90040001,
@@ -2037,6 +2049,8 @@ export const npcData: NPC[] = [
         charId: 2301,
         type: "Show",
         icon: "Zhangyu",
+        srId: 210101,
+        pos: [466, 2475],
         talks: [
             {
                 id: 90050001,
@@ -2433,6 +2447,8 @@ export const npcData: NPC[] = [
         charId: 3101,
         type: "Show",
         icon: "Linen",
+        srId: 210101,
+        pos: [9, 5079],
         talks: [
             {
                 id: 90130001,
@@ -2613,6 +2629,8 @@ export const npcData: NPC[] = [
         charId: 3103,
         type: "Show",
         icon: "Yeer",
+        srId: 210101,
+        pos: [350, 2833],
         talks: [
             {
                 id: 90180001,
@@ -4211,6 +4229,8 @@ export const npcData: NPC[] = [
         charId: 4202,
         type: "Show",
         icon: "Landi",
+        srId: 210101,
+        pos: [67, 5081],
         talks: [
             {
                 id: 90080001,
@@ -4564,6 +4584,8 @@ export const npcData: NPC[] = [
         charId: 5101,
         type: "Show",
         icon: "Songlu",
+        srId: 210101,
+        pos: [340, 3052],
         talks: [
             {
                 id: 90120001,
@@ -6687,6 +6709,8 @@ export const npcData: NPC[] = [
         id: 100366,
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [45, -3573],
     },
     {
         id: 100367,
@@ -6702,6 +6726,8 @@ export const npcData: NPC[] = [
         id: 100369,
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-670, -4300],
     },
     {
         id: 100370,
@@ -6899,6 +6925,8 @@ export const npcData: NPC[] = [
         name: "卡嘉",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [938, 7185],
         talks: [
             {
                 id: 11012501,
@@ -7398,6 +7426,8 @@ export const npcData: NPC[] = [
         name: "阿瓦尔",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [630, 7268],
         talks: [
             {
                 id: 11017901,
@@ -7599,6 +7629,8 @@ export const npcData: NPC[] = [
         name: "卡嘉",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [938, 7185],
         talks: [
             {
                 id: 11011841,
@@ -7703,6 +7735,8 @@ export const npcData: NPC[] = [
         name: "莱昂",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [1159, 7140],
         talks: [
             {
                 id: 11011841,
@@ -7759,6 +7793,8 @@ export const npcData: NPC[] = [
         name: "尤里安",
         camp: "NPC",
         type: "Normal",
+        srId: 102101,
+        pos: [30364, -37358],
         talks: [
             {
                 id: 11010401,
@@ -7862,6 +7898,8 @@ export const npcData: NPC[] = [
         name: "阿妮塔",
         camp: "NPC",
         type: "Normal",
+        srId: 102101,
+        pos: [29176, -38586],
         talks: [
             {
                 id: 11010501,
@@ -7938,6 +7976,8 @@ export const npcData: NPC[] = [
         name: "卡嘉",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [938, 7185],
         talks: [
             {
                 id: 11012501,
@@ -8625,6 +8665,8 @@ export const npcData: NPC[] = [
         name: "卡米拉",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-16120, -5434],
         talks: [
             {
                 id: 51002901,
@@ -8701,6 +8743,7 @@ export const npcData: NPC[] = [
                         id: 510029101,
                         content: "省略巴克先生层层叠叠的修辞手法，再将关键词重新组合，或许能听懂他在说些什么。",
                         next: 51002912,
+                        imprCheck: [1011, "Wisdom", 55],
                     },
                 ],
             },
@@ -8980,16 +9023,19 @@ export const npcData: NPC[] = [
                         id: 510019911,
                         content: "威尔斯先生没你说的不堪，别太过分了。",
                         next: 51001918,
+                        imprCheck: [1011, "Empathy", 70],
                     },
                     {
                         id: 510019912,
                         content: "桂冠卡戎对我们没有任何吸引力，别拿你浅薄的认知定义所有人。",
                         next: 51001918,
+                        imprCheck: [1011, "Benefit", 80],
                     },
                     {
                         id: 510019913,
                         content: "嘴巴放干净点。不然今天像狗一样被打一顿的，就是另一个“威尔斯先生”了。",
                         next: 51001918,
+                        imprCheck: [1011, "Chaos", 75],
                     },
                 ],
             },
@@ -9559,16 +9605,19 @@ export const npcData: NPC[] = [
                         id: 510019911,
                         content: "威尔斯先生没你说的不堪，别太过分了。",
                         next: 51001918,
+                        imprCheck: [1011, "Empathy", 70],
                     },
                     {
                         id: 510019912,
                         content: "桂冠卡戎对我们没有任何吸引力，别拿你浅薄的认知定义所有人。",
                         next: 51001918,
+                        imprCheck: [1011, "Benefit", 80],
                     },
                     {
                         id: 510019913,
                         content: "嘴巴放干净点。不然今天像狗一样被打一顿的，就是另一个“威尔斯先生”了。",
                         next: 51001918,
+                        imprCheck: [1011, "Chaos", 75],
                     },
                 ],
             },
@@ -9744,6 +9793,8 @@ export const npcData: NPC[] = [
         name: "松露",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [340, 3052],
         talks: [
             {
                 id: 20005501,
@@ -9818,6 +9869,8 @@ export const npcData: NPC[] = [
         name: "挖掘",
         camp: "NPC",
         type: "Normal",
+        srId: 101103,
+        pos: [-41433, 26183],
         talks: [
             {
                 id: 51007930,
@@ -10120,6 +10173,8 @@ export const npcData: NPC[] = [
         name: "悬衡派香官",
         camp: "NPC",
         type: "Normal",
+        srId: 104110,
+        pos: [34248, -1012],
         talks: [
             {
                 id: 12010616,
@@ -10792,6 +10847,8 @@ export const npcData: NPC[] = [
         name: "虬先生",
         camp: "NPC",
         type: "Normal",
+        srId: 104901,
+        pos: [-27790, 6762],
         talks: [
             {
                 id: 12025801,
@@ -10949,6 +11006,8 @@ export const npcData: NPC[] = [
         name: "无由生",
         camp: "NPC",
         type: "Normal",
+        srId: 105001,
+        pos: [-7174, 7158],
         talks: [
             {
                 id: 12026401,
@@ -10962,6 +11021,8 @@ export const npcData: NPC[] = [
         name: "无由生",
         camp: "NPC",
         type: "Normal",
+        srId: 105001,
+        pos: [-7174, 7158],
         talks: [
             {
                 id: 12026501,
@@ -11001,6 +11062,8 @@ export const npcData: NPC[] = [
         name: "不会说话的无由生",
         camp: "NPC",
         type: "Normal",
+        srId: 105001,
+        pos: [28300, -19750],
         talks: [
             {
                 id: 12026701,
@@ -11045,6 +11108,8 @@ export const npcData: NPC[] = [
         name: "菱生",
         camp: "NPC",
         type: "Normal",
+        srId: 104106,
+        pos: [17135, -33158],
         talks: [
             {
                 id: 12027101,
@@ -11332,6 +11397,8 @@ export const npcData: NPC[] = [
         name: "白鸟先生",
         camp: "NPC",
         type: "Normal",
+        srId: 101105,
+        pos: [-333, 21269],
         talks: [
             {
                 id: 12035310,
@@ -12310,6 +12377,8 @@ export const npcData: NPC[] = [
         name: "刻舟",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [-224, 4952],
         talks: [
             {
                 id: 12062340,
@@ -12407,6 +12476,8 @@ export const npcData: NPC[] = [
         name: "塔比瑟",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [466, 2475],
         talks: [
             {
                 id: 12061135,
@@ -12625,6 +12696,8 @@ export const npcData: NPC[] = [
         name: "科农",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-12111, 7813],
         talks: [
             {
                 id: 51001201,
@@ -12739,6 +12812,8 @@ export const npcData: NPC[] = [
         name: "爱丽丝",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-670, -4300],
         talks: [
             {
                 id: 51000812,
@@ -12752,6 +12827,8 @@ export const npcData: NPC[] = [
         name: "爱尔莎",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [273, -4561],
         talks: [
             {
                 id: 51000409,
@@ -12776,6 +12853,8 @@ export const npcData: NPC[] = [
         name: "哈兰",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-5233, -6545],
         talks: [
             {
                 id: 51011001,
@@ -12839,7 +12918,7 @@ export const npcData: NPC[] = [
                         id: 51011011,
                         content: "我就想要这件，要不你先穿上让我参考一下。",
                         next: 51011013,
-                        imprCheck: [1011, "Wisdom", 20],
+                        imprCheck: [1011, "Chaos", 20],
                     },
                 ],
             },
@@ -12986,6 +13065,8 @@ export const npcData: NPC[] = [
         name: "瓦伦",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-4903, -6403],
         talks: [
             {
                 id: 51010901,
@@ -13057,7 +13138,7 @@ export const npcData: NPC[] = [
                         id: 51010911,
                         content: "有心仪的人选吗？",
                         next: 51010914,
-                        imprCheck: [1011, "Morality", 20],
+                        imprCheck: [1011, "Empathy", 20],
                     },
                 ],
             },
@@ -13175,6 +13256,8 @@ export const npcData: NPC[] = [
         name: "露娜",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-2491, -4946],
         talks: [
             {
                 id: 51002031,
@@ -13222,12 +13305,16 @@ export const npcData: NPC[] = [
         name: "费伊",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-5334, 10058],
     },
     {
         id: 700013,
         name: "莱娜",
         camp: "NPC",
         type: "Normal",
+        srId: 101106,
+        pos: [19710, 1010],
         talks: [
             {
                 id: 51005001,
@@ -13302,7 +13389,7 @@ export const npcData: NPC[] = [
                         id: 510050121,
                         content: "现在所有人都当这里是鬼宅，但您似乎并不意外，也并不抵触。",
                         next: 51005015,
-                        imprCheck: [1011, "Wisdom", 10],
+                        imprCheck: [1011, "Empathy", 105],
                     },
                 ],
             },
@@ -13425,7 +13512,7 @@ export const npcData: NPC[] = [
                         id: 510050261,
                         content: "（你看见莱娜女士捧在手里的钥匙，一种熟悉感涌上心头。）",
                         next: 51005028,
-                        imprCheck: [1011, "Empathy", 10],
+                        imprCheck: [1011, "Wisdom", 110],
                     },
                 ],
             },
@@ -13522,16 +13609,19 @@ export const npcData: NPC[] = [
                         id: 510013041,
                         content: "不，卡米拉是一位值得信赖的朋友，她帮过我忙。",
                         next: 51001306,
+                        imprCheck: [1011, "Benefit", 50],
                     },
                     {
                         id: 510013042,
                         content: "你不用多费唇舌，卡米拉为人怎么样，我相信自己的判断。",
                         next: 51001306,
+                        imprCheck: [1011, "Morality", 50],
                     },
                     {
                         id: 510013043,
                         content: "所以你是向卡米拉推销酒水不成，着急了。",
                         next: 51001306,
+                        imprCheck: [1011, "Wisdom", 50],
                     },
                 ],
             },
@@ -13733,6 +13823,8 @@ export const npcData: NPC[] = [
         name: "巴克",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [1260, -10877],
         talks: [
             {
                 id: 51003001,
@@ -13965,7 +14057,7 @@ export const npcData: NPC[] = [
                         id: 510035061,
                         content: "你觉得我像是会泄密的人吗？",
                         next: 51003508,
-                        imprCheck: [1011, "Any", 10],
+                        imprCheck: [1011, "Morality", 60],
                     },
                 ],
             },
@@ -14096,6 +14188,7 @@ export const npcData: NPC[] = [
                         id: 510014061,
                         content: "才不是呢，你教会了孩子可贵的纯真与浪漫。",
                         next: 51001409,
+                        imprCheck: [1011, "Empathy", 60],
                     },
                 ],
             },
@@ -14176,6 +14269,8 @@ export const npcData: NPC[] = [
         name: "阿尔加尔",
         camp: "NPC",
         type: "Normal",
+        srId: 101103,
+        pos: [-14249, -2289],
     },
     {
         id: 700019,
@@ -14267,16 +14362,19 @@ export const npcData: NPC[] = [
                         id: 510003054,
                         content: "（询问她是不是遇到了什么烦心事。付一些报酬的话，可以考虑帮忙解决。）",
                         next: 51000307,
+                        imprCheck: [1011, "Benefit", 65],
                     },
                     {
                         id: 510003055,
                         content: "（询问她是否在找什么人，也许日后出城的时候可以帮她留意一下。）",
                         next: 51000307,
+                        imprCheck: [1011, "Wisdom", 65],
                     },
                     {
                         id: 510003056,
                         content: "（询问她是不是有什么困难，或许能提供一些帮助。）",
                         next: 51000307,
+                        imprCheck: [1011, "Empathy", 65],
                     },
                 ],
             },
@@ -14395,6 +14493,8 @@ export const npcData: NPC[] = [
         name: "有同情心的青年",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [45, -3573],
     },
     {
         id: 700024,
@@ -14442,6 +14542,8 @@ export const npcData: NPC[] = [
         name: "失忆的少女",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-670, -4300],
         talks: [
             {
                 id: 51000707,
@@ -14558,6 +14660,8 @@ export const npcData: NPC[] = [
         id: 700035,
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [45, -3573],
     },
     {
         id: 700036,
@@ -14625,6 +14729,8 @@ export const npcData: NPC[] = [
         name: "布鲁内托",
         camp: "NPC",
         type: "Normal",
+        srId: 100101,
+        pos: [9706, 9735],
         talks: [
             {
                 id: 51002201,
@@ -14783,12 +14889,16 @@ export const npcData: NPC[] = [
         name: "里奥拉",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-11140, -6090],
     },
     {
         id: 700068,
         name: "海诺",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [458, -919],
         talks: [
             {
                 id: 51001601,
@@ -14898,6 +15008,7 @@ export const npcData: NPC[] = [
                         id: 510016121,
                         content: "我可以看看您的“桂冠卡戎”奖章吗？",
                         next: 51001613,
+                        imprCheck: [1011, "Wisdom", 60],
                     },
                 ],
             },
@@ -15013,6 +15124,8 @@ export const npcData: NPC[] = [
         name: "达顿",
         camp: "NPC",
         type: "Normal",
+        srId: 101701,
+        pos: [-15960, -6490],
         talks: [
             {
                 id: 51007930,
@@ -15026,6 +15139,8 @@ export const npcData: NPC[] = [
         name: "奥尔多",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [270, -400],
     },
     {
         id: 700071,
@@ -15050,6 +15165,8 @@ export const npcData: NPC[] = [
         name: "南希",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-1923, -8825],
     },
     {
         id: 700075,
@@ -15229,7 +15346,7 @@ export const npcData: NPC[] = [
                         id: 51007315,
                         content: "也许你缺一个合适的向导。",
                         next: 510073152,
-                        imprCheck: [1011, "Benefit", 50],
+                        imprCheck: [1011, "Morality", 55],
                     },
                 ],
             },
@@ -15408,7 +15525,7 @@ export const npcData: NPC[] = [
                         id: 510033141,
                         content: "你并不怨恨他，也没有偷窃他家的财物，让我来猜猜看你为什么要半夜闯空门吧。",
                         next: 51003316,
-                        imprCheck: [1011, "Benefit", 10],
+                        imprCheck: [1011, "Wisdom", 65],
                     },
                 ],
             },
@@ -15455,6 +15572,8 @@ export const npcData: NPC[] = [
         name: "贝琳达",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-5470, -13149],
         talks: [
             {
                 id: 51003604,
@@ -15561,7 +15680,7 @@ export const npcData: NPC[] = [
                         id: 510036161,
                         content: "贝琳达似乎意有所指……",
                         next: 51003618,
-                        imprCheck: [1011, "Morality", 10],
+                        imprCheck: [1011, "Wisdom", 65],
                     },
                 ],
             },
@@ -15702,6 +15821,8 @@ export const npcData: NPC[] = [
         name: "巴克",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [1260, -10877],
         talks: [
             {
                 id: 510034141,
@@ -15867,11 +15988,13 @@ export const npcData: NPC[] = [
                         id: 510042171,
                         content: "（如果它流到不法之人手里……）",
                         next: 51004219,
+                        imprCheck: [1011, "Morality", 70],
                     },
                     {
                         id: 510042172,
                         content: "（它看起来很好用，得搞到手……）",
                         next: 51004219,
+                        imprCheck: [1011, "Benefit", 70],
                     },
                 ],
             },
@@ -15927,6 +16050,8 @@ export const npcData: NPC[] = [
         name: "莱娜",
         camp: "NPC",
         type: "Normal",
+        srId: 101106,
+        pos: [19710, 1010],
         talks: [
             {
                 id: 510034141,
@@ -15974,6 +16099,8 @@ export const npcData: NPC[] = [
         name: "费伊",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-5334, 10058],
         talks: [
             {
                 id: 51003901,
@@ -15983,6 +16110,7 @@ export const npcData: NPC[] = [
                         id: 510039011,
                         content: "（尝试向她搭话。）",
                         next: 51003903,
+                        imprCheck: [1011, "Empathy", 100],
                     },
                 ],
             },
@@ -16128,6 +16256,8 @@ export const npcData: NPC[] = [
         name: "费伊",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-5334, 10058],
         talks: [
             {
                 id: 51004107,
@@ -16193,6 +16323,7 @@ export const npcData: NPC[] = [
                         id: 510041141,
                         content: "（尝试说服费伊。）",
                         next: 51004116,
+                        imprCheck: [1011, "Wisdom", 100],
                     },
                 ],
             },
@@ -16553,7 +16684,7 @@ export const npcData: NPC[] = [
                         id: 510026031,
                         content: "凯文，冰湖城有人在违规售卖月石。",
                         next: 51002605,
-                        imprCheck: [1011, "Chaos", 10],
+                        imprCheck: [1011, "Chaos", 110],
                     },
                 ],
             },
@@ -16625,7 +16756,7 @@ export const npcData: NPC[] = [
                         id: 51010509,
                         content: "（按理说只要有人说出这种话，就会有意外发生。）",
                         next: 51010511,
-                        imprCheck: [1011, "Benefit", 20],
+                        imprCheck: [1011, "Chaos", 20],
                     },
                 ],
             },
@@ -16804,6 +16935,8 @@ export const npcData: NPC[] = [
         name: "维克多",
         camp: "NPC",
         type: "Normal",
+        srId: 101106,
+        pos: [22280, 1109],
     },
     {
         id: 700130,
@@ -16897,6 +17030,8 @@ export const npcData: NPC[] = [
         name: "酒馆侍者",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [1990, -10540],
         talks: [
             {
                 id: 51006734,
@@ -16946,6 +17081,8 @@ export const npcData: NPC[] = [
         name: "异国的商人",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-15782, -8746],
         talks: [
             {
                 id: 51007001,
@@ -16991,7 +17128,7 @@ export const npcData: NPC[] = [
                         id: 510070051,
                         content: "让一下，我有办法让她好好说话。",
                         next: 51007007,
-                        imprCheck: [1011, "Any", 50],
+                        imprCheck: [1011, "Wisdom", 130],
                     },
                 ],
             },
@@ -17007,6 +17144,8 @@ export const npcData: NPC[] = [
         name: "妮弗尔夫人",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [-12, 5126],
         talks: [
             {
                 id: 51006841,
@@ -17190,6 +17329,8 @@ export const npcData: NPC[] = [
         name: "达顿",
         camp: "NPC",
         type: "Normal",
+        srId: 101701,
+        pos: [-15960, -6490],
         talks: [
             {
                 id: 51007415,
@@ -17506,6 +17647,8 @@ export const npcData: NPC[] = [
         id: 700235,
         name: "埃莉诺",
         camp: "NPC",
+        srId: 101103,
+        pos: [-34304, 9334],
         talks: [
             {
                 id: 51000433,
@@ -17583,6 +17726,8 @@ export const npcData: NPC[] = [
         name: "安妮",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-670, -4300],
         talks: [
             {
                 id: 51000812,
@@ -17639,6 +17784,8 @@ export const npcData: NPC[] = [
         name: "赫斯特",
         camp: "NPC",
         type: "Normal",
+        srId: 101111,
+        pos: [46, -380],
         talks: [
             {
                 id: 51009301,
@@ -17863,6 +18010,7 @@ export const npcData: NPC[] = [
                         id: 51009339,
                         content: "（提醒她卡戎人的习俗。）",
                         next: 51009341,
+                        imprCheck: [1011, "Wisdom", 70],
                     },
                 ],
             },
@@ -18503,6 +18651,7 @@ export const npcData: NPC[] = [
                         id: 51011109,
                         content: "（询问空空皎皎致富秘诀。）",
                         next: 51011111,
+                        imprCheck: [1011, "Benefit", 20],
                     },
                 ],
             },
@@ -18547,6 +18696,8 @@ export const npcData: NPC[] = [
         name: "悲观皎皎",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [580, -11430],
         talks: [
             {
                 id: 51010701,
@@ -19079,6 +19230,8 @@ export const npcData: NPC[] = [
         name: "认真的吟游诗人",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [10, 155],
         talks: [
             {
                 id: 51010426,
@@ -19695,6 +19848,8 @@ export const npcData: NPC[] = [
         name: "认真的吟游诗人",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [10, 155],
         talks: [
             {
                 id: 51010426,
@@ -20682,13 +20837,13 @@ export const npcData: NPC[] = [
                         id: 51105932,
                         content: "世外高人向来放荡不羁，看他也是个奇人，教他两招又如何！",
                         next: 51105934,
-                        imprCheck: [1041, "Empathy", 40],
+                        imprCheck: [1041, "Chaos", 50],
                     },
                     {
                         id: 51105941,
                         content: "该让他回到现实了！",
                         next: 51105943,
-                        imprCheck: [1041, "Chaos", 40],
+                        imprCheck: [1041, "Morality", 50],
                     },
                 ],
             },
@@ -20793,6 +20948,8 @@ export const npcData: NPC[] = [
         name: "笃平",
         camp: "NPC",
         type: "Normal",
+        srId: 104102,
+        pos: [-43250, 3727],
         talks: [
             {
                 id: 51106000,
@@ -20864,7 +21021,7 @@ export const npcData: NPC[] = [
                         id: 51106011,
                         content: "这里发生过什么……似乎某人曾和你提及过。",
                         next: 51106013,
-                        imprCheck: [1041, "All", 40],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -21047,6 +21204,8 @@ export const npcData: NPC[] = [
         name: "饴生",
         camp: "NPC",
         type: "Normal",
+        srId: 104104,
+        pos: [5431, -4377],
         talks: [
             {
                 id: 51107000,
@@ -21128,7 +21287,7 @@ export const npcData: NPC[] = [
                         id: 51107013,
                         content: "你想起包里似乎剩着一些之前没有吃完的饴糖，或许可以分给它一些。",
                         next: 51107015,
-                        imprCheck: [1041, "Any", 50],
+                        imprCheck: [1041, "Morality", 50],
                     },
                 ],
             },
@@ -21278,6 +21437,8 @@ export const npcData: NPC[] = [
         name: "拉蒙",
         camp: "NPC",
         type: "Normal",
+        srId: 104108,
+        pos: [33321, 60817],
         talks: [
             {
                 id: 51108000,
@@ -21298,7 +21459,7 @@ export const npcData: NPC[] = [
                         id: 51108003,
                         content: "回应这位热情的男人。",
                         next: 51108005,
-                        imprCheck: [1041, "Benefit", 50],
+                        imprCheck: [1041, "Empathy", 50],
                     },
                 ],
             },
@@ -21559,6 +21720,8 @@ export const npcData: NPC[] = [
         name: "程老头",
         camp: "NPC",
         type: "Normal",
+        srId: 104110,
+        pos: [34399, -5022],
         talks: [
             {
                 id: 51109000,
@@ -21600,7 +21763,7 @@ export const npcData: NPC[] = [
                         id: 51109006,
                         content: "（狴犴，华胥的守护者，它是来自……）",
                         next: 51109008,
-                        imprCheck: [1041, "Morality", 50],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -21757,6 +21920,8 @@ export const npcData: NPC[] = [
         name: "蒋正义",
         camp: "NPC",
         type: "Normal",
+        srId: 104110,
+        pos: [27472, 750],
         talks: [
             {
                 id: 51110000,
@@ -21792,7 +21957,7 @@ export const npcData: NPC[] = [
                         id: 51110005,
                         content: "你……不是有龙氏吧，抟土氏是做不成狴犴的。",
                         next: 51110008,
-                        imprCheck: [1041, "Wisdom", 50],
+                        imprCheck: [1041, "Morality", 50],
                     },
                 ],
             },
@@ -21937,6 +22102,8 @@ export const npcData: NPC[] = [
         name: "萨米",
         camp: "NPC",
         type: "Normal",
+        srId: 104108,
+        pos: [35516, 51823],
         talks: [
             {
                 id: 51111000,
@@ -22052,6 +22219,8 @@ export const npcData: NPC[] = [
         name: "李什",
         camp: "NPC",
         type: "Normal",
+        srId: 104109,
+        pos: [-27801, 10381],
         talks: [
             {
                 id: 51112000,
@@ -22119,7 +22288,7 @@ export const npcData: NPC[] = [
                         id: 51112011,
                         content: "所以……你要带着这一帮人去报复别人？",
                         next: 51112013,
-                        imprCheck: [1041, "Empathy", 50],
+                        imprCheck: [1041, "Morality", 50],
                     },
                 ],
             },
@@ -22386,6 +22555,8 @@ export const npcData: NPC[] = [
         name: "筱云",
         camp: "NPC",
         type: "Normal",
+        srId: 104110,
+        pos: [33339, -9665],
         talks: [
             {
                 id: 51115000,
@@ -22704,6 +22875,8 @@ export const npcData: NPC[] = [
         name: "具睦",
         camp: "NPC",
         type: "Normal",
+        srId: 104107,
+        pos: [14471, 35162],
         talks: [
             {
                 id: 51116000,
@@ -22775,7 +22948,7 @@ export const npcData: NPC[] = [
                         id: 51116011,
                         content: "那好吧，我想想办法。",
                         next: 51116013,
-                        imprCheck: [1041, "All", 50],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -23028,7 +23201,7 @@ export const npcData: NPC[] = [
                         id: 51117018,
                         content: "（白色影子吗……会是什么呢？）",
                         next: 51117020,
-                        imprCheck: [1041, "Chaos", 20],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -23424,6 +23597,8 @@ export const npcData: NPC[] = [
         name: "黄药师",
         camp: "NPC",
         type: "Normal",
+        srId: 104109,
+        pos: [-19389, 7493],
         talks: [
             {
                 id: 51120000,
@@ -23737,7 +23912,7 @@ export const npcData: NPC[] = [
                         id: 51121015,
                         content: "试试劝架吧。",
                         next: 51121017,
-                        imprCheck: [1041, "Benefit", 20],
+                        imprCheck: [1041, "Morality", 50],
                     },
                 ],
             },
@@ -23908,6 +24083,8 @@ export const npcData: NPC[] = [
         name: "酒瓢子",
         camp: "NPC",
         type: "Normal",
+        srId: 104110,
+        pos: [32937, -5064],
         talks: [
             {
                 id: 51122000,
@@ -24030,7 +24207,7 @@ export const npcData: NPC[] = [
                         id: 51122019,
                         content: "（你从他手中接过酒水，试探性抿了一口。）",
                         next: 51122021,
-                        imprCheck: [1041, "Morality", 20],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -24087,6 +24264,8 @@ export const npcData: NPC[] = [
         name: "丰登",
         camp: "NPC",
         type: "Normal",
+        srId: 104107,
+        pos: [24137, 19956],
         talks: [
             {
                 id: 51123000,
@@ -24103,7 +24282,7 @@ export const npcData: NPC[] = [
                         id: 51123002,
                         content: "帮他想想。",
                         next: 51123004,
-                        imprCheck: [1041, "Wisdom", 20],
+                        imprCheck: [1041, "Wisdom", 40],
                     },
                 ],
             },
@@ -24234,6 +24413,8 @@ export const npcData: NPC[] = [
         name: "灵异皎皎",
         camp: "NPC",
         type: "Normal",
+        srId: 104104,
+        pos: [-3061, -947],
         talks: [
             {
                 id: 51124000,
@@ -24341,6 +24522,7 @@ export const npcData: NPC[] = [
                         id: 51124018,
                         content: "（所以这只皎皎吓人的目的是……）",
                         next: 51124020,
+                        imprCheck: [1041, "Empathy", 50],
                     },
                 ],
             },
@@ -24354,6 +24536,7 @@ export const npcData: NPC[] = [
                         id: 51124018,
                         content: "（所以这只皎皎吓人的目的是……）",
                         next: 51124020,
+                        imprCheck: [1041, "Empathy", 50],
                     },
                 ],
             },
@@ -28180,12 +28363,16 @@ export const npcData: NPC[] = [
         name: "陈老爹",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-25530, -64659],
     },
     {
         id: 701113,
         name: "汀兰",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [46091, -26177],
         talks: [
             {
                 id: 51156024,
@@ -28343,6 +28530,8 @@ export const npcData: NPC[] = [
         name: "诸葛陶",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [49284, -26468],
         talks: [
             {
                 id: 51156114,
@@ -28644,6 +28833,8 @@ export const npcData: NPC[] = [
         name: "月痕",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43279, -20891],
         talks: [
             {
                 id: 50107205,
@@ -28840,6 +29031,8 @@ export const npcData: NPC[] = [
         name: "离砚",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43931, -21958],
         talks: [
             {
                 id: 51156606,
@@ -28889,6 +29082,8 @@ export const npcData: NPC[] = [
         name: "沈禾",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43315, -21511],
         talks: [
             {
                 id: 51156718,
@@ -29011,6 +29206,8 @@ export const npcData: NPC[] = [
         name: "韩菱",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [44305, -25939],
         talks: [
             {
                 id: 51156801,
@@ -29088,6 +29285,8 @@ export const npcData: NPC[] = [
         name: "璎珞",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [48594, -26639],
         talks: [
             {
                 id: 51156928,
@@ -29264,6 +29463,8 @@ export const npcData: NPC[] = [
         name: "琳琅",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [52437, -27937],
         talks: [
             {
                 id: 51157014,
@@ -29352,6 +29553,8 @@ export const npcData: NPC[] = [
         name: "桂棹",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [44916, -22919],
         talks: [
             {
                 id: 51157625,
@@ -29509,6 +29712,8 @@ export const npcData: NPC[] = [
         name: "方朔",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [46310, -19972],
         talks: [
             {
                 id: 51157901,
@@ -29701,6 +29906,8 @@ export const npcData: NPC[] = [
         name: "云裳",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [49823, -25850],
         talks: [
             {
                 id: 51158010,
@@ -29768,6 +29975,8 @@ export const npcData: NPC[] = [
         name: "同福饭馆店小二",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43961, -26906],
         talks: [
             {
                 id: 51158322,
@@ -29800,6 +30009,8 @@ export const npcData: NPC[] = [
         name: "禾穗",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43521, -25041],
         talks: [
             {
                 id: 51158112,
@@ -30079,6 +30290,8 @@ export const npcData: NPC[] = [
         name: "孙枕石",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [36395, -24922],
         talks: [
             {
                 id: 51158411,
@@ -30204,6 +30417,8 @@ export const npcData: NPC[] = [
         name: "方晴川",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [55282, -26772],
         talks: [
             {
                 id: 51158616,
@@ -30306,6 +30521,8 @@ export const npcData: NPC[] = [
         name: "陆瑶光",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [54168, -24296],
         talks: [
             {
                 id: 51158812,
@@ -30494,6 +30711,8 @@ export const npcData: NPC[] = [
         name: "何道微",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [45206, -30314],
         talks: [
             {
                 id: 51159013,
@@ -30577,6 +30796,8 @@ export const npcData: NPC[] = [
         name: "褚家",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [38149, -18323],
         talks: [
             {
                 id: 51159111,
@@ -30649,6 +30870,8 @@ export const npcData: NPC[] = [
         name: "周伯远",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [15836, -30319],
         talks: [
             {
                 id: 51159225,
@@ -30796,6 +31019,8 @@ export const npcData: NPC[] = [
         name: "长庚",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [15047, -29601],
         talks: [
             {
                 id: 51159301,
@@ -30947,6 +31172,8 @@ export const npcData: NPC[] = [
         name: "周砚秋",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [17454, -30578],
         talks: [
             {
                 id: 51159428,
@@ -31127,6 +31354,8 @@ export const npcData: NPC[] = [
         name: "张老丈",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [13764, -35049],
         talks: [
             {
                 id: 51159501,
@@ -31269,6 +31498,8 @@ export const npcData: NPC[] = [
         name: "刘婆婆",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [13807, -27580],
         talks: [
             {
                 id: 51159621,
@@ -31370,6 +31601,8 @@ export const npcData: NPC[] = [
         name: "渡风",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [20277, -18159],
         talks: [
             {
                 id: 51159713,
@@ -31460,6 +31693,8 @@ export const npcData: NPC[] = [
         name: "林德昌",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [20851, -29636],
         talks: [
             {
                 id: 51159801,
@@ -31539,6 +31774,8 @@ export const npcData: NPC[] = [
         name: "阿菀",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [10977, -33737],
         talks: [
             {
                 id: 51159923,
@@ -31681,6 +31918,8 @@ export const npcData: NPC[] = [
         name: "寻鹤",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [9928, -33755],
         talks: [
             {
                 id: 51160116,
@@ -31732,6 +31971,8 @@ export const npcData: NPC[] = [
         name: "建业",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [12292, -33546],
         talks: [
             {
                 id: 51160108,
@@ -31788,6 +32029,8 @@ export const npcData: NPC[] = [
         name: "小棠",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [16138, -18963],
         talks: [
             {
                 id: 51160201,
@@ -31933,6 +32176,8 @@ export const npcData: NPC[] = [
         name: "时风",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [17179, -19059],
         talks: [
             {
                 id: 51160301,
@@ -32121,6 +32366,8 @@ export const npcData: NPC[] = [
         name: "秦执",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [-11353, -23972],
         talks: [
             {
                 id: 51160401,
@@ -32161,6 +32408,8 @@ export const npcData: NPC[] = [
         name: "王伯公",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [16157, -24336],
         talks: [
             {
                 id: 51160501,
@@ -32232,6 +32481,8 @@ export const npcData: NPC[] = [
         name: "李某某",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [13828, -24734],
         talks: [
             {
                 id: 51160626,
@@ -32398,6 +32649,8 @@ export const npcData: NPC[] = [
         name: "马老丈",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [17522, -15553],
         talks: [
             {
                 id: 51160801,
@@ -32477,6 +32730,8 @@ export const npcData: NPC[] = [
         name: "孙兰芝",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [15976, -13755],
         talks: [
             {
                 id: 51160909,
@@ -32534,6 +32789,8 @@ export const npcData: NPC[] = [
         name: "孟巧娘",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [18214, -26523],
         talks: [
             {
                 id: 51161035,
@@ -32834,6 +33091,8 @@ export const npcData: NPC[] = [
         name: "文博",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [9699, -42337],
         talks: [
             {
                 id: 51161322,
@@ -32975,6 +33234,8 @@ export const npcData: NPC[] = [
         name: "吴章知",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [9499, -47366],
         talks: [
             {
                 id: 51161401,
@@ -33065,6 +33326,8 @@ export const npcData: NPC[] = [
         name: "晚月",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [14230, -46249],
         talks: [
             {
                 id: 51161507,
@@ -33111,6 +33374,8 @@ export const npcData: NPC[] = [
         name: "安永",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [11835, -44335],
         talks: [
             {
                 id: 51161601,
@@ -33216,6 +33481,8 @@ export const npcData: NPC[] = [
         name: "卢静薇",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [12035, -46377],
         talks: [
             {
                 id: 51161706,
@@ -33258,6 +33525,8 @@ export const npcData: NPC[] = [
         name: "文彬",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [9894, -38321],
         talks: [
             {
                 id: 51161829,
@@ -33372,6 +33641,8 @@ export const npcData: NPC[] = [
         name: "景和",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [14850, -41114],
         talks: [
             {
                 id: 51162005,
@@ -33407,6 +33678,8 @@ export const npcData: NPC[] = [
         name: "裴德厚",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [12057, -38747],
         talks: [
             {
                 id: 51162101,
@@ -33491,6 +33764,8 @@ export const npcData: NPC[] = [
         name: "温玉笙",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [12215, -40705],
         talks: [
             {
                 id: 51162201,
@@ -33554,6 +33829,8 @@ export const npcData: NPC[] = [
         name: "清鸢",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [16063, -7329],
         talks: [
             {
                 id: 51162219,
@@ -33612,6 +33889,8 @@ export const npcData: NPC[] = [
         name: "灵月",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [14497, -8500],
         talks: [
             {
                 id: 51162323,
@@ -33759,6 +34038,8 @@ export const npcData: NPC[] = [
         name: "元祯",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [10199, -6370],
         talks: [
             {
                 id: 51162412,
@@ -33836,6 +34117,8 @@ export const npcData: NPC[] = [
         name: "白灵汐",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [12823, -10093],
         talks: [
             {
                 id: 51162501,
@@ -33976,6 +34259,8 @@ export const npcData: NPC[] = [
         name: "朱鹤龄",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [20321, -5288],
         talks: [
             {
                 id: 51162632,
@@ -34180,6 +34465,8 @@ export const npcData: NPC[] = [
         name: "魏青娥",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [22097, -16889],
         talks: [
             {
                 id: 51162726,
@@ -34360,6 +34647,8 @@ export const npcData: NPC[] = [
         name: "任清欢",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [9245, -1776],
         talks: [
             {
                 id: 51162801,
@@ -34504,6 +34793,8 @@ export const npcData: NPC[] = [
         name: "明玥",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [7631, -7398],
         talks: [
             {
                 id: 51162908,
@@ -34612,6 +34903,8 @@ export const npcData: NPC[] = [
         name: "时茂",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [11698, -13771],
         talks: [
             {
                 id: 51167101,
@@ -34713,6 +35006,8 @@ export const npcData: NPC[] = [
         name: "何子瑜",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [-1294, -9332],
         talks: [
             {
                 id: 51167201,
@@ -34853,6 +35148,8 @@ export const npcData: NPC[] = [
         name: "邵临起",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [-2611, -9993],
         talks: [
             {
                 id: 51167301,
@@ -34894,6 +35191,8 @@ export const npcData: NPC[] = [
         name: "陈川",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [322, -6208],
         talks: [
             {
                 id: 51167401,
@@ -35152,6 +35451,8 @@ export const npcData: NPC[] = [
         name: "阿舟",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [1034, -2481],
         talks: [
             {
                 id: 51167538,
@@ -35392,6 +35693,8 @@ export const npcData: NPC[] = [
         name: "郭老叟",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [5300, -8622],
         talks: [
             {
                 id: 51167601,
@@ -35495,6 +35798,8 @@ export const npcData: NPC[] = [
         name: "梁思远",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [5967, -8115],
         talks: [
             {
                 id: 51167710,
@@ -35557,6 +35862,8 @@ export const npcData: NPC[] = [
         name: "同叔",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [18225, -3755],
         talks: [
             {
                 id: 51167810,
@@ -35975,6 +36282,8 @@ export const npcData: NPC[] = [
         name: "玉芬",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [29503, -40601],
         talks: [
             {
                 id: 51168201,
@@ -36037,6 +36346,8 @@ export const npcData: NPC[] = [
         name: "大将军",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [33058, -47454],
         talks: [
             {
                 id: 51168301,
@@ -36121,6 +36432,8 @@ export const npcData: NPC[] = [
         name: "马景岐",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [37070, -73873],
         talks: [
             {
                 id: 51168417,
@@ -36316,6 +36629,8 @@ export const npcData: NPC[] = [
         name: "守拙",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [32023, -85296],
         talks: [
             {
                 id: 51169312,
@@ -36387,6 +36702,8 @@ export const npcData: NPC[] = [
         name: "雨桐",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [31390, -43949],
         talks: [
             {
                 id: 51169401,
@@ -36522,6 +36839,8 @@ export const npcData: NPC[] = [
         name: "小川",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [40300, -78937],
         talks: [
             {
                 id: 51169501,
@@ -36638,6 +36957,8 @@ export const npcData: NPC[] = [
         name: "洛奇",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [40136, -77401],
         talks: [
             {
                 id: 51169619,
@@ -36755,6 +37076,8 @@ export const npcData: NPC[] = [
         name: "韩老爹",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [27958, -83789],
         talks: [
             {
                 id: 51169701,
@@ -36979,6 +37302,8 @@ export const npcData: NPC[] = [
         name: "韩安世",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [26946, -81984],
         talks: [
             {
                 id: 51169901,
@@ -37167,6 +37492,8 @@ export const npcData: NPC[] = [
         name: "郭文昭",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [28670, -77111],
         talks: [
             {
                 id: 51170001,
@@ -37246,6 +37573,8 @@ export const npcData: NPC[] = [
         name: "砚北",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [46543, -36266],
         talks: [
             {
                 id: 51170101,
@@ -37378,6 +37707,8 @@ export const npcData: NPC[] = [
         name: "韩忠",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [41708, -39332],
         talks: [
             {
                 id: 51170201,
@@ -37644,6 +37975,8 @@ export const npcData: NPC[] = [
         name: "孟守诚",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [39325, -37406],
         talks: [
             {
                 id: 51170401,
@@ -37721,6 +38054,8 @@ export const npcData: NPC[] = [
         name: "李礼一",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [37226, -37704],
         talks: [
             {
                 id: 51170501,
@@ -37916,6 +38251,8 @@ export const npcData: NPC[] = [
         name: "思晴",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43560, -38892],
         talks: [
             {
                 id: 51170701,
@@ -37960,6 +38297,8 @@ export const npcData: NPC[] = [
         name: "沐阳",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [42719, -34330],
         talks: [
             {
                 id: 51174601,
@@ -38006,6 +38345,8 @@ export const npcData: NPC[] = [
         name: "承泽",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [41391, -34599],
         talks: [
             {
                 id: 51170801,
@@ -38096,6 +38437,8 @@ export const npcData: NPC[] = [
         name: "章景行",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [44889, -40247],
         talks: [
             {
                 id: 51170919,
@@ -38222,6 +38565,8 @@ export const npcData: NPC[] = [
         name: "柳明正",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [42471, -36093],
         talks: [
             {
                 id: 51171001,
@@ -38408,6 +38753,8 @@ export const npcData: NPC[] = [
         name: "郑景",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [42194, -32464],
         talks: [
             {
                 id: 51171102,
@@ -38464,6 +38811,8 @@ export const npcData: NPC[] = [
         name: "裴云",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [41407, -33653],
         talks: [
             {
                 id: 51171201,
@@ -38646,6 +38995,8 @@ export const npcData: NPC[] = [
         name: "卫德舆",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [42458, -33558],
         talks: [
             {
                 id: 51171301,
@@ -38735,6 +39086,8 @@ export const npcData: NPC[] = [
         name: "沈惠兰",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [25061, -60385],
         talks: [
             {
                 id: 51171402,
@@ -38787,6 +39140,8 @@ export const npcData: NPC[] = [
         name: "书瑶",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [25504, -53036],
         talks: [
             {
                 id: 51171501,
@@ -38867,6 +39222,8 @@ export const npcData: NPC[] = [
         name: "时川",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [28296, -62623],
         talks: [
             {
                 id: 51171601,
@@ -39036,6 +39393,8 @@ export const npcData: NPC[] = [
         name: "时川",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [24815, -59573],
         talks: [
             {
                 id: 51171701,
@@ -39181,6 +39540,8 @@ export const npcData: NPC[] = [
         name: "方寻",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [27779, -59753],
         talks: [
             {
                 id: 51171801,
@@ -39411,6 +39772,8 @@ export const npcData: NPC[] = [
         name: "章景曜",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [31971, -61343],
         talks: [
             {
                 id: 51172001,
@@ -39452,6 +39815,8 @@ export const npcData: NPC[] = [
         name: "清岚",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [30839, -55937],
         talks: [
             {
                 id: 51172101,
@@ -39601,6 +39966,8 @@ export const npcData: NPC[] = [
         name: "林甫",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [26959, -56807],
         talks: [
             {
                 id: 51172201,
@@ -39736,6 +40103,8 @@ export const npcData: NPC[] = [
         name: "明哲",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [26276, -64497],
         talks: [
             {
                 id: 51172301,
@@ -39834,6 +40203,8 @@ export const npcData: NPC[] = [
         name: "周晓棠",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [21104, -60538],
         talks: [
             {
                 id: 51172401,
@@ -39958,6 +40329,8 @@ export const npcData: NPC[] = [
         name: "陈岐",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [23682, -55041],
         talks: [
             {
                 id: 51172501,
@@ -40004,6 +40377,8 @@ export const npcData: NPC[] = [
         name: "伯渊",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [38347, -59565],
         talks: [
             {
                 id: 51172601,
@@ -40062,6 +40437,8 @@ export const npcData: NPC[] = [
         name: "芷柔",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [38072, -62443],
         talks: [
             {
                 id: 51172701,
@@ -40153,6 +40530,8 @@ export const npcData: NPC[] = [
         name: "张敬之",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [39350, -61148],
         talks: [
             {
                 id: 51174901,
@@ -40305,6 +40684,8 @@ export const npcData: NPC[] = [
         name: "景铄",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [38104, -56469],
         talks: [
             {
                 id: 51175001,
@@ -40464,6 +40845,8 @@ export const npcData: NPC[] = [
         name: "小瑜",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [43852, -59080],
         talks: [
             {
                 id: 51175101,
@@ -40542,6 +40925,8 @@ export const npcData: NPC[] = [
         name: "章老翁",
         camp: "NPC",
         type: "Normal",
+        srId: 104503,
+        pos: [39703, -55311],
         talks: [
             {
                 id: 50107124,
@@ -40806,6 +41191,8 @@ export const npcData: NPC[] = [
         name: "张大婶",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-22041, -55489],
         talks: [
             {
                 id: 51173102,
@@ -40854,6 +41241,8 @@ export const npcData: NPC[] = [
         name: "无愈",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-17881, -52197],
         talks: [
             {
                 id: 51173202,
@@ -40905,6 +41294,8 @@ export const npcData: NPC[] = [
         name: "长歌",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-17042, -53269],
         talks: [
             {
                 id: 51173301,
@@ -40952,6 +41343,8 @@ export const npcData: NPC[] = [
         name: "张远",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-19616, -56317],
         talks: [
             {
                 id: 51173402,
@@ -41118,6 +41511,8 @@ export const npcData: NPC[] = [
         name: "阿乔",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-22231, -51341],
         talks: [
             {
                 id: 51174702,
@@ -41170,6 +41565,8 @@ export const npcData: NPC[] = [
         name: "方慕声",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-23064, -54380],
         talks: [
             {
                 id: 51173502,
@@ -41257,6 +41654,8 @@ export const npcData: NPC[] = [
         name: "冬雪",
         camp: "NPC",
         type: "Normal",
+        srId: 104504,
+        pos: [-20419, -51477],
         talks: [
             {
                 id: 51173602,
@@ -41437,6 +41836,8 @@ export const npcData: NPC[] = [
         name: "汪洋",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [4110, 4650],
         talks: [
             {
                 id: 51173801,
@@ -41503,6 +41904,8 @@ export const npcData: NPC[] = [
         name: "婉婉",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [3470, 15810],
         talks: [
             {
                 id: 51173902,
@@ -41564,6 +41967,8 @@ export const npcData: NPC[] = [
         name: "史基",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [9230, 9340],
         talks: [
             {
                 id: 51174002,
@@ -41609,6 +42014,8 @@ export const npcData: NPC[] = [
         name: "桂北发",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [4480, 15550],
         talks: [
             {
                 id: 51174102,
@@ -41692,6 +42099,8 @@ export const npcData: NPC[] = [
         name: "竞天",
         camp: "NPC",
         type: "Normal",
+        srId: 105201,
+        pos: [17090, 4160],
         talks: [
             {
                 id: 51174202,
@@ -42003,6 +42412,8 @@ export const npcData: NPC[] = [
         name: "相生",
         camp: "NPC",
         type: "Normal",
+        srId: 105001,
+        pos: [-8510, 6413],
         talks: [
             {
                 id: 51174502,
@@ -42114,6 +42525,8 @@ export const npcData: NPC[] = [
         name: "星遥",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [54086, -22843],
         talks: [
             {
                 id: 51158711,
@@ -42235,6 +42648,3618 @@ export const npcData: NPC[] = [
         type: "Normal",
     },
     {
+        id: 701267,
+        name: "李大嘴",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104501,
+        pos: [44376, -25098],
+        talks: [
+            {
+                id: 51175601,
+                content: "民以食为天，食以香为先，香……这香……香啊……香。",
+                npc: 701267,
+                options: [
+                    {
+                        id: 51175602,
+                        content: "香是什么很稀奇的东西吗？",
+                        next: 51175603,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51175604,
+                        content: "有什么需要帮助的事情吗？",
+                        next: 51175605,
+                        impr: [1041, "Morality", 3],
+                    },
+                    {
+                        id: 51175606,
+                        content: "叽里咕噜说什么呢？",
+                        next: 51175607,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51175603,
+                content: "唔……不是，香在华胥自然不是什么稀奇的事物，只是……",
+                npc: 701267,
+                next: 51175608,
+            },
+            {
+                id: 51175605,
+                content: "需要帮助？唔，虽然的确需要帮助，但阁下看起来……并非华胥人士呀。",
+                npc: 701267,
+                next: 51175608,
+            },
+            {
+                id: 51175607,
+                content: "自然是在思考一些重要之事了，尤其是和食物相关的事，更是不能马虎呀。",
+                npc: 701267,
+                next: 51175608,
+            },
+            {
+                id: 51175608,
+                content: "幸会，我是同福饭馆的厨子——李大嘴，我忧心之事其实是近期店里生意不好，掌柜的就让我想办法，去琢磨些新菜式。",
+                npc: 701267,
+                next: 51175609,
+            },
+            {
+                id: 51175609,
+                content: "掌柜的说，最近来这的外国人有些多，要是能让菜系里融入咱们华胥特色的香料，岂不是更有噱头，更能吸引不熟悉香料的人。",
+                npc: 701267,
+                next: 51175610,
+            },
+            {
+                id: 51175610,
+                content:
+                    "可我是如何也想不明白，到底要怎么做才能做出与香料结合的好吃食物。虽然是想请教他人，可这一时半会谁知道该问谁呢？欸！",
+                npc: 701267,
+                options: [
+                    {
+                        id: 51175611,
+                        content: "香料做的食物吗？你倒是略有耳闻，教他几道也无妨。",
+                        next: 51175612,
+                        imprCheck: [1041, "Wisdom", 40],
+                    },
+                ],
+            },
+            {
+                id: 51175612,
+                content:
+                    "我长大的地方，因物资贫瘠，听说过有些村民会将生活中采集的任何植物用来制作食物，但我对华胥的香料不怎么了解，不知道能不能对应的上。",
+                npc: 100001,
+                next: 51175613,
+            },
+            {
+                id: 51175613,
+                content: "哦？还有这种事？那这样，我和你说我知晓的一些可食用的香料，你告诉我可以怎么做菜，如何？",
+                npc: 701267,
+                next: 51175614,
+            },
+            {
+                id: 51175614,
+                content: "可以试试。",
+                npc: 100001,
+                next: 51175615,
+            },
+            {
+                id: 51175615,
+                content: "华胥有一香，名唤冰台，平常看起来便如路边的野草一般羸弱娇小，但若是将其碾碎，其香气沁人心脾，冰凉透骨。",
+                npc: 701267,
+                next: 51175616,
+            },
+            {
+                id: 51175616,
+                content: "我听闻有人曾将其含在口中许久也没有中毒，您可有听说过这样的食物呢？",
+                npc: 701267,
+                options: [
+                    {
+                        id: 51175617,
+                        content: "你想想……",
+                        next: 51175618,
+                        imprCheck: [1041, "Wisdom", 50],
+                    },
+                ],
+            },
+            {
+                id: 51175618,
+                content: "这种东西倒是常见，入口冰凉，与大荤之物一同烹煮最合适，能以清凉的感觉将食材本身的油腻压下去。",
+                npc: 100001,
+                next: 51175619,
+            },
+            {
+                id: 51175619,
+                content: "我建议你可以使用此物与排骨，猪蹄，大肠等一同炸制。",
+                npc: 100001,
+                next: 51175620,
+            },
+            {
+                id: 51175620,
+                content: "哦哦！还有这种做法，的确十分有道理，我得记下来……",
+                npc: 701267,
+                next: 51175621,
+            },
+            {
+                id: 51175621,
+                content:
+                    "前辈，我们华胥还有另一种独特香料，叶细花小，盛开之时却香气扑鼻，有飘飘然空灵之感，我们常说若是身为华胥子民，应品行如春，此香名为——春一品。",
+                npc: 701267,
+                options: [
+                    {
+                        id: 51175622,
+                        content: "称呼已经是前辈了吗，你再想想……",
+                        next: 51175623,
+                        imprCheck: [1041, "Wisdom", 60],
+                    },
+                ],
+            },
+            {
+                id: 51175623,
+                content: "以前曾听说过花朵入菜的说法，花朵去蒂，花瓣清洗干净，沥干水分，在蔬菜入锅沾油后出锅前撒上一把。",
+                npc: 100001,
+                next: 51175624,
+            },
+            {
+                id: 51175624,
+                content: "以花香佐料，花瓣本身也是一种菜叶，花瓣点缀菜肴之上，既风雅又有风味。",
+                npc: 100001,
+                next: 51175625,
+            },
+            {
+                id: 51175625,
+                content: "前辈好见识啊！我怎么没有想到可以将花瓣做成菜的方法。的确有馋嘴的娃娃经常去摘花来嚼，说是有清甜之味。",
+                npc: 701267,
+                next: 51175626,
+            },
+            {
+                id: 51175626,
+                content:
+                    "那么前辈，华胥还有一种奇香，名叫怀香子，因它辛香浓烈，我们在用其制香时都不会放置太多，但却有医生曾说过，怀香子并无毒性……",
+                npc: 701267,
+                options: [
+                    {
+                        id: 51175627,
+                        content: "浓香吗，你得好好想想……",
+                        next: 51175628,
+                        imprCheck: [1041, "Wisdom", 70],
+                    },
+                ],
+            },
+            {
+                id: 51175628,
+                content: "浓烈之香，作为调味最合适，华胥应该也有膻味极重的食物？烈火灸烤后可将怀香子研磨后的粉均匀撒上，让香气盖过膻味。",
+                npc: 100001,
+                next: 51175629,
+            },
+            {
+                id: 51175629,
+                content: "至于用量嘛……只要不像某些人一样把一瓶都倒进锅里去就好……",
+                npc: 100001,
+                next: 51175630,
+            },
+            {
+                id: 51175630,
+                content: "前辈真乃奇人啊！虽不是华胥本地人，但却比我这种还要了解香料，还传授于我这么多知识，大恩大德，没齿难忘啊！",
+                npc: 701267,
+                next: 51175631,
+            },
+            {
+                id: 51175631,
+                content: "客气客气~",
+                npc: 100001,
+                next: 51175632,
+            },
+            {
+                id: 51175632,
+                content: "不管前辈如何推脱，我李大嘴今天都敬你一句恩师，华胥有句话，一日为师，终生为父，阁下就是我的再生父母！",
+                npc: 701267,
+                next: 51175633,
+            },
+            {
+                id: 51175633,
+                content: "夸张了哈……",
+                npc: 100001,
+                next: 51175634,
+            },
+            {
+                id: 51175634,
+                content: "不夸张，师傅，我今日要先回去钻研你传授的菜谱了，您若是有空，一定要来一趟同福饭馆，我定要请你吃一顿我的拿手好菜！",
+                npc: 701267,
+                next: 51175635,
+            },
+            {
+                id: 51175635,
+                content: "有空一定！",
+                npc: 100001,
+                next: 51175636,
+            },
+            {
+                id: 51175636,
+                content: "（李大嘴一步三回头，连连作揖道谢，直至消失在你的视野之中。）",
+            },
+        ],
+    },
+    {
+        id: 701268,
+        name: "花留情",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104503,
+        pos: [34749, -48619],
+        talks: [
+            {
+                id: 51175702,
+                content: "青青子衿，悠悠我心，在这苍茫人世间，难道我真就无法找到相伴一生之人？",
+                next: 51175703,
+            },
+            {
+                id: 51175703,
+                content: "（这名穿着打扮张扬的男子正捶胸顿足，闭着眼，嘴上念念有词。从他身上飘来一阵浓郁的酒气，想必是喝醉了。）",
+                next: 51175704,
+            },
+            {
+                id: 51175704,
+                content: "可怜我天生丽质，为何却无一人透过我俊美无双的外表，走进我澄澈如水的内心？",
+                next: 51175705,
+            },
+            {
+                id: 51175705,
+                content: "可悲可叹，可惜世人身无慧眼，看不穿我心中的诗与远方，希望与寒冬……",
+                next: 51175706,
+            },
+            {
+                id: 51175706,
+                content: "啊！白龙神君啊，回应我的祈愿吧，若你真的眷顾自己的人民，就在我睁眼之时，将我的真命佳偶带到我的面前吧！",
+                next: 51175707,
+            },
+            {
+                id: 51175707,
+                content: "（男子蓦然睁开双眼，与你盯着他打量的视线撞个正着。）",
+                next: 51175708,
+            },
+            {
+                id: 51175708,
+                content: "这……显……显灵了？这就是白龙神君为我送来的真命佳偶吗？",
+                next: 51175709,
+            },
+            {
+                id: 51175709,
+                content: "咳咳~自我介绍一下，小生——花~留情，万花丛中过，片叶不留情，说的就是小生这种英俊帅气与聪慧潇洒并存的……",
+                npc: 701268,
+                next: 51175710,
+            },
+            {
+                id: 51175710,
+                content: "万！",
+                npc: 701268,
+                next: 51175711,
+            },
+            {
+                id: 51175711,
+                content: "人！",
+                npc: 701268,
+                next: 51175712,
+            },
+            {
+                id: 51175712,
+                content: "迷~~~",
+                npc: 701268,
+                options: [
+                    {
+                        id: 51175713,
+                        content: "额，你好？我叫{nickname}。",
+                        next: 51175714,
+                        impr: [1041, "Morality", 3],
+                    },
+                    {
+                        id: 51175716,
+                        content: "我叫万人敌。",
+                        next: 51175717,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51175714,
+                content: "哦！{nickname}！多么美丽的名字啊，在未来无数次的深夜梦回之中，我一定会想起你，想起这个甜美的名字。",
+                npc: 701268,
+                next: 51175715,
+            },
+            {
+                id: 51175717,
+                content: "万人敌……万人敌！多么豪迈壮阔的名字啊，看看你腰间的剑，看看你锐利的眼神，我就知道，我等的就是这个！",
+                npc: 701268,
+                next: 51175718,
+            },
+            {
+                id: 51175715,
+                content: "像博山香行飘来的香薰，像八珍楼回荡的酒香，我把你的名字反复放在唇边咀嚼，哦！{nickname}！{nickname}！",
+                npc: 701268,
+                next: 51175719,
+            },
+            {
+                id: 51175718,
+                content: "白龙神君啊，你果然爱着你虔诚的子民，你竟将如此英武豪迈之人送来我的身边，我要如何感激您的恩德！",
+                npc: 701268,
+                next: 51175719,
+            },
+            {
+                id: 51175719,
+                content: "停——停！你这家伙喝醉认错人了，我根本不认识你。",
+                npc: 100001,
+                next: 51175720,
+            },
+            {
+                id: 51175720,
+                content: "对！就是这样，就是要先冷漠地拒绝我，然后我再对你展开猛烈的追求，但你郎心似铁，绝情地告知我，我们不能在一起。",
+                npc: 701268,
+                next: 51175721,
+            },
+            {
+                id: 51175721,
+                content: "接着，我心如死灰，日日买醉，八珍楼的酒桌上摆了一排又一排男儿泪，而我，在喧嚣的人流声中，喃喃唤你的名！",
+                npc: 701268,
+                next: 51175722,
+            },
+            {
+                id: 51175722,
+                content: "最终，我的故事化作一段坊间流传的佳话，谁人不道皓京有一位痴情男儿，为异国的白衣过客肝肠寸断！",
+                npc: 701268,
+                next: 51175723,
+            },
+            {
+                id: 51175723,
+                content: "而你~我最爱的人啊，我的真命佳偶！",
+                npc: 701268,
+                next: 51175724,
+            },
+            {
+                id: 51175724,
+                content: "你会在一个月亮正高的夜晚，望着被照得白茫茫的苍茫大地，你听见风从你的耳边低语，诉说的全是我对你的思念。",
+                npc: 701268,
+                next: 51175725,
+            },
+            {
+                id: 51175725,
+                content: "所谓爱情，就是要这样荡气回肠，牵肠挂肚，才会有如此惊天地泣鬼神之美啊！",
+                npc: 701268,
+                options: [
+                    {
+                        id: 51175726,
+                        content: "（这家伙简直是疯子……正常的方法想必没法打发走他，不如另辟蹊径？）",
+                        next: 51175728,
+                        imprCheck: [1041, "Chaos", 40],
+                    },
+                ],
+            },
+            {
+                id: 51175728,
+                content: "不，这样就得到的感情实在是太轻易了！",
+                npc: 100001,
+                next: 51175729,
+            },
+            {
+                id: 51175729,
+                content: "什……什么？！",
+                npc: 701268,
+                next: 51175730,
+            },
+            {
+                id: 51175730,
+                content: "你不是渴望一段荡气回肠的爱情故事吗？与你那个所谓的……真命佳偶？",
+                npc: 100001,
+                next: 51175731,
+            },
+            {
+                id: 51175731,
+                content: "虽说那个人肯定不会是我，但你编写的故事怎么想都太轻易得到爱情了，所以我这里有个更好的想法。",
+                npc: 100001,
+                next: 51175732,
+            },
+            {
+                id: 51175732,
+                content: "哦哦哦！~~~你果然懂我！！！快说吧，我们一起探讨什么是真正的爱情！",
+                npc: 701268,
+                next: 51175733,
+            },
+            {
+                id: 51175733,
+                content: "爱是得到，爱是占有，爱是成全，所以这个故事应该这么编……",
+                npc: 100001,
+                options: [
+                    {
+                        id: 51175734,
+                        content: "说一个悲伤的故事。",
+                        next: 51175735,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51175746,
+                        content: "说一个疯狂的故事。",
+                        next: 51175747,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51175735,
+                content: "你的故事始于一场冒险，你见证华胥之外的世界，当你的眼界足够高时，你们会在回程的织星客船上相遇。",
+                npc: 100001,
+                next: 51175736,
+            },
+            {
+                id: 51175747,
+                content: "你的故事始于一次探亲，你远房舅舅的侄女的哥哥结婚，邀请你前往婚宴。",
+                npc: 100001,
+                next: 51175748,
+            },
+            {
+                id: 51175736,
+                content: "你对那位真命佳偶一见钟情，你们很快相爱，难舍难分。",
+                npc: 100001,
+                next: 51175737,
+            },
+            {
+                id: 51175748,
+                content: "你带好了贺礼，来到了那个地方，接待你的人温柔体贴，你与她交谈甚欢，以至于你觉得这就是你的真命佳偶。",
+                npc: 100001,
+                next: 51175749,
+            },
+            {
+                id: 51175737,
+                content: "你在说什么？这种爱情太轻易了，这不是我的故事！",
+                npc: 701268,
+                next: 51175738,
+            },
+            {
+                id: 51175749,
+                content:
+                    "在你正试图倾诉你的爱慕之时，那位远房亲戚走了出来，揽过你眼中真命佳偶的胳膊，向你介绍道：这是今天的新娘，他将要成婚的爱人。",
+                npc: 100001,
+                next: 51175750,
+            },
+            {
+                id: 51175738,
+                content: "别急，我还没说完呢。",
+                npc: 100001,
+                next: 51175739,
+            },
+            {
+                id: 51175750,
+                content: "不！怎会如此！为何我的真命佳偶在与我相遇之时就与他人私定终生了！我不接受！",
+                npc: 701268,
+                next: 51175751,
+            },
+            {
+                id: 51175739,
+                content: "在你们归来的路上，海面上突然惊现一座巨型礁石，那天晚上，天很黑，负责观测航向的船员喝醉了酒，就像现在的你一样……",
+                npc: 100001,
+                next: 51175740,
+            },
+            {
+                id: 51175751,
+                content: "还没说完呢！你别急啊。",
+                npc: 100001,
+                next: 51175752,
+            },
+            {
+                id: 51175740,
+                content: "在伸手不见五指的午夜，船只撞上了暗礁，船上所有人都被巨大的动静吵醒，你们也不例外。",
+                npc: 100001,
+                next: 51175741,
+            },
+            {
+                id: 51175752,
+                content: "说吧，让我听听你那残忍的双唇还能吐出怎样伤人的话语！",
+                npc: 701268,
+                next: 51175753,
+            },
+            {
+                id: 51175741,
+                content: "求生的欲望使你们靠着本能在漫进船舱的冰冷海水中摸索，你好不容易护着心爱的那位找到了一艘救生艇。",
+                npc: 100001,
+                next: 51175742,
+            },
+            {
+                id: 51175753,
+                content: "你心灰意冷，之后你咽下痛苦，不再问新娘的消息。可没过多久，你竟然得知了那位新娘的死讯……",
+                npc: 100001,
+                next: 51175754,
+            },
+            {
+                id: 51175742,
+                content: "然而，那艘小艇已经满员，最多只能再塞下一名成员……",
+                npc: 100001,
+                next: 51175743,
+            },
+            {
+                id: 51175754,
+                content:
+                    "就在一个风雨交加的夜晚，你望着窗外摇曳的叶子出神，正在这时，你听到门外传来有节奏的脚步声。一缕香气飘来，但香气中似乎还夹杂着血腥味……",
+                npc: 100001,
+                next: 51175755,
+            },
+            {
+                id: 51175743,
+                content: "……呜呜……呜呜呜呜哇！",
+                npc: 701268,
+                next: 51175744,
+            },
+            {
+                id: 51175755,
+                content: "后面的故事我已经知道了！我迫不及待地打开房门，与她相拥而泣，我们互诉衷肠，让雨水见证我们的泪！",
+                npc: 701268,
+                next: 51175756,
+            },
+            {
+                id: 51175744,
+                content: "我！我已经知道结局了！我的真命佳偶啊，她一定是将最后的求生机会让给了我，她独自沉入了海水之中！",
+                npc: 701268,
+                next: 51175745,
+            },
+            {
+                id: 51175756,
+                content: "好吧……也不是不行。",
+                npc: 100001,
+                next: 51175757,
+            },
+            {
+                id: 51175745,
+                content: "我本来想说其实是你……算了，对！就是这样！",
+                npc: 100001,
+                next: 51175757,
+            },
+            {
+                id: 51175757,
+                content: "谢谢你！你真是给我说了一个我生平所听的最完美的爱情故事，它满足了我对于所有爱情的期待和幻想，谢谢你！我的……",
+                npc: 701268,
+                options: [
+                    {
+                        id: 51175758,
+                        content: "打住！",
+                        next: 51175759,
+                    },
+                ],
+            },
+            {
+                id: 51175759,
+                content: "你的真命佳偶应该去故事里寻找，而不是现实之中，就像你对于爱情的幻想也多半只是存在于故事中一样。",
+                npc: 100001,
+                next: 51175760,
+            },
+            {
+                id: 51175760,
+                content: "与其把时间沉溺在幻想之中，还是脚踏实地地去追寻一些看得见摸得着的东西吧。",
+                npc: 100001,
+                next: 51175761,
+            },
+            {
+                id: 51175761,
+                content: "看得见摸得着的存在？那……那不就是你吗？！",
+                npc: 701268,
+                next: 51175762,
+            },
+            {
+                id: 51175762,
+                content: "………………",
+                npc: 100001,
+                next: 51175763,
+            },
+            {
+                id: 51175763,
+                content: "（你决定先走为敬。）",
+                next: 51175764,
+            },
+            {
+                id: 51175764,
+                content: "喂！真命佳偶！你要去哪里啊？来和我一起出演美好的爱情故事吧！真命佳偶！",
+                npc: 701268,
+                next: 51175765,
+            },
+            {
+                id: 51175765,
+                content: "（快跑吧！！不要再被缠上了！！）",
+            },
+            {
+                id: 51175766,
+                content: "是你！我的真命佳偶，你还是决定要回来与我相伴终生了吗？！",
+                npc: 701268,
+            },
+        ],
+    },
+    {
+        id: 701269,
+        name: "天通君子",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104502,
+        pos: [16852, -33802],
+        talks: [
+            {
+                id: 51175802,
+                content: "要是我把这个人杀了……大家一定都会叫好，要是再把这个也顺便杀了……",
+                next: 51175803,
+            },
+            {
+                id: 51175803,
+                content: "可这样简单地杀，有些唐突，有些意外，却没有刻骨铭心的痛，实在无趣！",
+                next: 51175804,
+            },
+            {
+                id: 51175804,
+                content: "但若是不杀，没有爆点，没有成长，只能圆大家心中的一个美好念想，着实商业！",
+                next: 51175805,
+            },
+            {
+                id: 51175805,
+                content: "（你呆呆地注视着这名男人嘴中不断蹦出疯狂且大逆不道的话语，心中一惊。这家伙到底在说什么呢？！）",
+                next: 51175806,
+            },
+            {
+                id: 51175806,
+                content: "唉！实在是让我十分纠结，虽然我是他的亲生父亲，但到了这种要决定他生死的时刻，却是怎么也拿不定主意。",
+                next: 51175807,
+            },
+            {
+                id: 51175807,
+                content: "（什么？！还是有血缘关系的犯罪案件？难道大风九章不阻止吗？）",
+                options: [
+                    {
+                        id: 51175808,
+                        content: "（出言呵斥。）",
+                        next: 51175809,
+                        impr: [1041, "Morality", 3],
+                    },
+                    {
+                        id: 51175810,
+                        content: "（去找应天尉检举。）",
+                        next: 51175811,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                ],
+            },
+            {
+                id: 51175809,
+                content: "你这混蛋，连自己的孩子都下得了手？",
+                npc: 100001,
+                next: 51175814,
+            },
+            {
+                id: 51175811,
+                content: "（你转身欲逃，他却直接伸手将你拉住。）",
+                next: 51175812,
+            },
+            {
+                id: 51175814,
+                content: "我？你说我吗？哈哈哈！小友，你是不是误会了什么？",
+                next: 51175815,
+            },
+            {
+                id: 51175812,
+                content: "小友，我见你在这听了半天，你能不能告诉我，这个人我杀不杀呢？",
+                next: 51175813,
+            },
+            {
+                id: 51175815,
+                content: "误会？你的意思是……",
+                npc: 100001,
+                next: 51175816,
+            },
+            {
+                id: 51175813,
+                content: "……你疯了吗，准备杀人，还问我的意见？",
+                npc: 100001,
+                next: 51175814,
+            },
+            {
+                id: 51175816,
+                content: "我刚才说了什么……我想想……哦！我似乎是一直在说要不要杀人，要怎么杀，是吗？",
+                next: 51175817,
+            },
+            {
+                id: 51175817,
+                content: "难怪了，你会误会也是正常。",
+                next: 51175818,
+            },
+            {
+                id: 51175818,
+                content: "小友不必慌张，我不是什么可怕的杀人狂魔，再说了，在华胥应该也不会有这样的家伙吧？",
+                next: 51175819,
+            },
+            {
+                id: 51175819,
+                content: "我叫天通君子，当然，并非我的真名，而是我的……笔名。",
+                npc: 701269,
+                options: [
+                    {
+                        id: 51175820,
+                        content: "笔名？原来你是写小说的。",
+                        next: 51175822,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51175821,
+                        content: "所以你刚才说的杀人是……",
+                        next: 51175822,
+                        impr: [1041, "Morality", 3],
+                    },
+                ],
+            },
+            {
+                id: 51175822,
+                content: "是啊，我所纠结的这位杀或是不杀的人，正是我目前连载的话本《鸳鸯双飞剑》里的男主人公——张渊。",
+                npc: 701269,
+                next: 51175823,
+            },
+            {
+                id: 51175823,
+                content: "只要是连载，终归都会有完结的一天。我这里的存稿已经来到了大结局，月底书商就要来找我催稿了。",
+                npc: 701269,
+                next: 51175824,
+            },
+            {
+                id: 51175824,
+                content: "我目前所纠结的，就是这个故事的结局里，身为男主角的张渊要不要死……",
+                npc: 701269,
+                options: [
+                    {
+                        id: 51175825,
+                        content: "所以这是个怎么样的故事？",
+                        next: 51175826,
+                    },
+                ],
+            },
+            {
+                id: 51175826,
+                content: "怎么样的故事……唔……我想想怎么快速给你介绍一下。",
+                npc: 701269,
+                next: 51175827,
+            },
+            {
+                id: 51175827,
+                content:
+                    "大概就是一个，男主角全家从小被玄色狴犴屠杀，自己因为外出探亲躲过一劫，后来刻苦修炼，并得到女主角乐泱相助，最终成为应天尉的故事。",
+                npc: 701269,
+                next: 51175828,
+            },
+            {
+                id: 51175828,
+                content:
+                    "期间各种曲折，比如张渊如何被仇敌逼入绝境坠下悬崖得到奇宝，如何与乐泱产生嫌隙导致二人分别八年……桩桩故事，不便细说。",
+                npc: 701269,
+                next: 51175829,
+            },
+            {
+                id: 51175829,
+                content: "这个故事写到张渊当上应天尉后，不是就该结束了吗？",
+                npc: 100001,
+                next: 51175830,
+            },
+            {
+                id: 51175830,
+                content:
+                    "大多数人都是这么觉得，我的读者们也都如此想着，虽说张渊一路变强的过程之中波折重重，但最终也算是功成名就，抱得美人归。",
+                npc: 701269,
+                next: 51175831,
+            },
+            {
+                id: 51175831,
+                content: "我总觉得……这故事一路上都太顺遂了……",
+                npc: 701269,
+                next: 51175832,
+            },
+            {
+                id: 51175832,
+                content: "我不知道你能不能理解，就是你打开了一本话本，然后一路看着这个故事发展下去，你看着主角战无不胜，克服了所有难关……",
+                npc: 701269,
+                next: 51175833,
+            },
+            {
+                id: 51175833,
+                content:
+                    "一次两次也还好，只是看多了，你就不会再关心主人公的命运了，反正你早就知道，就算遇到再凶险的困难，主角也总是能搞定一切的。",
+                npc: 701269,
+                next: 51175834,
+            },
+            {
+                id: 51175834,
+                content: "虽说平稳落地的确是我目前最好的抉择，但我还是觉得……可以再来点意料之外的……",
+                npc: 701269,
+                next: 51175835,
+            },
+            {
+                id: 51175835,
+                content: "所以你就想把他写死？",
+                npc: 100001,
+                next: 51175836,
+            },
+            {
+                id: 51175836,
+                content: "《鸳鸯双飞剑》的开头杀死男主角全家性命的那只玄色狴犴王，正是男主最终要面对的死敌。",
+                npc: 701269,
+                next: 51175837,
+            },
+            {
+                id: 51175837,
+                content: "我的读者们都心知肚明，男主角会成功复仇，成为第一应天尉，但如果我此时兵行险着……",
+                npc: 701269,
+                options: [
+                    {
+                        id: 51175838,
+                        content: "你说得对，应该把他写死。",
+                        next: 51175839,
+                    },
+                    {
+                        id: 51175849,
+                        content: "我觉得还是不要把主角写死吧。",
+                        next: 51175850,
+                    },
+                ],
+            },
+            {
+                id: 51175839,
+                content: "是吗？可是……我实在找不到说服自己的理由，你能说说看你的想法吗？",
+                npc: 701269,
+                options: [
+                    {
+                        id: 51175840,
+                        content: "（他既然已经有了这样的想法，我为什么不顺着他的意思呢？）",
+                        next: 51175842,
+                        imprCheck: [1041, "Chaos", 40],
+                    },
+                    {
+                        id: 51175844,
+                        content: "（既然是精心创作的话本，肯定希望读者印象深刻吧？）",
+                        next: 51175846,
+                        imprCheck: [1041, "Benefit", 40],
+                    },
+                ],
+            },
+            {
+                id: 51175850,
+                content: "是吗？可是……我实在找不到说服自己的理由，你能说说看你的想法吗？",
+                npc: 701269,
+                options: [
+                    {
+                        id: 51175851,
+                        content: "（既然是精心创作的话本，肯定希望能得到良好的回馈吧？）",
+                        next: 51175853,
+                        imprCheck: [1041, "Morality", 40],
+                    },
+                    {
+                        id: 51175856,
+                        content: "（即使是一个虚拟角色，不也倾注了他的心血吗？）",
+                        next: 51175858,
+                        imprCheck: [1041, "Empathy", 40],
+                    },
+                ],
+            },
+            {
+                id: 51175842,
+                content: "一个好故事，一定得是让读者猜不到的结局。",
+                npc: 100001,
+                next: 51175843,
+            },
+            {
+                id: 51175846,
+                content: "既然你都说了，读者们已经对结局心知肚明，那么看到意料之中的结局，他们就会想，“果然如我所料，看到开头就猜到结局。”",
+                npc: 100001,
+                next: 51175847,
+            },
+            {
+                id: 51175853,
+                content: "正是因为你写了很多主人公无所不能的桥段，你的读者也相信他可以解决一切，所以在结局让他死掉是一件风险很高的事。",
+                npc: 100001,
+                next: 51175854,
+            },
+            {
+                id: 51175858,
+                content: "既然这位主人公是你创造出来的，想必你在他身上倾注了很多感情。",
+                npc: 100001,
+                next: 51175859,
+            },
+            {
+                id: 51175843,
+                content: "依我看，只是让男主角死掉，还不够意料之外。或许你可以让女主角也一起死，让他们做一对苦命鸳鸯。",
+                npc: 100001,
+                next: 51175861,
+            },
+            {
+                id: 51175847,
+                content: "他们会说，这本书只是和其他话本没什么区别的普通故事，毫无新意。",
+                npc: 100001,
+                next: 51175848,
+            },
+            {
+                id: 51175854,
+                content: "你的读者未必会因为一个意料之外的结局而满意，相反，他们可能会为此感到冒犯，认为你在戏耍他们的感情。",
+                npc: 100001,
+                next: 51175855,
+            },
+            {
+                id: 51175859,
+                content: "他自你的笔下诞生，你亲眼见证了他如何刻苦训练自身，数次三番身入险境，又在挣扎中绝境逢生。",
+                npc: 100001,
+                next: 51175860,
+            },
+            {
+                id: 51175861,
+                content: "我……你……我明白了！高山流水，知音难觅，你正是我苦苦追寻的知音啊！",
+                npc: 701269,
+                next: 51175862,
+            },
+            {
+                id: 51175848,
+                content: "但主人公死去了，那就不一样了，它会成为一个例外，一本独特的小说，无论你写得好与不好，读者都会记住它。",
+                npc: 100001,
+                next: 51175861,
+            },
+            {
+                id: 51175855,
+                content: "与其冒可能落得糟糕口碑的风险，还是让故事平稳落地会更好吧？",
+                npc: 100001,
+                next: 51175861,
+            },
+            {
+                id: 51175860,
+                content:
+                    "你是作者，是比所有人都要了解你的主角的人，你觉得你所书写的角色，你的孩子，会甘心在走到终点的时候，坦然接受死亡的结局吗？",
+                npc: 100001,
+                next: 51175861,
+            },
+            {
+                id: 51175862,
+                content: "这就是我想要的结局！谢谢你，我这就回家，将《鸳鸯双飞剑》的结局彻底重写！",
+                npc: 701269,
+                next: 51175863,
+            },
+            {
+                id: 51175863,
+                content: "我相信，这会成为我最完美的作品！哈哈哈哈哈哈！",
+                npc: 701269,
+                next: 51175864,
+            },
+            {
+                id: 51175864,
+                content: "（他仰天大笑，叉着腰疾步离开了……你不禁思索，这本话本究竟会迎来怎么样的结局呢？）",
+            },
+        ],
+    },
+    {
+        id: 701270,
+        name: "罗汉",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104502,
+        pos: [19129, -23402],
+        talks: [
+            {
+                id: 51175902,
+                content: "天气大好啊，等开春，去收两斤新茶泡来喝！",
+                npc: 701270,
+                next: 51175903,
+            },
+            {
+                id: 51175903,
+                content: "只是不晓得去年去的那茶园今年如何了，听说要是冬天落雪太多，茶树便会被压了杆子，来年长不出好叶子。",
+                npc: 701270,
+                next: 51175904,
+            },
+            {
+                id: 51175904,
+                content: "诶~小娃，你为何一直看着我？怎么？也想来尝尝我这刚买的茶叶吗？",
+                npc: 701270,
+                options: [
+                    {
+                        id: 51175905,
+                        content: "不用了，谢谢阿伯。",
+                        next: 51175907,
+                        impr: [1041, "Morality", 3],
+                    },
+                    {
+                        id: 51175906,
+                        content: "好好好，谢谢阿伯。",
+                        next: 51175907,
+                        impr: [1041, "Benefit", 3],
+                    },
+                ],
+            },
+            {
+                id: 51175907,
+                content: "诶哟，阿伯都叫上了，小嘴真甜！看在你叫我一句阿伯的份上，这茶怎么也得分你一壶了！",
+                npc: 701270,
+                next: 51175908,
+            },
+            {
+                id: 51175908,
+                content: "（老伯放下手中捧着的茶壶，转身急匆匆跑进了屋内，片刻后，又端着一盏清茶走了出来。）",
+                next: 51175909,
+            },
+            {
+                id: 51175909,
+                content: "来，娃娃来尝尝，都是好茶！阿伯我不骗你的，是之前出门踏青时，碰到那山上的茶园，园子里的小妹卖给我的。",
+                npc: 701270,
+                next: 51175910,
+            },
+            {
+                id: 51175910,
+                content: "我当时还不想要，连连摆手，结果她把那茶叶凑到我鼻尖，我一嗅，就知道这绝对是好东西！",
+                npc: 701270,
+                next: 51175911,
+            },
+            {
+                id: 51175911,
+                content: "来来，你来尝尝嘛！",
+                npc: 701270,
+                options: [
+                    {
+                        id: 51175912,
+                        content: "（盛情难却，尝尝吧。）",
+                        next: 51175913,
+                        impr: [1041, "Empathy", 3],
+                    },
+                    {
+                        id: 51175915,
+                        content: "（这么热情，一定有诈！）",
+                        next: 51175916,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                ],
+            },
+            {
+                id: 51175913,
+                content: "（你接过杯子，抿了一口，没品出好坏，只觉得有些苦，过了半响，甜味才稍稍从舌尖泛上来。）",
+                next: 51175914,
+            },
+            {
+                id: 51175916,
+                content: "（老伯见你犹豫不决的样子，眼底闪过一抹受伤，却又转瞬即逝，摆出一副憨厚的笑颜。）",
+                next: 51175917,
+            },
+            {
+                id: 51175914,
+                content: "挺好喝……吧？",
+                npc: 100001,
+                next: 51175918,
+            },
+            {
+                id: 51175917,
+                content: "没事，娃娃，没事，那就不喝了吧。",
+                npc: 701270,
+                next: 51175918,
+            },
+            {
+                id: 51175918,
+                content: "一看你那样子，就和我那老伴一样，不擅品茶，喝不出好歹。",
+                npc: 701270,
+                next: 51175919,
+            },
+            {
+                id: 51175919,
+                content: "这茶香的很，等来年开春我去郊外踏青之时，定要再去那茶园子找小妹买上几斤。",
+                npc: 701270,
+                options: [
+                    {
+                        id: 51175920,
+                        content: "（踏青是什么特殊的活动吗？你开始在脑中思索自己曾经看过的华胥书籍。）",
+                        next: 51175922,
+                        imprCheck: [1041, "Wisdom", 40],
+                    },
+                ],
+            },
+            {
+                id: 51175922,
+                content: "你说的踏青，是指华胥人在春季会进行的一种娱乐活动吧？",
+                npc: 100001,
+                next: 51175923,
+            },
+            {
+                id: 51175923,
+                content: "呃……是这么个理，但你这种说法却让人觉得陌生了，踏青就是，出门踏青嘛，的确是娱乐活动，但怎么说怎么不对味呢……",
+                npc: 701270,
+                next: 51175924,
+            },
+            {
+                id: 51175924,
+                content:
+                    "不是什么雅事，就是咱们小老百姓的生活日常，春天那暖风一吹，小花一开，呵！人心里就痒痒了，就想走出家门，去到外面看看了。",
+                npc: 701270,
+                next: 51175925,
+            },
+            {
+                id: 51175925,
+                content: "携家带口的，老的少的，带上吃喝用具，就往城郊跑，有的还跑的更远，要去别的城市玩。",
+                npc: 701270,
+                next: 51175926,
+            },
+            {
+                id: 51175926,
+                content: "像这样的活动可太多了，一年四季转不过来的，若是你久居华胥，就知道个中滋味了。",
+                npc: 701270,
+                next: 51175927,
+            },
+            {
+                id: 51175927,
+                content: "可惜我只是因为一些事情在华胥耽误一段时间，或许没多久就会离开了。",
+                npc: 100001,
+                next: 51175928,
+            },
+            {
+                id: 51175928,
+                content: "不过，阿伯说的事情听起来都很有意思。",
+                npc: 100001,
+                next: 51175929,
+            },
+            {
+                id: 51175929,
+                content: "那是自然！你也知道最近的奉香大典吧？其实早年有些说法，就是奉香大典前我们会组织一场去椒兰村制香的活动。",
+                npc: 701270,
+                next: 51175930,
+            },
+            {
+                id: 51175930,
+                content: "就是亲手参与一下制香过程，然后把做好的香在奉香大典上点掉，也算是表达了一些自己对龙君的心意。",
+                npc: 701270,
+                next: 51175931,
+            },
+            {
+                id: 51175931,
+                content: "不过后来，祀香阁推行了每日奉香，沉月香的价格变得十分低廉，去制香的时间成本还不如直接去祀香阁买成品香。",
+                npc: 701270,
+                next: 51175932,
+            },
+            {
+                id: 51175932,
+                content: "所以这事大家伙也就不愿去浪费时间了，毕竟原料的价格也不算太便宜，做出来的也不一定有香官们做的好。",
+                npc: 701270,
+                next: 51175933,
+            },
+            {
+                id: 51175933,
+                content: "还有最热的那个时候，皓京的大伙都爱在郊外戏水，好像有个更雅的说法，叫……雅集？对，雅集！",
+                npc: 701270,
+                next: 51175934,
+            },
+            {
+                id: 51175934,
+                content:
+                    "大家带着瓜啊果啊的，就上山去了，山上树荫遮天，凉快的很，那溪水摸起来冰冰凉，就把果子都泡进去，用交叠的石头卡住，不让它被冲走。",
+                npc: 701270,
+                next: 51175935,
+            },
+            {
+                id: 51175935,
+                content: "力气大的娃娃一掌就能给瓜劈开，然后其他娃娃就都凑过来，大家吃瓜吃得满嘴流汁，诶呀……想起来就觉得日子有盼头了……",
+                npc: 701270,
+                next: 51175936,
+            },
+            {
+                id: 51175936,
+                content: "所以啊，娃娃，欢迎你来皓京玩，以后有机会的话，你再来找我吧，我带你多去走走逛逛，好不好？",
+                npc: 701270,
+                next: 51175937,
+            },
+            {
+                id: 51175937,
+                content: "（你心知下次再来华胥的可能性其实并不高，但……）",
+                options: [
+                    {
+                        id: 51175938,
+                        content: "好，阿伯，我下次再来找你玩。",
+                        next: 51175939,
+                        impr: [1041, "Empathy", 3],
+                    },
+                    {
+                        id: 51175940,
+                        content: "我可能没有再来的机会了。",
+                        next: 51175941,
+                    },
+                ],
+            },
+            {
+                id: 51175939,
+                content: "好！好啊！我等着你，娃娃！",
+                npc: 701270,
+            },
+            {
+                id: 51175941,
+                content: "娃娃，别这么说，人生很长的，没过完最后一天之前，谁知道明天会去哪里呢？",
+                npc: 701270,
+                next: 51175942,
+            },
+            {
+                id: 51175942,
+                content: "或许你哪天就回来了，带着你重要的朋友，到时候再回来找我玩吧，我再给你们泡壶好茶，吃甜果子，好吧！",
+                npc: 701270,
+            },
+            {
+                id: 51175943,
+                content: "娃娃哟~我说什么来着？你这不是回来看我了吗？",
+                npc: 701270,
+            },
+        ],
+    },
+    {
+        id: 701271,
+        name: "贺仙姑",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104501,
+        pos: [42537, -12061],
+        talks: [
+            {
+                id: 51176002,
+                content: "瞧见那远处的楼没？我啊，小时候曾听老人说，其实它根本不存在，都是假的！",
+                npc: 701271,
+                next: 51176003,
+            },
+            {
+                id: 51176003,
+                content: "他们跟我说，那座楼是龙君麾下的八名仙人所建造，八名仙人分别掌管着人间的阴阳柔刚善恶水火之相。",
+                npc: 701271,
+                next: 51176004,
+            },
+            {
+                id: 51176004,
+                content: "我们凡人呢，每经一世，便是要在这八相之中轮转磨练，直至看破虚相，参悟一生。",
+                npc: 701271,
+                next: 51176005,
+            },
+            {
+                id: 51176005,
+                content: "姑母，你说的不对吧，为何前脚刚说这楼不存在，后脚却又说是八仙所建呢？",
+                npc: 701272,
+                next: 51176006,
+            },
+            {
+                id: 51176006,
+                content: "那就要问问小桃你啊，你觉得八仙是否真正存在于世上呢？",
+                npc: 701271,
+                next: 51176007,
+            },
+            {
+                id: 51176007,
+                content: "八仙是否真的存在？呜……我想不到，{性别：大哥哥|大姐姐}，你可以帮小桃回答吗？",
+                npc: 701272,
+                next: 51176008,
+            },
+            {
+                id: 51176008,
+                content: "（小女孩怯生生地拉住你的袖口，充满期待地看向你。）",
+                options: [
+                    {
+                        id: 51176009,
+                        content: "不存在吧，都说了楼是假的。",
+                        next: 51176012,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51176010,
+                        content: "存在？毕竟人生在世，的确历经磨练。",
+                        next: 51176012,
+                        impr: [1041, "Empathy", 3],
+                    },
+                    {
+                        id: 51176011,
+                        content: "哪来的八仙，华胥不是只有两条龙？",
+                        next: 51176012,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51176012,
+                content: "小桃！真不懂事！这位{性别：公子|姑娘}，实在不好意思，我在和我侄女开玩笑呢，打扰到你了。",
+                npc: 701271,
+                next: 51176013,
+            },
+            {
+                id: 51176013,
+                content: "没关系，我对你们的话题也很感兴趣。",
+                npc: 100001,
+                next: 51176014,
+            },
+            {
+                id: 51176014,
+                content: "姑母！我要和{性别：大哥哥|大姐姐}一起听故事！",
+                npc: 701272,
+                next: 51176015,
+            },
+            {
+                id: 51176015,
+                content: "这……好吧，{性别：公子|姑娘}，我所说的都是一些街坊之间的传言，没什么可信度的，你莫要放在心上。",
+                npc: 701271,
+                next: 51176016,
+            },
+            {
+                id: 51176016,
+                content: "那我可就继续说了啊……",
+                npc: 701271,
+                next: 51176017,
+            },
+            {
+                id: 51176017,
+                content: "好！",
+                npc: 701272,
+                next: 51176018,
+            },
+            {
+                id: 51176018,
+                content: "先说回八仙是否真实存在的说法，其实呢，在这个故事里，八仙的确是真实存在的。",
+                npc: 701271,
+                next: 51176019,
+            },
+            {
+                id: 51176019,
+                content: "他们共同用仙术，创造出了一座海上楼阁，并将其取名为蜃楼，说是一种巨大的贝壳吞吐仙气而形成。",
+                npc: 701271,
+                next: 51176020,
+            },
+            {
+                id: 51176020,
+                content: "不知道为什么，百姓之间就开始流传一种说法，说只要凭借自己的力量，不借助外物踏上蜃楼，便可获得长生不老的力量。",
+                npc: 701271,
+                next: 51176021,
+            },
+            {
+                id: 51176021,
+                content: "长生不老？就是长大了，变老了，也不会死掉是吗？那如果是有龙氏长大变成狴犴大人了呢？也会长生不老吗？",
+                npc: 701272,
+                next: 51176022,
+            },
+            {
+                id: 51176022,
+                content: "狴犴大人本来就是长生不老的，我所说的那些想要追求长生不老的家伙，反而是大多数像我们一样的抟土氏。",
+                npc: 701271,
+                next: 51176023,
+            },
+            {
+                id: 51176023,
+                content: "唔，当然，您应该也不会追求长生不老吧？",
+                npc: 701271,
+                options: [
+                    {
+                        id: 51176024,
+                        content: "如果是一个人的话，太孤独了。",
+                        next: 51176027,
+                        impr: [1041, "Empathy", 3],
+                    },
+                    {
+                        id: 51176025,
+                        content: "不是很好吗？想做什么就做什么。",
+                        next: 51176027,
+                        impr: [1041, "Chaos", 3],
+                    },
+                    {
+                        id: 51176026,
+                        content: "我会被帝国炼金院抓去研究的吧？",
+                        next: 51176027,
+                        impr: [1041, "Benefit", 3],
+                    },
+                ],
+            },
+            {
+                id: 51176027,
+                content:
+                    "哈哈，不管怎么说，可惜的是，长生不老根本是不可能存在的，反而有大多数抟土氏，因为过于渴望这一点，前赴后继地踏上登楼的道路。",
+                npc: 701271,
+                next: 51176028,
+            },
+            {
+                id: 51176028,
+                content: "不能借助外力，即坐不了船，用不了桨，凭借自己的力量过去谈何容易？大多都在水上夭折，尸骨无存。",
+                npc: 701271,
+                next: 51176029,
+            },
+            {
+                id: 51176029,
+                content:
+                    "再后来，为了让那些愚昧的家伙们不再去追求一些不可能实现的梦想，天禄司便真的在水上建了一座小岛，并在小岛上盖了个楼。",
+                npc: 701271,
+                next: 51176030,
+            },
+            {
+                id: 51176030,
+                content: "啊！所以，现在的楼是真的，以前的楼是假的，是吗？",
+                npc: 701272,
+                next: 51176031,
+            },
+            {
+                id: 51176031,
+                content: "可以这么说，但也有一种说法其实是，现在的楼是假蜃楼，真蜃楼则被藏了起来，任何人都无法再度找到它。",
+                npc: 701271,
+                options: [
+                    {
+                        id: 51176032,
+                        content: "再？你的意思是……",
+                        next: 51176033,
+                    },
+                ],
+            },
+            {
+                id: 51176033,
+                content: "是的，曾有一名沈姓书生，扬言自己登上了真蜃楼，并在上面见到了八仙，但却没有通过他们的考验。",
+                npc: 701271,
+                next: 51176034,
+            },
+            {
+                id: 51176034,
+                content:
+                    "他声称即使自己没有通过考验，但八仙依旧端出玉液琼浆，蟠桃珍馐，热情款待了他，并在他离开之际赠给他一个样貌别致的法宝。",
+                npc: 701271,
+                next: 51176035,
+            },
+            {
+                id: 51176035,
+                content: "说是可以消灾抵难，福寿延长。",
+                npc: 701271,
+                next: 51176036,
+            },
+            {
+                id: 51176036,
+                content: "哇！听起来好厉害啊，那姑母，沈书生现在在哪里？",
+                npc: 701272,
+                next: 51176037,
+            },
+            {
+                id: 51176037,
+                content: "那名沈书生啊，早就是一百多年前的事情了，听说他后来搬到了天禄司新建的假蜃楼上，并幻想着有一天可以再次登上真蜃楼。",
+                npc: 701271,
+                next: 51176038,
+            },
+            {
+                id: 51176038,
+                content:
+                    "不过呢……多半是没有后话了，应该是早已离世了吧，他似乎有留下一些书籍，写了自己登上真蜃楼后的经历，那书叫什么……《蜃景笔谈》？",
+                npc: 701271,
+                next: 51176039,
+            },
+            {
+                id: 51176039,
+                content: "估计现在早就找不到了，可能只有资历老的书商那边才有留档吧，也可能早就被丢到哪个瘸了腿的桌子下面当踮脚砖了。",
+                npc: 701271,
+                next: 51176040,
+            },
+            {
+                id: 51176040,
+                content: "好有趣的故事，姑母，哪天你带我去假蜃楼玩吧！",
+                npc: 701272,
+                next: 51176041,
+            },
+            {
+                id: 51176041,
+                content: "好啊，条件是你现在乖乖回家，把昨天你阿娘给你买的糖罐交出来，听到没？",
+                npc: 701271,
+                next: 51176042,
+            },
+            {
+                id: 51176042,
+                content: "可是那个，就是，嗯……吃，吃完了……",
+                npc: 701272,
+                next: 51176043,
+            },
+            {
+                id: 51176043,
+                content: "什么？！这才过了三天！你这贪吃的娃娃！小心牙齿全都掉光光！",
+                npc: 701271,
+                next: 51176044,
+            },
+            {
+                id: 51176044,
+                content: "（姑侄两人笑着闹着跑远了，独留你在原地看着她们离开的背影……）",
+                next: 51176045,
+            },
+            {
+                id: 51176045,
+                content: "（《蜃景笔谈》吗？有机会找来看看吧。）",
+            },
+        ],
+    },
+    {
+        id: 701272,
+        name: "阿桃",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701273,
+        name: "乐观皎皎",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104501,
+        pos: [46667, -28741],
+        talks: [
+            {
+                id: 51177002,
+                content: "所有目光向我看齐，在场的各位，都是彻彻底底的聪明龙！聪明土！",
+                npc: 701273,
+                next: 51177003,
+            },
+            {
+                id: 51177003,
+                content: "（眼前的皎皎趾高气昂地站在桌子上，意气风发。）",
+                options: [
+                    {
+                        id: 51177004,
+                        content: "这里不能站着。",
+                        next: 51177005,
+                        impr: [1041, "Morality", 3],
+                    },
+                    {
+                        id: 51177007,
+                        content: "站这么高不累吗？",
+                        next: 51177008,
+                        impr: [1041, "Empathy", 3],
+                    },
+                ],
+            },
+            {
+                id: 51177005,
+                content: "乐观皎皎的词典里没有不可以！只要用积极的眼光看出去，就会发现皓京里到处都是条条大道~",
+                npc: 701273,
+                next: 51177006,
+            },
+            {
+                id: 51177008,
+                content: "累，困，沮丧，疲惫……这些词在我乐观皎皎的词典里统统不存在！我想请你以其他的词语来形容我。",
+                npc: 701273,
+                next: 51177009,
+            },
+            {
+                id: 51177006,
+                content: "让我们说一些更加灿烂的词语吧，比如爱，比如希望，比如明天！",
+                npc: 701273,
+                next: 51177010,
+            },
+            {
+                id: 51177009,
+                content: "比如爱，比如希望，比如明天！",
+                npc: 701273,
+                next: 51177010,
+            },
+            {
+                id: 51177010,
+                content: "所以你在这里做什么？",
+                npc: 100001,
+                next: 51177011,
+            },
+            {
+                id: 51177011,
+                content: "如你所见，我在宣讲，宣讲一段独属于乐观的发言，我是被乐观感染的皎皎，我的存在即是为了将乐观传递给他人！",
+                npc: 701273,
+                next: 51177012,
+            },
+            {
+                id: 51177012,
+                content: "你看见了吗？看见了乐观洒满皓京城内的样子了吗？",
+                npc: 701273,
+                next: 51177013,
+            },
+            {
+                id: 51177013,
+                content: "隔夜的鲜花曾经奄奄一息，现在却焕发新姿，摇曳间散发芳香。",
+                npc: 701273,
+                next: 51177014,
+            },
+            {
+                id: 51177014,
+                content: "包子摊本来冷冷清清，今早一开摊却排起了长龙，大家抢着要买刚出笼的热乎乎的包子。",
+                npc: 701273,
+                next: 51177015,
+            },
+            {
+                id: 51177015,
+                content: "我最爱喝的绿豆沙店主也记住了我的口味，一碗里多放了六颗莲子！",
+                npc: 701273,
+                next: 51177016,
+            },
+            {
+                id: 51177016,
+                content: "大家开始像我一样乐观，像我一样爱笑……",
+                npc: 701273,
+                next: 51177017,
+            },
+            {
+                id: 51177017,
+                content: "这就是……",
+                npc: 701273,
+                next: 51177018,
+            },
+            {
+                id: 51177018,
+                content: "这就是乐观的感染啊！你呢？你有被感染到吗？！",
+                npc: 701273,
+                options: [
+                    {
+                        id: 51177019,
+                        content: "有被感染。",
+                        next: 51177021,
+                        impr: [1041, "Empathy", 3],
+                    },
+                    {
+                        id: 51177020,
+                        content: "有被“感染”。",
+                        next: 51177021,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51177021,
+                content: "对啦，这就对啦！只要所有人都心存乐观，世界就会变得更美好！",
+                npc: 701273,
+                next: 51177022,
+            },
+            {
+                id: 51177022,
+                content: "去吧，带着这份乐观，保持脸上的笑容，去把乐观传递给更多人吧！",
+                npc: 701273,
+                next: 51177023,
+            },
+            {
+                id: 51177023,
+                content: "（乐观皎皎伸出手，煞有介事地拍了拍你的肩膀，目光却灼灼地直视前方，似乎要透过你，看向更多的地方……）",
+                next: 51177024,
+            },
+            {
+                id: 51177024,
+                content: "（过了一会，她的目光转向了你，在短暂对视后，她重重的点了点头，然后挪开手，继续开始了宣讲。）",
+                next: 51177025,
+            },
+            {
+                id: 51177025,
+                content: "（你总觉得这种感觉似乎有些熟悉，像是这段对话曾经在何时发生过，只是不是以这样的形式……）",
+            },
+            {
+                id: 51177026,
+                content: "怎么样，今天有比昨天更乐观一些吗？如果没有的话，那就留下来再听听我的宣讲吧！",
+                npc: 701273,
+            },
+        ],
+    },
+    {
+        id: 701274,
+        name: "砚台清",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104501,
+        pos: [45799, -36881],
+        talks: [
+            {
+                id: 51178002,
+                content: "怎就没有愿意与我辩论之人？莫非是我过于咄咄逼人了？",
+                npc: 701274,
+                next: 51178003,
+            },
+            {
+                id: 51178003,
+                content: "明明我想了个如此精妙绝伦的辩题，辩完后必定醍醐灌顶，效用堪比仙人抚顶啊！",
+                npc: 701274,
+                next: 51178004,
+            },
+            {
+                id: 51178004,
+                content: "偏生那帮混蛋双目昏昏，愚钝不堪，不看好我的辩题，等到夫子回来，我定要狠狠告他们一桩。",
+                npc: 701274,
+                next: 51178005,
+            },
+            {
+                id: 51178005,
+                content: "唉……究竟何处能有慧眼识珠之人，透过我的脆弱，看穿我的坚强，与我展开一场精彩的辩论……",
+                npc: 701274,
+                options: [
+                    {
+                        id: 51178006,
+                        content: "我来！",
+                        next: 51178007,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51178009,
+                        content: "（没意思，走吧。）",
+                        next: 51178010,
+                    },
+                ],
+            },
+            {
+                id: 51178007,
+                content: "（他的目光移向你，炽热的视线似乎要把你灼伤。）",
+                next: 51178008,
+            },
+            {
+                id: 51178010,
+                content: "这位朋友请留步！我见你相貌堂堂，一表人才，眉间似有龙气萦绕，想必定是卧虎藏龙之辈。",
+                npc: 701274,
+                next: 51178011,
+            },
+            {
+                id: 51178008,
+                content: "好！好啊！就决定是你了！",
+                npc: 701274,
+                next: 51178012,
+            },
+            {
+                id: 51178011,
+                content: "不如就由你来与我辩论一番，如何？",
+                npc: 701274,
+                next: 51178012,
+            },
+            {
+                id: 51178012,
+                content: "你说的这个辩论我不懂，之前也没学过。",
+                npc: 100001,
+                next: 51178013,
+            },
+            {
+                id: 51178013,
+                content: "这话说得就生疏了，什么叫不懂和没学过呢，凡事不都得有第一次尝试？",
+                npc: 701274,
+                next: 51178014,
+            },
+            {
+                id: 51178014,
+                content: "再说了，辩论辩论，说白了就是嘴皮子一掀就能做的，我见你口齿伶俐，说不定在辩论一事上颇有天赋呢？",
+                npc: 701274,
+                next: 51178015,
+            },
+            {
+                id: 51178015,
+                content: "这样，本来分殊学院内部的辩论流程应该是要提前申请，再开论台请人鉴辩，最终由鉴辩者分出高低。",
+                npc: 701274,
+                next: 51178016,
+            },
+            {
+                id: 51178016,
+                content: "不过看在你第一次尝试，我们便进行一场私下较量，只碰撞思想，不考虑胜负，如何？",
+                npc: 701274,
+                options: [
+                    {
+                        id: 51178017,
+                        content: "（你不由开始思索起自己的才智究竟能不能承托起这场莫名其妙的辩论。）",
+                        next: 51178020,
+                        imprCheck: [1041, "Wisdom", 40],
+                    },
+                ],
+            },
+            {
+                id: 51178020,
+                content: "好，你说说辩题，我陪你玩玩。",
+                npc: 100001,
+                next: 51178021,
+            },
+            {
+                id: 51178021,
+                content: "哎呀！阁下也是爽快人！我的辩题十分简单，即：旁观者清亦或旁观者不清，你想选哪边？",
+                npc: 701274,
+                options: [
+                    {
+                        id: 51178022,
+                        content: "旁观者清。",
+                        next: 51178023,
+                    },
+                    {
+                        id: 51178037,
+                        content: "旁观者不清。",
+                        next: 51178038,
+                    },
+                ],
+            },
+            {
+                id: 51178023,
+                content: "好啊，那便是正方了。",
+                npc: 701274,
+                next: 51178024,
+            },
+            {
+                id: 51178038,
+                content: "好啊，那便是反方了。",
+                npc: 701274,
+                next: 51178039,
+            },
+            {
+                id: 51178024,
+                content: "（砚台清故意咳嗽了两声，挺胸抬头，摆出一副正经的样子，脸也板正了起来。）",
+                next: 51178025,
+            },
+            {
+                id: 51178039,
+                content: "既然你选了这个，那你便先提出你的观点吧，随便说就行，想怎么说就怎么说！",
+                npc: 701274,
+                next: 51178040,
+            },
+            {
+                id: 51178025,
+                content: "既然你选了这个，那你便先提出你的观点吧，随便说就行，想怎么说就怎么说！",
+                npc: 701274,
+                next: 51178026,
+            },
+            {
+                id: 51178040,
+                content: "（你开始思索你对于旁观者不清的理解，或许举例描述会更直白？）",
+                options: [
+                    {
+                        id: 51178041,
+                        content: "以大风九章为例。",
+                        next: 51178042,
+                        impr: [1041, "Empathy", 3],
+                    },
+                    {
+                        id: 51178046,
+                        content: "以小孩打架为例。",
+                        next: 51178047,
+                        impr: [1041, "Morality", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178026,
+                content: "（你开始思索你对于旁观者清的理解，或许举例描述会更直白？）",
+                options: [
+                    {
+                        id: 51178027,
+                        content: "以下棋为例。",
+                        next: 51178028,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51178032,
+                        content: "以生意为例。",
+                        next: 51178033,
+                        impr: [1041, "Benefit", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178042,
+                content: "我听一位飘零人说过，大风九章有时在尚未摸清事情的始末之时，便会派出狴犴前往执法。",
+                npc: 100001,
+                next: 51178043,
+            },
+            {
+                id: 51178047,
+                content: "我小时候生活的村子，孩子们常常在玩耍的时候争执，有时候甚至会闹到要打起来的地步。",
+                npc: 100001,
+                next: 51178048,
+            },
+            {
+                id: 51178028,
+                content:
+                    "我在酒馆见过别人下棋，他们往往会将所有心力都沉浸在当前的棋局之中，每一枚棋子要放在哪个格子上，都需要经过多种思考。",
+                npc: 100001,
+                next: 51178029,
+            },
+            {
+                id: 51178033,
+                content: "我曾听一位熟悉做生意的酒馆老板说起，谈判极为重要，但参与谈判的人有时并不能明确繁杂的利润算法。",
+                npc: 100001,
+                next: 51178034,
+            },
+            {
+                id: 51178043,
+                content: "导致许多人明明是因为一些不得已的原因犯下错误，却根本得不到辩解的机会。",
+                npc: 100001,
+                next: 51178044,
+            },
+            {
+                id: 51178048,
+                content: "孩子们鼻青脸肿地回家后，关心他们的父母看到伤痕就红了眼。",
+                npc: 100001,
+                next: 51178049,
+            },
+            {
+                id: 51178029,
+                content: "但这也直接导致了他们无法顾及全盘的局势，过于将心思放在这一枚棋子之上。",
+                npc: 100001,
+                next: 51178030,
+            },
+            {
+                id: 51178034,
+                content: "他们经常会被对方开出的短期利益迷惑，从而忘记自己的长久目的，造成谈判失误。",
+                npc: 100001,
+                next: 51178035,
+            },
+            {
+                id: 51178044,
+                content: "我想，在这些案件里，大风九章的判决就像是一种另类的旁观者一样，不知全情便进行判断，实在是算不上“清”。",
+                npc: 100001,
+                next: 51178045,
+            },
+            {
+                id: 51178049,
+                content: "他们直接粗暴地找到其他孩子家里去，甚至不预先询问究竟是因为什么原因打架——比如，是不是他们的孩子先欺负了其他孩子。",
+                npc: 100001,
+                next: 51178050,
+            },
+            {
+                id: 51178030,
+                content:
+                    "与此同时，在一边观看他们下棋的人则很容易就能分辨出来谁可能会赢，因为他们可以将全部的精力用于分析局势，而不是研究这一枚棋子。",
+                npc: 100001,
+                next: 51178031,
+            },
+            {
+                id: 51178035,
+                content: "所以他们会多带一两个人，那带过去的人就相当于他们的警钟，在他们快要迷失之时拉他们一把。",
+                npc: 100001,
+                next: 51178036,
+            },
+            {
+                id: 51178045,
+                content: "胡说八道！你好大的胆子！怎么敢置喙大风九章的判决？大风九章就是天理，说什么都是对的，怎会不清？",
+                npc: 701274,
+                next: 51178053,
+            },
+            {
+                id: 51178050,
+                content:
+                    "在这场斗殴中，孩子是参与者，而父母却是旁观者，但父母却不愿追究这场争斗的原因，只是因为自己的孩子受伤了，就要惩罚其他孩子。",
+                npc: 100001,
+                next: 51178051,
+            },
+            {
+                id: 51178031,
+                content: "胡说八道！你说的这是下棋下得不好的笨蛋，而不是真正的国手，要是足够厉害，怎会有你说的这种情况？",
+                npc: 701274,
+                next: 51178053,
+            },
+            {
+                id: 51178036,
+                content: "胡说八道！你说的这是做生意做不明白的笨蛋，而不是真正的大商贾，要是足够厉害，怎会有你说的这种情况？",
+                npc: 701274,
+                next: 51178053,
+            },
+            {
+                id: 51178053,
+                content: "（听到砚台清莫名其妙的话，你不由得眉头一皱。）",
+                next: 51178054,
+            },
+            {
+                id: 51178051,
+                content: "虽说是出于对孩子的关爱，但……我觉得这应该也是一种旁观者不清吧？",
+                npc: 100001,
+                next: 51178052,
+            },
+            {
+                id: 51178054,
+                content: "我们不是在辩论吗？你为什么不说你的观点，而是突然气急败坏？",
+                npc: 100001,
+                next: 51178055,
+            },
+            {
+                id: 51178052,
+                content: "胡说八道！我不管你什么村子，打架了、出手伤人那就是不对的，这在我们华胥是要被狴犴大人惩罚的！",
+                npc: 701274,
+                next: 51178053,
+            },
+            {
+                id: 51178055,
+                content: "这就是我的辩论道理！不然难道要任由你这样胡言乱语？",
+                npc: 701274,
+                next: 51178056,
+            },
+            {
+                id: 51178056,
+                content: "（你回想起了他最开始说的话……）",
+                next: 51178057,
+            },
+            {
+                id: 51178057,
+                content: "（你逐渐理解了为什么没有人愿意与他辩论……）",
+                next: 51178058,
+            },
+            {
+                id: 51178058,
+                content: "不可理喻。",
+                npc: 100001,
+                next: 51178059,
+            },
+            {
+                id: 51178059,
+                content: "你说什么呢？你骂我？",
+                npc: 701274,
+                options: [
+                    {
+                        id: 51178060,
+                        content: "不理他。",
+                        next: 51178061,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51178062,
+                        content: "吓唬他。",
+                        next: 51178063,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178061,
+                content: "（你径自走开，不理会在你身后跳脚大骂的砚台清。）",
+            },
+            {
+                id: 51178063,
+                content: "最近走夜路小心点。",
+                npc: 100001,
+                next: 51178064,
+            },
+            {
+                id: 51178064,
+                content: "（你握紧了腰间的刀柄，向他威慑性地亮了亮，然后转身离开。）",
+            },
+        ],
+    },
+    {
+        id: 701275,
+        name: "萍姐",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104503,
+        pos: [32925, -40244],
+        talks: [
+            {
+                id: 51178102,
+                content: "要说最为复杂的案件……莫过于十年前的那场意外了。",
+                npc: 701275,
+                next: 51178103,
+            },
+            {
+                id: 51178103,
+                content: "你毕竟也是刚来做调解人，这样的事件说给你实在有些……",
+                npc: 701275,
+                next: 51178104,
+            },
+            {
+                id: 51178104,
+                content: "姐，能一样吗？我可是新晋的调解人里接受度最高，能力也最为出众，口才也最好的那一位了。你就说给我听听吧~",
+                npc: 701276,
+                next: 51178105,
+            },
+            {
+                id: 51178105,
+                content: "我看你是嘴最贫，心眼子最多的那个还差不多！",
+                npc: 701275,
+                options: [
+                    {
+                        id: 51178106,
+                        content: "（默不作声假装靠近……）",
+                        next: 51178108,
+                        impr: [1041, "Benefit", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178108,
+                content: "那件事说起来是十年前，但对我来说，就像在昨天一样。",
+                npc: 701275,
+                next: 51178109,
+            },
+            {
+                id: 51178109,
+                content: "那日，我的舅父浑身浴血，急匆匆从外面赶了回来。",
+                npc: 701275,
+                next: 51178110,
+            },
+            {
+                id: 51178110,
+                content: "我看到时，吓了一跳，以为是他在外遇到了危险……",
+                npc: 701275,
+                next: 51178111,
+            },
+            {
+                id: 51178111,
+                content: "他慌里慌张的，喘着粗气，话也说不利索。他说：死人了。",
+                npc: 701275,
+                next: 51178112,
+            },
+            {
+                id: 51178112,
+                content: "死人？死的是谁？咱们不是有狴犴大人执法吗？如果真闹出了什么恶性事件，狴犴大人岂不是直接就将犯人逮捕了？",
+                npc: 701276,
+                next: 51178113,
+            },
+            {
+                id: 51178113,
+                content: "嗯哼~常理来说如此，但那件事并非常理之中。",
+                npc: 701275,
+                next: 51178114,
+            },
+            {
+                id: 51178114,
+                content: "遇害的那位是一名学堂的孩子，因为家境好，父母疏于管教又溺爱，导致性格十分恶劣，在学堂里一直有小霸王之称。",
+                npc: 701275,
+                next: 51178115,
+            },
+            {
+                id: 51178115,
+                content:
+                    "据说当时的孩子都很怕他，因为他经常威胁别的孩子把零花钱给自己，还会做出一些顽劣的恶作剧整蛊自己的同窗——直到成年，都是顽劣如此。",
+                npc: 701275,
+                next: 51178116,
+            },
+            {
+                id: 51178116,
+                content: "诶呀，这孩子真是……可是这样不会被狴犴惩罚吗？",
+                npc: 701276,
+                options: [
+                    {
+                        id: 51178117,
+                        content: "（有什么不会被惩罚的恶作剧吗……）",
+                        next: 51178119,
+                        imprCheck: [1041, "Chaos", 40],
+                    },
+                ],
+            },
+            {
+                id: 51178119,
+                content: "我小时候，隔壁一个顽劣的孩子喜欢捉弄自己的玩伴。他趁玩伴小睡的时候，把几只螃蟹塞在她装贝壳的陶罐里。",
+                npc: 100001,
+                next: 51178120,
+            },
+            {
+                id: 51178120,
+                content: "玩伴醒来，想把贝壳拿出来玩，就被受惊的螃蟹狠狠地夹了手指。",
+                npc: 100001,
+                next: 51178121,
+            },
+            {
+                id: 51178121,
+                content: "真是个坏孩子。那他后来怎么样了？",
+                npc: 701275,
+                next: 51178122,
+            },
+            {
+                id: 51178122,
+                content: "他站在一边捧腹大笑，但很快他就笑不出来了，因为我看不过去，和家人一起把他“修理”了一顿，从此之后他就老实了。",
+                npc: 100001,
+                next: 51178123,
+            },
+            {
+                id: 51178123,
+                content: "若有人管教，能走上正途，也算是一件好事了。只是我说的那小霸王，就没有那么好运了。",
+                npc: 701275,
+                next: 51178124,
+            },
+            {
+                id: 51178124,
+                content: "——他死了。但杀他的……",
+                npc: 701275,
+                next: 51178125,
+            },
+            {
+                id: 51178125,
+                content: "什么呀，姐你就别卖关子了！",
+                npc: 701276,
+                next: 51178126,
+            },
+            {
+                id: 51178126,
+                content: "是个傻子。",
+                npc: 701275,
+                next: 51178127,
+            },
+            {
+                id: 51178127,
+                content: "？！",
+                npc: 100001,
+                next: 51178128,
+            },
+            {
+                id: 51178128,
+                content:
+                    "他从娘胎里生出来就和旁人就不大一样，街坊邻居也都可怜他，自小也宽厚待他，只是长大了，送到学堂里，孩子们不懂事，有时便不给他好脸色。",
+                npc: 701275,
+                next: 51178129,
+            },
+            {
+                id: 51178129,
+                content:
+                    "只是不给好脸色久了，那孩子比起旁的孩子就显得有几分怯懦。怯懦久了，孩子们便不再把他当回事，不给他好脸色，或是总差遣他去做些杂活。",
+                npc: 701275,
+                next: 51178130,
+            },
+            {
+                id: 51178130,
+                content: "如此说来，这不就是在霸凌他吗？我明白了，所以那个欺负得最过分的那位，就是姐你刚才说的……“小霸王”？",
+                npc: 701276,
+                next: 51178131,
+            },
+            {
+                id: 51178131,
+                content:
+                    "没错，“小霸王”总是用玩闹的借口欺负傻的那位，可也是在一次玩闹里，那痴傻少年不小心把人从二楼推了下去，当场便没了气。",
+                npc: 701275,
+                next: 51178132,
+            },
+            {
+                id: 51178132,
+                content: "傻孩子还不知道发生了什么，见那血流了三尺，围观者无不尖叫呼救，他只意味站在原地拍手傻乐。",
+                npc: 701275,
+                next: 51178133,
+            },
+            {
+                id: 51178133,
+                content: "然后呢？狴犴大人是如何裁决的？",
+                npc: 701276,
+                next: 51178134,
+            },
+            {
+                id: 51178134,
+                content:
+                    "自然是飞速赶来，同样将傻孩子的命带走了，可怜那孩子的母亲，十月怀胎生下他，当的是心头肉一样拉扯他，好不容易长大成人，却得到这般结局。",
+                npc: 701275,
+                next: 51178135,
+            },
+            {
+                id: 51178135,
+                content: "冤情难解，尤其是她四处走访得知自己的孩子生前遭遇，更是哭瞎了眼。只能到处拜托近亲远邻，求他们还自己一个公道。",
+                npc: 701275,
+                next: 51178136,
+            },
+            {
+                id: 51178136,
+                content: "大伙儿纷纷避之不及，只有我的舅父心热，因着当时亲历现场，所以一路陪她诉冤陪到底。",
+                npc: 701275,
+                next: 51178137,
+            },
+            {
+                id: 51178137,
+                content: "所以最终的结局是什么？",
+                npc: 701276,
+                next: 51178138,
+            },
+            {
+                id: 51178138,
+                content: "虽然很想告诉你，但是我当时也只是个十几岁的孩子，所以这件事的结果，我不知道。",
+                npc: 701275,
+                next: 51178139,
+            },
+            {
+                id: 51178139,
+                content: "不知道？！姐，你就别拿我开玩笑了，就告诉我吧！",
+                npc: 701276,
+                next: 51178140,
+            },
+            {
+                id: 51178140,
+                content:
+                    "我是真的不晓得结果是什么，几次和舅父探听，也没有得到答案。不过，我今日来问问你们，你们觉得这场案件的结果会是什么呢？",
+                npc: 701275,
+                options: [
+                    {
+                        id: 51178141,
+                        content: "我认为杀人者的母亲取得了自己的公道。",
+                        next: 51178142,
+                        impr: [1041, "Empathy", 3],
+                    },
+                    {
+                        id: 51178145,
+                        content: "我认为这件事多半不了了之了。",
+                        next: 51178146,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178142,
+                content:
+                    "我想……她应该得到了公道。就算死者不能复活，也不能让他背负罪犯的恶名。无论怎么说，这件事都不能算是蓄意伤人，顶多算是一场意外。",
+                npc: 100001,
+                next: 51178143,
+            },
+            {
+                id: 51178146,
+                content:
+                    "如果这件事真的让那位孩子的母亲讨回了公道，你的舅父不会因此避而不谈的，只不过是没有做到，所以也不愿告知你，让你伤心。",
+                npc: 100001,
+                next: 51178147,
+            },
+            {
+                id: 51178143,
+                content: "你说得对，如果这事放在今日改制后的华胥，我也会竭尽全力为他的母亲辩护，直至她沉冤得雪。",
+                npc: 701275,
+                next: 51178144,
+            },
+            {
+                id: 51178147,
+                content: "是啊，我们心里其实都晓得，只是不愿去接受这样的结果……",
+                npc: 701275,
+                next: 51178148,
+            },
+            {
+                id: 51178144,
+                content: "毕竟，我们调解人就是为了这个目的诞生的——裁定罪行的不再是大风九章，而应当是人类自己，不是吗？",
+                npc: 701275,
+                next: 51178149,
+            },
+            {
+                id: 51178148,
+                content: "还好，改制后有了我们调解员——裁定罪行的不再是大风九章，而应当是人类自己，不是吗？",
+                npc: 701275,
+                next: 51178149,
+            },
+            {
+                id: 51178149,
+                content: "但是吧……无论结果如何，其实都谈不上是个好结果。",
+                npc: 701276,
+                next: 51178150,
+            },
+            {
+                id: 51178150,
+                content: "那孩子已经死了，那些是非对错又有什么意义呢？死了的人哪里还会在意自己的名声……",
+                npc: 701276,
+                next: 51178151,
+            },
+            {
+                id: 51178151,
+                content: "说到底，都是因为狴犴大人它……",
+                npc: 701276,
+                next: 51178152,
+            },
+            {
+                id: 51178152,
+                content: "这话你也敢说？",
+                npc: 100001,
+                next: 51178153,
+            },
+            {
+                id: 51178153,
+                content:
+                    "为何不敢说？未知结果之前，盲目断案，错的就是错的，我成为调解人，不就是为了减少这样的事情发生，还更多人一个公道吗？",
+                npc: 701276,
+                next: 51178154,
+            },
+            {
+                id: 51178154,
+                content: "……噗嗤~",
+                npc: 701275,
+                next: 51178155,
+            },
+            {
+                id: 51178155,
+                content: "萍姐，你笑什么？",
+                npc: 701276,
+                next: 51178156,
+            },
+            {
+                id: 51178156,
+                content: "你能这样想，那就不算浪费我今日唠叨的口舌啦……",
+                npc: 701275,
+                next: 51178157,
+            },
+            {
+                id: 51178157,
+                content: "我没理解，姐你到底什么意思嘛？",
+                npc: 701276,
+                next: 51178158,
+            },
+            {
+                id: 51178158,
+                content: "没事没事，今天的故事时间结束了，我还要回去整理卷宗，你也得一起。",
+                npc: 701275,
+                next: 51178159,
+            },
+            {
+                id: 51178159,
+                content: "对啦，这位{性别:公子|姑娘}，不好意思，耽误你许久听我讲这陈芝麻烂谷子的旧事。",
+                npc: 701275,
+                next: 51178160,
+            },
+            {
+                id: 51178160,
+                content: "没关系。",
+                npc: 100001,
+                next: 51178161,
+            },
+            {
+                id: 51178161,
+                content: "既然如此，那我们也不再叨扰了，再见。",
+                npc: 701275,
+            },
+            {
+                id: 51178162,
+                content: "还不回去是要等到什么时候？",
+                npc: 701275,
+                next: 51178163,
+            },
+            {
+                id: 51178163,
+                content: "再等等嘛，卷宗是整不完的，还是先珍惜一下我们难得的休息时间吧！",
+                npc: 701276,
+            },
+        ],
+    },
+    {
+        id: 701276,
+        name: "谢迁",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 701277,
+        name: "程宫",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104501,
+        pos: [38451, -37010],
+        talks: [
+            {
+                id: 51178202,
+                content: "若是法理不通，又怎敢把评判的权利交由那劳什子人心私情？",
+                npc: 701277,
+                next: 51178203,
+            },
+            {
+                id: 51178203,
+                content: "（眼前的男人趾高气昂地向人们大肆宣扬着，你不由地走近了些，想听听他说的是什么。）",
+                next: 51178204,
+            },
+            {
+                id: 51178204,
+                content: "本来咱们华胥的大风九章是多么完善的制度？",
+                npc: 701277,
+                next: 51178205,
+            },
+            {
+                id: 51178205,
+                content: "对就是对，错就是错，杀人就要偿命，伤人就要惩处，一切都简单明了，勿需他人来断。",
+                npc: 701277,
+                next: 51178206,
+            },
+            {
+                id: 51178206,
+                content:
+                    "现在倒好，弄出个劳什子改制。狴犴大人过去了，把人带回收押，期间不知道多少纠葛不足为外人道也，几番周折，罪行也被人忘了，不了了之了！",
+                npc: 701277,
+                next: 51178207,
+            },
+            {
+                id: 51178207,
+                content: "我华胥千年天人律法竟就此断送，以后，该怎么办呐！",
+                npc: 701277,
+                next: 51178208,
+            },
+            {
+                id: 51178208,
+                content: "（这家伙肆意倾泻着对于大风九章改制的不满，想想用什么话来反驳他吧。）",
+                options: [
+                    {
+                        id: 51178209,
+                        content: "（说点什么来反驳他。）",
+                        next: 51178211,
+                        imprCheck: [1041, "Wisdom", 40],
+                    },
+                ],
+            },
+            {
+                id: 51178211,
+                content: "你对华胥人好像缺乏应有的尊重。",
+                npc: 100001,
+                next: 51178212,
+            },
+            {
+                id: 51178212,
+                content: "什么？你什么意思？",
+                npc: 701277,
+                next: 51178213,
+            },
+            {
+                id: 51178213,
+                content: "按你的说法，你把华胥人说得很愚蠢，失去了神君的判断就没有办法独立行走。",
+                npc: 100001,
+                next: 51178214,
+            },
+            {
+                id: 51178214,
+                content: "绝无此意！且听我道来。",
+                npc: 701277,
+                next: 51178215,
+            },
+            {
+                id: 51178215,
+                content: "如果现在的人知晓了谋财害命的下场不是被狴犴惩处，而是被抓起来，经历审讯，那他们的心中便不会畏惧。",
+                npc: 701277,
+                next: 51178216,
+            },
+            {
+                id: 51178216,
+                content: "而畏惧就是栓马的木桩，是囚禁兀鹫的牢笼，是限制河水肆意横流的河堤。",
+                npc: 701277,
+                next: 51178217,
+            },
+            {
+                id: 51178217,
+                content:
+                    "失去了畏惧，那些阴暗的念头就会不断滋生，蔓延，直至大家又因为兵戈相见而惴惴不安，这还是华胥吗？还是和平的，安宁的华胥吗？",
+                npc: 701277,
+                next: 51178218,
+            },
+            {
+                id: 51178218,
+                content: "就算大风九章有错，也好过减轻惩罚，让人们忘却畏惧之心！",
+                npc: 701277,
+                next: 51178219,
+            },
+            {
+                id: 51178219,
+                content:
+                    "你又不是其他人，怎么知道其他华胥人都像你所说的那样心怀不轨呢？还是说你本身是这样的人，于是就拿这样的念头去揣度别人？",
+                npc: 100001,
+                next: 51178220,
+            },
+            {
+                id: 51178220,
+                content: "我只是假设，我是说假设！你敢保证没有这样的情况发生吗？",
+                npc: 701277,
+                options: [
+                    {
+                        id: 51178221,
+                        content: "（搬出止流。）",
+                        next: 51178222,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51178226,
+                        content: "（讲道理。）",
+                        next: 51178227,
+                        impr: [1041, "Morality", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178222,
+                content: "我听说，龙渊上卿就是神君的选择。",
+                npc: 100001,
+                next: 51178223,
+            },
+            {
+                id: 51178227,
+                content:
+                    "可即使是过去的大风九章，也无法阻止那些存心想做恶事的人。相反，我见过微茫市一群圆滑老道的家伙是如何钻大风九章的空子，逃避惩罚。",
+                npc: 100001,
+                next: 51178228,
+            },
+            {
+                id: 51178223,
+                content: "既然你相信神君，那你应该选择相信止流——白龙神君选择的龙渊上卿，相信她的判断。",
+                npc: 100001,
+                next: 51178224,
+            },
+            {
+                id: 51178228,
+                content: "但那些过去因为大风九章错判而被狴犴夺去性命的人，却再也回不来了。",
+                npc: 100001,
+                next: 51178229,
+            },
+            {
+                id: 51178224,
+                content: "止流推动的改制，或许正是神君自己的旨意。",
+                npc: 100001,
+                next: 51178225,
+            },
+            {
+                id: 51178229,
+                content: "我想……相比严酷，可能“确定”和“公正”更重要吧？——确保每一个做错事的人受到惩罚，给每一个被错判的人以纠正的机会。",
+                npc: 100001,
+                next: 51178230,
+            },
+            {
+                id: 51178225,
+                content: "神君自己的旨意？不，难道说……",
+                npc: 701277,
+                next: 51178232,
+            },
+            {
+                id: 51178230,
+                content: "这才是律法的意义，不是吗？",
+                npc: 100001,
+                next: 51178231,
+            },
+            {
+                id: 51178232,
+                content: "你，你说的好像也有点道理，我想想……",
+                npc: 701277,
+                next: 51178233,
+            },
+            {
+                id: 51178231,
+                content: "确定和公正……难道说……",
+                npc: 701277,
+                next: 51178232,
+            },
+            {
+                id: 51178233,
+                content: "（你眼前的男人在你面前失落地喃喃自语，你察觉到他只是有些恐惧——对于华胥即将迎来的改制，对于充满不确定性的未来。）",
+                next: 51178234,
+            },
+            {
+                id: 51178234,
+                content: "（但无论如何，变革已然发生——它也必然会发生。）",
+            },
+            {
+                id: 51178235,
+                content: "我想想……我再想想……",
+                npc: 701277,
+            },
+        ],
+    },
+    {
+        id: 701278,
+        name: "诸葛明",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104503,
+        pos: [36562, -56775],
+        talks: [
+            {
+                id: 51178302,
+                content: "现在敲敲打打的这些木头块，那都没意思！要是放在以前，我能给你们看带劲的大家伙！",
+                npc: 701278,
+                next: 51178303,
+            },
+            {
+                id: 51178303,
+                content: "想当初，我造的那可都是惊天地泣鬼神的东西，知道应龙壹型吗，那可是我仿造龙君的外型制造出的大型机傀。",
+                npc: 701278,
+                next: 51178304,
+            },
+            {
+                id: 51178304,
+                content: "可惜啊……那帮不长眼胆子小的，说什么，不敬龙君……什么恐伤路人……什么能止孩儿夜啼……",
+                npc: 701278,
+                next: 51178305,
+            },
+            {
+                id: 51178305,
+                content: "连启动都没有，连夜拆了个干净，可怜我花了多少心血，却见一眼他动起来的样子都不行……",
+                npc: 701278,
+                options: [
+                    {
+                        id: 51178306,
+                        content: "至少你还见过他被拆成碎片的样子。",
+                        next: 51178307,
+                        impr: [1041, "Chaos", 3],
+                    },
+                    {
+                        id: 51178308,
+                        content: "拆了之后的碎片做什么了？",
+                        next: 51178309,
+                        impr: [1041, "Benefit", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178307,
+                content: "你！你这家伙！怎么这么说话的！呜呜呜……我的应龙壹型，呜啊！",
+                npc: 701278,
+                next: 51178310,
+            },
+            {
+                id: 51178309,
+                content: "还能做什么……当然是再利用成了那些小玩具的零件……呜……可怜了我的应龙壹型，呜啊！",
+                npc: 701278,
+                next: 51178310,
+            },
+            {
+                id: 51178310,
+                content: "（老大不小的男人在你面前哭得像个稚嫩的孩子，看起来十分可怜。）",
+                options: [
+                    {
+                        id: 51178311,
+                        content: "（你挑起来的，还是安慰安慰他吧。）",
+                        next: 51178313,
+                        imprCheck: [1041, "Empathy", 40],
+                    },
+                ],
+            },
+            {
+                id: 51178313,
+                content: "别哭了，是我不好，让你想起了难过的事情。",
+                npc: 100001,
+                next: 51178314,
+            },
+            {
+                id: 51178314,
+                content: "嘶……不，不怪你，我只是感叹机枢派近些年来落魄至此。",
+                npc: 701278,
+                next: 51178315,
+            },
+            {
+                id: 51178315,
+                content: "曾经的机枢派，是多么百花齐放，书本上说，机傀术几乎每天都会进行迭代。更优越的性能，更炫酷的外型……",
+                npc: 701278,
+                next: 51178316,
+            },
+            {
+                id: 51178316,
+                content: "而现在呢，没法做出什么创新了。有也只是小打小闹，多么无趣，我只恨自己生的晚，没能亲历那个辉煌的年代。",
+                npc: 701278,
+                next: 51178317,
+            },
+            {
+                id: 51178317,
+                content: "只要你潜心钻研，以后说不定会好起来的，可以再造一个……应龙贰型？",
+                npc: 100001,
+                next: 51178318,
+            },
+            {
+                id: 51178318,
+                content: "实不相瞒，我最近已有了一些念头，就是关于重建应龙壹型的，不对，现在应该叫应龙贰型。",
+                npc: 701278,
+                next: 51178319,
+            },
+            {
+                id: 51178319,
+                content: "早年的设计稍许还是有些稚嫩，比如耗能过高，机体容易过热，还有外型过于庞大，移动不是很方便……",
+                npc: 701278,
+                next: 51178320,
+            },
+            {
+                id: 51178320,
+                content:
+                    "虽然我的确有了一些想法，但我也想听听别人的意见……对了，你觉得你理想中的机傀应该是什么样子，没关系，随便说就行，只当是聊天就好。",
+                npc: 701278,
+                options: [
+                    {
+                        id: 51178321,
+                        content: "机傀就应该强大！战无不胜！",
+                        next: 51178322,
+                        impr: [1041, "Benefit", 3],
+                    },
+                    {
+                        id: 51178324,
+                        content: "强是暂时的，但帅气是一辈子的。",
+                        next: 51178325,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51178328,
+                        content: "机傀一定要有娱乐性。",
+                        next: 51178329,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178322,
+                content: "强大……没错，我也这么觉得，这也是我设计应龙形态机傀的初衷，毕竟在华胥，没有什么比龙神更为强大的东西了。",
+                npc: 701278,
+                next: 51178323,
+            },
+            {
+                id: 51178325,
+                content: "帅气……没错！你说的很有道理，日后华胥的机傀术一定会再现曾经的荣光。",
+                npc: 701278,
+                next: 51178326,
+            },
+            {
+                id: 51178329,
+                content: "娱乐……性？我没有特别理解你的意思，你是说，机傀要有趣？好玩？这听起来好像和现在的机傀方向没什么相关性。",
+                npc: 701278,
+                next: 51178330,
+            },
+            {
+                id: 51178323,
+                content: "既然你也觉得强大是对的，那我在下次设计应龙贰型时，将重点放在供能和耗能相关上吧……",
+                npc: 701278,
+                next: 51178332,
+            },
+            {
+                id: 51178326,
+                content: "当更新迭代的速度过快时，我即使做出了当前最为强大的机傀，没两天也会被淘汰。",
+                npc: 701278,
+                next: 51178327,
+            },
+            {
+                id: 51178330,
+                content:
+                    "哦哦！我明白了，你的意思是，机傀应该剑走偏锋，比如我设计出一个龙君外型的机傀，它如果会唱歌跳舞，那一定十分受人欢迎。",
+                npc: 701278,
+                next: 51178331,
+            },
+            {
+                id: 51178332,
+                content: "你的建议我完全明白了，我相信我会设计出一个最完美的应龙贰型！",
+                npc: 701278,
+                next: 51178333,
+            },
+            {
+                id: 51178327,
+                content: "所以，我就应该在外型上多下些功夫，比如我把外甲替换为汉白玉如何？一定艳惊四座！",
+                npc: 701278,
+                next: 51178332,
+            },
+            {
+                id: 51178331,
+                content: "是啊，我怎么没想到呢，如果当时我的应龙壹型可以给那些家伙唱首歌，说不定他们就乐颠颠地拍手叫好，也不会拆了它……",
+                npc: 701278,
+                next: 51178332,
+            },
+            {
+                id: 51178333,
+                content: "等到应龙贰型落地后，我一定第一个找你来看看！",
+                npc: 701278,
+            },
+            {
+                id: 51178334,
+                content: "怎么这么快就回来了，应龙贰型还没头绪呢！",
+                npc: 701278,
+            },
+        ],
+    },
+    {
+        id: 701279,
+        name: "香官皎皎",
+        camp: "NPC",
+        type: "Normal",
+        srId: 104503,
+        pos: [28151, -57462],
+        talks: [
+            {
+                id: 51178402,
+                content: "皎皎为何不能当香官？我偏要当这皎皎第一人！",
+                npc: 701279,
+                next: 51178403,
+            },
+            {
+                id: 51178403,
+                content: "（在你面前的这位皎皎双手叉腰，似乎在和谁较劲一般，气得面红耳赤。）",
+                next: 51178404,
+            },
+            {
+                id: 51178404,
+                content: "你你你！你看什么看！你也觉得我不能当香官？",
+                npc: 701279,
+                options: [
+                    {
+                        id: 51178405,
+                        content: "我没这么说，是你自己说的。",
+                        next: 51178406,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51178408,
+                        content: "挺好的啊，我没这么觉得。",
+                        next: 51178409,
+                        impr: [1041, "Empathy", 3],
+                    },
+                    {
+                        id: 51178412,
+                        content: "大头鱼还能当香官？",
+                        next: 51178413,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178406,
+                content: "分明就是有！你的眼神，你的行为，你嘴巴弯起的弧度，都在挑衅我！",
+                npc: 701279,
+                next: 51178407,
+            },
+            {
+                id: 51178409,
+                content: "真的吗？！看你飘忽不定的眼神，该不会是随便说些好听的话来哄我的吧？",
+                npc: 701279,
+                next: 51178410,
+            },
+            {
+                id: 51178413,
+                content: "骂谁大头鱼呢！",
+                npc: 701279,
+                next: 51178414,
+            },
+            {
+                id: 51178407,
+                content: "我只是在呼吸。",
+                npc: 100001,
+                next: 51178416,
+            },
+            {
+                id: 51178410,
+                content: "真的啊，我像在哄你吗？",
+                npc: 100001,
+                next: 51178411,
+            },
+            {
+                id: 51178414,
+                content: "谁应了谁就是大头鱼。",
+                npc: 100001,
+                next: 51178415,
+            },
+            {
+                id: 51178416,
+                content: "反正无论怎么样努力都要被质疑……我早就习惯了……",
+                npc: 701279,
+                next: 51178417,
+            },
+            {
+                id: 51178411,
+                content: "嗯……嗯……好吧，那我就相信你了！",
+                npc: 701279,
+                next: 51178416,
+            },
+            {
+                id: 51178415,
+                content: "哼！本香官和其他一触即炸的皎皎们可不一样，我可是经受过专业教育，这种小小的挑衅才不会放在眼里呢！",
+                npc: 701279,
+                next: 51178416,
+            },
+            {
+                id: 51178417,
+                content: "他们只看到我当上香官时的风风光光，怎么就不看我从最开始压根不认识华胥字，到现在可以对《香籍》倒背如流？",
+                npc: 701279,
+                next: 51178418,
+            },
+            {
+                id: 51178418,
+                content: "他们都说皎皎一族只要负责可爱就好了，可以被大个子们抱起来捏捏脸揉揉头发就好，但我不想成为这样的皎皎。",
+                npc: 701279,
+                next: 51178419,
+            },
+            {
+                id: 51178419,
+                content: "我觉得我应该要更特殊一些，大家看到我的时候想到的不是：啊，这是一个皎皎。",
+                npc: 701279,
+                next: 51178420,
+            },
+            {
+                id: 51178420,
+                content: "而是：快看呐，是那个很厉害的香官皎皎！",
+                npc: 701279,
+                options: [
+                    {
+                        id: 51178421,
+                        content: "我觉得你已经做到了。",
+                        next: 51178422,
+                    },
+                ],
+            },
+            {
+                id: 51178422,
+                content: "人们对你的香官身份产生质疑，不正是说明他们想起你的时候冒出的第一个身份是香官皎皎，而不是一位普通的皎皎吗？",
+                npc: 100001,
+                next: 51178423,
+            },
+            {
+                id: 51178423,
+                content: "剩下的，有关你能不能胜任这个职位的事情，不如就交给时间来证明吧。",
+                npc: 100001,
+                next: 51178424,
+            },
+            {
+                id: 51178424,
+                content: "你说得对。只要我做好自己的本职工作，那些闲言碎语的人迟早会意识到我有多厉害，我只要一直努力，一直向上走……",
+                npc: 701279,
+                next: 51178425,
+            },
+            {
+                id: 51178425,
+                content: "一定！我一定可以做到的！",
+                npc: 701279,
+                next: 51178426,
+            },
+            {
+                id: 51178426,
+                content: "（她的脸上扬起明媚而自信的笑容，比今天的阳光还要耀眼。）",
+            },
+            {
+                id: 51178427,
+                content: "愿你善根常驻……咦？是你~你回来看我啦~",
+                npc: 701279,
+            },
+        ],
+    },
+    {
+        id: 701280,
+        name: "因何生",
+        camp: "NPC",
+        type: "Normal",
+        srId: 105501,
+        pos: [19039, -589],
+        talks: [
+            {
+                id: 51178502,
+                content: "想起来了，我可都想起来了，这些往事，我可全都记着呢！",
+                npc: 701280,
+                next: 51178503,
+            },
+            {
+                id: 51178503,
+                content: "你……就是你，你快过来，趁着我还清醒，这事我要说给你听，不然在月光拐过墙头时，我可能就什么也想不起来了……",
+                npc: 701280,
+                next: 51178504,
+            },
+            {
+                id: 51178504,
+                content: "小娃儿，你愿意耽搁片刻，听老婆子我说说这个故事吗？",
+                npc: 701280,
+                options: [
+                    {
+                        id: 51178505,
+                        content: "我愿意。",
+                        next: 51178506,
+                        impr: [1041, "Empathy", 3],
+                    },
+                    {
+                        id: 51178507,
+                        content: "我的时间很宝贵。",
+                        next: 51178508,
+                        impr: [1041, "Benefit", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178506,
+                content: "好，太好了，我要抓紧……",
+                npc: 701280,
+                next: 51178511,
+            },
+            {
+                id: 51178508,
+                content: "不会耽误你太久的，毕竟时间久了，可能我也要忘了……",
+                npc: 701280,
+                options: [
+                    {
+                        id: 51178509,
+                        content: "没空。",
+                        next: 51178510,
+                    },
+                ],
+            },
+            {
+                id: 51178511,
+                content: "让我想想，这事要从哪里说起来呢……",
+                npc: 701280,
+                next: 51178512,
+            },
+            {
+                id: 51178510,
+                content: "是吗……那算了，只好等到下一位有缘人，下一位让我想起这些事的有缘人了……",
+                npc: 701280,
+            },
+            {
+                id: 51178512,
+                content: "这一片儿，以前都是一家的，那家正是皓京城里赫赫有名的首富——萧府。",
+                npc: 701280,
+                next: 51178513,
+            },
+            {
+                id: 51178513,
+                content:
+                    "我是府上的管事，自小就跟着老爷做事，老爷年轻时经商，攒下了万贯家财，平日里便喜欢收集些古玩书画，我便常年帮他跑东跑西，收集藏品。",
+                npc: 701280,
+                next: 51178514,
+            },
+            {
+                id: 51178514,
+                content: "本想这辈子便也就这样了，谁想到老爷竟老来得子，府里上下欢天喜地。",
+                npc: 701280,
+                next: 51178515,
+            },
+            {
+                id: 51178515,
+                content: "小公子年幼，但聪慧的很，老爷十分看重他，更是宠得无法无天，不爱读书那便不读，喜欢拿那些老爷的藏品当玩具那也随他。",
+                npc: 701280,
+                next: 51178516,
+            },
+            {
+                id: 51178516,
+                content: "谁曾想呢，小公子竟成了个纨绔性格，不把所有人看在眼里，还十分挥霍，花起府上的钱来眼也不眨。",
+                npc: 701280,
+                next: 51178517,
+            },
+            {
+                id: 51178517,
+                content: "我当时管着账房，几次向老爷劝阻，他却只摆摆手由着。",
+                npc: 701280,
+                next: 51178518,
+            },
+            {
+                id: 51178518,
+                content: "后来啊，老爷生意出现了问题，府上收入渐少，形势日益严峻。少爷还充耳不闻，整日花天酒地。",
+                npc: 701280,
+                next: 51178519,
+            },
+            {
+                id: 51178519,
+                content:
+                    "老爷心痛，却不好说什么，可能是为了寄托，也可能只是他心善，他从外接回来许多孩子，都是父母因意外离世后没人管的孤儿，养在府中当义子。",
+                npc: 701280,
+                next: 51178520,
+            },
+            {
+                id: 51178520,
+                content: "那时他已经很老了，坐在那腰也直不起来，眼神也浑浊起来，只在看到孩子们围在他身边叫爷爷时才冒出些光彩来。",
+                npc: 701280,
+                next: 51178521,
+            },
+            {
+                id: 51178521,
+                content: "没多久，老爷离世了，他嘱咐我葬礼一切从简，省下钱将这些苦命的孩子们拉扯长大，至于少爷……他没吩咐。",
+                npc: 701280,
+                next: 51178522,
+            },
+            {
+                id: 51178522,
+                content:
+                    "萧府的顶梁柱断了，少爷没那个本事管着家里的铺子，但各方的开销还在继续，我只能变卖府上房子，将偌大一个府邸拆成各个房子出售给他人。",
+                npc: 701280,
+                next: 51178523,
+            },
+            {
+                id: 51178523,
+                content: "那些孩子，可怜的孩子们，他们不知道发生了什么，只知道疼他们的爷爷不见了，吃的东西从顿顿好的变成了粗茶淡饭。",
+                npc: 701280,
+                next: 51178524,
+            },
+            {
+                id: 51178524,
+                content: "少爷没多久就离开了萧府，我不晓得他去哪里了，因我根本没那个闲心去管，那些孩子逐渐长大，我拉扯他们也不容易……",
+                npc: 701280,
+                next: 51178525,
+            },
+            {
+                id: 51178525,
+                content: "一直到那一日……那些孩子里最大的那位，十岁生日的时候……再过几年就可以出去做工的年纪。",
+                npc: 701280,
+                next: 51178526,
+            },
+            {
+                id: 51178526,
+                content:
+                    "我们都围在最后卖剩下的那间主屋里，我去买了米面和蛋，做了长寿面，少爷也赶了回来，他看起来十分憔悴，虽说我们也好不到哪去。",
+                npc: 701280,
+                next: 51178527,
+            },
+            {
+                id: 51178527,
+                content: "那些孩子，小时候都是健健康康的，可能是我没能好好喂养他们，各个长大后瘦骨嶙峋，动不动就晕倒。",
+                npc: 701280,
+                next: 51178528,
+            },
+            {
+                id: 51178528,
+                content: "我端了面出来，一个二个眼睛冒着光，小狼一样，哧溜哧溜吸口水。",
+                npc: 701280,
+                next: 51178529,
+            },
+            {
+                id: 51178529,
+                content: "那天晚上啊少爷回来了，带着一大篓鱼，鱼又多又大，也有好多种，我都记不太清。",
+                npc: 701280,
+                next: 51178530,
+            },
+            {
+                id: 51178530,
+                content: "老爷还在世的时候少爷就最喜欢钓鱼，但等他过世的后少爷就一直劳碌，就没怎么挥过杆，没曾想他这本事一直没丢。",
+                npc: 701280,
+                next: 51178531,
+            },
+            {
+                id: 51178531,
+                content: "全家欢天喜地把这些鱼给煮了，府上也没有盐巴，就白水煮了，但毕竟是少爷新钓的，竟是一点也没有腥气……",
+                npc: 701280,
+                next: 51178532,
+            },
+            {
+                id: 51178532,
+                content: "后来……后来发生了什么……啊……我想不起来了……发生了什么呢……",
+                npc: 701280,
+                options: [
+                    {
+                        id: 51178533,
+                        content: "（他说的话听起来有些耳熟，你隐约想起了……）",
+                        next: 51178535,
+                        imprCheck: [1041, "Wisdom", 40],
+                    },
+                ],
+            },
+            {
+                id: 51178535,
+                content: "我听说，华胥有一种鱼有剧毒……需要细心处理……否则……",
+                npc: 100001,
+                next: 51178536,
+            },
+            {
+                id: 51178536,
+                content: "…………！",
+                npc: 701280,
+                next: 51178537,
+            },
+            {
+                id: 51178537,
+                content: "是了，那时候我不知怎的胸闷，迷迷瞪瞪地晕过去了。昏迷前，我看见少爷和孩子们都歪七扭八地躺在周围的地上……",
+                npc: 701280,
+                next: 51178538,
+            },
+            {
+                id: 51178538,
+                content: "老爷……我没做到，我没做到啊……您让我照顾好的孩子们，我都没做到……",
+                npc: 701280,
+                next: 51178539,
+            },
+            {
+                id: 51178539,
+                content: "（你面前的无由生突然剧烈地抖动，看起来悲怆万分……无由生也会流泪吗？）",
+                next: 51178540,
+            },
+            {
+                id: 51178540,
+                content: "（片刻之后，它似乎平复了情绪。又如同初见时一般在原地徘徊着……）",
+                next: 51178541,
+            },
+            {
+                id: 51178541,
+                content: "啊……我想起来了，这些往事，我都想起来了！",
+                npc: 701280,
+                next: 51178542,
+            },
+            {
+                id: 51178542,
+                content: "你……就是你，你快过来，趁着我还清醒，这事我要说给你听，不然在月光拐过墙头时，我可能就什么也想不起来了……",
+                npc: 701280,
+                next: 51178543,
+            },
+            {
+                id: 51178543,
+                content: "这故事你已经说过一遍了。",
+                npc: 100001,
+                next: 51178544,
+            },
+            {
+                id: 51178544,
+                content: "说过了？我怎么想不起来了？已经说过了吗？我记得……我没……",
+                npc: 701280,
+                next: 51178545,
+            },
+            {
+                id: 51178545,
+                content: "………………再见。",
+                npc: 100001,
+                next: 51178546,
+            },
+            {
+                id: 51178546,
+                content: "说过了吗？老爷……为何突然想起这个名字？老爷是谁？",
+                npc: 701280,
+                next: 51178547,
+            },
+            {
+                id: 51178547,
+                content: "谁？我又是谁……我有愧于你啊……有愧于……谁？",
+                npc: 701280,
+            },
+            {
+                id: 51178548,
+                content: "我是谁？以前的那些事，我还记得吗？呜呜呜……",
+                npc: 701280,
+            },
+        ],
+    },
+    {
+        id: 701281,
+        name: "空庭老人",
+        camp: "NPC",
+        type: "Normal",
+        srId: 105201,
+        pos: [1742, 3657],
+        talks: [
+            {
+                id: 51178602,
+                content: "飘零四杰啊……那时候的意气风发，如今尽往矣……",
+                npc: 701281,
+                next: 51178603,
+            },
+            {
+                id: 51178603,
+                content:
+                    "在我们山外山老一辈人的眼里，他们好似还是来时那桀骜不驯的半大青年。未曾想到，十数年过去，如今的皓京城里，他们也成为了街头巷尾的传奇故事。",
+                npc: 701281,
+                next: 51178604,
+            },
+            {
+                id: 51178604,
+                content: "有空的话，再说与你们听。今天先回去做功课吧。",
+                npc: 701281,
+                next: 51178605,
+            },
+            {
+                id: 51178605,
+                content: "老爷爷好坏，回回都吊着我们，上次说的烛阴闹海的故事也是说到一半就赶我们走，分明是故意的。",
+                next: 51178606,
+            },
+            {
+                id: 51178606,
+                content:
+                    "噢哟，倒赖上我了，你可记得你们的好老师菡姐因着你们在功课里胡乱写我讲的传奇故事，课上到一半就要来我这儿要说法，我可惹不起！",
+                npc: 701281,
+                next: 51178607,
+            },
+            {
+                id: 51178607,
+                content: "略略略！我不管，你就是骗我们，除非明天我来的时候你给我吃饴糖，我就原谅你。",
+                next: 51178608,
+            },
+            {
+                id: 51178608,
+                content: "你这小鬼，是想从我这里骗饴糖吧！",
+                npc: 701281,
+                next: 51178609,
+            },
+            {
+                id: 51178609,
+                content: "不听不听，咱们说好了，明天我就来取饴糖！我先走了！",
+                next: 51178610,
+            },
+            {
+                id: 51178610,
+                content: "（顽劣的孩子嬉笑打闹着，张牙舞爪地跑开了。）",
+                next: 51178611,
+            },
+            {
+                id: 51178611,
+                content: "这孩子……",
+                npc: 701281,
+                next: 51178612,
+            },
+            {
+                id: 51178612,
+                content: "（老人这才注意到你，面上显出几分诧异。）",
+                next: 51178613,
+            },
+            {
+                id: 51178613,
+                content: "你是刚来的后生吗？看着有些面生……",
+                npc: 701281,
+                options: [
+                    {
+                        id: 51178614,
+                        content: "我是苏乙带来的客人。",
+                        next: 51178619,
+                        impr: [1041, "Morality", 3],
+                    },
+                    {
+                        id: 51178615,
+                        content: "你不知道吗，山外山请我来帮忙的。",
+                        next: 51178616,
+                        impr: [1041, "Benefit", 3],
+                    },
+                    {
+                        id: 51178617,
+                        content: "我是飘零四杰第五杰——人称狩月人之王的净界岛主{nickname}。",
+                        next: 51178618,
+                        impr: [1041, "Chaos", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178619,
+                content: "幸会幸会，不管怎么说，欢迎你来到山外山。",
+                npc: 701281,
+                next: 51178620,
+            },
+            {
+                id: 51178616,
+                content: "哦？还有这事？我确是不晓得，不过既然他们这么决定，想必你定是有几分过人之处。",
+                npc: 701281,
+                next: 51178619,
+            },
+            {
+                id: 51178618,
+                content: "哈哈，小友真会开玩笑，飘零四杰的时代已经过去啦，即使再有新人谱写故事，应该也不会选择如此古早的称号。",
+                npc: 701281,
+                next: 51178619,
+            },
+            {
+                id: 51178620,
+                content: "我刚才听到你和那些孩子们说起飘零四杰……",
+                npc: 100001,
+                next: 51178621,
+            },
+            {
+                id: 51178621,
+                content: "是啊，被你听到了。你也是因为好奇他们的事情才在老头子我这里留步的吗？",
+                npc: 701281,
+                next: 51178622,
+            },
+            {
+                id: 51178622,
+                content: "确实有兴趣。",
+                npc: 100001,
+                next: 51178623,
+            },
+            {
+                id: 51178623,
+                content: "嗯……只是我今天已经讲过一遍啦，想要再听一遍的话，总得拿些什么东西换才是，老头子我啊可不乐意白讲。",
+                npc: 701281,
+                options: [
+                    {
+                        id: 51178624,
+                        content: "我是你们山外山的贵客，了解一些基础情报也不行吗？",
+                        next: 51178627,
+                        impr: [1041, "Benefit", 3],
+                    },
+                    {
+                        id: 51178625,
+                        content: "一物换一物，你告诉我一个故事，我告诉你一个故事。",
+                        next: 51178627,
+                        impr: [1041, "Wisdom", 3],
+                    },
+                    {
+                        id: 51178626,
+                        content: "这听起来只是一些往事，不是什么有价值的情报吧。",
+                        next: 51178627,
+                        impr: [1041, "Benefit", 3],
+                    },
+                ],
+            },
+            {
+                id: 51178627,
+                content: "哈哈哈！开玩笑的！不要惊慌，只是我想看看小友会如何反应，方才出此下策。",
+                npc: 701281,
+                next: 51178628,
+            },
+            {
+                id: 51178628,
+                content: "既然这样，小友想了解谁的故事呢？先说好，那些大家都耳熟能详的我就不说了，我只说一些我觉得有趣的事。",
+                npc: 701281,
+                options: [
+                    {
+                        id: 51178629,
+                        content: "问问宴山亭。",
+                        next: 51178630,
+                    },
+                    {
+                        id: 51178634,
+                        content: "问问苏暮鹧。",
+                        next: 51178635,
+                    },
+                    {
+                        id: 51178640,
+                        content: "问问行香子。",
+                        next: 51178641,
+                    },
+                    {
+                        id: 51178646,
+                        content: "问问文氏姐妹。",
+                        next: 51178647,
+                    },
+                ],
+            },
+            {
+                id: 51178630,
+                content: "荡涤千山——宴山亭，名字很潇洒吧？那家伙艺高人胆大，喜欢耍点剑法，还爱显摆，总喜欢收一个又一个徒弟。",
+                npc: 701281,
+                next: 51178631,
+            },
+            {
+                id: 51178635,
+                content:
+                    "一燕平川——苏暮鹧，苏乙那丫头的姑姑。其实她没什么好说的，或者说，苏乙现在什么样子，当年的苏暮鹧就是什么样子，简直一个模子印出来的。",
+                npc: 701281,
+                next: 51178636,
+            },
+            {
+                id: 51178641,
+                content: "哎呀那个老混蛋！我可好久没见到他了！那家伙，打铁玩火一把好手！",
+                npc: 701281,
+                next: 51178642,
+            },
+            {
+                id: 51178647,
+                content: "那两个娃娃啊……是可怜丫头，长得一模一样，伫在你面前，不仔细看是完全分不出来的。",
+                npc: 701281,
+                next: 51178648,
+            },
+            {
+                id: 51178631,
+                content: "你知道他以前是个香官吧？是不是下意识里会觉得，华胥的香官便是成熟稳重的家伙？他嘛，简直是成熟稳重的反义词！",
+                npc: 701281,
+                next: 51178632,
+            },
+            {
+                id: 51178636,
+                content:
+                    "其实我不太了解她，她大多数时间都在研究机傀术，后面也因为一些原因早早离世……但山外山的人们都知晓她与宴山亭的关系，并且以为他们会早早……",
+                npc: 701281,
+                next: 51178637,
+            },
+            {
+                id: 51178642,
+                content: "他是我见过最无聊的人了，之前的山外山，家家户户都用灶火烧饭，有时柴火受潮，火头就不旺。火头不旺，烧出的饭便不香。",
+                npc: 701281,
+                next: 51178643,
+            },
+            {
+                id: 51178648,
+                content: "其实她俩乖的很，年纪轻但心里藏着事，所以大多数时间都沉默寡言。",
+                npc: 701281,
+                next: 51178649,
+            },
+            {
+                id: 51178632,
+                content: "他有次聊发少年狂，不知为何用剑挑下了树上的蜂窝，引得那马蜂追着他跑了三里地，鼻青脸肿地回来找我取药。",
+                npc: 701281,
+                next: 51178633,
+            },
+            {
+                id: 51178637,
+                content: "算啦……不说这个。苏暮鹧嘛……我记得她特别爱吃酸食，就是皓京城里那些卖蜜饯的小摊，她回回都要去把最酸的那些果干买空。",
+                npc: 701281,
+                next: 51178638,
+            },
+            {
+                id: 51178643,
+                content: "他就专门盯着人家火头不旺的锅沿，假装从门口路过，等人家恭恭敬敬请他去帮忙点火，再客客气气请他吃上一顿晚饭。",
+                npc: 701281,
+                next: 51178644,
+            },
+            {
+                id: 51178649,
+                content: "她们难得展露出女儿家情态，是在绣东西的时候。",
+                npc: 701281,
+                next: 51178650,
+            },
+            {
+                id: 51178633,
+                content: "怎么样，是不是和你印象里的宴山亭大相径庭？",
+                npc: 701281,
+                next: 51178628,
+            },
+            {
+                id: 51178638,
+                content: "然后就一边对着她那堆叠如山的设计图纸，一边像是没有味觉一样把酸到掉牙的果干往嘴里塞。",
+                npc: 701281,
+                next: 51178639,
+            },
+            {
+                id: 51178644,
+                content: "至于为什么他点火就旺其他人不行，这自然是他自己的功夫，但他非要说是自己到处行善积德，一颗赤子之心的缘故。",
+                npc: 701281,
+                next: 51178645,
+            },
+            {
+                id: 51178650,
+                content:
+                    "我们这的大多数人，手可以搓机傀可以拿利器，但捧起绣花针那就傻了眼，只能干看着发愣。但她俩一来，却是将大多数针线活都包揽了过去。",
+                npc: 701281,
+                next: 51178651,
+            },
+            {
+                id: 51178639,
+                content: "据说是这样可以有一些提神醒脑的效果？我非她，焉知她之乐呢？",
+                npc: 701281,
+                next: 51178628,
+            },
+            {
+                id: 51178645,
+                content: "喜欢贫嘴，带点自吹自擂，这就是白焰丹曦——行香子。",
+                npc: 701281,
+                next: 51178628,
+            },
+            {
+                id: 51178651,
+                content:
+                    "有段时间，山外山人人都用上了绣着小花的手绢，纳着鸳鸯的鞋垫，我们就这样接受着她们俩默默的善意，用力所能及的东西回馈她们。",
+                npc: 701281,
+                next: 51178652,
+            },
+            {
+                id: 51178652,
+                content: "只是可惜……只是可惜啊……",
+                npc: 701281,
+                next: 51178628,
+            },
+        ],
+    },
+    {
+        id: 701282,
+        name: "孩童",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
         id: 790001,
         name: "米娅",
         camp: "NPC",
@@ -42288,6 +46313,8 @@ export const npcData: NPC[] = [
         name: "詹姆斯",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [1227, -11269],
         talks: [
             {
                 id: 51001332,
@@ -42313,6 +46340,8 @@ export const npcData: NPC[] = [
         name: "杰克",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [-511, -8859],
         talks: [
             {
                 id: 51001335,
@@ -42338,6 +46367,8 @@ export const npcData: NPC[] = [
         name: "艾米莉",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [-259, -9336],
         talks: [
             {
                 id: 51001338,
@@ -43527,12 +47558,16 @@ export const npcData: NPC[] = [
         name: "傲气的机枢派师傅",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [13918, -35055],
     },
     {
         id: 840003,
         name: "头疼的店员",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [10199, -6370],
     },
     {
         id: 840004,
@@ -43545,12 +47580,16 @@ export const npcData: NPC[] = [
         name: "馋嘴的孩子",
         camp: "NPC",
         type: "Normal",
+        srId: 104501,
+        pos: [43560, -38892],
     },
     {
         id: 840006,
         name: "热情的妇人",
         camp: "NPC",
         type: "Normal",
+        srId: 104502,
+        pos: [13807, -27580],
     },
     {
         id: 888888,
@@ -43570,6 +47609,8 @@ export const npcData: NPC[] = [
         camp: "NPC",
         type: "Normal",
         icon: "TieJiangJJ",
+        srId: 210101,
+        pos: [-383, 2829],
         talks: [
             {
                 id: 90010201,
@@ -43589,6 +47630,8 @@ export const npcData: NPC[] = [
         name: "侍者皎皎",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [547, 2861],
         talks: [
             {
                 id: 90020201,
@@ -45594,6 +49637,8 @@ export const npcData: NPC[] = [
         name: "中年男",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-15782, -8746],
         talks: [
             {
                 id: 741147055,
@@ -45932,6 +49977,8 @@ export const npcData: NPC[] = [
         name: "青年男",
         camp: "NPC",
         type: "Normal",
+        srId: 101107,
+        pos: [1260, -10877],
         talks: [
             {
                 id: 741147109,
@@ -46535,6 +50582,8 @@ export const npcData: NPC[] = [
         name: "阿瓦尔",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [630, 7268],
         talks: [
             {
                 id: 741147190,
@@ -46699,6 +50748,8 @@ export const npcData: NPC[] = [
         name: "维吉尔",
         camp: "NPC",
         type: "Normal",
+        srId: 101901,
+        pos: [23006, 9824],
         talks: [
             {
                 id: 741147215,
@@ -47184,6 +51235,8 @@ export const npcData: NPC[] = [
         name: "卡嘉",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [938, 7185],
         talks: [
             {
                 id: 741147290,
@@ -47245,6 +51298,8 @@ export const npcData: NPC[] = [
         name: "兰迪",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [67, 5081],
         talks: [
             {
                 id: 741147299,
@@ -47837,6 +51892,8 @@ export const npcData: NPC[] = [
         name: "琳恩",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [9, 5079],
         talks: [
             {
                 id: 741147420,
@@ -48718,6 +52775,8 @@ export const npcData: NPC[] = [
         name: "耶尔",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [350, 2833],
         talks: [
             {
                 id: 741147901,
@@ -48893,6 +52952,8 @@ export const npcData: NPC[] = [
         name: "松露",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [340, 3052],
         talks: [
             {
                 id: 741148001,
@@ -49068,6 +53129,8 @@ export const npcData: NPC[] = [
         name: "塔比瑟",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [466, 2475],
         talks: [
             {
                 id: 741148101,
@@ -49243,6 +53306,8 @@ export const npcData: NPC[] = [
         name: "卡米拉",
         camp: "NPC",
         type: "Normal",
+        srId: 101101,
+        pos: [-16120, -5434],
         talks: [
             {
                 id: 741148201,
@@ -49449,11 +53514,13 @@ export const npcData: NPC[] = [
                         id: 7411482301,
                         content: "选项一",
                         next: 741148231,
+                        imprCheck: [1011, "Benefit", 40],
                     },
                     {
                         id: 7411482302,
                         content: "选项二",
                         next: 741148231,
+                        imprCheck: [1011, "Morality", 40],
                     },
                 ],
             },
@@ -49603,11 +53670,13 @@ export const npcData: NPC[] = [
                         id: 7411482301,
                         content: "选项一",
                         next: 741148231,
+                        imprCheck: [1011, "Benefit", 40],
                     },
                     {
                         id: 7411482302,
                         content: "选项二",
                         next: 741148231,
+                        imprCheck: [1011, "Morality", 40],
                     },
                 ],
             },
@@ -49990,6 +54059,8 @@ export const npcData: NPC[] = [
         name: "丽蓓卡",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [328, 3196],
         talks: [
             {
                 id: 741148501,
@@ -50340,6 +54411,8 @@ export const npcData: NPC[] = [
         name: "幻景",
         camp: "NPC",
         type: "Normal",
+        srId: 102102,
+        pos: [-10847, -21542],
         talks: [
             {
                 id: 741148801,
@@ -50690,6 +54763,8 @@ export const npcData: NPC[] = [
         name: "希尔妲",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [31, 5110],
         talks: [
             {
                 id: 741149001,
@@ -50865,6 +54940,8 @@ export const npcData: NPC[] = [
         name: "刻舟",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [-224, 4952],
         talks: [
             {
                 id: 741149101,
@@ -51040,6 +55117,8 @@ export const npcData: NPC[] = [
         name: "松露",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [340, 3052],
         talks: [
             {
                 id: 741149201,
@@ -51565,6 +55644,8 @@ export const npcData: NPC[] = [
         name: "妮弗尔夫人",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [-12, 5126],
         talks: [
             {
                 id: 741149501,
@@ -51941,6 +56022,8 @@ export const npcData: NPC[] = [
         name: "Wuyou01",
         camp: "NPC",
         type: "Normal",
+        srId: 105001,
+        pos: [28300, -19750],
         talks: [
             {
                 id: 760000101,

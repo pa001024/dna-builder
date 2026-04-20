@@ -86,7 +86,7 @@ const fishSpots = computed(() => {
             <SRouterLink :to="`/db/fish/${fish.id}`" class="text-lg font-bold link link-primary">
                 {{ fish.name }}
             </SRouterLink>
-            <span class="text-xs text-base-content/70">ID: {{ fish.id }}</span>
+            <CopyID :id="fish.id" />
             <div class="text-sm text-base-content/70 flex items-center gap-2">
                 <span class="px-1.5 py-0.5 rounded" :class="getRarityColor(fish.type)">
                     {{ getRarityName(fish.type) }}

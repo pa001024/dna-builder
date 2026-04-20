@@ -1,26 +1,34 @@
 #!/usr/bin/env bun
 
-import { readFile, writeFile } from "node:fs/promises"
+import { readdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import * as ts from "typescript"
 
 const SOURCE_ROOT = path.resolve("..", "DuetNightAbyssData2", "final", "i18n")
+const OUT_ROOT = path.resolve("..", "DuetNightAbyssData2", "out")
 const TARGET_DIR = path.resolve("src", "data", "d")
 const LOCALES = ["cn", "en", "fr", "jp", "kr", "tc"] as const
 type Locale = (typeof LOCALES)[number]
 
 type Mapping = {
-    source: string
+    source: string | (() => Promise<GeneratedReplacement[]> | GeneratedReplacement[])
     targetStem: string
     targetVar: string
     locales?: readonly string[]
     targetVars?: Partial<Record<Locale, string>>
 }
 
+type GeneratedReplacement = {
+    targetVar: string
+    text: string
+}
+
 const MAPPINGS: Mapping[] = [
     { source: "AbyssBuff", targetStem: "abyss", targetVar: "abyssBuffs", locales: ["cn"] },
     { source: "AbyssDungeon", targetStem: "abyss", targetVar: "abyssDungeons", locales: ["cn"] },
     { source: "Achievement", targetStem: "achievement", targetVar: "t", locales: ["cn"] },
+    { source: "BackpackPuzzleItem", targetStem: "backpackpuzzle", targetVar: "backpackPuzzleItems", locales: ["cn"] },
+    { source: "BackpackPuzzleLevel", targetStem: "backpackpuzzle", targetVar: "backpackPuzzleLevels", locales: ["cn"] },
     { source: "BookSeriesArchive", targetStem: "book", targetVar: "booksData", locales: ["cn"] },
     { source: "Char", targetStem: "char", targetVar: "t", locales: ["cn"] },
     { source: "CharAccessory", targetStem: "accessory", targetVar: "charAccessoryData", locales: ["cn"] },
@@ -50,7 +58,7 @@ const MAPPINGS: Mapping[] = [
     },
     { source: "Draft", targetStem: "draft", targetVar: "t", locales: ["cn"] },
     { source: "Dungeon", targetStem: "dungeon", targetVar: "dungeonsData", locales: ["cn"] },
-    { source: "DynQuest", targetStem: "dynquest", targetVar: "t", locales: ["cn"] },
+    { source: "Dispatch", targetStem: "dynquest", targetVar: "t", locales: ["cn"] },
     { source: "Cutoff", targetStem: "cutoff", targetVar: "cutoffData", locales: ["cn"] },
     { source: "Event", targetStem: "event", targetVar: "eventData", locales: ["cn"] },
     { source: "Fish", targetStem: "fish", targetVar: "fishs", locales: ["cn"] },
@@ -108,6 +116,85 @@ const MAPPINGS: Mapping[] = [
     { source: "Weapon", targetStem: "weapon", targetVar: "t", locales: ["cn"] },
     { source: "WeaponAccessory", targetStem: "accessory", targetVar: "weaponAccessoryData", locales: ["cn"] },
     { source: "WeaponSkin", targetStem: "accessory", targetVar: "weaponSkinData", locales: ["cn"] },
+    {
+        source: async () => {
+            const { seasonText, levelText } = await loadAbyssOutTables(OUT_ROOT)
+            const seasons = JSON.parse(seasonText) as Record<string, AbyssSeasonRow>
+            const levels = JSON.parse(levelText) as Record<string, AbyssLevelRow>
+
+            const seasonRows = Object.values(seasons)
+                .filter(row => row.AbyssType === 3)
+                .sort((a, b) => a.AbyssStartTime - b.AbyssStartTime)
+
+            if (!seasonRows.length) {
+                throw new Error("没有找到不朽剧目赛季数据")
+            }
+
+            const rules: Record<number, { abyssId: number; levelIds: number[]; initLevels: number[]; levelAddOn: number }> = {}
+            for (const season of seasonRows) {
+                const levelIds = season.AbyssLevelId
+                const levelRows = levelIds.map(levelId => {
+                    const levelRow = levels[String(levelId)]
+                    if (!levelRow) {
+                        throw new Error(`赛季 ${season.AbyssSeasonId} 找不到 AbyssLevel[${levelId}]`)
+                    }
+                    return levelRow
+                })
+                const levelAddOns = [...new Set(levelRows.map(row => row.LevelAddOn ?? 0))]
+                if (levelAddOns.length !== 1) {
+                    throw new Error(`赛季 ${season.AbyssSeasonId} 的 LevelAddOn 不一致: ${levelAddOns.join(",")}`)
+                }
+
+                rules[season.AbyssSeasonId] = {
+                    abyssId: season.AbyssId,
+                    levelIds: [...levelIds],
+                    initLevels: levelRows.map(row => row.InitLevel),
+                    levelAddOn: levelAddOns[0],
+                }
+            }
+
+            const defaultSeasonId = seasonRows[seasonRows.length - 1].AbyssSeasonId
+            return [
+                {
+                    targetVar: "immortalMonsterLevelRules",
+                    text: formatTsValue(rules, 0),
+                },
+                {
+                    targetVar: "defaultImmortalSeasonId",
+                    text: String(defaultSeasonId),
+                },
+            ]
+        },
+        targetStem: "abyss",
+        targetVar: "immortalMonsterLevelRules",
+    },
+    {
+        source: async () => {
+            const sourceRoot = OUT_ROOT
+            const [costRuleText, itemText, poolText] = await Promise.all([
+                readFile(path.join(sourceRoot, "LimitedPrizeCostRule.json"), "utf8"),
+                readFile(path.join(sourceRoot, "LimitedPrizeItem.json"), "utf8"),
+                readFile(path.join(sourceRoot, "LimitedPrizePool.json"), "utf8"),
+            ])
+
+            return [
+                {
+                    targetVar: "limitedPrizeCostRules",
+                    text: formatTsValue(JSON.parse(costRuleText), 0),
+                },
+                {
+                    targetVar: "limitedPrizeItems",
+                    text: formatTsValue(JSON.parse(itemText), 0),
+                },
+                {
+                    targetVar: "limitedPrizePools",
+                    text: formatTsValue(JSON.parse(poolText), 0),
+                },
+            ]
+        },
+        targetStem: "limitedprize",
+        targetVar: "limitedPrizeCostRules",
+    },
 ]
 
 const SKIPPED_SOURCES = [
@@ -218,6 +305,27 @@ function findReplacementSpan(sourceFile: ts.SourceFile, targetVar: string): { st
 }
 
 /**
+ * 根据变量名定位变量初始化表达式区间。
+ */
+function findVariableInitializerSpan(sourceFile: ts.SourceFile, targetVar: string): { start: number; end: number } {
+    for (const statement of sourceFile.statements) {
+        if (!ts.isVariableStatement(statement)) {
+            continue
+        }
+        for (const declaration of statement.declarationList.declarations) {
+            if (!ts.isIdentifier(declaration.name) || declaration.name.text !== targetVar || !declaration.initializer) {
+                continue
+            }
+            return {
+                start: declaration.initializer.getStart(sourceFile),
+                end: declaration.initializer.getEnd(),
+            }
+        }
+    }
+    throw new Error(`在 ${sourceFile.fileName} 中找不到变量 ${targetVar}`)
+}
+
+/**
  * 将单个目标文件中的多个数组替换应用到文本上。
  */
 function applyReplacements(fileText: string, replacements: Array<{ start: number; end: number; text: string }>): string {
@@ -228,12 +336,106 @@ function applyReplacements(fileText: string, replacements: Array<{ start: number
     return result
 }
 
+type AbyssSeasonRow = {
+    AbyssEndTime: number
+    AbyssId: number
+    AbyssLevelId: number[]
+    AbyssSeasonId: number
+    AbyssStartTime: number
+    AbyssType: number
+}
+
+type AbyssLevelRow = {
+    AbyssType: number
+    InitLevel: number
+    LevelAddOn?: number
+}
+
+/**
+ * 从 out 目录自动识别不朽剧目赛季和等级表文件。
+ * @param sourceRoot out 目录。
+ * @returns 赛季表与等级表内容。
+ */
+async function loadAbyssOutTables(sourceRoot: string): Promise<{ seasonText: string; levelText: string }> {
+    const entries = await readdir(sourceRoot, { withFileTypes: true })
+    let seasonText: string | null = null
+    let levelText: string | null = null
+
+    for (const entry of entries) {
+        if (!entry.isFile() || !entry.name.endsWith(".json")) {
+            continue
+        }
+
+        const fileText = await readFile(path.join(sourceRoot, entry.name), "utf8")
+        let parsed: Record<string, unknown>
+        try {
+            parsed = JSON.parse(fileText) as Record<string, unknown>
+        } catch {
+            continue
+        }
+
+        const rows = Object.values(parsed)
+        if (!seasonText && rows.some(row => isAbyssSeasonRow(row))) {
+            seasonText = fileText
+        }
+        if (!levelText && rows.some(row => isAbyssLevelRow(row))) {
+            levelText = fileText
+        }
+
+        if (seasonText && levelText) {
+            break
+        }
+    }
+
+    if (!seasonText || !levelText) {
+        throw new Error(`无法在 ${sourceRoot} 中自动识别 AbyssSeason/AbyssLevel`)
+    }
+
+    return { seasonText, levelText }
+}
+
+/**
+ * 判断是否为 AbyssSeason 行。
+ * @param value 待判断的值。
+ * @returns 是否匹配。
+ */
+function isAbyssSeasonRow(value: unknown): value is AbyssSeasonRow {
+    if (!value || typeof value !== "object") {
+        return false
+    }
+
+    const row = value as Record<string, unknown>
+    return (
+        typeof row.AbyssSeasonId === "number" &&
+        typeof row.AbyssId === "number" &&
+        typeof row.AbyssType === "number" &&
+        Array.isArray(row.AbyssLevelId)
+    )
+}
+
+/**
+ * 判断是否为 AbyssLevel 行。
+ * @param value 待判断的值。
+ * @returns 是否匹配。
+ */
+function isAbyssLevelRow(value: unknown): value is AbyssLevelRow {
+    if (!value || typeof value !== "object") {
+        return false
+    }
+
+    const row = value as Record<string, unknown>
+    return typeof row.InitLevel === "number" && typeof row.AbyssType === "number" && "LevelAddOn" in row
+}
+
 /**
  * 执行导入。
  */
 async function main() {
     const grouped = new Map<string, Mapping[]>()
     for (const mapping of MAPPINGS) {
+        if (typeof mapping.source === "function") {
+            continue
+        }
         const list = grouped.get(mapping.targetStem) ?? []
         list.push(mapping)
         grouped.set(mapping.targetStem, list)
@@ -282,6 +484,35 @@ async function main() {
                 await writeFile(filePath, nextText, "utf-8")
                 updatedFiles.push(path.relative(process.cwd(), filePath))
             }
+        }
+    }
+
+    for (const mapping of MAPPINGS) {
+        if (typeof mapping.source !== "function") {
+            continue
+        }
+
+        const targetFile = path.join(TARGET_DIR, `${mapping.targetStem}.data.ts`)
+        const originalText = await readFile(targetFile, "utf-8")
+        const sourceFile = ts.createSourceFile(targetFile, originalText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+        const generatedReplacements = await mapping.source()
+        const replacements = generatedReplacements.map(replacement => {
+            const span = findVariableInitializerSpan(sourceFile, replacement.targetVar)
+            return {
+                start: span.start,
+                end: span.end,
+                text: replacement.text,
+            }
+        })
+
+        if (replacements.length === 0) {
+            continue
+        }
+
+        const nextText = applyReplacements(originalText, replacements)
+        if (nextText !== originalText) {
+            await writeFile(targetFile, nextText, "utf-8")
+            updatedFiles.push(path.relative(process.cwd(), targetFile))
         }
     }
 

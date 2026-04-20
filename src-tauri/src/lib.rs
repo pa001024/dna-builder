@@ -16,6 +16,8 @@ use tauri::{Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 use zip::ZipArchive;
 mod util;
 
+use crate::submodules::{repak_tools, win};
+
 // 全局HTTP客户端，用于复用连接
 lazy_static! {
     static ref HTTP_CLIENT: Arc<reqwest::Client> = Arc::new(
@@ -124,6 +126,14 @@ struct CloudGamePageLoadPayload {
 struct CloudGameBridgeEventPayload {
     event_type: String,
     payload: Option<serde_json::Value>,
+}
+
+/// 窗口样式参数。
+#[derive(Debug, Clone, Deserialize)]
+#[serde(untagged)]
+enum WindowStyleArg {
+    Number(i32),
+    Text(String),
 }
 
 // #[macro_use]
@@ -880,12 +890,6 @@ fn import_pic(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn predict_font_ocr(image_path: String) -> Result<submodules::font_ocr::FontOcrPrediction, String> {
-    let path = PathBuf::from(image_path);
-    submodules::font_ocr::predict_font_ocr(path.as_path(), true)
-}
-
-#[tauri::command]
 fn get_game_install() -> String {
     #[cfg(target_os = "windows")]
     {
@@ -1210,6 +1214,50 @@ async fn write_text_file(file_path: String, content: String) -> Result<String, S
 
     fs::write(path, content).map_err(|e| format!("写入文件失败: {}", e))?;
     Ok(format!("文件已保存: {}", file_path))
+}
+
+/// 递归枚举目录中的所有 `.pak` 文件。
+#[tauri::command]
+async fn enumerate_pak_files(
+    root_path: String,
+    aes_key: Option<String>,
+) -> Result<Vec<String>, String> {
+    repak_tools::enumerate_pak_files(Path::new(&root_path), aes_key.as_deref())
+}
+
+/// 列出多个 pak 文件内的文件列表。
+#[tauri::command]
+async fn list_pak_files(
+    pak_paths: Vec<String>,
+    aes_key: Option<String>,
+) -> Result<Vec<repak_tools::PakFileListResult>, String> {
+    repak_tools::list_pak_files(&pak_paths, aes_key.as_deref())
+}
+
+/// 导出指定 pak 内的文件，并将 Lua 字节码反编译后直接落盘为 `.lua`。
+#[tauri::command]
+async fn export_pak_files(
+    pak_files: std::collections::BTreeMap<String, Vec<String>>,
+    aes_key: Option<String>,
+    target_path: String,
+) -> Result<Vec<repak_tools::PakExportResult>, String> {
+    repak_tools::export_pak_files(&pak_files, aes_key.as_deref(), Path::new(&target_path))
+}
+
+/// 使用 unluac 反编译 Lua 字节码文件。
+#[tauri::command]
+async fn decompile_lua_bytecode_files(
+    input_files: Vec<String>,
+    source_root: String,
+    unluac_path: String,
+    output_dir: String,
+) -> Result<repak_tools::LuaDecompileBatchResult, String> {
+    repak_tools::decompile_lua_bytecode_files(
+        &input_files,
+        Path::new(&source_root),
+        Path::new(&unluac_path),
+        Path::new(&output_dir),
+    )
 }
 
 /// 获取文档目录路径
@@ -2042,10 +2090,18 @@ async fn rename_file(old_path: String, new_path: String) -> Result<String, Strin
     Ok(format!("文件已重命名: {} -> {}", old_path, new_path))
 }
 
-/// 删除文件（移动到回收站）
+/// 删除文件。
 #[tauri::command]
-async fn delete_file(file_path: String) -> Result<String, String> {
+async fn delete_file(file_path: String, force: Option<bool>) -> Result<String, String> {
     let path = Path::new(&file_path);
+
+    if force.unwrap_or(false) {
+        if !path.exists() {
+            return Ok(format!("文件不存在: {}", file_path));
+        }
+        fs::remove_file(path).map_err(|e| format!("删除文件失败: {}", e))?;
+        return Ok(format!("文件已删除: {}", file_path));
+    }
 
     if !path.exists() {
         return Err(format!("文件不存在: {}", file_path));
@@ -2110,6 +2166,21 @@ async fn run_script(script_path: String, app_handle: tauri::AppHandle) -> Result
         Ok(result) => Ok(result),
         Err(e) => Err(format!("脚本执行失败: {}", e)),
     }
+}
+
+#[tauri::command]
+async fn exec_script(
+    script: String,
+    scope: Option<String>,
+    timeout_ms: Option<u64>,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
+    use submodules::script::exec_script_with_tauri_console;
+    let result = exec_script_with_tauri_console(script, scope, app_handle)
+        .await
+        .map_err(|e| format!("临时脚本执行失败: {}", e))?;
+    let _ = timeout_ms;
+    Ok(result.result)
 }
 
 /// CLI 入口：执行指定脚本文件。
@@ -2741,6 +2812,36 @@ fn eval_cloudgame_window(app_handle: tauri::AppHandle, script: String) -> Result
         .map_err(|error| format!("执行云游戏脚本失败: {error}"))
 }
 
+/// 修改指定窗口样式。
+#[tauri::command]
+fn set_window_style(
+    hwnd: isize,
+    style: WindowStyleArg,
+    ex_style: Option<i32>,
+) -> Result<(), String> {
+    let hwnd = windows::Win32::Foundation::HWND(hwnd as *mut std::ffi::c_void);
+    match style {
+        WindowStyleArg::Number(style) => {
+            win::set_window_style(hwnd, style, ex_style).map_err(|error| error.to_string())
+        }
+        WindowStyleArg::Text(expression) => {
+            if ex_style.is_some() {
+                return Err("setWindowStyle 传入字符串样式时不允许提供第三个参数".to_string());
+            }
+            let (style, ex_style) = win::apply_window_style_expression(hwnd, &expression)?;
+            win::set_window_style(hwnd, style, Some(ex_style)).map_err(|error| error.to_string())
+        }
+    }
+}
+
+/// 根据进程名获取窗口句柄。
+#[tauri::command]
+fn get_window_by_process_name(process_name: String) -> Result<isize, String> {
+    win::get_window_by_process_name(&process_name)
+        .map(|hwnd| hwnd.0 as isize)
+        .ok_or_else(|| format!("未找到进程对应窗口: {process_name}"))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut app = tauri::Builder::default()
@@ -2828,12 +2929,15 @@ pub fn run() {
         import_mod,
         enable_mod,
         import_pic,
-        predict_font_ocr,
         fetch,
         get_local_qq,
         list_script_files,
         read_text_file,
         write_text_file,
+        enumerate_pak_files,
+        list_pak_files,
+        export_pak_files,
+        decompile_lua_bytecode_files,
         export_binary_file,
         start_heartbeat,
         stop_heartbeat,
@@ -2844,6 +2948,7 @@ pub fn run() {
         get_file_hash,
         cleanup_temp_dir,
         run_script,
+        exec_script,
         resolve_script_config_request,
         resolve_script_help_request,
         stop_script,
@@ -2871,6 +2976,8 @@ pub fn run() {
         navigate_cloudgame_window,
         dispatch_cloudgame_command,
         eval_cloudgame_window,
+        set_window_style,
+        get_window_by_process_name,
         get_documents_dir,
         rename_file,
         delete_file,

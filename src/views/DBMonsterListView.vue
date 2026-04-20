@@ -6,8 +6,9 @@ import { LeveledMonster, monsterMap } from "@/data"
 import { monsterTagData } from "@/data/d/monstertag.data"
 import monsterData, { Faction } from "../data/d/monster.data"
 import { getMonsterTagGroupByMonster, monsterTagGroups } from "../utils/monster-tag-utils"
-import { getMonsterType } from "../utils/monster-utils"
+import { getMonsterListRarity } from "../utils/monster-utils"
 import { matchPinyin } from "../utils/pinyin-utils"
+import { getRarityGradientClass } from "../utils/rarity-utils"
 
 type MonsterListType = "allMonster" | "normalMonster" | "commanderMonster" | "monsterTag" | "monster"
 type NormalizedMonsterListType = Exclude<MonsterListType, "monster">
@@ -254,7 +255,10 @@ useInitialScrollToSelectedItem()
 
                 <!-- 列表 -->
                 <ScrollArea class="flex-1">
-                    <div class="p-2 space-y-2">
+                    <div
+                        class="p-2 grid gap-2"
+                        :class="{ 'grid-cols-[repeat(auto-fill,minmax(120px,1fr))]': normalizedSelectedType !== 'monsterTag' }"
+                    >
                         <template v-if="normalizedSelectedType !== 'monsterTag'">
                             <div
                                 v-for="monster in filteredMonsters"
@@ -263,30 +267,22 @@ useInitialScrollToSelectedItem()
                                 :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedMonsterId === monster.id }"
                                 @click="selectMonster(monster.id)"
                             >
-                                <div class="flex items-start justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <img :src="LeveledMonster.url(monster.icon)" alt="怪物图标" class="w-8 h-8 rounded" />
-                                        <div>
-                                            <div class="font-medium flex gap-2 items-center">
-                                                {{ monster.n }}
-                                            </div>
-                                            <div class="text-xs opacity-70 mt-1">
-                                                {{ $t(getFactionName(monster.f)) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div v-if="monster.t" class="flex flex-col items-end gap-1">
-                                        <span class="text-xs px-2 py-0.5 rounded" :class="getMonsterType(monster.t).color + ' text-white'">
-                                            {{ getMonsterType(monster.t).label }}
-                                        </span>
+                                <div class="flex flex-col items-center gap-2 text-center">
+                                    <ImageFallback
+                                        :src="LeveledMonster.url(monster.icon)"
+                                        :alt="monster.n"
+                                        class="w-14 h-14 rounded shrink-0 bg-linear-15"
+                                        :class="getRarityGradientClass(getMonsterListRarity(monster.t))"
+                                    >
+                                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="monster.n" class="w-14 h-14 rounded shrink-0" />
+                                    </ImageFallback>
+                                    <div class="min-w-0 w-full">
+                                        <div class="font-medium truncate">{{ monster.n }}</div>
+                                        <div class="text-xs opacity-70 mt-1">{{ $t(getFactionName(monster.f)) }}</div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                    <span>HP: {{ monster.hp }}</span>
-                                    <span>ATK: {{ monster.atk }}</span>
-                                    <span>DEF: {{ monster.def }}</span>
-                                    <span v-if="monster.es">ES: {{ monster.es }}</span>
-                                    <span class="ml-auto">ID: {{ monster.id }}</span>
+                                <div class="mt-1 text-xs opacity-70 space-y-1">
+                                    <div class="flex items-center justify-center gap-2">ID {{ monster.id }}</div>
                                 </div>
                             </div>
                         </template>

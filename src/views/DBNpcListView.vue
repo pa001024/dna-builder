@@ -532,7 +532,7 @@ useInitialScrollToSelectedItem()
             </div>
 
             <ScrollArea v-if="selectedNpc" class="flex-2">
-                <DBNpcDetailItem :npc="selectedNpc" />
+                <DBNpcDetailItem :key="selectedNpc.id" :npc="selectedNpc" />
             </ScrollArea>
         </div>
     </div>

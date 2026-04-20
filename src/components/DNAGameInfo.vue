@@ -598,7 +598,7 @@ async function generateScreenshot() {
                     <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
                         <DNAWeaponItem
                             v-for="weapon in roleInfo.roleInfo.roleShow.langRangeWeapons"
-                            :key="weapon.weaponId"
+                            :key="`${weapon.weaponId}-${weapon.weaponEid}`"
                             :weapon="weapon"
                         />
                     </div>
@@ -609,7 +609,11 @@ async function generateScreenshot() {
                 <div class="card-body">
                     <h3 class="card-title mb-4">近战武器 ({{ getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.closeWeapons) }})</h3>
                     <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
-                        <DNAWeaponItem v-for="weapon in roleInfo.roleInfo.roleShow.closeWeapons" :key="weapon.weaponId" :weapon="weapon" />
+                        <DNAWeaponItem
+                            v-for="weapon in roleInfo.roleInfo.roleShow.closeWeapons"
+                            :key="`${weapon.weaponId}-${weapon.weaponEid}`"
+                            :weapon="weapon"
+                        />
                     </div>
                 </div>
             </div>

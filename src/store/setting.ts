@@ -36,6 +36,7 @@ export const useSettingStore = defineStore("setting", {
             // 自动签到设置
             autoSign: useLocalStorage("setting_auto_sign", false),
             launchAtStartup: useLocalStorage("setting_launch_at_startup", false),
+            initScriptHotkeysAtStartup: useLocalStorage("setting_init_script_hotkeys_at_startup", true),
             nextSignCheckTime: useLocalStorage("setting_next_sign_check_time", 0),
             // 剧情文本替换设置
             protagonistName1: useLocalStorage("story_protagonist_name_1", "维塔"),

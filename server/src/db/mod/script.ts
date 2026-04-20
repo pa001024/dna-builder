@@ -199,7 +199,7 @@ export const resolvers = {
                 author: context.user.name,
                 date: script.updateAt ?? undefined,
             })
-            await db.update(schema.scripts).set({ content }).where(eq(schema.scripts.id, script.id))
+            await db.update(schema.scripts).set({ content, updateAt: schema.now() }).where(eq(schema.scripts.id, script.id))
             let result = script
             result.content = content
             if (getSubSelection(info, "user")) {
@@ -239,7 +239,11 @@ export const resolvers = {
                 throw createGraphQLError("无权修改此脚本")
             }
 
-            const [updated] = await db.update(schema.scripts).set(input).where(eq(schema.scripts.id, id)).returning()
+            const [updated] = await db
+                .update(schema.scripts)
+                .set({ ...input, updateAt: schema.now() })
+                .where(eq(schema.scripts.id, id))
+                .returning()
 
             let isLiked = false
             const [like] = await db

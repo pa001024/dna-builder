@@ -1,6 +1,6 @@
 import { type AnyVariables, gql, type OperationContext } from "@urql/vue"
 import { useUIStore } from "@/store/ui"
-import { gqClient } from "./graphql"
+import { gqClient } from "./client"
 
 function extractType<T extends string>(gqlQuery: T) {
     const match = gqlQuery.match(/mutation[\s\S]*?\s(\w+?)\s*[({]/m)

@@ -13,11 +13,11 @@ export function getRarityName(rarity: number): string {
 export function getRarityValue(rarity: string): number {
     return (
         {
-            金: 1,
-            紫: 2,
+            金: 5,
+            紫: 4,
             蓝: 3,
-            绿: 4,
-            白: 5,
+            绿: 2,
+            白: 1,
         }[rarity] || 0
     )
 }

@@ -7,6 +7,24 @@ export async function applyMaterial(material: (typeof MATERIALS)[number]) {
     return (await invoke("apply_material", { material })) as string
 }
 
+/**
+ * 修改指定窗口样式。
+ * @param hwnd 窗口句柄
+ * @param style GWL_STYLE 完整位掩码，或形如 `+WS_CAPTION -WS_THICKFRAME` 的表达式
+ * @param exStyle 可选的 GWL_EXSTYLE 完整位掩码，仅在数值路径下使用
+ */
+export async function setWindowStyle(hwnd: number, style: number | string, exStyle?: number) {
+    return await invoke("set_window_style", { hwnd, style, exStyle })
+}
+
+/**
+ * 根据进程名获取窗口句柄。
+ * @param processName 进程名
+ */
+export async function getWindowByProcessName(processName: string) {
+    return await invoke<number>("get_window_by_process_name", { processName })
+}
+
 export async function getOSVersion() {
     return await invoke<string>("get_os_version")
 }
@@ -144,6 +162,76 @@ export async function listDirectories(dirPath: string) {
 }
 
 /**
+ * 递归枚举目录中的所有 pak 文件。
+ * @param rootPath 根目录路径
+ * @returns pak 文件路径列表
+ */
+export async function enumeratePakFiles(rootPath: string) {
+    return await invoke<string[]>("enumerate_pak_files", { rootPath })
+}
+
+/**
+ * 递归枚举目录中的所有 pak 文件，并按 AES key 过滤无效包。
+ * @param rootPath 根目录路径
+ * @param aesKey AES key
+ * @returns pak 文件路径列表
+ */
+export async function enumerateValidPakFiles(rootPath: string, aesKey?: string | null) {
+    return await invoke<string[]>("enumerate_pak_files", { rootPath, aesKey })
+}
+
+/**
+ * 列出多个 pak 文件内的文件列表。
+ * @param pakPaths pak 文件路径列表
+ * @param aesKey AES key
+ * @returns pak 内文件列表
+ */
+export async function listPakFiles(pakPaths: string[], aesKey?: string | null): Promise<{ pakPath: string; files: string[] }[]> {
+    return await invoke("list_pak_files", { pakPaths, aesKey })
+}
+
+/**
+ * 导出 pak 文件中的指定文件。
+ * @param pakFiles pak 文件名和目标文件名列表
+ * @param aesKey AES key
+ * @param targetPath 目标目录
+ * @returns 导出结果
+ */
+export async function exportPakFiles(
+    pakFiles: Record<string, string[]>,
+    aesKey: string | null | undefined,
+    targetPath: string
+): Promise<{ pakPath: string; exportedFiles: string[] }[]> {
+    return await invoke("export_pak_files", { pakFiles, aesKey, targetPath })
+}
+
+export interface LuaDecompileResult {
+    inputFile: string
+    outputFile: string
+}
+
+export interface LuaDecompileBatchResult {
+    succeededFiles: LuaDecompileResult[]
+    failedFiles: string[]
+}
+
+/**
+ * 使用 unluac 反编译 Lua 字节码文件。
+ * @param inputFiles 输入文件路径列表
+ * @param unluacPath unluac jar 路径
+ * @param outputDir 输出目录
+ * @returns 反编译结果
+ */
+export async function decompileLuaBytecodeFiles(
+    inputFiles: string[],
+    sourceRoot: string,
+    unluacPath: string,
+    outputDir: string
+): Promise<LuaDecompileBatchResult> {
+    return await invoke("decompile_lua_bytecode_files", { inputFiles, sourceRoot, unluacPath, outputDir })
+}
+
+/**
  * 提取游戏资产
  * @param zipPath 压缩包路径
  * @param targetDir 目标目录
@@ -166,10 +254,11 @@ export async function renameFile(oldPath: string, newPath: string) {
 /**
  * 删除文件
  * @param filePath 文件路径
+ * @param force 是否直接删除，不进入回收站
  * @returns 成功消息
  */
-export async function deleteFile(filePath: string) {
-    return await invoke<string>("delete_file", { filePath })
+export async function deleteFile(filePath: string, force?: boolean) {
+    return await invoke<string>("delete_file", { filePath, force })
 }
 
 /**
@@ -197,6 +286,17 @@ export async function unwatchFile(filePath: string) {
  */
 export async function runScript(scriptPath: string) {
     return await invoke<string>("run_script", { scriptPath })
+}
+
+/**
+ * 执行临时脚本源码。
+ * @param script 脚本源码
+ * @param scope 可选作用域
+ * @param timeoutMs 可选超时时间
+ * @returns 脚本返回值字符串（无返回值时为空字符串）
+ */
+export async function execScript(script: string, scope?: string, timeoutMs?: number) {
+    return await invoke<string>("exec_script", { script, scope, timeoutMs })
 }
 
 /**

@@ -4,10 +4,19 @@ import Fuse, { type FuseResultMatch } from "fuse.js"
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import dynQuestData, { type DynQuest } from "@/data/d/dynquest.data"
+import dynQuestData, {
+    DYN_QUEST_TYPE_ICON_MAP,
+    type DynQuest,
+    formatDynQuestDemand,
+    formatDynQuestLevelRange,
+    getDynQuestLevelKey,
+    getDynQuestTypeLabel,
+} from "@/data/d/dynquest.data"
+import type { Dialogue, DialogueOption } from "@/data/d/quest.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 interface DynQuestSnippetSegment {
     text: string
@@ -23,14 +32,23 @@ interface DynQuestSearchSnippet {
 interface DynQuestSearchResult {
     quest: DynQuest
     snippet: DynQuestSearchSnippet | null
+    levelGroups: DynQuestLevelGroup[]
+}
+
+interface DynQuestLevelGroup {
+    key: string
+    label: string
 }
 
 interface DynQuestFullTextEntry {
     quest: DynQuest
     questId: string
     questName: string
+    questDesc: string
+    questType: string
     regionName: string
     subRegionName: string
+    levelLabels: string[]
     snippets: string[]
     searchText: string
 }
@@ -40,19 +58,21 @@ const selectedQuestId = useSearchParam<number>("id", 0)
 const selectedRegion = useSearchParam<string>("rg", "")
 const selectedSubRegion = useSearchParam<string>("srg", "")
 const selectedLevel = useSearchParam<string>("lv", "")
+const showImprIncreaseOnly = useSearchParam<boolean>("iio", false)
 const showFullTextSearch = useSearchParam<boolean>("fts", false)
 const showRegionFilter = useLocalStorage("dynquest.showRegionFilter", true)
-const showSubRegionFilter = useLocalStorage("dynquest.showSubRegionFilter", true)
 const showLevelFilter = useLocalStorage("dynquest.showLevelFilter", true)
 
-const dynQuestFullTextEntries = buildDynQuestFullTextEntries()
+const normalizedDynQuestData = buildNormalizedDynQuestData(dynQuestData)
+const dynQuestFullTextEntries = buildDynQuestFullTextEntries(normalizedDynQuestData)
 const dynQuestFullTextFuse = createDynQuestFullTextFuse(dynQuestFullTextEntries)
+const dynQuestImprIncreaseIdSet = buildDynQuestImprIncreaseIdSet(normalizedDynQuestData)
 
 /**
  * 根据 ID 获取选中的委托。
  */
 const selectedQuest = computed(() => {
-    return selectedQuestId.value ? dynQuestData.find(quest => quest.id === selectedQuestId.value) || null : null
+    return selectedQuestId.value ? normalizedDynQuestData.find(quest => quest.id === selectedQuestId.value) || null : null
 })
 
 /**
@@ -76,18 +96,12 @@ function getSubRegionName(subRegionId: number): string {
 }
 
 /**
- * 获取委托等级范围筛选键。
+ * 获取动态委托图标地址。
  * @param quest 委托数据
- * @returns 等级范围键
+ * @returns 图标地址
  */
-function getQuestLevelKey(quest: DynQuest): string {
-    if (!quest.level.length) {
-        return "unknown"
-    }
-
-    const minLevel = quest.level[0]
-    const maxLevel = quest.level[1]
-    return `${minLevel}-${maxLevel ?? ""}`
+function getDynQuestIconUrl(quest: DynQuest): string {
+    return `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[quest.type]}.webp`
 }
 
 /**
@@ -100,8 +114,108 @@ function getLevelLabelByKey(levelKey: string): string {
         return "等级未知"
     }
 
-    const [minLevel, maxLevel] = levelKey.split("-")
-    return `等级 ${minLevel} - ${maxLevel || "?"}`
+    const matchingLevel = normalizedDynQuestData.flatMap(quest => quest.levels).find(level => getDynQuestLevelKey(level) === levelKey)
+    return matchingLevel ? formatDynQuestLevelRange(matchingLevel) : levelKey
+}
+
+/**
+ * 按等级范围去重并生成展示分组。
+ * @param levels 等级档位列表
+ * @returns 去重后的分组
+ */
+function getQuestLevelGroups(levels: DynQuest["levels"]): DynQuestLevelGroup[] {
+    const groupMap = new Map<string, DynQuestLevelGroup>()
+
+    for (const level of levels) {
+        const key = getDynQuestLevelKey(level)
+        if (!groupMap.has(key)) {
+            groupMap.set(key, {
+                key,
+                label: formatDynQuestLevelRange(level),
+            })
+        }
+    }
+
+    return [...groupMap.values()]
+}
+
+/**
+ * 判断单个对话是否包含印象增加。
+ * @param dialogue 对话节点
+ * @returns 是否包含印象增加
+ */
+function hasDialogueImprIncrease(dialogue: Pick<Dialogue, "impr" | "options"> | Pick<DialogueOption, "impr" | "options">): boolean {
+    if (dialogue.impr && dialogue.impr[2] > 0) {
+        return true
+    }
+
+    return dialogue.options?.some(childOption => hasDialogueImprIncrease(childOption)) ?? false
+}
+
+/**
+ * 构建包含印象增加的动态任务 ID 集合。
+ * @param quests 动态任务数据
+ * @returns 任务 ID 集合
+ */
+function buildDynQuestImprIncreaseIdSet(quests: DynQuest[]): Set<number> {
+    const questIdSet = new Set<number>()
+
+    for (const quest of quests) {
+        const hasImprIncrease = quest.nodes?.some(node => {
+            return node.dialogues?.some(dialogue => {
+                return hasDialogueImprIncrease(dialogue)
+            })
+        })
+
+        if (hasImprIncrease) {
+            questIdSet.add(quest.id)
+        }
+    }
+
+    return questIdSet
+}
+
+/**
+ * 合并重复的动态委托条目。
+ * @param quests 原始动态委托数据
+ * @returns 去重后的动态委托数据
+ */
+function buildNormalizedDynQuestData(quests: DynQuest[]): DynQuest[] {
+    const questMap = new Map<number, DynQuest>()
+
+    for (const quest of quests) {
+        const existingQuest = questMap.get(quest.id)
+        if (!existingQuest) {
+            questMap.set(quest.id, {
+                ...quest,
+                levels: [...quest.levels],
+                nodes: quest.nodes ? [...quest.nodes] : undefined,
+                startIds: quest.startIds ? [...quest.startIds] : undefined,
+            })
+            continue
+        }
+
+        existingQuest.levels = [...existingQuest.levels, ...quest.levels]
+
+        if (quest.nodes?.length) {
+            const existingNodeIds = new Set((existingQuest.nodes ?? []).map(node => node.id))
+            const mergedNodes = [...(existingQuest.nodes ?? [])]
+            for (const node of quest.nodes) {
+                if (existingNodeIds.has(node.id)) {
+                    continue
+                }
+                mergedNodes.push(node)
+                existingNodeIds.add(node.id)
+            }
+            existingQuest.nodes = mergedNodes
+        }
+
+        if (quest.startIds?.length) {
+            existingQuest.startIds = Array.from(new Set([...(existingQuest.startIds ?? []), ...quest.startIds]))
+        }
+    }
+
+    return [...questMap.values()]
 }
 
 /**
@@ -122,8 +236,26 @@ function collectDynQuestSnippets(quest: DynQuest): string[] {
     const snippets: string[] = []
 
     snippets.push(quest.name)
+    snippets.push(quest.desc)
+    snippets.push(getDynQuestTypeLabel(quest.type))
     snippets.push(getRegionName(quest.regionId))
     snippets.push(getSubRegionName(quest.subRegionId))
+    snippets.push(`${quest.cd}`)
+    snippets.push(`${quest.person}`)
+    snippets.push(`${quest.rarity}`)
+    snippets.push(`${quest.ttk}`)
+    snippets.push(`${quest.weight}`)
+    snippets.push(`${quest.pos[0]}`)
+    snippets.push(`${quest.pos[1]}`)
+
+    for (const level of quest.levels) {
+        snippets.push(formatDynQuestLevelRange(level))
+        snippets.push(formatDynQuestDemand(level.demand))
+        snippets.push(`${level.id}`)
+        for (const rewardId of level.reward) {
+            snippets.push(`${rewardId}`)
+        }
+    }
 
     for (const node of quest.nodes ?? []) {
         if (node.name) {
@@ -168,12 +300,30 @@ function collectDynQuestSnippets(quest: DynQuest): string[] {
  * 构建委托全文检索索引。
  * @returns 全文检索索引
  */
-function buildDynQuestFullTextEntries(): DynQuestFullTextEntry[] {
-    return dynQuestData.map(quest => {
+function buildDynQuestFullTextEntries(quests: DynQuest[]): DynQuestFullTextEntry[] {
+    return quests.map(quest => {
         const snippets = collectDynQuestSnippets(quest)
         const regionName = getRegionName(quest.regionId)
         const subRegionName = getSubRegionName(quest.subRegionId)
-        const searchText = [quest.id, quest.name, regionName, subRegionName, quest.level[0], quest.level[1], quest.chance, ...snippets]
+        const levelLabels = quest.levels.map(level => formatDynQuestLevelRange(level))
+        const searchText = [
+            quest.id,
+            quest.name,
+            quest.desc,
+            getDynQuestTypeLabel(quest.type),
+            regionName,
+            subRegionName,
+            quest.cd,
+            quest.person,
+            quest.rarity,
+            quest.ttk,
+            quest.weight,
+            quest.pos[0],
+            quest.pos[1],
+            ...levelLabels,
+            ...quest.levels.flatMap(level => [level.id, formatDynQuestDemand(level.demand), ...level.reward]),
+            ...snippets,
+        ]
             .filter(v => v !== undefined && v !== null && `${v}`.trim() !== "")
             .join(" ")
 
@@ -181,8 +331,11 @@ function buildDynQuestFullTextEntries(): DynQuestFullTextEntry[] {
             quest,
             questId: `${quest.id}`,
             questName: quest.name,
+            questDesc: quest.desc,
+            questType: getDynQuestTypeLabel(quest.type),
             regionName,
             subRegionName,
+            levelLabels,
             snippets,
             searchText,
         }
@@ -202,9 +355,12 @@ function createDynQuestFullTextFuse(entries: DynQuestFullTextEntry[]): Fuse<DynQ
         includeMatches: true,
         keys: [
             { name: "questName", weight: 2.4 },
+            { name: "questDesc", weight: 1.8 },
+            { name: "questType", weight: 1.0 },
             { name: "questId", weight: 2.0 },
             { name: "regionName", weight: 1.2 },
             { name: "subRegionName", weight: 1.2 },
+            { name: "levelLabels", weight: 1.0 },
             { name: "snippets", weight: 1.8 },
             { name: "searchText", weight: 1.4 },
         ],
@@ -371,8 +527,17 @@ function getDynQuestFuzzySnippet(matches: readonly FuseResultMatch[] | undefined
 function passesRegionFilters(quest: DynQuest): boolean {
     const matchesRegion = selectedRegion.value === "" || quest.regionId === Number(selectedRegion.value)
     const matchesSubRegion = selectedSubRegion.value === "" || quest.subRegionId === Number(selectedSubRegion.value)
-    const matchesLevel = selectedLevel.value === "" || getQuestLevelKey(quest) === selectedLevel.value
+    const matchesLevel = selectedLevel.value === "" || quest.levels.some(level => getDynQuestLevelKey(level) === selectedLevel.value)
     return matchesRegion && matchesSubRegion && matchesLevel
+}
+
+/**
+ * 判断动态任务是否包含印象增加。
+ * @param questId 任务 ID
+ * @returns 是否包含印象增加
+ */
+function hasDynQuestImprIncrease(questId: number): boolean {
+    return dynQuestImprIncreaseIdSet.has(questId)
 }
 
 /**
@@ -403,23 +568,8 @@ function toggleFilter(filterName: "region" | "subRegion" | "level", show: boolea
  * 获取所有区域。
  */
 const allRegions = computed(() => {
-    const regions = new Set(dynQuestData.map(q => q.regionId))
+    const regions = new Set(normalizedDynQuestData.map(q => q.regionId))
     return Array.from(regions).sort((a, b) => a - b)
-})
-
-/**
- * 获取当前选中区域的所有子区域。
- */
-const subRegions = computed(() => {
-    if (!selectedRegion.value) {
-        return []
-    }
-
-    const subRegionIds = new Set(dynQuestData.filter(q => q.regionId === Number(selectedRegion.value)).map(q => q.subRegionId))
-    return Array.from(subRegionIds)
-        .map(id => subRegionMap.get(id))
-        .filter(r => !!r)
-        .sort((a, b) => a.id - b.id)
 })
 
 /**
@@ -428,8 +578,10 @@ const subRegions = computed(() => {
 const levelRanges = computed(() => {
     const levelRangeSet = new Set<string>()
 
-    for (const quest of dynQuestData) {
-        levelRangeSet.add(getQuestLevelKey(quest))
+    for (const quest of normalizedDynQuestData) {
+        for (const level of quest.levels) {
+            levelRangeSet.add(getDynQuestLevelKey(level))
+        }
     }
 
     return Array.from(levelRangeSet)
@@ -455,56 +607,76 @@ const levelRanges = computed(() => {
  * 按关键词和区域筛选委托。
  */
 const filteredQuests = computed<DynQuestSearchResult[]>(() => {
+    const keyword = searchKeyword.value.trim()
+
     if (showFullTextSearch.value) {
-        const keyword = searchKeyword.value.trim()
         if (keyword === "") {
-            return dynQuestData.filter(passesRegionFilters).map(quest => ({
-                quest,
-                snippet: null,
-            }))
+            return normalizedDynQuestData
+                .filter(quest => passesRegionFilters(quest))
+                .filter(quest => !showImprIncreaseOnly.value || hasDynQuestImprIncrease(quest.id))
+                .map(quest => ({
+                    quest,
+                    snippet: null,
+                    levelGroups: getQuestLevelGroups(quest.levels),
+                }))
         }
 
         const reorderedResults = dynQuestFullTextFuse
             .search(keyword, { limit: 400 })
             .filter(result => passesRegionFilters(result.item.quest))
+            .filter(result => !showImprIncreaseOnly.value || hasDynQuestImprIncrease(result.item.quest.id))
         const exactResults = reorderedResults
             .filter(result => result.item.searchText.includes(keyword))
             .map(result => ({
                 quest: result.item.quest,
                 snippet: getDynQuestSearchSnippet(result.item.snippets, keyword) ?? getDynQuestFuzzySnippet(result.matches),
+                levelGroups: getQuestLevelGroups(result.item.quest.levels),
             }))
         const fuzzyResults = reorderedResults
             .filter(result => !result.item.searchText.includes(keyword))
             .map(result => ({
                 quest: result.item.quest,
                 snippet: getDynQuestFuzzySnippet(result.matches),
+                levelGroups: getQuestLevelGroups(result.item.quest.levels),
             }))
 
         return [...exactResults, ...fuzzyResults]
     }
 
-    return dynQuestData
+    return normalizedDynQuestData
         .filter(quest => {
             if (!passesRegionFilters(quest)) {
                 return false
             }
 
-            if (searchKeyword.value === "") {
+            if (showImprIncreaseOnly.value && !hasDynQuestImprIncrease(quest.id)) {
+                return false
+            }
+
+            if (keyword === "") {
                 return true
             }
 
-            const keyword = searchKeyword.value
             if (
                 `${quest.id}`.includes(keyword) ||
                 quest.name.includes(keyword) ||
+                quest.desc.includes(keyword) ||
+                getDynQuestTypeLabel(quest.type).includes(keyword) ||
                 getRegionName(quest.regionId).includes(keyword) ||
-                getSubRegionName(quest.subRegionId).includes(keyword)
+                getSubRegionName(quest.subRegionId).includes(keyword) ||
+                quest.levels.some(
+                    level =>
+                        `${level.id}`.includes(keyword) ||
+                        formatDynQuestLevelRange(level).includes(keyword) ||
+                        formatDynQuestDemand(level.demand).includes(keyword)
+                )
             ) {
                 return true
             }
 
             return (
                 matchPinyin(quest.name, keyword).match ||
+                matchPinyin(quest.desc, keyword).match ||
                 matchPinyin(getRegionName(quest.regionId), keyword).match ||
                 matchPinyin(getSubRegionName(quest.subRegionId), keyword).match
             )
@@ -512,6 +684,7 @@ const filteredQuests = computed<DynQuestSearchResult[]>(() => {
         .map(quest => ({
             quest,
             snippet: null,
+            levelGroups: getQuestLevelGroups(quest.levels),
         }))
 })
 
@@ -530,14 +703,6 @@ function selectQuest(quest: DynQuest | null) {
 function selectRegion(regionId: string) {
     selectedRegion.value = regionId
     selectedSubRegion.value = ""
-}
-
-/**
- * 选择子区域。
- * @param subRegionId 子区域 ID
- */
-function selectSubRegion(subRegionId: string) {
-    selectedSubRegion.value = subRegionId
 }
 
 useInitialScrollToSelectedItem()
@@ -576,21 +741,16 @@ useInitialScrollToSelectedItem()
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
                             <input
-                                v-model="showSubRegionFilter"
-                                type="checkbox"
-                                class="checkbox checkbox-xs"
-                                @change="toggleFilter('subRegion', showSubRegionFilter)"
-                            />
-                            <span class="text-xs text-base-content/70">子区域筛选</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input
                                 v-model="showLevelFilter"
                                 type="checkbox"
                                 class="checkbox checkbox-xs"
                                 @change="toggleFilter('level', showLevelFilter)"
                             />
                             <span class="text-xs text-base-content/70">等级筛选</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input v-model="showImprIncreaseOnly" type="checkbox" class="checkbox checkbox-xs" />
+                            <span class="text-xs text-base-content/70">印象</span>
                         </label>
                     </div>
 
@@ -600,7 +760,7 @@ useInitialScrollToSelectedItem()
                             :class="selectedRegion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectRegion('')"
                         >
-                            全部区域
+                            {{ $t("全部") }}
                         </button>
                         <button
                             v-for="regionId in allRegions.map(r => String(r))"
@@ -615,36 +775,13 @@ useInitialScrollToSelectedItem()
                         </button>
                     </div>
 
-                    <div v-show="showSubRegionFilter && selectedRegion" class="flex flex-wrap gap-1 pb-1">
-                        <button
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedSubRegion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                            @click="selectSubRegion('')"
-                        >
-                            全部子区域
-                        </button>
-                        <button
-                            v-for="subRegion in subRegions"
-                            :key="subRegion.id"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
-                            :class="
-                                selectedSubRegion === String(subRegion.id)
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
-                            "
-                            @click="selectSubRegion(String(subRegion.id))"
-                        >
-                            {{ subRegion.name }}
-                        </button>
-                    </div>
-
                     <div v-show="showLevelFilter" class="flex flex-wrap gap-1 pb-1">
                         <button
                             class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedLevel === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedLevel = ''"
                         >
-                            全部等级
+                            {{ $t("全部") }}
                         </button>
                         <button
                             v-for="levelRange in levelRanges"
@@ -672,28 +809,57 @@ useInitialScrollToSelectedItem()
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedQuestId === questResult.quest.id }"
                             @click="selectQuest(questResult.quest)"
                         >
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <div class="font-medium">{{ questResult.quest.name }}</div>
-                                    <div class="text-xs opacity-70 mt-1">
-                                        <span>等级: {{ questResult.quest.level[0] }} - {{ questResult.quest.level[1] || "?" }}</span>
-                                        <span
-                                            v-if="questResult.quest.dayLimit"
-                                            class="ml-2 px-1.5 py-0.5 rounded bg-warning text-warning-content"
-                                            >每日限制</span
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start gap-3">
+                                        <ImageFallback
+                                            :src="getDynQuestIconUrl(questResult.quest)"
+                                            :alt="questResult.quest.name"
+                                            class="size-14 shrink-0 rounded"
+                                            :class="`bg-linear-15 ${getRarityGradientClass(questResult.quest.rarity + 1)}`"
                                         >
+                                            <img
+                                                src="/imgs/webp/T_Head_Empty.webp"
+                                                :alt="questResult.quest.name"
+                                                class="size-14 shrink-0 rounded"
+                                            />
+                                        </ImageFallback>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-medium wrap-break-word">
+                                                {{ questResult.quest.name }}
+                                                <span class="text-xs opacity-70">ID: {{ questResult.quest.id }}</span>
+                                            </div>
+                                            <div class="text-xs opacity-70 mt-1 flex flex-wrap items-center gap-1.5">
+                                                <span>{{ getDynQuestTypeLabel(questResult.quest.type) }}</span>
+                                                <span
+                                                    v-if="hasDynQuestImprIncrease(questResult.quest.id)"
+                                                    class="text-xs px-2 py-0.5 rounded bg-success text-white"
+                                                >
+                                                    印象增加
+                                                </span>
+                                                <span>冷却 {{ questResult.quest.cd }}m</span>
+                                                <span>人数 {{ questResult.quest.person }}</span>
+                                                <span>权重 {{ questResult.quest.weight }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 flex flex-wrap gap-1">
+                                        <span
+                                            v-for="level in questResult.levelGroups"
+                                            :key="`${questResult.quest.id}-${level.key}`"
+                                            class="px-1.5 py-0.5 text-[11px] rounded bg-base-300/80"
+                                        >
+                                            {{ level.label }}
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
                                     <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
-                                        {{ getRegionName(questResult.quest.regionId) }}
+                                        {{ getRegionName(questResult.quest.regionId) }}·
+                                        <span>{{ getSubRegionName(questResult.quest.subRegionId) }}</span>
                                     </span>
                                     <span class="text-xs opacity-70">ID: {{ questResult.quest.id }}</span>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>{{ getSubRegionName(questResult.quest.subRegionId) }}</span>
-                                <span>概率: {{ questResult.quest.chance }}%</span>
                             </div>
 
                             <div
@@ -738,7 +904,7 @@ useInitialScrollToSelectedItem()
             </div>
 
             <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedQuest" class="flex-1">
+            <ScrollArea v-if="selectedQuest" class="flex-2">
                 <DBDynQuestDetailItem :quest="selectedQuest" />
             </ScrollArea>
         </div>

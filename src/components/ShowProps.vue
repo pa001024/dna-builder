@@ -44,19 +44,21 @@ function getQualityColor(quality: string): string {
     <FullTooltip :side="side">
         <template #tooltip>
             <div class="flex flex-col gap-2 max-w-75 min-w-28">
-                <div v-if="title" class="text-sm font-bold">
-                    <SRouterLink v-if="link" :to="link" class="cursor-pointer hover:underline">{{ title }}</SRouterLink>
-                    <span v-else>{{ title }}</span>
-                    <span v-if="rarity" class="text-xs p-1 rounded-sm ml-1" :class="getQualityColor(rarity)">
-                        {{ rarity }}
-                    </span>
+                <div class="flex">
+                    <div v-if="title" class="text-sm font-bold">
+                        <SRouterLink v-if="link" :to="link" class="cursor-pointer hover:underline">{{ title }}</SRouterLink>
+                        <span v-else>{{ title }}</span>
+                        <span v-if="rarity" class="text-xs p-1 rounded-sm ml-1" :class="getQualityColor(rarity)">
+                            {{ rarity }}
+                        </span>
+                    </div>
+                    <div v-if="polarity || cost" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
+                        {{ cost }}
+                        <Icon v-if="polarity" :icon="`po-${polarity}`" />
+                    </div>
                 </div>
                 <div v-if="desc" class="text-xs text-gray-400">
                     {{ desc }}
-                </div>
-                <div v-if="polarity || cost" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
-                    {{ cost }}
-                    <Icon v-if="polarity" :icon="`po-${polarity}`" />
                 </div>
                 <div
                     v-for="[prop, val] in Object.entries(props).filter(([, val]) => val)"

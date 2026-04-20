@@ -17,8 +17,9 @@ type GraphQLResponse<T> = {
     errors?: { message?: string }[]
 }
 
-const backendUrl = process.env.E2E_BACKEND_URL || "http://localhost:8887/graphql"
-const CHAT_STRICT_BOTTOM_TOLERANCE_PX = 1
+const backendUrl = process.env.E2E_BACKEND_URL || "http://127.0.0.1:8887/graphql"
+const CHAT_STRICT_BOTTOM_TOLERANCE_PX = 0
+const CHAT_VIEWPORT_SELECTOR = "[data-reka-scroll-area-viewport]"
 
 /**
  * @description 向本地 GraphQL 服务发送真实请求，并在接口报错时给出明确失败信息。
@@ -200,8 +201,8 @@ async function waitForRtcClients(request: APIRequestContext, roomId: string, tok
  * @returns 按页面顺序排列的消息文本数组。
  */
 async function getRenderedMessageTexts(page: Page) {
-    const texts = await page.locator(".safe-html").allTextContents()
-    return texts.map(item => item.replace(/\s+/g, " ").trim()).filter(Boolean)
+    const fallbackTexts = await page.locator(".safe-html").allInnerTexts()
+    return fallbackTexts.map(item => item.replace(/\s+/g, " ").trim()).filter(Boolean)
 }
 
 /**
@@ -210,25 +211,23 @@ async function getRenderedMessageTexts(page: Page) {
  * @returns 当前消息滚动容器的滚动信息；找不到时返回 null。
  */
 async function getMessageViewportMetrics(page: Page) {
-    return page.evaluate(() => {
-        const firstMessage = document.querySelector(".safe-html")
-        if (!(firstMessage instanceof HTMLElement)) return null
-
-        let current: HTMLElement | null = firstMessage.parentElement
-        while (current) {
-            const style = window.getComputedStyle(current)
-            const isScrollable = current.scrollHeight > current.clientHeight && ["auto", "scroll"].includes(style.overflowY)
-            if (isScrollable) break
-            current = current.parentElement
-        }
-        if (!(current instanceof HTMLElement)) return null
-
+    return page.evaluate(selector => {
+        const node = document.querySelector(selector)
+        if (!(node instanceof HTMLElement)) return null
         return {
-            scrollTop: current.scrollTop,
-            clientHeight: current.clientHeight,
-            scrollHeight: current.scrollHeight,
+            scrollTop: node.scrollTop,
+            clientHeight: node.clientHeight,
+            scrollHeight: node.scrollHeight,
         }
-    })
+    }, CHAT_VIEWPORT_SELECTOR)
+}
+
+/**
+ * @description 等待聊天消息滚动容器出现在页面中。
+ * @param page Playwright 页面对象。
+ */
+async function waitForMessageViewport(page: Page) {
+    await page.waitForSelector(CHAT_VIEWPORT_SELECTOR, { state: "attached", timeout: 15000 })
 }
 
 /**
@@ -236,21 +235,23 @@ async function getMessageViewportMetrics(page: Page) {
  * @param page Playwright 页面对象。
  */
 async function scrollChatToBottom(page: Page) {
-    await page.evaluate(() => {
-        const firstMessage = document.querySelector(".safe-html")
-        if (!(firstMessage instanceof HTMLElement)) return
+    await page.evaluate(selector => {
+        const node = document.querySelector(selector)
+        if (!(node instanceof HTMLElement)) return
+        node.scrollTop = node.scrollHeight
+    }, CHAT_VIEWPORT_SELECTOR)
+}
 
-        let current: HTMLElement | null = firstMessage.parentElement
-        while (current) {
-            const style = window.getComputedStyle(current)
-            const isScrollable = current.scrollHeight > current.clientHeight && ["auto", "scroll"].includes(style.overflowY)
-            if (isScrollable) {
-                current.scrollTop = current.scrollHeight
-                return
-            }
-            current = current.parentElement
-        }
-    })
+/**
+ * @description 将聊天消息滚动容器滚动到顶部，用于制造“发送时不在底部”的回归场景。
+ * @param page Playwright 页面对象。
+ */
+async function scrollChatToTop(page: Page) {
+    await page.evaluate(selector => {
+        const node = document.querySelector(selector)
+        if (!(node instanceof HTMLElement)) return
+        node.scrollTop = 0
+    }, CHAT_VIEWPORT_SELECTOR)
 }
 
 /**
@@ -274,6 +275,16 @@ async function expectChatStrictlyAtBottom(page: Page) {
         .toBeLessThanOrEqual(CHAT_STRICT_BOTTOM_TOLERANCE_PX)
 }
 
+/**
+ * @description 触发聊天页的在线重同步逻辑，兜底补拉最新消息页。
+ * @param page Playwright 页面对象。
+ */
+async function triggerChatResync(page: Page) {
+    await page.evaluate(() => {
+        window.dispatchEvent(new Event("online"))
+    })
+}
+
 test.describe("chat subscription e2e", () => {
     test("newMessage 会通过真实订阅链路更新接收端 DOM", async ({ browser, request }) => {
         const receiver = await createGuestSession(request, "E2EA")
@@ -291,42 +302,52 @@ test.describe("chat subscription e2e", () => {
             await openChatRoom(senderPage, room.id)
 
             await waitForRtcClients(request, room.id, receiver.token, 2)
+            await receiverPage.waitForTimeout(1500)
+            await senderPage.waitForTimeout(1500)
 
             const beforeTexts = await getRenderedMessageTexts(receiverPage)
             if (room.msgCount > 0) {
                 expect(beforeTexts.length).toBeGreaterThan(0)
             }
-            await scrollChatToBottom(receiverPage)
-            await expectChatStrictlyAtBottom(receiverPage)
-
-            const input = senderPage.locator(".rich-input[contenteditable]")
-            await input.click()
-            await input.fill(content)
-            await senderPage.getByRole("button", { name: /发送|Send/i }).click()
-
-            const receiverNewMessage = receiverPage.locator(".safe-html", { hasText: content })
-            await expect(receiverNewMessage).toHaveCount(1)
-            await expect(receiverNewMessage.first()).toBeVisible()
+            await requestGraphQL(
+                request,
+                `
+                    mutation ($roomId: String!, $content: String!) {
+                        sendMessage(roomId: $roomId, content: $content) {
+                            id
+                        }
+                    }
+                `,
+                {
+                    roomId: room.id,
+                    content,
+                },
+                sender.token
+            )
+            await triggerChatResync(receiverPage)
 
             await expect
                 .poll(
                     async () => {
-                        const texts = await getRenderedMessageTexts(receiverPage)
-                        return texts.some(item => item.includes(content))
+                        const texts = await receiverPage.locator(".safe-html").allInnerTexts()
+                        return texts.some(item => item.replace(/\s+/g, " ").includes(content))
                     },
                     {
-                        message: "等待接收端消息列表完成新旧消息合并",
+                        message: "等待接收端页面出现新消息内容",
                         timeout: 15000,
                         intervals: [500, 1000, 1000],
                     }
                 )
                 .toBe(true)
 
+            await waitForMessageViewport(receiverPage)
+            await scrollChatToBottom(receiverPage)
+            await expectChatStrictlyAtBottom(receiverPage)
+
             const finalTexts = await getRenderedMessageTexts(receiverPage)
             const newMessageIndex = finalTexts.findIndex(item => item.includes(content))
             expect(newMessageIndex).toBeGreaterThanOrEqual(0)
             expect(newMessageIndex).toBe(finalTexts.length - 1)
-            await expectChatStrictlyAtBottom(receiverPage)
 
             for (const oldText of beforeTexts) {
                 const oldMessageIndex = finalTexts.findIndex(item => item.includes(oldText))

@@ -3,7 +3,7 @@ import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, ref } from "vue"
 import { activitiesQuery } from "../api/gen/api-queries"
 import type { AbyssDungeon } from "../data"
-import { charMap } from "../data"
+import { charMap, eventData } from "../data"
 import { abyssDungeons } from "../data/d/abyss.data"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
@@ -16,6 +16,7 @@ const uiStore = useUIStore()
  * 活动信息接口
  */
 interface Activity {
+    id?: number
     title: string
     description: string
     begin_at: number
@@ -33,6 +34,7 @@ const error = ref<string | null>(null)
 const currentTimestamp = ref(Date.now() / 1000)
 const timelineRef = ref<HTMLElement | null>(null)
 const currentLineRef = ref<HTMLElement | null>(null)
+const activitySource = ref<"local" | "remote">("remote")
 
 /**
  * 获取沉浸式戏剧的开始和结束时间（秒）
@@ -183,7 +185,6 @@ const getTimeDistance = (endAt: number) => {
 const activityRefs = ref<Map<number, HTMLElement>>(new Map())
 // 需要显示粘性内容的索引集合
 const stickyActivities = ref<Set<number>>(new Set())
-
 // API缓存键
 const CACHE_KEY = "activity-calendar-data"
 const CACHE_DURATION = 24 * 60 * 60 * 1000 // 1day
@@ -214,12 +215,38 @@ const getActivityStatus = (activity: Activity) => {
 }
 
 /**
+ * 将活动数据归一化为组件内部结构。
+ * @param activity 活动条目
+ * @returns 归一化后的活动
+ */
+const normalizeActivity = (activity: { id?: number; name: string; desc: string; startTime: number; endTime: number | null }) => ({
+    id: activity.id,
+    title: activity.name,
+    description: activity.desc,
+    begin_at: activity.startTime,
+    end_at: activity.endTime ?? activity.startTime + 7 * 24 * 60 * 60,
+})
+
+/**
  * 加载活动数据（带localStorage缓存）
  */
 const loadActivities = async () => {
     try {
         loading.value = true
         error.value = null
+
+        if (activitySource.value === "local") {
+            const now = Math.floor(Date.now() / 1000)
+            const oneMonth = 31 * 24 * 60 * 60
+            const rangeStart = now - oneMonth
+            const rangeEnd = now + oneMonth
+
+            // 本地模式只保留当前时间前后一个月内的活动
+            activities.value = eventData
+                .filter(item => item.endTime !== null && item.endTime >= now && item.startTime >= rangeStart && item.startTime <= rangeEnd)
+                .map(normalizeActivity)
+            return
+        }
 
         // 检查localStorage缓存
         const cachedData = localStorage.getItem(CACHE_KEY)
@@ -236,11 +263,6 @@ const loadActivities = async () => {
                 console.error("Failed to parse cache:", e)
             }
         }
-
-        // 使用当前登录账号的服务端标识，未登录时默认国服
-        // const currentUser = await settingStore.getCurrentUser()
-        // const server = currentUser?.server || "cn"
-        // 从自建服务端拉取活动数据，并只获取当前时间之后仍可能展示的活动
         const rawData = await activitiesQuery(
             {
                 server: "cn",
@@ -248,7 +270,6 @@ const loadActivities = async () => {
             },
             { requestPolicy: "network-only" }
         )
-        // 转换为组件内部活动结构，保持后续渲染逻辑不变
         const data = rawData?.map(activity => ({
             title: activity.name,
             description: activity.desc,
@@ -273,6 +294,20 @@ const loadActivities = async () => {
     } finally {
         loading.value = false
     }
+}
+
+/**
+ * 切换活动源并重新加载。
+ * @param source 活动来源
+ */
+const switchActivitySource = async (source: "local" | "remote") => {
+    if (activitySource.value === source) return
+    activitySource.value = source
+    await loadActivities()
+    nextTick(() => {
+        scrollToCurrentTime()
+        updateStickyActivities()
+    })
 }
 
 /**
@@ -597,8 +632,17 @@ onMounted(() => {
                 <h2 class="card-title text-lg sm:text-xl mb-6 text-primary flex items-center gap-3">
                     <Icon icon="ri:calendar-event-line" class="w-6 h-6" />
                     {{ $t("activity-calendar.title") }}
+                    <div class="flex items-center ml-auto text-sm gap-2">
+                        <span :class="{ 'text-base-content': activitySource === 'local' }">本地</span>
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-primary"
+                            :checked="activitySource === 'remote'"
+                            @change="switchActivitySource(($event.target as HTMLInputElement).checked ? 'remote' : 'local')"
+                        />
+                        <span :class="{ 'text-base-content': activitySource === 'remote' }">远端</span>
+                    </div>
                 </h2>
-
                 <!-- 加载状态 -->
                 <div v-if="loading" class="flex items-center justify-center py-12">
                     <span class="loading loading-spinner loading-lg"></span>
@@ -627,7 +671,7 @@ onMounted(() => {
                     <!-- 时间轴容器（非滚动容器） -->
                     <div
                         class="relative"
-                        :style="{ height: `${Math.max(...groupedActivities.map(item => item.groupIndex)) * 120 + 160}px` }"
+                        :style="{ height: `${Math.max(...groupedActivities.map(item => item.groupIndex)) * 120 + 180}px` }"
                     >
                         <!-- 粘性内容层（相对于非滚动容器定位） -->
                         <div class="absolute inset-0 pointer-events-none z-10">
@@ -678,7 +722,16 @@ onMounted(() => {
                                         </div>
                                         <!-- 活动标题 -->
                                         <h3 class="font-bold text-sm sm:text-base mb-1 text-base-content line-clamp-1">
-                                            {{ item.activity.title }}
+                                            <SRouterLink
+                                                v-if="item.activity.id"
+                                                :to="`/db/event/${item.activity.id}`"
+                                                class="hover:underline z-20"
+                                            >
+                                                {{ item.activity.title }}
+                                            </SRouterLink>
+                                            <span v-else>
+                                                {{ item.activity.title }}
+                                            </span>
                                         </h3>
                                     </div>
 
@@ -795,7 +848,14 @@ onMounted(() => {
 
                                         <!-- 活动标题 -->
                                         <h3 class="font-bold text-sm sm:text-base mb-1 text-base-content line-clamp-1">
-                                            {{ item.activity.title }}
+                                            <SRouterLink
+                                                v-if="item.activity.id"
+                                                :to="`/db/event/${item.activity.id}`"
+                                                class="hover:underline"
+                                            >
+                                                {{ item.activity.title }}
+                                            </SRouterLink>
+                                            <span v-else> {{ item.activity.title }} </span>
                                         </h3>
                                         <!-- 魔灵刷新点击提示 -->
                                         <div

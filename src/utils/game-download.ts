@@ -109,6 +109,83 @@ export interface OptionalPatchSignsRes {
 export type ProgressCallback = (progress: DownloadProgress) => void
 
 /**
+ * 将资源清单统一归一化为同一套字段名。
+ * @param assetsMap 原始资源清单
+ * @returns 统一字段名后的资源清单
+ */
+export function normalizeGameAssetsMap(assetsMap: Record<string, unknown>) {
+    const normalized: Record<string, GameAssets> = {}
+    for (const [filename, asset] of Object.entries(assetsMap)) {
+        if (!asset || typeof asset !== "object") continue
+        const current = asset as Record<string, unknown>
+        const zipGameVersion = current.ZipGameVersion ?? current.zipGameVersion
+        const zipMd5 = current.ZipMd5 ?? current.zipMd5
+        const zipSize = current.ZipSize ?? current.zipSize
+        const bIsSDK = current.bIsSDK ?? current.bisSDK ?? current.BIsSDK
+        if (typeof zipGameVersion !== "number" || typeof zipMd5 !== "string" || typeof zipSize !== "number") continue
+        normalized[filename] = {
+            ZipGameVersion: zipGameVersion,
+            ZipMd5: zipMd5,
+            ZipSize: zipSize,
+            bIsSDK: typeof bIsSDK === "string" ? bIsSDK : String(bIsSDK ?? false),
+        }
+    }
+    return normalized
+}
+
+/**
+ * 解析本地 BaseVersion.json 并提取标准化后的资源映射。
+ * @param localContent BaseVersion.json 文本
+ * @returns 标准化后的资源映射，解析失败返回 null
+ */
+export function resolveLocalVersions(localContent: string): Record<string, GameAssets> | null {
+    const localVersionList = JSON.parse(localContent) as Partial<GameVersionListLocal> & Partial<GameVersionListRes>
+    if (localVersionList.gameVersionList?.["1"]?.gameVersionList) {
+        return normalizeGameAssetsMap(localVersionList.gameVersionList["1"].gameVersionList)
+    }
+    if (localVersionList.GameVersionList?.["1"]?.GameVersionList) {
+        return normalizeGameAssetsMap(localVersionList.GameVersionList["1"].GameVersionList)
+    }
+    return null
+}
+
+/**
+ * 比较本地与远端资源清单是否需要更新。
+ * @param localVersions 本地资源清单
+ * @param remoteVersions 远端资源清单
+ * @returns 是否有更新和更新大小
+ */
+export function compareGameVersions(localVersions: Record<string, GameAssets>, remoteVersions: Record<string, GameAssets>) {
+    let hasUpdate = false
+    let updateSizeBytes = 0
+    for (const [filename, remoteAsset] of Object.entries(remoteVersions)) {
+        if (!localVersions[filename] || remoteAsset.ZipGameVersion !== localVersions[filename].ZipGameVersion) {
+            hasUpdate = true
+            updateSizeBytes += remoteAsset.ZipSize
+        }
+    }
+    return {
+        hasUpdate,
+        updateSizeBytes,
+    }
+}
+
+/**
+ * 将远端资源清单转换为本地 BaseVersion.json 的写入结构。
+ * @param gameVersionList 远端资源清单
+ * @returns 本地 BaseVersion.json 结构
+ */
+export function toLocalBaseVersionFormat(gameVersionList: Record<string, GameAssets>) {
+    return {
+        gameVersionList: {
+            "1": {
+                gameVersionList: normalizeGameAssetsMap(gameVersionList),
+            },
+        },
+    }
+}
+
+/**
  * 校验本地文件是否与远端清单一致。
  * @param filePath 本地文件路径
  * @param expectedSize 预期文件大小

@@ -32,6 +32,7 @@ INTRO.md
 server/.env
 src-tauri/sidecar/dna_mcp_server-x86_64-pc-windows-msvc.exe
 .claude/
+.serena/
 src/game/*.md
 .moonagent/
 .trae/
@@ -54,3 +55,4 @@ tools/radix-icons/
 mcp_server/target/
 test-results/
 tools/deploy_server.sh
+.omx/

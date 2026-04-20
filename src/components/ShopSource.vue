@@ -75,7 +75,9 @@ function formatCutoffTime(timestamp: number) {
                                                 <div class="text-xs text-neutral-500 whitespace-nowrap">
                                                     {{ $t("shop-detail.discount") }}
                                                 </div>
-                                                <div class="font-medium text-primary">{{ +(source.cutoffInfo.discount / 10).toFixed(1) }}折</div>
+                                                <div class="font-medium text-primary">
+                                                    {{ +(source.cutoffInfo.discount / 10).toFixed(1) }}折
+                                                </div>
                                             </div>
                                             <div class="flex justify-between items-center gap-2 text-sm">
                                                 <div class="text-xs text-neutral-500 whitespace-nowrap">

@@ -275,7 +275,7 @@ function getRewardBackgroundColor(item: RewardItemType) {
         return "from-blue-900/80 to-blue-100/80"
     }
     if (item.t === "Char") {
-        return "from-green-900/80 to-green-100/80"
+        return getRarityGradientClass(5)
     }
     if (item.t === "Draft") {
         return "from-yellow-900/80 to-yellow-100/80"
@@ -304,7 +304,10 @@ function getRewardDisplayName(item: RewardItemType) {
     if (item.t === "Mod") {
         return item.n ? t(item.n) : `ID: ${item.id}`
     }
-    if (["Weapon", "Char", "Skin", "HeadSculpture", "HeadFrame"].includes(item.t)) {
+    if (item.t === "Char") {
+        return charMap.get(item.id)?.名称 || item.n || `ID: ${item.id}`
+    }
+    if (["Weapon", "Skin", "HeadSculpture", "HeadFrame"].includes(item.t)) {
         return item.n ? t(item.n) : `ID: ${item.id}`
     }
     if (["CharAccessory", "WeaponAccessory", "WeaponSkin"].includes(item.t)) {

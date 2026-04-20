@@ -24,7 +24,7 @@ function parseEventText(text?: string): StoryTextSegment[] {
                 <SRouterLink :to="`/db/event/${event.id}`" class="text-lg font-bold link link-primary">
                     {{ event.name }}
                 </SRouterLink>
-                <span class="text-sm text-base-content/70">ID: {{ event.id }}</span>
+                <CopyID :id="event.id" />
             </div>
             <div class="mt-1 text-xs text-base-content/70">
                 {{ formatTimeRange(event.startTime, event.endTime) }}
@@ -64,6 +64,10 @@ function parseEventText(text?: string): StoryTextSegment[] {
                 </template>
             </div>
         </div>
+
+        <BackpackPuzzle v-if="event.id === 103015" :event-id="event.id" />
+
+        <LimitedPrizeSimulator v-if="event.id === 103021" :event-id="event.id" />
 
         <div v-if="event.boxDrop" class="rounded-md bg-base-200 p-3">
             <BoxDropItem :box-drop="event.boxDrop" />

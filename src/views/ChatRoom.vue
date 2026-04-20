@@ -2,12 +2,13 @@
 import { gql, useQuery, useSubscription } from "@urql/vue"
 import { useLocalStorage, useScroll } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from "vue"
 import { onBeforeRouteLeave, useRoute } from "vue-router"
 import { editMessageMutation, Msg, msgsQuery, roomQuery, rtcClientsQuery, rtcJoinMutation, sendMessageMutation } from "@/api/graphql"
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { sleep } from "@/util"
 import { copyHtmlContent, isImage, sanitizeHTML } from "@/utils/html"
 import { fileToDataUrlWithRealMime, normalizeInlineImageDataUrlMime } from "@/utils/image-data-url"
 
@@ -138,22 +139,12 @@ function getLatestPageOffset(total: number, limit = 20) {
 }
 
 /**
- * @description 等待浏览器下一帧，确保异步渲染后的滚动高度已经稳定。
- */
-function waitForNextFrame() {
-    return new Promise<void>(resolve => {
-        requestAnimationFrame(() => resolve())
-    })
-}
-
-/**
- * @description 将消息列表强制贴到底部，并在下一帧做一次补偿滚动，避免新消息渲染后 scrollHeight 再次增长。
+ * @description 将消息列表强制贴到底部，给新消息渲染留出一次稳定窗口。
  */
 async function scrollMessageListToBottom() {
     const viewport = el.value
     if (!viewport) return
-    viewport.scrollTop = viewport.scrollHeight
-    await waitForNextFrame()
+    await sleep(50)
     viewport.scrollTop = viewport.scrollHeight
 }
 
@@ -318,11 +309,11 @@ useSubscription<{ msgEdited: Msg }>({
 
 async function addMessage(msg: Msg) {
     console.debug("addMessage", msg)
-    if (msg.user?.id !== user.id && !isUserBlocked(msg.user?.id)) {
+    if (msg.user?.id !== user.id && !isUserBlocked(msg.user?.id) && newMsgTip.value) {
         sfx.play()
     }
     if (arrivedState.bottom) {
-        await nextTick()
+        await sleep(50)
         await scrollMessageListToBottom()
     }
 }
@@ -344,21 +335,16 @@ async function sendMessage(e: Event) {
     input.value.innerHTML = ""
     newMsgText.value = ""
     input.value.focus()
-    const result = await sendMessageMutation({
-        content,
-        roomId: roomId.value,
-        replyToMsgId: replyingTo.value?.id,
-    })
-    replyingTo.value = null
-    if (result) {
-        void user.refreshProfile()
+    try {
+        await sendMessageMutation({
+            content,
+            roomId: roomId.value,
+            replyToMsgId: replyingTo.value?.id,
+        })
+    } catch (error) {
+        ui.showErrorMessage(error)
     }
-    await nextTick()
-    el.value?.scrollTo({
-        top: el.value.scrollHeight,
-        left: 0,
-        behavior: "smooth",
-    })
+    replyingTo.value = null
 }
 
 function insertEmoji(text: string) {
@@ -693,10 +679,15 @@ function cancelReply() {
                                     </ContextMenuItem>
                                 </template>
                             </ContextMenu>
-                            <div v-if="item.edited" class="text-xs text-base-content/60 self-end">{{ $t("chat.edited") }}</div>
                             <div class="flex-1"></div>
-                            <div class="hidden group-hover:block p-1 text-xs text-base-content/60 whitespace-nowrap">
-                                {{ item.createdAt }}
+                            <div class="flex flex-col h-full" :class="{ 'items-end': user.id === item.user!.id }">
+                                <div class="hidden group-hover:block p-1 text-xs text-base-content/60 whitespace-nowrap">
+                                    {{ item.createdAt }}
+                                </div>
+                                <div class="flex-1"></div>
+                                <div v-if="item.edited" class="text-xs text-base-content/60 whitespace-nowrap">
+                                    {{ $t("chat.edited") }}
+                                </div>
                             </div>
                         </div>
                     </div>

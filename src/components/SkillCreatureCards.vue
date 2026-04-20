@@ -13,8 +13,8 @@ interface CreatureFieldItem {
 }
 
 /**
- * 兼容不同创造物形状字段，返回结构化形状文本。
- * @param creature 创造物对象
+ * 兼容不同实体形状字段，返回结构化形状文本。
+ * @param creature 实体对象
  * @returns 形状文本
  */
 function getShapeText(creature: SkillCreature) {
@@ -33,8 +33,8 @@ function getShapeText(creature: SkillCreature) {
 }
 
 /**
- * 将创造物对象预渲染成字段数组。
- * @param creature 创造物对象
+ * 将实体对象预渲染成字段数组。
+ * @param creature 实体对象
  * @returns 结构化字段数组
  */
 function getCreatureFields(creature: SkillCreature): CreatureFieldItem[] {
@@ -63,7 +63,7 @@ const creatureCards = computed(() =>
     <div class="grid grid-cols-1 gap-3">
         <div v-for="(card, index) in creatureCards" :key="index" class="rounded">
             <div class="text-xs text-base-content/70 mb-2">
-                {{ titlePrefix ? `${titlePrefix}创造物#${card.creature.id}` : `创造物#${card.creature.id}` }}
+                {{ titlePrefix ? `${titlePrefix}实体#${card.creature.id}` : `实体#${card.creature.id}` }}
             </div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 text-xs">
                 <div

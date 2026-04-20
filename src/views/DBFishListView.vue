@@ -105,7 +105,6 @@ useInitialScrollToSelectedItem()
                 <div class="p-2 border-b border-base-200 space-y-2">
                     <!-- 类型筛选 -->
                     <div>
-                        <div class="text-xs text-base-content/70 mb-1">类型</div>
                         <div class="flex flex-wrap gap-1 pb-1">
                             <button
                                 class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"

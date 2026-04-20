@@ -1,5 +1,5 @@
 export const DNA_CURRENT_VERSION_GLOBAL_KEY = "__DNA_CURRENT_VERSION__"
-export const DNA_SAFE_VERSION_LIMIT = 1.2
+export const DNA_SAFE_VERSION_LIMIT = 1.3
 
 type VersionedItem = {
     版本?: string

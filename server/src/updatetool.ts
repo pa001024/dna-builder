@@ -362,7 +362,7 @@ async function buildAbyssUploadPayloadWithReason(
 
     const starsValue = String(roleInfo.roleInfo.abyssInfo?.stars ?? "").split("/")[0]
     const stars = Number(starsValue)
-    if (!Number.isInteger(stars) || stars < 0) {
+    if (!Number.isInteger(stars) || stars < 160) {
         return { payload: null, reason: `stars 非法: ${starsValue || "空"}` }
     }
 

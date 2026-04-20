@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
-import type { CharAttr, CharBuild, LeveledChar, LeveledMod } from "@/data"
+import { CharAttr, CharBuild, LeveledChar, LeveledMod } from "@/data"
 import { format100r } from "@/util"
 
 const props = withDefaults(
@@ -55,6 +55,18 @@ const dynamicAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() =>
     })
 
     return sourceMap
+})
+
+const modAttributeBonusSources = computed(() => {
+    const modAttributeBonus = props.charBuild.getTotalBonus(`${props.charBuild.char.属性}MOD属性`)
+
+    if (modAttributeBonus > 0) {
+        const modsBySeries = props.charBuild.charMods.filter(
+            (mod): mod is LeveledMod => mod !== null && CharBuild.elmSeries.includes(mod.系列)
+        )
+        return modsBySeries
+    }
+    return []
 })
 </script>
 <template>
@@ -133,6 +145,23 @@ const dynamicAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() =>
                     >
                         <div class="text-base-content/80">{{ dynamicSource.sourceName }}</div>
                         {{ format100r(dynamicSource.value) }}
+                    </li>
+                    <li
+                        v-if="
+                            charBuild.getTotalBonus(`${charBuild.char.属性}MOD属性`) > 0 &&
+                            modAttributeBonusSources.some(v => v.addAttr[key])
+                        "
+                        v-for="(buff, index) in charBuild.buffs.filter(b => b[`${charBuild.char.属性}MOD属性`])"
+                        :key="index"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">{{ buff.名称 }}</div>
+                        {{
+                            format100r(
+                                modAttributeBonusSources.reduce((v, r) => v + (r.addAttr[key] ?? 0), 0) *
+                                    buff[`${charBuild.char.属性}MOD属性`]!
+                            )
+                        }}
                     </li>
                 </ul>
             </div>

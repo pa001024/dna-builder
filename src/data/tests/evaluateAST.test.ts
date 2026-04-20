@@ -351,6 +351,29 @@ describe("evaluateAST函数测试", () => {
             expect(result).toBeGreaterThan(0)
         })
 
+        it("应该正确计算Q命名空间下的技能伤害字段", () => {
+            charBuild = new CharBuild({
+                char: new LeveledChar("苏乙"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                buffs: [],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "歼星模式",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "Q::[剑如虹]伤害",
+            })
+
+            const attrs = charBuild.calculateWeaponAttributes()
+            const result = charBuild.evaluateAST("Q::[剑如虹]伤害", attrs)
+
+            expect(result).toBeGreaterThan(0)
+            expect(result).toBeCloseTo(36661.61, 2)
+        })
+
         it("应该支持复杂的自定义目标函数", () => {
             charBuild.mods = [
                 new LeveledMod(41324), // 雷鸣·燎原

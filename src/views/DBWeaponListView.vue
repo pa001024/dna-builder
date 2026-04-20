@@ -7,6 +7,7 @@ import { LeveledWeapon } from "@/data"
 import weaponData from "../data/d/weapon.data"
 import { formatProp } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
+import { getRarityGradientClass } from "../utils/rarity-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedWeaponId = useSearchParam<number>("id", 0)
@@ -249,7 +250,13 @@ useInitialScrollToSelectedItem()
                             <div class="flex items-start justify-between">
                                 <div class="flex">
                                     <div class="flex items-center gap-2">
-                                        <img :src="LeveledWeapon.url(weapon.icon)" alt="武器图标" class="w-8 h-8 rounded" />
+                                        <div class="size-12 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(5)">
+                                            <img
+                                                :src="LeveledWeapon.url(weapon.icon)"
+                                                alt="武器图标"
+                                                class="w-full h-full object-cover rounded"
+                                            />
+                                        </div>
                                         <div>
                                             <div class="font-medium">
                                                 {{ $t(weapon.名称) }}
@@ -281,26 +288,6 @@ useInitialScrollToSelectedItem()
                                 <div class="flex items-center gap-1">
                                     <span>{{ $t("触发") }}</span>
                                     <span class="font-medium">{{ formatProp("基础触发", weapon.触发) }}</span>
-                                </div>
-                                <div v-if="weapon.弹匣" class="flex items-center gap-1">
-                                    <span>{{ $t("弹匣") }}</span>
-                                    <span class="font-medium">{{ weapon.弹匣 }}</span>
-                                </div>
-                                <div v-if="weapon.最大弹药" class="flex items-center gap-1">
-                                    <span>{{ $t("最大弹药") }}</span>
-                                    <span class="font-medium">{{ weapon.最大弹药 }}</span>
-                                </div>
-                                <div v-if="weapon.装填" class="flex items-center gap-1">
-                                    <span>{{ $t("装填") }}</span>
-                                    <span class="font-medium">{{ formatProp("基础装填", weapon.装填) }}</span>
-                                </div>
-                                <div v-if="weapon.射击间隔" class="flex items-center gap-1">
-                                    <span>{{ $t("射击间隔") }}</span>
-                                    <span class="font-medium">{{ formatProp("基础装填", weapon.射击间隔) }}</span>
-                                </div>
-                                <div v-if="weapon.射击间隔" class="flex items-center gap-1">
-                                    <span>{{ $t("射速") }}</span>
-                                    <span class="font-medium">{{ +(1 / weapon.射击间隔).toFixed(2) }}</span>
                                 </div>
                             </div>
                         </div>

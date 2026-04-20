@@ -25,7 +25,7 @@ const mockRoleInfo = {
             ],
         },
         abyssInfo: {
-            stars: 3,
+            stars: 160,
             bestTimeVo1: {
                 charIcon: "https://herobox-img.yingxiong.com/role/config/character/icon/T_Head_Zhiliu.png",
                 closeWeaponIcon: "https://herobox-img.yingxiong.com/role/config/weapon/Head_Claymore_Wangu.png",
@@ -55,7 +55,7 @@ describe("buildAbyssUploadPayload", () => {
             supportWeapon1: 10502,
             support2: 4201,
             supportWeapon2: 10203,
-            stars: 3,
+            stars: 160,
         })
         expect(payload?.ownedChars).toEqual([
             { charId: 160101, gradeLevel: 6 },
@@ -102,5 +102,20 @@ describe("buildAbyssUploadPayload", () => {
         } as DNARoleEntity)
 
         expect(payload?.stars).toBe(2653)
+    })
+
+    it("应该拒绝低于 160 的 stars", async () => {
+        await expect(
+            buildAbyssUploadPayload({
+                ...mockRoleInfo,
+                roleInfo: {
+                    ...mockRoleInfo.roleInfo,
+                    abyssInfo: {
+                        ...mockRoleInfo.roleInfo.abyssInfo,
+                        stars: "159/162",
+                    },
+                },
+            } as DNARoleEntity)
+        ).rejects.toThrow("stars 非法")
     })
 })

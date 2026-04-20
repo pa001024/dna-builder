@@ -124,7 +124,7 @@ const totalLevelExp = computed(() => {
                     <SRouterLink :to="`/db/reputation/${reputation.id}`" class="text-lg font-bold link link-primary">
                         {{ $t(reputation.name) }}
                     </SRouterLink>
-                    <div class="text-sm text-base-content/70">ID: {{ reputation.id }}</div>
+                    <CopyID :id="reputation.id" />
                 </div>
             </div>
             <span class="text-xs px-2 py-1 rounded bg-primary text-primary-content">Lv.{{ reputation.levels.length }}</span>
@@ -209,7 +209,7 @@ const totalLevelExp = computed(() => {
                         <img :src="getEntrustIcon(entrust.icon)" :alt="entrust.name" class="size-10 rounded bg-base-200 object-cover" />
                         <div class="min-w-0">
                             <div class="font-medium wrap-break-word">{{ $t(entrust.name) }}</div>
-                            <div class="text-xs text-base-content/70 mt-0.5">ID: {{ entrust.id }}</div>
+                            <CopyID :id="entrust.id" />
                         </div>
                     </div>
                     <div class="text-right text-xs shrink-0">

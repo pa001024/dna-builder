@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { useLocalStorage } from "@vueuse/core"
+import * as echarts from "echarts"
 import Fuse, { type FuseResultMatch } from "fuse.js"
-import { computed, watch } from "vue"
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { eventData } from "@/data"
@@ -16,8 +17,21 @@ const selectedTimePointIndex = useSearchParam<number>("ti", 0)
 const showFullTextSearch = useSearchParam<boolean>("fts", false)
 const showVersionFilter = useLocalStorage("event.showVersionFilter", true)
 const showTimeFilter = useLocalStorage("event.showTimeFilter", true)
+const showTimeLine = useLocalStorage("event.showTimeline", false)
 const diffOnlyEnabled = useSearchParam("td", false)
 const selectedVersion = useSearchParam<string>("ver", "")
+const eventTimeLineChartRef = ref<HTMLElement | null>(null)
+const currentTimeMs = ref(Date.now())
+const eventTimeLineZoomStart = ref(0)
+const eventTimeLineZoomEnd = ref(30)
+let eventTimeLineChartInstance: echarts.ECharts | null = null
+let eventTimeLineResizeObserver: ResizeObserver | null = null
+let currentTimeTimer: number | null = null
+
+const HEIGHT_RATIO = 0.8
+const DIM_CATEGORY_INDEX = 0
+const DIM_TIME_ARRIVAL = 1
+const DIM_TIME_DEPARTURE = 2
 
 interface EventSnippetSegment {
     text: string
@@ -43,8 +57,184 @@ interface EventFullTextEntry {
     snippets: string[]
 }
 
+interface EventTimelinePoint {
+    event: (typeof eventData)[number]
+    index: number
+    startTimeMs: number
+    endTimeMs: number
+    endTimeText: string
+}
+
+interface EventTimelineRow {
+    name: string
+    points: EventTimelinePoint[]
+}
+
+interface EventTimelineBarData {
+    rowIndex: number
+    startTimeMs: number
+    endTimeMs: number
+    name: string
+    eventId: number
+}
+
 const eventFullTextEntries = buildEventFullTextEntries()
 const eventFullTextFuse = createEventFullTextFuse(eventFullTextEntries)
+
+/**
+ * 判断活动是否匹配当前关键词。
+ * @param item 活动项
+ * @param keyword 关键词
+ * @param fullTextMatchedIds 全文检索命中的活动 ID 集合
+ * @returns 是否命中
+ */
+function isEventKeywordMatched(item: (typeof eventData)[number], keyword: string, fullTextMatchedIds: ReadonlySet<number> | null): boolean {
+    if (keyword === "") {
+        return true
+    }
+
+    if (fullTextMatchedIds) {
+        return fullTextMatchedIds.has(item.id)
+    }
+
+    if (
+        `${item.id}`.includes(keyword) ||
+        item.name.includes(keyword) ||
+        item.desc.includes(keyword) ||
+        (item.rule?.includes(keyword) ?? false)
+    ) {
+        return true
+    }
+
+    return matchPinyin(item.name, keyword).match || matchPinyin(item.desc, keyword).match || matchPinyin(item.rule ?? "", keyword).match
+}
+
+/**
+ * 生成时间表中显示的活动列表。
+ * 仅保留版本、手动版本筛选和关键词筛选，不受时间点滑块影响。
+ * @returns 时间表活动列表
+ */
+const eventTimeLinePoints = computed<EventTimelinePoint[]>(() => {
+    const keyword = searchKeyword.value.trim()
+    const fullTextMatchedIds =
+        showFullTextSearch.value && keyword !== "" ? new Set(eventFullTextFuse.search(keyword).map(result => result.item.event.id)) : null
+
+    return eventData
+        .filter(item => {
+            const eventVersion = getVersionByTime(item.startTime)
+            if (!isVersionAllowed(eventVersion)) {
+                return false
+            }
+
+            if (selectedVersion.value !== "" && eventVersion !== selectedVersion.value) {
+                return false
+            }
+
+            return isEventKeywordMatched(item, keyword, fullTextMatchedIds)
+        })
+        .sort((left, right) => left.startTime - right.startTime || left.id - right.id)
+        .map((event, index) => {
+            const endTime = event.endTime ?? Math.max(event.startTime, Math.floor(Date.now() / 1000))
+            return {
+                event,
+                index,
+                startTimeMs: event.startTime * 1000,
+                endTimeMs: endTime * 1000,
+                endTimeText: event.endTime == null ? "至今" : formatDateTime(event.endTime),
+            }
+        })
+})
+
+/**
+ * 是否存在可显示的时间表数据。
+ * @returns 是否可显示
+ */
+const eventTimeLineRows = computed<EventTimelineRow[]>(() => {
+    const rowMap = new Map<string, EventTimelinePoint[]>()
+
+    for (const point of eventTimeLinePoints.value) {
+        const rowPoints = rowMap.get(point.event.name)
+        if (rowPoints) {
+            rowPoints.push(point)
+            continue
+        }
+
+        rowMap.set(point.event.name, [point])
+    }
+
+    return Array.from(rowMap.entries())
+        .map(([name, points]) => ({
+            name,
+            points: [...points].sort((left, right) => left.startTimeMs - right.startTimeMs || left.event.id - right.event.id),
+        }))
+        .sort((left, right) => left.points[0].startTimeMs - right.points[0].startTimeMs || left.name.localeCompare(right.name))
+})
+
+/**
+ * 时间表活动 ID 索引。
+ * @returns 活动 ID 到时间点的映射
+ */
+const eventTimeLinePointById = computed(() => {
+    return new Map(eventTimeLinePoints.value.map(point => [point.event.id, point]))
+})
+
+/**
+ * 将秒级时间戳格式化为日期文本。
+ * @param timestamp 秒级时间戳
+ * @returns 日期文本
+ */
+function formatEventDate(timestamp: number): string {
+    return new Date(timestamp * 1000).toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    })
+}
+
+/**
+ * 扁平化后的时间表条目。
+ * @returns 条目列表
+ */
+const eventTimeLineBars = computed<EventTimelineBarData[]>(() => {
+    const visibleRows = eventTimeLineVisibleRows.value
+
+    return visibleRows.flatMap((row, rowIndex) =>
+        row.points.map(point => ({
+            rowIndex,
+            startTimeMs: point.startTimeMs,
+            endTimeMs: point.event.endTime == null ? eventTimeLineRange.value.max * 1000 : point.endTimeMs,
+            name: point.event.name,
+            eventId: point.event.id,
+        }))
+    )
+})
+
+/**
+ * 根据当前 x 轴窗口筛选可见行。
+ * @returns 可见行列表
+ */
+const eventTimeLineVisibleRows = computed<EventTimelineRow[]>(() => {
+    const rows = eventTimeLineRows.value
+    const range = eventTimeLineRange.value
+    const totalRange = Math.max(1, range.max - range.min)
+    const windowStart = range.min + (totalRange * eventTimeLineZoomStart.value) / 100
+    const windowEnd = range.min + (totalRange * eventTimeLineZoomEnd.value) / 100
+    const windowStartMs = windowStart * 1000
+    const windowEndMs = windowEnd * 1000
+
+    return rows.filter(row =>
+        row.points.some(point => {
+            const pointEndMs = point.event.endTime == null ? range.max * 1000 : point.endTimeMs
+            return point.startTimeMs <= windowEndMs && pointEndMs >= windowStartMs
+        })
+    )
+})
+
+/**
+ * 是否存在可显示的时间表数据。
+ * @returns 是否可显示
+ */
+const hasEventTimeLinePoints = computed(() => eventTimeLineVisibleRows.value.length > 0)
 
 /**
  * 生成活动可切换的离散时间点。
@@ -545,12 +735,390 @@ function resetToCurrentTimePoint(): void {
 }
 
 /**
+ * 收起活动详情面板。
+ */
+function closeSelectedEvent(): void {
+    selectedEventId.value = 0
+}
+
+/**
+ * 选中活动。
+ * @param eventId 活动 ID
+ */
+function selectEvent(eventId: number): void {
+    if (Number.isFinite(eventId)) {
+        selectedEventId.value = eventId
+    }
+}
+
+/**
  * 格式化离散时间点显示文本。
  * @param timestamp 时间戳
  * @returns 时间文本
  */
 function formatEventTimePoint(timestamp: number | null): string {
     return timestamp == null ? "-" : formatDateTime(timestamp)
+}
+
+/**
+ * 计算时间表横轴范围。
+ * @returns 时间轴最小和最大时间戳
+ */
+const eventTimeLineRange = computed(() => {
+    const now = currentTimeMs.value / 1000
+    if (eventTimeLineRows.value.length === 0) {
+        return {
+            min: Math.floor(now - 86400),
+            max: Math.ceil(now + 86400),
+        }
+    }
+
+    const allPoints = eventTimeLineRows.value.flatMap(row => row.points)
+    const min = Math.max(
+        0,
+        Math.floor(
+            Math.min(
+                now - 86400,
+                allPoints.reduce((currentMin, point) => Math.min(currentMin, point.event.startTime), Number.POSITIVE_INFINITY) - 86400
+            )
+        )
+    )
+    const max = Math.ceil(
+        Math.max(
+            now + 86400,
+            allPoints.reduce((currentMax, point) => Math.max(currentMax, point.event.endTime ?? point.event.startTime), 0) + 86400
+        )
+    )
+
+    return {
+        min,
+        max,
+    }
+})
+
+/**
+ * 绘制时间表条目。
+ * @param params 自定义系列渲染参数
+ * @param api 数据访问接口
+ * @returns 渲染图形
+ */
+function renderEventTimeLineItem(params: any, api: any): any {
+    const categoryIndex = api.value(DIM_CATEGORY_INDEX)
+    const timeArrival = api.coord([api.value(DIM_TIME_ARRIVAL), categoryIndex])
+    const timeDeparture = api.coord([api.value(DIM_TIME_DEPARTURE), categoryIndex])
+    const coordSys = params.coordSys
+    const barLength = timeDeparture[0] - timeArrival[0]
+    const barHeight = api.size([0, 1])[1] * HEIGHT_RATIO
+    const x = timeArrival[0]
+    const y = timeArrival[1] - barHeight
+    const eventName = `${api.value(3) ?? ""}`
+    const eventNameWidth = echarts.format.getTextRect(eventName).width
+    const text = barLength > eventNameWidth + 40 && x + barLength >= 180 ? eventName : ""
+    const rectNormal = echarts.graphic.clipRectByRect(
+        {
+            x,
+            y,
+            width: barLength,
+            height: barHeight,
+        },
+        coordSys
+    )
+
+    return {
+        type: "group",
+        children: [
+            {
+                type: "rect",
+                ignore: !rectNormal,
+                shape: rectNormal,
+                style: api.style({
+                    cursor: "pointer",
+                }),
+            },
+            {
+                type: "rect",
+                ignore: !rectNormal,
+                shape: rectNormal,
+                style: api.style({
+                    fill: "transparent",
+                    stroke: "transparent",
+                    text,
+                    textFill: "#fff",
+                    cursor: "pointer",
+                }),
+            },
+        ],
+    }
+}
+
+/**
+ * 绘制时间表左侧标签。
+ * @param params 自定义系列渲染参数
+ * @param api 数据访问接口
+ * @returns 渲染图形
+ */
+function renderEventTimeLineAxisLabelItem(params: any, api: any): any {
+    const y = api.coord([0, api.value(0)])[1]
+    if (y < params.coordSys.y + 5) {
+        return
+    }
+
+    return {
+        type: "group",
+        position: [10, y],
+        children: [
+            {
+                type: "path",
+                shape: {
+                    d: "M0,0 L0,-20 L30,-20 C42,-20 38,-1 50,-1 L70,-1 L70,0 Z",
+                    x: 0,
+                    y: -20,
+                    width: 90,
+                    height: 20,
+                    layout: "cover",
+                },
+                style: {
+                    fill: "#368c6c",
+                },
+            },
+            {
+                type: "text",
+                style: {
+                    x: 24,
+                    y: -3,
+                    text: `${api.value(1)}`,
+                    textVerticalAlign: "bottom",
+                    textAlign: "center",
+                    textFill: "#fff",
+                },
+            },
+        ],
+    }
+}
+
+/**
+ * 生成时间表图表配置。
+ * @returns 图表配置
+ */
+const eventTimeLineChartOption = computed<echarts.EChartsOption>(() => {
+    const rows = eventTimeLineVisibleRows.value
+    const range = eventTimeLineRange.value
+
+    return {
+        animation: false,
+        backgroundColor: "transparent",
+        title: {
+            text: "活动时间表",
+            left: "center",
+            top: 8,
+            textStyle: {
+                fontSize: 16,
+                fontWeight: 600,
+            },
+        },
+        grid: {
+            show: true,
+            top: 70,
+            bottom: 20,
+            left: 100,
+            right: 20,
+            // backgroundColor: "#fff",
+            borderWidth: 0,
+        },
+        tooltip: {
+            trigger: "item",
+            renderMode: "html",
+            extraCssText: "max-width: 420px; white-space: pre-wrap; word-break: break-word;",
+            formatter: params => {
+                const item = Array.isArray(params) ? params[0] : params
+                const rawValue = Array.isArray(item.value) ? item.value : []
+                const [, startTimeMs, endTimeMs, , eventId] = rawValue as [number, number, number, string, number]
+                const point = eventTimeLinePointById.value.get(eventId)
+                if (!point) {
+                    return ""
+                }
+
+                return [
+                    point.event.name,
+                    `ID：${point.event.id}`,
+                    `时间：${formatDateTime(Math.floor(startTimeMs / 1000))} - ${point.event.endTime == null ? "至今" : formatDateTime(Math.floor(endTimeMs / 1000))}`,
+                    `描述：${point.event.desc}`,
+                ].join("<br/>")
+            },
+        },
+        xAxis: {
+            type: "time",
+            position: "top",
+            min: range.min * 1000,
+            max: range.max * 1000,
+            axisLabel: {
+                formatter: value => formatEventDate(Math.floor(Number(value) / 1000)),
+                hideOverlap: true,
+            },
+            axisTick: {
+                show: false,
+            },
+            minorTick: {
+                show: false,
+            },
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    color: "rgba(127, 127, 127, 0.15)",
+                },
+            },
+        },
+        yAxis: {
+            axisTick: { show: false },
+            splitLine: { show: false },
+            axisLine: { show: false },
+            axisLabel: {
+                show: false,
+            },
+            min: 0,
+            max: rows.length,
+        },
+        dataZoom: [
+            {
+                type: "slider",
+                xAxisIndex: 0,
+                filterMode: "weakFilter",
+                height: 20,
+                bottom: 0,
+                start: eventTimeLineZoomStart.value,
+                end: eventTimeLineZoomEnd.value,
+                handleSize: "80%",
+                showDetail: false,
+            },
+            {
+                type: "inside",
+                xAxisIndex: 0,
+                filterMode: "weakFilter",
+                start: eventTimeLineZoomStart.value,
+                end: eventTimeLineZoomEnd.value,
+                zoomOnMouseWheel: true,
+                moveOnMouseWheel: true,
+                moveOnMouseMove: true,
+            },
+        ],
+        series: [
+            {
+                name: "时间表",
+                type: "custom",
+                renderItem: renderEventTimeLineItem as unknown as echarts.CustomSeriesRenderItem,
+                encode: {
+                    x: [DIM_TIME_ARRIVAL, DIM_TIME_DEPARTURE],
+                    y: DIM_CATEGORY_INDEX,
+                    tooltip: [DIM_CATEGORY_INDEX, DIM_TIME_ARRIVAL, DIM_TIME_DEPARTURE],
+                },
+                progressive: 0,
+                data: eventTimeLineBars.value.map(bar => [bar.rowIndex, bar.startTimeMs, bar.endTimeMs, bar.name, bar.eventId]),
+            },
+            {
+                type: "custom",
+                renderItem: renderEventTimeLineAxisLabelItem,
+                encode: {
+                    x: -1,
+                    y: 0,
+                },
+                data: rows.map((row, index) => [index, row.name]),
+            },
+            {
+                type: "line",
+                name: "当前时间",
+                data: [],
+                symbol: "none",
+                silent: true,
+                tooltip: {
+                    show: false,
+                },
+                lineStyle: {
+                    opacity: 0,
+                },
+                markLine: {
+                    symbol: "none",
+                    silent: true,
+                    label: {
+                        show: false,
+                    },
+                    lineStyle: {
+                        color: "rgba(220, 38, 38, 0.85)",
+                        width: 1,
+                        type: "dashed",
+                    },
+                    data: [
+                        {
+                            xAxis: currentTimeMs.value,
+                        },
+                    ],
+                },
+            },
+        ],
+    } satisfies echarts.EChartsOption
+})
+
+/**
+ * 重新渲染时间表。
+ */
+function renderEventTimeLineChart(): void {
+    if (!showTimeLine.value || !hasEventTimeLinePoints.value || !eventTimeLineChartRef.value) {
+        return
+    }
+
+    if (!eventTimeLineChartInstance) {
+        eventTimeLineChartInstance = echarts.init(eventTimeLineChartRef.value)
+        eventTimeLineChartInstance.on("datazoom", params => {
+            const payload = params as { start?: number; end?: number; batch?: Array<{ start?: number; end?: number }> }
+            const zoom = payload.batch?.[0] ?? payload
+            if (zoom.start != null && zoom.end != null) {
+                eventTimeLineZoomStart.value = zoom.start
+                eventTimeLineZoomEnd.value = zoom.end
+            }
+        })
+        eventTimeLineChartInstance.on("click", params => {
+            const rawValue = (params as { data?: unknown[]; value?: unknown[] }).data ?? (params as { value?: unknown[] }).value
+            const eventId = Number(Array.isArray(rawValue) ? rawValue[4] : NaN)
+            if (Number.isFinite(eventId)) {
+                selectEvent(eventId)
+                return
+            }
+
+            const dataIndex = Number((params as { dataIndex?: number }).dataIndex)
+            const fallbackEventId = eventTimeLineBars.value[dataIndex]?.eventId
+            selectEvent(fallbackEventId ?? NaN)
+        })
+    }
+
+    eventTimeLineChartInstance.setOption(eventTimeLineChartOption.value, { notMerge: false })
+    eventTimeLineChartInstance.resize()
+}
+
+/**
+ * 清理时间表实例。
+ */
+function disposeEventTimeLineChart(): void {
+    eventTimeLineResizeObserver?.disconnect()
+    eventTimeLineResizeObserver = null
+
+    if (eventTimeLineChartInstance) {
+        eventTimeLineChartInstance.dispose()
+        eventTimeLineChartInstance = null
+    }
+}
+
+/**
+ * 确保时间表容器尺寸变化时自动刷新。
+ */
+function observeEventTimeLineChartResize(): void {
+    if (!eventTimeLineChartRef.value) {
+        return
+    }
+
+    eventTimeLineResizeObserver?.disconnect()
+    eventTimeLineResizeObserver = new ResizeObserver(() => {
+        eventTimeLineChartInstance?.resize()
+    })
+    eventTimeLineResizeObserver.observe(eventTimeLineChartRef.value)
 }
 
 watch(
@@ -591,7 +1159,52 @@ watch(
     { immediate: true }
 )
 
+watch(
+    showTimeLine,
+    async show => {
+        if (!show) {
+            disposeEventTimeLineChart()
+            return
+        }
+
+        await nextTick()
+        observeEventTimeLineChartResize()
+        renderEventTimeLineChart()
+    },
+    { immediate: true }
+)
+
+watch(
+    eventTimeLineChartOption,
+    async () => {
+        if (!showTimeLine.value) {
+            return
+        }
+
+        await nextTick()
+        renderEventTimeLineChart()
+    },
+    { immediate: true }
+)
+
 useInitialScrollToSelectedItem()
+
+onMounted(() => {
+    currentTimeTimer = window.setInterval(() => {
+        currentTimeMs.value = Date.now()
+        renderEventTimeLineChart()
+    }, 60000)
+    window.addEventListener("resize", renderEventTimeLineChart)
+})
+
+onUnmounted(() => {
+    if (currentTimeTimer != null) {
+        window.clearInterval(currentTimeTimer)
+        currentTimeTimer = null
+    }
+    window.removeEventListener("resize", renderEventTimeLineChart)
+    disposeEventTimeLineChart()
+})
 </script>
 
 <template>
@@ -620,6 +1233,10 @@ useInitialScrollToSelectedItem()
                         <label class="flex items-center gap-1 cursor-pointer">
                             <input v-model="showFullTextSearch" type="checkbox" class="checkbox checkbox-xs" />
                             <span class="text-xs text-base-content/70">全文搜索</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input v-model="showTimeLine" type="checkbox" class="checkbox checkbox-xs" />
+                            <span class="text-xs text-base-content/70">时间表</span>
                         </label>
                     </div>
 
@@ -681,65 +1298,85 @@ useInitialScrollToSelectedItem()
                     </div>
                 </div>
 
-                <ScrollArea class="flex-1">
-                    <div class="p-2 space-y-2">
-                        <div v-if="filteredEvents.length === 0" class="p-4 text-center text-sm text-base-content/60">
-                            {{ diffOnlyEnabled ? "与上一时间点相比没有变化活动" : "当前时间点没有符合条件的活动" }}
-                        </div>
-                        <div
-                            v-for="item in filteredEvents"
-                            :key="item.id"
-                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedEventId === item.id }"
-                            @click="selectedEventId = item.id"
-                        >
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0">
-                                    <div class="font-medium truncate">{{ item.name }}</div>
-                                    <div class="text-xs opacity-70 mt-1">
-                                        {{ formatTimeRange(item.startTime, item.endTime) }}
-                                        <span v-if="getVersionByTime(item.startTime)" class="ml-2"
-                                            >v{{ getVersionByTime(item.startTime) }}</span
-                                        >
-                                    </div>
-                                </div>
-                                <div class="text-xs text-right opacity-70 whitespace-nowrap">ID: {{ item.id }}</div>
-                            </div>
-                            <div class="text-xs opacity-70 mt-2 line-clamp-2 whitespace-pre-wrap break-all">
-                                {{ item.desc }}
-                            </div>
-                            <div v-if="searchKeyword.trim()" class="mt-2 text-xs leading-relaxed opacity-85">
-                                <span class="opacity-65">匹配：</span>
-                                <span v-if="getEventSnippet(item)?.prefixEllipsis">...</span>
-                                <template v-for="(segment, index) in getEventSnippet(item)?.segments || []" :key="`${item.id}-${index}`">
-                                    <span
-                                        :class="
-                                            segment.highlighted
-                                                ? selectedEventId === item.id
-                                                    ? 'bg-base-100/45 text-primary-content font-semibold px-0.5 rounded underline decoration-primary-content/80 decoration-2 underline-offset-2'
-                                                    : 'bg-primary/20 text-base-content font-semibold px-0.5 rounded underline decoration-primary/80 decoration-2 underline-offset-2'
-                                                : ''
-                                        "
-                                    >
-                                        {{ segment.text }}
-                                    </span>
-                                </template>
-                                <span v-if="getEventSnippet(item)?.suffixEllipsis">...</span>
-                            </div>
-                        </div>
+                <template v-if="showTimeLine">
+                    <div class="flex-1 min-h-0 p-2 overflow-hidden">
+                        <div v-if="hasEventTimeLinePoints" ref="eventTimeLineChartRef" class="h-full w-full" />
+                        <div v-else class="flex h-full items-center justify-center text-sm text-base-content/60">无数据</div>
                     </div>
-                </ScrollArea>
+                </template>
+                <template v-else>
+                    <ScrollArea class="flex-1">
+                        <div class="p-2 space-y-2">
+                            <div v-if="filteredEvents.length === 0" class="p-4 text-center text-sm text-base-content/60">
+                                {{ diffOnlyEnabled ? "与上一时间点相比没有变化活动" : "当前时间点没有符合条件的活动" }}
+                            </div>
+                            <div
+                                v-for="item in filteredEvents"
+                                :key="item.id"
+                                class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
+                                :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedEventId === item.id }"
+                                @click="selectEvent(item.id)"
+                            >
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <div class="font-medium truncate">{{ item.name }}</div>
+                                        <div class="text-xs opacity-70 mt-1">
+                                            {{ formatTimeRange(item.startTime, item.endTime) }}
+                                            <span v-if="getVersionByTime(item.startTime)" class="ml-2"
+                                                >v{{ getVersionByTime(item.startTime) }}</span
+                                            >
+                                        </div>
+                                    </div>
+                                    <CopyID :id="item.id" />
+                                </div>
+                                <div class="text-xs opacity-70 mt-2 line-clamp-2 whitespace-pre-wrap break-all">
+                                    {{ item.desc }}
+                                </div>
+                                <div
+                                    v-if="showFullTextSearch && searchKeyword.trim() && getEventSnippet(item)?.segments?.length"
+                                    class="mt-2 text-xs leading-relaxed opacity-85"
+                                >
+                                    <span class="opacity-65">匹配：</span>
+                                    <span v-if="getEventSnippet(item)?.prefixEllipsis">...</span>
+                                    <template
+                                        v-for="(segment, index) in getEventSnippet(item)?.segments || []"
+                                        :key="`${item.id}-${index}`"
+                                    >
+                                        <span
+                                            :class="
+                                                segment.highlighted
+                                                    ? selectedEventId === item.id
+                                                        ? 'bg-base-100/45 text-primary-content font-semibold px-0.5 rounded underline decoration-primary-content/80 decoration-2 underline-offset-2'
+                                                        : 'bg-primary/20 text-base-content font-semibold px-0.5 rounded underline decoration-primary/80 decoration-2 underline-offset-2'
+                                                    : ''
+                                            "
+                                        >
+                                            {{ segment.text }}
+                                        </span>
+                                    </template>
+                                    <span v-if="getEventSnippet(item)?.suffixEllipsis">...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredEvents.length }} 个活动
-                </div>
+                    <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
+                        共 {{ filteredEvents.length }} 个活动
+                    </div>
+                </template>
             </div>
 
-            <div v-if="selectedEvent" class="flex-1 overflow-hidden">
-                <ScrollArea class="h-full">
-                    <DBEventDetailItem :event="selectedEvent" class="flex-1" />
-                </ScrollArea>
+            <div
+                v-if="selectedEvent"
+                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                @click="closeSelectedEvent"
+            >
+                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
             </div>
+
+            <ScrollArea v-if="selectedEvent" class="flex-2">
+                <DBEventDetailItem :event="selectedEvent" class="flex-1" />
+            </ScrollArea>
         </div>
     </div>
 </template>

@@ -161,7 +161,7 @@ export interface Skill {
     字段?: SkillField[]
     术语解释?: Record<string, string>
     召唤物?: SkillSummon
-    创造物?: SkillCreature[]
+    实体?: SkillCreature[]
     cd?: number
     e?: SkillEffect[]
     b?: SkillBuff[]
@@ -180,7 +180,7 @@ export interface SubSkill {
     字段?: SkillField[]
     术语解释?: Record<string, string>
     召唤物?: SkillSummon
-    创造物?: SkillCreature[]
+    实体?: SkillCreature[]
     cd?: number
     e?: SkillEffect[]
     b?: SkillBuff[]
@@ -352,7 +352,7 @@ export interface WeaponSkill {
     削韧?: number[]
     延迟?: number[]
     卡肉?: number[]
-    创造物?: SkillCreature[]
+    实体?: SkillCreature[]
 }
 
 export enum WeaponSkillType {

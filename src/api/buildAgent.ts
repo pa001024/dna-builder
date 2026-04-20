@@ -1367,7 +1367,7 @@ export class BuildAgent {
      */
     private setBaseAndTargetFunction(params: { baseName?: string; targetFunction?: string }): string {
         const currentSettings = this.charSettings.value
-        const currentBuild = CharBuild.fromCharSetting(this.selectedChar.value, this.inv, currentSettings)
+        const currentBuild = CharBuild.fromCharSetting(this.selectedChar.value, currentSettings, this.inv)
         const fallbackBaseName = currentSettings.baseName || currentBuild.charSkills[0]?.名称 || ""
         const requestedBaseName = params.baseName?.trim()
         const requestedTargetFunction = params.targetFunction?.trim()
@@ -1380,7 +1380,7 @@ export class BuildAgent {
             baseName: nextBaseName,
             targetFunction: nextTargetFunction,
         }
-        const probeBuild = CharBuild.fromCharSetting(this.selectedChar.value, this.inv, probeSettings)
+        const probeBuild = CharBuild.fromCharSetting(this.selectedChar.value, probeSettings, this.inv)
         const availableSkillNames = probeBuild.allSkills.map(skill => skill.名称)
 
         if (requestedBaseName && !availableSkillNames.includes(requestedBaseName)) {
@@ -1414,7 +1414,7 @@ export class BuildAgent {
             targetFunction: nextTargetFunction,
         }
 
-        const finalBuild = CharBuild.fromCharSetting(this.selectedChar.value, this.inv, this.charSettings.value)
+        const finalBuild = CharBuild.fromCharSetting(this.selectedChar.value, this.charSettings.value, this.inv)
         const targetPreview = finalBuild.calculateTargetFunction(finalBuild.calculateWeaponAttributes())
 
         return JSON.stringify(
@@ -1437,7 +1437,7 @@ export class BuildAgent {
      * 工具实现: 获取当前配置
      */
     private getCurrentConfig(): string {
-        const build = CharBuild.fromCharSetting(this.selectedChar.value, this.inv, this.charSettings.value)
+        const build = CharBuild.fromCharSetting(this.selectedChar.value, this.charSettings.value, this.inv)
         const baseName = this.charSettings.value.baseName || build.charSkills[0]?.名称 || ""
         const targetFunction = this.charSettings.value.targetFunction || "伤害"
         const targetFunctionError = build.validateAST(targetFunction)
@@ -1494,7 +1494,7 @@ export class BuildAgent {
         const enableLog = params.enableLog ?? true
         const apply = params.apply ?? false
 
-        const build = CharBuild.fromCharSetting(this.selectedChar.value, this.inv, this.charSettings.value)
+        const build = CharBuild.fromCharSetting(this.selectedChar.value, this.charSettings.value, this.inv)
         const final = {
             includeTypes,
             preserveTypes,

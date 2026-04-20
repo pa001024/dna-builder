@@ -57,6 +57,12 @@ interface PointColorRow {
     colors: PointColorEntry[]
 }
 
+interface ReferenceImageHoverInfo {
+    x: number
+    y: number
+    color: PixelColorInfo | null
+}
+
 interface ImagePointColorEntry {
     point: PointItem
     pointIndex: number
@@ -128,6 +134,7 @@ const pointCheckColorEditing = ref<Record<number, boolean>>({})
 const pointCategoryForceChecks = ref<Record<string, boolean>>({})
 const pointTolerances = ref<Record<number, number>>({})
 const pointToleranceInputs = ref<Record<number, string>>({})
+const hoveredReferencePixel = ref<ReferenceImageHoverInfo | null>(null)
 const classificationTestResults = ref<Record<string, ClassificationTestResult>>({})
 const loading = ref(false)
 const isDragging = ref(false)
@@ -1096,6 +1103,40 @@ function handleToleranceInput(event: Event) {
 }
 
 /**
+ * 根据鼠标位置读取参考图上的像素点信息。
+ * @param clientX 鼠标横坐标
+ * @param clientY 鼠标纵坐标
+ * @returns 像素点信息；越界时返回 null
+ */
+function getReferenceImagePixelFromClientPosition(clientX: number, clientY: number): ReferenceImageHoverInfo | null {
+    const base = referenceImage.value
+    const imageEl = referenceImageRef.value
+    if (!base || !imageEl) {
+        return null
+    }
+
+    const rect = imageEl.getBoundingClientRect()
+    if (rect.width <= 0 || rect.height <= 0) {
+        return null
+    }
+
+    const scale = zoomScale.value
+    const rawX = (clientX - rect.left) / scale
+    const rawY = (clientY - rect.top) / scale
+    const x = Math.floor(rawX)
+    const y = Math.floor(rawY)
+    if (x < 0 || y < 0 || x >= base.width || y >= base.height) {
+        return null
+    }
+
+    return {
+        x,
+        y,
+        color: getPixelColor(base, x, y),
+    }
+}
+
+/**
  * 设置指定点位的容差。
  * @param pointId 点位 ID
  * @param value 目标容差
@@ -1162,40 +1203,27 @@ function revertPointToleranceInput(pointId: number) {
  * @param forceCheck 是否按当前分类自动启用强制检查
  */
 function addPointOnReferenceImage(event: MouseEvent, forceCheck: boolean) {
+    const pixel = getReferenceImagePixelFromClientPosition(event.clientX, event.clientY)
     const base = referenceImage.value
-    const imageEl = referenceImageRef.value
-    if (!base || !imageEl) {
+    if (!base || !pixel) {
         return
     }
-
-    const rect = imageEl.getBoundingClientRect()
-    if (rect.width <= 0 || rect.height <= 0) {
-        return
-    }
-
-    // 按当前 1:N 缩放倍数直接换算像素坐标，避免比例误差。
-    const scale = zoomScale.value
-    const rawX = (event.clientX - rect.left) / scale
-    const rawY = (event.clientY - rect.top) / scale
-    const x = Math.max(0, Math.min(base.width - 1, Math.floor(rawX)))
-    const y = Math.max(0, Math.min(base.height - 1, Math.floor(rawY)))
 
     const pointId = pointIdSeed++
     points.value.push({
         id: pointId,
-        x,
-        y,
+        x: pixel.x,
+        y: pixel.y,
     })
     pointTolerances.value = {
         ...pointTolerances.value,
         [pointId]: defaultTolerance.value,
     }
 
-    const baseColor = getPixelColor(base, x, y)
-    if (baseColor) {
+    if (pixel.color) {
         pointInitialCheckColors.value = {
             ...pointInitialCheckColors.value,
-            [pointId]: baseColor.hex,
+            [pointId]: pixel.color.hex,
         }
     }
     const activeLabel = getImageLabelByIndex(activeImageIndex.value)
@@ -1214,6 +1242,21 @@ function addPointOnReferenceImage(event: MouseEvent, forceCheck: boolean) {
  */
 function handleReferenceImageClick(event: MouseEvent) {
     addPointOnReferenceImage(event, false)
+}
+
+/**
+ * 更新左侧参考图的实时像素采样信息。
+ * @param event 指针事件
+ */
+function handleReferenceImagePointerMove(event: PointerEvent) {
+    hoveredReferencePixel.value = getReferenceImagePixelFromClientPosition(event.clientX, event.clientY)
+}
+
+/**
+ * 清空左侧参考图的实时像素采样信息。
+ */
+function clearReferenceImagePointerInfo() {
+    hoveredReferencePixel.value = null
 }
 
 /**
@@ -2378,10 +2421,6 @@ onUnmounted(() => {
                 class="hidden"
                 @change="handleProjectImportSelection"
             />
-            <div v-if="env.isApp" class="flex items-center gap-3 text-xs text-base-content/70">
-                <span>实时结果 {{ realtimeTestResultText || "-" }}</span>
-                <span>FPS {{ realtimeTestFpsText || "-" }}</span>
-            </div>
             <div class="text-xs text-base-content/70">
                 请先加载多张图片，然后在当前图上点击添加坐标点（坐标可点击复制 cc，桌面端支持拖拽导入）
             </div>
@@ -2433,6 +2472,8 @@ onUnmounted(() => {
                                 :style="referenceImageStyle"
                                 @click="handleReferenceImageClick"
                                 @contextmenu="handleReferenceImageContextMenu"
+                                @pointermove="handleReferenceImagePointerMove"
+                                @pointerleave="clearReferenceImagePointerInfo"
                             />
                             <div
                                 v-for="(point, index) in points"
@@ -2459,7 +2500,26 @@ onUnmounted(() => {
                             </div>
                         </div>
                     </div>
-                    <div class="text-xs text-base-content/60">已加载 {{ loadedImages.length }} 张图片，已打点 {{ points.length }} 个</div>
+                    <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-base-content/60">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span>已加载 {{ loadedImages.length }} 张图片，已打点 {{ points.length }} 个</span>
+                            <span v-if="env.isApp">实时结果 {{ realtimeTestResultText || "-" }}</span>
+                            <span v-if="env.isApp">FPS {{ realtimeTestFpsText || "-" }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 font-mono">
+                            <span v-if="hoveredReferencePixel">{{ hoveredReferencePixel.x }},{{ hoveredReferencePixel.y }}</span>
+                            <span v-else>-</span>
+                            <span
+                                class="inline-block w-3 h-3 rounded border border-base-300"
+                                :style="{
+                                    backgroundColor: hoveredReferencePixel?.color
+                                        ? `rgba(${hoveredReferencePixel.color.r}, ${hoveredReferencePixel.color.g}, ${hoveredReferencePixel.color.b}, ${hoveredReferencePixel.color.a / 255})`
+                                        : 'transparent',
+                                }"
+                            />
+                            <span>{{ hoveredReferencePixel?.color?.hex ?? "-" }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2670,5 +2730,6 @@ onUnmounted(() => {
                 <div class="text-xs text-base-content/70 mt-1">支持 png / jpg / jpeg / webp / bmp / gif / tiff / ico</div>
             </div>
         </div>
+
     </div>
 </template>

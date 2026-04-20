@@ -11,7 +11,7 @@ const props = defineProps<{
 }>()
 
 const currentMonsterLevel = ref(AbyssMonsterLevelLimit)
-const currentActMode = ref<"12" | "36" | "custom">("12")
+const currentActMode = ref<"12" | "36" | "50" | "custom">("12")
 const currentActCount = ref(12)
 
 const isImmortalPlay = computed(() => getAbyssDungeonGroup(props.dungeon) === "不朽剧目")
@@ -19,7 +19,7 @@ const currentStarCount = computed(() => getAbyssStarCountByActCount(currentActCo
 
 const monsterDisplayLevel = computed(() => {
     if (isImmortalPlay.value) {
-        return getImmortalMonsterLevelByActCount(currentActCount.value)
+        return getImmortalMonsterLevelByActCount(currentActCount.value, props.dungeon.sid)
     }
 
     return currentMonsterLevel.value
@@ -30,12 +30,15 @@ const monsterDisplayLevel = computed(() => {
  * @param actCount 幕数
  * @returns 对应的 tab
  */
-function getActModeByCount(actCount: number): "12" | "36" | "custom" {
+function getActModeByCount(actCount: number): "12" | "36" | "50" | "custom" {
     if (actCount === 12) {
         return "12"
     }
     if (actCount === 36) {
         return "36"
+    }
+    if (actCount === 50) {
+        return "50"
     }
 
     return "custom"
@@ -45,7 +48,7 @@ function getActModeByCount(actCount: number): "12" | "36" | "custom" {
  * 切换累计奖励幕数预设。
  * @param mode 预设模式
  */
-function setActMode(mode: "12" | "36" | "custom"): void {
+function setActMode(mode: "12" | "36" | "50" | "custom"): void {
     currentActMode.value = mode
     if (mode === "12") {
         currentActCount.value = 12
@@ -53,6 +56,10 @@ function setActMode(mode: "12" | "36" | "custom"): void {
     }
     if (mode === "36") {
         currentActCount.value = 36
+        return
+    }
+    if (mode === "50") {
+        currentActCount.value = 50
     }
 }
 
@@ -138,7 +145,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     <span v-if="dungeon.cid">{{ $t(getCharName(dungeon.cid)) }}</span>
                     #{{ getAbyssDungeonLevel(dungeon) }}
                 </SRouterLink>
-                <div class="text-sm text-base-content/70">ID: {{ dungeon.id }}</div>
+                <CopyID :id="dungeon.id" />
             </div>
         </div>
 
@@ -180,7 +187,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     <SRouterLink :to="`/char/${char.id}`" class="font-medium link link-primary">
                         {{ char.名称 }}
                     </SRouterLink>
-                    <span class="text-xs text-base-content/70">ID: {{ char.id }}</span>
+                    <CopyID :id="char.id" />
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <div class="flex justify-between">
@@ -216,14 +223,17 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
         <div v-if="dungeon.buff?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
             <h3 class="font-bold mb-2">BUFF列表 ({{ dungeon.buff.length }}个)</h3>
             <div class="space-y-2">
-                <div v-for="buff in dungeon.buff" :key="buff.id" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
+                <div
+                    v-for="buff in dungeon.buff"
+                    :key="buff.id"
+                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                >
                     <div class="flex items-start gap-2">
                         <img :src="`/imgs/webp/T_Abyss_Buff_${buff.icon}.webp`" class="h-10 inline-block rounded" />
                         <div class="flex-1">
                             <div class="font-medium text-sm">
                                 {{ buff.n }}
-
-                                <span class="text-xs text-base-content/70">ID: {{ buff.id }}</span>
+                                <CopyID :id="buff.id" />
                             </div>
                             <div class="text-xs text-base-content/70 mt-1">
                                 {{ buff.d }}
@@ -246,7 +256,11 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                 <div v-if="dungeon.art" class="text-sm font-medium mb-2">
                     {{ dungeon.art }}
                 </div>
-                <div v-for="item in dungeon.arl" :key="item.lv" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
+                <div
+                    v-for="item in dungeon.arl"
+                    :key="item.lv"
+                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                >
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-sm font-medium">
                             <img src="/imgs/res/T_Abyss_Star02.webp" alt="图标" class="w-6 h-6 inline-block align-middle mr-1" />
@@ -290,6 +304,14 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     @click="setActMode('36')"
                 >
                     36
+                </button>
+                <button
+                    type="button"
+                    class="rounded px-3 py-1 transition-colors duration-200"
+                    :class="currentActMode === '50' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                    @click="setActMode('50')"
+                >
+                    50
                 </button>
                 <button
                     type="button"

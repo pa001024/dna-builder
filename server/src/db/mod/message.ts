@@ -383,13 +383,13 @@ export const resolvers = {
                     .where(eq(schema.msgs.id, msgId))
                     .returning()
             )[0]
+            const msgEdited = {
+                ...msg,
+                content: content_sanitized,
+                edited: updated_msg?.edited ?? msg.edited ?? 0,
+            }
             if (updated_msg) {
                 const room = await getRoomVisibilityInfo(msg.roomId)
-                const msgEdited = {
-                    ...msg,
-                    content: content_sanitized,
-                    edited: updated_msg.edited,
-                }
                 if (room && isPrivateRoomType(room.type)) {
                     const targets = getPrivateRoomTargets(room, msg.userId, msg.replyToUserId)
                     for (const targetUserId of targets) {
@@ -399,8 +399,7 @@ export const resolvers = {
                     pubsub.publish("msgEdited", msg.roomId, { msgEdited })
                 }
             }
-
-            return updated_msg
+            return msgEdited
         },
     },
     Subscription: {

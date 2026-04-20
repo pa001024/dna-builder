@@ -410,7 +410,7 @@ watch(
                         <div class="card-body p-4">
                             <div class="flex items-center gap-2">
                                 <div class="text-sm font-bold">商品列表</div>
-                                <div class="ml-auto tabs tabs-boxed">
+                                <div class="ml-auto tabs tabs-box">
                                     <a class="tab" :class="{ 'tab-active': tab === 'all' }" @click="tab = 'all'">全部</a>
                                     <a class="tab" :class="{ 'tab-active': tab === 'title' }" @click="tab = 'title'">称号</a>
                                     <a class="tab" :class="{ 'tab-active': tab === 'name_card' }" @click="tab = 'name_card'">名字特效</a>
