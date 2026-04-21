@@ -484,6 +484,8 @@
         "resource_desc": "查看资源信息和图标",
         "shop": "商店",
         "shop_desc": "查看商店物品信息",
+        "solotreasure": "奉香群英试",
+        "solotreasure_desc": "查看搜打撤活动(奉香群英试)副本和玩法信息",
         "title": "资料库",
         "title_data": "称号",
         "title_data_desc": "查看称号前后缀与来源信息",

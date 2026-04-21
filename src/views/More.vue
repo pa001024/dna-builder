@@ -24,7 +24,7 @@ const items = [
     {
         name: "counter",
         path: "/counter",
-        icon: "ri:bar-chart-line",
+        icon: "plus_one",
     },
     {
         name: "build-compare",

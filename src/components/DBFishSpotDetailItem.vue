@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
 import { calculateFishPrice, getRandomFish } from "@/utils/fish-utils"
+import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
 import type { Fish, FishingSpot } from "../data"
 import { fishMap, petMap } from "../data"
@@ -33,34 +34,6 @@ const spotPet = computed(() => {
 const spotIcon = computed(() => {
     return props.spot.icon ? `/imgs/webp/${props.spot.icon}.webp` : "/imgs/webp/T_Tab_Angling00.webp"
 })
-
-/**
- * 获取稀有度颜色
- */
-function getRarityColor(rarity: number): string {
-    const colorMap: Record<number, string> = {
-        1: "bg-green-200 text-green-800",
-        2: "bg-green-200 text-green-800",
-        3: "bg-blue-200 text-blue-800",
-        4: "bg-purple-200 text-purple-800",
-        5: "bg-yellow-200 text-yellow-800",
-    }
-    return colorMap[rarity] || "bg-base-200 text-base-content"
-}
-
-/**
- * 获取稀有度名称
- */
-function getRarityName(rarity: number): string {
-    const rarityMap: Record<number, string> = {
-        1: "白",
-        2: "绿",
-        3: "蓝",
-        4: "紫",
-        5: "金",
-    }
-    return rarityMap[rarity] || rarity.toString()
-}
 
 /**
  * 获取出现时间名称
@@ -403,7 +376,7 @@ function clearHistory() {
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium">{{ fish.name }}</span>
                                             <CopyID :id="fish.id" />
-                                            <span class="text-xs px-1.5 py-0.5 rounded" :class="getRarityColor(fish.rarity)">
+                                            <span class="px-1.5 py-0.5 rounded" :class="getRarityBadgeClass(fish.rarity)">
                                                 {{ getRarityName(fish.rarity) }}
                                             </span>
                                         </div>
@@ -488,7 +461,7 @@ function clearHistory() {
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium">{{ record.finalFish.name }}</span>
-                                            <span class="text-xs px-1.5 py-0.5 rounded" :class="getRarityColor(record.finalFish.rarity)">
+                                            <span class="px-1.5 py-0.5 rounded" :class="getRarityBadgeClass(record.finalFish.rarity)">
                                                 {{ getRarityName(record.finalFish.rarity) }}
                                             </span>
                                             <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 text-gray-800">

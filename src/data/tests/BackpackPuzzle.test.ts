@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { backpackPuzzleLevels, backpackPuzzleSolutionPresets } from "@/data/d"
+import { backpackPuzzleLevels, backpackPuzzleSolutionPresets } from "@/data/d/backpackpuzzle.data"
 
 describe("BackpackPuzzle", () => {
     it("默认关卡应优先命中缓存最优摆法", () => {

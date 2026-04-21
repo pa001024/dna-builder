@@ -121,6 +121,13 @@ const databaseItems = [
         color: "from-rose-500/20 to-orange-600/20 text-rose-500",
     },
     {
+        name: "database.solotreasure",
+        path: "/db/solotreasure",
+        desc: "database.solotreasure_desc",
+        icon: "M12 2L4 6V12C4 17 7.5 21.74 12 23C16.5 21.74 20 17 20 12V6L12 2ZM12 4.2L18 7.2V12C18 16.04 15.25 19.82 12 20.91C8.75 19.82 6 16.04 6 12V7.2L12 4.2ZM11 7V13H13V7H11ZM11 15V17H13V15H11Z",
+        color: "from-amber-500/20 to-orange-600/20 text-amber-500",
+    },
+    {
         name: "魔灵地图",
         path: "/db/map-local",
         desc: "详细魔灵刷新点位",
@@ -249,7 +256,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "聚合区域、副本、刷新点位与采集相关资料，优先服务跑图、采集和副本路线查询。",
         badge: "Explore",
         accentClass: "bg-emerald-500",
-        paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/event", "/db/walnut"],
+        paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/event", "/db/solotreasure"],
     },
     {
         id: "world",
@@ -265,7 +272,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "面向首领、怪物、成就与称号等目标型内容，方便围绕挑战目标进行连续检索。",
         badge: "Challenge",
         accentClass: "bg-amber-500",
-        paths: ["/db/monster", "/db/hardboss", "/db/achievement", "/db/title", "/db/book"],
+        paths: ["/db/monster", "/db/hardboss", "/db/achievement", "/db/title", "/db/book", "/db/walnut"],
     },
 ]
 

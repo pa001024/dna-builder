@@ -5343,6 +5343,8 @@
         "resource_desc": "查看資源資訊和圖標",
         "shop": "商店",
         "shop_desc": "查看商店物品資訊",
+        "solotreasure": "奉香群英試",
+        "solotreasure_desc": "查看搜打撤活動（奉香群英試）副本和玩法資訊",
         "title": "資料庫",
         "title_data": "稱號",
         "title_data_desc": "查看稱號前後綴與來源資訊",

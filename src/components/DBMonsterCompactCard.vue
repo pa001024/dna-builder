@@ -3,6 +3,7 @@ import { computed } from "vue"
 import { useRouter } from "vue-router"
 import { Faction } from "@/data"
 import type { Monster } from "@/data/d/monster.data"
+import { type ExtractionTreasureMechanism, extractionTreasureMechanismData, type SoloTreasureDropEntry } from "@/data/d/solotreasure.data"
 import { LeveledMonster } from "@/data/leveled/LeveledMonster"
 import { formatBigNumber } from "@/util"
 import { getMonsterType } from "@/utils/monster-utils"
@@ -14,10 +15,14 @@ const props = withDefaults(
         monster: MonsterCardSource
         level?: number
         clickable?: boolean
+        quantity?: number
+        reward?: SoloTreasureDropEntry | SoloTreasureDropEntry[] | null
     }>(),
     {
         level: undefined,
         clickable: true,
+        quantity: undefined,
+        reward: undefined,
     }
 )
 
@@ -114,6 +119,63 @@ function getFactionName(faction: number | undefined): string {
 }
 
 /**
+ * 归一化奖励列表。
+ * @returns 奖励列表
+ */
+const soloTreasureRewards = computed(() => {
+    if (!props.reward) {
+        return []
+    }
+
+    return Array.isArray(props.reward) ? props.reward : [props.reward]
+})
+
+const dropMechanisms = computed(() => {
+    const mechanisms = new Map<number, ExtractionTreasureMechanism>()
+
+    soloTreasureRewards.value.forEach(reward => {
+        if (reward.DropMechanismId === undefined) {
+            return
+        }
+
+        const mechanism = extractionTreasureMechanismData.find(item => item.id === reward.DropMechanismId)
+        if (mechanism) {
+            mechanisms.set(mechanism.id, mechanism)
+        }
+    })
+
+    return Array.from(mechanisms.values())
+})
+
+/**
+ * 格式化提取宝藏奖励文本。
+ * @returns 奖励文本
+ */
+function getSoloTreasureRewardText(): string {
+    if (!soloTreasureRewards.value.length) {
+        return "-"
+    }
+
+    return soloTreasureRewards.value
+        .map(reward => {
+            if (reward.KillScore !== undefined) {
+                return `积分 ${reward.KillScore}`
+            }
+
+            // if (reward.DropMechanismId !== undefined) {
+            //     return `机制 ${reward.DropMechanismId}`
+            // }
+
+            if (reward.BoxDropRate !== undefined) {
+                return `掉率 ${Math.round(reward.BoxDropRate * 100)}%`
+            }
+
+            return "-"
+        })
+        .join(" / ")
+}
+
+/**
  * 点击卡片跳转怪物详情。
  */
 function handleClickMonsterCard(): void {
@@ -127,7 +189,7 @@ function handleClickMonsterCard(): void {
 
 <template>
     <div
-        class="group rounded-xl border border-base-300 bg-base-200/70 p-2.5 transition-all duration-200 hover:border-primary/40 hover:bg-base-200"
+        class="group rounded-lg border border-base-300 bg-base-200/70 p-2.5 transition-all duration-200 hover:border-primary/40 hover:bg-base-200"
         :class="{ 'cursor-pointer': clickable }"
         @click="handleClickMonsterCard"
     >
@@ -143,9 +205,7 @@ function handleClickMonsterCard(): void {
                     >
                         {{ $t(displayMonster.n) }}
                     </SRouterLink>
-                    <span class="shrink-0 rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/75"
-                        >#{{ displayMonster.id }}</span
-                    >
+                    <CopyID :id="displayMonster.id" />
                 </div>
 
                 <div class="mt-1 flex flex-wrap items-center gap-1.5">
@@ -153,12 +213,18 @@ function handleClickMonsterCard(): void {
                         $t(getFactionName(displayMonster.f))
                     }}</span>
                     <span class="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] text-primary">Lv.{{ monsterLevel ?? "--" }}</span>
+                    <span v-if="quantity !== undefined" class="rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/75">
+                        x{{ quantity }}
+                    </span>
                     <span
                         v-if="displayMonster.t"
                         class="rounded px-1.5 py-0.5 text-[10px] text-white"
                         :class="getMonsterType(displayMonster.t).color"
                     >
                         {{ getMonsterType(displayMonster.t).label }}
+                    </span>
+                    <span v-if="soloTreasureRewards.length" class="rounded bg-secondary/20 px-1.5 py-0.5 text-[10px] text-secondary">
+                        {{ getSoloTreasureRewardText() }}
                     </span>
                 </div>
             </div>
@@ -180,6 +246,13 @@ function handleClickMonsterCard(): void {
             <div class="rounded bg-base-300/90 px-1.5 py-1">
                 <div class="text-[10px] text-base-content/65">有效生命</div>
                 <div class="font-semibold text-accent">{{ formatBigNumber(effectiveHealth) }}</div>
+            </div>
+        </div>
+
+        <div v-if="dropMechanisms.length" class="mt-2 space-y-2">
+            <span class="px-1.5 py-0.5 text-[10px] text-base-content/80">掉落</span>
+            <div class="rounded bg-base-300/90 px-1.5 py-1">
+                <DBSoloTreasureMechanismItem v-for="mechanism in dropMechanisms" :key="mechanism.id" :mechanism="mechanism" />
             </div>
         </div>
     </div>

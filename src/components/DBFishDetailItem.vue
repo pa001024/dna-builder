@@ -1,39 +1,12 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { calculateFishPrice } from "@/utils/fish-utils"
+import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
 import { Fish, fish2SpotMap, fishingSpotMap, fishMap, resourceMap } from "../data"
 
 const props = defineProps<{
     fish: Fish
 }>()
-
-/**
- * 获取稀有度颜色
- * @param type 稀有度 1绿 2蓝 3紫 4金
- */
-function getRarityColor(type: number): string {
-    const colorMap: Record<number, string> = {
-        1: "bg-green-200 text-green-800",
-        2: "bg-blue-200 text-blue-800",
-        3: "bg-purple-200 text-purple-800",
-        4: "bg-yellow-200 text-yellow-800",
-    }
-    return colorMap[type] || "bg-base-200 text-base-content"
-}
-
-/**
- * 获取稀有度名称
- * @param type 稀有度 1绿 2蓝 3紫 4金
- */
-function getRarityName(type: number): string {
-    const rarityMap: Record<number, string> = {
-        1: "绿",
-        2: "蓝",
-        3: "紫",
-        4: "金",
-    }
-    return rarityMap[type] || type.toString()
-}
 
 /**
  * 获取出现时间名称
@@ -88,8 +61,8 @@ const fishSpots = computed(() => {
             </SRouterLink>
             <CopyID :id="fish.id" />
             <div class="text-sm text-base-content/70 flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded" :class="getRarityColor(fish.type)">
-                    {{ getRarityName(fish.type) }}
+                <span class="px-1.5 py-0.5 rounded" :class="getRarityBadgeClass(fish.rarity)">
+                    {{ getRarityName(fish.rarity) }}
                 </span>
             </div>
         </div>

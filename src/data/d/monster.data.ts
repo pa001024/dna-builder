@@ -46,7 +46,7 @@ const monsterData: Monster[] = [
         es: 340,
         hp: 340,
         tn: 250,
-        tags: ["Mon.Strong.Burst"],
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Strong.Burst", "Mon.Elite.Jailer"],
     },
     {
         id: 6001001,
@@ -57,6 +57,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "Gr_Jichong_C01",
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 6001011,
@@ -68,7 +69,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
-        tags: ["Mon.Strong.Frozen"],
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Strong.Frozen", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6001012,
@@ -80,7 +81,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
-        tags: ["Mon.Strong.Burst"],
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Strong.Burst", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6001013,
@@ -92,7 +93,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
-        tags: ["Mon.Strong.Poison"],
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Strong.Poison", "Mon.SurvivalPoison", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6001014,
@@ -104,7 +105,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
-        tags: ["Mon.Strong.Thunder"],
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Strong.Thunder", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6001016,
@@ -116,7 +117,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Strong.Fade", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6001018,
@@ -128,7 +129,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Jichong_C01",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Strong.Revenge", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6001601,
@@ -139,6 +140,7 @@ const monsterData: Monster[] = [
         hp: 350,
         tn: 150,
         icon: "Gr_Jichong_C01",
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 6001701,
@@ -150,7 +152,15 @@ const monsterData: Monster[] = [
         hp: 2040,
         tn: 600,
         icon: "Gr_Jichong_C01",
-        tags: ["Mon.Strong.Thunder.Double", "Mon.Strong.Kamikaze.Double"],
+        tags: [
+            "Mon.Gr",
+            "Mon.Melee",
+            "Mon.Strong.Thunder.Double",
+            "Mon.Strong.Kamikaze.Double",
+            "Mon.Reward.B",
+            "Mon.Elite",
+            "Mon.Strong.Double",
+        ],
     },
     {
         id: 6002001,
@@ -161,6 +171,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "Gr_Youji_C01",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 6002011,
@@ -172,7 +183,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Youji_C01",
-        tags: ["Mon.Strong.Frozen"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Strong.Frozen", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6002015,
@@ -184,7 +195,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Youji_C01",
-        tags: ["Mon.Strong.Blood"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Strong.Blood", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6002016,
@@ -196,7 +207,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Youji_C01",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Strong.Fade", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6002017,
@@ -208,7 +219,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Youji_C01",
-        tags: ["Mon.Strong.Shield"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Strong.Shield", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6002018,
@@ -220,7 +231,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Youji_C01",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Strong.Revenge", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6002601,
@@ -231,6 +242,7 @@ const monsterData: Monster[] = [
         hp: 350,
         tn: 150,
         icon: "Gr_Youji_C01",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 6002701,
@@ -242,7 +254,15 @@ const monsterData: Monster[] = [
         hp: 2040,
         tn: 600,
         icon: "Gr_Youji_C01",
-        tags: ["Mon.Strong.Revenge.Double", "Mon.Strong.Reflect.Double"],
+        tags: [
+            "Mon.Gr",
+            "Mon.Ranged",
+            "Mon.Strong.Revenge.Double",
+            "Mon.Strong.Reflect.Double",
+            "Mon.Reward.B",
+            "Mon.Elite",
+            "Mon.Strong.Double",
+        ],
     },
     {
         id: 6003001,
@@ -253,6 +273,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "Gr_Piaofu_C01",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Fly", "Mon.Reward.E"],
     },
     {
         id: 6003601,
@@ -263,6 +284,7 @@ const monsterData: Monster[] = [
         hp: 350,
         tn: 150,
         icon: "Gr_Piaofu_C01",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Fly", "Mon.Reward.E"],
     },
     {
         id: 6004001,
@@ -273,6 +295,7 @@ const monsterData: Monster[] = [
         hp: 245,
         tn: 300,
         icon: "Gr_Baotu_C01",
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Reward.D"],
     },
     {
         id: 6004007,
@@ -283,6 +306,7 @@ const monsterData: Monster[] = [
         hp: 3450,
         tn: 300,
         icon: "Boss_04_Lizhan",
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Reward.D"],
     },
     {
         id: 6004012,
@@ -294,7 +318,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Baotu_C01",
-        tags: ["Mon.Strong.Burst"],
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Burst"],
     },
     {
         id: 6004013,
@@ -306,7 +330,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Baotu_C01",
-        tags: ["Mon.Strong.Poison"],
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Strong.Poison", "Mon.SurvivalPoison", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 6004014,
@@ -318,7 +342,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Baotu_C01",
-        tags: ["Mon.Strong.Thunder"],
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Thunder"],
     },
     {
         id: 6004020,
@@ -330,7 +354,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 600,
         icon: "Gr_Baotu_C01",
-        tags: ["Mon.Strong.Reflect"],
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Reflect"],
     },
     {
         id: 6004601,
@@ -341,6 +365,7 @@ const monsterData: Monster[] = [
         hp: 1225,
         tn: 300,
         icon: "Gr_Baotu_C01",
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Reward.D"],
     },
     {
         id: 6005001,
@@ -351,6 +376,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 600,
         icon: "GR_Longcao",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 6006001,
@@ -361,6 +387,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "GR_Banyun",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Fly", "Mon.Reward.E"],
     },
     {
         id: 6006002,
@@ -371,6 +398,7 @@ const monsterData: Monster[] = [
         hp: 40,
         tn: 150,
         icon: "GR_Banyun",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Fly"],
     },
     {
         id: 6007001,
@@ -381,6 +409,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "GR_Zhuoxin",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 6007011,
@@ -392,7 +421,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Zhuoxin",
-        tags: ["Mon.Strong.Frozen"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Frozen", "Mon.Elite"],
     },
     {
         id: 6007016,
@@ -404,7 +433,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Zhuoxin",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Fade", "Mon.Elite"],
     },
     {
         id: 6007024,
@@ -416,7 +445,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Zhuoxin",
-        tags: ["Mon.Strong.Threefold"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Threefold", "Mon.Elite"],
     },
     {
         id: 6007601,
@@ -427,6 +456,7 @@ const monsterData: Monster[] = [
         hp: 350,
         tn: 150,
         icon: "GR_Zhuoxin",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 6011001,
@@ -437,6 +467,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "Gr_Jichong_C01",
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Attribute.Thunder", "Mon.Reward.E"],
     },
     {
         id: 6011601,
@@ -447,6 +478,7 @@ const monsterData: Monster[] = [
         hp: 350,
         tn: 150,
         icon: "Gr_Jichong_C01",
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Attribute.Thunder", "Mon.Reward.E"],
     },
     {
         id: 6012001,
@@ -457,6 +489,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "Gr_Youji_C01",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Attribute.Fire", "Mon.Reward.E"],
     },
     {
         id: 6012601,
@@ -467,6 +500,7 @@ const monsterData: Monster[] = [
         hp: 350,
         tn: 150,
         icon: "Gr_Youji_C01",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Attribute.Fire", "Mon.Reward.E"],
     },
     {
         id: 6013001,
@@ -477,6 +511,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "Gr_Piaofu_C01",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Fly", "Mon.Attribute.Water", "Mon.Reward.E"],
     },
     {
         id: 6013015,
@@ -488,7 +523,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "Gr_Piaofu_C01",
-        tags: ["Mon.Strong.Blood"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Fly", "Mon.Attribute.Water", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Blood"],
     },
     {
         id: 6013017,
@@ -500,7 +535,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "Gr_Piaofu_C01",
-        tags: ["Mon.Strong.Shield"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Fly", "Mon.Attribute.Water", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Shield"],
     },
     {
         id: 6013018,
@@ -512,7 +547,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "Gr_Piaofu_C01",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Fly", "Mon.Attribute.Water", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Revenge"],
     },
     {
         id: 6013601,
@@ -523,6 +558,7 @@ const monsterData: Monster[] = [
         hp: 350,
         tn: 150,
         icon: "Gr_Piaofu_C01",
+        tags: ["Mon.Gr", "Mon.Ranged", "Mon.Fly", "Mon.Attribute.Water", "Mon.Reward.E"],
     },
     {
         id: 6014001,
@@ -533,6 +569,7 @@ const monsterData: Monster[] = [
         hp: 245,
         tn: 300,
         icon: "Gr_Baotu_C01",
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Attribute.Fire", "Mon.Reward.D"],
     },
     {
         id: 6014601,
@@ -543,6 +580,7 @@ const monsterData: Monster[] = [
         hp: 1225,
         tn: 300,
         icon: "Gr_Baotu_C01",
+        tags: ["Mon.Gr", "Mon.Melee", "Mon.Attribute.Fire", "Mon.Reward.D"],
     },
     {
         id: 6015001,
@@ -553,6 +591,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "GR_Fangjin",
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 6015013,
@@ -564,7 +603,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Fangjin",
-        tags: ["Mon.Strong.Poison"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Poison", "Mon.SurvivalPoison"],
     },
     {
         id: 6015018,
@@ -576,7 +615,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Fangjin",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Revenge", "Mon.Elite"],
     },
     {
         id: 6015021,
@@ -588,7 +627,29 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Fangjin",
-        tags: ["Mon.Strong.Kamikaze"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Kamikaze", "Mon.Elite"],
+    },
+    {
+        id: 6015051,
+        n: "芳烬秽兽",
+        f: 1,
+        atk: 5.56,
+        def: 130,
+        hp: 71,
+        tn: 150,
+        icon: "GR_Fangjin",
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.E", "Mon.SoloTreasure.BPoint"],
+    },
+    {
+        id: 6015052,
+        n: "芳烬秽兽",
+        f: 1,
+        atk: 5.56,
+        def: 130,
+        hp: 71,
+        tn: 150,
+        icon: "GR_Fangjin",
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.E", "Mon.SoloTreasure.APoint"],
     },
     {
         id: 6016001,
@@ -599,6 +660,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "GR_Eshi",
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 6016011,
@@ -610,7 +672,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
-        tags: ["Mon.Strong.Frozen"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Frozen", "Mon.Elite"],
     },
     {
         id: 6016013,
@@ -622,7 +684,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
-        tags: ["Mon.Strong.Poison"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Poison", "Mon.SurvivalPoison"],
     },
     {
         id: 6016015,
@@ -634,7 +696,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
-        tags: ["Mon.Strong.Blood"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Blood", "Mon.Elite"],
     },
     {
         id: 6016016,
@@ -646,7 +708,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Fade", "Mon.Elite"],
     },
     {
         id: 6016017,
@@ -658,7 +720,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
-        tags: ["Mon.Strong.Shield"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Shield", "Mon.Elite"],
     },
     {
         id: 6016018,
@@ -670,7 +732,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Revenge", "Mon.Elite"],
     },
     {
         id: 6016021,
@@ -682,7 +744,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
-        tags: ["Mon.Strong.Kamikaze"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Kamikaze", "Mon.Elite"],
     },
     {
         id: 6016022,
@@ -694,7 +756,29 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Eshi",
-        tags: ["Mon.Strong.ThunderLaser"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.ThunderLaser", "Mon.Elite"],
+    },
+    {
+        id: 6016051,
+        n: "萼蚀秽兽",
+        f: 1,
+        atk: 5.56,
+        def: 130,
+        hp: 71,
+        tn: 150,
+        icon: "GR_Eshi",
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.E", "Mon.SoloTreasure.BPoint"],
+    },
+    {
+        id: 6016052,
+        n: "萼蚀秽兽",
+        f: 1,
+        atk: 5.56,
+        def: 130,
+        hp: 71,
+        tn: 150,
+        icon: "GR_Eshi",
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Ranged", "Mon.Reward.E", "Mon.SoloTreasure.APoint"],
     },
     {
         id: 6017001,
@@ -705,6 +789,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "GR_Kuirui",
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 6017012,
@@ -716,7 +801,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Kuirui",
-        tags: ["Mon.Strong.Burst"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Burst", "Mon.Elite"],
     },
     {
         id: 6017013,
@@ -728,7 +813,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Kuirui",
-        tags: ["Mon.Strong.Poison"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Poison", "Mon.SurvivalPoison", "Mon.Elite"],
     },
     {
         id: 6017014,
@@ -740,7 +825,7 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Kuirui",
-        tags: ["Mon.Strong.Thunder"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Thunder", "Mon.Elite"],
     },
     {
         id: 6017018,
@@ -752,7 +837,29 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 150,
         icon: "GR_Kuirui",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Revenge", "Mon.Elite"],
+    },
+    {
+        id: 6017051,
+        n: "魁蕊秽兽",
+        f: 1,
+        atk: 10,
+        def: 130,
+        hp: 71,
+        tn: 150,
+        icon: "GR_Kuirui",
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Melee", "Mon.Reward.E", "Mon.SoloTreasure.BPoint"],
+    },
+    {
+        id: 6017052,
+        n: "魁蕊秽兽",
+        f: 1,
+        atk: 10,
+        def: 130,
+        hp: 71,
+        tn: 150,
+        icon: "GR_Kuirui",
+        tags: ["Mon.Gr", "Mon.HxGr", "Mon.Melee", "Mon.Reward.E", "Mon.SoloTreasure.APoint"],
     },
     {
         id: 7001001,
@@ -764,6 +871,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 7001005,
@@ -776,6 +884,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Capture", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7001008,
@@ -787,6 +896,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "Jt_Juji",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 7001011,
@@ -799,7 +909,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
-        tags: ["Mon.Strong.Frozen"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Frozen", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7001015,
@@ -812,7 +922,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
-        tags: ["Mon.Strong.Blood"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Blood", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7001016,
@@ -825,7 +935,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Fade", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7001017,
@@ -838,7 +948,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
-        tags: ["Mon.Strong.Shield"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Shield", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7001018,
@@ -851,7 +961,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Revenge", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7001024,
@@ -864,7 +974,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Juji_C01",
-        tags: ["Mon.Strong.Threefold"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Threefold", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7001601,
@@ -876,6 +986,7 @@ const monsterData: Monster[] = [
         hp: 230,
         tn: 150,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 7002001,
@@ -887,6 +998,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 7002005,
@@ -899,6 +1011,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Capture", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7002007,
@@ -910,6 +1023,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "Jt_Pizhuo",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 7002011,
@@ -922,7 +1036,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
-        tags: ["Mon.Strong.Frozen"],
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Strong.Frozen", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7002012,
@@ -935,7 +1049,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
-        tags: ["Mon.Strong.Burst"],
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Strong.Burst", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7002014,
@@ -948,7 +1062,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
-        tags: ["Mon.Strong.Thunder"],
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Strong.Thunder", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7002016,
@@ -961,7 +1075,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Strong.Fade", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7002018,
@@ -974,7 +1088,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Strong.Revenge", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7002019,
@@ -987,7 +1101,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Pizhuo_C01",
-        tags: ["Mon.Strong.IceOrb"],
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Strong.IceOrb", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7002601,
@@ -999,6 +1113,7 @@ const monsterData: Monster[] = [
         hp: 230,
         tn: 150,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 7003001,
@@ -1010,6 +1125,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 7003005,
@@ -1022,6 +1138,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Capture", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7003011,
@@ -1034,7 +1151,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
-        tags: ["Mon.Strong.Frozen"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Frozen", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7003015,
@@ -1047,7 +1164,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
-        tags: ["Mon.Strong.Blood"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Blood", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7003016,
@@ -1060,7 +1177,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Fade", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7003017,
@@ -1073,7 +1190,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
-        tags: ["Mon.Strong.Shield"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Shield", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7003018,
@@ -1086,7 +1203,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.Revenge", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7003022,
@@ -1099,7 +1216,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Ranger_C01",
-        tags: ["Mon.Strong.ThunderLaser"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Strong.ThunderLaser", "Mon.Reward.B", "Mon.Elite"],
     },
     {
         id: 7003601,
@@ -1111,6 +1228,7 @@ const monsterData: Monster[] = [
         hp: 230,
         tn: 150,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 7004001,
@@ -1122,6 +1240,7 @@ const monsterData: Monster[] = [
         hp: 163,
         tn: 300,
         icon: "Jt_Tuji_C01",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 7004017,
@@ -1134,7 +1253,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Tuji_C01",
-        tags: ["Mon.Strong.Shield"],
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Shield"],
     },
     {
         id: 7004020,
@@ -1147,7 +1266,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Tuji_C01",
-        tags: ["Mon.Strong.Reflect"],
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Reflect"],
     },
     {
         id: 7004601,
@@ -1159,6 +1278,7 @@ const monsterData: Monster[] = [
         hp: 815,
         tn: 300,
         icon: "Jt_Tuji_C01",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 7006001,
@@ -1170,6 +1290,7 @@ const monsterData: Monster[] = [
         hp: 500,
         tn: 150,
         icon: "Jt_HealRobot",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Summon.Light"],
     },
     {
         id: 7007001,
@@ -1180,6 +1301,7 @@ const monsterData: Monster[] = [
         hp: 200,
         tn: 100,
         icon: "Jt_BlastRobot",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Summon.Light"],
     },
     {
         id: 7007002,
@@ -1190,6 +1312,7 @@ const monsterData: Monster[] = [
         hp: 2,
         tn: 150,
         icon: "Jt_BlastRobot_C01",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.ChangeColor.BlastRobot01"],
     },
     {
         id: 7008001,
@@ -1202,6 +1325,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Zhihui",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.C", "Mon.Elite"],
     },
     {
         id: 7008023,
@@ -1214,7 +1338,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "Jt_Zhihui",
-        tags: ["Mon.Strong.Vampire"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.C", "Mon.Elite", "Mon.Strong.Vampire"],
     },
     {
         id: 7008071,
@@ -1227,6 +1351,7 @@ const monsterData: Monster[] = [
         hp: 1700,
         tn: 600,
         icon: "Jt_Zhihui",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.C", "Mon.Elite", "Mon.Corp"],
     },
     {
         id: 7009001,
@@ -1238,6 +1363,7 @@ const monsterData: Monster[] = [
         hp: 163,
         tn: 300,
         icon: "Jt_Zhiren",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 7009020,
@@ -1250,7 +1376,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 300,
         icon: "Jt_Zhiren",
-        tags: ["Mon.Strong.Reflect"],
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.Reflect"],
     },
     {
         id: 7010001,
@@ -1262,6 +1388,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "Jt_Zhijian",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 7010022,
@@ -1274,7 +1401,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 150,
         icon: "Jt_Zhijian",
-        tags: ["Mon.Strong.ThunderLaser"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.B", "Mon.Elite", "Mon.Strong.ThunderLaser"],
     },
     {
         id: 7010601,
@@ -1286,6 +1413,7 @@ const monsterData: Monster[] = [
         hp: 235,
         tn: 150,
         icon: "Jt_Zhijian",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 7011001,
@@ -1297,6 +1425,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Attribute.Water", "Mon.Reward.E"],
     },
     {
         id: 7011601,
@@ -1308,6 +1437,7 @@ const monsterData: Monster[] = [
         hp: 235,
         tn: 150,
         icon: "Jt_Juji_C01",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Attribute.Water", "Mon.Reward.E"],
     },
     {
         id: 7012001,
@@ -1319,6 +1449,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E", "Mon.Attribute.Wind"],
     },
     {
         id: 7012005,
@@ -1330,6 +1461,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E", "Mon.Attribute.Wind"],
     },
     {
         id: 7012601,
@@ -1341,6 +1473,7 @@ const monsterData: Monster[] = [
         hp: 235,
         tn: 150,
         icon: "Jt_Pizhuo_C01",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E", "Mon.Attribute.Wind"],
     },
     {
         id: 7013001,
@@ -1352,6 +1485,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E", "Mon.Attribute.Thunder"],
     },
     {
         id: 7013601,
@@ -1363,6 +1497,7 @@ const monsterData: Monster[] = [
         hp: 235,
         tn: 150,
         icon: "Jt_Ranger_C01",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E", "Mon.Attribute.Thunder"],
     },
     {
         id: 7014001,
@@ -1374,6 +1509,7 @@ const monsterData: Monster[] = [
         hp: 163,
         tn: 300,
         icon: "Jt_Tuji_C01",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E", "Mon.Attribute.Thunder"],
     },
     {
         id: 7015001,
@@ -1385,6 +1521,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "JT_Jingjie",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 7015011,
@@ -1397,7 +1534,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 150,
         icon: "JT_Jingjie",
-        tags: ["Mon.Strong.Frozen"],
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Frozen", "Mon.Elite"],
     },
     {
         id: 7015601,
@@ -1409,6 +1546,7 @@ const monsterData: Monster[] = [
         hp: 235,
         tn: 150,
         icon: "JT_Jingjie",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 7016001,
@@ -1420,6 +1558,7 @@ const monsterData: Monster[] = [
         hp: 100,
         tn: 150,
         icon: "JT_Zhiyan",
+        tags: ["Mon.Jt", "Mon.Ranged", "Mon.Fly", "Mon.Reward.E", "Mon.Vehicle"],
     },
     {
         id: 7018001,
@@ -1431,6 +1570,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "JT_Zhiyan",
+        tags: ["Mon.Jt", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 8001001,
@@ -1442,6 +1582,7 @@ const monsterData: Monster[] = [
         hp: 14,
         tn: 150,
         icon: "Jh_Zhishi",
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 8001015,
@@ -1454,7 +1595,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Zhishi",
-        tags: ["Mon.Strong.Blood"],
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Blood", "Mon.Elite"],
     },
     {
         id: 8001019,
@@ -1467,7 +1608,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Zhishi",
-        tags: ["Mon.Strong.IceOrb"],
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.IceOrb", "Mon.Elite"],
     },
     {
         id: 8001021,
@@ -1480,7 +1621,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Zhishi",
-        tags: ["Mon.Strong.Kamikaze"],
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Kamikaze", "Mon.Elite"],
     },
     {
         id: 8001601,
@@ -1492,6 +1633,7 @@ const monsterData: Monster[] = [
         hp: 70,
         tn: 150,
         icon: "Jh_Zhishi",
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 8002001,
@@ -1503,6 +1645,7 @@ const monsterData: Monster[] = [
         hp: 14,
         tn: 150,
         icon: "Jh_Xianfeng",
+        tags: ["Mon.Jh", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 8002012,
@@ -1515,7 +1658,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Xianfeng",
-        tags: ["Mon.Strong.Burst"],
+        tags: ["Mon.Jh", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Burst", "Mon.Elite"],
     },
     {
         id: 8002014,
@@ -1528,7 +1671,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Xianfeng",
-        tags: ["Mon.Strong.Thunder"],
+        tags: ["Mon.Jh", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Thunder", "Mon.Elite"],
     },
     {
         id: 8002016,
@@ -1541,7 +1684,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Xianfeng",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Jh", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Fade", "Mon.Elite"],
     },
     {
         id: 8002018,
@@ -1554,7 +1697,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Xianfeng",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Jh", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Revenge", "Mon.Elite"],
     },
     {
         id: 8002020,
@@ -1567,7 +1710,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Xianfeng",
-        tags: ["Mon.Strong.Reflect"],
+        tags: ["Mon.Jh", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Reflect", "Mon.Elite"],
     },
     {
         id: 8002601,
@@ -1579,6 +1722,7 @@ const monsterData: Monster[] = [
         hp: 70,
         tn: 150,
         icon: "Jh_Xianfeng",
+        tags: ["Mon.Jh", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 8002701,
@@ -1591,7 +1735,15 @@ const monsterData: Monster[] = [
         hp: 408,
         tn: 150,
         icon: "Jh_Xianfeng",
-        tags: ["Mon.Strong.Thunder.Double", "Mon.Strong.IceOrb.Double"],
+        tags: [
+            "Mon.Jh",
+            "Mon.Melee",
+            "Mon.Reward.B",
+            "Mon.Strong.Thunder.Double",
+            "Mon.Strong.IceOrb.Double",
+            "Mon.Elite",
+            "Mon.Strong.Double",
+        ],
     },
     {
         id: 8002702,
@@ -1604,7 +1756,7 @@ const monsterData: Monster[] = [
         hp: 408,
         tn: 150,
         icon: "Jh_Xianfeng",
-        tags: ["Mon.Strong.Thunder"],
+        tags: ["Mon.Jh", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Thunder", "Mon.Elite"],
     },
     {
         id: 8002703,
@@ -1617,7 +1769,7 @@ const monsterData: Monster[] = [
         hp: 408,
         tn: 150,
         icon: "Jh_Xianfeng",
-        tags: ["Mon.Strong.IceOrb"],
+        tags: ["Mon.Jh", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.IceOrb", "Mon.Elite"],
     },
     {
         id: 8002704,
@@ -1630,7 +1782,15 @@ const monsterData: Monster[] = [
         hp: 408,
         tn: 150,
         icon: "Jh_Xianfeng",
-        tags: ["Mon.Strong.Fade.Double", "Mon.Strong.Burst.Double"],
+        tags: [
+            "Mon.Jh",
+            "Mon.Melee",
+            "Mon.Reward.B",
+            "Mon.Strong.Fade.Double",
+            "Mon.Strong.Burst.Double",
+            "Mon.Elite",
+            "Mon.Strong.Double",
+        ],
     },
     {
         id: 8003001,
@@ -1642,6 +1802,7 @@ const monsterData: Monster[] = [
         hp: 14,
         tn: 150,
         icon: "Jh_Shenfu",
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 8003016,
@@ -1654,7 +1815,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Shenfu",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Fade", "Mon.Elite"],
     },
     {
         id: 8003021,
@@ -1667,7 +1828,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Shenfu",
-        tags: ["Mon.Strong.Kamikaze"],
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Kamikaze", "Mon.Elite"],
     },
     {
         id: 8003022,
@@ -1680,7 +1841,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Shenfu",
-        tags: ["Mon.Strong.ThunderLaser"],
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.ThunderLaser", "Mon.Elite"],
     },
     {
         id: 8003024,
@@ -1693,7 +1854,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "Jh_Shenfu",
-        tags: ["Mon.Strong.Threefold"],
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Threefold", "Mon.Elite"],
     },
     {
         id: 8003601,
@@ -1705,6 +1866,7 @@ const monsterData: Monster[] = [
         hp: 70,
         tn: 150,
         icon: "Jh_Shenfu",
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 8003701,
@@ -1717,7 +1879,15 @@ const monsterData: Monster[] = [
         hp: 408,
         tn: 150,
         icon: "Jh_Shenfu",
-        tags: ["Mon.Strong.Fade.Double", "Mon.Strong.Shield.Double"],
+        tags: [
+            "Mon.Jh",
+            "Mon.Ranged",
+            "Mon.Reward.B",
+            "Mon.Strong.Fade.Double",
+            "Mon.Strong.Shield.Double",
+            "Mon.Elite",
+            "Mon.Strong.Double",
+        ],
     },
     {
         id: 8003702,
@@ -1730,7 +1900,7 @@ const monsterData: Monster[] = [
         hp: 408,
         tn: 150,
         icon: "Jh_Shenfu",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Fade", "Mon.Elite"],
     },
     {
         id: 8003703,
@@ -1743,7 +1913,7 @@ const monsterData: Monster[] = [
         hp: 408,
         tn: 150,
         icon: "Jh_Shenfu",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Jh", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Revenge", "Mon.Elite"],
     },
     {
         id: 8003704,
@@ -1756,7 +1926,15 @@ const monsterData: Monster[] = [
         hp: 408,
         tn: 150,
         icon: "Jh_Shenfu",
-        tags: ["Mon.Strong.Frozen.Double", "Mon.Strong.Vampire.Double"],
+        tags: [
+            "Mon.Jh",
+            "Mon.Ranged",
+            "Mon.Reward.B",
+            "Mon.Strong.Frozen.Double",
+            "Mon.Strong.Vampire.Double",
+            "Mon.Elite",
+            "Mon.Strong.Double",
+        ],
     },
     {
         id: 8500001,
@@ -1767,6 +1945,7 @@ const monsterData: Monster[] = [
         hp: 4200,
         tn: 1400,
         icon: "Boss_00_Xibi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8500002,
@@ -1777,6 +1956,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 8400,
         icon: "Boss_00_Xibi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8500601,
@@ -1787,6 +1967,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 8400,
         icon: "Boss_00_Xibi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8501001,
@@ -1797,6 +1978,7 @@ const monsterData: Monster[] = [
         hp: 1440,
         tn: 2500,
         icon: "Boss_04_Lizhan",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8501002,
@@ -1807,6 +1989,7 @@ const monsterData: Monster[] = [
         hp: 1530,
         tn: 1000,
         icon: "Boss_04_Lizhan",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8501601,
@@ -1817,6 +2000,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 6000,
         icon: "Boss_04_Lizhan",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8502001,
@@ -1827,6 +2011,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 4500,
         icon: "Boss_01_Saiqi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8502002,
@@ -1837,6 +2022,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 8400,
         icon: "Boss_01_Saiqi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8502601,
@@ -1847,6 +2033,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 8400,
         icon: "Boss_01_Saiqi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8502602,
@@ -1857,6 +2044,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 8400,
         icon: "Boss_01_Saiqi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8503001,
@@ -1867,6 +2055,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 99999,
         icon: "Boss_03_Shijing",
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.IgnoreSeekEnemy"],
     },
     {
         id: 8503002,
@@ -1877,6 +2066,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 6000,
         icon: "Boss_03_Shijing",
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.IgnoreSeekEnemy"],
     },
     {
         id: 8503601,
@@ -1887,6 +2077,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 6000,
         icon: "Boss_03_Shijing",
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.IgnoreSeekEnemy"],
     },
     {
         id: 8505001,
@@ -1897,6 +2088,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 4500,
         icon: "Boss_05_Lianhuo",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8505002,
@@ -1907,6 +2099,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 8400,
         icon: "Boss_05_Lianhuo",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8505601,
@@ -1917,6 +2110,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 8400,
         icon: "Boss_05_Lianhuo",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8505602,
@@ -1927,6 +2121,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 8400,
         icon: "Boss_05_Lianhuo",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8509001,
@@ -1937,6 +2132,7 @@ const monsterData: Monster[] = [
         hp: 2000,
         tn: 4500,
         icon: "Boss_Tuosi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8509601,
@@ -1947,6 +2143,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 3000,
         icon: "Boss_Tuosi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8510001,
@@ -1957,6 +2154,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 4500,
         icon: "Boss_Heilong",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8510004,
@@ -1967,6 +2165,7 @@ const monsterData: Monster[] = [
         hp: 3000,
         tn: 4500,
         icon: "Boss_Heilong",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8511001,
@@ -1977,6 +2176,7 @@ const monsterData: Monster[] = [
         hp: 3000,
         tn: 4500,
         icon: "Boss_Bailong",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8511002,
@@ -1987,6 +2187,7 @@ const monsterData: Monster[] = [
         hp: 3000,
         tn: 4500,
         icon: "Boss_Heilong",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8512001,
@@ -1997,6 +2198,7 @@ const monsterData: Monster[] = [
         hp: 4800,
         tn: 99999,
         icon: "Boss_Linen",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8512002,
@@ -2007,6 +2209,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 8400,
         icon: "Boss_Linen",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8512601,
@@ -2017,6 +2220,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 10000,
         icon: "Boss_Linen",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8512602,
@@ -2027,6 +2231,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 10000,
         icon: "Boss_Linen",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8513001,
@@ -2037,6 +2242,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 2000,
         icon: "Boss_Kuxiu",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8513601,
@@ -2047,6 +2253,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 2000,
         icon: "Boss_Kuxiu",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8513701,
@@ -2057,7 +2264,7 @@ const monsterData: Monster[] = [
         hp: 225000,
         tn: 2000,
         icon: "Boss_Kuxiu",
-        tags: ["Mon.Strong.ThunderLaser"],
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.Strong.ThunderLaser"],
     },
     {
         id: 8514001,
@@ -2068,6 +2275,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 4500,
         icon: "Boss_Shenpan",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8514051,
@@ -2078,6 +2286,7 @@ const monsterData: Monster[] = [
         hp: 2000,
         tn: 4500,
         icon: "Boss_Shenpan",
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.NoTeleport"],
     },
     {
         id: 8514601,
@@ -2088,6 +2297,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 4500,
         icon: "Boss_Shenpan",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8514701,
@@ -2098,7 +2308,7 @@ const monsterData: Monster[] = [
         hp: 225000,
         tn: 4500,
         icon: "Boss_Shenpan",
-        tags: ["Mon.Strong.Thunder"],
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.Strong.Thunder"],
     },
     {
         id: 8515001,
@@ -2109,6 +2319,29 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 1000,
         icon: "Boss_Jushi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
+    },
+    {
+        id: 8515053,
+        n: "巨噬者",
+        t: "Elite_Monster",
+        atk: 15,
+        def: 0,
+        hp: 6000,
+        tn: 1000,
+        icon: "Boss_Jushi",
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.SoloTreasure.FPoint", "Mon.SoloTreasure.FContainer"],
+    },
+    {
+        id: 8515054,
+        n: "巨噬者",
+        t: "Elite_Monster",
+        atk: 15,
+        def: 0,
+        hp: 6000,
+        tn: 1000,
+        icon: "Boss_Jushi",
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.SoloTreasure.EPoint", "Mon.SoloTreasure.EContainer"],
     },
     {
         id: 8515601,
@@ -2119,6 +2352,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 1000,
         icon: "Boss_Jushi",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8516001,
@@ -2129,6 +2363,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 1000,
         icon: "Empty",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8518001,
@@ -2139,6 +2374,7 @@ const monsterData: Monster[] = [
         hp: 3000,
         tn: 3000,
         icon: "Boss_Juque",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8518601,
@@ -2149,6 +2385,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 3000,
         icon: "Boss_Juque",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8519001,
@@ -2159,6 +2396,7 @@ const monsterData: Monster[] = [
         hp: 1500,
         tn: 99999,
         icon: "Empty",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8520001,
@@ -2169,6 +2407,7 @@ const monsterData: Monster[] = [
         hp: 4000,
         tn: 0,
         icon: "Empty",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8522001,
@@ -2179,6 +2418,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 4500,
         icon: "HX_Tuisheng",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8522601,
@@ -2189,6 +2429,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 4500,
         icon: "HX_Tuisheng",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 8522701,
@@ -2199,7 +2440,7 @@ const monsterData: Monster[] = [
         hp: 225000,
         tn: 4500,
         icon: "HX_Tuisheng",
-        tags: ["Mon.Strong.Frozen"],
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.Strong.Frozen"],
     },
     {
         id: 8523001,
@@ -2210,6 +2451,7 @@ const monsterData: Monster[] = [
         hp: 6000,
         tn: 2000,
         icon: "Empty",
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.Corp"],
     },
     {
         id: 8524001,
@@ -2220,6 +2462,7 @@ const monsterData: Monster[] = [
         hp: 7000,
         tn: 4500,
         icon: "Empty",
+        tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
         id: 9001001,
@@ -2231,6 +2474,7 @@ const monsterData: Monster[] = [
         hp: 14,
         tn: 150,
         icon: "SQ_Yinxie",
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9001014,
@@ -2243,7 +2487,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Yinxie",
-        tags: ["Mon.Strong.Thunder"],
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Thunder", "Mon.Elite"],
     },
     {
         id: 9001017,
@@ -2256,7 +2500,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Yinxie",
-        tags: ["Mon.Strong.Shield"],
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Shield", "Mon.Elite"],
     },
     {
         id: 9001023,
@@ -2269,7 +2513,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Yinxie",
-        tags: ["Mon.Strong.Vampire"],
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Vampire", "Mon.Elite"],
     },
     {
         id: 9001024,
@@ -2282,7 +2526,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Yinxie",
-        tags: ["Mon.Strong.Threefold"],
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Threefold", "Mon.Elite"],
     },
     {
         id: 9001601,
@@ -2294,6 +2538,7 @@ const monsterData: Monster[] = [
         hp: 70,
         tn: 150,
         icon: "SQ_Yinxie",
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9002001,
@@ -2305,6 +2550,7 @@ const monsterData: Monster[] = [
         hp: 14,
         tn: 150,
         icon: "SQ_Dufeng",
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 9002015,
@@ -2317,7 +2563,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Dufeng",
-        tags: ["Mon.Strong.Blood"],
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Blood", "Mon.Elite"],
     },
     {
         id: 9002019,
@@ -2330,7 +2576,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Dufeng",
-        tags: ["Mon.Strong.IceOrb"],
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.IceOrb", "Mon.Elite"],
     },
     {
         id: 9002023,
@@ -2343,7 +2589,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Dufeng",
-        tags: ["Mon.Strong.Vampire"],
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Vampire", "Mon.Elite"],
     },
     {
         id: 9002024,
@@ -2356,7 +2602,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Dufeng",
-        tags: ["Mon.Strong.Threefold"],
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Threefold", "Mon.Elite"],
     },
     {
         id: 9002601,
@@ -2368,6 +2614,7 @@ const monsterData: Monster[] = [
         hp: 70,
         tn: 150,
         icon: "SQ_Dufeng",
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 9003001,
@@ -2380,6 +2627,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 300,
         icon: "SQ_Wanju",
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.C", "Mon.Elite"],
     },
     {
         id: 9003004,
@@ -2392,6 +2640,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 300,
         icon: "SQ_Wanju",
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.C", "Mon.Elite"],
     },
     {
         id: 9005001,
@@ -2404,6 +2653,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 300,
         icon: "SQ_Baozha",
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.C", "Mon.Elite"],
     },
     {
         id: 9005004,
@@ -2416,6 +2666,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 300,
         icon: "SQ_Baozha",
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.C", "Mon.Elite"],
     },
     {
         id: 9006001,
@@ -2428,6 +2679,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 300,
         icon: "SQ_Qizha",
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.C", "Mon.Elite"],
     },
     {
         id: 9006004,
@@ -2440,6 +2692,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 300,
         icon: "SQ_Qizha",
+        tags: ["Mon.Sq", "Mon.Melee", "Mon.Reward.C", "Mon.Elite"],
     },
     {
         id: 9007001,
@@ -2451,6 +2704,7 @@ const monsterData: Monster[] = [
         hp: 14,
         tn: 150,
         icon: "SQ_Niaopao",
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 9007019,
@@ -2463,7 +2717,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Niaopao",
-        tags: ["Mon.Strong.IceOrb"],
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.IceOrb", "Mon.Elite"],
     },
     {
         id: 9007022,
@@ -2476,7 +2730,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Niaopao",
-        tags: ["Mon.Strong.ThunderLaser"],
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.ThunderLaser", "Mon.Elite"],
     },
     {
         id: 9007023,
@@ -2489,7 +2743,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 600,
         icon: "SQ_Niaopao",
-        tags: ["Mon.Strong.Vampire"],
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.B", "Mon.Strong.Vampire", "Mon.Elite"],
     },
     {
         id: 9007601,
@@ -2501,6 +2755,7 @@ const monsterData: Monster[] = [
         hp: 70,
         tn: 150,
         icon: "SQ_Niaopao",
+        tags: ["Mon.Sq", "Mon.Ranged", "Mon.Reward.E"],
     },
     {
         id: 9500001,
@@ -2510,6 +2765,7 @@ const monsterData: Monster[] = [
         hp: 1000,
         tn: 300,
         icon: "NE_Dajie",
+        tags: ["Mon.Melee", "Mon.Reward.A", "Mon.Treasure"],
     },
     {
         id: 9501001,
@@ -2520,6 +2776,7 @@ const monsterData: Monster[] = [
         hp: 450,
         tn: 100,
         icon: "MN_Haer",
+        tags: ["Mon.Melee", "Mon.Reward.C", "Mon.Elite"],
     },
     {
         id: 9801001,
@@ -2529,6 +2786,7 @@ const monsterData: Monster[] = [
         hp: 71,
         tn: 150,
         icon: "Animal_Xuelang_01",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9801002,
@@ -2539,6 +2797,7 @@ const monsterData: Monster[] = [
         hp: 142,
         tn: 150,
         icon: "Animal_Xuelang_02",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9802001,
@@ -2548,6 +2807,7 @@ const monsterData: Monster[] = [
         hp: 45,
         tn: 150,
         icon: "Animal_Hongjiaolu_02",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9802002,
@@ -2557,6 +2817,7 @@ const monsterData: Monster[] = [
         hp: 45,
         tn: 150,
         icon: "Animal_Hongjiaolu_01",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9803001,
@@ -2566,6 +2827,7 @@ const monsterData: Monster[] = [
         hp: 25,
         tn: 150,
         icon: "Animal_Yinbeishu_02",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9803002,
@@ -2576,6 +2838,7 @@ const monsterData: Monster[] = [
         hp: 45,
         tn: 150,
         icon: "Animal_Yinbeishu_02",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9804001,
@@ -2585,6 +2848,7 @@ const monsterData: Monster[] = [
         hp: 1,
         tn: 0,
         icon: "Mon_Jiiujiu",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9805001,
@@ -2594,6 +2858,7 @@ const monsterData: Monster[] = [
         hp: 1,
         tn: 0,
         icon: "Mon_Suoweng",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9806001,
@@ -2603,6 +2868,7 @@ const monsterData: Monster[] = [
         hp: 1,
         tn: 0,
         icon: "Mon_Cuiping01",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9807001,
@@ -2612,6 +2878,7 @@ const monsterData: Monster[] = [
         hp: 1,
         tn: 0,
         icon: "Mon_Zhenzhu",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9808001,
@@ -2621,6 +2888,7 @@ const monsterData: Monster[] = [
         hp: 1,
         tn: 0,
         icon: "Mon_Chihu",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9809001,
@@ -2630,6 +2898,7 @@ const monsterData: Monster[] = [
         hp: 45,
         tn: 150,
         icon: "Mon_Yunzong02",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9809002,
@@ -2639,6 +2908,7 @@ const monsterData: Monster[] = [
         hp: 45,
         tn: 150,
         icon: "Mon_Yunzong01",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 9810001,
@@ -2648,6 +2918,7 @@ const monsterData: Monster[] = [
         hp: 1,
         tn: 150,
         icon: "HX_Hainiao",
+        tags: ["Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 10001001,
@@ -2659,6 +2930,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "HX_Tianshi02",
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 10002001,
@@ -2671,6 +2943,7 @@ const monsterData: Monster[] = [
         hp: 340,
         tn: 600,
         icon: "HX_Tianwei",
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.C", "Mon.Elite"],
     },
     {
         id: 10003001,
@@ -2682,6 +2955,31 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 1000,
         icon: "HX_Bian01",
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.C", "Mon.Elite"],
+    },
+    {
+        id: 10003051,
+        n: "玄色狴犴",
+        t: "Elite_Monster",
+        f: 5,
+        atk: 20,
+        def: 300,
+        hp: 510,
+        tn: 1000,
+        icon: "HX_Bian01",
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.C", "Mon.Elite", "Mon.SoloTreasure.DPoint", "Mon.SoloTreasure.DContainer"],
+    },
+    {
+        id: 10003052,
+        n: "玄色狴犴",
+        t: "Elite_Monster",
+        f: 5,
+        atk: 20,
+        def: 300,
+        hp: 510,
+        tn: 1000,
+        icon: "HX_Bian01",
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.C", "Mon.Elite", "Mon.SoloTreasure.CPoint", "Mon.SoloTreasure.CContainer"],
     },
     {
         id: 10004001,
@@ -2693,6 +2991,31 @@ const monsterData: Monster[] = [
         hp: 510,
         tn: 1000,
         icon: "HX_Bian02",
+        tags: ["Mon.Hx", "Mon.Ranged", "Mon.Reward.C", "Mon.Elite"],
+    },
+    {
+        id: 10004051,
+        n: "狴犴",
+        t: "Elite_Monster",
+        f: 5,
+        atk: 20,
+        def: 300,
+        hp: 510,
+        tn: 1000,
+        icon: "HX_Bian02",
+        tags: ["Mon.Hx", "Mon.Ranged", "Mon.Reward.C", "Mon.Elite", "Mon.SoloTreasure.DPoint", "Mon.SoloTreasure.DContainer"],
+    },
+    {
+        id: 10004052,
+        n: "狴犴",
+        t: "Elite_Monster",
+        f: 5,
+        atk: 20,
+        def: 300,
+        hp: 510,
+        tn: 1000,
+        icon: "HX_Bian02",
+        tags: ["Mon.Hx", "Mon.Ranged", "Mon.Reward.C", "Mon.Elite", "Mon.SoloTreasure.CPoint", "Mon.SoloTreasure.CContainer"],
     },
     {
         id: 10005001,
@@ -2704,6 +3027,7 @@ const monsterData: Monster[] = [
         hp: 47,
         tn: 150,
         icon: "HX_Tianshi02",
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.E"],
     },
     {
         id: 10005011,
@@ -2716,7 +3040,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
-        tags: ["Mon.Strong.Frozen"],
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Frozen", "Mon.Elite"],
     },
     {
         id: 10005012,
@@ -2729,7 +3053,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
-        tags: ["Mon.Strong.Burst"],
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Burst", "Mon.Elite"],
     },
     {
         id: 10005013,
@@ -2742,7 +3066,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
-        tags: ["Mon.Strong.Poison"],
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Poison", "Mon.SurvivalPoison", "Mon.Elite"],
     },
     {
         id: 10005014,
@@ -2755,7 +3079,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
-        tags: ["Mon.Strong.Thunder"],
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Thunder", "Mon.Elite"],
     },
     {
         id: 10005016,
@@ -2768,7 +3092,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
-        tags: ["Mon.Strong.Fade"],
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Fade", "Mon.Elite"],
     },
     {
         id: 10005018,
@@ -2781,7 +3105,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
-        tags: ["Mon.Strong.Revenge"],
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Revenge", "Mon.Elite"],
     },
     {
         id: 10005019,
@@ -2794,7 +3118,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
-        tags: ["Mon.Strong.IceOrb"],
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.IceOrb", "Mon.Elite"],
     },
     {
         id: 10005023,
@@ -2807,7 +3131,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
-        tags: ["Mon.Strong.Vampire"],
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Vampire", "Mon.Elite"],
     },
     {
         id: 10005024,
@@ -2820,7 +3144,7 @@ const monsterData: Monster[] = [
         hp: 102,
         tn: 150,
         icon: "HX_Tianshi02",
-        tags: ["Mon.Strong.Threefold"],
+        tags: ["Mon.Hx", "Mon.Melee", "Mon.Reward.B", "Mon.Strong.Threefold", "Mon.Elite"],
     },
 ]
 

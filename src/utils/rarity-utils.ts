@@ -1,11 +1,12 @@
 export function getRarityName(rarity: number): string {
     return (
         {
-            1: "金",
-            2: "紫",
+            1: "白",
+            2: "绿",
             3: "蓝",
-            4: "绿",
-            5: "白",
+            4: "紫",
+            5: "金",
+            6: "红",
         }[rarity] || "白"
     )
 }
@@ -13,11 +14,12 @@ export function getRarityName(rarity: number): string {
 export function getRarityValue(rarity: string): number {
     return (
         {
-            金: 5,
-            紫: 4,
-            蓝: 3,
-            绿: 2,
             白: 1,
+            绿: 2,
+            蓝: 3,
+            紫: 4,
+            金: 5,
+            红: 6,
         }[rarity] || 0
     )
 }
@@ -34,6 +36,7 @@ export function getRarityGradientClass(rarity: number | string): string {
         3: "from-blue-900/80 to-blue-100/80",
         4: "from-purple-900/80 to-purple-100/80",
         5: "from-yellow-900/80 to-yellow-100/80",
+        6: "from-red-900/80 to-red-100/80",
     }
     return rarityMap[typeof rarity === "string" ? getRarityValue(rarity) : rarity] || rarityMap[1]
 }
@@ -50,6 +53,7 @@ export function getRarityBadgeClass(rarity: number): string {
         3: "bg-blue-200 text-blue-800",
         4: "bg-purple-200 text-purple-800",
         5: "bg-yellow-200 text-yellow-800",
+        6: "bg-red-200 text-red-800",
     }
 
     return rarityMap[rarity] || "bg-base-200 text-base-content"
