@@ -2106,6 +2106,9 @@ function preparseScriptConfigFromSource(scope: string, source: string): ScriptCo
  * @returns 本地脚本是否比云端脚本旧
  */
 async function isOnlineScriptExpiredLocal(script: Script): Promise<boolean> {
+    function normalizeTimestampToMinute(timestamp: number): number {
+        return Math.floor(timestamp / 60000)
+    }
     const fileName = getScriptFileNameByTitle(script.title)
     if (!localScripts.value.includes(fileName)) {
         return false
@@ -2116,7 +2119,7 @@ async function isOnlineScriptExpiredLocal(script: Script): Promise<boolean> {
     if (localUpdateAt === null) {
         return true
     }
-    return localUpdateAt < script.updateAt
+    return normalizeTimestampToMinute(localUpdateAt) < normalizeTimestampToMinute(script.updateAt)
 }
 
 /**
@@ -4049,7 +4052,7 @@ onUnmounted(async () => {
                                             </button>
                                         </div>
                                         <div class="text-[11px] text-base-content/40">
-                    {{ formatDateTime(item.timestamp) }}
+                                            {{ formatDateTime(item.timestamp) }}
                                         </div>
                                         <div v-if="item.text" class="text-xs text-base-content/85 whitespace-pre-wrap break-all">
                                             {{ item.text }}
