@@ -183,6 +183,7 @@ export const resolvers = {
 
             const { input } = args
             const category = await ensureScriptCategory(input.category)
+            const updateAt = schema.now()
 
             const [script] = await db
                 .insert(schema.scripts)
@@ -197,17 +198,22 @@ export const resolvers = {
                 id: script.id,
                 name: input.title,
                 author: context.user.name,
-                date: script.updateAt ?? undefined,
+                date: updateAt,
             })
-            await db.update(schema.scripts).set({ content, updateAt: schema.now() }).where(eq(schema.scripts.id, script.id))
-            let result = script
-            result.content = content
+            await db.update(schema.scripts).set({ content, updateAt }).where(eq(schema.scripts.id, script.id))
+            let result = { ...script, content, updateAt }
             if (getSubSelection(info, "user")) {
                 const userScript = await db.query.scripts.findFirst({
                     where: eq(schema.scripts.id, script.id),
                     with: { user: true },
                 })
-                if (userScript) result = userScript
+                if (userScript) {
+                    result = {
+                        ...userScript,
+                        content,
+                        updateAt,
+                    }
+                }
             }
 
             return {
@@ -228,6 +234,7 @@ export const resolvers = {
             }
 
             const { id, input } = args
+            const updateAt = schema.now()
             const script = await db.query.scripts.findFirst({
                 where: eq(schema.scripts.id, id),
             })
@@ -239,9 +246,16 @@ export const resolvers = {
                 throw createGraphQLError("无权修改此脚本")
             }
 
+            const content = replaceScriptHeader(input.content, {
+                id: script.id,
+                name: input.title,
+                author: context.user.name,
+                date: updateAt,
+            })
+
             const [updated] = await db
                 .update(schema.scripts)
-                .set({ ...input, updateAt: schema.now() })
+                .set({ ...input, content, updateAt })
                 .where(eq(schema.scripts.id, id))
                 .returning()
 
@@ -252,13 +266,19 @@ export const resolvers = {
                 .where(and(eq(schema.scriptLikes.userId, context.user.id), eq(schema.scriptLikes.scriptId, id)))
             isLiked = !!like
 
-            let result = updated
+            let result = { ...updated, updateAt }
             if (getSubSelection(info, "user")) {
                 const userScript = await db.query.scripts.findFirst({
                     where: eq(schema.scripts.id, id),
                     with: { user: true },
                 })
-                if (userScript) result = userScript
+                if (userScript) {
+                    result = {
+                        ...userScript,
+                        content,
+                        updateAt,
+                    }
+                }
             }
 
             return {
