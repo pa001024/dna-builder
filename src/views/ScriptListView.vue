@@ -122,6 +122,10 @@ function getScriptFileNameByTitle(title: string): string {
  */
 function parseScriptHeaderDate(dateHeader?: string): number | null {
     if (!dateHeader) return null
+    if (/^\d+$/.test(dateHeader)) {
+        const timestamp = Number(dateHeader)
+        return Number.isFinite(timestamp) ? timestamp : null
+    }
     const parsed = Date.parse(dateHeader)
     return Number.isFinite(parsed) ? parsed : null
 }
@@ -3203,7 +3207,7 @@ async function publishScript(fileName: string) {
                 name: header.name || fileName.replace(/\.js$/, ""),
                 desc: header.desc || "",
                 author: nextAuthor,
-                date: formatDateTime(result.updateAt),
+                date: result.updateAt,
             })
             const filePath = `${scriptsDir.value}\\${fileName}`
             await writeTextFile(filePath, newHeader)

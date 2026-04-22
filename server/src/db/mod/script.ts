@@ -197,7 +197,7 @@ export const resolvers = {
                 id: script.id,
                 name: input.title,
                 author: context.user.name,
-                date: script.updateAt != null ? String(script.updateAt) : undefined,
+                date: script.updateAt ?? undefined,
             })
             await db.update(schema.scripts).set({ content, updateAt: schema.now() }).where(eq(schema.scripts.id, script.id))
             let result = script
