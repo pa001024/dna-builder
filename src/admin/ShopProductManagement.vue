@@ -19,6 +19,13 @@ const ui = useUIStore()
  * @returns 可直接提交给 GraphQL 的商品输入。
  */
 function toShopProductInput(form: Record<string, unknown>): ShopProductInput {
+    const parseTime = (value: unknown) => {
+        const text = String(value ?? "").trim()
+        if (!text) return undefined
+        const timestamp = new Date(text.replace(" ", "T")).getTime()
+        return Number.isNaN(timestamp) ? undefined : timestamp
+    }
+
     return {
         name: String(form.name ?? "").trim(),
         description: String(form.description ?? "").trim() || undefined,
@@ -30,8 +37,8 @@ function toShopProductInput(form: Record<string, unknown>): ShopProductInput {
         displayCss: String(form.displayCss ?? "").trim() || undefined,
         sortOrder: Number(form.sortOrder ?? 0),
         isActive: String(form.isActive ?? "true") === "true",
-        startTime: String(form.startTime ?? "").trim() || undefined,
-        endTime: String(form.endTime ?? "").trim() || undefined,
+        startTime: parseTime(form.startTime),
+        endTime: parseTime(form.endTime),
     }
 }
 
@@ -41,7 +48,7 @@ function toShopProductInput(form: Record<string, unknown>): ShopProductInput {
  * @param endTime 结束时间。
  * @returns 时间范围字符串。
  */
-function formatProductTimeRange(startTime?: string, endTime?: string): string {
+function formatProductTimeRange(startTime?: number, endTime?: number): string {
     if (!startTime && !endTime) return "长期有效"
     return `${startTime || "即时生效"} ~ ${endTime || "长期有效"}`
 }
@@ -148,7 +155,7 @@ const config: AdminCrudConfig<ShopProduct> = {
                 endTime: item.endTime,
             }),
             formatter: value => {
-                const range = value as { startTime?: string; endTime?: string }
+                const range = value as { startTime?: number; endTime?: number }
                 return formatProductTimeRange(range.startTime, range.endTime)
             },
         },
@@ -235,8 +242,8 @@ const config: AdminCrudConfig<ShopProduct> = {
                 rewardKey: item.rewardKey || "",
                 pointsCost: item.pointsCost || 0,
                 sortOrder: item.sortOrder || 0,
-                startTime: item.startTime || "",
-                endTime: item.endTime || "",
+                startTime: item.startTime ? new Date(item.startTime).toISOString().slice(0, 16) : "",
+                endTime: item.endTime ? new Date(item.endTime).toISOString().slice(0, 16) : "",
                 displayClass: item.displayClass || "",
                 displayCss: item.displayCss || "",
                 description: item.description || "",

@@ -7,6 +7,7 @@ import {
     todosWithCountQuery,
     updateSystemTodoMutation,
 } from "@/api/graphql"
+import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
 
@@ -34,11 +35,11 @@ const config: AdminCrudConfig<Todo> = {
             title: "时间范围",
             accessor: item => ({ startTime: item.startTime, endTime: item.endTime }),
             formatter: value => {
-                const range = value as { startTime?: string; endTime?: string }
+                const range = value as { startTime?: number; endTime?: number }
                 if (!range.startTime || !range.endTime) {
                     return "-"
                 }
-                return `${range.startTime} ~ ${range.endTime}`
+                return `${formatDateTime(range.startTime)} ~ ${formatDateTime(range.endTime)}`
             },
         },
         {
@@ -51,7 +52,7 @@ const config: AdminCrudConfig<Todo> = {
             key: "createdAt",
             title: "创建时间",
             cellClass: "px-8 py-5 whitespace-nowrap text-sm text-base-content/70",
-            formatter: value => String(value || "-"),
+            formatter: value => (value ? formatDateTime(Number(value)) : "-"),
         },
     ],
     rowKey: item => item.id,
@@ -69,8 +70,8 @@ const config: AdminCrudConfig<Todo> = {
             items: (result?.todos || []).map(todo => ({
                 ...todo,
                 description: todo.description ?? "",
-                startTime: todo.startTime ?? "",
-                endTime: todo.endTime ?? "",
+                startTime: todo.startTime ?? 0,
+                endTime: todo.endTime ?? 0,
             })),
             total: result?.todosCount || 0,
         }
@@ -132,10 +133,10 @@ const config: AdminCrudConfig<Todo> = {
                 description: form.description ? String(form.description) : undefined,
             }
             if (form.startTime) {
-                input.startTime = String(form.startTime)
+                input.startTime = Number(form.startTime)
             }
             if (form.endTime) {
-                input.endTime = String(form.endTime)
+                input.endTime = Number(form.endTime)
             }
             await createSystemTodoMutation({ input })
         },
@@ -145,10 +146,10 @@ const config: AdminCrudConfig<Todo> = {
                 description: form.description ? String(form.description) : undefined,
             }
             if (form.startTime) {
-                input.startTime = String(form.startTime)
+                input.startTime = Number(form.startTime)
             }
             if (form.endTime) {
-                input.endTime = String(form.endTime)
+                input.endTime = Number(form.endTime)
             }
 
             await updateSystemTodoMutation({

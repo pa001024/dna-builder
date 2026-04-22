@@ -30,7 +30,7 @@ export const typeDefs = /* GraphQL */ `
         user: String!
         action: String!
         target: String!
-        time: String!
+        time: Int!
     }
 `
 
@@ -114,7 +114,7 @@ export const resolvers = {
                         user: login.userName || login.userEmail || "用户",
                         action: "登录系统",
                         target: login.userEmail || "",
-                        time: formatRelativeTime(login.createdAt || ""),
+                        time: login.createdAt || 0,
                     })
                 }
             }
@@ -140,7 +140,7 @@ export const resolvers = {
                         user: guide.userName || "用户",
                         action: "添加了攻略",
                         target: guide.title || "新攻略",
-                        time: formatRelativeTime(guide.createdAt || ""),
+                        time: guide.createdAt || 0,
                     })
                 }
             }
@@ -166,15 +166,15 @@ export const resolvers = {
                         user: room.ownerName || "用户",
                         action: "创建了房间",
                         target: room.name || "新房间",
-                        time: formatRelativeTime(room.createdAt || ""),
+                        time: room.createdAt || 0,
                     })
                 }
             }
 
             // 按时间排序
             activities.sort((a, b) => {
-                const timeA = new Date(a.time).getTime()
-                const timeB = new Date(b.time).getTime()
+                const timeA = a.time
+                const timeB = b.time
                 return timeB - timeA
             })
 
@@ -188,13 +188,11 @@ export const resolvers = {
  * 格式化相对时间
  * 将时间字符串转换为相对时间描述（如"2分钟前"）
  */
-function formatRelativeTime(dateString: string): string {
-    if (!dateString) return "未知时间"
+function formatRelativeTime(timestamp: number): string {
+    if (!timestamp) return "未知时间"
 
     try {
-        const date = new Date(dateString)
-        const now = new Date()
-        const diffMs = now.getTime() - date.getTime()
+        const diffMs = Date.now() - timestamp
         const diffSeconds = Math.floor(diffMs / 1000)
         const diffMinutes = Math.floor(diffSeconds / 60)
         const diffHours = Math.floor(diffMinutes / 60)
@@ -210,9 +208,9 @@ function formatRelativeTime(dateString: string): string {
             return `${diffDays}天前`
         } else {
             // 超过7天返回日期
-            return dateString
+            return new Date(timestamp).toLocaleString("zh-CN")
         }
     } catch {
-        return dateString
+        return new Date(timestamp).toLocaleString("zh-CN")
     }
 }

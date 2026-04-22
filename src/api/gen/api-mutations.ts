@@ -592,6 +592,7 @@ export const createScriptMutation = typedMutation<Types.Script, { input: Types.S
     mutation ($input: ScriptInput!) {
         createScript(input: $input) {
             id
+            updateAt
             user {
                 name
             }
@@ -603,6 +604,10 @@ export const updateScriptMutation = typedMutation<Types.Script, { id: string; in
     mutation ($id: String!, $input: ScriptInput!) {
         updateScript(id: $id, input: $input) {
             id
+            updateAt
+            user {
+                name
+            }
         }
     }
 `)

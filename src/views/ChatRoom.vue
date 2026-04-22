@@ -11,6 +11,7 @@ import { useUserStore } from "@/store/user"
 import { sleep } from "@/util"
 import { copyHtmlContent, isImage, sanitizeHTML } from "@/utils/html"
 import { fileToDataUrlWithRealMime, normalizeInlineImageDataUrlMime } from "@/utils/image-data-url"
+import { formatDateTime } from "@/utils/time"
 
 const route = useRoute()
 const roomId = computed(() => route.params.room as string)
@@ -682,7 +683,7 @@ function cancelReply() {
                             <div class="flex-1"></div>
                             <div class="flex flex-col h-full" :class="{ 'items-end': user.id === item.user!.id }">
                                 <div class="hidden group-hover:block p-1 text-xs text-base-content/60 whitespace-nowrap">
-                                    {{ item.createdAt }}
+                                    {{ formatDateTime(item.createdAt || 0) }}
                                 </div>
                                 <div class="flex-1"></div>
                                 <div v-if="item.edited" class="text-xs text-base-content/60 whitespace-nowrap">

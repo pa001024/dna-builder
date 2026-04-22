@@ -1047,7 +1047,7 @@ export const activityQuery = typedQuery(
 
 export const activitiesQuery = typedQuery(
     /* GraphQL */ `
-        query ($server: String!, $startTime: Float, $endTime: Float) {
+        query ($server: String!, $startTime: Int, $endTime: Int) {
             activities(server: $server, startTime: $startTime, endTime: $endTime) {
                 id
                 server

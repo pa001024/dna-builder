@@ -171,14 +171,14 @@ watch(
                 <label class="label cursor-pointer gap-2 p-0">
                     <span class="text-xs text-base-content/70">普通模式</span>
                     <input v-model="hardModeEnabled" :disabled="!canToggleMode" type="checkbox" class="toggle toggle-primary toggle-sm" />
-                    <span class="text-xs text-base-content/70">困难模式</span>
+                    <span class="text-xs text-base-content/70">挑战模式</span>
                 </label>
             </div>
             <div class="mt-2 text-xs text-base-content/70">禁用协战: {{ banPhantomEnabled ? "是" : "否" }}</div>
         </div>
 
         <div class="card bg-base-200 rounded p-3">
-            <div class="mb-2 text-xs text-base-content/70">入场费</div>
+            <div class="mb-2 text-xs text-base-content/70">报名费用</div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem
                     v-if="hardModeEnabled && 'hardModeFee' in dungeon"

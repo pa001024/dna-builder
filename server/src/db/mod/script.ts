@@ -38,8 +38,8 @@ export const typeDefs = /* GraphQL */ `
         likes: Int!
         isRecommended: Boolean
         isPinned: Boolean
-        createdAt: String!
-        updateAt: String!
+        createdAt: Float!
+        updateAt: Float!
         user: User
         isLiked: Boolean
     }
@@ -111,8 +111,8 @@ export const resolvers = {
                     likes: script.likes ?? 0,
                     isRecommended: script.isRecommended ?? false,
                     isPinned: script.isPinned ?? false,
-                    createdAt: script.createdAt ?? "",
-                    updateAt: script.updateAt ?? "",
+                    createdAt: script.createdAt ?? 0,
+                    updateAt: script.updateAt ?? 0,
                     isLiked: likedScriptIds.has(script.id),
                 }
             })
@@ -169,8 +169,8 @@ export const resolvers = {
                 likes: script.likes ?? 0,
                 isRecommended: script.isRecommended ?? false,
                 isPinned: script.isPinned ?? false,
-                createdAt: script.createdAt ?? "",
-                updateAt: script.updateAt ?? "",
+                createdAt: script.createdAt ?? 0,
+                updateAt: script.updateAt ?? 0,
                 isLiked,
             }
         },
@@ -197,7 +197,7 @@ export const resolvers = {
                 id: script.id,
                 name: input.title,
                 author: context.user.name,
-                date: script.updateAt ?? undefined,
+                date: script.updateAt != null ? String(script.updateAt) : undefined,
             })
             await db.update(schema.scripts).set({ content, updateAt: schema.now() }).where(eq(schema.scripts.id, script.id))
             let result = script
@@ -217,8 +217,8 @@ export const resolvers = {
                 likes: result.likes ?? 0,
                 isRecommended: result.isRecommended ?? false,
                 isPinned: result.isPinned ?? false,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked: false,
             }
         },
@@ -269,8 +269,8 @@ export const resolvers = {
                 likes: result.likes ?? 0,
                 isRecommended: result.isRecommended ?? false,
                 isPinned: result.isPinned ?? false,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked,
             }
         },
@@ -342,8 +342,8 @@ export const resolvers = {
                 likes: (script.likes ?? 0) + 1,
                 isRecommended: updated.isRecommended ?? false,
                 isPinned: updated.isPinned ?? false,
-                createdAt: updated.createdAt ?? "",
-                updateAt: updated.updateAt ?? "",
+                createdAt: updated.createdAt ?? 0,
+                updateAt: updated.updateAt ?? 0,
                 isLiked: true,
             }
         },
@@ -386,8 +386,8 @@ export const resolvers = {
                 likes: Math.max(0, (script.likes ?? 0) - 1),
                 isRecommended: updated.isRecommended ?? false,
                 isPinned: updated.isPinned ?? false,
-                createdAt: updated.createdAt ?? "",
-                updateAt: updated.updateAt ?? "",
+                createdAt: updated.createdAt ?? 0,
+                updateAt: updated.updateAt ?? 0,
                 isLiked: false,
             }
         },
@@ -435,8 +435,8 @@ export const resolvers = {
                 description: result.description ?? "",
                 views: result.views ?? 0,
                 likes: result.likes ?? 0,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked,
             }
         },
@@ -480,8 +480,8 @@ export const resolvers = {
                 description: result.description ?? "",
                 views: result.views ?? 0,
                 likes: result.likes ?? 0,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked,
             }
         },

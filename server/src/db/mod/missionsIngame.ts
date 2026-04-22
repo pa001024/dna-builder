@@ -23,7 +23,7 @@ export const typeDefs = /* GraphQL */ `
         id: Int!
         server: String!
         missions: [[String!]!]!
-        createdAt: String
+        createdAt: Float
     }
 `
 

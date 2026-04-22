@@ -11,6 +11,7 @@ import {
 } from "@/api/graphql"
 import { charData } from "@/data"
 import { useUIStore } from "@/store/ui"
+import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
 
@@ -83,10 +84,7 @@ const config: AdminCrudConfig<Timeline> = {
             key: "createdAt",
             title: "创建日期",
             cellClass: "px-2 text-xs",
-            formatter: value => {
-                if (!value) return "-"
-                return new Date(String(value)).toLocaleDateString()
-            },
+            formatter: value => (value ? formatDateTime(Number(value)) : "-"),
         },
     ],
     rowKey: item => item.id,

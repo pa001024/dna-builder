@@ -42,8 +42,8 @@ export const typeDefs = /* GraphQL */ `
         likes: Int!
         isRecommended: Boolean
         isPinned: Boolean
-        createdAt: String!
-        updateAt: String!
+        createdAt: Float!
+        updateAt: Float!
         user: User
         isLiked: Boolean
     }
@@ -120,8 +120,8 @@ export const resolvers = {
                     likes: guide.likes ?? 0,
                     isRecommended: guide.isRecommended ?? false,
                     isPinned: guide.isPinned ?? false,
-                    createdAt: guide.createdAt ?? "",
-                    updateAt: guide.updateAt ?? "",
+                    createdAt: guide.createdAt ?? 0,
+                    updateAt: guide.updateAt ?? 0,
                     isLiked: likedGuideIds.has(guide.id),
                 }
             })
@@ -176,8 +176,8 @@ export const resolvers = {
                 likes: guide.likes ?? 0,
                 isRecommended: guide.isRecommended ?? false,
                 isPinned: guide.isPinned ?? false,
-                createdAt: guide.createdAt ?? "",
-                updateAt: guide.updateAt ?? "",
+                createdAt: guide.createdAt ?? 0,
+                updateAt: guide.updateAt ?? 0,
                 isLiked,
             }
         },
@@ -218,8 +218,8 @@ export const resolvers = {
                 likes: result.likes ?? 0,
                 isRecommended: result.isRecommended ?? false,
                 isPinned: result.isPinned ?? false,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked: false,
             }
         },
@@ -272,8 +272,8 @@ export const resolvers = {
                 likes: result.likes ?? 0,
                 isRecommended: result.isRecommended ?? false,
                 isPinned: result.isPinned ?? false,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked,
             }
         },
@@ -346,8 +346,8 @@ export const resolvers = {
                 likes: (guide.likes ?? 0) + 1,
                 isRecommended: updated.isRecommended ?? false,
                 isPinned: updated.isPinned ?? false,
-                createdAt: updated.createdAt ?? "",
-                updateAt: updated.updateAt ?? "",
+                createdAt: updated.createdAt ?? 0,
+                updateAt: updated.updateAt ?? 0,
                 isLiked: true,
             }
         },
@@ -388,8 +388,8 @@ export const resolvers = {
                 likes: Math.max(0, (guide.likes ?? 0) - 1),
                 isRecommended: updated.isRecommended ?? false,
                 isPinned: updated.isPinned ?? false,
-                createdAt: updated.createdAt ?? "",
-                updateAt: updated.updateAt ?? "",
+                createdAt: updated.createdAt ?? 0,
+                updateAt: updated.updateAt ?? 0,
                 isLiked: false,
             }
         },
@@ -433,8 +433,8 @@ export const resolvers = {
                 images: result.images || [],
                 views: result.views ?? 0,
                 likes: result.likes ?? 0,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked,
             }
         },
@@ -478,8 +478,8 @@ export const resolvers = {
                 images: result.images || [],
                 views: result.views ?? 0,
                 likes: result.likes ?? 0,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked,
             }
         },

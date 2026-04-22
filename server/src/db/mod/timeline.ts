@@ -18,8 +18,8 @@ export const typeDefs = /* GraphQL */ `
         likes: Int!
         isRecommended: Boolean
         isPinned: Boolean
-        createdAt: String!
-        updateAt: String!
+        createdAt: Float!
+        updateAt: Float!
         user: User
         isLiked: Boolean
     }
@@ -104,8 +104,8 @@ export const resolvers = {
                 likes: timeline.likes ?? 0,
                 isRecommended: timeline.isRecommended ?? false,
                 isPinned: timeline.isPinned ?? false,
-                createdAt: timeline.createdAt ?? "",
-                updateAt: timeline.updateAt ?? "",
+                createdAt: timeline.createdAt ?? 0,
+                updateAt: timeline.updateAt ?? 0,
                 isLiked: likedTimelineIds.has(timeline.id),
             }))
         },
@@ -152,8 +152,8 @@ export const resolvers = {
                 likes: timeline.likes ?? 0,
                 isRecommended: timeline.isRecommended ?? false,
                 isPinned: timeline.isPinned ?? false,
-                createdAt: timeline.createdAt ?? "",
-                updateAt: timeline.updateAt ?? "",
+                createdAt: timeline.createdAt ?? 0,
+                updateAt: timeline.updateAt ?? 0,
                 isLiked: likedTimelineIds.has(timeline.id),
             }))
         },
@@ -181,8 +181,8 @@ export const resolvers = {
                 likes: timeline.likes ?? 0,
                 isRecommended: timeline.isRecommended ?? false,
                 isPinned: timeline.isPinned ?? false,
-                createdAt: timeline.createdAt ?? "",
-                updateAt: timeline.updateAt ?? "",
+                createdAt: timeline.createdAt ?? 0,
+                updateAt: timeline.updateAt ?? 0,
                 isLiked: likedTimelineIds.has(timeline.id),
             }))
         },
@@ -218,8 +218,8 @@ export const resolvers = {
                 likes: timeline.likes ?? 0,
                 isRecommended: timeline.isRecommended ?? false,
                 isPinned: timeline.isPinned ?? false,
-                createdAt: timeline.createdAt ?? "",
-                updateAt: timeline.updateAt ?? "",
+                createdAt: timeline.createdAt ?? 0,
+                updateAt: timeline.updateAt ?? 0,
                 isLiked: likedTimelineIds.has(id),
             }
         },
@@ -260,8 +260,8 @@ export const resolvers = {
                 likes: result.likes ?? 0,
                 isRecommended: result.isRecommended ?? false,
                 isPinned: result.isPinned ?? false,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked: false,
             }
         },
@@ -319,8 +319,8 @@ export const resolvers = {
                 likes: result.likes ?? 0,
                 isRecommended: result.isRecommended ?? false,
                 isPinned: result.isPinned ?? false,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked: likedTimelineIds.has(id),
             }
         },
@@ -393,8 +393,8 @@ export const resolvers = {
                 likes: (timeline.likes ?? 0) + 1,
                 isRecommended: updated.isRecommended ?? false,
                 isPinned: updated.isPinned ?? false,
-                createdAt: updated.createdAt ?? "",
-                updateAt: updated.updateAt ?? "",
+                createdAt: updated.createdAt ?? 0,
+                updateAt: updated.updateAt ?? 0,
                 isLiked: true,
             }
         },
@@ -436,8 +436,8 @@ export const resolvers = {
                 likes: Math.max(0, (timeline.likes ?? 0) - 1),
                 isRecommended: updated.isRecommended ?? false,
                 isPinned: updated.isPinned ?? false,
-                createdAt: updated.createdAt ?? "",
-                updateAt: updated.updateAt ?? "",
+                createdAt: updated.createdAt ?? 0,
+                updateAt: updated.updateAt ?? 0,
                 isLiked: false,
             }
         },
@@ -490,8 +490,8 @@ export const resolvers = {
                 likes: result.likes ?? 0,
                 isRecommended: result.isRecommended ?? false,
                 isPinned: result.isPinned ?? false,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked: likedTimelineIds.has(id),
             }
         },
@@ -541,8 +541,8 @@ export const resolvers = {
                 likes: result.likes ?? 0,
                 isRecommended: result.isRecommended ?? false,
                 isPinned: result.isPinned ?? false,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isLiked: likedTimelineIds.has(id),
             }
         },

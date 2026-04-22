@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { deleteUserMutation, type User, updateUserMutation, usersWithCountQuery } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
+import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
 
@@ -66,7 +67,7 @@ const config: AdminCrudConfig<User> = {
             key: "createdAt",
             title: "创建时间",
             cellClass: "px-8 py-5 whitespace-nowrap text-sm text-base-content/70",
-            formatter: value => String(value || "-"),
+            formatter: value => (value ? formatDateTime(Number(value)) : "-"),
         },
     ],
     rowKey: item => item.id,

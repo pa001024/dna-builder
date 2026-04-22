@@ -12,6 +12,7 @@ import {
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { formatDateTime } from "@/utils/time"
 
 type ShopTab = "all" | "title" | "name_card"
 
@@ -93,9 +94,10 @@ function getPreviewUserLevel(): number {
  * @param value 原始时间文本。
  * @returns 时间戳；为空返回 `null`，格式非法返回 `Number.NaN`。
  */
-function parseProductTime(value?: string): number | null {
+function parseProductTime(value?: string | number): number | null {
     const text = String(value ?? "").trim()
     if (!text) return null
+    if (/^\d+$/.test(text)) return Number(text)
     const normalized = text.replace(" ", "T")
     const timestamp = new Date(normalized).getTime()
     return Number.isNaN(timestamp) ? Number.NaN : timestamp
@@ -152,7 +154,9 @@ function formatProductAvailability(product: ShopProduct): string {
     if (!product.startTime && !product.endTime) {
         return t("shop-detail.alwaysAvailable")
     }
-    return `${product.startTime || t("shop-detail.immediateEffective")} ~ ${product.endTime || t("shop-detail.longTermValid")}`
+    return `${product.startTime ? formatDateTime(product.startTime) : t("shop-detail.immediateEffective")} ~ ${
+        product.endTime ? formatDateTime(product.endTime) : t("shop-detail.longTermValid")
+    }`
 }
 
 const pointsBalance = computed(() => summary.value?.points ?? null)

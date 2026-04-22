@@ -12,10 +12,10 @@ import {
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 
-type SoloTreasureType = "story" | "permanent" | "treasure" | "bag"
+type SoloTreasureType = "story" | "repeat" | "treasure" | "bag"
 type SoloTreasureListItem =
     | { kind: "story"; id: number; title: string; desc: string; meta: string }
-    | { kind: "permanent"; id: number; title: string; desc: string; meta: string }
+    | { kind: "repeat"; id: number; title: string; desc: string; meta: string }
     | { kind: "treasure"; id: number; title: string; desc: string; treasure: (typeof extractionTreasureData)[number] }
     | { kind: "bag"; id: number; title: string; desc: string; meta: string }
 
@@ -27,9 +27,9 @@ const selectedType = useSearchParam<SoloTreasureType>("tp", "story")
 
 const typeTabs = [
     { key: "story" as const, label: "剧情副本" },
-    { key: "permanent" as const, label: "常驻副本" },
-    { key: "treasure" as const, label: "宝藏" },
-    { key: "bag" as const, label: "背包" },
+    { key: "repeat" as const, label: "常驻副本" },
+    { key: "treasure" as const, label: "宝物" },
+    { key: "bag" as const, label: "百宝囊" },
 ]
 
 const filteredSoloTreasure = computed<SoloTreasureListItem[]>(() => {
@@ -57,9 +57,9 @@ function getListItems(type: SoloTreasureType): SoloTreasureListItem[] {
         }))
     }
 
-    if (type === "permanent") {
+    if (type === "repeat") {
         return treasureHuntRepeatDungeonData.map(item => ({
-            kind: "permanent",
+            kind: "repeat",
             id: item.id,
             title: item.name,
             desc: item.desc,
@@ -128,7 +128,7 @@ function selectBag(id: number): void {
  * 清空当前类型的选中项。
  */
 function clearSelectedDetail(): void {
-    if (selectedType.value === "story" || selectedType.value === "permanent") {
+    if (selectedType.value === "story" || selectedType.value === "repeat") {
         selectedDungeonId.value = 0
         return
     }
@@ -156,7 +156,7 @@ const selectedStoryDungeon = computed(() => {
  * 获取当前选中的常驻副本。
  */
 const selectedRepeatDungeon = computed(() => {
-    if (selectedType.value !== "permanent") {
+    if (selectedType.value !== "repeat") {
         return null
     }
 
@@ -209,7 +209,7 @@ const selectedDetailKind = computed(() => {
  * @param item 条目。
  */
 function isItemSelected(item: SoloTreasureListItem): boolean {
-    if (item.kind === "story" || item.kind === "permanent") {
+    if (item.kind === "story" || item.kind === "repeat") {
         return selectedType.value === item.kind && selectedDungeonId.value === item.id
     }
 
@@ -282,7 +282,7 @@ useInitialScrollToSelectedItem()
                                 :key="`${item.kind}-${item.id}`"
                                 class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                                 :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': isItemSelected(item) }"
-                                @click="item.kind === 'story' || item.kind === 'permanent' ? selectDungeon(item.id) : selectBag(item.id)"
+                                @click="item.kind === 'story' || item.kind === 'repeat' ? selectDungeon(item.id) : selectBag(item.id)"
                             >
                                 <div class="flex flex-col gap-2">
                                     <div class="w-full">

@@ -15,6 +15,7 @@ import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { copyText } from "@/util"
+import { formatDateTime } from "@/utils/time"
 
 const props = defineProps<{
     charName: string
@@ -75,9 +76,8 @@ function toggleDescriptionExpand(buildId: string) {
 }
 
 // 格式化日期
-function formatDate(dateString: string): string {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("zh-CN")
+function formatDate(timestamp: number): string {
+    return formatDateTime(timestamp).split(" ")[0] ?? ""
 }
 
 // 获取构筑列表

@@ -68,8 +68,8 @@ export const typeDefs = /* GraphQL */ `
         nameEffectClass: String
         dailyExperienceStatus: UserDailyExperienceStatus
         abyssUsageUploadStatus: UserAbyssUsageUploadStatus
-        createdAt: String
-        updateAt: String
+        createdAt: Float
+        updateAt: Float
     }
 
     type UserDailyExperienceStatus {
@@ -549,7 +549,7 @@ export const resolvers = {
 
             // 生成6位数字验证码
             const token = Math.floor(100000 + Math.random() * 900000).toString()
-            const expiresAt = new Date(Date.now() + 1000 * 60 * 30).toISOString() // 30分钟过期
+            const expiresAt = Date.now() + 1000 * 60 * 30
 
             // 保存重置验证码
             await db
@@ -596,8 +596,8 @@ export const resolvers = {
 
             // 检查验证码是否过期
             const now = new Date()
-            const expiresAt = new Date(reset.expiresAt)
-            if (now > expiresAt) {
+            const expiresAt = reset.expiresAt ?? 0
+            if (now.getTime() > expiresAt) {
                 // 删除过期的验证码
                 await db.delete(schema.passwordResets).where(eq(schema.passwordResets.id, reset.id))
                 throw createGraphQLError("Reset token has expired")

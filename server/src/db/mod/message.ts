@@ -46,8 +46,8 @@ export const typeDefs = /* GraphQL */ `
         userId: String!
         content: String!
         edited: Int
-        createdAt: String
-        updateAt: String
+        createdAt: Float
+        updateAt: Float
         replyToMsgId: String
         replyToUserId: String
         user: User
@@ -60,7 +60,7 @@ export const typeDefs = /* GraphQL */ `
         msgId: String!
         count: Int
         users: [User!]
-        createdAt: String
+        createdAt: Float
     }
 `
 

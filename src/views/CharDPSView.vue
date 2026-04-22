@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import { type DPS, dpsListQuery } from "@/api/graphql"
+import { formatDateTime } from "@/utils/time"
 import { charMap } from "../data"
 
 // 状态管理
@@ -189,7 +190,7 @@ const filterDPSList = (dpsList: DPS[]) => {
                                         <div class="text-right">
                                             <div class="text-2xl font-bold text-green-600">{{ dpsItem.dpsValue.toLocaleString() }} DPS</div>
                                             <div class="text-sm text-gray-500 mt-1">
-                                                {{ new Date(dpsItem.createdAt).toLocaleString() }}
+                                                {{ formatDateTime(dpsItem.createdAt) }}
                                             </div>
                                         </div>
                                     </div>

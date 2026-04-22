@@ -32,8 +32,8 @@ export const typeDefs = /* GraphQL */ `
         name: String!
         icon: String!
         desc: String!
-        createdAt: String
-        updateAt: String
+        createdAt: Float
+        updateAt: Float
     }
 
     input ActivityInput {

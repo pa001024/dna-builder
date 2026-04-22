@@ -13,8 +13,12 @@ import {
 } from "drizzle-orm/sqlite-core"
 import { nanoid } from "nanoid"
 
+/**
+ * @description 生成当前时间戳，统一作为数据库时间字段默认值。
+ * @returns 当前时间戳（毫秒）。
+ */
 export function now() {
-    return new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", hour12: false })
+    return Date.now()
 }
 
 export function id() {
@@ -132,8 +136,8 @@ export const users = sqliteTable(
             .$default(() => 1),
         selectedTitleAssetId: text("selected_title_asset_id"),
         selectedNameCardAssetId: text("selected_name_card_asset_id"),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at"),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at"),
     },
     users => [uniqueIndex("email_idx").on(users.email)]
 )
@@ -146,7 +150,7 @@ export const logins = sqliteTable("logins", {
         .references(() => users.id, { onDelete: "cascade" }),
     ip: text("ip"),
     ua: text("ua"),
-    createdAt: text("created_at").$default(now),
+    createdAt: integer("created_at").$default(now),
 })
 
 export const loginsRelations = relations(logins, ({ one }) => ({
@@ -160,8 +164,8 @@ export const passwords = sqliteTable("passwords", {
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
     hash: text("hash").notNull(),
-    createdAt: text("created_at").$default(now),
-    updateAt: text("update_at").$onUpdate(now),
+    createdAt: integer("created_at").$default(now),
+    updateAt: integer("update_at").$onUpdate(now),
 })
 
 export const passwordsRelations = relations(passwords, ({ one }) => ({
@@ -177,8 +181,8 @@ export const passwordResets = sqliteTable(
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
         token: text("token").notNull(),
-        expiresAt: text("expires_at").notNull(),
-        createdAt: text("created_at").$default(now),
+        expiresAt: integer("expires_at").notNull(),
+        createdAt: integer("created_at").$default(now),
     },
     table => [uniqueIndex("password_resets_user_id_unique").on(table.userId)]
 )
@@ -196,8 +200,8 @@ export const rooms = sqliteTable("rooms", {
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
     maxUsers: integer("max_users"),
-    createdAt: text("created_at").$default(now),
-    updateAt: text("update_at").$onUpdate(now),
+    createdAt: integer("created_at").$default(now),
+    updateAt: integer("update_at").$onUpdate(now),
 })
 
 export const roomsRelations = relations(rooms, ({ one, many }) => ({
@@ -220,8 +224,8 @@ export const msgs = sqliteTable(
         replyToUserId: text("reply_to_user_id").references(() => users.id, { onDelete: "set null" }),
         content: text("content").notNull(),
         edited: integer("edited").$default(() => 0),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     msgs => [index("msg_room_id_idx").on(msgs.roomId)]
 )
@@ -242,7 +246,7 @@ export const reactions = sqliteTable("reactions", {
         .notNull()
         .references(() => msgs.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
-    createdAt: text("created_at").$default(now),
+    createdAt: integer("created_at").$default(now),
 })
 
 export const reactionsRelations = relations(reactions, ({ one }) => ({
@@ -259,7 +263,7 @@ export const userReactions = sqliteTable(
         reactionId: text("reaction_id")
             .notNull()
             .references(() => reactions.id, { onDelete: "cascade" }),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     userReactions => [uniqueIndex("user_reaction_idx").on(userReactions.userId, userReactions.reactionId)]
 )
@@ -278,8 +282,8 @@ export const notifications = sqliteTable("notifications", {
     type: text("type").notNull(),
     content: text("content").notNull(),
     isRead: integer("is_read").$default(() => 0),
-    createdAt: text("created_at").$default(now),
-    updateAt: text("update_at").$onUpdate(now),
+    createdAt: integer("created_at").$default(now),
+    updateAt: integer("update_at").$onUpdate(now),
 })
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
@@ -290,16 +294,16 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 export const schedules = sqliteTable("schedules", {
     id: text("id").$default(id).primaryKey(),
     name: text("name").notNull(),
-    startTime: text("start_time").notNull(),
-    endTime: text("end_time").notNull(),
+    startTime: integer("start_time").notNull(),
+    endTime: integer("end_time").notNull(),
     repeatType: text("repeat_type"),
     repeatInterval: integer("repeat_interval"),
     repeatCount: integer("repeat_count"),
     userId: text("user_id")
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
-    createdAt: text("created_at").$default(now),
-    updateAt: text("update_at").$onUpdate(now),
+    createdAt: integer("created_at").$default(now),
+    updateAt: integer("update_at").$onUpdate(now),
 })
 
 export const schedulesRelations = relations(schedules, ({ one }) => ({
@@ -317,7 +321,7 @@ export const userExperienceRewards = sqliteTable(
         source: text("source").notNull(),
         dateKey: text("date_key").notNull(),
         awardedExp: integer("awarded_exp").notNull(),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     table => [
         uniqueIndex("user_experience_reward_unique_idx").on(table.userId, table.source, table.dateKey),
@@ -339,8 +343,8 @@ export const shopAssets = sqliteTable(
         rewardName: text("reward_name").notNull(),
         displayClass: text("display_class"),
         displayCss: text("display_css"),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     table => [
         uniqueIndex("shop_assets_reward_key_unique_idx").on(table.rewardType, table.rewardKey),
@@ -365,10 +369,10 @@ export const shopProducts = sqliteTable(
         isActive: integer("is_active")
             .notNull()
             .$default(() => 1),
-        startTime: text("start_time"),
-        endTime: text("end_time"),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        startTime: integer("start_time"),
+        endTime: integer("end_time"),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     table => [
         index("shop_products_asset_idx").on(table.assetId),
@@ -387,7 +391,7 @@ export const userShopItems = sqliteTable(
         assetId: text("asset_id")
             .notNull()
             .references(() => shopAssets.id, { onDelete: "cascade" }),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     table => [uniqueIndex("user_shop_item_unique_idx").on(table.userId, table.assetId), index("user_shop_item_user_idx").on(table.userId)]
 )
@@ -407,7 +411,7 @@ export const shopRedemptions = sqliteTable(
             .notNull()
             .references(() => shopAssets.id, { onDelete: "cascade" }),
         pointsCost: integer("points_cost").notNull(),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     table => [
         index("shop_redemptions_user_idx").on(table.userId),
@@ -444,8 +448,8 @@ export const tasks = sqliteTable("tasks", {
     id: text("id").$default(id).primaryKey(),
     name: text("name").notNull(),
     desc: text("desc"),
-    startTime: text("start_time"),
-    endTime: text("end_time"),
+    startTime: integer("start_time"),
+    endTime: integer("end_time"),
     maxUser: integer("max_user").notNull(),
     maxAge: integer("max_age"),
     userList: text("user_list", { mode: "json" }).notNull().$type<Array<string>>(),
@@ -455,8 +459,8 @@ export const tasks = sqliteTable("tasks", {
     userId: text("user_id")
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
-    createdAt: text("created_at").$default(now),
-    updateAt: text("update_at").$onUpdate(now),
+    createdAt: integer("created_at").$default(now),
+    updateAt: integer("update_at").$onUpdate(now),
 })
 
 export const tasksRelations = relations(tasks, ({ one }) => ({
@@ -470,7 +474,7 @@ export const missionsIngame = sqliteTable(
         id: integer("id").primaryKey({ autoIncrement: true }),
         server: text("server").notNull(),
         missions: text("missions", { mode: "json" }).notNull().$type<Array<string[]>>(),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     missionsIngame => [index("missions_ingame_server_idx").on(missionsIngame.server)]
 )
@@ -488,8 +492,8 @@ export const activitiesIngame = sqliteTable(
         name: text("name").notNull(),
         icon: text("icon").notNull(),
         desc: text("desc").notNull(),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     activitiesIngame => [
         uniqueIndex("activities_ingame_server_id_idx").on(activitiesIngame.server, activitiesIngame.id),
@@ -517,8 +521,8 @@ export const guides = sqliteTable(
         likes: integer("likes").$default(() => 0),
         isRecommended: integer("is_recommended", { mode: "boolean" }).$default(() => false),
         isPinned: integer("is_pinned", { mode: "boolean" }).$default(() => false),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     guides => [
         index("guides_type_idx").on(guides.type),
@@ -543,7 +547,7 @@ export const guideLikes = sqliteTable(
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     guideLikes => [
         uniqueIndex("guide_like_idx").on(guideLikes.userId, guideLikes.guideId),
@@ -562,8 +566,8 @@ export const dnaAuthSessions = sqliteTable("dna_auth_sessions", {
     code: text("code").notNull().unique(),
     imageUrl: text("image_url").notNull(),
     dnaUid: text("dna_uid").notNull(),
-    expiresAt: text("expires_at").notNull(),
-    createdAt: text("created_at").$default(now),
+    expiresAt: integer("expires_at").notNull(),
+    createdAt: integer("created_at").$default(now),
 })
 
 export const dnaAuthSessionsRelations = relations(dnaAuthSessions, () => ({}))
@@ -577,8 +581,8 @@ export const dnaUserBindings = sqliteTable(
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
         dnaUid: text("dna_uid").notNull().unique(),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     dnaUserBindings => [uniqueIndex("dna_user_binding_idx").on(dnaUserBindings.userId, dnaUserBindings.dnaUid)]
 )
@@ -608,14 +612,14 @@ export const todos = sqliteTable(
         id: text("id").$default(id).primaryKey(),
         title: text("title").notNull(),
         description: text("desc"),
-        startTime: text("start_time"),
-        endTime: text("end_time"),
+        startTime: integer("start_time"),
+        endTime: integer("end_time"),
         type: text("type").notNull(), // 'user' | 'system'
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     todos => [index("todos_user_id_idx").on(todos.userId), index("todos_type_idx").on(todos.type)]
 )
@@ -636,7 +640,7 @@ export const todoCompletions = sqliteTable(
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
-        completedAt: text("completed_at").$default(now),
+        completedAt: integer("completed_at").$default(now),
     },
     todoCompletions => [uniqueIndex("todo_completion_idx").on(todoCompletions.todoId, todoCompletions.userId)]
 )
@@ -662,8 +666,8 @@ export const builds = sqliteTable(
         likes: integer("likes").default(0),
         isRecommended: integer("is_recommended", { mode: "boolean" }).default(false),
         isPinned: integer("is_pinned", { mode: "boolean" }).default(false),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at"),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at"),
     },
     builds => [
         index("builds_char_id_idx").on(builds.charId),
@@ -692,7 +696,7 @@ export const buildLikes = sqliteTable(
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     buildLikes => [
         uniqueIndex("build_like_idx").on(buildLikes.userId, buildLikes.buildId),
@@ -722,8 +726,8 @@ export const timelines = sqliteTable(
         likes: integer("likes").default(0),
         isRecommended: integer("is_recommended", { mode: "boolean" }).default(false),
         isPinned: integer("is_pinned", { mode: "boolean" }).default(false),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     timelines => [
         index("timelines_char_id_idx").on(timelines.charId),
@@ -749,7 +753,7 @@ export const timelineLikes = sqliteTable(
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     timelineLikes => [
         uniqueIndex("timeline_like_idx").on(timelineLikes.userId, timelineLikes.timelineId),
@@ -775,8 +779,8 @@ export const dps = sqliteTable(
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     dps => [
         index("dps_char_id_idx").on(dps.charId),
@@ -809,8 +813,8 @@ export const abyssUsageSubmissions = sqliteTable(
         supportWeapon2: integer("support_weapon_2").notNull(),
         petId: integer("pet_id"),
         stars: integer("stars").notNull(),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     submissions => [
         uniqueIndex("abyss_usage_submissions_season_uid_idx").on(submissions.uidSha256, submissions.seasonId),
@@ -842,7 +846,7 @@ export const abyssUsageRoleParticipants = sqliteTable(
         roleType: text("role_type").notNull(),
         charId: integer("char_id").notNull(),
         gradeLevel: integer("grade_level").notNull(),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     participants => [
         index("abyss_usage_role_participants_season_id_idx").on(participants.seasonId),
@@ -864,7 +868,7 @@ export const abyssUsageWeaponParticipants = sqliteTable(
         roleType: text("role_type").notNull(),
         weaponId: integer("weapon_id").notNull(),
         skillLevel: integer("skill_level").notNull(),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     participants => [
         index("abyss_usage_weapon_participants_season_id_idx").on(participants.seasonId),
@@ -890,8 +894,8 @@ export const scripts = sqliteTable(
         likes: integer("likes").default(0),
         isRecommended: integer("is_recommended", { mode: "boolean" }).default(false),
         isPinned: integer("is_pinned", { mode: "boolean" }).default(false),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at"),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at"),
     },
     scripts => [
         index("scripts_category_idx").on(scripts.category),
@@ -912,8 +916,8 @@ export const scriptCategories = sqliteTable(
         id: text("id").$default(id).primaryKey(),
         name: text("name").notNull(),
         description: text("description"),
-        createdAt: text("created_at").$default(now),
-        updateAt: text("update_at").$onUpdate(now),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
     },
     scriptCategories => [uniqueIndex("script_categories_name_idx").on(scriptCategories.name)]
 )
@@ -929,7 +933,7 @@ export const scriptLikes = sqliteTable(
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
-        createdAt: text("created_at").$default(now),
+        createdAt: integer("created_at").$default(now),
     },
     scriptLikes => [
         uniqueIndex("script_like_idx").on(scriptLikes.userId, scriptLikes.scriptId),

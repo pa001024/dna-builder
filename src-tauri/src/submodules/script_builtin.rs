@@ -2539,6 +2539,52 @@ fn _read_text(path: Option<JsValue>, url: Option<JsValue>, ctx: &mut Context) ->
     Ok(JsValue::from(js_string!(content)))
 }
 
+/// 删除文件函数。
+fn _delete_file(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+
+    if path.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("deleteFile path 不能为空")
+            .into());
+    }
+
+    let resolved_path = _resolve_script_resource_path(&path);
+    let target_path = Path::new(resolved_path.as_str());
+
+    if !target_path.exists() {
+        return Ok(JsValue::new(false));
+    }
+
+    fs::remove_file(target_path)
+        .map_err(|e| JsNativeError::error().with_message(format!("deleteFile 删除失败: {e}")))?;
+    Ok(JsValue::new(true))
+}
+
+/// 检查文件是否存在函数。
+fn _exists_file(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let path = path
+        .unwrap_or_else(|| JsValue::undefined())
+        .to_string(ctx)?
+        .to_std_string_lossy()
+        .trim()
+        .to_string();
+
+    if path.is_empty() {
+        return Err(JsNativeError::typ()
+            .with_message("existsFile path 不能为空")
+            .into());
+    }
+
+    let resolved_path = _resolve_script_resource_path(&path);
+    Ok(JsValue::new(Path::new(resolved_path.as_str()).exists()))
+}
+
 /// 从本地或网络加载图像Mat对象函数
 /// 如果 local_path 不为空，先尝试从本地路径加载，失败则从网络下载并保存到本地
 /// 如果 local_path 为空，直接从网络加载不保存到本地
@@ -5558,6 +5604,14 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 下载文件（异步）
     let f = _download_file.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("downloadFile"), 3, f)?;
+
+    // 删除文件
+    let f = _delete_file.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("deleteFile"), 1, f)?;
+
+    // 检查文件是否存在
+    let f = _exists_file.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("existsFile"), 1, f)?;
 
     // OCR 初始化（自动下载资源）
     let f = _init_ocr.into_js_function_copied(context);

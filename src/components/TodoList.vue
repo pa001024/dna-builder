@@ -6,6 +6,7 @@ import { completeTodoMutation, createTodoMutation, deleteTodoMutation, todosQuer
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { copyText } from "@/util"
+import { formatDateTime } from "@/utils/time"
 
 const userStore = useUserStore()
 const ui = useUIStore()
@@ -15,12 +16,12 @@ interface Todo {
     id: string
     title: string
     description: string | null
-    startTime: string | null
-    endTime: string | null
+    startTime: number | null
+    endTime: number | null
     type: "user" | "system"
     userId: string
-    createdAt: string
-    updateAt: string
+    createdAt: number
+    updateAt: number
     isCompleted: boolean
     user: {
         id: string
@@ -102,8 +103,8 @@ const fetchTodos = async () => {
             todos.value = (result || []).map(todo => ({
                 ...todo,
                 description: todo.description ?? "",
-                startTime: todo.startTime ?? "",
-                endTime: todo.endTime ?? "",
+                startTime: todo.startTime ?? 0,
+                endTime: todo.endTime ?? 0,
                 isCompleted: todo.isCompleted || false,
             })) as Todo[]
         }
@@ -142,8 +143,8 @@ const openEditDialog = (todo: Todo) => {
     editForm.value = {
         title: todo.title,
         description: todo.description ?? "",
-        startTime: todo.startTime ?? "",
-        endTime: todo.endTime ?? "",
+        startTime: todo.startTime ? new Date(todo.startTime).toISOString().slice(0, 16) : "",
+        endTime: todo.endTime ? new Date(todo.endTime).toISOString().slice(0, 16) : "",
     }
     editDialogOpen.value = true
 }
@@ -176,10 +177,10 @@ const submitCreate = async () => {
         }
 
         if (createForm.value.startTime) {
-            input.startTime = createForm.value.startTime
+            input.startTime = Number(createForm.value.startTime)
         }
         if (createForm.value.endTime) {
-            input.endTime = createForm.value.endTime
+            input.endTime = Number(createForm.value.endTime)
         }
 
         const result = await createTodoMutation({ input })
@@ -215,10 +216,10 @@ const submitEdit = async () => {
         }
 
         if (editForm.value.startTime) {
-            input.startTime = editForm.value.startTime
+            input.startTime = Number(editForm.value.startTime)
         }
         if (editForm.value.endTime) {
-            input.endTime = editForm.value.endTime
+            input.endTime = Number(editForm.value.endTime)
         }
 
         const result = await updateTodoMutation({
@@ -285,9 +286,9 @@ const toggleComplete = async (todo: Todo) => {
 }
 
 // 格式化时间显示
-const formatTime = (timeStr: string | null) => {
-    if (!timeStr) return ""
-    return timeStr.replace("T", " ").substring(0, 16)
+const formatTime = (timestamp: number | null) => {
+    if (!timestamp) return ""
+    return formatDateTime(timestamp)
 }
 
 // 页面挂载时获取待办事项列表

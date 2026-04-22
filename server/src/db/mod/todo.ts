@@ -12,12 +12,10 @@ import { getSubSelection } from "."
  * - endTime 无法解析：保守放行，避免误过滤历史数据
  */
 function buildUnexpiredTodoCondition() {
-    const parsedEndTime = sql`datetime(replace(${schema.todos.endTime}, 'T', ' '))`
     return sql`(
         ${schema.todos.endTime} IS NULL
-        OR ${schema.todos.endTime} = ''
-        OR ${parsedEndTime} IS NULL
-        OR ${parsedEndTime} >= datetime('now', 'localtime')
+        OR ${schema.todos.endTime} = 0
+        OR ${schema.todos.endTime} >= ${Date.now()}
     )`
 }
 
@@ -26,12 +24,12 @@ export const typeDefs = /* GraphQL */ `
         id: String!
         title: String!
         description: String
-        startTime: String
-        endTime: String
+        startTime: Float
+        endTime: Float
         type: String!
         userId: String!
-        createdAt: String!
-        updateAt: String!
+        createdAt: Float!
+        updateAt: Float!
         user: User
         isCompleted: Boolean
     }
@@ -39,8 +37,8 @@ export const typeDefs = /* GraphQL */ `
     input TodoInput {
         title: String!
         description: String
-        startTime: String
-        endTime: String
+        startTime: Float
+        endTime: Float
     }
 
     type Mutation {
@@ -108,10 +106,10 @@ export const resolvers = {
                 return {
                     ...todo,
                     description: todo.description ?? "",
-                    startTime: todo.startTime ?? "",
-                    endTime: todo.endTime ?? "",
-                    createdAt: todo.createdAt ?? "",
-                    updateAt: todo.updateAt ?? "",
+                    startTime: todo.startTime ?? 0,
+                    endTime: todo.endTime ?? 0,
+                    createdAt: todo.createdAt ?? 0,
+                    updateAt: todo.updateAt ?? 0,
                     isCompleted,
                 }
             })
@@ -149,10 +147,10 @@ export const resolvers = {
             return {
                 ...todo,
                 description: todo.description ?? "",
-                startTime: todo.startTime ?? "",
-                endTime: todo.endTime ?? "",
-                createdAt: todo.createdAt ?? "",
-                updateAt: todo.updateAt ?? "",
+                startTime: todo.startTime ?? 0,
+                endTime: todo.endTime ?? 0,
+                createdAt: todo.createdAt ?? 0,
+                updateAt: todo.updateAt ?? 0,
                 isCompleted,
             }
         },
@@ -211,10 +209,10 @@ export const resolvers = {
             return {
                 ...result,
                 description: result.description ?? "",
-                startTime: result.startTime ?? "",
-                endTime: result.endTime ?? "",
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                startTime: result.startTime ?? 0,
+                endTime: result.endTime ?? 0,
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isCompleted: false,
             }
         },
@@ -251,10 +249,10 @@ export const resolvers = {
             return {
                 ...result,
                 description: result.description ?? "",
-                startTime: result.startTime ?? "",
-                endTime: result.endTime ?? "",
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                startTime: result.startTime ?? 0,
+                endTime: result.endTime ?? 0,
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isCompleted: false,
             }
         },
@@ -307,10 +305,10 @@ export const resolvers = {
             return {
                 ...result,
                 description: result.description ?? "",
-                startTime: result.startTime ?? "",
-                endTime: result.endTime ?? "",
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                startTime: result.startTime ?? 0,
+                endTime: result.endTime ?? 0,
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isCompleted: false,
             }
         },
@@ -362,10 +360,10 @@ export const resolvers = {
             return {
                 ...result,
                 description: result.description ?? "",
-                startTime: result.startTime ?? "",
-                endTime: result.endTime ?? "",
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                startTime: result.startTime ?? 0,
+                endTime: result.endTime ?? 0,
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
                 isCompleted,
             }
         },
@@ -437,10 +435,10 @@ export const resolvers = {
             return {
                 ...updated,
                 description: updated.description ?? "",
-                startTime: updated.startTime ?? "",
-                endTime: updated.endTime ?? "",
-                createdAt: updated.createdAt ?? "",
-                updateAt: updated.updateAt ?? "",
+                startTime: updated.startTime ?? 0,
+                endTime: updated.endTime ?? 0,
+                createdAt: updated.createdAt ?? 0,
+                updateAt: updated.updateAt ?? 0,
                 isCompleted,
             }
         },
