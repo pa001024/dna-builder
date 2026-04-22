@@ -661,7 +661,7 @@ export const roomsCountQuery = typedQuery(
 
 export const timeOffsetQuery = typedQuery(
     /* GraphQL */ `
-        query ($t: Int!) {
+        query ($t: Float!) {
             timeOffset(t: $t)
         }
     ` as const
@@ -1047,7 +1047,7 @@ export const activityQuery = typedQuery(
 
 export const activitiesQuery = typedQuery(
     /* GraphQL */ `
-        query ($server: String!, $startTime: Int, $endTime: Int) {
+        query ($server: String!, $startTime: Float, $endTime: Float) {
             activities(server: $server, startTime: $startTime, endTime: $endTime) {
                 id
                 server

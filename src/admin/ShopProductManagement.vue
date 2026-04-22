@@ -8,6 +8,7 @@ import {
     updateShopProductMutation,
 } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
+import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
 
@@ -50,7 +51,7 @@ function toShopProductInput(form: Record<string, unknown>): ShopProductInput {
  */
 function formatProductTimeRange(startTime?: number, endTime?: number): string {
     if (!startTime && !endTime) return "长期有效"
-    return `${startTime || "即时生效"} ~ ${endTime || "长期有效"}`
+    return `${startTime ? formatDateTime(startTime) : "即时生效"} ~ ${endTime ? formatDateTime(endTime) : "长期有效"}`
 }
 
 /**

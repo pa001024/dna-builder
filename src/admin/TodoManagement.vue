@@ -12,6 +12,21 @@ import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
 
 /**
+ * 将后台时间输入转换为时间戳。
+ * @param value 时间输入值。
+ * @returns 可提交的时间戳；为空或无效时返回 undefined。
+ */
+function parseTodoDateTime(value: unknown): number | undefined {
+    const text = String(value ?? "").trim()
+    if (!text) {
+        return undefined
+    }
+
+    const timestamp = new Date(text.replace(" ", "T")).getTime()
+    return Number.isNaN(timestamp) ? undefined : timestamp
+}
+
+/**
  * 待办管理页配置
  */
 const config: AdminCrudConfig<Todo> = {
@@ -132,12 +147,8 @@ const config: AdminCrudConfig<Todo> = {
                 title: String(form.title),
                 description: form.description ? String(form.description) : undefined,
             }
-            if (form.startTime) {
-                input.startTime = Number(form.startTime)
-            }
-            if (form.endTime) {
-                input.endTime = Number(form.endTime)
-            }
+            input.startTime = parseTodoDateTime(form.startTime)
+            input.endTime = parseTodoDateTime(form.endTime)
             await createSystemTodoMutation({ input })
         },
         async update(item, form) {
@@ -145,12 +156,8 @@ const config: AdminCrudConfig<Todo> = {
                 title: String(form.title),
                 description: form.description ? String(form.description) : undefined,
             }
-            if (form.startTime) {
-                input.startTime = Number(form.startTime)
-            }
-            if (form.endTime) {
-                input.endTime = Number(form.endTime)
-            }
+            input.startTime = parseTodoDateTime(form.startTime)
+            input.endTime = parseTodoDateTime(form.endTime)
 
             await updateSystemTodoMutation({
                 id: item.id,
