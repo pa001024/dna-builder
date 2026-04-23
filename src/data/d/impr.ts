@@ -30,6 +30,22 @@ export interface ImprEntry {
 }
 
 /**
+ * 生成印象条目的唯一键。
+ * @param entry 印象条目
+ * @returns 唯一键
+ */
+export function getImprEntryKey(entry: ImprEntry): string {
+    return [
+        entry.sourceType,
+        entry.sourceId,
+        entry.sourceQuestId ?? "",
+        entry.sourceDialogueId ?? "",
+        entry.sourceOptionId ?? "",
+        entry.valueType,
+    ].join("|")
+}
+
+/**
  * 获取地区标签。
  * @param regionId 地区 ID
  * @returns 地区标签

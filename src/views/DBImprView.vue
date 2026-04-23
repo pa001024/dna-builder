@@ -6,7 +6,7 @@ import { execScript } from "@/api/app"
 import DBImprDetailItem from "@/components/DBImprDetailItem.vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { getLocalizedImprEntriesByLanguage, type ImprEntry } from "@/data/d/impr"
+import { getImprEntryKey, getLocalizedImprEntriesByLanguage, type ImprEntry } from "@/data/d/impr"
 import { getImprType } from "@/data/d/quest.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
@@ -59,7 +59,7 @@ const searchKeywords = computed(() => splitSearchKeywords(searchKeyword.value))
 const imprEntryMap = computed(() => {
     const map = new Map<string, ImprEntry>()
     for (const entry of imprEntries.value) {
-        map.set(getEntryKey(entry), entry)
+        map.set(getImprEntryKey(entry), entry)
     }
     return map
 })
@@ -358,13 +358,13 @@ const filteredEntries = computed<ImprResultItem[]>(() => {
 
     const baseEntryMap = new Map<string, ImprEntry>()
     for (const entry of baseEntries) {
-        baseEntryMap.set(getEntryKey(entry), entry)
+        baseEntryMap.set(getImprEntryKey(entry), entry)
     }
 
     const resultMap = new Map<string, ImprResultItem & { exactCount: number }>()
 
     for (const entry of baseEntries) {
-        const key = getEntryKey(entry)
+        const key = getImprEntryKey(entry)
         let exactCount = 0
         let snippet: ImprSearchSnippet | null = null
 
@@ -392,7 +392,7 @@ const filteredEntries = computed<ImprResultItem[]>(() => {
     for (const keyword of keywords) {
         const fuzzyResults = imprFuse.value.search(keyword)
         for (const result of fuzzyResults) {
-            const key = getEntryKey(result.item)
+            const key = getImprEntryKey(result.item)
             if (!baseEntryMap.has(key) || resultMap.has(key)) {
                 continue
             }
@@ -415,22 +415,12 @@ const filteredEntries = computed<ImprResultItem[]>(() => {
  * @param entry 印象条目
  * @returns 持久化键
  */
-function getEntryKey(entry: ImprEntry): string {
-    return [
-        entry.sourceType,
-        entry.sourceId,
-        entry.regionId,
-        entry.sourceSubRegionId ?? "",
-        entry.valueType,
-    ].join("|")
-}
-
 /**
  * 选中条目。
  * @param entry 条目
  */
 function selectEntry(entry: ImprEntry) {
-    selectedEntryKey.value = getEntryKey(entry)
+    selectedEntryKey.value = getImprEntryKey(entry)
 }
 
 /**
@@ -439,7 +429,7 @@ function selectEntry(entry: ImprEntry) {
  * @returns 是否选中
  */
 function isSelectedEntry(entry: ImprEntry): boolean {
-    return selectedEntryKey.value === getEntryKey(entry)
+    return selectedEntryKey.value === getImprEntryKey(entry)
 }
 
 /**
@@ -454,7 +444,7 @@ const selectedEntry = computed<ImprEntry | null>({
         return imprEntryMap.value.get(selectedEntryKey.value) ?? null
     },
     set: value => {
-        selectedEntryKey.value = value ? getEntryKey(value) : ""
+        selectedEntryKey.value = value ? getImprEntryKey(value) : ""
     },
 })
 
@@ -682,7 +672,7 @@ useInitialScrollToSelectedItem({
                     <div class="p-2 space-y-2">
                         <div
                             v-for="item in filteredEntries"
-                            :key="`${item.entry.sourceType}-${item.entry.sourceId}-${item.entry.displayText}`"
+                            :key="getImprEntryKey(item.entry)"
                             :data-selected="isSelectedEntry(item.entry) ? 'true' : 'false'"
                             class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
                             :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': isSelectedEntry(item.entry) }"
