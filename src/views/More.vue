@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import forge from "node-forge"
+import { onBeforeUnmount, onMounted } from "vue"
+import { useRouter } from "vue-router"
 import { useSettingStore } from "@/store/setting"
+import { sha256 } from "@/utils/sha256"
 import type { IconTypes } from "../components/Icon.vue"
 import { env } from "../env"
 
 const setting = useSettingStore()
+const router = useRouter()
 const items = [
     {
         name: "char-build",
@@ -14,12 +19,6 @@ const items = [
         name: "guides",
         path: "/guides",
         icon: "ri:book-line",
-    },
-    {
-        name: "script-list",
-        path: "/scripts",
-        icon: "ri:code-s-slash-line",
-        show: env.isApp && !setting.safeMode,
     },
     {
         name: "counter",
@@ -87,12 +86,6 @@ const items = [
         icon: "ri:timeline-view",
     },
     {
-        name: "ai",
-        path: "/ai",
-        icon: "ri:robot-2-line",
-        show: env.isApp,
-    },
-    {
         name: "help",
         path: "/help",
         icon: "ri:question-line",
@@ -114,6 +107,63 @@ const items = [
 const getAnimationDelay = (index: number) => {
     return Math.min(index * 50, 500) // 最多延迟500ms
 }
+
+let hh: string[] = []
+
+/**
+ * 计算字符串的 SHA1。
+ * @param input 输入字符串。
+ * @returns 十六进制摘要。
+ */
+const sha1 = (input: string) => {
+    const md = forge.md.sha1.create()
+    md.update(input, "utf8")
+    return md.digest().toHex()
+}
+
+/**
+ * 生成当前输入序列的校验串。
+ * @param history 最近 5 次输入。
+ * @param input 当前输入字符。
+ * @returns 校验串。
+ */
+const buildSignature = (history: string[], input: string) => {
+    const signature = `${sha1(`0:${history[0] ?? ""}`)}${sha1(`1:${history[1] ?? ""}`)}${sha1(`2:${history[2] ?? ""}`)}${sha1(`3:${history[3] ?? ""}`)}${sha1(`4:${history[4] ?? ""}`)}${sha1(`5:${input}`)}`
+
+    return sha256(signature)
+}
+
+const scriptSignature = "c43801e66e06857150b1930ae4a9831af5259aeb7d65ed7d73d83176adabec97"
+
+/**
+ * 处理 More 页面全局按键输入。
+ * @param event 键盘事件。
+ */
+const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key.length !== 1 || event.altKey || event.ctrlKey || event.metaKey) {
+        return
+    }
+
+    const input = event.key.toLowerCase()
+    const history = hh.slice(-5)
+    const signature = buildSignature(history, input)
+
+    if (signature === scriptSignature) {
+        router.push("/scripts")
+        hh = []
+        return
+    }
+
+    hh = [...history, input].slice(-5)
+}
+
+onMounted(() => {
+    document.addEventListener("keydown", handleKeydown)
+})
+
+onBeforeUnmount(() => {
+    document.removeEventListener("keydown", handleKeydown)
+})
 </script>
 <template>
     <ScrollArea class="h-full">
