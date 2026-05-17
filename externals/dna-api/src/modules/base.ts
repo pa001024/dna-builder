@@ -4,7 +4,6 @@ import {
     aesDecryptImageUrl,
     build_signature111,
     build_signature120,
-    build_signature122,
     build_signature130,
     build_upload_signature,
     type HeadersPayload,
@@ -105,7 +104,7 @@ export class DNABaseAPI {
             this.baseHeaders = {
                 countrycode: "CN",
                 version: this.server === "cn" ? "1.3.0" : "1.1.1",
-                versioncode: this.server === "cn" ? "9" : "5",
+                versioncode: this.server === "cn" ? "10" : "5",
                 source: "android",
                 lang: this.lang,
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -220,10 +219,8 @@ export class DNABaseAPI {
                         const { tn, sa } = build_signature130(pk, payload, token)
 
                         // 更新 headers
-                        if (options?.token) {
-                            headers.tn = tn
-                            headers.sa = sa
-                        }
+                        headers.tn = tn
+                        headers.sa = sa
                     } else {
                         const { tn, sa, rk } = build_signature120(pk, payload, token)
 
