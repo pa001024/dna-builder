@@ -457,6 +457,8 @@
         "event_desc": "查看活动列表与活动详情",
         "fish": "钓鱼",
         "fish_desc": "钓鱼点详细收益计算",
+        "forge": "灾厄武器",
+        "forge_desc": "灾厄武器熔炼等级与任务",
         "hardboss": "梦魇残声",
         "hardboss_desc": "查看梦魇残声信息和奖励",
         "impr": "印象",

@@ -281,15 +281,7 @@ interface RankDataItem {
     reward: PreRaidRankRewardItem
 }
 
-const titleFrameByRaidSeason: Record<number, Record<string, number>> = {
-    1003: {
-        SSS: 10021,
-        SS: 10022,
-        S: 10023,
-        A: 10024,
-        B: 10025,
-    },
-}
+const supportedTitleFrameIds = new Set([10021, 10022, 10023, 10024, 10025, 10028, 10029, 10030, 10031, 10032])
 
 const rankData = computed<RankDataItem[]>(() => {
     const data = PreRaidRank[selectedSeason.value]
@@ -309,8 +301,10 @@ const rankData = computed<RankDataItem[]>(() => {
     })
 })
 
-function getTitleFrameId(rank: string) {
-    return titleFrameByRaidSeason[selectedSeason.value]?.[rank]
+function getTitleFrameId(reward: PreRaidRankRewardItem) {
+    const titleFrameId = reward.child?.[0]?.id
+    if (!titleFrameId || !supportedTitleFrameIds.has(titleFrameId)) return undefined
+    return titleFrameId
 }
 
 function getDungeonName(dungeonId: number) {
@@ -484,9 +478,9 @@ function getSeasonName(str: number) {
                 </div>
                 <div class="inline-flex relative">
                     <TitleFrameRender
-                        v-if="getTitleFrameId(item.rank)"
+                        v-if="getTitleFrameId(item.reward)"
                         class="w-48 h-12 max-w-full shrink-0"
-                        :title-frame-id="getTitleFrameId(item.rank)"
+                        :title-frame-id="getTitleFrameId(item.reward)"
                     />
                     <img v-else class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
                     <div class="absolute inset-0 flex items-center justify-center">

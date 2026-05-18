@@ -18,6 +18,7 @@ export function getRewardTypeText(type: string): string {
         Skin: "角色皮肤",
         Title: "称号",
         TitleFrame: "称号框",
+        IronTicket: "深境罗盘",
         Walnut: "密函",
         Weapon: "武器",
         WeaponAccessory: "武器饰品",
@@ -96,6 +97,10 @@ export function getRewardDetails(
             const newParentProbability = item.p ?? 1
             const childReward = getRewardDetails(item.id, visited, newParentProbability, false)
             if (childReward) {
+                childReward.c = item.c
+                if (item.n) {
+                    childReward.n = item.n
+                }
                 childRewards.push(childReward)
             }
         } else {

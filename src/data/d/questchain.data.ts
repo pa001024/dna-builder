@@ -72,6 +72,9 @@ export const questChain2VersionRanges: QuestChainVersionRange[] = [
     [120301, 120308, "1.3"],
     [200317, 200318, "1.3"],
     [400121, 400129, "1.3"],
+    [100401, 100405, "1.4"],
+    [200237, 200240, "1.4"],
+    [200401, 200403, "1.4"],
 ]
 
 export const questChain2Version: Record<number, string> = buildQuestChainVersionMap(questChain2VersionRanges)
@@ -1396,6 +1399,565 @@ const questChainDataRaw: QuestChain[] = [
         ],
     },
     {
+        id: 100401,
+        name: "暗巷行路",
+        chapterName: "夜航篇",
+        chapterNumber: "UI_ChapterName_03",
+        episode: "银星奔流",
+        type: 1,
+        main: 1,
+        reward: [50544],
+        questReward: {
+            "10040104": 10040107,
+        },
+        quests: [
+            {
+                id: 10040101,
+                sr: 101107,
+                next: {
+                    Success: 10040116,
+                },
+            },
+            {
+                id: 10040103,
+                sr: 106001,
+                next: {
+                    Success: 10040104,
+                },
+            },
+            {
+                id: 10040104,
+                sr: 106001,
+                next: {
+                    Success: 10040106,
+                },
+            },
+            {
+                id: 10040106,
+                sr: 106001,
+                next: {
+                    Success: 10040107,
+                },
+            },
+            {
+                id: 10040107,
+                sr: 106301,
+                next: {
+                    Success: 10040109,
+                },
+            },
+            {
+                id: 10040109,
+                sr: 106301,
+                next: {
+                    Success: 10040110,
+                },
+            },
+            {
+                id: 10040110,
+                sr: 106301,
+                next: {
+                    Success: 10040111,
+                },
+            },
+            {
+                id: 10040111,
+                sr: 106301,
+                next: {
+                    Success: 10040112,
+                },
+            },
+            {
+                id: 10040112,
+                sr: 106001,
+            },
+            {
+                id: 10040116,
+                sr: 101101,
+                next: {
+                    Success: 10040103,
+                },
+            },
+        ],
+    },
+    {
+        id: 100402,
+        name: "铁道线上的阴谋",
+        chapterName: "夜航篇",
+        chapterNumber: "UI_ChapterName_03",
+        episode: "银星奔流",
+        type: 1,
+        main: 1,
+        reward: [50545],
+        quests: [
+            {
+                id: 10040201,
+                sr: 106001,
+                next: {
+                    Success: 10040208,
+                },
+            },
+            {
+                id: 10040202,
+                sr: 106001,
+                next: {
+                    Success: 10040209,
+                },
+            },
+            {
+                id: 10040203,
+                sr: 106001,
+                next: {
+                    Success: 10040210,
+                },
+            },
+            {
+                id: 10040204,
+                sr: 106001,
+                next: {
+                    Success: 10040206,
+                },
+            },
+            {
+                id: 10040205,
+                sr: 106301,
+                next: {
+                    Success: 10040207,
+                },
+            },
+            {
+                id: 10040206,
+                sr: 106001,
+                next: {
+                    Success: 10040205,
+                },
+            },
+            {
+                id: 10040207,
+                sr: 106001,
+            },
+            {
+                id: 10040208,
+                sr: 106001,
+                next: {
+                    Success: 10040202,
+                },
+            },
+            {
+                id: 10040209,
+                sr: 106001,
+                next: {
+                    Success: 10040214,
+                },
+            },
+            {
+                id: 10040210,
+                sr: 106001,
+                next: {
+                    Success: 10040213,
+                },
+            },
+            {
+                id: 10040213,
+                sr: 106001,
+                next: {
+                    Success: 10040204,
+                },
+            },
+            {
+                id: 10040214,
+                sr: 106001,
+                next: {
+                    Success: 10040203,
+                },
+            },
+        ],
+    },
+    {
+        id: 100403,
+        name: "爆炸案研究",
+        chapterName: "夜航篇",
+        chapterNumber: "UI_ChapterName_03",
+        episode: "银星奔流",
+        type: 1,
+        main: 1,
+        reward: [50546],
+        quests: [
+            {
+                id: 10040301,
+                sr: 106001,
+                next: {
+                    Success: 10040302,
+                },
+            },
+            {
+                id: 10040302,
+                sr: 106001,
+                next: {
+                    Success: 10040303,
+                },
+            },
+            {
+                id: 10040303,
+                sr: 106001,
+                next: {
+                    Success: 10040305,
+                },
+            },
+            {
+                id: 10040305,
+                sr: 106001,
+                next: {
+                    Success: 10040306,
+                },
+            },
+            {
+                id: 10040306,
+                sr: 106001,
+                next: {
+                    Success: 10040313,
+                },
+            },
+            {
+                id: 10040307,
+                sr: 106001,
+                next: {
+                    Success: 10040308,
+                },
+            },
+            {
+                id: 10040308,
+                sr: 106001,
+                next: {
+                    Success: 10040309,
+                },
+            },
+            {
+                id: 10040309,
+                sr: 106001,
+                next: {
+                    Success: 10040310,
+                },
+            },
+            {
+                id: 10040310,
+                sr: 106001,
+                next: {
+                    Success: 10040311,
+                },
+            },
+            {
+                id: 10040311,
+                sr: 106001,
+                next: {
+                    Success: 10040312,
+                },
+            },
+            {
+                id: 10040312,
+                sr: 106001,
+            },
+            {
+                id: 10040313,
+                sr: 106001,
+                next: {
+                    Success: 10040307,
+                },
+            },
+        ],
+    },
+    {
+        id: 100404,
+        name: "极光快车上的秘密",
+        chapterName: "夜航篇",
+        chapterNumber: "UI_ChapterName_03",
+        episode: "银星奔流",
+        type: 1,
+        main: 1,
+        reward: [50547],
+        quests: [
+            {
+                id: 10040401,
+                sr: 106001,
+                next: {
+                    Success: 10040402,
+                },
+            },
+            {
+                id: 10040402,
+                sr: 106101,
+                next: {
+                    Success: 10040403,
+                },
+            },
+            {
+                id: 10040403,
+                sr: 106101,
+                next: {
+                    Success: 10040422,
+                },
+            },
+            {
+                id: 10040404,
+                sr: 106101,
+                next: {
+                    Success: 10040423,
+                },
+            },
+            {
+                id: 10040405,
+                sr: 106101,
+                next: {
+                    Success: 10040406,
+                },
+            },
+            {
+                id: 10040406,
+                sr: 106101,
+                next: {
+                    Success: 10040424,
+                },
+            },
+            {
+                id: 10040407,
+                sr: 106101,
+                next: {
+                    Success: 10040408,
+                },
+            },
+            {
+                id: 10040408,
+                sr: 106101,
+                next: {
+                    Success: 10040409,
+                },
+            },
+            {
+                id: 10040409,
+                sr: 106101,
+                next: {
+                    Success: 10040410,
+                },
+            },
+            {
+                id: 10040410,
+                sr: 106101,
+                next: {
+                    Success: 10040411,
+                },
+            },
+            {
+                id: 10040411,
+                sr: 106101,
+                next: {
+                    Success: 10040413,
+                },
+            },
+            {
+                id: 10040413,
+                sr: 106101,
+                next: {
+                    Success: 10040414,
+                },
+            },
+            {
+                id: 10040414,
+                sr: 106101,
+                next: {
+                    Success: 10040415,
+                },
+            },
+            {
+                id: 10040415,
+                sr: 106101,
+                next: {
+                    Success: 10040416,
+                },
+            },
+            {
+                id: 10040416,
+                sr: 106101,
+                next: {
+                    Success: 10040417,
+                },
+            },
+            {
+                id: 10040417,
+                sr: 106101,
+                next: {
+                    Success: 10040418,
+                },
+            },
+            {
+                id: 10040418,
+                sr: 106101,
+                next: {
+                    Success: 10040419,
+                },
+            },
+            {
+                id: 10040419,
+                sr: 106101,
+                next: {
+                    Success: 10040420,
+                },
+            },
+            {
+                id: 10040420,
+                sr: 106101,
+                next: {
+                    Success: 10040421,
+                },
+            },
+            {
+                id: 10040421,
+                sr: 106101,
+                next: {
+                    Success: 10040428,
+                },
+            },
+            {
+                id: 10040422,
+                sr: 1061010,
+                next: {
+                    Success: 10040404,
+                },
+            },
+            {
+                id: 10040423,
+                sr: 106101,
+                next: {
+                    Success: 10040405,
+                },
+            },
+            {
+                id: 10040424,
+                sr: 106101,
+                next: {
+                    Success: 10040407,
+                },
+            },
+            {
+                id: 10040426,
+                sr: 106101,
+            },
+            {
+                id: 10040427,
+                sr: 106101,
+                next: {
+                    Success: 10040426,
+                },
+            },
+            {
+                id: 10040428,
+                sr: 106101,
+                next: {
+                    Success: 10040427,
+                },
+            },
+        ],
+    },
+    {
+        id: 100405,
+        name: "嫌疑人的现身",
+        chapterName: "夜航篇",
+        chapterNumber: "UI_ChapterName_03",
+        episode: "银星奔流",
+        type: 1,
+        main: 1,
+        reward: [50548],
+        quests: [
+            {
+                id: 10040501,
+                sr: 106101,
+                next: {
+                    Success: 10040502,
+                },
+            },
+            {
+                id: 10040502,
+                sr: 106101,
+                next: {
+                    Success: 10040503,
+                },
+            },
+            {
+                id: 10040503,
+                sr: 106101,
+                next: {
+                    Success: 10040504,
+                },
+            },
+            {
+                id: 10040504,
+                sr: 106101,
+                next: {
+                    Success: 10040514,
+                },
+            },
+            {
+                id: 10040506,
+                sr: 106101,
+                next: {
+                    Success: 10040507,
+                },
+            },
+            {
+                id: 10040507,
+                sr: 106101,
+                next: {
+                    Success: 10040513,
+                },
+            },
+            {
+                id: 10040508,
+                sr: 106201,
+                next: {
+                    Success: 10040511,
+                },
+            },
+            {
+                id: 10040509,
+                sr: 106101,
+                next: {
+                    Success: 10040510,
+                },
+            },
+            {
+                id: 10040510,
+                sr: 106101,
+            },
+            {
+                id: 10040511,
+                sr: 106001,
+                next: {
+                    Success: 10040509,
+                },
+            },
+            {
+                id: 10040512,
+                sr: 106101,
+                next: {
+                    Success: 10040508,
+                },
+            },
+            {
+                id: 10040513,
+                sr: 101107,
+                next: {
+                    Success: 10040512,
+                },
+            },
+            {
+                id: 10040514,
+                sr: 106101,
+                next: {
+                    Success: 10040506,
+                },
+            },
+        ],
+    },
+    {
         id: 110101,
         name: "尘沙的另一岸",
         chapterName: "泊暮篇",
@@ -1925,11 +2487,9 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "世界纪游",
         chapterNumber: "华胥",
         episode: "烟津渡影蔽香尘",
-        type: 6,
+        type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50528],
-        startTime: 1765159200,
-        endTime: 8204788800,
         quests: [
             {
                 id: 12000101,
@@ -1963,11 +2523,9 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "世界纪游",
         chapterNumber: "华胥",
         episode: "烟津渡影蔽香尘",
-        type: 6,
+        type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50529],
-        startTime: 1765159200,
-        endTime: 8204788800,
         quests: [
             {
                 id: 12000201,
@@ -2037,11 +2595,9 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "世界纪游",
         chapterNumber: "华胥",
         episode: "烟津渡影蔽香尘",
-        type: 6,
+        type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50530],
-        startTime: 1766455200,
-        endTime: 8204788800,
         quests: [
             {
                 id: 12000301,
@@ -4295,6 +4851,7 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 20010305,
+                sr: 101103,
                 next: {
                     Success: 20010306,
                 },
@@ -5786,6 +6343,130 @@ const questChainDataRaw: QuestChain[] = [
         ],
     },
     {
+        id: 200237,
+        name: "他带来的灾厄",
+        chapterName: "夜航篇",
+        episode: "他带来的灾厄",
+        desc: "回到休憩之所",
+        detail: "离开冰湖城也有几日，这次回来也该回休憩之所看看，只是……白去哪里了？",
+        type: 4,
+        reward: [50631],
+        npc: 900001,
+        quests: [
+            {
+                id: 20023700,
+                sr: 210101,
+                next: {
+                    Success: 20023701,
+                },
+            },
+            {
+                id: 20023701,
+                sr: 210101,
+                next: {
+                    Success: 20023702,
+                },
+            },
+            {
+                id: 20023702,
+                sr: 210101,
+            },
+        ],
+    },
+    {
+        id: 200238,
+        name: "铸造灾厄武器·一",
+        chapterName: "夜航篇",
+        episode: "铸造灾厄武器·一",
+        desc: "向铁匠皎皎提交材料",
+        detail: "提交[力量的饰章][信仰的饰章][谐和的饰章][秽浊的饰章][不屈的饰章]各30个",
+        type: 4,
+        reward: [50632],
+        npc: 900001,
+        quests: [
+            {
+                id: 20023800,
+                sr: 210101,
+                next: {
+                    Success: 20023802,
+                },
+            },
+            {
+                id: 20023801,
+                sr: 210101,
+            },
+            {
+                id: 20023802,
+                sr: 210101,
+                next: {
+                    Success: 20023801,
+                },
+            },
+        ],
+    },
+    {
+        id: 200239,
+        name: "铸造灾厄武器·二",
+        chapterName: "夜航篇",
+        episode: "铸造灾厄武器·二",
+        desc: "向铁匠皎皎提交材料",
+        detail: "提交[火之晶块][水之晶块][风之晶块][雷之晶块][光之晶块][暗之晶块]各1个",
+        type: 4,
+        reward: [50633],
+        npc: 900001,
+        quests: [
+            {
+                id: 20023900,
+                sr: 210101,
+                next: {
+                    Success: 20023902,
+                },
+            },
+            {
+                id: 20023901,
+                sr: 210101,
+            },
+            {
+                id: 20023902,
+                sr: 210101,
+                next: {
+                    Success: 20023901,
+                },
+            },
+        ],
+    },
+    {
+        id: 200240,
+        name: "铸造灾厄武器·三",
+        chapterName: "夜航篇",
+        episode: "铸造灾厄武器·三",
+        desc: "向铁匠皎皎提交材料",
+        detail: "提交[璀璨晶块]1个",
+        type: 4,
+        reward: [50634],
+        npc: 900001,
+        quests: [
+            {
+                id: 20024000,
+                sr: 210101,
+                next: {
+                    Success: 20024002,
+                },
+            },
+            {
+                id: 20024001,
+                sr: 210101,
+            },
+            {
+                id: 20024002,
+                sr: 210101,
+                next: {
+                    Success: 20024001,
+                },
+            },
+        ],
+    },
+    {
         id: 200301,
         name: "神的垂青",
         chapterName: "世界纪游",
@@ -6612,6 +7293,188 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 20031808,
                 sr: 104501,
+            },
+        ],
+    },
+    {
+        id: 200401,
+        name: "黑面包与黄油",
+        chapterName: "夜航篇",
+        episode: "黑面包与黄油",
+        desc: "出于一些目的，你决定买下这个盒子。",
+        detail: "行商向你们展示了一种奇怪的盒子，看起来年代已久……你们不仅有些怀疑，这么小的盒子里面，真的会有宝贝吗？",
+        type: 3,
+        reward: [50635],
+        quests: [
+            {
+                id: 20040100,
+                sr: 106001,
+                next: {
+                    Success: 20040102,
+                },
+            },
+            {
+                id: 20040102,
+                sr: 106301,
+                next: {
+                    Success: 20040103,
+                },
+            },
+            {
+                id: 20040103,
+                sr: 106301,
+                next: {
+                    Success: 20040104,
+                },
+            },
+            {
+                id: 20040104,
+                sr: 106001,
+                next: {
+                    Success: 20040105,
+                },
+            },
+            {
+                id: 20040105,
+                sr: 106001,
+            },
+        ],
+    },
+    {
+        id: 200402,
+        name: "汽笛鸣泣之时",
+        chapterName: "夜航篇",
+        episode: "汽笛鸣泣之时",
+        desc: "在车站遇到了一位奇怪的行商，问问他有什么“好东西”。",
+        detail: "和同伴们在百花车站闲逛的时候，遇见了一位行商……似乎是因为你们出手阔绰，想要向你们兜售商品。",
+        type: 3,
+        reward: [50636],
+        npc: 700397,
+        quests: [
+            {
+                id: 20040200,
+                sr: 106001,
+                next: {
+                    Success: 20040201,
+                },
+            },
+            {
+                id: 20040201,
+                sr: 106001,
+                next: {
+                    Success: 20040202,
+                },
+            },
+            {
+                id: 20040202,
+                sr: 106001,
+                next: {
+                    Success: 20040203,
+                },
+            },
+            {
+                id: 20040203,
+                sr: 106001,
+                next: {
+                    Success: 20040204,
+                },
+            },
+            {
+                id: 20040204,
+                sr: 106001,
+                next: {
+                    Success: 20040205,
+                },
+            },
+            {
+                id: 20040205,
+                sr: 106001,
+                next: {
+                    Success: 20040206,
+                },
+            },
+            {
+                id: 20040206,
+                sr: 106001,
+                next: {
+                    Success: 20040207,
+                },
+            },
+            {
+                id: 20040207,
+                sr: 106001,
+                next: {
+                    Success: 20040208,
+                },
+            },
+            {
+                id: 20040208,
+                sr: 106001,
+                next: {
+                    Success: 20040209,
+                },
+            },
+            {
+                id: 20040209,
+                sr: 106001,
+            },
+        ],
+    },
+    {
+        id: 200403,
+        name: "惊悚惊喜",
+        chapterName: "夜航篇",
+        episode: "惊悚惊喜",
+        desc: "与老妇人聊聊这个木箱",
+        detail: "\n在百花车站的货运区发现了一个很可疑的木箱，正当打算处理掉它之时，此前有过一面之缘的老妇人站了出来，好像有什么话要说。",
+        type: 3,
+        reward: [50637],
+        quests: [
+            {
+                id: 20040300,
+                sr: 106001,
+                next: {
+                    Success: 20040301,
+                },
+            },
+            {
+                id: 20040301,
+                sr: 106001,
+                next: {
+                    Success: 20040302,
+                },
+            },
+            {
+                id: 20040302,
+                sr: 106001,
+                next: {
+                    Success: 20040303,
+                },
+            },
+            {
+                id: 20040303,
+                sr: 106001,
+                next: {
+                    Success: 20040304,
+                },
+            },
+            {
+                id: 20040304,
+                sr: 106301,
+                next: {
+                    Success: 20040305,
+                },
+            },
+            {
+                id: 20040305,
+                sr: 106001,
+                next: {
+                    Success: 20040306,
+                },
+            },
+            {
+                id: 20040306,
+                sr: 106001,
             },
         ],
     },

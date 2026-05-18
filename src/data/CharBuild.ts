@@ -35,6 +35,7 @@ export interface CharAttr {
     技能倍率赋值: number
     召唤物攻击速度: number
     召唤物范围: number
+    召唤物伤害: number
     减伤: number
     有效生命: number
 }
@@ -521,6 +522,7 @@ export class CharBuild {
         let skillAdd = this.getTotalBonus("技能倍率加数")
         let summonAttackSpeed = this.getTotalBonus("召唤物攻击速度")
         let summonRange = this.getTotalBonus("召唤物范围")
+        let summonDamage = this.getTotalBonus("召唤物伤害")
         const ignoreDefense = this.getTotalBonusMul("无视防御")
         const skillIgnoreDefense = this.getTotalBonusMul("技能无视防御")
         const independentDamageIncrease = this.getTotalBonusMul("独立增伤")
@@ -554,6 +556,7 @@ export class CharBuild {
             skillAdd += modAttributeBonus * this.getModsBonus(modsBySeries, "技能倍率加数")
             summonAttackSpeed += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物攻击速度")
             summonRange += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物范围")
+            summonDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物伤害")
         }
 
         // 计算基础属性
@@ -605,6 +608,7 @@ export class CharBuild {
             技能倍率乘数: skillMultiplier,
             召唤物攻击速度: summonAttackSpeed,
             召唤物范围: summonRange,
+            召唤物伤害: summonDamage,
             减伤: damageReduce,
             技能倍率赋值: skillMultiplierSet,
             有效生命: (health / (1 - defense / (300 + defense)) + shield) / (1 - damageReduce),
@@ -1023,7 +1027,7 @@ export class CharBuild {
         const resistancePenetration = Math.max(0, (1 - this.enemyResistance) * (1 + attrs.属性穿透))
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
-        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害
+        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (this.selectedSkill?.召唤物 ? attrs.召唤物伤害 : 0)
         const independentDamageIncrease = 1 + attrs.独立增伤
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 

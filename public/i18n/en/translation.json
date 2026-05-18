@@ -5361,6 +5361,8 @@
         "event_desc": "View event list and event details",
         "fish": "Fishing",
         "fish_desc": "Detailed fishing spot yield calculation",
+        "forge": "Calamity Weapons",
+        "forge_desc": "Calamity weapon smelting levels and quests",
         "hardboss": "Nightmare Remnants",
         "hardboss_desc": "View nightmare remnant information and rewards",
         "impr": "Impression",

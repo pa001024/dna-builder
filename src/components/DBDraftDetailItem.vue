@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { draftShopSourceMap } from "@/data/d/shop.data"
+import shopData from "@/data/d/shop.data"
 import { type ResourceDungeonSourceInfo } from "@/utils/resource-source"
 import { getDraftDropInfo } from "@/utils/reward-utils"
+import type { ShopSourceInfo } from "@/utils/weapon-source"
 import { draftDungeonMap, modMap, weaponMap } from "../data/d/index"
 import type { Draft } from "../data/data-types"
 
@@ -55,9 +56,52 @@ const draftDungeons = computed(() => {
     })
 })
 
-const draftShopSource = computed(() => {
-    return draftShopSourceMap.get(props.draft.id)
-})
+/**
+ * 收集当前图纸的商店来源信息。
+ * @param draft 图纸数据
+ * @returns 商店来源列表
+ */
+function collectDraftShopSources(draft: Draft): ShopSourceInfo[] {
+    const result: ShopSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    shopData.forEach(shop => {
+        shop.mainTabs.forEach(mainTab => {
+            mainTab.subTabs.forEach(subTab => {
+                subTab.items.forEach(item => {
+                    if (item.itemType !== "Draft" || item.typeId !== draft.id) {
+                        return
+                    }
+
+                    const key = `shop-${shop.id}-${mainTab.id}-${subTab.id}-${item.id}-${draft.id}`
+                    if (sourceKeySet.has(key)) {
+                        return
+                    }
+
+                    sourceKeySet.add(key)
+                    result.push({
+                        key,
+                        timeStart: item.startTime,
+                        timeEnd: item.endTime,
+                        detail: `${mainTab.name} -> ${subTab.name}`,
+                        itemId: item.id,
+                        shopId: shop.id,
+                        shopName: shop.name,
+                        subTabId: subTab.id,
+                        price: item.price,
+                        priceName: item.priceName,
+                        num: item.num,
+                        limit: item.limit,
+                    })
+                })
+            })
+        })
+    })
+
+    return result
+}
+
+const draftShopSources = computed<ShopSourceInfo[]>(() => collectDraftShopSources(props.draft))
 
 /**
  * 获取产物展示项的 ResourceCostItem 入参。
@@ -145,9 +189,9 @@ const productDisplay = computed(() => {
         </div>
 
         <!-- 获取途径 -->
-        <div v-if="draftShopSource" class="p-3 bg-base-200 rounded">
+        <div v-if="draftShopSources.length > 0" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">获取途径</div>
-            <div class="space-y-2 text-sm">{{ draftShopSource.shop }} - {{ draftShopSource.cost }} x {{ draftShopSource.n }}</div>
+            <ShopSource :shop-sources="draftShopSources" />
         </div>
 
         <!-- 掉落来源 -->

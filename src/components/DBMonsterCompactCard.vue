@@ -202,10 +202,10 @@ function handleClickMonsterCard(): void {
                         :to="`/db/monster/${displayMonster.id}`"
                         class="truncate text-sm font-semibold text-base-content hover:text-primary"
                         @click.stop
+                        :title="displayMonster.n"
                     >
                         {{ $t(displayMonster.n) }}
                     </SRouterLink>
-                    <CopyID :id="displayMonster.id" />
                 </div>
 
                 <div class="mt-1 flex flex-wrap items-center gap-1.5">

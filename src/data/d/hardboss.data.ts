@@ -1896,7 +1896,7 @@ export const hardBossMap: Map<number, HardBoss> = [
     },
     {
         id: 4,
-        name: "“炼火的典狱长”",
+        name: "炼火的典狱长",
         icon: "T_Permanent_HardBoss_Haier_S",
         desc: "帝国皇家军监狱典狱长，她的锁链将会惩戒罪恶，她的火焰将会坚守正义。",
         diff: [
@@ -1935,7 +1935,7 @@ export const hardBossMap: Map<number, HardBoss> = [
     },
     {
         id: 5,
-        name: "“雪国的野兽”",
+        name: "雪国的野兽",
         icon: "T_Permanent_HardBoss_Linen_S",
         desc: "那是肆虐在雪国的野兽，摧毁了孩子们的故乡，融化了妖精的碎梦。",
         diff: [
@@ -2010,6 +2010,45 @@ export const hardBossMap: Map<number, HardBoss> = [
             },
         ],
         mid: [8510004, 8511002],
+    },
+    {
+        id: 7,
+        name: "极光号主炮",
+        icon: "T_Permanent_HardBoss_Lieche_S",
+        desc: "列车车头搭载的月髓动力炮。\n口径210毫米，滑膛炮，穿甲能力佳。\n配合列车搭载的其他武器可以消灭视线内一切敌人。",
+        diff: [
+            {
+                id: 1061,
+                lv: 30,
+                r: 1022,
+            },
+            {
+                id: 1062,
+                lv: 40,
+                r: 1023,
+            },
+            {
+                id: 1063,
+                lv: 50,
+                r: 1024,
+            },
+            {
+                id: 1064,
+                lv: 60,
+                r: 1025,
+            },
+            {
+                id: 1065,
+                lv: 70,
+                r: 1026,
+            },
+            {
+                id: 1066,
+                lv: 80,
+                r: 1027,
+            },
+        ],
+        mid: [8519501, 8519504, 8519504],
     },
 ].reduce((acc, cur) => {
     acc.set(cur.id, cur)

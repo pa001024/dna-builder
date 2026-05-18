@@ -65,6 +65,7 @@ const MAPPINGS: Mapping[] = [
     { source: "FishingSpot", targetStem: "fish", targetVar: "fishingSpots", locales: ["cn"] },
     { source: "HardBoss", targetStem: "hardboss", targetVar: "hardBossMap", locales: ["cn"] },
     { source: "Hair", targetStem: "accessory", targetVar: "hairData", locales: ["cn"] },
+    { source: "IronTicket", targetStem: "iconticket", targetVar: "iconticketData", locales: ["cn"] },
     { source: "HeadSculpture", targetStem: "headsculpture", targetVar: "headSculptureData", locales: ["cn"] },
     { source: "HeadFrame", targetStem: "accessory", targetVar: "headFrameData", locales: ["cn"] },
     { source: "ImpressionShop", targetStem: "shop", targetVar: "imprShopData", locales: ["cn"] },
@@ -202,6 +203,27 @@ const MAPPINGS: Mapping[] = [
         },
         targetStem: "limitedprize",
         targetVar: "limitedPrizeCostRules",
+    },
+    {
+        source: async () => {
+            const [ironSurvivalText, ironSurvivalDungeonText] = await Promise.all([
+                readFile(path.join(OUT_ROOT, "IronSurvival.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "IronSurvivalDungeon.json"), "utf8"),
+            ])
+
+            return [
+                {
+                    targetVar: "ironSurvivalData",
+                    text: formatTsValue(JSON.parse(ironSurvivalText), 0),
+                },
+                {
+                    targetVar: "ironSurvivalDungeonData",
+                    text: formatTsValue(JSON.parse(ironSurvivalDungeonText), 0),
+                },
+            ]
+        },
+        targetStem: "ironsurvival",
+        targetVar: "ironSurvivalData",
     },
 ]
 

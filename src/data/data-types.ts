@@ -147,7 +147,23 @@ export interface Weapon {
     装填?: number
     加成?: CommonAttr
     熔炼?: string[]
+    熔炉?: ForgeData[]
     技能?: WeaponSkill[]
+}
+
+export interface ForgeData {
+    lv: number
+    解锁: Record<string, number>
+    技能?: ForgeSkill[]
+}
+
+export interface ForgeSkill {
+    id: number
+    名称: string
+    icon: string
+    描述?: string
+    解锁?: Record<string, number>
+    加成?: Record<string, number>
 }
 
 export interface Skill {

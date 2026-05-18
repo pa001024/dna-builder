@@ -5361,6 +5361,8 @@
         "event_desc": "이벤트 목록과 이벤트 상세 확인",
         "fish": "낚시",
         "fish_desc": "낚시터 상세 수익 계산",
+        "forge": "재앙 무기",
+        "forge_desc": "재앙 무기 융해 레벨과 임무",
         "hardboss": "나이트메어 잔재",
         "hardboss_desc": "나이트메어 잔재 정보 및 보상 확인",
         "impr": "인상",

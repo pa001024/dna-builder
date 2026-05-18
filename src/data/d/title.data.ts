@@ -448,13 +448,11 @@ export const titleData: Title[] = [
         id: 10078,
         name: "操碎了心的",
         suf: false,
-        src: "活动期间累计交付<H>300</>个绿色材料",
     },
     {
         id: 10079,
         name: "纯白",
         suf: false,
-        src: "活动期间累计交付<H>100</>个蓝色材料",
     },
     {
         id: 10080,
@@ -555,6 +553,7 @@ export const titleData: Title[] = [
         id: 10097,
         name: "希尔妲的",
         suf: false,
+        src: "成就「停驻光阴·希尔妲」",
     },
     {
         id: 10098,
@@ -672,6 +671,12 @@ export const titleData: Title[] = [
         name: "直视神明的",
         suf: false,
         src: "成就「万法归一」",
+    },
+    {
+        id: 10118,
+        name: "芙罗拉的",
+        suf: false,
+        src: "成就「停驻光阴·芙罗拉」",
     },
     {
         id: 20001,
@@ -1048,13 +1053,11 @@ export const titleData: Title[] = [
         id: 20067,
         name: "急急国王",
         suf: true,
-        src: "活动期间累计交付<H>30</>个节日余温",
     },
     {
         id: 20068,
         name: "魔王",
         suf: true,
-        src: "以最高奖励完成<H>5</>次小游戏",
     },
     {
         id: 20069,
@@ -1131,6 +1134,7 @@ export const titleData: Title[] = [
         id: 20081,
         name: "希尔妲",
         suf: true,
+        src: "成就「休憩一刻·希尔妲」",
     },
     {
         id: 20082,
@@ -1232,6 +1236,17 @@ export const titleData: Title[] = [
         name: "姑奶奶",
         suf: true,
         src: "成就「辈分学问」",
+    },
+    {
+        id: 20099,
+        name: "火车王",
+        suf: true,
+    },
+    {
+        id: 20100,
+        name: "芙罗拉",
+        suf: true,
+        src: "成就「休憩一刻·芙罗拉」",
     },
 ]
 

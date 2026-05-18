@@ -66,6 +66,11 @@ export const RaidBuff = [
             "光属性角色技能范围大于技能耐久时，每超过10%，造成技能伤害时无视目标7%防御，最多无视42%防御；技能耐久大于技能范围时，每超过20%，全属性穿透提高10%，最多提高50%。",
         RaidBuffParameter: ["10%", "7%", "42%", "20%", "10%", "50%"],
     },
+    {
+        RaidBuffID: 14,
+        RaidBuffDes: "暗属性角色每持有12%昂扬，全属性穿透提高10%，最多提高50%。",
+        RaidBuffParameter: ["12%", "10%", "50%"],
+    },
 ].reduce(
     (prev, cur) => {
         prev[cur.RaidBuffID] = cur
@@ -356,6 +361,19 @@ export const RaidSeason: Record<string | number, RaidSeasonItem> = {
         RaidTime: 168,
         Shop: "RaidShopSeason01",
     },
+    "1004": {
+        EventId: 111004,
+        PreRaidRank: 1,
+        PreRaidTime: 62,
+        RaidPointToRewrad: {
+            "1000": 300315,
+        },
+        RaidPointToRewradMaxTime: 750,
+        RaidRankCount: 1000,
+        RaidSeason: 1004,
+        RaidTime: 168,
+        Shop: "RaidShopSeason01",
+    },
 }
 
 export type PreRaidRankRewardItem = RewardItem
@@ -438,6 +456,13 @@ const PreRaidRankRewardVersions: Record<number, PreRaidRankRewardItem[]> = {
         createPreRaidRankReward(300319, 10024, "A级狩月人·3", 1500, 1, 1),
         createPreRaidRankReward(300320, 10025, "B级狩月人·3", 1000, 1, 1),
     ],
+    1004: [
+        createPreRaidRankReward(300316, 10028, "SSS级狩月人·4", 3000, 2, 2),
+        createPreRaidRankReward(300317, 10029, "SS级狩月人·4", 2500, 2, 2),
+        createPreRaidRankReward(300318, 10030, "S级狩月人·4", 2000, 2, 2),
+        createPreRaidRankReward(300319, 10031, "A级狩月人·4", 1500, 1, 1),
+        createPreRaidRankReward(300320, 10032, "B级狩月人·4", 1000, 1, 1),
+    ],
 }
 
 export interface PreRaidRankItem {
@@ -464,6 +489,13 @@ export const PreRaidRank: Record<string | number, PreRaidRankItem> = {
         RankReward: [300316, 300317, 300318, 300319, 300320],
     },
     "1003": {
+        IsOnline: [false, false, false, false, false],
+        PreRaidRank: 1,
+        RankName: ["SSS", "SS", "S", "A", "B"],
+        RankPercent: [15, 35, 55, 75, 100],
+        RankReward: [300316, 300317, 300318, 300319, 300320],
+    },
+    "1004": {
         IsOnline: [false, false, false, false, false],
         PreRaidRank: 1,
         RankName: ["SSS", "SS", "S", "A", "B"],

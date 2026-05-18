@@ -884,6 +884,1412 @@ export const partyTopicData_en: PartyTopic[] = [
         ],
     },
     {
+        id: 110201,
+        charId: 1102,
+        name: "The Maid and the Princess",
+        desc: "In a quiet house, two exiles from distant lands keep each other company.",
+        memoryName: "Storybook",
+        memoryDesc: "The maid picks up a storybook, hoping to lull the princess to sleep with a tale.",
+        reward: 7050,
+        consume: {
+            "19001": 2,
+            "19007": 2,
+        },
+        dialogues: [
+            {
+                id: 80260101,
+                content: '"Once upon a time, there was a young princess who lived in a house of gold."',
+                voice: "inv/Fuluo/001/C8EC38D2",
+                npc: 790089,
+                next: 80260102,
+            },
+            {
+                id: 80260102,
+                content:
+                    '"She had everything the world could offer: a hundred crowns set with dazzling diamonds, a hundred gowns adorned with the finest pearls, and each morning, a hundred servants bringing her flowers fresh with dew."',
+                voice: "inv/Fuluo/001/C8EC38FC",
+                npc: 790089,
+                next: 80260103,
+            },
+            {
+                id: 80260103,
+                content:
+                    '"And yet there was one thing she could never have: anything beyond those golden walls. Not even a drop of rain. Not even a breath of wind."',
+                voice: "inv/Fuluo/001/C8EC3926",
+                npc: 790089,
+                next: 80260104,
+            },
+            {
+                id: 80260104,
+                content: "...",
+                voice: "inv/Fuluo/001/C8EC3950",
+                npc: 790088,
+                next: 80260105,
+            },
+            {
+                id: 80260105,
+                content: "Ah... listen to me. This won't do. I'll find you a better story.",
+                voice: "inv/Fuluo/001/C8EC397A",
+                npc: 790089,
+                next: 80260106,
+            },
+            {
+                id: 80260106,
+                content:
+                    "There's no need, Hilda... I've long since outgrown bedtime stories. Just stay here with me, like this. That's enough.",
+                voice: "inv/Fuluo/001/C8EC39A4",
+                npc: 790088,
+                next: 80260107,
+            },
+            {
+                id: 80260107,
+                content:
+                    "The bleeding's stopped. You'll be fine. We're lucky there was a cache of medicine here. The previous owner hid it in a sealed room.",
+                voice: "inv/Fuluo/001/C8EC39CE",
+                npc: 790089,
+                next: 80260108,
+            },
+            {
+                id: 80260108,
+                content:
+                    "This was the site of that recent Deterioration incident. The local Security Bureau sealed it off. The most dangerous place is often the safest place to hide — the 13th Legion will never think to look for us here.",
+                voice: "inv/Fuluo/001/C8EC39F8",
+                npc: 790089,
+                next: 80260109,
+            },
+            {
+                id: 80260109,
+                content: "Go back to sleep, Flora. You're injured. You need the rest.",
+                voice: "inv/Fuluo/001/C8EC3A22",
+                npc: 790089,
+                next: 80260110,
+            },
+            {
+                id: 80260110,
+                content:
+                    "I'm fine. I'm wide awake now. I already had a very good sleep... thanks to being unconscious. I don't think I've ever slept so peacefully before.",
+                voice: "inv/Fuluo/001/C8EC3A4C",
+                npc: 790088,
+                next: 80260111,
+            },
+            {
+                id: 80260111,
+                content: "Thank you, Hilda. You've saved me again.",
+                voice: "inv/Fuluo/001/C8EC3A76",
+                npc: 790088,
+                next: 80260112,
+            },
+            {
+                id: 80260112,
+                content: "Icelake... the Empire's northernmost city. We've made it this far already. Beyond this... lies Askard.",
+                voice: "inv/Fuluo/001/C8EC3AA0",
+                npc: 790088,
+                next: 80260113,
+            },
+            {
+                id: 80260113,
+                content:
+                    "When I first met you, you seemed so gentle, so humble. Just another maid among many. I never imagined you would risk so much for me... that you would help me flee the Imperial Capital.",
+                voice: "inv/Fuluo/001/C8EC3ACA",
+                npc: 790088,
+                next: 80260114,
+            },
+            {
+                id: 80260114,
+                content: "Even a maid may, from time to time, take it into her head to chase a little adventure, my lady.",
+                voice: "inv/Fuluo/001/C8EC3AF4",
+                npc: 790089,
+                next: 80260115,
+            },
+            {
+                id: 80260115,
+                content:
+                    "But girls brought up in noble houses don't hide firearms beneath their skirts. They don't know how to coat a dagger in poison with such practiced ease, either.",
+                voice: "inv/Fuluo/001/C8EC3B1E",
+                npc: 790088,
+                next: 80260116,
+            },
+            {
+                id: 80260116,
+                content:
+                    "And they certainly don't stay so calm when armed soldiers close in, then still manage to get the princess out alive.",
+                voice: "inv/Fuluo/001/C8EC3B48",
+                npc: 790088,
+                next: 80260117,
+            },
+            {
+                id: 80260117,
+                content: "Hilda... there's more to you than you let on, isn't there?",
+                voice: "inv/Fuluo/001/C8EC3B72",
+                npc: 790088,
+                next: 80260118,
+            },
+            {
+                id: 80260118,
+                content: "...",
+                voice: "inv/Fuluo/001/C8EC3B9C",
+                npc: 790089,
+                next: 80260119,
+            },
+            {
+                id: 80260119,
+                content: "This isn't Princess Flodia asking. It's Flora... your friend. You don't have to answer.",
+                voice: "inv/Fuluo/001/C8EC3BC6",
+                npc: 790088,
+                next: 80260120,
+            },
+            {
+                id: 80260120,
+                content: "I had been wondering when the right time to tell you would be. Since you've asked...",
+                voice: "inv/Fuluo/001/C8EC3BF0",
+                npc: 790089,
+                next: 80260121,
+            },
+            {
+                id: 80260121,
+                content:
+                    "I am Baron Godfrey's daughter. But I am also an agent, trained by the Legion and placed in the palace to watch you, and to report every word you spoke and every step you took.",
+                voice: "inv/Fuluo/001/C8EC3C1A",
+                npc: 790089,
+                next: 80260122,
+            },
+            {
+                id: 80260122,
+                content: "My mother was an agent as well. When I was young, she told me a story: The North Wind and the Sun.",
+                voice: "inv/Fuluo/001/C8EC3C44",
+                npc: 790089,
+                next: 80260123,
+            },
+            {
+                id: 80260123,
+                content: '"The North Wind and the Sun once made a wager over who could make a traveller remove the cloak."',
+                voice: "inv/Fuluo/001/C8EC3C6E",
+                npc: 790089,
+                next: 80260124,
+            },
+            {
+                id: 80260124,
+                content:
+                    '"The North Wind tried with all its might to tear his cloak away, but only made the traveller clutch it tighter. The Sun merely shone gently, and in its warmth, the traveller removed it of his own accord."',
+                voice: "inv/Fuluo/001/C8EC3C98",
+                npc: 790089,
+                next: 80260125,
+            },
+            {
+                id: 80260125,
+                content: '"Espionage," she told me, "is the art of the sun."',
+                voice: "inv/Fuluo/001/C8EC3CC2",
+                npc: 790089,
+                next: 80260126,
+            },
+            {
+                id: 80260126,
+                content:
+                    "So I decided I would become that sun. Even when you kept me at a distance, I went on trying, little by little, to win your trust and draw closer to you.",
+                voice: "inv/Fuluo/001/C8EC3CEC",
+                npc: 790089,
+                next: 80260127,
+            },
+            {
+                id: 80260127,
+                content: "...",
+                voice: "inv/Fuluo/001/C8EC3D16",
+                npc: 790088,
+                next: 80260128,
+            },
+            {
+                id: 80260128,
+                content:
+                    "To make it convincing, I told myself you were a real friend of mine, not simply someone I had been sent to watch. What came of that... you already know.",
+                voice: "inv/Fuluo/001/C8EC3D40",
+                npc: 790089,
+                next: 80260129,
+            },
+            {
+                id: 80260129,
+                content: "In the end, the only person I truly deceived... was myself.",
+                voice: "inv/Fuluo/001/C8EC3D6A",
+                npc: 790089,
+                next: 80260130,
+            },
+            {
+                id: 80260130,
+                content: "You don't seem surprised, Flora. Of course, you're no fool. You must have guessed long before I said anything.",
+                voice: "inv/Fuluo/001/C8EC3D94",
+                npc: 790089,
+                next: 80260131,
+            },
+            {
+                id: 80260131,
+                content: "Then allow me to apologise properly. I am sorry for deceiving you.",
+                voice: "inv/Fuluo/001/C8EC3DBE",
+                npc: 790089,
+                next: 80260132,
+            },
+            {
+                id: 80260132,
+                content: "You are not a very good agent, Hilda.",
+                voice: "inv/Fuluo/001/C8EC3DE8",
+                npc: 790088,
+                next: 80260133,
+            },
+            {
+                id: 80260133,
+                content: "But you are the dearest friend I have. If anyone should be sorry... it is I.",
+                voice: "inv/Fuluo/001/C8EC3E12",
+                npc: 790088,
+                next: 80260134,
+            },
+            {
+                id: 80260134,
+                content:
+                    "...<H>There were two paths before me: flee north to Askard and live in hiding for the rest of my life... or go to Aethyrie, unravel the mystery of that painting, and seek the strength I needed.</> I chose the first.",
+                voice: "inv/Fuluo/001/C8EC3E3C",
+                npc: 790088,
+                next: 80260135,
+            },
+            {
+                id: 80260135,
+                content: "It was only when I stood on the threshold between life and death... that I understood what I truly wanted.",
+                voice: "inv/Fuluo/001/C8EC3E66",
+                npc: 790088,
+                next: 80260136,
+            },
+            {
+                id: 80260136,
+                content:
+                    "When the Legion surrounded us, I knew survival ought to have come first, even if it meant throwing myself at my uncle's feet and begging for mercy like a dog.",
+                voice: "inv/Fuluo/001/C8EC3E90",
+                npc: 790088,
+                next: 80260137,
+            },
+            {
+                id: 80260137,
+                content:
+                    "But instead... I threw myself at the soldiers' blades. Not because I had calmly reasoned that they would not dare harm me, and that their hesitation might buy us time to escape...",
+                voice: "inv/Fuluo/001/C8EC3EBA",
+                npc: 790088,
+                next: 80260138,
+            },
+            {
+                id: 80260138,
+                content: "But because you would rather die in Icelake than be taken back to Dismania.",
+                voice: "inv/Fuluo/001/C8EC3EE4",
+                npc: 790089,
+                next: 80260139,
+            },
+            {
+                id: 80260139,
+                content:
+                    "Yes. In that moment, there was only one thought in my mind: no matter what, I would never again become a prisoner in that tower.",
+                voice: "inv/Fuluo/001/C8EC3F0E",
+                npc: 790088,
+                next: 80260140,
+            },
+            {
+                id: 80260140,
+                content: "I understand. Then I shall begin making preparations for our journey to Askard. It will take a few days.",
+                voice: "inv/Fuluo/001/C8EC3F38",
+                npc: 790089,
+                next: 80260141,
+            },
+            {
+                id: 80260141,
+                content: "...I am pathetic, am I not? I am ashamed of myself.",
+                voice: "inv/Fuluo/001/C8EC3F62",
+                npc: 790088,
+                next: 80260142,
+            },
+            {
+                id: 80260142,
+                content:
+                    "My father cannot rest in peace while his murderer still sits upon the throne, revered and beloved by the people of Hyperborea.",
+                voice: "inv/Fuluo/001/C8EC3F8C",
+                npc: 790088,
+                next: 80260143,
+            },
+            {
+                id: 80260143,
+                content:
+                    "And you... you gave up so much merely to spirit me out of that impregnable Imperial Palace. Yet I chose to run from the burden that should have been mine to bear.",
+                voice: "inv/Fuluo/001/C8EC3FB6",
+                npc: 790088,
+                next: 80260144,
+            },
+            {
+                id: 80260144,
+                content: "Flora... forgive my impertinence, but you must not say that.",
+                voice: "inv/Fuluo/001/C8EC3FE0",
+                npc: 790089,
+                next: 80260145,
+            },
+            {
+                id: 80260145,
+                content:
+                    "No one is born to carry another person's burdens, not even those of their parents. No one has the right to decide how you should live... except you.",
+                voice: "inv/Fuluo/001/C8EC400A",
+                npc: 790089,
+                next: 80260146,
+            },
+            {
+                id: 80260146,
+                content: "As for me... you do owe me one thing.",
+                voice: "inv/Fuluo/001/C8EC4034",
+                npc: 790089,
+                next: 80260147,
+            },
+            {
+                id: 80260147,
+                content:
+                    "Do you remember? The first birthday we spent together... I gave you a gift. You loved it. Afterwards, I asked for something in return.",
+                voice: "inv/Fuluo/001/C8EC405E",
+                npc: 790089,
+                next: 80260148,
+            },
+            {
+                id: 80260148,
+                content: "At the time, I chose that gift for the sake of my mission... but what I said then was sincere. It still is.",
+                voice: "inv/Fuluo/001/C8EC4088",
+                npc: 790089,
+                next: 80260149,
+            },
+            {
+                id: 80260149,
+                content: '"Flodia, I hope that one day... I shall see you smile for yourself."',
+                voice: "inv/Fuluo/001/C8EC40B2",
+                npc: 790089,
+                next: 80260150,
+            },
+            {
+                id: 80260150,
+                content:
+                    "So go to Askard, Flora. Run from that duty, if it can even be called that. It doesn't matter. Run far enough... and you will be free.",
+                voice: "inv/Fuluo/001/C8EC40DC",
+                npc: 790089,
+                next: 80260151,
+            },
+            {
+                id: 80260151,
+                content: "You've always longed for that day, haven't you?",
+                voice: "inv/Fuluo/001/C8EC4106",
+                npc: 790089,
+                next: 80260152,
+            },
+            {
+                id: 80260152,
+                content: "...Hilda.",
+                voice: "inv/Fuluo/001/C8EC4130",
+                npc: 790088,
+                next: 80260153,
+            },
+            {
+                id: 80260153,
+                content: "(If I go far enough, I will be free...)",
+                voice: "inv/Fuluo/001/C8EC415A",
+                npc: 790088,
+                next: 80260154,
+            },
+            {
+                id: 80260154,
+                content: "(...And if I can be free...)",
+                voice: "inv/Fuluo/001/C8EC4184",
+                npc: 790088,
+            },
+        ],
+    },
+    {
+        id: 110202,
+        charId: 1102,
+        name: "Daughter and Mother",
+        desc: "She had pulled this little stunt countless times before to test how much her daughter had improved. Only this time... it would be the last.",
+        memoryName: "Rose Brooch",
+        memoryDesc: "A rose-shaped brooch — one Hilda has always kept close to her heart.",
+        reward: 7051,
+        consume: {
+            "19004": 5,
+            "19005": 5,
+            "19008": 5,
+        },
+        dialogues: [
+            {
+                id: 80260201,
+                content: "...",
+                voice: "inv/Fuluo/002/C8EC493A",
+                npc: 790089,
+                next: 80260202,
+            },
+            {
+                id: 80260202,
+                content: "You have been following me for some time. Would you care to show yourself?",
+                voice: "inv/Fuluo/002/C8EC4964",
+                npc: 790089,
+                next: 80260203,
+            },
+            {
+                id: 80260203,
+                content: "Otherwise... I cannot promise you a gracious welcome.",
+                voice: "inv/Fuluo/002/C8EC498E",
+                npc: 790089,
+                next: 80260204,
+            },
+            {
+                id: 80260204,
+                content: "...",
+                voice: "inv/Fuluo/002/C8EC49B8",
+                npc: 790090,
+                next: 80260205,
+            },
+            {
+                id: 80260206,
+                content:
+                    "A flash of steel cuts through the biting wind. From the shadows, a dark figure moves faster than Hilda.\nA cold blade darts out like a serpent's tongue, resting at the maid's throat.\nBut it goes no further. With a long, quiet sigh, the intruder lets the dagger drop to the ground.",
+                voice: "inv/Fuluo/002/C8EC4A0C",
+                next: 80260207,
+            },
+            {
+                id: 80260207,
+                content: "Too slow, Hilda. It seems a daughter still can't outwit her mother. Should I be concerned?",
+                voice: "inv/Fuluo/002/C8EC4A36",
+                npc: 790090,
+                next: 80260208,
+            },
+            {
+                id: 80260208,
+                content:
+                    "...Lady Concerto. Next time, kindly spare me these little games. I'm already on edge as it is. One fright too many, and your daughter may not live to old age.",
+                voice: "inv/Fuluo/002/C8EC4A60",
+                npc: 790089,
+                next: 80260209,
+            },
+            {
+                id: 80260209,
+                content:
+                    "Very well, very well. As you wish. And really, there's no need for codenames when it's only the two of us. There's no fear of anyone discovering how we're related.",
+                voice: "inv/Fuluo/002/C8EC4A8A",
+                npc: 790090,
+                next: 80260210,
+            },
+            {
+                id: 80260210,
+                content:
+                    "Can't we go back to when you were little? You, on your newest rocking horse, cream all over your face, calling me Mum in that sweet little voice... I'd dearly love to see that again.",
+                voice: "inv/Fuluo/002/C8EC4AB4",
+                npc: 790090,
+                next: 80260211,
+            },
+            {
+                id: 80260211,
+                content: "...Please don't ever mention that again. It's embarrassing.",
+                voice: "inv/Fuluo/002/C8EC4ADE",
+                npc: 790089,
+                next: 80260212,
+            },
+            {
+                id: 80260212,
+                content:
+                    "Let's speak of something else. For instance... what are you doing here? Shouldn't you be out shopping for your latest gown somewhere along the Whisper River?",
+                voice: "inv/Fuluo/002/C8EC4B08",
+                npc: 790089,
+                next: 80260213,
+            },
+            {
+                id: 80260213,
+                content: "And you still have the cheek to ask? It's all your doing.",
+                voice: "inv/Fuluo/002/C8EC4B32",
+                npc: 790090,
+                next: 80260214,
+            },
+            {
+                id: 80260214,
+                content:
+                    "I can hardly believe you let the princess you were meant to protect slip through your fingers just like that... and with her went the flawless record of my career as an agent.",
+                voice: "inv/Fuluo/002/C8EC4B5C",
+                npc: 790090,
+                next: 80260215,
+            },
+            {
+                id: 80260215,
+                content:
+                    "And to crown it all, the one who ruined my operation was the very daughter I raised. After a humiliation like that, how could I possibly remain in the capital? So here I am, apparently retired to the countryside.",
+                voice: "inv/Fuluo/002/C8EC4B86",
+                npc: 790090,
+                next: 80260216,
+            },
+            {
+                id: 80260216,
+                content: "I don't believe a word of it. This is not even your home.",
+                voice: "inv/Fuluo/002/C8EC4BB0",
+                npc: 790089,
+                next: 80260217,
+            },
+            {
+                id: 80260217,
+                content: "Besides... you let us go on purpose, didn't you?",
+                voice: "inv/Fuluo/002/C8EC4BDA",
+                npc: 790089,
+                next: 80260218,
+            },
+            {
+                id: 80260218,
+                content: "I have no idea what you mean.",
+                voice: "inv/Fuluo/002/C8EC4C04",
+                npc: 790090,
+                next: 80260219,
+            },
+            {
+                id: 80260219,
+                content:
+                    "Princess Flodia's security plan. You are not the sort to leave a highly confidential file lying out on the dining table.",
+                voice: "inv/Fuluo/002/C8EC4C2E",
+                npc: 790089,
+                next: 80260220,
+            },
+            {
+                id: 80260220,
+                content: "Hm... perhaps. Or perhaps not. Who can say?",
+                voice: "inv/Fuluo/002/C8EC4C58",
+                npc: 790090,
+                next: 80260221,
+            },
+            {
+                id: 80260221,
+                content: "Enough about the past. Tell me what you mean to do next — no, wait. Let me guess.",
+                voice: "inv/Fuluo/002/C8EC4C82",
+                npc: 790090,
+                next: 80260222,
+            },
+            {
+                id: 80260222,
+                content:
+                    "I heard that a few days ago, two mysterious young gentlemen paid an absurd sum for a painting at an auction in Icelake... the <H>Mad King's Starry Sky</>. That would have been you and Princess Flodia, would it not?",
+                voice: "inv/Fuluo/002/C8EC4CAC",
+                npc: 790090,
+                next: 80260223,
+            },
+            {
+                id: 80260223,
+                content: "...",
+                voice: "inv/Fuluo/002/C8EC4CD6",
+                npc: 790089,
+                next: 80260224,
+            },
+            {
+                id: 80260224,
+                content:
+                    "Nobles who can produce that much cash at a moment's notice, and insist on concealing their identities... even in disguise, they are not difficult to recognise.",
+                voice: "inv/Fuluo/002/C8EC4D00",
+                npc: 790090,
+                next: 80260225,
+            },
+            {
+                id: 80260225,
+                content:
+                    "They say the painting — a star-drenched canvas beyond description — hides a treasure of immense power, enough to alter the course of history... though it carries <H>a terrible curse</>. The former emperor was driven mad by it.",
+                voice: "inv/Fuluo/002/C8EC4D2A",
+                npc: 790090,
+                next: 80260226,
+            },
+            {
+                id: 80260226,
+                content:
+                    "Personally, I think it is nothing more than a myth. Court rumours do have a way of breeding all manner of conspiracy theories. Perhaps it is simply a story meant to sell an otherwise ordinary painting at an outrageous price.",
+                voice: "inv/Fuluo/002/C8EC4D54",
+                npc: 790090,
+                next: 80260227,
+            },
+            {
+                id: 80260227,
+                content:
+                    "...Princess Flodia wishes to gather anything connected to her parents, even if it is nothing more than an ordinary painting.",
+                voice: "inv/Fuluo/002/C8EC4D7E",
+                npc: 790089,
+                next: 80260228,
+            },
+            {
+                id: 80260228,
+                content: "...Then if it is not the treasure you are after, you mean to leave the Empire. Where to next? North, to Askard?",
+                voice: "inv/Fuluo/002/C8EC4DA8",
+                npc: 790090,
+                next: 80260229,
+            },
+            {
+                id: 80260229,
+                content: "Perhaps. Or perhaps not. Who can say?",
+                voice: "inv/Fuluo/002/C8EC4DD2",
+                npc: 790089,
+                next: 80260230,
+            },
+            {
+                id: 80260230,
+                content: "Look at you — learning from your mother already.",
+                voice: "inv/Fuluo/002/C8EC4DFC",
+                npc: 790090,
+                next: 80260231,
+            },
+            {
+                id: 80260231,
+                content: "...No matter. I didn't come here to ask after the princess, and I don't much care what you plan to do next.",
+                voice: "inv/Fuluo/002/C8EC4E26",
+                npc: 790090,
+                next: 80260232,
+            },
+            {
+                id: 80260232,
+                content: "You needn't be so guarded. As I said, I've already left the Legion.",
+                voice: "inv/Fuluo/002/C8EC4E50",
+                npc: 790090,
+                next: 80260233,
+            },
+            {
+                id: 80260233,
+                content:
+                    "I came only to ask you one thing. I heard from a former colleague that when you and Flodia clashed with the Legion, one of you was injured...",
+                voice: "inv/Fuluo/002/C8EC4E7A",
+                npc: 790090,
+                next: 80260234,
+            },
+            {
+                id: 80260234,
+                content: "Was it you? ...Does it still hurt?",
+                voice: "inv/Fuluo/002/C8EC4EA4",
+                npc: 790090,
+                next: 80260235,
+            },
+            {
+                id: 80260235,
+                content: "...Mum.",
+                voice: "inv/Fuluo/002/C8EC4ECE",
+                npc: 790089,
+                next: 80260236,
+            },
+            {
+                id: 80260236,
+                content: "It was nothing serious. I'm fine now. I'm sorry I worried you.",
+                voice: "inv/Fuluo/002/C8EC4EF8",
+                npc: 790089,
+                next: 80260237,
+            },
+            {
+                id: 80260237,
+                content:
+                    "...Good. That's good. Take these gold coins with you. After buying that painting, I imagine you've little left. You'll need enough to live on.",
+                voice: "inv/Fuluo/002/C8EC4F22",
+                npc: 790090,
+                next: 80260238,
+            },
+            {
+                id: 80260238,
+                content: "...All right.",
+                voice: "inv/Fuluo/002/C8EC4F4C",
+                npc: 790089,
+                next: 80260239,
+            },
+            {
+                id: 80260239,
+                content: "...Hilda.",
+                voice: "inv/Fuluo/002/C8EC4F76",
+                npc: 790090,
+                next: 80260240,
+            },
+            {
+                id: 80260240,
+                content: "Will you come back?",
+                voice: "inv/Fuluo/002/C8EC4FA0",
+                npc: 790090,
+                next: 80260241,
+            },
+            {
+                id: 80260241,
+                content: "...I don't know.",
+                voice: "inv/Fuluo/002/C8EC4FCA",
+                npc: 790089,
+                next: 80260242,
+            },
+            {
+                id: 80260242,
+                content: "I... I'm sorry. This is not very dignified of me. Concerto is meant to be elegant, poised, and proud.",
+                voice: "inv/Fuluo/002/C8EC4FF4",
+                npc: 790090,
+                next: 80260243,
+            },
+            {
+                id: 80260243,
+                content:
+                    "But, Hilda... I'm not asking you this as Concerto. I'm asking as your mother. Is there even the slightest chance you might stay... for me? You and Flodia could live under false names. I could keep the two of you hidden from the Legion.",
+                voice: "inv/Fuluo/002/C8EC501E",
+                npc: 790090,
+                next: 80260244,
+            },
+            {
+                id: 80260244,
+                content: "If only, from time to time, I could see you... and know that you're safe... that would be enough for me.",
+                voice: "inv/Fuluo/002/C8EC5048",
+                npc: 790090,
+                next: 80260245,
+            },
+            {
+                id: 80260245,
+                content: "...",
+                voice: "inv/Fuluo/002/C8EC5072",
+                npc: 790089,
+                next: 80260246,
+            },
+            {
+                id: 80260246,
+                content: "...I'm sorry, Mum.",
+                voice: "inv/Fuluo/002/C8EC509C",
+                npc: 790089,
+                next: 80260247,
+            },
+            {
+                id: 80260247,
+                content:
+                    "...I see. Of course. Why did I even ask? I know you too well, Hilda. Once you've made your choice, you always see it through.",
+                voice: "inv/Fuluo/002/C8EC50C6",
+                npc: 790090,
+                next: 80260248,
+            },
+            {
+                id: 80260248,
+                content:
+                    "I just... had to try before I heard you say no. Now that I have... I can finally snuff out this last little spark of hope.",
+                voice: "inv/Fuluo/002/C8EC50F0",
+                npc: 790090,
+                next: 80260249,
+            },
+            {
+                id: 80260249,
+                content:
+                    "Then give me the rose brooch I gave you when you were little, will you? I know you still carry it. So that when I miss you, I may look at it... and perhaps find a little comfort.",
+                voice: "inv/Fuluo/002/C8EC511A",
+                npc: 790090,
+                next: 80260250,
+            },
+            {
+                id: 80260250,
+                content: "...All right. Here.",
+                voice: "inv/Fuluo/002/C8EC5144",
+                npc: 790089,
+                next: 80260251,
+            },
+            {
+                id: 80260251,
+                content: "I'm sorry. Please forgive me for being so selfish. This time... I want to choose for myself how to live.",
+                voice: "inv/Fuluo/002/C8EC516E",
+                npc: 790089,
+                next: 80260252,
+            },
+            {
+                id: 80260252,
+                content: "...Very well. Then remember this:",
+                voice: "inv/Fuluo/002/C8EC5198",
+                npc: 790090,
+                next: 80260253,
+            },
+            {
+                id: 80260253,
+                content: "No matter what happens... I love you. As I always have.",
+                voice: "inv/Fuluo/002/C8EC51C2",
+                npc: 790090,
+            },
+        ],
+    },
+    {
+        id: 110203,
+        charId: 1102,
+        name: "A Wish and Its Price",
+        desc: "Tears still cling to a mother's face, bearing the one message the girl most dreads to hear.",
+        memoryName: "White Costume",
+        memoryDesc: "A white stage costume, like a bird unfurling its wings into the open sky.",
+        reward: 7052,
+        consume: {
+            "19003": 8,
+            "19007": 8,
+        },
+        dialogues: [
+            {
+                id: 80260301,
+                content: "Lady Rosa? Why are you here?",
+                voice: "inv/Fuluo/003/C8EC59A2",
+                npc: 790088,
+                next: 80260302,
+            },
+            {
+                id: 80260302,
+                content: "You've been crying...?",
+                voice: "inv/Fuluo/003/C8EC59CC",
+                npc: 790088,
+                next: 80260303,
+            },
+            {
+                id: 80260303,
+                content: "Good day, Your Highness.",
+                voice: "inv/Fuluo/003/C8EC59F6",
+                npc: 790090,
+                next: 80260304,
+            },
+            {
+                id: 80260304,
+                content: "Given the urgency, forgive me for dispensing with formalities. I will speak plainly.",
+                voice: "inv/Fuluo/003/C8EC5A20",
+                npc: 790090,
+                next: 80260305,
+            },
+            {
+                id: 80260305,
+                content:
+                    "You may already have noticed the resemblance. Hilda is my daughter. For certain reasons, we kept that from you until now.",
+                voice: "inv/Fuluo/003/C8EC5A4A",
+                npc: 790090,
+                next: 80260306,
+            },
+            {
+                id: 80260306,
+                content:
+                    "But that is beside the point. What matters now is this: you must change into this costume at once and prepare to leave. A car trimmed with red velvet ribbons is waiting outside. I shall wait by the door.",
+                voice: "inv/Fuluo/003/C8EC5A74",
+                npc: 790090,
+                next: 80260307,
+            },
+            {
+                id: 80260307,
+                content:
+                    "It is a costume from a travelling troupe. I have made the necessary arrangements. While the carnival is still in full swing, you can pass as one of the performers and board their train for Scarletriver in the south.",
+                voice: "inv/Fuluo/003/C8EC5A9E",
+                npc: 790090,
+                next: 80260308,
+            },
+            {
+                id: 80260308,
+                content:
+                    "Once you arrive, someone will escort you on to Luca. It is not the route you intended, but it is safer than going to Askard.",
+                voice: "inv/Fuluo/003/C8EC5AC8",
+                npc: 790090,
+                next: 80260309,
+            },
+            {
+                id: 80260309,
+                content: "I'm sorry — just a moment.",
+                voice: "inv/Fuluo/003/C8EC5AF2",
+                npc: 790088,
+                next: 80260310,
+            },
+            {
+                id: 80260310,
+                content: "Where is Hilda? Will she be coming with me?",
+                voice: "inv/Fuluo/003/C8EC5B1C",
+                npc: 790088,
+                next: 80260311,
+            },
+            {
+                id: 80260311,
+                content: "...",
+                voice: "inv/Fuluo/003/C8EC5B46",
+                npc: 790090,
+                next: 80260312,
+            },
+            {
+                id: 80260312,
+                content: "...Please do not ask about Hilda again, Your Highness.",
+                voice: "inv/Fuluo/003/C8EC5B70",
+                npc: 790090,
+                next: 80260313,
+            },
+            {
+                id: 80260313,
+                content: "Unless I hear it from her myself, I cannot trust anyone. Not even you, Lady Rosa. I hope you understand.",
+                voice: "inv/Fuluo/003/C8EC5B9A",
+                npc: 790088,
+                next: 80260314,
+            },
+            {
+                id: 80260314,
+                content: "...She won't be coming back.",
+                voice: "inv/Fuluo/003/C8EC5BC4",
+                npc: 790090,
+                next: 80260315,
+            },
+            {
+                id: 80260315,
+                content: "What...?",
+                voice: "inv/Fuluo/003/C8EC5BEE",
+                npc: 790088,
+                next: 80260316,
+            },
+            {
+                id: 80260316,
+                content:
+                    "She was taken by the 13th Legion at dawn, while she was out buying provisions... most likely in preparation for crossing the northern border.",
+                voice: "inv/Fuluo/003/C8EC5C18",
+                npc: 790090,
+                next: 80260317,
+            },
+            {
+                id: 80260317,
+                content:
+                    "The Legion already knew you were in Icelake. It was only a matter of time before they began watching Hilda closely.",
+                voice: "inv/Fuluo/003/C8EC5C42",
+                npc: 790090,
+                next: 80260318,
+            },
+            {
+                id: 80260318,
+                content: "...",
+                voice: "inv/Fuluo/003/C8EC5C6C",
+                npc: 790088,
+                next: 80260319,
+            },
+            {
+                id: 80260319,
+                content:
+                    "They brought me there to persuade her. To make her tell them where you were. I begged her... I begged her through tears. But she said nothing.",
+                voice: "inv/Fuluo/003/C8EC5C96",
+                npc: 790090,
+                next: 80260320,
+            },
+            {
+                id: 80260320,
+                content:
+                    "She only gave me this. A brooch I once gave her. She said... we might never meet again. That I should keep it to remember her by.",
+                voice: "inv/Fuluo/003/C8EC5CC0",
+                npc: 790090,
+                next: 80260321,
+            },
+            {
+                id: 80260321,
+                content: "...Yes. That brooch... she always carried it with her.",
+                voice: "inv/Fuluo/003/C8EC5CEA",
+                npc: 790088,
+                next: 80260322,
+            },
+            {
+                id: 80260322,
+                content:
+                    "But I discovered something unexpected. She had altered it — there was a hidden compartment inside. I opened it in private. Inside... there was a note.",
+                voice: "inv/Fuluo/003/C8EC5D14",
+                npc: 790090,
+                next: 80260323,
+            },
+            {
+                id: 80260323,
+                content:
+                    "She had written down where you were hiding... and left a request for me. She must have known she might be taken. So she placed her hopes in one thing — that I would honour her final wish, and help you escape Hyperborea.",
+                voice: "inv/Fuluo/003/C8EC5D3E",
+                npc: 790090,
+                next: 80260324,
+            },
+            {
+                id: 80260324,
+                content: "Final wish...? What do you mean!?",
+                voice: "inv/Fuluo/003/C8EC5D68",
+                npc: 790088,
+                next: 80260325,
+            },
+            {
+                id: 80260325,
+                content:
+                    "Exactly what it sounds like, Your Highness. Her duty, as an agent of the Legion, was to protect you. Instead, she defied that duty. She helped you flee the Imperial Capital, exposed you to danger... and even took up arms against the Legion.",
+                voice: "inv/Fuluo/003/C8EC5D92",
+                npc: 790090,
+                next: 80260326,
+            },
+            {
+                id: 80260326,
+                content:
+                    "And when she refused to give you up, she lost her last chance of pardon. She will be sent to the Royal Military Prison to await sentence... and execution.",
+                voice: "inv/Fuluo/003/C8EC5DBC",
+                npc: 790090,
+                next: 80260327,
+            },
+            {
+                id: 80260327,
+                content: "How can that be...? She never told me it would cost her life to help me escape!",
+                voice: "inv/Fuluo/003/C8EC5DE6",
+                npc: 790088,
+                next: 80260328,
+            },
+            {
+                id: 80260328,
+                content:
+                    "Some children cry when they are hurt. Hilda never was one of them. Do you remember, Your Highness? You once had a kitten. It fell ill, and died.",
+                voice: "inv/Fuluo/003/C8EC5E10",
+                npc: 790090,
+                next: 80260329,
+            },
+            {
+                id: 80260329,
+                content:
+                    "Even in pain, it only lay quietly on its cushion. It never cried out, not even at the end. Hilda is the same. No matter how frightened she is, she buries it deep, because she never wanted to trouble you.",
+                voice: "inv/Fuluo/003/C8EC5E3A",
+                npc: 790090,
+                next: 80260330,
+            },
+            {
+                id: 80260330,
+                content: "...As her mother, I often regret that I did not pay her more attention.",
+                voice: "inv/Fuluo/003/C8EC5E64",
+                npc: 790090,
+                next: 80260331,
+            },
+            {
+                id: 80260331,
+                content:
+                    "It will be dark soon, Your Highness. The time Hilda bought us is limited. The Legion will soon begin searching house by house. We must leave before they do. Please... decide quickly. I shall wait outside.",
+                voice: "inv/Fuluo/003/C8EC5E8E",
+                npc: 790090,
+                next: 80260332,
+            },
+            {
+                id: 80260332,
+                content: "This is the only thing I can still do for her — honour her final wish, and get you out of Hyperborea.",
+                voice: "inv/Fuluo/003/C8EC5EB8",
+                npc: 790090,
+                next: 80260333,
+            },
+            {
+                id: 80260333,
+                content: "Her final wish... Hilda...",
+                voice: "inv/Fuluo/003/C8EC5EE2",
+                npc: 790088,
+            },
+        ],
+    },
+    {
+        id: 110204,
+        charId: 1102,
+        name: "The North Wind and the Sun",
+        desc: "She has made her choice.",
+        memoryName: "The Sun's Warm Ray",
+        memoryDesc:
+            "They both gave up what they cherished most for each other, and in the end, they were left with nothing but shattered hope. But this is not where the story ends.",
+        reward: 7053,
+        consume: {
+            "19002": 10,
+            "19006": 10,
+            "19007": 10,
+            "19008": 10,
+        },
+        dialogues: [
+            {
+                id: 80260401,
+                content: "Your Highness... you've come.",
+                voice: "inv/Fuluo/004/C8EC6A0A",
+                npc: 790090,
+                next: 80260402,
+            },
+            {
+                id: 80260402,
+                content: "Thank you for trusting me. Come. Let us go. Soon... you will be free.",
+                voice: "inv/Fuluo/004/C8EC6A34",
+                npc: 790090,
+                next: 80260403,
+            },
+            {
+                id: 80260403,
+                content: "Free...",
+                voice: "inv/Fuluo/004/C8EC6A5E",
+                npc: 790091,
+                next: 80260404,
+            },
+            {
+                id: 80260405,
+                content:
+                    "Go to Askard, Flora. Run from that duty, if it can even be called that. It doesn't matter. Run far enough... and you will be free.",
+                voice: "inv/Fuluo/004/C8EC6AB2",
+                npc: 790089,
+                next: 80260406,
+            },
+            {
+                id: 80260406,
+                content: "You've always longed for that day, haven't you?",
+                voice: "inv/Fuluo/004/C8EC6ADC",
+                npc: 790089,
+                next: 80260407,
+            },
+            {
+                id: 80260407,
+                content: "Yes. Freedom. Hilda wanted that for you as well.",
+                voice: "inv/Fuluo/004/C8EC6B06",
+                npc: 790090,
+                next: 80260408,
+            },
+            {
+                id: 80260408,
+                content: "...Hilda...",
+                voice: "inv/Fuluo/004/C8EC6B30",
+                npc: 790091,
+                next: 80260409,
+            },
+            {
+                id: 80260409,
+                content:
+                    "To make it convincing, I told myself you were a real friend of mine, not simply someone I had been sent to watch. What came of that... you already know.",
+                voice: "inv/Fuluo/004/C8EC6B5A",
+                npc: 790089,
+                next: 80260410,
+            },
+            {
+                id: 80260410,
+                content: "In the end, the only person I truly deceived... was myself.",
+                voice: "inv/Fuluo/004/C8EC6B84",
+                npc: 790089,
+                next: 80260411,
+            },
+            {
+                id: 80260411,
+                content: "At the time, I chose that gift for the sake of my mission... but what I said then was sincere. It still is.",
+                voice: "inv/Fuluo/004/C8EC6BAE",
+                npc: 790089,
+                next: 80260412,
+            },
+            {
+                id: 80260412,
+                content: '"Flodia, I hope that one day... I shall see you smile for yourself."',
+                voice: "inv/Fuluo/004/C8EC6BD8",
+                npc: 790089,
+                next: 80260413,
+            },
+            {
+                id: 80260413,
+                content: "Let us go, Lady Rosa.",
+                voice: "inv/Fuluo/004/C8EC6C02",
+                npc: 790091,
+                next: 80260414,
+            },
+            {
+                id: 80260414,
+                content: "<H>I have made my choice.</>",
+                voice: "inv/Fuluo/004/C8EC6C2C",
+                npc: 790091,
+            },
+            {
+                id: 80260416,
+                content: "...So that is how you deceived Princess Flodia.",
+                voice: "inv/Fuluo/004/C8EC6C80",
+                npc: 790015,
+                next: 80260417,
+            },
+            {
+                id: 80260417,
+                content:
+                    "You pretended not to know where they were hiding. Then you wore Hilda's guard down, tracked her movements, and got hold of a keepsake she always carried with her...",
+                voice: "inv/Fuluo/004/C8EC6CAA",
+                npc: 790015,
+                next: 80260418,
+            },
+            {
+                id: 80260418,
+                content:
+                    "And while she was out preparing for their escape, you went to Princess Flodia with that keepsake, used it to gain her trust, and led her straight into the trap... By the time Her Highness realised it was one, it was already too late.",
+                voice: "inv/Fuluo/004/C8EC6CD4",
+                npc: 790015,
+                next: 80260419,
+            },
+            {
+                id: 80260419,
+                content:
+                    "Once her wounds have healed, we can take her back to the Imperial Capital on the Jackdaw. I must say... the legendary agent Concerto more than lives up to her name. You outmanoeuvred both of them. I sincerely admire your skill, ma'am.",
+                voice: "inv/Fuluo/004/C8EC6CFE",
+                npc: 790015,
+                next: 80260420,
+            },
+            {
+                id: 80260420,
+                content: "Heh... naturally. A daughter cannot outplay her mother.",
+                voice: "inv/Fuluo/004/C8EC6D28",
+                npc: 790090,
+                next: 80260421,
+            },
+            {
+                id: 80260421,
+                content:
+                    "Hilda is no fool. But sentiment... that is her fatal weakness. The moment I played the family card, she stopped thinking clearly.",
+                voice: "inv/Fuluo/004/C8EC6D52",
+                npc: 790090,
+                next: 80260422,
+            },
+            {
+                id: 80260422,
+                content: "No wonder the Legion recalled you for this operation.",
+                voice: "inv/Fuluo/004/C8EC6D7C",
+                npc: 790015,
+                next: 80260423,
+            },
+            {
+                id: 80260423,
+                content:
+                    "No one understands them better than you do. Without you, even if we had found Her Highness, she might have resisted us with her life, just as she did last time. If anything had gone wrong, the Legion would have been held accountable.",
+                voice: "inv/Fuluo/004/C8EC6DA6",
+                npc: 790015,
+                next: 80260424,
+            },
+            {
+                id: 80260424,
+                content: "I suppose congratulations are in order — this ought to mean a promotion for you, ma'am.",
+                voice: "inv/Fuluo/004/C8EC6DD0",
+                npc: 790015,
+                next: 80260425,
+            },
+            {
+                id: 80260425,
+                content: "I have already submitted my resignation, Howard. This time, I really do mean to retire to the countryside.",
+                voice: "inv/Fuluo/004/C8EC6DFA",
+                npc: 790090,
+                next: 80260426,
+            },
+            {
+                id: 80260426,
+                content: "There is nothing to celebrate in this victory. By now... those two girls must hate me through and through.",
+                voice: "inv/Fuluo/004/C8EC6E24",
+                npc: 790090,
+                next: 80260427,
+            },
+            {
+                id: 80260427,
+                content: "I robbed her of freedom with lies... though I knew better than anyone how desperately she longed for it.",
+                voice: "inv/Fuluo/004/C8EC6E4E",
+                npc: 790090,
+                next: 80260428,
+            },
+            {
+                id: 80260428,
+                content: "And Hilda... my dearest daughter...",
+                voice: "inv/Fuluo/004/C8EC6E78",
+                npc: 790090,
+                next: 80260429,
+            },
+            {
+                id: 80260429,
+                content: "She will never forgive me.",
+                voice: "inv/Fuluo/004/C8EC6EA2",
+                npc: 790090,
+                next: 80260430,
+            },
+            {
+                id: 80260430,
+                content:
+                    "There is no need to take it so much to heart, ma'am. When Hilda learns that everything you did was for her sake, she will understand.",
+                voice: "inv/Fuluo/004/C8EC6ECC",
+                npc: 790015,
+                next: 80260431,
+            },
+            {
+                id: 80260431,
+                content:
+                    "Even if you had refused the mission, the Legion would never have allowed Princess Flodia to leave the Empire. And if you had not accepted it in exchange for Hilda's special pardon... she would have been sentenced to death.",
+                voice: "inv/Fuluo/004/C8EC6EF6",
+                npc: 790015,
+                next: 80260432,
+            },
+            {
+                id: 80260432,
+                content: "I am sure she will understand why you made the choices you did.",
+                voice: "inv/Fuluo/004/C8EC6F20",
+                npc: 790015,
+                next: 80260433,
+            },
+            {
+                id: 80260433,
+                content: "...Let us hope so.",
+                voice: "inv/Fuluo/004/C8EC6F4A",
+                npc: 790090,
+                next: 80260434,
+            },
+            {
+                id: 80260434,
+                content:
+                    "When I first saw Hilda, I feared for a moment that she might see through me. Long ago, I once told her a story — the North Wind and the Sun.",
+                voice: "inv/Fuluo/004/C8EC6F74",
+                npc: 790090,
+                next: 80260435,
+            },
+            {
+                id: 80260435,
+                content:
+                    '"The North Wind tried with all its might to tear his cloak away, but only made the traveller clutch it tighter. The Sun merely shone gently, and in its warmth, the traveller removed it of his own accord."',
+                voice: "inv/Fuluo/004/C8EC6F9E",
+                npc: 790090,
+                next: 80260436,
+            },
+            {
+                id: 80260436,
+                content: '"Only the sun\'s warmth can make someone lower their guard. That is why espionage is the art of the sun."',
+                voice: "inv/Fuluo/004/C8EC6FC8",
+                npc: 790090,
+                next: 80260437,
+            },
+            {
+                id: 80260437,
+                content: "As an agent, I have always been the sun. But Hilda... forgot the part she was meant to play.",
+                voice: "inv/Fuluo/004/C8EC6FF2",
+                npc: 790090,
+                next: 80260438,
+            },
+            {
+                id: 80260438,
+                content: "She simply shone on her princess, like the first light of dawn. And Flodia... returned that warmth in kind.",
+                voice: "inv/Fuluo/004/C8EC701C",
+                npc: 790090,
+                next: 80260439,
+            },
+            {
+                id: 80260439,
+                content:
+                    "They both gave up what they cherished most for each other... and in the end, they were left with nothing but shattered hope.",
+                voice: "inv/Fuluo/004/C8EC7046",
+                npc: 790090,
+                next: 80260440,
+            },
+            {
+                id: 80260440,
+                content: "...So Hilda gave up her family for Princess Flodia's freedom. But what did Her Highness give up?",
+                voice: "inv/Fuluo/004/C8EC7070",
+                npc: 790015,
+                next: 80260441,
+            },
+            {
+                id: 80260441,
+                content: 'Oh, Mr Howard... did I not tell you? Princess Flodia was not "captured" by me. Rather...',
+                voice: "inv/Fuluo/004/C8EC709A",
+                npc: 790090,
+                next: 80260442,
+            },
+            {
+                id: 80260443,
+                content: "Let us go, Lady Rosa.",
+                voice: "inv/Fuluo/004/C8EC70EE",
+                npc: 790091,
+                next: 80260444,
+            },
+            {
+                id: 80260444,
+                content: "<H>I have made my choice.</>",
+                voice: "inv/Fuluo/004/C8EC7118",
+                npc: 790091,
+                next: 80260445,
+            },
+            {
+                id: 80260445,
+                content:
+                    "We are going to the Legion. I will give myself up to them and return to the palace. I will live as a prisoner for the rest of my life. And in exchange...",
+                voice: "inv/Fuluo/004/C8EC7142",
+                npc: 790091,
+                next: 80260446,
+            },
+            {
+                id: 80260446,
+                content: "I want Hilda to be safe.",
+                voice: "inv/Fuluo/004/C8EC716C",
+                npc: 790091,
+            },
+            {
+                id: 80260415,
+                content: "Five days later",
+                voice: "inv/Fuluo/004/C8EC6C56",
+            },
+        ],
+    },
+    {
         id: 110301,
         charId: 1103,
         name: "Point of Attack",
@@ -9194,14 +10600,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090101,
                 content: "...",
-                voice: "inv/Zhangyu/001/C87F4632",
                 npc: 92301,
                 next: 80090102,
             },
             {
                 id: 80090102,
                 content: "...",
-                voice: "inv/Zhangyu/001/C87F465C",
                 npc: 92301,
                 next: 80090103,
             },
@@ -9209,7 +10613,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090103,
                 content:
                     "...Hey! Didn't you see I suddenly vanished after finishing my drink? How could you just act like nothing happened?!",
-                voice: "inv/Zhangyu/001/C87F4686",
                 npc: 92301,
                 next: 80090104,
             },
@@ -9217,7 +10620,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090104,
                 content:
                     "Right in broad daylight, Demon Tabethe the Red Hand mysteriously disappeared! Aren't you at least a bit curious or worried?",
-                voice: "inv/Zhangyu/001/C87F46B0",
                 npc: 92301,
                 options: [
                     {
@@ -9235,35 +10637,30 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090106,
                 content: "What?! You saw through my awesome disguise?!",
-                voice: "inv/Zhangyu/001/C87F4704",
                 npc: 92301,
                 next: 80090109,
             },
             {
                 id: 80090108,
                 content: "Pff, get over yourself — I was just trying to spook you! BOO! Get it?",
-                voice: "inv/Zhangyu/001/C87F4758",
                 npc: 92301,
                 next: 80090109,
             },
             {
                 id: 80090109,
                 content: "Hmph, I slipped up this time. But next time, I'll turn into something you'd never expect!",
-                voice: "inv/Zhangyu/001/C87F4782",
                 npc: 92301,
                 next: 80090110,
             },
             {
                 id: 80090110,
                 content: "What to turn into next... Maybe a barrel? A chandelier? Or even a big hammer?",
-                voice: "inv/Zhangyu/001/C87F47AC",
                 npc: 92301,
                 next: 80090111,
             },
             {
                 id: 80090111,
                 content: "Wow, you're really good at this.",
-                voice: "inv/Zhangyu/001/C87F47D6",
                 npc: 790008,
                 next: 80090112,
             },
@@ -9271,35 +10668,30 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090112,
                 content:
                     "Of course! I heard this trick of mine is called... caramel... camel... camel-something... Ah — camouflage! That's it!",
-                voice: "inv/Zhangyu/001/C87F4800",
                 npc: 92301,
                 next: 80090113,
             },
             {
                 id: 80090113,
                 content: "So you can turn into anything?",
-                voice: "inv/Zhangyu/001/C87F482A",
                 npc: 790008,
                 next: 80090114,
             },
             {
                 id: 80090114,
                 content: "Hehe, you bet! Watch this—",
-                voice: "inv/Zhangyu/001/C87F4854",
                 npc: 92301,
                 next: 80090144,
             },
             {
                 id: 80090115,
                 content: "I'll make an offer you can't refuse. Think it over before you respond.",
-                voice: "inv/Zhangyu/001/C87F487E",
                 npc: 790052,
                 next: 80090116,
             },
             {
                 id: 80090116,
                 content: "What wakes me is business; what about you?",
-                voice: "inv/Zhangyu/001/C87F48A8",
                 npc: 790052,
                 options: [
                     {
@@ -9317,14 +10709,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090118,
                 content: "Hehe, you're so sweet — sweeter than this drink you made!",
-                voice: "inv/Zhangyu/001/C87F48FC",
                 npc: 790052,
                 next: 80090144,
             },
             {
                 id: 80090120,
                 content: "I'm not scared of her! No one can catch Demon Tabethe the Red Hand!",
-                voice: "inv/Zhangyu/001/C87F4950",
                 npc: 790052,
                 next: 80090144,
             },
@@ -9332,7 +10722,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090121,
                 content:
                     "But I can't turn into anything too big or too small. I can do a cat, but not a mouse; a barrel, but not a lamppost.",
-                voice: "inv/Zhangyu/001/C87F497A",
                 npc: 92301,
                 next: 80090122,
             },
@@ -9340,7 +10729,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090122,
                 content:
                     "That's enough to fool most people, though. I can just turn into a bin or a crate, and those rotten thieves won't know what hit them!",
-                voice: "inv/Zhangyu/001/C87F49A4",
                 npc: 92301,
                 options: [
                     {
@@ -9358,28 +10746,24 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090124,
                 content: "What are you mumbling about?",
-                voice: "inv/Zhangyu/001/C87F49F8",
                 npc: 92301,
                 next: 80090125,
             },
             {
                 id: 80090132,
                 content: "What do you mean?",
-                voice: "inv/Zhangyu/001/C87F4B48",
                 npc: 92301,
                 next: 80090133,
             },
             {
                 id: 80090125,
                 content: "Nothing, I just meant you are awesome.",
-                voice: "inv/Zhangyu/001/C87F4A22",
                 npc: 790008,
                 next: 80090126,
             },
             {
                 id: 80090133,
                 content: "I mean, imagine if someone smart but nasty had your skills — the whole town would be in chaos.",
-                voice: "inv/Zhangyu/001/C87F4B72",
                 npc: 790008,
                 next: 80090134,
             },
@@ -9387,21 +10771,18 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090126,
                 content:
                     "But maybe avoid turning into bins or crates next time. Wouldn't want someone accidentally smashing you while looking for something useful...",
-                voice: "inv/Zhangyu/001/C87F4A4C",
                 npc: 790008,
                 next: 80090127,
             },
             {
                 id: 80090134,
                 content: "Mm-hmm, I thought so too! I'm nothing like those bad grown-ups. Wait, are you saying I'm not smart?",
-                voice: "inv/Zhangyu/001/C87F4B9C",
                 npc: 92301,
                 next: 80090135,
             },
             {
                 id: 80090127,
                 content: "Who would do that?",
-                voice: "inv/Zhangyu/001/C87F4A76",
                 npc: 92301,
                 next: 80090128,
             },
@@ -9409,14 +10790,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090135,
                 content:
                     'Of course not, Tabethe is very smart. Anyway, I\'ve been curious about these "bad grown-ups" you always talk about. Who are they?',
-                voice: "inv/Zhangyu/001/C87F4BC6",
                 npc: 790008,
                 next: 80090136,
             },
             {
                 id: 80090128,
                 content: "Er... some overly curious passersby, perhaps?",
-                voice: "inv/Zhangyu/001/C87F4AA0",
                 npc: 790008,
                 next: 80090129,
             },
@@ -9424,14 +10803,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090136,
                 content:
                     'Any bullies who pick on the weak! The first time I met bad grown-ups was at the orphanage. Those caretakers... well, calling them "caretakers" is a stretch — they were more like jailers.',
-                voice: "inv/Zhangyu/001/C87F4BF0",
                 npc: 92301,
                 next: 80090137,
             },
             {
                 id: 80090129,
                 content: "Always taking what's useful and tossing the rest — typical bad grown-ups!",
-                voice: "inv/Zhangyu/001/C87F4ACA",
                 npc: 92301,
                 next: 80090130,
             },
@@ -9439,14 +10816,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090137,
                 content:
                     "Back then, when they caught me sneaking food in the kitchen, they'd beat me. Ugh, those monsters! I only did it because they never fed me enough!",
-                voice: "inv/Zhangyu/001/C87F4C1A",
                 npc: 92301,
                 next: 80090138,
             },
             {
                 id: 80090130,
                 content: 'Those passersby wouldn\'t mean to hurt anyone! Anyway, who are those "bad grown-ups" you always talk about?',
-                voice: "inv/Zhangyu/001/C87F4AF4",
                 npc: 790008,
                 next: 80090136,
             },
@@ -9454,7 +10829,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090138,
                 content:
                     "If I ran into them now, I'd hang them upside down from the ceiling and make them watch as I eat up all the food in the kitchen!",
-                voice: "inv/Zhangyu/001/C87F4C44",
                 npc: 92301,
                 options: [
                     {
@@ -9472,7 +10846,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090141,
                 content: "Hmph! Exactly!",
-                voice: "inv/Zhangyu/001/C87F4CC2",
                 npc: 92301,
                 next: 80090142,
             },
@@ -9480,14 +10853,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090142,
                 content:
                     "Alright, I've finished my drink. I'll tell you more about those bad grown-ups next time. Now, let's go play outside!",
-                voice: "inv/Zhangyu/001/C87F4CEC",
                 npc: 92301,
                 next: 80090143,
             },
             {
                 id: 80090143,
                 content: "Hehehe, wanna play hide and seek? I bet you won't find me so easily this time!",
-                voice: "inv/Zhangyu/001/C87F4D16",
                 npc: 92301,
             },
         ],
@@ -9509,7 +10880,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090201,
                 content: "Mmm, this drink's a bit salty but so yummy — like sea breeze-flavored cotton candy!",
-                voice: "inv/Zhangyu/002/C87F569A",
                 npc: 92301,
                 next: 80090202,
             },
@@ -9517,7 +10887,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090202,
                 content:
                     "It kind of reminds me of something I drank long ago... back when I was still with my mom and dad, before our ship sank and I ended up at that orphanage...",
-                voice: "inv/Zhangyu/002/C87F56C4",
                 npc: 92301,
                 next: 80090203,
             },
@@ -9525,7 +10894,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090203,
                 content:
                     "But honestly, I'd choose wandering on my own over staying with those bad grown-ups! They were stingy with food, not to mention anything as nice as a drink.",
-                voice: "inv/Zhangyu/002/C87F56EE",
                 npc: 92301,
                 next: 80090204,
             },
@@ -9533,7 +10901,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090204,
                 content:
                     "At least being on the streets, I could scavenge for something to eat — beats starving under the watch of those bad grown-ups!",
-                voice: "inv/Zhangyu/002/C87F5718",
                 npc: 92301,
                 next: 80090205,
             },
@@ -9541,7 +10908,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090205,
                 content:
                     "When I got a bit older, groups of rich visitors would come by now and then, taking away some unwanted kids with horns like me. People at the orphanage said they were adopted by rich families.",
-                voice: "inv/Zhangyu/002/C87F5742",
                 npc: 92301,
                 next: 80090206,
             },
@@ -9549,7 +10915,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090206,
                 content:
                     "I didn't want new parents, but I thought being in a rich home meant I'd never go hungry again, so I wanted them to take me. But those bad grown-ups said no rich people would want a naughty troublemaker like me.",
-                voice: "inv/Zhangyu/002/C87F576C",
                 npc: 92301,
                 next: 80090207,
             },
@@ -9557,7 +10922,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090207,
                 content:
                     "Hmph! As if I'd ever behave just to be chosen! I couldn't stand that awful place for another day, so during their visit, I transformed into one of their suitcases.",
-                voice: "inv/Zhangyu/002/C87F5796",
                 npc: 92301,
                 next: 80090208,
             },
@@ -9565,7 +10929,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090208,
                 content:
                     "Turns out those rich folks weren't too bright — they just picked me up and walked away, completely clueless. It was rough on my ears, though — they were pulled as the handles, and I almost got dropped along the way!",
-                voice: "inv/Zhangyu/002/C87F57C0",
                 npc: 92301,
                 options: [
                     {
@@ -9583,14 +10946,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090210,
                 content: "...Thanks, sounds a bit weird though...",
-                voice: "inv/Zhangyu/002/C87F5814",
                 npc: 92301,
                 next: 80090213,
             },
             {
                 id: 80090212,
                 content: "Hehe, you bet! Too bad I wasn't as skilled back then, or I wouldn't have turned my ears into the handles.",
-                voice: "inv/Zhangyu/002/C87F5868",
                 npc: 92301,
                 next: 80090213,
             },
@@ -9598,7 +10959,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090213,
                 content:
                     "Actually, I was planning to sneak in with those kids getting adopted, hoping I'd never starve again with a rich family.",
-                voice: "inv/Zhangyu/002/C87F5892",
                 npc: 92301,
                 next: 80090214,
             },
@@ -9606,14 +10966,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090214,
                 content:
                     "But those rich people reeked of disinfectant — it stung my nose! And the way they looked at those kids... I don't know why, but it gave me the creeps...",
-                voice: "inv/Zhangyu/002/C87F58BC",
                 npc: 92301,
                 next: 80090215,
             },
             {
                 id: 80090215,
                 content: "It was like... a chef sizing up fish or ducks!",
-                voice: "inv/Zhangyu/002/C87F58E6",
                 npc: 92301,
                 next: 80090216,
             },
@@ -9621,14 +10979,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090216,
                 content:
                     "I've seen too many bad grown-ups to trust them — I might be better off on my own. So I didn't join those kids, and ended up running away by myself.",
-                voice: "inv/Zhangyu/002/C87F5910",
                 npc: 92301,
                 next: 80090217,
             },
             {
                 id: 80090217,
                 content: "And that was my first step towards becoming Demon Tabethe the Red Hand!",
-                voice: "inv/Zhangyu/002/C87F593A",
                 npc: 92301,
                 options: [
                     {
@@ -9646,21 +11002,18 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090219,
                 content: "Not bad, just special? No one's ever put it that way before... A special kid, special... Hehe!",
-                voice: "inv/Zhangyu/002/C87F598E",
                 npc: 92301,
                 next: 80090223,
             },
             {
                 id: 80090221,
                 content: "Exactly, you got it!",
-                voice: "inv/Zhangyu/002/C87F59E2",
                 npc: 92301,
                 next: 80090222,
             },
             {
                 id: 80090223,
                 content: "Getting out safely on your own was already something. Congratulations on earning your freedom, Tabethe.",
-                voice: "inv/Zhangyu/002/C87F5A36",
                 npc: 790008,
                 next: 80090224,
             },
@@ -9668,7 +11021,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090222,
                 content:
                     "Back then, I was just focused on getting away. If I were as good at my disguise tricks then, I would've secretly followed them to see what they were really up to!",
-                voice: "inv/Zhangyu/002/C87F5A0C",
                 npc: 92301,
                 next: 80090223,
             },
@@ -9676,7 +11028,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090224,
                 content:
                     "Yeah, I did great! Breathing fresh air again was so awesome. For the first time, I realised the night sky wasn't always so dark, and the dim stars I'd seen through dirty glass were actually bright and beautiful.",
-                voice: "inv/Zhangyu/002/C87F5A60",
                 npc: 92301,
                 next: 80090225,
             },
@@ -9684,35 +11035,30 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090225,
                 content:
                     "I slept under the stars that night, right on the grass — and woke up to a beautiful sunny day! Since that day, I've been living in that little seaside town, free from those bad grown-ups!",
-                voice: "inv/Zhangyu/002/C87F5A8A",
                 npc: 92301,
                 next: 80090226,
             },
             {
                 id: 80090226,
                 content: "And I met someone there...",
-                voice: "inv/Zhangyu/002/C87F5AB4",
                 npc: 92301,
                 next: 80090227,
             },
             {
                 id: 80090227,
                 content: "Did you finally meet someone kind?",
-                voice: "inv/Zhangyu/002/C87F5ADE",
                 npc: 790008,
                 next: 80090228,
             },
             {
                 id: 80090228,
                 content: "Yep, a really, really kind person! But I'm a bit tired now... even Demon Tabethe the Red Hand needs her rest!",
-                voice: "inv/Zhangyu/002/C87F5B08",
                 npc: 92301,
                 next: 80090229,
             },
             {
                 id: 80090229,
                 content: "Next time you whip up a new drink, I'll tell you all about it!",
-                voice: "inv/Zhangyu/002/C87F5B32",
                 npc: 92301,
             },
         ],
@@ -9735,7 +11081,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090301,
                 content: "Yum-yum! This drink's so good — just like all the other drinks you've made! Hehe, you know exactly what I like.",
-                voice: "inv/Zhangyu/003/C87F6702",
                 npc: 92301,
                 next: 80090302,
             },
@@ -9743,28 +11088,24 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090302,
                 content:
                     "I fell asleep on the grass under the stars last night. The sky turned from bright blue to dark navy, with stars twinkling like frosting on a blueberry smoothie!",
-                voice: "inv/Zhangyu/003/C87F672C",
                 npc: 92301,
                 next: 80090303,
             },
             {
                 id: 80090303,
                 content: "Except for the night I escaped the orphanage, I almost never had such a sound night's sleep on the grass.",
-                voice: "inv/Zhangyu/003/C87F6756",
                 npc: 92301,
                 next: 80090304,
             },
             {
                 id: 80090304,
                 content: "...Because when I first got to the town, I did a lot of bad stuff...",
-                voice: "inv/Zhangyu/003/C87F6780",
                 npc: 92301,
                 next: 80090305,
             },
             {
                 id: 80090305,
                 content: 'The grown-ups there hated me for that. They called me a "demon"...',
-                voice: "inv/Zhangyu/003/C87F67AA",
                 npc: 92301,
                 options: [
                     {
@@ -9782,14 +11123,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090307,
                 content: "They could've handled it if they were smarter! Well... you're right, it was my fault.",
-                voice: "inv/Zhangyu/003/C87F67FE",
                 npc: 92301,
                 next: 80090310,
             },
             {
                 id: 80090309,
                 content: "I'm not that big of an eater! Well, you got part of it right though...",
-                voice: "inv/Zhangyu/003/C87F6852",
                 npc: 92301,
                 next: 80090310,
             },
@@ -9797,21 +11136,18 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090310,
                 content:
                     "I had been living off stealing food from the street stalls. The vendors were so mad they tried to beat me, but I just mimicked their angry faces to piss them off. I didn't think what I did was wrong back then.",
-                voice: "inv/Zhangyu/003/C87F687C",
                 npc: 92301,
                 next: 80090311,
             },
             {
                 id: 80090311,
                 content: "\"I just took a little, it's not like you'd starve! Tightwad!\"",
-                voice: "inv/Zhangyu/003/C87F68A6",
                 npc: 92301,
                 next: 80090312,
             },
             {
                 id: 80090312,
                 content: "Until I met her...",
-                voice: "inv/Zhangyu/003/C87F68D0",
                 npc: 92301,
                 next: 80090313,
             },
@@ -9819,7 +11155,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090313,
                 content:
                     "She was the fishmonger's daughter. She caught me stealing from her dad's stall but didn't tell on me; instead, she gave me fish to fill my belly, asked if I was separated from my family, and even offered me a place to stay for the night. She was the first truly kind person I'd ever met.",
-                voice: "inv/Zhangyu/003/C87F68FA",
                 npc: 92301,
                 next: 80090314,
             },
@@ -9827,7 +11162,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090314,
                 content:
                     "A lot happened after that... She ended up without a home and had to go to the orphanage — like I'd let her go through what I had! I decided I'd be her family!",
-                voice: "inv/Zhangyu/003/C87F6924",
                 npc: 92301,
                 next: 80090315,
             },
@@ -9835,7 +11169,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090315,
                 content:
                     "We'd giggle under the hot sun, splash each other by the sea, and race down muddy paths together. I'd turn into little animals just to make her laugh.",
-                voice: "inv/Zhangyu/003/C87F694E",
                 npc: 92301,
                 next: 80090316,
             },
@@ -9843,7 +11176,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090316,
                 content:
                     "She was like a little sister to me — she'd call me Big Sis Tabethe. Even though we didn't always have enough food, she always said she was happy.",
-                voice: "inv/Zhangyu/003/C87F6978",
                 npc: 92301,
                 next: 80090317,
             },
@@ -9851,7 +11183,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090317,
                 content:
                     "It was because of her that I decided to stop stealing from good grown-ups. From then on, Demon Tabethe the Red Hand would only target the bad ones!",
-                voice: "inv/Zhangyu/003/C87F69A2",
                 npc: 92301,
                 options: [
                     {
@@ -9869,14 +11200,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090319,
                 content: "Yeah. I didn't wanna break her heart.",
-                voice: "inv/Zhangyu/003/C87F69F6",
                 npc: 92301,
                 next: 80090326,
             },
             {
                 id: 80090321,
                 content: "Wha... Stop it! You're embarrassing both yourself and me!",
-                voice: "inv/Zhangyu/003/C87F6A4A",
                 npc: 92301,
                 next: 80090322,
             },
@@ -9884,28 +11213,24 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090326,
                 content:
                     "At first, I didn't listen — how could those vendors be good people? I was starving, and they just yelled at me, never giving me anything to eat.",
-                voice: "inv/Zhangyu/003/C87F6B1C",
                 npc: 92301,
                 next: 80090327,
             },
             {
                 id: 80090322,
                 content: "I just wanted to see if you'd also take me in if I called you that...",
-                voice: "inv/Zhangyu/003/C87F6A74",
                 npc: 790008,
                 next: 80090323,
             },
             {
                 id: 80090327,
                 content: "But then I realised — some vendors actually saw me stealing, but they looked the other way.",
-                voice: "inv/Zhangyu/003/C87F6B46",
                 npc: 92301,
                 next: 80090328,
             },
             {
                 id: 80090323,
                 content: "...Are you an eight-year-old? Come on, act your age.",
-                voice: "inv/Zhangyu/003/C87F6A9E",
                 npc: 92301,
                 next: 80090324,
             },
@@ -9913,14 +11238,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090328,
                 content:
                     "And those who chased me never really followed through... Of course, they couldn't catch me if they tried — I was fast...!",
-                voice: "inv/Zhangyu/003/C87F6B70",
                 npc: 92301,
                 next: 80090329,
             },
             {
                 id: 80090324,
                 content: "Just kidding. So, was it because you really care about what she thinks?",
-                voice: "inv/Zhangyu/003/C87F6AC8",
                 npc: 790008,
                 next: 80090325,
             },
@@ -9928,14 +11251,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090329,
                 content:
                     "And some vendors even left unsold food out for me. But back then I thought they did it because they were scared of me and were paying protection money.",
-                voice: "inv/Zhangyu/003/C87F6B9A",
                 npc: 92301,
                 next: 80090330,
             },
             {
                 id: 80090325,
                 content: 'She once asked me, "Is it right to steal from good people?"',
-                voice: "inv/Zhangyu/003/C87F6AF2",
                 npc: 92301,
                 next: 80090326,
             },
@@ -9943,28 +11264,24 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090330,
                 content:
                     "I held such a grudge against the bad people I met, that I was completely blind to the kindness of those good people.",
-                voice: "inv/Zhangyu/003/C87F6BC4",
                 npc: 92301,
                 next: 80090331,
             },
             {
                 id: 80090331,
                 content: "When I realised all this, I felt so bad that the food I stole tasted off.",
-                voice: "inv/Zhangyu/003/C87F6BEE",
                 npc: 92301,
                 next: 80090332,
             },
             {
                 id: 80090332,
                 content: "I guess I'd been taking out my hate for the bad grown-ups on those vendors.",
-                voice: "inv/Zhangyu/003/C87F6C18",
                 npc: 92301,
                 next: 80090333,
             },
             {
                 id: 80090333,
                 content: "I really was a demon...",
-                voice: "inv/Zhangyu/003/C87F6C42",
                 npc: 92301,
                 options: [
                     {
@@ -9983,14 +11300,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090335,
                 content: "Thank you... but you don't need to sugar-coat it for me. I know what I did was wrong.",
-                voice: "inv/Zhangyu/003/C87F6C96",
                 npc: 92301,
                 next: 80090338,
             },
             {
                 id: 80090337,
                 content: "You're right... Go ahead and let me have it. I won't talk back — I deserve this.",
-                voice: "inv/Zhangyu/003/C87F6CEA",
                 npc: 92301,
                 next: 80090338,
             },
@@ -9998,7 +11313,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090338,
                 content:
                     "Ever since then, I'd only take stuff from bad thieves and mean grown-ups. It felt great, and it wouldn't hurt good people.",
-                voice: "inv/Zhangyu/003/C87F6D14",
                 npc: 92301,
                 next: 80090339,
             },
@@ -10006,7 +11320,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090339,
                 content:
                     "And guess what — those bad guys are loaded! I hardly ever go hungry now. Plus, I get to play tricks on them and watch them fume, hehe, it's so much fun!",
-                voice: "inv/Zhangyu/003/C87F6D3E",
                 npc: 92301,
                 options: [
                     {
@@ -10020,21 +11333,18 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090341,
                 content:
                     'Exactly! Er, I mean, not really! This is about "serving justice." All I did was teach them not to mess with the good folks.',
-                voice: "inv/Zhangyu/003/C87F6D92",
                 npc: 92301,
                 next: 80090342,
             },
             {
                 id: 80090342,
                 content: "Whew, that was a lot of talking today — my throat's literally smoking!",
-                voice: "inv/Zhangyu/003/C87F6DBC",
                 npc: 92301,
                 next: 80090343,
             },
             {
                 id: 80090343,
                 content: "Hehe, can I get a refill of that blueberry drink?",
-                voice: "inv/Zhangyu/003/C87F6DE6",
                 npc: 92301,
             },
         ],
@@ -10066,7 +11376,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090458,
                 content: "Aaaare you alright?! Oh no... it wasn't the drink, was it...?",
-                voice: "inv/Zhangyu/004/C87F80C4",
                 npc: 92301,
                 next: 80090459,
             },
@@ -10074,7 +11383,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090459,
                 content:
                     "...I drank the same thing! It was so good that it knocked me out for a moment, but I'm perfectly fine now! Hey, wake up! Don't even think about trying to scam me by pretending it's food poisoning...!",
-                voice: "inv/Zhangyu/004/C87F80EE",
                 npc: 92301,
                 options: [
                     {
@@ -10087,14 +11395,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090461,
                 content: "...",
-                voice: "inv/Zhangyu/004/C87F8142",
                 npc: 92301,
                 next: 80090462,
             },
             {
                 id: 80090462,
                 content: "Doc! Help!!!",
-                voice: "inv/Zhangyu/004/C87F816C",
                 npc: 92301,
                 next: 80090463,
             },
@@ -10107,14 +11413,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090401,
                 content:
                     "This is so good! I could never get enough of this drink! I don't often say nice things, but thank you for always making these for me.",
-                voice: "inv/Zhangyu/004/C87F776A",
                 npc: 92301,
                 next: 80090402,
             },
             {
                 id: 80090402,
                 content: "Hehehe, since you've made so many good drinks for me, it's time I return the favour!",
-                voice: "inv/Zhangyu/004/C87F7794",
                 npc: 92301,
                 next: 80090403,
             },
@@ -10128,7 +11432,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090404,
                 content:
                     "Ta-da! Behold my special creation — Demon Tabethe the Red Hand — named after my own title! Just so you know, this glass is filled with my thanks, hehe!",
-                voice: "inv/Zhangyu/004/C87F77E8",
                 npc: 92301,
                 options: [
                     {
@@ -10146,14 +11449,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090406,
                 content: 'Come on! This is the one and only "Demon Tabethe the Red Hand" in the world!',
-                voice: "inv/Zhangyu/004/C87F783C",
                 npc: 92301,
                 next: 80090407,
             },
             {
                 id: 80090411,
                 content: "Excellent choice!",
-                voice: "inv/Zhangyu/004/C87F790E",
                 npc: 92301,
                 next: 80090412,
             },
@@ -10161,7 +11462,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090407,
                 content:
                     "I've put all the good food that good grown-ups gave me into this drink. I've been saving the ingredients bit by bit — tried so hard not to eat them right away! I can't even imagine how yummy this drink will be with all that good stuff put together!",
-                voice: "inv/Zhangyu/004/C87F7866",
                 npc: 92301,
                 next: 80090408,
             },
@@ -10169,14 +11469,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090412,
                 content:
                     "I've put all the good food that good grown-ups gave me into this drink. I've been saving the ingredients bit by bit — tried so hard not to eat them right away! I can't even imagine how yummy this drink will be with all that good stuff put together!",
-                voice: "inv/Zhangyu/004/C87F7938",
                 npc: 92301,
                 next: 80090413,
             },
             {
                 id: 80090408,
                 content: "How about we share it? Not that I want to try it myself! I'm just setting an example for a coward!",
-                voice: "inv/Zhangyu/004/C87F7890",
                 npc: 92301,
                 next: 80090409,
             },
@@ -10184,47 +11482,40 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090413,
                 content:
                     "Who else but you deserves such a precious drink, right? But could you share a little with me? Hehe, I'm curious what the best drink in the world tastes like!",
-                voice: "inv/Zhangyu/004/C87F7962",
                 npc: 92301,
                 next: 80090414,
             },
             {
                 id: 80090409,
                 content: "Cheers!",
-                voice: "inv/Zhangyu/004/C87F78BA",
                 npc: 92301,
             },
             {
                 id: 80090414,
                 content: "Alright, I'm done getting all mushy! Cheers!",
-                voice: "inv/Zhangyu/004/C87F798C",
                 npc: 92301,
             },
             {
                 id: 80090416,
                 content: "They're still breathing. Both of them are fine — just passed out.",
-                voice: "inv/Zhangyu/004/C87F79E0",
                 npc: 92301,
                 next: 80090417,
             },
             {
                 id: 80090417,
                 content: "Waah... I was so scared... I've warned Tabethe not to put just anything in that drink — it's not safe...",
-                voice: "inv/Zhangyu/004/C87F7A0A",
                 npc: 92301,
                 next: 80090418,
             },
             {
                 id: 80090418,
                 content: "Hehehe, maybe it'll mess up their brains and cause some weird side effects!",
-                voice: "inv/Zhangyu/004/C87F7A34",
                 npc: 92301,
                 next: 80090419,
             },
             {
                 id: 80090419,
                 content: "Knock it off! You ghoul!",
-                voice: "inv/Zhangyu/004/C87F7A5E",
                 npc: 92301,
                 options: [
                     {
@@ -10242,14 +11533,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090422,
                 content: "Did you hear that...? {nickname} is talking to us.",
-                voice: "inv/Zhangyu/004/C87F7ADC",
                 npc: 92301,
                 next: 80090423,
             },
             {
                 id: 80090423,
                 content: "To my knowledge, only Tabethe can hear us speak.",
-                voice: "inv/Zhangyu/004/C87F7B06",
                 npc: 92301,
                 next: 80090424,
             },
@@ -10257,7 +11546,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090424,
                 content:
                     "...Oh no... This is bad, really bad! I knew it — every time 5 says something bad, it always happens for real! Could you zip it next time? I'm begging you!",
-                voice: "inv/Zhangyu/004/C87F7B30",
                 npc: 92301,
                 options: [
                     {
@@ -10271,7 +11559,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090426,
                 content:
                     "Um... hello? Yes, we're Tabethe's tentacles. Never thought we'd be having a conversation like this! Life's full of surprises, huh? Haha...",
-                voice: "inv/Zhangyu/004/C87F7B84",
                 npc: 92301,
                 next: 80090427,
             },
@@ -10279,7 +11566,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090427,
                 content:
                     "Um... it might be that drink that caused this situation... We're so sorry... didn't mean to make you chug down something weird...",
-                voice: "inv/Zhangyu/004/C87F7BAE",
                 npc: 92301,
                 options: [
                     {
@@ -10297,7 +11583,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090430,
                 content: "Based on my observations, you're both just reacting to some... special ingredients. A good sleep should fix it!",
-                voice: "inv/Zhangyu/004/C87F7C2C",
                 npc: 92301,
                 next: 80090431,
             },
@@ -10305,7 +11590,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090431,
                 content:
                     "Ahem, just so you know — it was under my leadership that we concocted this beverage for Tabethe's unprecedented get-together with you!",
-                voice: "inv/Zhangyu/004/C87F7C56",
                 npc: 92301,
                 next: 80090432,
             },
@@ -10313,28 +11597,24 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090432,
                 content:
                     "Hmm? I thought it was because Tabethe knew nothing about making drinks, so she just threw in some pretty mushroom slices, which led to this.",
-                voice: "inv/Zhangyu/004/C87F7C80",
                 npc: 92301,
                 next: 80090433,
             },
             {
                 id: 80090433,
                 content: "Hehe, keep acting all smug, 3, and you might find yourself part of the next drink, hehehe.",
-                voice: "inv/Zhangyu/004/C87F7CAA",
                 npc: 92301,
                 next: 80090434,
             },
             {
                 id: 80090434,
                 content: "Ah, that sounds horrible! Waah!",
-                voice: "inv/Zhangyu/004/C87F7CD4",
                 npc: 92301,
                 next: 80090435,
             },
             {
                 id: 80090435,
                 content: "Please, you guys are too loud... Aren't you tired? And don't scare {nickname}...",
-                voice: "inv/Zhangyu/004/C87F7CFE",
                 npc: 92301,
                 options: [
                     {
@@ -10348,7 +11628,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090437,
                 content:
                     "That's one way to see it. Though no one knows how long the drink's effects will last... Actually, there's quite a lot we'd like to talk to you about! Maybe this is the chance... 1, you go first!",
-                voice: "inv/Zhangyu/004/C87F7D52",
                 npc: 92301,
                 next: 80090438,
             },
@@ -10356,7 +11635,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090438,
                 content:
                     "...My sentience came into being on the ocean, right after the shipwreck. I kept Tabethe company during those dark times in the sea. She got through it by talking to me.",
-                voice: "inv/Zhangyu/004/C87F7D7C",
                 npc: 92301,
                 next: 80090439,
             },
@@ -10364,7 +11642,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090439,
                 content:
                     "I... I woke up when Tabethe had just been taken in by the orphanage. The staff there were mean to her; she was scared, but wouldn't show weakness in front of anyone. At night, she'd cling on to me, shivering...",
-                voice: "inv/Zhangyu/004/C87F7DA6",
                 npc: 92301,
                 next: 80090440,
             },
@@ -10372,14 +11649,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090440,
                 content:
                     "I myself joined this esteemed group in the orphanage's kitchen. In a dire moment, it was under my command that we managed to evade the patrolling guards and secure half a loaf of bread!",
-                voice: "inv/Zhangyu/004/C87F7DD0",
                 npc: 92301,
                 next: 80090441,
             },
             {
                 id: 80090441,
                 content: "And as for my manner of speaking, it's a perfect impersonation of the head of the orphanage.",
-                voice: "inv/Zhangyu/004/C87F7DFA",
                 npc: 92301,
                 next: 80090442,
             },
@@ -10387,7 +11662,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090442,
                 content:
                     "Yawn... I awoke the night we escaped the orphanage. The sense of relief was so heavy... that once we were safe, I fell asleep right away on the grass with her...",
-                voice: "inv/Zhangyu/004/C87F7E24",
                 npc: 92301,
                 next: 80090443,
             },
@@ -10395,7 +11669,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090443,
                 content:
                     "And then there's me, hehehe! I'm Tabethe's best partner in crime! The thrill of all sorts of heists is just the best! Woo-hoo!",
-                voice: "inv/Zhangyu/004/C87F7E4E",
                 npc: 92301,
                 next: 80090444,
             },
@@ -10403,7 +11676,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090444,
                 content:
                     "Get ahold of yourself! Sorry, this kid is a bit of a wild card. Ahem, I'm the youngest, and only recently became sentient.",
-                voice: "inv/Zhangyu/004/C87F7E78",
                 npc: 92301,
                 next: 80090445,
             },
@@ -10411,14 +11683,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090445,
                 content:
                     "Actually, I woke up once a long time ago. But then that little fish vendor girl got separated from Tabethe, which made her very sad. She didn't talk about it, but it hit her really hard and even affected me — I fell back into slumber, immersed in those memories.",
-                voice: "inv/Zhangyu/004/C87F7EA2",
                 npc: 92301,
                 next: 80090446,
             },
             {
                 id: 80090446,
                 content: "Until she met another person who also truly cherishes her — yes, it was because of you that I woke up again.",
-                voice: "inv/Zhangyu/004/C87F7ECC",
                 npc: 92301,
                 next: 80090447,
             },
@@ -10426,7 +11696,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090447,
                 content:
                     "Thank you for taking care of Tabethe. Your kindness woke me from my dream. And it was on my suggestion that she decided to make this drink as a thank you.",
-                voice: "inv/Zhangyu/004/C87F7EF6",
                 npc: 92301,
                 next: 80090448,
             },
@@ -10434,14 +11703,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090448,
                 content:
                     "But I didn't expect her to go this overboard! She knows nothing about mixing drinks and just tossed in whatever looked good — and you two, 3 and 5! You two egged her on!",
-                voice: "inv/Zhangyu/004/C87F7F20",
                 npc: 92301,
                 next: 80090449,
             },
             {
                 id: 80090449,
                 content: "We're so sorry...",
-                voice: "inv/Zhangyu/004/C87F7F4A",
                 npc: 92301,
                 options: [
                     {
@@ -10454,21 +11721,18 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80090451,
                 content: "...",
-                voice: "inv/Zhangyu/004/C87F7F9E",
                 npc: 92301,
                 next: 80090452,
             },
             {
                 id: 80090452,
                 content: "Tabethe's waking up. How do you feel?",
-                voice: "inv/Zhangyu/004/C87F7FC8",
                 npc: 92301,
                 next: 80090453,
             },
             {
                 id: 80090453,
                 content: "Ah, already?! I haven't finished my speech...",
-                voice: "inv/Zhangyu/004/C87F7FF2",
                 npc: 92301,
                 options: [
                     {
@@ -10493,7 +11757,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090457,
                 content:
                     'Before blacking out again, you seem to hear a cacophony of voices: "Gods bless the kind-hearted," "What doesn\'t kill you makes you stronger," "I\'ll take the lead with the head," along with many voices murmuring, "Thank you."',
-                voice: "inv/Zhangyu/004/C87F809A",
             },
         ],
     },
@@ -13518,79 +14781,70 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020201,
                 content: "I must say, I envy you for having the leisure to throw a little tea party.",
-                voice: "inv/Xier/002/C8527A3A",
                 npc: 93102,
                 next: 80020202,
             },
             {
                 id: 80020202,
-                content:
-                    "I've just completed a grueling assignment up north and feel like I'm falling apart. I'll probably need a full night and day of sleep to recover.",
-                voice: "inv/Xier/002/C8527A64",
+                content: "If I were you, I'd take on more commissions.",
                 npc: 93102,
-                options: [
-                    {
-                        id: 800202021,
-                        content: "Ah, why don't you go take a rest now? Our little tea party can wait.",
-                        next: 80020203,
-                    },
-                    {
-                        id: 800202022,
-                        content: "That's a slight exaggeration, isn't it?",
-                        next: 80020204,
-                    },
-                ],
+                next: 800202021,
+            },
+            {
+                id: 800202021,
+                content: "Icelake is hardly peaceful these days, and the rest of the Empire is no better.",
+                npc: 93102,
+                next: 80020203,
             },
             {
                 id: 80020203,
-                content: "It's fine. I'm already seated — might as well have a drink with you before heading to bed.",
-                voice: "inv/Xier/002/C8527A8E",
+                content:
+                    "Then there's the Elysian Church in the south. The truce is only temporary. No one can say when war will break out again.",
                 npc: 93102,
-                next: 80020205,
+                next: 800202022,
+            },
+            {
+                id: 800202022,
+                content:
+                    "Even within the Empire, the Forsakens have been stirring up unrest. I assume you heard about the uprising in the south some time ago.",
+                npc: 93102,
+                next: 80020204,
             },
             {
                 id: 80020204,
-                content: "Perhaps you can handle a commission for me next time.",
-                voice: "inv/Xier/002/C8527AB8",
+                content: "I heard there's a Lunarian in the square warning that \"the end is nigh\". Maybe she's not just being dramatic.",
                 npc: 93102,
                 next: 80020205,
             },
             {
                 id: 80020205,
-                content:
-                    "Mm, maybe I should just reject further commissions from this client. The pay is good but hardly worth the danger.",
-                voice: "inv/Xier/002/C8527AE2",
+                content: "Right... so you're saying I should take on more commissions and sharpen my skills?",
                 npc: 93102,
                 next: 80020206,
             },
             {
                 id: 80020206,
                 content:
-                    "She had me deliver a rather colourful letter to her violence-prone relatives back home, designed to make them see red.",
-                voice: "inv/Xier/002/C8527B0C",
+                    "Exactly. You can handle yourself in a fight, but you're still slow when it comes to information. As a Phoxhunter, you should learn to use your work to gather it.",
                 npc: 93102,
                 next: 80020207,
             },
             {
                 id: 80020207,
                 content:
-                    'I had to bolt the second I delivered the letter; otherwise, the phrase "shoot the messenger" might have become more than just metaphorical — I bet those savages have never been on the receiving end of the kind words used in that letter.',
-                voice: "inv/Xier/002/C8527B36",
+                    "For example, take escort jobs for noble households, and you'll overhear things the public never does. Work in Charon communities, and you'll start hearing whispers of the Forsakens without even trying.",
                 npc: 93102,
                 next: 80020208,
             },
             {
                 id: 80020208,
-                content:
-                    "Then it was a whole night's trekking through the snow to dodge ambushes. Sure, I could easily handle them, but there's no extra pay for that...",
-                voice: "inv/Xier/002/C8527B60",
+                content: "I speak from experience. Miss Flora and I only reached Icelake safely because of lessons like that. Though...",
                 npc: 93102,
                 next: 80020209,
             },
             {
                 id: 80020209,
                 content: "Hmm? You look astonished. What's wrong?",
-                voice: "inv/Xier/002/C8527B8A",
                 npc: 93102,
                 options: [
                     {
@@ -13608,14 +14862,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020210,
                 content: "Of course, at least for now.",
-                voice: "inv/Xier/002/C8527BB4",
                 npc: 93102,
                 next: 80020212,
             },
             {
                 id: 80020211,
                 content: "Not really. I've been through worse.",
-                voice: "inv/Xier/002/C8527BDE",
                 npc: 93102,
                 next: 80020212,
             },
@@ -13623,7 +14875,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020212,
                 content:
                     "Before I was Miss Flora's maid, I briefly held a different position where I acquired many of the skills I use today, whether necessary or not.",
-                voice: "inv/Xier/002/C8527C08",
                 npc: 93102,
                 next: 80020213,
             },
@@ -13631,14 +14882,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020213,
                 content:
                     "Like how to swiftly dismantle firearms, extract poison from plants, or knock someone out in three seconds without serious harm...",
-                voice: "inv/Xier/002/C8527C32",
                 npc: 93102,
                 next: 80020214,
             },
             {
                 id: 80020214,
                 content: "Well, you are my long-term client, so I'll just be upfront with you — I used to be an agent.",
-                voice: "inv/Xier/002/C8527C5C",
                 npc: 93102,
                 next: 80020215,
             },
@@ -13646,7 +14895,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020215,
                 content:
                     "Some called us spies. But the title doesn't matter. Essentially, we were a nameless group, always cloaked in disguise and shadow.",
-                voice: "inv/Xier/002/C8527C86",
                 npc: 93102,
                 next: 80020216,
             },
@@ -13654,7 +14902,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020216,
                 content:
                     "You might brush past one on the street, thinking they're just an ordinary passerby, when in reality, they could be on their way to create chaos or deliver secret messages.",
-                voice: "inv/Xier/002/C8527CB0",
                 npc: 93102,
                 options: [
                     {
@@ -13672,35 +14919,30 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020217,
                 content: "I once romanticised it as well, but reality is another story.",
-                voice: "inv/Xier/002/C8527CDA",
                 npc: 93102,
                 next: 80020219,
             },
             {
                 id: 80020218,
                 content: "Indeed, it may sound exciting, but it's actually packed with challenges and risks.",
-                voice: "inv/Xier/002/C8527D04",
                 npc: 93102,
                 next: 80020219,
             },
             {
                 id: 80020219,
                 content: "Most agents are stuck with their legion, forced to follow orders — some even involve killing their own family.",
-                voice: "inv/Xier/002/C8527D2E",
                 npc: 93102,
                 next: 80020220,
             },
             {
                 id: 80020220,
                 content: "I couldn't stand all those rules and restrictions, so I figured out a way to break free.",
-                voice: "inv/Xier/002/C8527D58",
                 npc: 93102,
                 next: 80020221,
             },
             {
                 id: 80020221,
                 content: "The escape was another heart-stopping story. This drink's not enough for me to share it, though.",
-                voice: "inv/Xier/002/C8527D82",
                 npc: 93102,
                 next: 80020222,
             },
@@ -13708,21 +14950,18 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020222,
                 content:
                     "I should go to bed now. I'll need to prepare breakfast for Miss Flora tomorrow. It's been days since she had my dessert.",
-                voice: "inv/Xier/002/C8527DAC",
                 npc: 93102,
                 next: 80020223,
             },
             {
                 id: 80020223,
                 content: "And as a thank-you for this drink, I'll save a piece of cake for you.",
-                voice: "inv/Xier/002/C8527DD6",
                 npc: 93102,
                 next: 80020224,
             },
             {
                 id: 80020224,
                 content: "Good night, then.",
-                voice: "inv/Xier/002/C8527E00",
                 npc: 93102,
             },
         ],
@@ -13744,7 +14983,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020301,
                 content: "I've finally got some free time today. I'm all yours if you're up for a few more drinks.",
-                voice: "inv/Xier/003/C8528AA2",
                 npc: 93102,
                 next: 80020302,
             },
@@ -13752,7 +14990,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020302,
                 content:
                     "And after we're done here, I'm going to hit the shops — I've got some extra silver coins to squander from all those commissions I took.",
-                voice: "inv/Xier/003/C8528ACC",
                 npc: 93102,
                 options: [
                     {
@@ -13770,14 +15007,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020303,
                 content: "Sure, I can help pick out something that suits you.",
-                voice: "inv/Xier/003/C8528AF6",
                 npc: 93102,
                 next: 80020305,
             },
             {
                 id: 80020304,
                 content: "Like I'd breathe, have meals, and sleep.",
-                voice: "inv/Xier/003/C8528B20",
                 npc: 93102,
                 next: 80020305,
             },
@@ -13785,7 +15020,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020305,
                 content:
                     "Shopping is my way to unwind. It's thoughtless, gets me some fresh air, and I can wear what I like — a rare opportunity for me.",
-                voice: "inv/Xier/003/C8528B4A",
                 npc: 93102,
                 next: 80020306,
             },
@@ -13793,7 +15027,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020306,
                 content:
                     "At work, I'm typically in my maid's uniform or a bulky trench coat filled with pockets for various mission-essential gadgets.",
-                voice: "inv/Xier/003/C8528B74",
                 npc: 93102,
                 next: 80020307,
             },
@@ -13801,42 +15034,36 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020307,
                 content:
                     "And to keep a low profile during a mission, I'd tie up my hair. You know, red hair tends to draw unnecessary attention.",
-                voice: "inv/Xier/003/C8528B9E",
                 npc: 93102,
                 next: 80020308,
             },
             {
                 id: 80020308,
                 content: "But when I'm out shopping, I can let loose a bit and wear lighter-coloured clothes.",
-                voice: "inv/Xier/003/C8528BC8",
                 npc: 93102,
                 next: 80020309,
             },
             {
                 id: 80020309,
                 content: "Light colours really complement my hair. Though when I'm out with Miss Flora, I still tend to wear a hat.",
-                voice: "inv/Xier/003/C8528BF2",
                 npc: 93102,
                 next: 80020310,
             },
             {
                 id: 80020310,
                 content: "I always wear dark red shoes. You know, like a red velvet cake needs to be topped with red berries.",
-                voice: "inv/Xier/003/C8528C1C",
                 npc: 93102,
                 next: 80020311,
             },
             {
                 id: 80020311,
                 content: "I'd also dab on some fragrances and wear exotic accessories from the Starweavers — they really lift my spirits.",
-                voice: "inv/Xier/003/C8528C46",
                 npc: 93102,
                 next: 80020312,
             },
             {
                 id: 80020312,
                 content: "With your light silver hair, you'd look more vibrant in bright colours too.",
-                voice: "inv/Xier/003/C8528C70",
                 npc: 93102,
                 options: [
                     {
@@ -13854,14 +15081,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020313,
                 content: "Hmm? I thought it was pretty straightforward.",
-                voice: "inv/Xier/003/C8528C9A",
                 npc: 93102,
                 next: 80020315,
             },
             {
                 id: 80020314,
                 content: "Right? You should try it too.",
-                voice: "inv/Xier/003/C8528CC4",
                 npc: 93102,
                 next: 80020315,
             },
@@ -13869,7 +15094,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020315,
                 content:
                     "Actually, my fascination with this started during my career as an agent. We had to master the art of disguise, looking completely unlike ourselves.",
-                voice: "inv/Xier/003/C8528CEE",
                 npc: 93102,
                 next: 80020316,
             },
@@ -13877,7 +15101,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020316,
                 content:
                     'I started with the basics: playing a street flower girl, a heavy-jewelled lady, an elderly woman teetering in the breeze, and even a "prince" or "princess" at times.',
-                voice: "inv/Xier/003/C8528D18",
                 npc: 93102,
                 options: [
                     {
@@ -13891,7 +15114,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020317,
                 content:
                     "Mm-hmm, it was quite convincing as long as I remained silent. There were even a few noble ladies who gave me their handkerchiefs — it was adorable.",
-                voice: "inv/Xier/003/C8528D42",
                 npc: 93102,
                 next: 80020318,
             },
@@ -13899,21 +15121,18 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020318,
                 content:
                     "Over time, I realised that disguising myself as someone else could also change my mood. Even a dress or a piece of jewellery can be a factor in brightening my day.",
-                voice: "inv/Xier/003/C8528D6C",
                 npc: 93102,
                 next: 80020319,
             },
             {
                 id: 80020319,
                 content: "So, after that, I fell in love with shopping for new outfits.",
-                voice: "inv/Xier/003/C8528D96",
                 npc: 93102,
                 next: 80020320,
             },
             {
                 id: 80020320,
                 content: "Well, I've finished my drink. Let's go hit the shops. I'll help you put together an outfit as a thank-you.",
-                voice: "inv/Xier/003/C8528DC0",
                 npc: 93102,
             },
         ],
@@ -13933,14 +15152,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020401,
                 content: "Thanks for inviting me... Mm, thank you.",
-                voice: "inv/Xier/004/C8529B0A",
                 npc: 93102,
                 next: 80020402,
             },
             {
                 id: 80020402,
                 content: "After this drink, I'm off to trim the flowers.",
-                voice: "inv/Xier/004/C8529B34",
                 npc: 93102,
                 options: [
                     {
@@ -13958,14 +15175,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020403,
                 content: "Quite the opposite, actually. I want to pick up the shears precisely because I'm not in the best spirits.",
-                voice: "inv/Xier/004/C8529B5E",
                 npc: 93102,
                 next: 80020405,
             },
             {
                 id: 80020404,
                 content: "It's not about work, actually; it's more about stress relief.",
-                voice: "inv/Xier/004/C8529B88",
                 npc: 93102,
                 next: 80020405,
             },
@@ -13973,7 +15188,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020405,
                 content:
                     "When I feel the pressure mounting, I find snipping away at dying flowers quite cathartic — as if I'm trimming away my own gloom.",
-                voice: "inv/Xier/004/C8529BB2",
                 npc: 93102,
                 next: 80020406,
             },
@@ -13981,14 +15195,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020406,
                 content:
                     "I hope you wouldn't find that strange. It's just my way of blowing off steam. After all, the assignments I take normally require much more than making conversations.",
-                voice: "inv/Xier/004/C8529BDC",
                 npc: 93102,
                 next: 80020407,
             },
             {
                 id: 80020407,
                 content: "Back when I was an agent, some of my colleagues had... let's say, darker ways of unwinding.",
-                voice: "inv/Xier/004/C8529C06",
                 npc: 93102,
                 next: 80020408,
             },
@@ -13996,14 +15208,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020408,
                 content:
                     "An assassination that lasts only seconds might require a month of planning, a week of prep, and a whole day of agonising wait — and failure could mean a lifetime behind bars.",
-                voice: "inv/Xier/004/C8529C30",
                 npc: 93102,
                 next: 80020409,
             },
             {
                 id: 80020409,
                 content: "Considering that kind of pressure, randomly cutting several flowers seems quite mild, doesn't it?",
-                voice: "inv/Xier/004/C8529C5A",
                 npc: 93102,
                 options: [
                     {
@@ -14021,21 +15231,18 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020410,
                 content: "Well, it's not really a bother.",
-                voice: "inv/Xier/004/C8529C84",
                 npc: 93102,
                 next: 80020412,
             },
             {
                 id: 80020411,
                 content: "It seems you're missing the point of this conversation, aren't you?",
-                voice: "inv/Xier/004/C8529CAE",
                 npc: 93102,
                 next: 80020412,
             },
             {
                 id: 80020412,
                 content: "I was just thinking of... um, someone important.",
-                voice: "inv/Xier/004/C8529CD8",
                 npc: 93102,
                 next: 80020413,
             },
@@ -14043,35 +15250,30 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020413,
                 content:
                     "She was a fellow agent, but she always thought I wasn't cut out for the job. So I made so much effort trying to prove to her that I was not only competent but exceptional.",
-                voice: "inv/Xier/004/C8529D02",
                 npc: 93102,
                 next: 80020414,
             },
             {
                 id: 80020414,
                 content: "In the end, it turned out she was right.",
-                voice: "inv/Xier/004/C8529D2C",
                 npc: 93102,
                 next: 80020415,
             },
             {
                 id: 80020415,
                 content: "I couldn't put missions above all else like she could.",
-                voice: "inv/Xier/004/C8529D56",
                 npc: 93102,
                 next: 80020416,
             },
             {
                 id: 80020416,
                 content: "Yet, there's a part of me that's relieved that I didn't end up walking her path.",
-                voice: "inv/Xier/004/C8529D80",
                 npc: 93102,
                 next: 80020417,
             },
             {
                 id: 80020417,
-                content: "We lost touch when I left the Legion. Now that I'm settling in here, I find myself... wondering how she's doing.",
-                voice: "inv/Xier/004/C8529DAA",
+                content: "The last time I saw her, she deceived me. Even now, I still don't know what she wanted from me.",
                 npc: 93102,
                 options: [
                     {
@@ -14083,22 +15285,25 @@ export const partyTopicData_en: PartyTopic[] = [
             },
             {
                 id: 80020418,
-                content: "Huh? Well...",
-                voice: "inv/Xier/004/C8529DD4",
+                content: "...Forget it. If I saw her now, I wouldn't know what to say to her.",
                 npc: 93102,
                 next: 80020419,
             },
             {
                 id: 80020419,
-                content: "You're right. Instead of trimming flowers here, perhaps I should just go see her in person.",
-                voice: "inv/Xier/004/C8529DFE",
+                content:
+                    "Hm... I have it. I'd hand her a bouquet, and the moment she reached for it, I'd draw the gun hidden inside. I wouldn't fire, of course. I would only give her a scare.",
                 npc: 93102,
+                next: 80020420,
+            },
+            {
+                id: 80020420,
+                content: "But that is for another day. Still... thank you. You've helped me make up my mind.",
             },
         ],
     },
     {
         id: 310204,
-        charId: 3102,
         name: "A Belated Farewell",
         desc: 'No matter how well you hide, "growing up" always finds a way to catch up with you.',
         memoryName: "Drink: Delicate Flower Tea",
@@ -14115,7 +15320,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020501,
                 content:
                     "You approached me as soon as I returned, inviting me for a drink. Please be honest with me — have you picked up some of my old agent tricks and been keeping tabs on me?",
-                voice: "inv/Xier/005/C852AB72",
                 npc: 93102,
                 options: [
                     {
@@ -14134,7 +15338,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020503,
                 content:
                     "I was only teasing you. You came over because you're curious if I've met that lady who's important to me, aren't you?",
-                voice: "inv/Xier/005/C852ABC6",
                 npc: 93102,
                 next: 80020504,
             },
@@ -14142,7 +15345,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020504,
                 content:
                     "Truth be told, no. She was reassigned away from the capital for certain reasons, so I've only caught snippets about her from others.",
-                voice: "inv/Xier/005/C852ABF0",
                 npc: 93102,
                 next: 80020505,
             },
@@ -14150,7 +15352,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020505,
                 content:
                     "She's in a small town in the south — nothing like the icy grip here, but a place where she can enjoy bright sunlight and some music often.",
-                voice: "inv/Xier/005/C852AC1A",
                 npc: 93102,
                 next: 80020506,
             },
@@ -14158,14 +15359,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020506,
                 content:
                     "To be honest, I was relieved. Because I wasn't sure how I would face her... But knowing she's doing well gives me some peace of mind.",
-                voice: "inv/Xier/005/C852AC44",
                 npc: 93102,
                 next: 80020507,
             },
             {
                 id: 80020507,
                 content: "This means the last ties between me, the Legion, and my past life as an agent have finally been severed.",
-                voice: "inv/Xier/005/C852AC6E",
                 npc: 93102,
                 options: [
                     {
@@ -14183,14 +15382,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020508,
                 content: "Yes, finally.",
-                voice: "inv/Xier/005/C852AC98",
                 npc: 93102,
                 next: 80020510,
             },
             {
                 id: 80020509,
                 content: "The old me would, but no, not anymore.",
-                voice: "inv/Xier/005/C852ACC2",
                 npc: 93102,
                 next: 80020510,
             },
@@ -14198,7 +15395,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020510,
                 content:
                     "She's actually a close family member of mine. She was the reason that I joined the Legion, and the reason I decided to leave.",
-                voice: "inv/Xier/005/C852ACEC",
                 npc: 93102,
                 next: 80020511,
             },
@@ -14206,7 +15402,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020511,
                 content:
                     "She never wanted me to stay in such a dangerous profession, but I was desperate to show her that I could handle it — maybe even share some of her burdens.",
-                voice: "inv/Xier/005/C852AD16",
                 npc: 93102,
                 next: 80020512,
             },
@@ -14214,7 +15409,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020512,
                 content:
                     "It was the irony of fate that she and I received conflicting missions — hers to eliminate Miss Flora, mine to protect her.",
-                voice: "inv/Xier/005/C852AD40",
                 npc: 93102,
                 next: 800205121,
             },
@@ -14222,7 +15416,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 800205121,
                 content:
                     "While I was hesitating, she didn't think twice about fulfilling her task — even considering me as a potential obstacle to be removed if necessary.",
-                voice: "inv/Xier/005/C852AD41",
                 npc: 93102,
                 next: 80020513,
             },
@@ -14230,7 +15423,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020513,
                 content:
                     "So I took Miss Flora and fled before her assassination attempt could commence. At that time, I didn't have the leisure to dwell on my days in the Legion or anything related to her.",
-                voice: "inv/Xier/005/C852AD6A",
                 npc: 93102,
                 next: 80020514,
             },
@@ -14238,7 +15430,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020514,
                 content:
                     "It's only because things have settled down recently, and you've been there for me to unload these old stories, that this whole thing had become a thorn in my heart, which led to my recent discomposure.",
-                voice: "inv/Xier/005/C852AD6B",
                 npc: 93102,
                 options: [
                     {
@@ -14257,7 +15448,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 800205143,
                 content:
                     "To be honest, I don't know. I just feel a bit indignant, aggrieved, and wistful. For agents like us, love and hate are luxuries we can't afford.",
-                voice: "inv/Xier/005/C852AD94",
                 npc: 93102,
                 next: 80020515,
             },
@@ -14265,28 +15455,24 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020515,
                 content:
                     "What I knew for sure was that eventually, I had to confront a complete farewell with her, which was something I had been trying to run away from.",
-                voice: "inv/Xier/005/C852ADBE",
                 npc: 93102,
                 next: 80020516,
             },
             {
                 id: 80020516,
                 content: "Now that it's finally happened, it doesn't feel so bad. I'm even relieved that it'll no longer haunt me.",
-                voice: "inv/Xier/005/C852ADE8",
                 npc: 93102,
                 next: 80020517,
             },
             {
                 id: 80020517,
                 content: "I've got so much I want to do now — trim flowers, bake a cake, shop for new outfits, maybe even dance a little.",
-                voice: "inv/Xier/005/C852AE12",
                 npc: 93102,
                 next: 80020518,
             },
             {
                 id: 80020518,
                 content: "But what I want to do most at the moment is thank you for helping me truly move on.",
-                voice: "inv/Xier/005/C852AE3C",
                 npc: 93102,
                 options: [
                     {
@@ -14304,7 +15490,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80020522,
                 content: "Thank you — is it so strange to hear that from me? I mean it sincerely.",
-                voice: "inv/Xier/005/C852AE65",
                 npc: 93102,
                 next: 80020519,
             },
@@ -14312,21 +15497,18 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80020519,
                 content:
                     "But I must also remind you: now that you know my past, it means that one day when the Legion comes after me and Miss Flora, you won't be able to stay out of it.",
-                voice: "inv/Xier/005/C852AE66",
                 npc: 93102,
                 next: 80020520,
             },
             {
                 id: 80020520,
                 content: "I hope you're not too scared. Do you feel like I've handed you a sugar-coated poison?",
-                voice: "inv/Xier/005/C852AE90",
                 npc: 93102,
                 next: 80020521,
             },
             {
                 id: 80020521,
                 content: "Please rest assured that, I, Hilda, the all-capable maid, will always ensure your safety.",
-                voice: "inv/Xier/005/C852AEBA",
                 npc: 93102,
             },
         ],
@@ -23168,14 +24350,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030101,
                 content: "Nothing beats having a refreshing drink after a good rest. It's so wonderful to have a break from work!",
-                voice: "inv/Landi/001/C858D272",
                 npc: 94202,
                 next: 80030102,
             },
             {
                 id: 80030102,
                 content: "Speaking of which, I got a package before I came here. Let me take a look.",
-                voice: "inv/Landi/001/C858D29C",
                 npc: 94202,
                 next: 80030103,
             },
@@ -23183,7 +24363,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030103,
                 content:
                     "This must be the pyjamas and incense my subordinate bought me as a sleep aid. Perfect, I'll go back home and take another rest.",
-                voice: "inv/Landi/001/C858D2C6",
                 npc: 94202,
                 next: 80030104,
             },
@@ -23191,7 +24370,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030104,
                 content:
                     'Huh? "Proposal on the Optimisation of Ornamental Plants of the 13th Legion"? "Application for Purchasing Recreational Facilities to Enhance Soldiers\' Morale"?',
-                voice: "inv/Landi/001/C858D2F0",
                 npc: 94202,
                 next: 80030105,
             },
@@ -23199,7 +24377,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030105,
                 content:
                     "Urgh, it's always about work. Let's talk about this later. I won't let my holiday be spoiled by anything or anyone, except the Chief. But I doubt she'll show up here.",
-                voice: "inv/Landi/001/C858D31A",
                 npc: 94202,
                 options: [
                     {
@@ -23217,21 +24394,18 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030106,
                 content: "It's not easy to come up with such practical principles as these.",
-                voice: "inv/Landi/001/C858D344",
                 npc: 94202,
                 next: 80030108,
             },
             {
                 id: 80030107,
                 content: 'Whoa, how could you call this "slacking off"?',
-                voice: "inv/Landi/001/C858D36E",
                 npc: 94202,
                 next: 80030108,
             },
             {
                 id: 80030108,
                 content: 'This is the "Howard High-Efficiency Energy-Saving Mode", created by yours truly, Randy Howard.',
-                voice: "inv/Landi/001/C858D398",
                 npc: 94202,
                 next: 80030109,
             },
@@ -23239,28 +24413,24 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030109,
                 content:
                     "When you take a break, clear your mind of all work so that you can start working again in a good mood. That way, you won't dread getting back to work.",
-                voice: "inv/Landi/001/C858D3C2",
                 npc: 94202,
                 next: 80030110,
             },
             {
                 id: 80030110,
                 content: "After years of practising and optimising this method, I've got it working perfectly.",
-                voice: "inv/Landi/001/C858D3EC",
                 npc: 94202,
                 next: 80030111,
             },
             {
                 id: 80030111,
                 content: "This has helped me to figure out the most energy-saving solution to different problems in seconds.",
-                voice: "inv/Landi/001/C858D416",
                 npc: 94202,
                 next: 80030112,
             },
             {
                 id: 80030112,
                 content: "Such as this conversation with an ulterior motive.",
-                voice: "inv/Landi/001/C858D417",
                 npc: 94202,
                 next: 80030113,
             },
@@ -23273,7 +24443,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030114,
                 content: "A bit too late to play dumb, don't you think?",
-                voice: "inv/Landi/001/C858D418",
                 npc: 94202,
                 next: 80030115,
             },
@@ -23286,7 +24455,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030116,
                 content: "Hah, so that's No. 0's name — Berenica.",
-                voice: "inv/Landi/001/C858D419",
                 npc: 94202,
                 next: 80030117,
             },
@@ -23299,7 +24467,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030118,
                 content: "Well, playing dumb is how smart people start a conversation.",
-                voice: "inv/Landi/001/C858D41A",
                 npc: 94202,
                 next: 80030119,
             },
@@ -23307,14 +24474,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030119,
                 content:
                     "But honestly, your question's moot. For starters, even if I did tell you something, there's no way you could verify it.",
-                voice: "inv/Landi/001/C858D41B",
                 npc: 94202,
                 next: 80030120,
             },
             {
                 id: 80030120,
                 content: 'Secondly, in the principle of the "Howard High-Efficiency Energy-Saving Mode", I keep work and life separate.',
-                voice: "inv/Landi/001/C858D41C",
                 npc: 94202,
                 next: 80030121,
             },
@@ -23322,7 +24487,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030121,
                 content:
                     "Life might blend into work, but work must never intrude on my life. Right now, I'm technically on vacation, and that's the most \"energy-efficient\" way I operate.",
-                voice: "inv/Landi/001/C858D41D",
                 npc: 94202,
                 next: 80030122,
             },
@@ -23330,35 +24494,30 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030122,
                 content:
                     "So, this conversation and any future talks about No. 0 aren't gonna get anywhere; but if you want to chat about life and other fun stuff, I'm all ears.",
-                voice: "inv/Landi/001/C858D41E",
                 npc: 94202,
                 next: 80030123,
             },
             {
                 id: 80030123,
                 content: "Then it seems we're done here. You can leave.",
-                voice: "inv/Landi/001/C858D41F",
                 npc: 790008,
                 next: 80030124,
             },
             {
                 id: 80030124,
                 content: "While I can't disclose her whereabouts, I can assure you, she's safe.",
-                voice: "inv/Landi/001/C858D421",
                 npc: 94202,
                 next: 80030125,
             },
             {
                 id: 80030125,
                 content: "There's no way I could verify that.",
-                voice: "inv/Landi/001/C858D422",
                 npc: 790008,
                 next: 80030126,
             },
             {
                 id: 80030126,
                 content: "Hahaha, smart people are all quick learners.",
-                voice: "inv/Landi/001/C858D423",
                 npc: 94202,
                 next: 80030127,
             },
@@ -23366,7 +24525,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030127,
                 content:
                     "*sigh* It's sad to see good intentions go unappreciated — so much so that I might not be able to rest properly tomorrow...",
-                voice: "inv/Landi/001/C858D4BE",
                 npc: 94202,
                 next: 80030128,
             },
@@ -23374,14 +24532,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030128,
                 content:
                     "Oh, wait! Maybe I should try to extend my holiday by taking sick leave. Like, I need a prolonged holiday 'cause my illness had prevented me from getting proper rest. That makes perfect sense, doesn't it?!",
-                voice: "inv/Landi/001/C858D4E8",
                 npc: 94202,
                 next: 80030129,
             },
             {
                 id: 80030129,
                 content: "And the reason I'll use will be... I feel achy all over, especially in my heart.",
-                voice: "inv/Landi/001/C858D512",
                 npc: 94202,
                 next: 80030130,
             },
@@ -23389,21 +24545,18 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030130,
                 content:
                     "Because of a conflict during a public opinion survey... but it has been resolved through private negotiations. Maybe I'll even get compensation out of it. Today has been very fruitful.",
-                voice: "inv/Landi/001/C858D53C",
                 npc: 94202,
                 next: 80030131,
             },
             {
                 id: 80030131,
                 content: "You just extended my holiday in mere seconds. My friend, you're the best!",
-                voice: "inv/Landi/001/C858D566",
                 npc: 94202,
                 next: 80030132,
             },
             {
                 id: 80030132,
                 content: "I'm looking forward to my next excuse for... Ahem... I mean, our next meeting.",
-                voice: "inv/Landi/001/C858D590",
                 npc: 94202,
             },
         ],
@@ -23427,7 +24580,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030201,
                 content: "Looks like you're finally up for some casual chats, huh?",
-                voice: "inv/Landi/002/C858E2DA",
                 npc: 94202,
                 next: 80030202,
             },
@@ -23435,14 +24587,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030202,
                 content:
                     "I'm still on a mission, so I couldn't meet up with you during working hours. I requested leave especially to grab a drink with you.",
-                voice: "inv/Landi/002/C858E304",
                 npc: 94202,
                 next: 80030203,
             },
             {
                 id: 80030203,
                 content: "And my reason for this leave... I told them I was invited to a dance by a young lady of nobility.",
-                voice: "inv/Landi/002/C858E32E",
                 npc: 94202,
                 next: 80030204,
             },
@@ -23450,14 +24600,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030204,
                 content:
                     "Oh don't be surprised. It's quite common for young officers and noble ladies to have romantic affairs. The Legion turns a blind eye to them. After all, having relations with \"the nobility\" can bolster the Legion's influence.",
-                voice: "inv/Landi/0/C858E358",
                 npc: 94202,
                 next: 80030205,
             },
             {
                 id: 80030205,
                 content: "As a gentleman, I had to take longer leave for this reason. I think it makes perfect sense.",
-                voice: "inv/Landi/002/C858E382",
                 npc: 94202,
                 options: [
                     {
@@ -23475,28 +24623,24 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030206,
                 content: "Your words are like a dagger in my heart. I might have to extend my leave to recover from that burn.",
-                voice: "inv/Landi/002/C858E3AC",
                 npc: 94202,
                 next: 80030208,
             },
             {
                 id: 80030207,
                 content: "Thank you, I'll take that as a compliment.",
-                voice: "inv/Landi/002/C858E3D6",
                 npc: 94202,
                 next: 80030208,
             },
             {
                 id: 80030208,
                 content: 'I\'m aware by the way, that "gentleman" is often used sarcastically, not as praise.',
-                voice: "inv/Landi/002/C858E400",
                 npc: 94202,
                 next: 80030209,
             },
             {
                 id: 80030209,
                 content: "When I was little, my sisters told me that being a gentleman is the ultimate goal for a man.",
-                voice: "inv/Landi/002/C858E42A",
                 npc: 94202,
                 options: [
                     {
@@ -23515,14 +24659,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030210,
                 content:
                     "Maybe you're making that assumption based on your high opinion of me, but unfortunately, they're not lovely ladies, not at all.",
-                voice: "inv/Landi/002/C858E454",
                 npc: 94202,
                 next: 80030212,
             },
             {
                 id: 80030211,
                 content: "I was just like any ordinary kid. Dumb and naive.",
-                voice: "inv/Landi/002/C858E47E",
                 npc: 94202,
                 next: 80030212,
             },
@@ -23530,14 +24672,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030212,
                 content:
                     "Look, I really don't feel like talking about my sisters. They tormented me during my childhood. But since you're my holiday buddy, I will tell you this.",
-                voice: "inv/Landi/002/C858E4A8",
                 npc: 94202,
                 next: 80030213,
             },
             {
                 id: 80030213,
                 content: 'I grew up with their "love". To survive their clutches... ahem, I mean love, I had to develop many skills.',
-                voice: "inv/Landi/002/C858E4D2",
                 npc: 94202,
                 options: [
                     {
@@ -23555,14 +24695,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030214,
                 content: "Yeah, love. Tough love.",
-                voice: "inv/Landi/002/C858E4FC",
                 npc: 94202,
                 next: 80030216,
             },
             {
                 id: 80030215,
                 content: "Yeah, it was rather bitter.",
-                voice: "inv/Landi/002/C858E526",
                 npc: 94202,
                 next: 80030216,
             },
@@ -23570,14 +24708,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030216,
                 content:
                     "Back then, they told me that a gentleman should kiss a lady's dress when they meet, and that one should adhere to principles and etiquette to conceal their true thoughts and feelings.",
-                voice: "inv/Landi/002/C858E550",
                 npc: 94202,
                 next: 80030217,
             },
             {
                 id: 80030217,
                 content: "When I was five or six years old, I acted like a gentleman to every woman I met, even though I didn't want to.",
-                voice: "inv/Landi/002/C858E57A",
                 npc: 94202,
                 next: 80030218,
             },
@@ -23585,21 +24721,18 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030218,
                 content:
                     "You can imagine how my sisters watched me and laughed. Later on, they told me that gentlemen didn't really have to do that.",
-                voice: "inv/Landi/002/C858E5A4",
                 npc: 94202,
                 next: 80030219,
             },
             {
                 id: 80030219,
                 content: "They should actually kiss the back of a lady's hand. Not her dress.",
-                voice: "inv/Landi/002/C858E5CE",
                 npc: 94202,
                 next: 80030220,
             },
             {
                 id: 80030220,
                 content: "Anyway, let's not talk about this. Here's a toast to my miserable childhood.",
-                voice: "inv/Landi/002/C858E5F8",
                 npc: 94202,
             },
         ],
@@ -23622,7 +24755,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030401,
                 content: "I'm here. I couldn't stand you up now, could I?",
-                voice: "inv/Landi/004/C85903AA",
                 npc: 94202,
                 next: 80030402,
             },
@@ -23630,7 +24762,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030402,
                 content:
                     "Check this out. The Military Alloy Temperature Control Vessel - Ultimate Type. I've tried it, and it works like a charm... *yawn*",
-                voice: "inv/Landi/004/C85903D4",
                 npc: 94202,
                 next: 80030403,
             },
@@ -23638,7 +24769,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030403,
                 content:
                     "I'm feeling a bit drowsy at the moment, I need to find a place to get some shut-eye. I've nearly run out of annual leave, and I can't report to Chief Sibylle tomorrow with dark rings around my eyes.",
-                voice: "inv/Landi/004/C85903FE",
                 npc: 94202,
                 options: [
                     {
@@ -23656,21 +24786,18 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030404,
                 content: "You're very perceptive. Yes, there's something on my mind.",
-                voice: "inv/Landi/004/C8590428",
                 npc: 94202,
                 next: 80030405,
             },
             {
                 id: 80030406,
                 content: "Of course not. You know how lazy I am. I turn most invitations down.",
-                voice: "inv/Landi/004/C859047C",
                 npc: 94202,
                 next: 80030407,
             },
             {
                 id: 80030405,
                 content: "I won't keep it from you. Basically, I had a nightmare.",
-                voice: "inv/Landi/004/C8590452",
                 npc: 94202,
                 options: [
                     {
@@ -23683,7 +24810,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030407,
                 content: "To be honest, I had a nightmare last night, so I'm feeling a bit off today.",
-                voice: "inv/Landi/004/C85904A6",
                 npc: 94202,
                 options: [
                     {
@@ -23696,7 +24822,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030408,
                 content: "Well, like many of my nightmares, this one was about my dad.",
-                voice: "inv/Landi/004/C85904D0",
                 npc: 94202,
                 options: [
                     {
@@ -23709,7 +24834,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030409,
                 content: "He used to be a soldier in the Empire, but... he's been bedridden for years now.",
-                voice: "inv/Landi/004/C85904FA",
                 npc: 94202,
                 next: 80030410,
             },
@@ -23717,7 +24841,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030410,
                 content:
                     "Back when I was tricked by my sisters into becoming a gentleman, he was a sergeant in the Legion. He spent more time on the front lines than at home, just like me now.",
-                voice: "inv/Landi/004/C8590524",
                 npc: 94202,
                 next: 80030411,
             },
@@ -23725,7 +24848,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030411,
                 content:
                     "But the difference between us is that he was proud of being a soldier. He treated the Legion as his home and his actual home as nothing more than a hotel where he could complain as much as he liked.",
-                voice: "inv/Landi/004/C859054E",
                 npc: 94202,
                 next: 80030412,
             },
@@ -23733,14 +24855,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030412,
                 content:
                     "Whenever he came home, he'd complain about something or other, like the Emperor's portrait not being hung up properly, or my sisters coming home too late.",
-                voice: "inv/Landi/004/C8590578",
                 npc: 94202,
                 next: 80030413,
             },
             {
                 id: 80030413,
                 content: "And he'd always check up on me last.",
-                voice: "inv/Landi/004/C85905A2",
                 npc: 94202,
                 next: 80030414,
             },
@@ -23748,21 +24868,18 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030414,
                 content:
                     "He'd check how much taller I'd got, how many books I'd read, how many forts I'd learned the names of, and what new survival skills I'd acquired.",
-                voice: "inv/Landi/004/C85905CC",
                 npc: 94202,
                 next: 80030415,
             },
             {
                 id: 80030415,
                 content: 'I tried talking to him about other things, but he wasn\'t interested in anything other than "being a soldier."',
-                voice: "inv/Landi/004/C85905F6",
                 npc: 94202,
                 next: 80030416,
             },
             {
                 id: 80030416,
                 content: "Once, to try to please him, I painstakingly carved a wooden pistol for him and eagerly awaited his praise.",
-                voice: "inv/Landi/004/C8590620",
                 npc: 94202,
                 next: 80030417,
             },
@@ -23770,7 +24887,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030417,
                 content:
                     'But with a stren face he just snatched it from me, "Don\'t waste your time on things like this. Think about how you can become a better soldier from now on."',
-                voice: "inv/Landi/004/C859064A",
                 npc: 94202,
                 next: 80030418,
             },
@@ -23778,7 +24894,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030418,
                 content:
                     "At that moment, I felt something change within me. Something cold, bitter, intangible and unstoppable, like the howling wind outside our home.",
-                voice: "inv/Landi/004/C8590674",
                 npc: 94202,
                 next: 80030419,
             },
@@ -23786,7 +24901,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030419,
                 content:
                     "Later, I gradually realised that it was hatred. Although it was weak to begin with, it was still strong enough to make me feel that the person in front of me was nothing more than a stranger.",
-                voice: "inv/Landi/004/C859069E",
                 npc: 94202,
                 next: 80030420,
             },
@@ -23794,7 +24908,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030420,
                 content:
                     "So after that, I stopped trying to be the son he wanted me to be. I ignored his check-ups on me, no matter how much he scolded me.",
-                voice: "inv/Landi/004/C85906C8",
                 npc: 94202,
                 next: 80030421,
             },
@@ -23802,7 +24915,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030421,
                 content:
                     "Years passed... He was shot in the head while protecting one of his subordinates. He was sent home with a purple heart. Although he was still alive, he had fallen into a coma.",
-                voice: "inv/Landi/004/C85906F2",
                 npc: 94202,
                 next: 80030422,
             },
@@ -23810,7 +24922,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030422,
                 content:
                     "When he came back, he had nothing but shiny medals, his slender savings, and a wooden pistol that was broken in two.",
-                voice: "inv/Landi/004/C859071C",
                 npc: 94202,
                 next: 80030423,
             },
@@ -23818,14 +24929,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030423,
                 content:
                     "I thought he was disappointed in me because of that broken pistol, but his subordinates told me that he carried it with him at all times and that it broke when he fell on the battlefield.",
-                voice: "inv/Landi/004/C8590746",
                 npc: 94202,
                 next: 80030424,
             },
             {
                 id: 80030424,
                 content: "It seems that he did love me after all. But his way of expressing it was unrecognisable. Maddening.",
-                voice: "inv/Landi/004/C8590770",
                 npc: 94202,
                 next: 80030425,
             },
@@ -23833,14 +24942,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030425,
                 content:
                     "If he was proud of me, he should've told me. A few words of encouragement would've been enough, but instead, he just forced me to do things I didn't enjoy.",
-                voice: "inv/Landi/004/C859079A",
                 npc: 94202,
                 next: 80030426,
             },
             {
                 id: 80030426,
                 content: "Although he'd never push me to do anything again, I still joined the army, just like he wanted.",
-                voice: "inv/Landi/004/C85907C4",
                 npc: 94202,
                 next: 80030427,
             },
@@ -23848,14 +24955,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030427,
                 content:
                     "I was curious about the Legion, the place that had turned my father into a detached man. I also wanted to prove that I could live a great life without his scolding.",
-                voice: "inv/Landi/004/C85907EE",
                 npc: 94202,
                 next: 80030428,
             },
             {
                 id: 80030428,
                 content: "Unfortunately for both of us, I found out that he was right all along. He was protecting me.",
-                voice: "inv/Landi/004/C8590818",
                 npc: 94202,
                 next: 80030429,
             },
@@ -23863,7 +24968,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030429,
                 content:
                     "We're unlike most people in the Legion. We crawled out of piles of corpses on the battlefield, and kneel down to receive the medals they bestowed upon us like charity.",
-                voice: "inv/Landi/004/C8590842",
                 npc: 94202,
                 next: 80030430,
             },
@@ -23871,14 +24975,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030430,
                 content:
                     "A decent job, a great life, and a means of survival. Everything about us is determined by those small medals. For the sake of our family, my dad devoted himself to them.",
-                voice: "inv/Landi/004/C859086C",
                 npc: 94202,
                 next: 80030431,
             },
             {
                 id: 80030431,
                 content: "He obeyed, endured, suppressed his feelings, pushed back the tears, and turned himself into a husk of a man.",
-                voice: "inv/Landi/004/C8590896",
                 npc: 94202,
                 next: 80030432,
             },
@@ -23886,7 +24988,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030432,
                 content:
                     "I can't do that, but I need money to support myself and maintain my family's decent lifestyle. So, I'm a happy loser now, as you can see.",
-                voice: "inv/Landi/004/C85908C0",
                 npc: 94202,
                 options: [
                     {
@@ -23899,7 +25000,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030433,
                 content: "...",
-                voice: "inv/Landi/004/C85908EA",
                 npc: 94202,
                 next: 80030434,
             },
@@ -23907,14 +25007,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030434,
                 content:
                     "You have a keen eye. But to be frank, I have no idea what I want to do. After a long bout of depression, I've finally realised that —",
-                voice: "inv/Landi/004/C8590914",
                 npc: 94202,
                 next: 80030435,
             },
             {
                 id: 80030435,
                 content: "Even though I haven't lived up to my dad's expectations, I'm happy with the life I have.",
-                voice: "inv/Landi/004/C859093E",
                 npc: 94202,
                 options: [
                     {
@@ -23932,21 +25030,18 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030436,
                 content: "I hope so. If that happens, my nightmares may finally end.",
-                voice: "inv/Landi/004/C8590968",
                 npc: 94202,
                 next: 80030438,
             },
             {
                 id: 80030437,
                 content: "That tastes good. This will help me sleep without nightmares.",
-                voice: "inv/Landi/004/C8590992",
                 npc: 94202,
                 next: 80030438,
             },
             {
                 id: 80030438,
                 content: "Thanks, holiday buddy, but I need some sleep now, or else I'll have to take more leave tomorrow.",
-                voice: "inv/Landi/004/C85909BC",
                 npc: 94202,
                 next: 80030439,
             },
@@ -23954,7 +25049,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030439,
                 content:
                     "Don't worry, I'll be the regular Randy you know the next time we meet. And if I have another nightmare, please make me one more cup of this delicious drink.",
-                voice: "inv/Landi/004/C85909E6",
                 npc: 94202,
             },
         ],
@@ -23979,7 +25073,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030501,
                 content:
                     "A hot drink with extra sugar, please. I brought some desserts from the Imperial Capital. I queued up to buy them during my break. Want to try some?",
-                voice: "inv/Landi/005/C8591412",
                 npc: 94202,
                 options: [
                     {
@@ -23997,21 +25090,18 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030502,
                 content: "I sure am. I'm in the mood for a sweet drink as a prelude to my invitation.",
-                voice: "inv/Landi/005/C859143C",
                 npc: 94202,
                 next: 80030504,
             },
             {
                 id: 80030503,
                 content: 'Ooh! I want to ask a small favour of you, but I wouldn\'t call it a "plan."',
-                voice: "inv/Landi/005/C8591466",
                 npc: 94202,
                 next: 80030504,
             },
             {
                 id: 80030504,
                 content: "Ahem... Maybe this is a little sudden, but do you want to attend a dance with me?",
-                voice: "inv/Landi/005/C8591490",
                 npc: 94202,
                 next: 80030505,
             },
@@ -24019,28 +25109,24 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030505,
                 content:
                     "Like I mentioned to you before, the Legion needs to maintain ties with local nobility. So, I need to attend annoying social balls in the inner city from time to time.",
-                voice: "inv/Landi/005/C85914BA",
                 npc: 94202,
                 next: 80030506,
             },
             {
                 id: 80030506,
                 content: "I really don't want to go. The trip is paid for, but dealing with nobility is such a headache.",
-                voice: "inv/Landi/005/C85914E4",
                 npc: 94202,
                 next: 80030507,
             },
             {
                 id: 80030507,
                 content: "So, I have a perfect solution. I can take a gorgeous lady with me as my partner.",
-                voice: "inv/Landi/005/C859150E",
                 npc: 94202,
                 next: 80030508,
             },
             {
                 id: 80030508,
                 content: "That way, no one will try to introduce me to a female relative I've never met before.",
-                voice: "inv/Landi/005/C8591538",
                 npc: 94202,
                 options: [
                     {
@@ -24058,7 +25144,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030509,
                 content: "Well... I was thinking... maybe... you could try to disguise yourself as a lady.",
-                voice: "inv/Landi/005/C8591562",
                 npc: 94202,
                 options: [
                     {
@@ -24076,7 +25161,6 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030526,
                 content: "Yes, you're my best dancing partner, after all. The question is, are you willing to do me this favour?",
-                voice: "inv/Landi/005/C8591856",
                 npc: 94202,
                 options: [
                     {
@@ -24089,21 +25173,18 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030510,
                 content: "I can't. I'm the one who's been invited.",
-                voice: "inv/Landi/005/C859158C",
                 npc: 94202,
                 next: 80030512,
             },
             {
                 id: 80030511,
                 content: "Sorry, but you're my last hope. I'm really clutching at straws here!",
-                voice: "inv/Landi/005/C85915B6",
                 npc: 94202,
                 next: 80030512,
             },
             {
                 id: 80030527,
                 content: "What?",
-                voice: "inv/Landi/005/C8591880",
                 npc: 94202,
                 next: 80030528,
             },
@@ -24111,14 +25192,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030512,
                 content:
                     "We've had so many drinks together, and you're my closest friend. I'm even closer to you than my siblings, so I'm begging you for help.",
-                voice: "inv/Landi/005/C85915E0",
                 npc: 94202,
                 next: 80030513,
             },
             {
                 id: 80030528,
                 content: "Why on earth would you think that? If I really wanted to arrest you, I could've done that the first time we met.",
-                voice: "inv/Landi/005/C85918AA",
                 npc: 94202,
                 next: 80030529,
             },
@@ -24126,7 +25205,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030513,
                 content:
                     "If you help me in my time of need, I'll give you half of my salary for the next six months. And, if Chief Sibylle tries to arrest you next time, I'll come forward and protect you!",
-                voice: "inv/Landi/005/C859160A",
                 npc: 94202,
                 next: 80030514,
             },
@@ -24134,14 +25212,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030529,
                 content:
                     'I don\'t see the point in using my precious leave to come here and organise something like a "secret arrest ball".',
-                voice: "inv/Landi/005/C85918D4",
                 npc: 94202,
                 next: 80030530,
             },
             {
                 id: 80030514,
                 content: "If that's not enough, I'll dress up like a lady and entertain you after the ball. What do you say?",
-                voice: "inv/Landi/005/C8591634",
                 npc: 94202,
                 options: [
                     {
@@ -24159,21 +25235,18 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030530,
                 content: "And what if you turn me down? How would my plan work in that case?",
-                voice: "inv/Landi/005/C85918FE",
                 npc: 94202,
                 next: 80030531,
             },
             {
                 id: 80030515,
                 content: "No, no, no! You've got the wrong idea! What makes you think that?",
-                voice: "inv/Landi/005/C859165E",
                 npc: 94202,
                 next: 80030516,
             },
             {
                 id: 80030531,
                 content: "You must be kidding. Do you seriously think I'm a scheming fool like that?",
-                voice: "inv/Landi/005/C8591928",
                 npc: 94202,
                 options: [
                     {
@@ -24192,7 +25265,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030516,
                 content:
                     "I mean, it's normal, right? Best buds do everything together — hang out, share meals, hit the restroom, try on dresses...",
-                voice: "inv/Landi/005/C8591688",
                 npc: 94202,
                 options: [
                     {
@@ -24206,14 +25278,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030532,
                 content:
                     "Alright then. If you really did misunderstand me and think I was a shameless jerk who'd betray his friends like that, I'd need a month's leave to recover from such heartbreak.",
-                voice: "inv/Landi/005/C8591952",
                 npc: 94202,
                 next: 80030534,
             },
             {
                 id: 80030533,
                 content: "Hey, at least deny that I betrayed my friends for personal gain, or else you'll hurt my feelings!",
-                voice: "inv/Landi/005/C859197C",
                 npc: 94202,
                 next: 80030534,
             },
@@ -24221,7 +25291,6 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030517,
                 content:
                     "Hey, don't laugh at me. I'm really in a bind here. Please just give me your answer. If you say \"no,\" I'll have to find another solution.",
-                voice: "inv/Landi/005/C85916B2",
                 npc: 94202,
                 options: [
                     {
@@ -24239,14 +25308,12 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030534,
                 content: "But now there's one thing I'm sure of — You're not afraid of risk at all.",
-                voice: "inv/Landi/005/C85919A6",
                 npc: 94202,
                 next: 80030535,
             },
             {
                 id: 80030518,
                 content: "Just think about it...",
-                voice: "inv/Landi/005/C85916DC",
                 npc: 94202,
                 next: 80030519,
             },
@@ -24254,14 +25321,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030523,
                 content:
                     "Please give it plenty of consideration. After the ball, I'll find many creative ways to repay you, just like how I come up with excuses to take time off.",
-                voice: "inv/Landi/005/C85917AE",
                 npc: 94202,
                 next: 80030524,
             },
             {
                 id: 80030535,
                 content: "So, you were messing with me to see my reaction.",
-                voice: "inv/Landi/005/C85919D0",
                 npc: 94202,
                 options: [
                     {
@@ -24279,35 +25344,30 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030519,
                 content: "Huh? Really? That's fantastic! You're a lifesaver!",
-                voice: "inv/Landi/005/C8591706",
                 npc: 94202,
                 next: 80030520,
             },
             {
                 id: 80030524,
                 content: "Take as much time as you need. I really need your help, and I'm certain that you'll come through for me.",
-                voice: "inv/Landi/005/C85917D8",
                 npc: 94202,
                 next: 80030525,
             },
             {
                 id: 80030536,
                 content: "I didn't know you love mean tricks like me. Where did you pick that up?",
-                voice: "inv/Landi/005/C85919FA",
                 npc: 94202,
                 next: 80030537,
             },
             {
                 id: 80030539,
                 content: "What?!",
-                voice: "inv/Landi/005/C8591A78",
                 npc: 94202,
                 next: 80030540,
             },
             {
                 id: 80030520,
                 content: "You've done me a huge favour. I'll repay you however I can.",
-                voice: "inv/Landi/005/C8591730",
                 npc: 94202,
                 next: 80030521,
             },
@@ -24315,14 +25375,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030525,
                 content:
                     "I'll be awaiting your answer. See you later, my holiday buddy, break-time pal, and the target of my pursuits to this very day.",
-                voice: "inv/Landi/005/C8591802",
                 npc: 94202,
             },
             {
                 id: 80030537,
                 content:
                     "I panicked for a moment then. Although deep down I knew it was impossible, I was still worried. What if you really thought that way?",
-                voice: "inv/Landi/005/C8591A24",
                 npc: 94202,
                 next: 80030538,
             },
@@ -24330,21 +25388,18 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80030540,
                 content:
                     "Okay, fine, you're right. I've been wanting to arrest you for ages. Every morning, I wake up and think about how to carry out my devious plan, but I procrastinate too much to actually do it.",
-                voice: "inv/Landi/005/C8591AA2",
                 npc: 94202,
                 next: 80030541,
             },
             {
                 id: 80030521,
                 content: "But let's talk about this after the ball. I need to go home and prepare my outfit before you change your mind.",
-                voice: "inv/Landi/005/C859175A",
                 npc: 94202,
                 next: 80030522,
             },
             {
                 id: 80030538,
                 content: "So, to make up for your trick, you must help me.",
-                voice: "inv/Landi/005/C8591A4E",
                 npc: 94202,
                 options: [
                     {
@@ -24362,41 +25417,35 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030541,
                 content: "This time, I was hoping to fulfil my duty but failed. What do I do?",
-                voice: "inv/Landi/005/C8591ACC",
                 npc: 94202,
                 next: 80030542,
             },
             {
                 id: 80030522,
                 content: "I'll see you later, my holiday buddy, break-time pal, and the target of my pursuits to this very day.",
-                voice: "inv/Landi/005/C8591784",
                 npc: 94202,
             },
             {
                 id: 80030544,
                 content: "Maybe you can think twice before answering me...",
-                voice: "inv/Landi/005/C8591B4A",
                 npc: 94202,
                 next: 80030545,
             },
             {
                 id: 80030542,
                 content: "One day, I'll be fired by the Legion and end up homeless and destitute on the cold streets of Icelake.",
-                voice: "inv/Landi/005/C8591AF6",
                 npc: 94202,
                 next: 80030543,
             },
             {
                 id: 80030545,
                 content: "... Huh? Really? That's fantastic! You're my lifesaver!",
-                voice: "inv/Landi/005/C8591B74",
                 npc: 94202,
                 next: 80030546,
             },
             {
                 id: 80030543,
                 content: "Do you really want to see me turn into an ice sculpture on the street?",
-                voice: "inv/Landi/005/C8591B20",
                 npc: 94202,
                 options: [
                     {
@@ -24414,21 +25463,18 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80030546,
                 content: "You've done me a huge favour. I'll repay you however I can.",
-                voice: "inv/Landi/005/C8591B9E",
                 npc: 94202,
                 next: 80030547,
             },
             {
                 id: 80030547,
                 content: "But let's talk about this after the ball. I need to go home and prepare my outfit before you change your mind.",
-                voice: "inv/Landi/005/C8591BC8",
                 npc: 94202,
                 next: 80030548,
             },
             {
                 id: 80030548,
                 content: "I'll see you later, my holiday buddy, break-time pal, and the target of my pursuits to this very day.",
-                voice: "inv/Landi/005/C8591BF2",
                 npc: 94202,
             },
         ],

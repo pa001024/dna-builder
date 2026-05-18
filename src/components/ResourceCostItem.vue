@@ -5,6 +5,7 @@ import { charMap, draftMap, modMap, walnutMap, weaponMap } from "@/data/d"
 import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
+import { iconticketMap } from "@/data/d/iconticket.data"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
@@ -26,6 +27,7 @@ const props = defineProps<{
                   | "WeaponAccessory"
                   | "Walnut"
                   | "Resource"
+                  | "IronTicket"
                   | "Skin"
                   | "HeadSculpture"
                   | "HeadFrame"
@@ -92,6 +94,34 @@ function getResourceIconById(resourceId: number | string) {
 function getResourceBackgroundById(resourceId: number | string) {
     const resource = getResourceById(resourceId)
     return getRarityGradientClass(resource?.rarity || 1)
+}
+
+/**
+ * 获取深境罗盘图标。
+ * @param ticketId 深境罗盘ID
+ * @returns 图标路径
+ */
+function getIronTicketIcon(ticketId: number | string): string {
+    const ticket = iconticketMap.get(Number(ticketId))
+    return ticket?.icon ? `/imgs/res/${ticket.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+}
+
+/**
+ * 获取深境罗盘稀有度。
+ * @param ticketId 深境罗盘ID
+ * @returns 稀有度
+ */
+function getIronTicketRarity(ticketId: number | string): number {
+    return iconticketMap.get(Number(ticketId))?.rarity || 1
+}
+
+/**
+ * 获取深境罗盘背景色。
+ * @param ticketId 深境罗盘ID
+ * @returns 背景色类名
+ */
+function getIronTicketBackgroundById(ticketId: number | string): string {
+    return getRarityGradientClass(getIronTicketRarity(ticketId))
 }
 
 /**
@@ -526,6 +556,29 @@ function handleCardClick() {
             />
             <SRouterLink :to="`/db/resource/${getResourceById(value[1])!.id}`" stop class="hover:underline">
                 {{ getResourceById(value[1])!.name }}
+            </SRouterLink>
+        </span>
+        <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+    </div>
+    <div
+        v-else-if="
+            Array.isArray(value) &&
+            (value[2] === 'IronTicket' || nameString.startsWith('IronTicket_')) &&
+            iconticketMap.get(Number(value[1]))
+        "
+        class="flex items-center p-3 rounded bg-base-300 transition-colors duration-200"
+        v-bind="$attrs"
+        @click="$emit('click')"
+    >
+        <span class="font-medium truncate">
+            <img
+                :src="getIronTicketIcon(value[1])"
+                alt=""
+                class="size-8 inline-block mr-2 bg-linear-15 rounded"
+                :class="getIronTicketBackgroundById(value[1])"
+            />
+            <SRouterLink :to="`/db/resource/${value[1]}`" stop class="hover:underline">
+                {{ iconticketMap.get(Number(value[1]))?.name || name }}
             </SRouterLink>
         </span>
         <span class="font-bold text-primary ml-auto">{{ value[0] }}</span>
