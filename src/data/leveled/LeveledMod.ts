@@ -211,7 +211,7 @@ export class LeveledMod implements Mod {
             let lv = this._等级
             if ((this.系列 === "换生灵" || this.系列 === "海妖") && prop === "减伤") lv = this.maxLevel
             // 架势MOD属性不受等级变化
-            if (this.id > 100000) lv = this.maxLevel
+            if ((this.id > 100000 && this.id < 150000) || this.id > 200000) lv = this.maxLevel
             const maxValue = this._originalModData[prop] || 0
             if (maxValue) {
                 const currentValue = this.calculateBasePropertyValue(prop, maxValue, lv)

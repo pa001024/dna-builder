@@ -3,7 +3,6 @@ import type { DNACommonConfigEntity } from "../type-generated"
 import {
     aesDecryptImageUrl,
     build_signature111,
-    build_signature120,
     build_signature130,
     build_upload_signature,
     type HeadersPayload,
@@ -113,8 +112,8 @@ export class DNABaseAPI {
         } else {
             this.baseHeaders = {
                 countrycode: "CN",
-                version: this.server === "cn" ? "1.2.0" : "1.1.1",
-                versioncode: this.server === "cn" ? "7" : "5",
+                version: this.server === "cn" ? "1.3.0" : "1.1.1",
+                versioncode: this.server === "cn" ? "10" : "5",
                 source: "ios",
                 lang: this.lang,
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -222,10 +221,9 @@ export class DNABaseAPI {
                         headers.tn = tn
                         headers.sa = sa
                     } else {
-                        const { tn, sa, rk } = build_signature120(pk, payload, token)
+                        const { tn, sa } = build_signature130(pk, payload, token)
 
                         // 更新 headers
-                        headers.rk = rk
                         headers.tn = tn
                         headers.sa = sa
                     }
