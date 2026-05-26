@@ -5,6 +5,27 @@ export interface DNARoleEntity {
     roleInfo: DNARoleInfoBean
 }
 
+export interface DNAItemWeeklyReport {
+    categories: DNAItemWeeklyCategory[]
+    endDate: string
+    startDate: string
+    weekType: number
+}
+
+export interface DNAItemWeeklyCategory {
+    categoryName: string
+    isBase: boolean
+    items: DNAItemWeeklyItem[]
+    type: number
+}
+
+export interface DNAItemWeeklyItem {
+    icon: string
+    itemId: number
+    itemName: string
+    quality: number
+    totalNum: string
+}
 export interface DNAPushStringBean {
     config: string
 }

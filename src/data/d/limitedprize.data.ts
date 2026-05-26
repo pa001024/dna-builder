@@ -17,6 +17,14 @@ export interface LimitedPrizeItem {
 export interface LimitedPrizePool {
     EventId: number
     LimitedPrizePoolId: number[]
+    BigPrizeBPPath?: string
+    BigPrizeMobileBPPath?: string
+    HistoryBPPath?: string
+    ProcessBPPath?: string
+    ProcessMobileBPPath?: string
+    ResultBPPath?: string
+    ResultMobileBPPath?: string
+    RoundBPPath?: string
 }
 
 /** 限时奖池成本规则，由 importdata 从 out 自动写入。 */

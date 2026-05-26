@@ -15193,6 +15193,7 @@ export const partyTopicData_jp: PartyTopic[] = [
     },
     {
         id: 310204,
+        charId: 3102,
         name: "ひとあし遅れの別れ",
         desc: "どんなに目立たない片隅に身を隠したとしても、「成長」はいずれ私たちに追いつき、私たちを見出す。",
         memoryName: "飲料‐フローラルティー",

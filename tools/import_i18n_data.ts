@@ -61,6 +61,20 @@ const MAPPINGS: Mapping[] = [
     { source: "Dispatch", targetStem: "dynquest", targetVar: "t", locales: ["cn"] },
     { source: "Cutoff", targetStem: "cutoff", targetVar: "cutoffData", locales: ["cn"] },
     { source: "Event", targetStem: "event", targetVar: "eventData", locales: ["cn"] },
+    {
+        source: async () => {
+            const convertText = await readFile(path.join(OUT_ROOT, "ModConvertId2ModId.json"), "utf8")
+
+            return [
+                {
+                    targetVar: "modConvertData",
+                    text: formatTsValue(JSON.parse(convertText), 0),
+                },
+            ]
+        },
+        targetStem: "convert",
+        targetVar: "modConvertData",
+    },
     { source: "Fish", targetStem: "fish", targetVar: "fishs", locales: ["cn"] },
     { source: "FishingSpot", targetStem: "fish", targetVar: "fishingSpots", locales: ["cn"] },
     { source: "HardBoss", targetStem: "hardboss", targetVar: "hardBossMap", locales: ["cn"] },

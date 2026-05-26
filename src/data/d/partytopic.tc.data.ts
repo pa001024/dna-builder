@@ -14723,6 +14723,7 @@ export const partyTopicData_tc: PartyTopic[] = [
     },
     {
         id: 310204,
+        charId: 3102,
         name: "遲來的告別",
         desc: "無論把自己藏在怎樣隱蔽的小角落，「成長」總會追上我們，找到我們。",
         memoryName: "飲品·精緻花茶",

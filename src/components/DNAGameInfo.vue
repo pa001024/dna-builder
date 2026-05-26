@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
-import { DNAAPI, DNARoleEntity, DNAShortNoteEntity, DNAWeaponBean } from "dna-api"
+import { DNAAPI, DNAItemWeeklyReport, DNARoleEntity, DNAShortNoteEntity, DNAWeaponBean } from "dna-api"
 import { toPng } from "html-to-image"
 import { t } from "i18next"
 import { computed, onMounted, ref } from "vue"
@@ -107,6 +107,10 @@ const lastUpdateTime = useLocalStorage("dna.gameInfo.lastUpdateTime", 0)
 const abyssUploading = ref(false)
 const abyssUploadId = ref<string | null>(null)
 const canUploadAbyss = computed(() => !!roleInfo.value?.roleInfo?.abyssInfo?.bestTimeVo1 && !!roleInfo.value?.roleInfo?.roleShow?.roleId)
+const weeklyReportType = ref<1 | 2>(1)
+const weeklyReport = ref<DNAItemWeeklyReport | null>(null)
+const weeklyReportLoading = ref(false)
+const weeklyReportError = ref("")
 
 // 截图相关状态
 const screenshotResult = ref<string | null>(null)
@@ -146,6 +150,8 @@ async function loadData(force = false) {
         } else {
             throw new Error(shortNoteRes.msg || "获取额外信息失败")
         }
+
+        await loadWeeklyReport(weeklyReportType.value)
 
         lastUpdateTime.value = ui.timeNow
     } catch (e) {
@@ -187,6 +193,42 @@ defineExpose({
     loadData,
     lastUpdateTime,
 })
+
+/**
+ * 获取道具获取周报数据。
+ * @param weekType 周类型，1=本周，2=上周
+ */
+async function loadWeeklyReport(weekType: 1 | 2 = weeklyReportType.value) {
+    weeklyReportLoading.value = true
+    weeklyReportError.value = ""
+    try {
+        const weeklyReportRes = await api.getItemWeeklyReport(weekType)
+        if (weeklyReportRes.is_success && weeklyReportRes.data) {
+            weeklyReport.value = weeklyReportRes.data
+            weeklyReportType.value = weekType
+        } else {
+            throw new Error(weeklyReportRes.msg || "获取道具获取周报失败")
+        }
+    } catch (error) {
+        console.error(error)
+        weeklyReportError.value = error instanceof Error ? error.message : String(error)
+        ui.showErrorMessage(weeklyReportError.value)
+    } finally {
+        weeklyReportLoading.value = false
+    }
+}
+
+/**
+ * 切换道具获取周报的周类型。
+ * @param weekType 周类型，1=本周，2=上周
+ */
+async function switchWeeklyReport(weekType: 1 | 2) {
+    if (weeklyReportType.value === weekType && weeklyReport.value) {
+        return
+    }
+
+    await loadWeeklyReport(weekType)
+}
 
 /**
  * 上传当前深渊数据。
@@ -409,6 +451,59 @@ async function generateScreenshot() {
                     <div class="flex justify-center">
                         <div class="space-y-4 max-w-4xl grow">
                             <DNAMihanItem :missions="roleInfo.instanceInfo.map(item => item.instances.map(v => v.name)) || []" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <div class="flex items-center gap-3 mb-4">
+                        <h3 class="card-title m-0">道具获取周报</h3>
+                        <div class="join ml-auto">
+                            <button
+                                class="btn btn-sm join-item"
+                                :class="weeklyReportType === 2 ? 'btn-ghost' : 'btn-primary'"
+                                @click="switchWeeklyReport(1)"
+                            >
+                                本周
+                            </button>
+                            <button
+                                class="btn btn-sm join-item"
+                                :class="weeklyReportType === 2 ? 'btn-primary' : 'btn-ghost'"
+                                @click="switchWeeklyReport(2)"
+                            >
+                                上周
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="weeklyReportLoading" class="flex justify-center items-center py-8">
+                        <span class="loading loading-spinner loading-lg" />
+                    </div>
+                    <div v-else-if="weeklyReportError" class="py-8 text-center text-base-content/70">
+                        {{ weeklyReportError }}
+                    </div>
+                    <div v-else-if="weeklyReport" class="space-y-4">
+                        <div
+                            v-for="category in weeklyReport.categories"
+                            :key="`${category.type}-${category.categoryName}`"
+                            class="rounded overflow-hidden"
+                        >
+                            <div class="text-sm font-bold p-2">
+                                {{ category.categoryName }}
+                            </div>
+                            <div class="p-2">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
+                                    <ResourceCostItem
+                                        v-for="item in category.items"
+                                        :key="item.itemId"
+                                        class="flex-1 min-w-0"
+                                        :name="item.itemName"
+                                        :value="[Number(item.totalNum), item.itemId, 'Resource']"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

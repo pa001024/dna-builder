@@ -15303,6 +15303,7 @@ export const partyTopicData_en: PartyTopic[] = [
     },
     {
         id: 310204,
+        charId: 3102,
         name: "A Belated Farewell",
         desc: 'No matter how well you hide, "growing up" always finds a way to catch up with you.',
         memoryName: "Drink: Delicate Flower Tea",

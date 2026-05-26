@@ -15414,6 +15414,7 @@ export const partyTopicData_fr: PartyTopic[] = [
     },
     {
         id: 310204,
+        charId: 3102,
         name: "Adieu tardif",
         desc: "On a beau se cacher dans le moindre recoin... « grandir » finit toujours par nous retrouver.",
         memoryName: "Boisson : Thé floral délicat",

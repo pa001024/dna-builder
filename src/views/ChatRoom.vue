@@ -319,7 +319,7 @@ async function addMessage(msg: Msg) {
     }
 }
 
-const input = ref<HTMLDivElement>(null as any)
+const input = ref<HTMLDivElement | null>(null)
 const inputForm = ref<HTMLDivElement>(null as any)
 const newMsgText = ref("")
 const replyingTo = ref<Msg | null>(null)
@@ -333,6 +333,7 @@ async function sendMessage(e: Event) {
     if (!html) return
     const content = sanitizeHTML(normalizeInlineImageDataUrlMime(html))
     if (!content) return
+    if (!input.value) return
     input.value.innerHTML = ""
     newMsgText.value = ""
     input.value.focus()
@@ -350,6 +351,7 @@ async function sendMessage(e: Event) {
 
 function insertEmoji(text: string) {
     const el = input.value
+    if (!el) return
     el.focus()
     const sel = window.getSelection()!
     const range = sel.getRangeAt(0)
@@ -410,6 +412,7 @@ async function insertImage() {
         if (!file) return
         const data = await fileToDataUrlWithRealMime(file)
         const el = input.value
+        if (!el) return
         el.focus()
         const sel = window.getSelection()!
         const range = sel.getRangeAt(0)
@@ -781,7 +784,7 @@ function cancelReply() {
                     :placeholder="$t('chat.chatPlaceholder')"
                     class="flex-1 overflow-hidden"
                     inner-class="min-h-20"
-                    @loadref="r => (input = r)"
+                    @loadref="(r: HTMLDivElement) => (input = r)"
                     @enter="sendMessage"
                 />
                 <!-- 操作栏 -->

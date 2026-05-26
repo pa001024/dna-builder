@@ -15127,6 +15127,7 @@ export const partyTopicData_kr: PartyTopic[] = [
     },
     {
         id: 310204,
+        charId: 3102,
         name: "늦은 작별",
         desc: "어디에 어떻게 숨어도 '성장'은 항상 우릴 뒤쫓고, 결국 찾아낸다.",
         memoryName: "음료·아름다운 꽃차",
