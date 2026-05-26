@@ -899,9 +899,10 @@ export const partyTopicData_fr: PartyTopic[] = [
         memoryDesc: "La servante ouvre un livre d’histoires, espérant qu’un récit permettra à la princesse de trouver le sommeil.",
         reward: 7050,
         consume: {
-            "19001": 2,
-            "19007": 2,
+            "19005": 2,
+            "19008": 2,
         },
+        conditionId: 100307,
         dialogues: [
             {
                 id: 80260101,
@@ -1320,9 +1321,8 @@ export const partyTopicData_fr: PartyTopic[] = [
         memoryDesc: "Une broche en forme de rose — un trésor que Hilda a toujours gardé près de son cœur.",
         reward: 7051,
         consume: {
-            "19004": 5,
+            "19002": 5,
             "19005": 5,
-            "19008": 5,
         },
         dialogues: [
             {
@@ -1721,6 +1721,7 @@ export const partyTopicData_fr: PartyTopic[] = [
         memoryDesc: "Une tenue de représentation immaculée, pareille à un oiseau blanc déployant ses ailes vers un ciel libre.",
         reward: 7052,
         consume: {
+            "19002": 8,
             "19003": 8,
             "19007": 8,
         },
@@ -1985,8 +1986,6 @@ export const partyTopicData_fr: PartyTopic[] = [
         reward: 7053,
         consume: {
             "19002": 10,
-            "19006": 10,
-            "19007": 10,
             "19008": 10,
         },
         dialogues: [
@@ -6720,7 +6719,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80210419,
                 content:
-                    "Le deuxième s’appelle Mingluan. Un peu plus âgé que moi. Un prodige reconnu dès l’enfance, célèbre très jeune, capable de participer à l’épreuve avant même l’âge adulte.",
+                    "Le deuxième s’appelle Mingluan. Reconnu dès l’enfance comme un prodige des arts martiaux, il s’est fait un nom très jeune et participait déjà à l’épreuve avant même l’âge adulte.",
                 voice: "inv/Kezhou/004/C8CC61DE",
                 npc: 790067,
                 next: 80210420,

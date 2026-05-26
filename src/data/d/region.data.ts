@@ -481,7 +481,7 @@ const t: Region[] = [
     },
     {
         id: 1060,
-        name: "百花车站（待包装）",
+        name: "百花车站",
         type: "Main",
         mapId: 205,
         mapImage: "WBP_Map_Reg_Chapter03_Station_AG",
@@ -500,7 +500,7 @@ const t: Region[] = [
     },
     {
         id: 1061,
-        name: "科赛托斯省远郊（待包装）",
+        name: "科赛托斯省远郊",
         type: "Main",
         mapId: 205,
         mapScale: [0.5, 1.25],
@@ -508,14 +508,14 @@ const t: Region[] = [
     },
     {
         id: 1062,
-        name: "？？？（待包装）",
+        name: "？？？",
         type: "Main",
         mapScale: [0.5, 1.25],
         isRandom: [106201],
     },
     {
         id: 1063,
-        name: "锻铁厂上层（待包装）",
+        name: "锻铁厂",
         type: "Main",
         mapId: 206,
         mapImage: "WBP_Map_Reg_Chapter03_Station_UG",

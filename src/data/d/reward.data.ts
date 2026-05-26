@@ -10688,7 +10688,7 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 206,
                 t: "Resource",
-                c: 1,
+                c: 5,
                 n: "委托手册·一",
             },
         ],
@@ -10770,10 +10770,10 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 1004,
+                id: 1003,
                 t: "Resource",
                 c: 1,
-                n: "华彩沙漏·限时",
+                n: "华彩沙漏",
             },
         ],
     },
@@ -10856,7 +10856,7 @@ const t: import("../data-types").Reward[] = [
             {
                 id: 206,
                 t: "Resource",
-                c: 1,
+                c: 5,
                 n: "委托手册·一",
             },
         ],
@@ -13374,6 +13374,36 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 12096,
+        m: "Fixed",
+        child: [
+            {
+                id: 110201,
+                t: "Skin",
+                c: 1,
+                n: "赦罪者",
+            },
+            {
+                id: 3010207,
+                t: "WeaponSkin",
+                c: 1,
+                n: "赦罪日冕",
+            },
+            {
+                id: 10114,
+                t: "CharAccessory",
+                c: 1,
+                n: "天之痕·涅白",
+            },
+            {
+                id: 80051,
+                t: "CharAccessory",
+                c: 1,
+                n: "天之灵·涅白",
+            },
+        ],
+    },
+    {
         id: 12097,
         m: "Fixed",
         child: [
@@ -15274,7 +15304,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12185,
         m: "Fixed",
-        icon: "T_Pack_GachaRes01_01",
+        icon: "T_Pack_GachaSkinRes03_01",
         child: [
             {
                 id: 1004,
@@ -15299,7 +15329,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12186,
         m: "Fixed",
-        icon: "T_Pack_GachaRes01_02",
+        icon: "T_Pack_GachaSkinRes03_02",
         child: [
             {
                 id: 1004,
@@ -15593,7 +15623,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12200,
         m: "Fixed",
-        icon: "com",
+        icon: "T_Pack_ResGacha04_01",
         child: [
             {
                 id: 1009,
@@ -15618,7 +15648,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12201,
         m: "Fixed",
-        icon: "com",
+        icon: "T_Pack_ResGacha04_02",
         child: [
             {
                 id: 1009,
@@ -15643,7 +15673,7 @@ const t: import("../data-types").Reward[] = [
     {
         id: 12202,
         m: "Fixed",
-        icon: "com",
+        icon: "T_Pack_ResGacha04_03",
         child: [
             {
                 id: 1009,
@@ -35652,6 +35682,12 @@ const t: import("../data-types").Reward[] = [
                 c: 6,
                 n: "武器说明书·三",
             },
+            {
+                id: 1001201,
+                t: "Resource",
+                c: 30,
+                n: "思绪片段·狩月人·暗",
+            },
         ],
     },
     {
@@ -35681,6 +35717,12 @@ const t: import("../data-types").Reward[] = [
                 t: "Resource",
                 c: 6,
                 n: "战斗旋律·三",
+            },
+            {
+                id: 1001201,
+                t: "Resource",
+                c: 30,
+                n: "思绪片段·狩月人·暗",
             },
         ],
     },
@@ -35718,6 +35760,12 @@ const t: import("../data-types").Reward[] = [
                 c: 5,
                 n: "战斗旋律·三",
             },
+            {
+                id: 1001201,
+                t: "Resource",
+                c: 30,
+                n: "思绪片段·狩月人·暗",
+            },
         ],
     },
     {
@@ -35747,6 +35795,12 @@ const t: import("../data-types").Reward[] = [
                 t: "Resource",
                 c: 6,
                 n: "战斗旋律·三",
+            },
+            {
+                id: 1001201,
+                t: "Resource",
+                c: 30,
+                n: "思绪片段·狩月人·暗",
             },
         ],
     },
@@ -35789,6 +35843,12 @@ const t: import("../data-types").Reward[] = [
                 t: "Resource",
                 c: 100,
                 n: "心迹·纷繁",
+            },
+            {
+                id: 1001201,
+                t: "Resource",
+                c: 60,
+                n: "思绪片段·狩月人·暗",
             },
         ],
     },
@@ -61210,6 +61270,114 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 82034,
+        m: "Fixed",
+        child: [
+            {
+                id: 10034,
+                t: "HeadFrame",
+                c: 1,
+                n: "UI_HeadFrame_Name_10034",
+            },
+        ],
+    },
+    {
+        id: 82035,
+        m: "Fixed",
+        child: [
+            {
+                id: 10035,
+                t: "HeadFrame",
+                c: 1,
+                n: "蓝蔷薇",
+            },
+        ],
+    },
+    {
+        id: 82036,
+        m: "Fixed",
+        child: [
+            {
+                id: 10036,
+                t: "HeadFrame",
+                c: 1,
+                n: "清扫整备",
+            },
+        ],
+    },
+    {
+        id: 82037,
+        m: "Fixed",
+        child: [
+            {
+                id: 10037,
+                t: "HeadFrame",
+                c: 1,
+                n: "七日圣约·墨玉",
+            },
+        ],
+    },
+    {
+        id: 82038,
+        m: "Fixed",
+        child: [
+            {
+                id: 10038,
+                t: "HeadFrame",
+                c: 1,
+                n: "七日圣约·锈红",
+            },
+        ],
+    },
+    {
+        id: 82039,
+        m: "Fixed",
+        child: [
+            {
+                id: 10039,
+                t: "HeadFrame",
+                c: 1,
+                n: "黑色礼节",
+            },
+        ],
+    },
+    {
+        id: 82040,
+        m: "Fixed",
+        child: [
+            {
+                id: 10040,
+                t: "HeadFrame",
+                c: 1,
+                n: "华彩殿堂",
+            },
+        ],
+    },
+    {
+        id: 82041,
+        m: "Fixed",
+        child: [
+            {
+                id: 10041,
+                t: "HeadFrame",
+                c: 1,
+                n: "华彩殿堂·闪烁",
+            },
+        ],
+    },
+    {
+        id: 82042,
+        m: "Fixed",
+        child: [
+            {
+                id: 10042,
+                t: "HeadFrame",
+                c: 1,
+                n: "尖叫",
+            },
+        ],
+    },
+    {
         id: 91001,
         m: "Fixed",
         child: [
@@ -62848,7 +63016,7 @@ const t: import("../data-types").Reward[] = [
     },
     {
         id: 110506,
-        m: "Sequence",
+        m: "Once",
         icon: "T_Pack_Mod01",
         child: [
             {
@@ -63175,6 +63343,12 @@ const t: import("../data-types").Reward[] = [
                 t: "Resource",
                 c: 100,
                 n: "皎皎之民的信物",
+            },
+            {
+                id: 20099,
+                t: "Title",
+                c: 1,
+                n: "火车王",
             },
         ],
     },
@@ -88264,6 +88438,336 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 370001,
+        m: "Fixed",
+        child: [
+            {
+                id: 1003,
+                t: "Resource",
+                c: 1,
+                n: "华彩沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 1,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370002,
+        m: "Fixed",
+        child: [
+            {
+                id: 1001,
+                t: "Resource",
+                c: 1,
+                n: "纯白沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 2,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370003,
+        m: "Fixed",
+        child: [
+            {
+                id: 30152,
+                t: "HeadSculpture",
+                c: 1,
+                n: "华彩殿堂",
+            },
+            {
+                id: 1003,
+                t: "Resource",
+                c: 1,
+                n: "华彩沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 3,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370004,
+        m: "Fixed",
+        child: [
+            {
+                id: 10033,
+                t: "TitleFrame",
+                c: 1,
+                n: "华彩殿堂·1",
+            },
+            {
+                id: 1001,
+                t: "Resource",
+                c: 1,
+                n: "纯白沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 5,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370005,
+        m: "Fixed",
+        child: [
+            {
+                id: 10034,
+                t: "TitleFrame",
+                c: 1,
+                n: "华彩殿堂·2",
+            },
+            {
+                id: 1003,
+                t: "Resource",
+                c: 1,
+                n: "华彩沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 5,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370006,
+        m: "Fixed",
+        child: [
+            {
+                id: 10040,
+                t: "HeadFrame",
+                c: 1,
+                n: "华彩殿堂",
+            },
+            {
+                id: 10035,
+                t: "TitleFrame",
+                c: 1,
+                n: "华彩殿堂·3",
+            },
+            {
+                id: 1003,
+                t: "Resource",
+                c: 2,
+                n: "华彩沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 10,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370007,
+        m: "Fixed",
+        child: [
+            {
+                id: 10036,
+                t: "TitleFrame",
+                c: 1,
+                n: "华彩殿堂·4",
+            },
+            {
+                id: 1001,
+                t: "Resource",
+                c: 2,
+                n: "纯白沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 10,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370008,
+        m: "Fixed",
+        child: [
+            {
+                id: 10037,
+                t: "TitleFrame",
+                c: 1,
+                n: "华彩殿堂·5",
+            },
+            {
+                id: 1003,
+                t: "Resource",
+                c: 4,
+                n: "华彩沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 10,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370009,
+        m: "Fixed",
+        child: [
+            {
+                id: 40002,
+                t: "HeadSculpture",
+                c: 1,
+                n: "华彩殿堂·闪烁",
+            },
+            {
+                id: 10038,
+                t: "TitleFrame",
+                c: 1,
+                n: "华彩殿堂·6",
+            },
+            {
+                id: 1001,
+                t: "Resource",
+                c: 4,
+                n: "纯白沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 20,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370010,
+        m: "Fixed",
+        child: [
+            {
+                id: 10039,
+                t: "TitleFrame",
+                c: 1,
+                n: "华彩殿堂·7",
+            },
+            {
+                id: 1003,
+                t: "Resource",
+                c: 6,
+                n: "华彩沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 20,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370011,
+        m: "Fixed",
+        child: [
+            {
+                id: 10040,
+                t: "TitleFrame",
+                c: 1,
+                n: "华彩殿堂·8",
+            },
+            {
+                id: 1001,
+                t: "Resource",
+                c: 6,
+                n: "纯白沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 20,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 370012,
+        m: "Fixed",
+        child: [
+            {
+                id: 10041,
+                t: "HeadFrame",
+                c: 1,
+                n: "华彩殿堂·闪烁",
+            },
+            {
+                id: 10041,
+                t: "TitleFrame",
+                c: 1,
+                n: "华彩殿堂·9",
+            },
+            {
+                id: 1003,
+                t: "Resource",
+                c: 10,
+                n: "华彩沙漏",
+            },
+            {
+                id: 30112,
+                t: "Resource",
+                c: 20,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 371001,
+        m: "Fixed",
+        child: [
+            {
+                id: 30112,
+                t: "Resource",
+                c: 1,
+                n: "虹彩染剂",
+            },
+        ],
+    },
+    {
+        id: 371002,
+        m: "Fixed",
+        child: [
+            {
+                id: 1003,
+                t: "Resource",
+                c: 1,
+                n: "华彩沙漏",
+            },
+        ],
+    },
+    {
+        id: 371003,
+        m: "Fixed",
+        child: [
+            {
+                id: 1001,
+                t: "Resource",
+                c: 1,
+                n: "纯白沙漏",
+            },
+        ],
+    },
+    {
         id: 500000,
         m: "Sequence",
         icon: "T_Icon_Random_Box_01",
@@ -90063,21 +90567,21 @@ const t: import("../data-types").Reward[] = [
                 t: "Walnut",
                 c: 3,
                 p: 10000,
-                n: "密函：圣血*太刀",
+                n: "密函：圣血·太刀",
             },
             {
                 id: 2059,
                 t: "Walnut",
                 c: 1,
                 p: 8000,
-                n: "密函：圣血*太刀",
+                n: "密函：圣血·太刀",
             },
             {
                 id: 2059,
                 t: "Walnut",
                 c: 1,
                 p: 2000,
-                n: "密函：圣血*太刀",
+                n: "密函：圣血·太刀",
             },
             {
                 id: 10101,
@@ -91322,13 +91826,13 @@ const t: import("../data-types").Reward[] = [
                 id: 3000020,
                 t: "Resource",
                 c: 1,
-                n: "工卡【待包装】",
+                n: "车站工卡",
             },
             {
                 id: 3000021,
                 t: "Resource",
                 c: 1,
-                n: "支票【待包装】",
+                n: "一叠支票",
             },
         ],
     },
@@ -91340,7 +91844,7 @@ const t: import("../data-types").Reward[] = [
                 id: 3000021,
                 t: "Resource",
                 c: 1,
-                n: "支票【待包装】",
+                n: "一叠支票",
             },
         ],
     },

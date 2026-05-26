@@ -892,9 +892,10 @@ export const partyTopicData_en: PartyTopic[] = [
         memoryDesc: "The maid picks up a storybook, hoping to lull the princess to sleep with a tale.",
         reward: 7050,
         consume: {
-            "19001": 2,
-            "19007": 2,
+            "19005": 2,
+            "19008": 2,
         },
+        conditionId: 100307,
         dialogues: [
             {
                 id: 80260101,
@@ -1306,9 +1307,8 @@ export const partyTopicData_en: PartyTopic[] = [
         memoryDesc: "A rose-shaped brooch — one Hilda has always kept close to her heart.",
         reward: 7051,
         consume: {
-            "19004": 5,
+            "19002": 5,
             "19005": 5,
-            "19008": 5,
         },
         dialogues: [
             {
@@ -1703,6 +1703,7 @@ export const partyTopicData_en: PartyTopic[] = [
         memoryDesc: "A white stage costume, like a bird unfurling its wings into the open sky.",
         reward: 7052,
         consume: {
+            "19002": 8,
             "19003": 8,
             "19007": 8,
         },
@@ -1965,8 +1966,6 @@ export const partyTopicData_en: PartyTopic[] = [
         reward: 7053,
         consume: {
             "19002": 10,
-            "19006": 10,
-            "19007": 10,
             "19008": 10,
         },
         dialogues: [
@@ -6691,7 +6690,7 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80210419,
                 content:
-                    "The next was Mingluan, a little older than me. A prodigy since childhood — he became famous young, fighting in this contest before he'd even come of age.",
+                    "The next was Mingluan. A prodigy since childhood — he became famous young, fighting in this contest before he'd even come of age.",
                 voice: "inv/Kezhou/004/C8CC61DE",
                 npc: 790067,
                 next: 80210420,

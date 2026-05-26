@@ -122,7 +122,7 @@ export const mountData: Mount[] = [
     {
         id: 1009,
         name: "夜帷",
-        des: "夜色的帷幕将天与地遮掩，嘶哑的鸣啸响彻其间。",
+        des: "夜色的帷幕将天与地遮掩，嘶哑的鸣啸响彻其间。\n无需持有声名许可也能进行飞行。",
         icon: "Mounts_0011",
         resourceIcon: "Icon_Mounts_0011",
         rarity: 6,
@@ -133,7 +133,7 @@ export const mountData: Mount[] = [
     {
         id: 1010,
         name: "驶入夜幕",
-        des: "漆黑的双翼划开夜色，悄然驶入连月光都无法抵达的彼岸。",
+        des: "漆黑的双翼划开夜色，悄然驶入连月光都无法抵达的彼岸。\n飞行速度提高50%，无需持有声名许可也能进行飞行。",
         icon: "Mounts_0010",
         resourceIcon: "Icon_Mounts_0010",
         rarity: 6,

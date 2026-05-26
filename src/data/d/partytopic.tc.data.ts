@@ -867,9 +867,10 @@ export const partyTopicData_tc: PartyTopic[] = [
         memoryDesc: "侍女捧起一冊故事書，試圖講一個故事，讓公主得以安眠。",
         reward: 7050,
         consume: {
-            "19001": 2,
-            "19007": 2,
+            "19005": 2,
+            "19008": 2,
         },
+        conditionId: 100307,
         dialogues: [
             {
                 id: 80260101,
@@ -1266,9 +1267,8 @@ export const partyTopicData_tc: PartyTopic[] = [
         memoryDesc: "一枚玫瑰胸針，希爾妲隨身珍藏的愛物。",
         reward: 7051,
         consume: {
-            "19004": 5,
+            "19002": 5,
             "19005": 5,
-            "19008": 5,
         },
         dialogues: [
             {
@@ -1649,6 +1649,7 @@ export const partyTopicData_tc: PartyTopic[] = [
         memoryDesc: "一套白色的演出用服飾，看上去就像是一隻雪白的鳥兒，向著自由的碧空舒展羽翼。",
         reward: 7052,
         consume: {
+            "19002": 8,
             "19003": 8,
             "19007": 8,
         },
@@ -1902,8 +1903,6 @@ export const partyTopicData_tc: PartyTopic[] = [
         reward: 7053,
         consume: {
             "19002": 10,
-            "19006": 10,
-            "19007": 10,
             "19008": 10,
         },
         dialogues: [
@@ -14945,7 +14944,7 @@ export const partyTopicData_tc: PartyTopic[] = [
             },
             {
                 id: 80130102,
-                content: "請容許我自我介紹一下，我……我是來自紅溪城的耶爾，是玩具店「劈里啪啦」的店主。",
+                content: "請容許我自我介紹一下，我……我是來自丹流城的耶爾，是玩具店「劈里啪啦」的店主。",
                 voice: "inv/Yeer/001/C898E8DC",
                 npc: 93103,
                 next: 80130103,
@@ -15119,7 +15118,7 @@ export const partyTopicData_tc: PartyTopic[] = [
             },
             {
                 id: 80130122,
-                content: "我在紅溪城就聽說你是這裡嶄露頭角的狩月人，想必你需要這些。",
+                content: "我在丹流城就聽說你是這裡嶄露頭角的狩月人，想必你需要這些。",
                 voice: "inv/Yeer/001/C898EC24",
                 npc: 93103,
                 next: 80130123,
@@ -15183,7 +15182,7 @@ export const partyTopicData_tc: PartyTopic[] = [
             },
             {
                 id: 80130131,
-                content: "來自紅溪城的耶爾和奥利弗，讓人印象深刻的奇怪組合，有空的話買一些小玩具吧，炸裂陀螺和飛高高煙花聽起來都很有趣……",
+                content: "來自丹流城的耶爾和奥利弗，讓人印象深刻的奇怪組合，有空的話買一些小玩具吧，炸裂陀螺和飛高高煙花聽起來都很有趣……",
                 voice: "inv/Yeer/001/C898ED9E",
             },
         ],
@@ -15454,7 +15453,7 @@ export const partyTopicData_tc: PartyTopic[] = [
             },
             {
                 id: 80130232,
-                content: "謝謝你的茶，我搞清了自己的想法……謝謝，我這就回紅溪城。",
+                content: "謝謝你的茶，我搞清了自己的想法……謝謝，我這就回丹流城。",
                 voice: "inv/Yeer/002/C898FE30",
                 npc: 93103,
                 next: 80130233,
@@ -15782,7 +15781,7 @@ export const partyTopicData_tc: PartyTopic[] = [
             {
                 id: 80130337,
                 content:
-                    "最後，我們到了紅溪城，一起開了一家玩具店，耶爾給它起了「劈里啪啦」這個沒品味的名字。我們都沒有再提起過研究所裡的一切。",
+                    "最後，我們到了丹流城，一起開了一家玩具店，耶爾給它起了「劈里啪啦」這個沒品味的名字。我們都沒有再提起過研究所裡的一切。",
                 voice: "inv/Yeer/003/C8990F6A",
                 npc: 93103,
                 next: 80130338,
@@ -16040,7 +16039,7 @@ export const partyTopicData_tc: PartyTopic[] = [
             },
             {
                 id: 80130421,
-                content: "還提到一個叫做紅溪城的地方，城外的河水看起來是紅色的，當落日的時候，會非常漂亮。",
+                content: "還提到一個叫做丹流城的地方，城外的河水看起來是紅色的，當落日的時候，會非常漂亮。",
                 voice: "inv/Yeer/004/C8991D32",
                 npc: 790023,
                 next: 80130422,
@@ -16054,7 +16053,7 @@ export const partyTopicData_tc: PartyTopic[] = [
             },
             {
                 id: 80130423,
-                content: "於是，我的心裡又多了一個自私的願望，等我見到了冰湖城的雪和紅溪城的落日之後，再把身體還給奥利弗。",
+                content: "於是，我的心裡又多了一個自私的願望，等我見到了冰湖城的雪和丹流城的落日之後，再把身體還給奥利弗。",
                 voice: "inv/Yeer/004/C8991D86",
                 npc: 790023,
                 next: 80130424,

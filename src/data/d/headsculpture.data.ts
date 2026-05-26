@@ -128,7 +128,7 @@ export const headSculptureData: HeadSculpture[] = [
     },
     {
         id: 10022,
-        name: "Portrait: Flora",
+        name: "百花公主的肖像",
         desc: "可将头像更换为芙罗拉的形象。",
         icon: "T_Head_Fuluo",
     },
@@ -224,21 +224,21 @@ export const headSculptureData: HeadSculpture[] = [
     },
     {
         id: 20007,
-        name: "机枢少女的肖像·晴空",
+        name: "百花公主的肖像·恩典",
         desc: "适用于头像。",
         icon: "T_Head_Fuluo01",
     },
     {
         id: 20008,
-        name: "机枢少女的肖像·晴空",
+        name: "雾海引渡人的肖像·祷音",
         desc: "适用于头像。",
         icon: "T_Head_Nifu01",
     },
     {
         id: 20009,
-        name: "机枢少女的肖像·晴空",
+        name: "违心之人的肖像·祷音",
         desc: "适用于头像。",
-        icon: "T_Head_Suyi01",
+        icon: "T_Head_Linen01",
     },
     {
         id: 30001,
@@ -1076,13 +1076,13 @@ export const headSculptureData: HeadSculpture[] = [
     },
     {
         id: 30140,
-        name: "祷音回廊·墨玉",
+        name: "灰羽",
         desc: "适用于头像。",
         icon: "T_Head_Art_0029",
     },
     {
         id: 30141,
-        name: "祷音回廊·黛蓝",
+        name: "祷音回廊",
         desc: "适用于头像。",
         icon: "T_Head_Art_0037",
     },
@@ -1102,7 +1102,7 @@ export const headSculptureData: HeadSculpture[] = [
         id: 30144,
         name: "皎皎铁道周游",
         desc: "适用于头像。",
-        icon: "T_Head_Other0038",
+        icon: "T_Head_Theater01",
     },
     {
         id: 30145,

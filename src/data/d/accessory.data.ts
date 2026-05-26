@@ -1565,7 +1565,7 @@ export const charAccessoryData: Accessory[] = [
     {
         id: 13033,
         name: "暮色梦魇·墨玉",
-        desc: "这就是真正的猫咪音乐。",
+        desc: "当余晖燃尽，恐惧便有了形状。",
         icon: "T_Fashion_Back43_01",
         rarity: 5,
         unlock: "通过商店获得",
@@ -1573,7 +1573,7 @@ export const charAccessoryData: Accessory[] = [
     {
         id: 13034,
         name: "暮色梦魇·鎏金",
-        desc: "这就是真正的猫咪音乐。",
+        desc: "当余晖燃尽，恐惧便有了形状。",
         icon: "T_Fashion_Back43_04",
         rarity: 5,
         unlock: "通过商店获得",
@@ -1581,7 +1581,7 @@ export const charAccessoryData: Accessory[] = [
     {
         id: 13035,
         name: "暮色梦魇·碧绿",
-        desc: "这就是真正的猫咪音乐。",
+        desc: "当余晖燃尽，恐惧便有了形状。",
         icon: "T_Fashion_Back43_03",
         rarity: 5,
         unlock: "通过商店获得",
@@ -1589,7 +1589,7 @@ export const charAccessoryData: Accessory[] = [
     {
         id: 13036,
         name: "暮色梦魇·白樱",
-        desc: "这就是真正的猫咪音乐。",
+        desc: "当余晖燃尽，恐惧便有了形状。",
         icon: "T_Fashion_Back43_02",
         rarity: 5,
         unlock: "通过商店获得",
@@ -4176,10 +4176,10 @@ export const weaponAccessoryData: Accessory[] = [
     {
         id: 30001,
         name: "腾龙诀",
-        desc: "适用于招式魔之楔腾龙诀。",
+        desc: "适用于招式魔之楔穿引共鸣。",
         icon: "T_Fashion_Fx21",
         rarity: 5,
-        unlock: "通过棱镜兑换获得",
+        unlock: "通过商店获得",
     },
 ]
 
@@ -4408,28 +4408,28 @@ export const headFrameData: HeadFrameItem[] = [
         name: "蓝蔷薇",
         desc: "刺破牢笼的蔷薇。",
         icon: "T_Head_Frame36",
-        access: "通过商店获得",
+        access: "通过月度订单获得",
     },
     {
         id: 10036,
         name: "清扫整备",
         desc: "整装待发，清扫开始。",
         icon: "T_Head_Frame37",
-        access: "通过商店获得",
+        access: "通过月度订单获得",
     },
     {
         id: 10037,
         name: "七日圣约·墨玉",
         desc: "聆听祂的誓言。",
         icon: "T_Head_Frame34",
-        access: "通过商店获得",
+        access: "通过活动获得",
     },
     {
         id: 10038,
         name: "七日圣约·锈红",
         desc: "聆听祂的誓言。",
         icon: "T_Head_Frame33",
-        access: "通过商店获得",
+        access: "通过活动获得",
     },
     {
         id: 10039,
@@ -4443,14 +4443,14 @@ export const headFrameData: HeadFrameItem[] = [
         name: "华彩殿堂",
         desc: "欢迎步入，华彩殿堂。",
         icon: "T_Head_Frame35",
-        access: "通过商店获得",
+        access: "通过活动获得",
     },
     {
         id: 10041,
         name: "华彩殿堂·闪烁",
         desc: "欢迎步入，华彩殿堂。",
         icon: "",
-        access: "通过商店获得",
+        access: "通过活动获得",
     },
     {
         id: 10042,
@@ -4499,7 +4499,7 @@ export const skinData: SkinItem[] = [
             HeadSculpture: [
                 {
                     id: 10022,
-                    name: "Portrait: Flora",
+                    name: "百花公主的肖像",
                     num: 1,
                 },
             ],
@@ -5160,7 +5160,7 @@ export const skinData: SkinItem[] = [
     {
         id: 110201,
         name: "赦罪者",
-        desc: "高洁的天使执起裁决的剑，她必将把那有罪者审判，她必将那无罪者宽恕。",
+        desc: "高洁的天使执起裁决的剑，她必将那有罪者审判，她必将那无罪者宽恕。",
         icon: "T_Head_Fuluo01",
         rarity: 5,
         charId: 1102,
@@ -5177,7 +5177,7 @@ export const skinData: SkinItem[] = [
             HeadSculpture: [
                 {
                     id: 20007,
-                    name: "机枢少女的肖像·晴空",
+                    name: "百花公主的肖像·恩典",
                     num: 1,
                 },
             ],
@@ -5219,7 +5219,7 @@ export const skinData: SkinItem[] = [
             HeadSculpture: [
                 {
                     id: 20008,
-                    name: "机枢少女的肖像·晴空",
+                    name: "雾海引渡人的肖像·祷音",
                     num: 1,
                 },
             ],
@@ -5407,7 +5407,7 @@ export const skinData: SkinItem[] = [
             HeadSculpture: [
                 {
                     id: 20009,
-                    name: "机枢少女的肖像·晴空",
+                    name: "违心之人的肖像·祷音",
                     num: 1,
                 },
             ],
@@ -7755,7 +7755,7 @@ export const hairData: HairItem[] = [
     {
         id: 110292,
         name: "赦罪者",
-        icon: "T_Icon_Fuluo",
+        icon: "T_Fashion_Fuluo_01",
         rarity: 5,
         charId: 1102,
     },

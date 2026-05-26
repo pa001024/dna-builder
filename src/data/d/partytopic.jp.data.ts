@@ -901,9 +901,10 @@ export const partyTopicData_jp: PartyTopic[] = [
         memoryDesc: "メイドは一冊の物語の本を手に取り、姫が眠れるようにと物語を語ろうとする。",
         reward: 7050,
         consume: {
-            "19001": 2,
-            "19007": 2,
+            "19005": 2,
+            "19008": 2,
         },
+        conditionId: 100307,
         dialogues: [
             {
                 id: 80260101,
@@ -1316,9 +1317,8 @@ export const partyTopicData_jp: PartyTopic[] = [
         memoryDesc: "ヒルダが大切に持ち歩いていた、バラのブローチ。",
         reward: 7051,
         consume: {
-            "19004": 5,
+            "19002": 5,
             "19005": 5,
-            "19008": 5,
         },
         dialogues: [
             {
@@ -1716,6 +1716,7 @@ export const partyTopicData_jp: PartyTopic[] = [
         memoryDesc: "白い舞台用の衣装。まるで真っ白な鳥が、自由な碧空へ向かって翼を広げているかのようだ。",
         reward: 7052,
         consume: {
+            "19002": 8,
             "19003": 8,
             "19007": 8,
         },
@@ -1979,8 +1980,6 @@ export const partyTopicData_jp: PartyTopic[] = [
         reward: 7053,
         consume: {
             "19002": 10,
-            "19006": 10,
-            "19007": 10,
             "19008": 10,
         },
         dialogues: [

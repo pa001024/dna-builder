@@ -7274,5 +7274,47 @@ export const charVoiceData: CharVoice[] = [
         res: "char_Fuluo01_vo_skill02_r03",
         text: "我将赐予永恒的安宁。",
     },
+    {
+        id: 11054,
+        charId: 2101,
+        name: "角色形象·初见",
+        res: "char_Shuimu02_vo_gain",
+        text: "我爱你，哪怕昏聩、衰朽、坠落直至溺于水底，我都将深爱着你。爱之神就在这里，倾听我们的誓言，见证我们的约定。你，可不要背约哟。",
+    },
+    {
+        id: 11055,
+        charId: 2101,
+        name: "角色形象·准备就绪",
+        res: "char_Shuimu02_vo_appear",
+        text: "爱人啊，请你揭开我的头纱。",
+    },
+    {
+        id: 11056,
+        charId: 2101,
+        name: "角色形象·战斗开始",
+        res: "char_Shuimu02_vo_battlestart",
+        text: "\n好像有客人们想要打扰我们的宴会，得要好好招待他们才行。",
+    },
+    {
+        id: 11057,
+        charId: 2101,
+        name: "角色形象·释放终结技·其一",
+        res: "char_Shuimu02_vo_skill02_r01",
+        text: "育诞……爱的新生！",
+    },
+    {
+        id: 11058,
+        charId: 2101,
+        name: "角色形象·释放终结技·其二",
+        res: "char_Shuimu02_vo_skill02_r02",
+        text: "让我听到你们的祝福！",
+    },
+    {
+        id: 11059,
+        charId: 2101,
+        name: "角色形象·释放终结技·其三",
+        res: "char_Shuimu02_vo_skill02_r03",
+        text: "太过吵闹的客人，会受到惩戒哦。",
+    },
 ]
 export default charVoiceData

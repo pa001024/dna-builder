@@ -885,9 +885,10 @@ export const partyTopicData_kr: PartyTopic[] = [
         memoryDesc: "메이드가 동화책 한 권을 들고, 공주가 편안히 잠들 수 있도록 이야기를 들려주려 한다.",
         reward: 7050,
         consume: {
-            "19001": 2,
-            "19007": 2,
+            "19005": 2,
+            "19008": 2,
         },
+        conditionId: 100307,
         dialogues: [
             {
                 id: 80260101,
@@ -1299,9 +1300,8 @@ export const partyTopicData_kr: PartyTopic[] = [
         memoryDesc: "장미 브로치. 힐다가 늘 소중히 간직하는 애장품이다.",
         reward: 7051,
         consume: {
-            "19004": 5,
+            "19002": 5,
             "19005": 5,
-            "19008": 5,
         },
         dialogues: [
             {
@@ -1694,6 +1694,7 @@ export const partyTopicData_kr: PartyTopic[] = [
         memoryDesc: "흰색 공연용 의상. 푸른 하늘을 향해 자유롭게 날아오르는, 눈처럼 하얀 새를 닮았다.",
         reward: 7052,
         consume: {
+            "19002": 8,
             "19003": 8,
             "19007": 8,
         },
@@ -1957,8 +1958,6 @@ export const partyTopicData_kr: PartyTopic[] = [
         reward: 7053,
         consume: {
             "19002": 10,
-            "19006": 10,
-            "19007": 10,
             "19008": 10,
         },
         dialogues: [
@@ -6626,7 +6625,7 @@ export const partyTopicData_kr: PartyTopic[] = [
             {
                 id: 80210419,
                 content:
-                    "두 번째는 난명이라는 자인데, 나이는 나보다 조금 위야. 어렸을 때부터 무공에 천재적인 재능을 보여 이름을 날리다, 약관의 나이에 논검 대회에 참가했지.",
+                    "두 번째는 난명이라는 자야. 어렸을 때부터 무공에 천재적인 재능을 보여 이름을 날리다, 약관의 나이에 논검 대회에 참가했지.",
                 voice: "inv/Kezhou/004/C8CC61DE",
                 npc: 790067,
                 next: 80210420,

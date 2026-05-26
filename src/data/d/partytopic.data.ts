@@ -881,9 +881,10 @@ export const partyTopicData: PartyTopic[] = [
         memoryDesc: "侍女捧起一册故事书，试图讲一个故事，让公主得以安眠。",
         reward: 7050,
         consume: {
-            "19001": 2,
-            "19007": 2,
+            "19005": 2,
+            "19008": 2,
         },
+        conditionId: 100307,
         dialogues: [
             {
                 id: 80260101,
@@ -1280,9 +1281,8 @@ export const partyTopicData: PartyTopic[] = [
         memoryDesc: "一枚玫瑰胸针，希尔妲随身珍藏的爱物。",
         reward: 7051,
         consume: {
-            "19004": 5,
+            "19002": 5,
             "19005": 5,
-            "19008": 5,
         },
         dialogues: [
             {
@@ -1663,6 +1663,7 @@ export const partyTopicData: PartyTopic[] = [
         memoryDesc: "一套白色的演出用服饰，看上去就像是一只雪白的鸟儿，向着自由的碧空舒展羽翼。",
         reward: 7052,
         consume: {
+            "19002": 8,
             "19003": 8,
             "19007": 8,
         },
@@ -1916,8 +1917,6 @@ export const partyTopicData: PartyTopic[] = [
         reward: 7053,
         consume: {
             "19002": 10,
-            "19006": 10,
-            "19007": 10,
             "19008": 10,
         },
         dialogues: [

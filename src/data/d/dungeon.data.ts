@@ -3,8 +3,10 @@ export interface Dungeon {
     n: string
     t: string
     e?: string
+    /** DungeonTypeShow */
     ts?: string
     lv: number
+    /** IsRandom */
     rd: number
     desc?: string
     m: number[]

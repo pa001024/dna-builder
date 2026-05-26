@@ -1605,10 +1605,17 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 10040305,
+                id: 10040304,
                 sr: 106001,
                 next: {
                     Success: 10040306,
+                },
+            },
+            {
+                id: 10040305,
+                sr: 106001,
+                next: {
+                    Success: 10040304,
                 },
             },
             {
@@ -1818,7 +1825,7 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 10040422,
-                sr: 1061010,
+                sr: 106101,
                 next: {
                     Success: 10040404,
                 },
@@ -1899,14 +1906,14 @@ const questChainDataRaw: QuestChain[] = [
                 id: 10040506,
                 sr: 106101,
                 next: {
-                    Success: 10040507,
+                    Success: 10040512,
                 },
             },
             {
                 id: 10040507,
                 sr: 106101,
                 next: {
-                    Success: 10040513,
+                    Success: 10040508,
                 },
             },
             {
@@ -1925,7 +1932,7 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 10040510,
-                sr: 106101,
+                sr: 210101,
             },
             {
                 id: 10040511,
@@ -1938,14 +1945,7 @@ const questChainDataRaw: QuestChain[] = [
                 id: 10040512,
                 sr: 106101,
                 next: {
-                    Success: 10040508,
-                },
-            },
-            {
-                id: 10040513,
-                sr: 101107,
-                next: {
-                    Success: 10040512,
+                    Success: 10040507,
                 },
             },
             {
@@ -6351,15 +6351,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "离开冰湖城也有几日，这次回来也该回休憩之所看看，只是……白去哪里了？",
         type: 4,
         reward: [50631],
-        npc: 900001,
         quests: [
-            {
-                id: 20023700,
-                sr: 210101,
-                next: {
-                    Success: 20023701,
-                },
-            },
             {
                 id: 20023701,
                 sr: 210101,

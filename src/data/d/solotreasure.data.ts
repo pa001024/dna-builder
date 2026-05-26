@@ -799,7 +799,7 @@ export const extractionTreasureBagData: ExtractionTreasureBag[] = [
     {
         id: 1,
         name: "百宝囊·一",
-        desc: "24.0",
+        desc: "24",
         price: 0,
         shape: [
             [2, 2],
@@ -811,7 +811,7 @@ export const extractionTreasureBagData: ExtractionTreasureBag[] = [
     {
         id: 2,
         name: "百宝囊·二",
-        desc: "35.0",
+        desc: "35",
         price: 800,
         shape: [
             [1, 3],
@@ -826,7 +826,7 @@ export const extractionTreasureBagData: ExtractionTreasureBag[] = [
     {
         id: 3,
         name: "百宝囊·三",
-        desc: "45.0",
+        desc: "45",
         price: 4000,
         shape: [
             [1, 3],
@@ -841,7 +841,7 @@ export const extractionTreasureBagData: ExtractionTreasureBag[] = [
     {
         id: 4,
         name: "百宝囊·四",
-        desc: "55.0",
+        desc: "55",
         price: 10000,
         shape: [
             [1, 3],
@@ -857,7 +857,7 @@ export const extractionTreasureBagData: ExtractionTreasureBag[] = [
     {
         id: 5,
         name: "百宝囊·五",
-        desc: "60.0",
+        desc: "60",
         price: 30000,
         shape: [[5, 12]],
         shapeType: 3,
@@ -867,7 +867,7 @@ export const extractionTreasureBagData: ExtractionTreasureBag[] = [
     {
         id: 6,
         name: "百宝囊·六",
-        desc: "70.0",
+        desc: "70",
         price: 150000,
         shape: [[5, 14]],
         shapeType: 3,
