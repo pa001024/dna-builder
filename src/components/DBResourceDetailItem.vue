@@ -13,6 +13,7 @@ import {
     collectResourceQuestSources,
     collectResourceShopSources,
 } from "@/utils/resource-source"
+import { getDropModeText, getRewardDetails } from "@/utils/reward-utils"
 import type { Resource } from "../data/d/resource.data"
 
 interface ResourceSourceGroup {
@@ -58,6 +59,7 @@ const bookLink = computed<RouteLocationRaw | null>(() => {
         },
     }
 })
+const packReward = computed(() => (props.resource.pack !== undefined ? getRewardDetails(props.resource.pack) : null))
 const fishTarget = computed(() => {
     for (const fish of fishMap.values()) {
         if (fish.rid !== props.resource.id) {
@@ -165,6 +167,23 @@ function getResourceIconUrl(icon: string): string {
         <div v-if="resource.desc2" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.background") }}</div>
             <div class="text-sm leading-6 whitespace-pre-wrap">{{ resource.desc2 }}</div>
+        </div>
+
+        <div v-if="packReward" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">道具箱</div>
+            <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-base-content/70">
+                <span>奖励组 {{ packReward.id }}</span>
+                <span
+                    class="px-1.5 py-0.5 rounded"
+                    :class="getDropModeText(packReward.m || '') === '独立' ? 'bg-success text-success-content' : 'bg-warning text-warning-content'"
+                >
+                    {{ getDropModeText(packReward.m || "") }}
+                    <span v-if="typeof packReward.totalP === 'number'"> 总容量 {{ packReward.totalP }}</span>
+                </span>
+                <span v-if="typeof packReward.pp === 'number'">概率: {{ +(packReward.pp * 100).toFixed(2) }}%</span>
+                <span v-if="typeof packReward.times === 'number'">期望: {{ +packReward.times.toFixed(2) }}次</span>
+            </div>
+            <RewardItem :reward="packReward" />
         </div>
 
         <div v-if="bookLink && bookTarget" class="p-3 bg-base-200 rounded">

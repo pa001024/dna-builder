@@ -1,4 +1,4 @@
-import { dungeonMap, rewardMap } from "@/data"
+import { dungeonMap, resourceMap, rewardMap } from "@/data"
 import { charMap, modMap } from "@/data/d"
 import { getHardBossDetail, hardBossMap } from "@/data/d/hardboss.data"
 import { questChainData } from "@/data/d/questchain.data"
@@ -76,6 +76,17 @@ export interface ModCharBreakthroughSourceInfo {
     charId: number
     charName?: string
     num?: number
+}
+
+export interface ModPackSourceInfo {
+    key: string
+    resourceId: number
+    resourceName: string
+    resourceIcon: string
+    resourceRarity: number
+    rewardId: number
+    pp?: number
+    times?: number
 }
 
 /**
@@ -303,6 +314,51 @@ export function collectModCharBreakthroughSources(modId: number): ModCharBreakth
             charId: specialRule.charId,
             charName: char?.名称,
             num: specialRule.num,
+        })
+    }
+
+    return sources
+}
+
+/**
+ * 扫描资源道具箱奖励表，反查魔之楔对应的来源。
+ * @param modId 魔之楔ID
+ * @returns 道具箱来源列表
+ */
+export function collectModPackSources(modId: number): ModPackSourceInfo[] {
+    const sources: ModPackSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    for (const resource of Array.from(resourceMap.values())) {
+        if (resource.pack === undefined) {
+            continue
+        }
+
+        const reward = getRewardDetails(resource.pack)
+        if (!reward) {
+            continue
+        }
+
+        const matched = findInRewardTree(reward, modId, "Mod")
+        if (!matched) {
+            continue
+        }
+
+        const key = `resource-pack-${resource.id}-${resource.pack}-${modId}`
+        if (sourceKeySet.has(key)) {
+            continue
+        }
+
+        sourceKeySet.add(key)
+        sources.push({
+            key,
+            resourceId: resource.id,
+            resourceName: resource.name,
+            resourceIcon: resource.icon,
+            resourceRarity: resource.rarity,
+            rewardId: resource.pack,
+            pp: matched.pp,
+            times: matched.times,
         })
     }
 

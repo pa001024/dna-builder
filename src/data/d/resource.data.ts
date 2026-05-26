@@ -12,6 +12,7 @@ export interface Resource {
     icon: string
     rarity: number
     source?: ResourceSource[]
+    pack?: number
 }
 
 export const resourceData: Resource[] = [
@@ -7533,6 +7534,7 @@ export const resourceData: Resource[] = [
         name: "千丝雨惊喜道具箱",
         icon: "T_Pack_RandomMod_Daily",
         rarity: 5,
+        pack: 12169,
         desc: "具体概率与数量如下，概率四舍五入至小数点后4位：\n月石晶胚*10：29.4010%\n月石晶胚*16：44.1014%\n月石晶胚*18：22.0507%\n月石晶胚*40：3.6751%\n月石晶胚*100：0.7350%\n月石晶胚*888：0.0368%",
     },
     {
@@ -7540,120 +7542,140 @@ export const resourceData: Resource[] = [
         name: "蓝色近战魔之楔道具箱",
         icon: "T_Pack_RandomMod_01",
         rarity: 3,
+        pack: 350000,
     },
     {
         id: 110020,
         name: "紫色近战魔之楔道具箱",
         icon: "T_Pack_RandomMod_01",
         rarity: 4,
+        pack: 350001,
     },
     {
         id: 110021,
         name: "蓝色不死鸟魔之楔道具箱",
         icon: "T_Pack_RandomMod_02",
         rarity: 3,
+        pack: 350002,
     },
     {
         id: 110022,
         name: "紫色不死鸟魔之楔道具箱",
         icon: "T_Pack_RandomMod_02",
         rarity: 4,
+        pack: 350003,
     },
     {
         id: 110023,
         name: "蓝色远程魔之楔道具箱",
         icon: "T_Pack_RandomMod_03",
         rarity: 3,
+        pack: 350004,
     },
     {
         id: 110024,
         name: "紫色远程魔之楔道具箱",
         icon: "T_Pack_RandomMod_03",
         rarity: 4,
+        pack: 350005,
     },
     {
         id: 110025,
         name: "紫色狮鹫魔之楔道具箱",
         icon: "T_Pack_RandomMod_04",
         rarity: 4,
+        pack: 350006,
     },
     {
         id: 110026,
         name: "紫色风属性百首魔之楔道具箱",
         icon: "T_Pack_RandomMod_05",
         rarity: 4,
+        pack: 350007,
     },
     {
         id: 110027,
         name: "紫色火属性百首魔之楔道具箱",
         icon: "T_Pack_RandomMod_06",
         rarity: 4,
+        pack: 350008,
     },
     {
         id: 110028,
         name: "紫色雷属性百首魔之楔道具箱",
         icon: "T_Pack_RandomMod_07",
         rarity: 4,
+        pack: 350009,
     },
     {
         id: 110029,
         name: "紫色水属性百首魔之楔道具箱",
         icon: "T_Pack_RandomMod_08",
         rarity: 4,
+        pack: 350010,
     },
     {
         id: 110030,
         name: "紫色光属性百首魔之楔道具箱",
         icon: "T_Pack_RandomMod_09",
         rarity: 4,
+        pack: 350011,
     },
     {
         id: 110031,
         name: "紫色暗属性百首魔之楔道具箱",
         icon: "T_Pack_RandomMod_10",
         rarity: 4,
+        pack: 350012,
     },
     {
         id: 110032,
         name: "紫色风属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_11",
         rarity: 4,
+        pack: 350013,
     },
     {
         id: 110033,
         name: "紫色火属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_16",
         rarity: 4,
+        pack: 350014,
     },
     {
         id: 110034,
         name: "紫色雷属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_12",
         rarity: 4,
+        pack: 350015,
     },
     {
         id: 110035,
         name: "紫色水属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_13",
         rarity: 4,
+        pack: 350016,
     },
     {
         id: 110036,
         name: "紫色光属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_14",
         rarity: 4,
+        pack: 350017,
     },
     {
         id: 110037,
         name: "紫色暗属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_15",
         rarity: 4,
+        pack: 350018,
     },
     {
         id: 110038,
         name: "夜莺小姐的肖像·绿荫",
         icon: "T_Head_Other0014",
         rarity: 4,
+        pack: 114100,
     },
     {
         id: 110039,
@@ -7692,42 +7714,49 @@ export const resourceData: Resource[] = [
         name: "风属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_11",
         rarity: 5,
+        pack: 350019,
     },
     {
         id: 110046,
         name: "火属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_16",
         rarity: 5,
+        pack: 350020,
     },
     {
         id: 110047,
         name: "雷属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_12",
         rarity: 5,
+        pack: 350021,
     },
     {
         id: 110048,
         name: "水属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_13",
         rarity: 5,
+        pack: 350022,
     },
     {
         id: 110049,
         name: "光属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_14",
         rarity: 5,
+        pack: 350023,
     },
     {
         id: 110050,
         name: "暗属性契约者魔之楔道具箱",
         icon: "T_Pack_RandomMod_15",
         rarity: 5,
+        pack: 350024,
     },
     {
         id: 110051,
         name: "腾龙诀惊喜礼箱",
         icon: "T_Pack_ModFx",
         rarity: 5,
+        pack: 12176,
         desc: "具体概率与数量如下：\n腾龙诀*1：2%\n排斥结晶*1：8%\n金砂*1：8%\n铜币*10000：10%\n铜币*20000：16%\n铜币*50000：26%\n铜币*100000：30%",
     },
     {
@@ -7735,6 +7764,7 @@ export const resourceData: Resource[] = [
         name: "黄铜小提琴惊喜礼箱",
         icon: "T_Pack_Machinegun_Huangtong",
         rarity: 5,
+        pack: 12177,
         desc: "具体概率与数量如下：\n黄铜小提琴*1：3%\n排斥结晶*1：10%\n金砂*1：10%\n铜币*10000：10%\n铜币*20000：13%\n铜币*50000：23%\n铜币*100000：30%",
     },
     {
@@ -7742,6 +7772,7 @@ export const resourceData: Resource[] = [
         name: "寰宇邀约·鞭刃惊喜礼箱",
         icon: "T_Pack_Swordwhip_Huanyu",
         rarity: 5,
+        pack: 12178,
         desc: "具体概率与数量如下：\n寰宇邀约·鞭刃*1：3%\n排斥结晶*1：10%\n金砂*1：10%\n铜币*10000：10%\n铜币*20000：13%\n铜币*50000：23%\n铜币*100000：30%",
     },
     {
@@ -7749,6 +7780,7 @@ export const resourceData: Resource[] = [
         name: "寰宇邀约·太刀惊喜礼箱",
         icon: "T_Pack_Katana_Huanyu",
         rarity: 5,
+        pack: 12179,
         desc: "具体概率与数量如下：\n寰宇邀约·太刀*1：3%\n排斥结晶*1：10%\n金砂*1：10%\n铜币*10000：10%\n铜币*20000：13%\n铜币*50000：23%\n铜币*100000：30%",
     },
     {
@@ -7756,6 +7788,7 @@ export const resourceData: Resource[] = [
         name: "千丝雨惊喜道具箱",
         icon: "T_Pack_RandomMod_Daily",
         rarity: 5,
+        pack: 12180,
         desc: "具体概率与数量如下，概率四舍五入至小数点后4位：\n月石晶胚*36：22.0507%\n月石晶胚*48：51.4517%\n月石晶胚*68：22.0507%\n月石晶胚*100：3.6751%\n月石晶胚*120：0.7350%\n月石晶胚*888：0.0368%",
     },
     {
