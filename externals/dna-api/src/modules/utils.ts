@@ -334,6 +334,69 @@ export function build_signature122(pk: string, payload: Record<string, any>, tok
     return { rk, tn, sa }
 }
 
+function build_h5_sign_string(params: Record<string, any>, app_key: string): string {
+    const sorted_keys = Object.keys(params).sort()
+    const pairs: string[] = []
+    for (const key of sorted_keys) {
+        const value = params[key]
+        if (value) {
+            pairs.push(`${key}=${value}`)
+        }
+    }
+    pairs.push(app_key)
+    return pairs.join("&")
+}
+
+function generate_h5_raw_sa(): string {
+    const timestamp = Date.now().toString()
+    const chars = Array.from({ length: 30 }, () => "0123456789"[Math.floor(Math.random() * 10)])
+    let tsIndex = 0
+    for (let i = 0; i < 5; i++) chars[3 + i] = timestamp[tsIndex++]
+    for (let i = 0; i < 6; i++) chars[18 + i] = timestamp[tsIndex++]
+    for (let i = 0; i < 2; i++) chars[27 + i] = timestamp[tsIndex++]
+    return chars.join("")
+}
+
+function build_h5_sa_header(raw_sa: string): string {
+    const chars = raw_sa.split("")
+    for (const [i, j] of [
+        [5, 19],
+        [11, 22],
+        [17, 28],
+    ]) {
+        ;[chars[i], chars[j]] = [chars[j], chars[i]]
+    }
+    return chars.join("")
+}
+
+/**
+ * 生成 H5 版请求签名。
+ * @param pk RSA 公钥
+ * @param payload 请求参数
+ * @param token 可选 token
+ * @returns 包含 rk、tn、sa 的签名数据
+ */
+export function build_signatureh5(pk: string, payload: Record<string, any>, token?: string): Record<string, any> {
+    const rk = rand_str(16)
+    const raw_sa = generate_h5_raw_sa()
+    const sa = build_h5_sa_header(raw_sa)
+
+    const sign_params: Record<string, any> = {}
+    for (const [k, v] of Object.entries(payload)) {
+        sign_params[k] = String(v)
+    }
+    if (token) {
+        sign_params.token = token
+    }
+    sign_params.sa = raw_sa
+
+    const sign_val = md5_upper(build_h5_sign_string(sign_params, rk))
+    const sign_encoded = xor_encode(shuffle_md5(sign_val), rk)
+    const rk_encrypted = rsa_encrypt(rk, pk)
+    const tn = `${rk_encrypted},${sign_encoded}`
+
+    return { rk, tn, sa }
+}
 /**
  * 生成 1.3.0 版本的请求签名。
  * @param pk RSA 公钥

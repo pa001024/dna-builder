@@ -10,7 +10,8 @@ const email = ref("")
 const phone = ref("")
 const code = ref("")
 // const captchaId = "a9d7b33f6daf81efea5e3dcea8d92bd7" // ios
-const captchaId = "114d4e96cc4536050c7efaeb7e4f3c8c"
+// const captchaId = "114d4e96cc4536050c7efaeb7e4f3c8c" // android
+const captchaId = "b4b05ab6ca764ef4242e87cba47df9c8" // h5
 
 const server = ref("cn" as "cn" | "global")
 
@@ -42,7 +43,7 @@ async function getEmailCode() {
 }
 
 async function getSMSCode(validate: any) {
-    const response = await api.getSmsCode(phone.value, JSON.stringify(validate))
+    const response = await api.h5.getSmsCode(phone.value, JSON.stringify(validate))
     if (response.is_success) {
         // showSuccessMessage("验证码发送成功")
     } else {

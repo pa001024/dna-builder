@@ -4,6 +4,7 @@ import {
     aesDecryptImageUrl,
     build_signature111,
     build_signature130,
+    build_signatureh5,
     build_upload_signature,
     type HeadersPayload,
     type RequestOptions,
@@ -170,11 +171,11 @@ export class DNABaseAPI {
         } = options || {}
 
         const h5BaseHeader = {
-            version: "3.11.0",
+            version: "3.11.1",
             source: "h5",
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent":
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0",
         }
         const kfBaseHeader = {
             Authorization: kf_token,
@@ -214,8 +215,8 @@ export class DNABaseAPI {
             if (!kf) {
                 const pk = await this.getRsaPublicKey()
                 if (this.server === "cn") {
-                    if (this.mode === "android") {
-                        const { tn, sa } = build_signature130(pk, payload, token)
+                    if (is_h5) {
+                        const { tn, sa } = build_signatureh5(pk, payload, token)
 
                         // 更新 headers
                         headers.tn = tn
