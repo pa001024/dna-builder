@@ -21743,6 +21743,10 @@ export const npcData: NPC[] = [
         type: "Normal",
     },
     {
+        id: 700453,
+        name: "白",
+    },
+    {
         id: 700501,
         name: "克拉拉",
         camp: "NPC",

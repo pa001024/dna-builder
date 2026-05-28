@@ -13521,7 +13521,7 @@ const shopData_i: Shop[] = [
                                 id: 160193,
                                 itemType: "Reward",
                                 typeId: 12202,
-                                typeName: "星辉丝线补给礼箱三",
+                                typeName: "星辉丝线补给礼箱·三",
                                 price: 3200,
                                 priceType: 99,
                                 priceName: "月石晶胚",

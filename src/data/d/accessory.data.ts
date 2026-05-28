@@ -4490,7 +4490,7 @@ export const skinData: SkinItem[] = [
     {
         id: 1102,
         name: "芙罗拉的衣饰",
-        desc: "芙罗拉[原皮]（待包装）",
+        desc: "无论她走到何处，海伯利亚那巨大的阴影仿佛都投射在她的身上，化作无形的漆黑囚笼。",
         icon: "T_Head_Fuluo",
         rarity: 5,
         charId: 1102,
@@ -4539,8 +4539,8 @@ export const skinData: SkinItem[] = [
     },
     {
         id: 1201,
-        name: "{nickname}的衣饰（待包装）",
-        desc: "暗主（待包装）",
+        name: "{nickname}的衣饰",
+        desc: "一人，一剑，一袭白衣。跨过汪洋与寒夜，只为在黎明的尽头相逢。",
         icon: "T_Head_Nvzhu02",
         rarity: 5,
         charId: 1201,
@@ -4810,7 +4810,7 @@ export const skinData: SkinItem[] = [
     {
         id: 3102,
         name: "希尔妲的衣饰",
-        desc: "希尔妲[原皮]（待包装）",
+        desc: "裙摆之上，捧着精心裁剪的花束；裙摆之下，藏着危险致命的枪火。一如裙摆的黑白两色，在光与影之间，写下一位女仆忙碌的一日。",
         icon: "T_Head_Xier",
         rarity: 5,
         charId: 3102,
@@ -5199,8 +5199,8 @@ export const skinData: SkinItem[] = [
     },
     {
         id: 120101,
-        name: "{nickname}的衣饰（待包装）",
-        desc: "暗主（待包装）",
+        name: "{nickname}的衣饰",
+        desc: "一人，一剑，一袭白衣。跨过汪洋与寒夜，只为在黎明的尽头相逢。",
         icon: "T_Head_Nanzhu02",
         rarity: 5,
         charId: 120101,
