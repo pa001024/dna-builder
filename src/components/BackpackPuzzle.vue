@@ -6,7 +6,7 @@ import {
     backpackPuzzleItems,
     backpackPuzzleLevels,
     backpackPuzzleSolutionPresets,
-} from "@/data/d"
+} from "@/data/d/backpackpuzzle.data"
 import { getRewardDetails } from "@/utils/reward-utils"
 
 const props = defineProps<{

@@ -101,7 +101,7 @@ function handleRefreshAll() {
             <DNAGameInfo v-if="activeTab === '游戏信息'" ref="gameInfoRef" nobtn />
             <DNAForum v-if="activeTab === '论坛'" ref="forumRef" nobtn />
             <DNASignCalendar v-if="activeTab === '签到'" ref="signCalendarRef" nobtn />
-            <DNAPropFlow v-if="activeTab === '流水查询'" ref="propFlowRef" nobtn />
+            <!-- <DNAPropFlow v-if="activeTab === '流水查询'" ref="propFlowRef" nobtn /> -->
         </ScrollArea>
     </div>
 </template>

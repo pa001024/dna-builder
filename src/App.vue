@@ -303,7 +303,7 @@ onBeforeUnmount(() => {
 
 <template>
     <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
-    <Updater />
+    <!-- <Updater /> -->
     <ResizeableWindow
         id="main-window"
         :title="

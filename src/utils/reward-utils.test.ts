@@ -178,6 +178,17 @@ describe("getRewardDetails", () => {
         expect(result?.p).toBe(0.5)
     })
 
+    it("应该保留Fixed奖励组的数量并展开子奖励", () => {
+        const result = getRewardDetails(303116)
+        expect(result).not.toBeNull()
+        expect(result?.m).toBe("Fixed")
+        expect(result?.child?.[0].t).toBe("Reward")
+        expect(result?.child?.[0].c).toBe(2)
+        expect(result?.child?.[0].m).toBe("Independent")
+        expect(result?.child?.[0].child?.[0].t).toBe("IronTicket")
+        expect(result?.child?.[0].child?.[0].p).toBe(100)
+    })
+
     it("应该正确处理Sequence模式的递归计算", () => {
         const result = getRewardDetails(50)
         expect(result).not.toBeNull()

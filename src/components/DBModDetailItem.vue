@@ -5,7 +5,7 @@ import { modConvertData } from "@/data/d/convert.data"
 import shopData from "@/data/d/shop.data"
 import weaponData from "@/data/d/weapon.data"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
-import { collectModCharBreakthroughSources, collectModQuestSources } from "@/utils/resource-source"
+import { collectModCharBreakthroughSources, collectModPackSources, collectModQuestSources } from "@/utils/resource-source"
 import { getModDropInfo } from "@/utils/reward-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
 import { modDraftMap, modDungeonMap } from "../data/d/index"
@@ -85,6 +85,7 @@ const modDungeonSources = computed(() => {
 })
 const modQuestSources = computed(() => collectModQuestSources(props.mod.id))
 const modCharBreakthroughSources = computed(() => collectModCharBreakthroughSources(props.mod.id))
+const modPackSources = computed(() => collectModPackSources(props.mod.id))
 
 /**
  * 收集当前魔之楔的商店来源信息。
@@ -444,7 +445,8 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                 modDungeonSources.length > 0 ||
                 modShopSources.length > 0 ||
                 modQuestSources.length > 0 ||
-                modCharBreakthroughSources.length > 0
+                modCharBreakthroughSources.length > 0 ||
+                modPackSources.length > 0
             "
             class="p-3 bg-base-200 rounded"
         >
@@ -454,6 +456,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                 <ModCustomSource :custom-sources="modCharBreakthroughSources" />
                 <DungeonSource :dungeon-sources="modDungeonSources" />
                 <ShopSource :shop-sources="modShopSources" />
+                <PackSource :pack-sources="modPackSources" source-title="道具箱" />
             </div>
         </div>
     </div>

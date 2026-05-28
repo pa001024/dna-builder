@@ -211,7 +211,7 @@ export class LeveledMod implements Mod {
             let lv = this._等级
             if ((this.系列 === "换生灵" || this.系列 === "海妖") && prop === "减伤") lv = this.maxLevel
             // 架势MOD属性不受等级变化
-            if (this.id > 100000) lv = this.maxLevel
+            if ((this.id > 100000 && this.id < 150000) || this.id > 200000) lv = this.maxLevel
             const maxValue = this._originalModData[prop] || 0
             if (maxValue) {
                 const currentValue = this.calculateBasePropertyValue(prop, maxValue, lv)
@@ -321,8 +321,26 @@ export class LeveledMod implements Mod {
             },
             {} as Record<string, number>
         )
+        const modIdTable = charMods.reduce(
+            (acc, mod) => {
+                acc[mod.id] = (acc[mod.id] || 0) + 1
+                return acc
+            },
+            {} as Record<number, number>
+        )
+        const maxModIdCount = Math.max(0, ...Object.values(modIdTable))
         // if (this.极性) poTable[this.极性] = (poTable[this.极性] || 0) + 1
         const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
+            if (attr === "*id") {
+                if (op === "*") return true
+                if (op === "=") return maxModIdCount === value
+                if (op === ">") return maxModIdCount > value
+                if (op === ">=") return maxModIdCount >= value
+                if (op === "<") return maxModIdCount < value
+                if (op === "<=") return maxModIdCount <= value
+                if (op === "!=") return maxModIdCount !== value
+                return false
+            }
             const attrValue = poTable[attr.slice(0, 1)] ?? conditionValues?.[attr] ?? attrs[attr as keyof CharAttr]
             if (op === "*") return true
             if (op === "=") return attrValue === value
@@ -365,6 +383,7 @@ export class LeveledMod implements Mod {
             技能倍率赋值: 0,
             召唤物攻击速度: 0,
             召唤物范围: 0,
+            召唤物伤害: 0,
             减伤: 0,
             有效生命: 0,
         }
@@ -372,6 +391,9 @@ export class LeveledMod implements Mod {
             if (prop in attrs) attrs[prop as keyof CharAttr] += this[prop]
         })
         const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
+            if (attr === "*id") {
+                return value >= 1
+            }
             const attrValue = attrs[attr as keyof CharAttr]
             if (op === "*") return true
             if (op === "=") return attrValue === value

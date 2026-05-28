@@ -985,6 +985,21 @@ describe("CharBuild类测试", () => {
             expect(result.newBuild.checkModEffective(result.newBuild.auraMod!)?.isEffective).toBe(true)
         })
 
+        it("应该仅在装备的魔之楔id重复不超过1次时生效", () => {
+            const charBuild = createCharBuild()
+            const targetMod = new LeveledMod(41716)
+            const attrs = charBuild.calculateAttributes()
+
+            expect(targetMod.checkCondition(attrs, [new LeveledMod(41002), new LeveledMod(41003), targetMod])?.isEffective).toBe(true)
+
+            expect(targetMod.checkCondition(attrs, [new LeveledMod(41002), new LeveledMod(41002), targetMod])?.isEffective).toBe(false)
+
+            expect(
+                targetMod.checkCondition(attrs, [new LeveledMod(41002), new LeveledMod(41003), targetMod, new LeveledMod(41716)])
+                    ?.isEffective
+            ).toBe(false)
+        })
+
         it("应该先补齐技能范围条件再纳入对应条件MOD", () => {
             const charBuild = createCharBuild()
             charBuild.char = new LeveledChar("丽蓓卡")

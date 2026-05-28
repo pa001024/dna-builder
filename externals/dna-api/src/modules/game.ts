@@ -1,5 +1,6 @@
 import type {
     DNACharDetailEntity,
+    DNAItemWeeklyReport,
     DNAPushStringBean,
     DNARoleEntity,
     DNAShortNoteEntity,
@@ -12,6 +13,11 @@ export class GameAPI extends DNASubModule {
     async defaultRoleForTool(type: number = 1, otherUserId = "") {
         const data = { otherUserId, type }
         return await this._dna_request<DNARoleEntity>("role/defaultRoleForTool", data, { sign: true })
+    }
+
+    async getItemWeeklyReport(weekType: number = 1) {
+        const data = { weekType }
+        return await this._dna_request<DNAItemWeeklyReport>("role/getItemWeeklyReport", data)
     }
 
     async getMhSwitchStatus() {

@@ -169,6 +169,13 @@
             "when": 1775287270713,
             "tag": "0023_broken_nekra",
             "breakpoints": true
+        },
+        {
+            "idx": 24,
+            "version": "6",
+            "when": 1776836566245,
+            "tag": "0024_serious_newton_destine",
+            "breakpoints": true
         }
     ]
 }

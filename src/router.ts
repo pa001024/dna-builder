@@ -296,6 +296,18 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "forge-list",
+                path: "forge",
+                component: () => import("./views/DBForgeListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "forge-detail",
+                path: "forge/:id",
+                component: () => import("./views/DBForgeDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
                 name: "event-list",
                 path: "event",
                 component: () => import("./views/DBEventListView.vue"),
@@ -306,6 +318,13 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "event/:id",
                 component: () => import("./views/DBEventDetailView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "solotreasure-list",
+                path: "solotreasure",
+                component: () => import("./views/DBSoloTreasureView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+                meta: { title: "database.solotreasure" },
             },
             {
                 name: "resource-list",

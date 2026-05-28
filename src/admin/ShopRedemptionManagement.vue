@@ -7,6 +7,7 @@ import {
     shopProductsQuery,
     usersQuery,
 } from "@/api/graphql"
+import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
 
@@ -141,7 +142,7 @@ const config: AdminCrudConfig<ShopRedemption> = {
         {
             key: "createdAt",
             title: "兑换时间",
-            formatter: value => String(value || "-"),
+            formatter: value => (value ? formatDateTime(Number(value)) : "-"),
         },
     ],
     rowKey: item => item.id,

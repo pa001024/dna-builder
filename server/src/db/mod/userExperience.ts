@@ -134,12 +134,14 @@ export function getShanghaiDateKey(date: Date = new Date()): string {
 }
 
 /**
- * @description 解析数据库里按 `zh-CN` 生成的时间字符串。
- * @param value 数据库保存的时间文本。
+ * @description 解析数据库里保存的时间值，兼容旧字符串与新时间戳。
+ * @param value 数据库保存的时间值。
  * @returns 对应时间戳；解析失败时返回 `null`。
  */
-export function parseStoredDateTime(value?: string | null): number | null {
+export function parseStoredDateTime(value?: string | number | null): number | null {
+    if (typeof value === "number" && Number.isFinite(value)) return value
     if (!value) return null
+    if (typeof value !== "string") return null
     const matched = value.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/)
     if (!matched) return null
 

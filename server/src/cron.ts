@@ -77,7 +77,7 @@ export const cronPlugin = () => {
             where: eq(schema.missionsIngame.server, server),
             orderBy: desc(schema.missionsIngame.id),
         })
-        const last = lastMissionsIngame?.createdAt ? Date.parse(lastMissionsIngame.createdAt) : 0
+        const last = lastMissionsIngame?.createdAt ?? 0
         const getNextUpdateTime = (t?: number) => {
             const now = t ?? Date.now()
             const oneHour = 60 * 60 * 1000

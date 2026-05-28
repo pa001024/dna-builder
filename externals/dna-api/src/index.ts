@@ -85,6 +85,11 @@ export class DNAAPI extends DNABaseAPI {
         return await this.game.soulTask()
     }
 
+    /** 获取物品的周报数据 1=本周 2=上周 */
+    async getItemWeeklyReport(type: number = 1) {
+        return await this.game.getItemWeeklyReport(type)
+    }
+
     async defaultRoleForTool(type: number = 1, otherUserId?: string) {
         return await this.game.defaultRoleForTool(type, otherUserId)
     }

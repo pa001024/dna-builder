@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { Guide, guidesQuery } from "@/api/graphql"
+import { formatDateTime } from "@/utils/time"
 import { charData } from "../data"
 
 const router = useRouter()
@@ -60,9 +61,8 @@ function goToDetail(id: string) {
     router.push({ name: "guide-detail", params: { id } })
 }
 
-function formatDate(dateString: string) {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("zh-CN")
+function formatDate(timestamp: number) {
+    return formatDateTime(timestamp).split(" ")[0] ?? ""
 }
 
 function getCharName(charId: number | null) {

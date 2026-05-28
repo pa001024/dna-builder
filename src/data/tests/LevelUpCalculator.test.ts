@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import modData from "../d/mod.data"
 import { LevelUpCalculator, type ResourceCost } from "../LevelUpCalculator"
-import { estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
+import { calculateCharLevelUp, estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
 
 describe("LevelUpCalculator", () => {
     const mockResourceNeeds: ResourceCost = {
@@ -38,6 +38,28 @@ describe("LevelUpCalculator", () => {
      */
     function getTotalDungeonRuns(result: ReturnType<typeof estimateTime>) {
         return Object.values(result.dungeonTimes).reduce((sum, [times]) => sum + times, 0)
+    }
+
+    /**
+     * 构造用于技能升级材料测试的角色数据
+     * @returns 最小角色与技能升级表
+     */
+    function createSkillLevelUpChar() {
+        return {
+            id: 1,
+            突破: [],
+            技能: [
+                {
+                    升级: [
+                        { 铜币: 10, A: 1 },
+                        { 铜币: 20, B: 1 },
+                        { 铜币: 30, C: 1 },
+                    ],
+                },
+                {},
+                {},
+            ],
+        }
     }
 
     it("test estimateTime", () => {
@@ -77,5 +99,27 @@ describe("LevelUpCalculator", () => {
 
         expect(fastResult.mins).toBe(1)
         expect(slowResult.mins).toBe(2)
+    })
+
+    it("should count skill upgrade materials from previous level to next level", async () => {
+        const result = calculateCharLevelUp([createSkillLevelUpChar() as never], {
+            chars: [
+                {
+                    currentLevel: 1,
+                    targetLevel: 1,
+                    skills: [
+                        { currentLevel: 1, targetLevel: 3 },
+                        { currentLevel: 1, targetLevel: 1 },
+                        { currentLevel: 1, targetLevel: 1 },
+                    ],
+                },
+            ],
+        })
+
+        expect(result.details.skills).toEqual({
+            铜币: 30,
+            A: 1,
+            B: 1,
+        })
     })
 })

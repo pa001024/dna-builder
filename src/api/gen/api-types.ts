@@ -16,8 +16,8 @@ export interface User {
     nameEffectClass?: string
     dailyExperienceStatus?: UserDailyExperienceStatus
     abyssUsageUploadStatus?: UserAbyssUsageUploadStatus
-    createdAt?: string
-    updateAt?: string
+    createdAt?: number
+    updateAt?: number
 }
 
 export interface UserDailyExperienceStatus {
@@ -64,12 +64,12 @@ export interface Todo {
     id: string
     title: string
     description?: string
-    startTime?: string
-    endTime?: string
+    startTime?: number
+    endTime?: number
     type: string
     userId: string
-    createdAt: string
-    updateAt: string
+    createdAt: number
+    updateAt: number
     user?: User
     isCompleted?: boolean
 }
@@ -86,8 +86,8 @@ export interface Timeline {
     likes: number
     isRecommended?: boolean
     isPinned?: boolean
-    createdAt: string
-    updateAt: string
+    createdAt: number
+    updateAt: number
     user?: User
     isLiked?: boolean
 }
@@ -105,12 +105,12 @@ export interface Task {
     maxUser: number
     maxAge?: number
     userList?: string[]
-    startTime?: string
-    endTime?: string
+    startTime?: number
+    endTime?: number
     roomId: string
     userId: string
-    createdAt?: string
-    updateAt?: string
+    createdAt?: number
+    updateAt?: number
     online?: boolean
     paused?: boolean
     user: User
@@ -123,8 +123,8 @@ export interface ShopAsset {
     rewardName: string
     displayClass?: string
     displayCss?: string
-    createdAt?: string
-    updateAt?: string
+    createdAt?: number
+    updateAt?: number
 }
 
 export interface ShopProduct {
@@ -140,10 +140,10 @@ export interface ShopProduct {
     pointsCost: number
     sortOrder: number
     isActive: boolean
-    startTime?: string
-    endTime?: string
-    createdAt?: string
-    updateAt?: string
+    startTime?: number
+    endTime?: number
+    createdAt?: number
+    updateAt?: number
     asset: ShopAsset
 }
 
@@ -151,7 +151,7 @@ export interface UserShopItem {
     id: string
     userId: string
     assetId: string
-    createdAt?: string
+    createdAt?: number
     asset: ShopAsset
 }
 
@@ -170,7 +170,7 @@ export interface ShopRedemption {
     productId: string
     assetId: string
     pointsCost: number
-    createdAt?: string
+    createdAt?: number
     user?: User
     product?: ShopProduct
     asset?: ShopAsset
@@ -195,8 +195,8 @@ export interface ScriptCategory {
     id: string
     name: string
     description?: string
-    createdAt: string
-    updateAt: string
+    createdAt: number
+    updateAt: number
 }
 
 export interface Script {
@@ -210,8 +210,8 @@ export interface Script {
     likes: number
     isRecommended?: boolean
     isPinned?: boolean
-    createdAt: string
-    updateAt: string
+    createdAt: number
+    updateAt: number
     user?: User
     isLiked?: boolean
 }
@@ -251,8 +251,8 @@ export interface Room {
     type?: string
     ownerId: string
     maxUsers?: number
-    createdAt?: string
-    updateAt?: string
+    createdAt?: number
+    updateAt?: number
     owner?: User
     msgCount: number
     lastMsg?: Msg
@@ -263,7 +263,7 @@ export interface MissionsIngame {
     id: number
     server: string
     missions?: string[][]
-    createdAt?: string
+    createdAt?: number
 }
 
 export interface Msg {
@@ -272,8 +272,8 @@ export interface Msg {
     userId: string
     content: string
     edited?: number
-    createdAt?: string
-    updateAt?: string
+    createdAt?: number
+    updateAt?: number
     replyToMsgId?: string
     replyToUserId?: string
     user?: User
@@ -286,7 +286,7 @@ export interface Reaction {
     msgId: string
     count?: number
     users?: User[]
-    createdAt?: string
+    createdAt?: number
 }
 
 export interface Guide {
@@ -302,8 +302,8 @@ export interface Guide {
     likes: number
     isRecommended?: boolean
     isPinned?: boolean
-    createdAt: string
-    updateAt: string
+    createdAt: number
+    updateAt: number
     user?: User
     isLiked?: boolean
 }
@@ -316,8 +316,8 @@ export interface DPS {
     dpsValue: number
     details?: string
     userId: string
-    createdAt: string
-    updateAt: string
+    createdAt: number
+    updateAt: number
     user?: User
     build?: Build
     timeline?: Timeline
@@ -334,8 +334,8 @@ export interface Build {
     likes: number
     isRecommended?: boolean
     isPinned?: boolean
-    createdAt: string
-    updateAt: string
+    createdAt: number
+    updateAt: number
     user?: User
     isLiked?: boolean
 }
@@ -354,7 +354,7 @@ export interface RecentActivity {
     user: string
     action: string
     target: string
-    time: string
+    time: number
 }
 
 export interface Activity {
@@ -366,8 +366,8 @@ export interface Activity {
     name: string
     icon: string
     desc: string
-    createdAt?: string
-    updateAt?: string
+    createdAt?: number
+    updateAt?: number
 }
 
 export interface AbyssUsageSubmission {
@@ -384,8 +384,8 @@ export interface AbyssUsageSubmission {
     supportWeapon2: number
     stars: number
     petId?: number
-    createdAt?: string
-    updateAt?: string
+    createdAt?: number
+    updateAt?: number
     roleParticipants?: AbyssUsageRoleParticipant[]
     weaponParticipants?: AbyssUsageWeaponParticipant[]
     reward?: UserExperienceRewardResult
@@ -396,7 +396,7 @@ export interface AbyssUsageRoleParticipant {
     roleType: string
     charId: number
     gradeLevel: number
-    createdAt?: string
+    createdAt?: number
 }
 
 export interface AbyssUsageWeaponParticipant {
@@ -404,7 +404,7 @@ export interface AbyssUsageWeaponParticipant {
     roleType: string
     weaponId: number
     skillLevel: number
-    createdAt?: string
+    createdAt?: number
 }
 
 export interface AbyssRoleUsageStat {
@@ -458,8 +458,8 @@ export interface UsersUpdateInput {
 export interface TodoInput {
     title: string
     description?: string
-    startTime?: string
-    endTime?: string
+    startTime?: number
+    endTime?: number
 }
 
 export interface TimelineInput {
@@ -481,8 +481,8 @@ export interface ShopProductInput {
     displayCss?: string
     sortOrder: number
     isActive: boolean
-    startTime?: string
-    endTime?: string
+    startTime?: number
+    endTime?: number
 }
 
 export interface ScriptCategoryInput {

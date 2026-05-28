@@ -140,8 +140,8 @@ export const typeDefs = /* GraphQL */ `
         supportWeapon2: Int!
         stars: Int!
         petId: Int
-        createdAt: String
-        updateAt: String
+        createdAt: Float
+        updateAt: Float
         roleParticipants: [AbyssUsageRoleParticipant!]!
         weaponParticipants: [AbyssUsageWeaponParticipant!]!
         reward: UserExperienceRewardResult
@@ -152,7 +152,7 @@ export const typeDefs = /* GraphQL */ `
         roleType: String!
         charId: Int!
         gradeLevel: Int!
-        createdAt: String
+        createdAt: Float
     }
 
     type AbyssUsageWeaponParticipant {
@@ -160,7 +160,7 @@ export const typeDefs = /* GraphQL */ `
         roleType: String!
         weaponId: Int!
         skillLevel: Int!
-        createdAt: String
+        createdAt: Float
     }
 
     type AbyssRoleUsageStat {
@@ -310,8 +310,8 @@ export function getCurrentSeasonId(timestamp = Date.now()) {
 function serializeSubmission(submission: typeof schema.abyssUsageSubmissions.$inferSelect) {
     return {
         ...submission,
-        createdAt: submission.createdAt ?? "",
-        updateAt: submission.updateAt ?? "",
+        createdAt: submission.createdAt ?? 0,
+        updateAt: submission.updateAt ?? 0,
     }
 }
 

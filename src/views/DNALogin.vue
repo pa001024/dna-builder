@@ -9,12 +9,14 @@ const successMessage = ref("")
 const email = ref("")
 const phone = ref("")
 const code = ref("")
-const captchaId = "a9d7b33f6daf81efea5e3dcea8d92bd7"
+// const captchaId = "a9d7b33f6daf81efea5e3dcea8d92bd7" // ios
+const captchaId = "114d4e96cc4536050c7efaeb7e4f3c8c"
 
 const server = ref("cn" as "cn" | "global")
 
 const api = new DNAAPI({
     fetchFn: tauriFetch,
+    mode: "android",
 })
 
 function showSuccessMessage(message: string) {

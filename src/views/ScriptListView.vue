@@ -35,6 +35,7 @@ import { type ScriptRuntimeSidePanelTab, useScriptRuntimeStore } from "@/store/s
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import { parseScriptHeader, replaceScriptHeader } from "@/utils/script-header"
+import { formatDateTime, formatTimeOnly } from "@/utils/time"
 
 const ui = useUIStore()
 const cloudgame = useCloudGameStore()
@@ -121,6 +122,10 @@ function getScriptFileNameByTitle(title: string): string {
  */
 function parseScriptHeaderDate(dateHeader?: string): number | null {
     if (!dateHeader) return null
+    if (/^\d+$/.test(dateHeader)) {
+        const timestamp = Number(dateHeader)
+        return Number.isFinite(timestamp) ? timestamp : null
+    }
     const parsed = Date.parse(dateHeader)
     return Number.isFinite(parsed) ? parsed : null
 }
@@ -2101,6 +2106,9 @@ function preparseScriptConfigFromSource(scope: string, source: string): ScriptCo
  * @returns 本地脚本是否比云端脚本旧
  */
 async function isOnlineScriptExpiredLocal(script: Script): Promise<boolean> {
+    function normalizeTimestampToMinute(timestamp: number): number {
+        return Math.floor(timestamp / 60000)
+    }
     const fileName = getScriptFileNameByTitle(script.title)
     if (!localScripts.value.includes(fileName)) {
         return false
@@ -2108,14 +2116,10 @@ async function isOnlineScriptExpiredLocal(script: Script): Promise<boolean> {
 
     const content = await loadLocalScriptContent(fileName)
     const localUpdateAt = getLocalScriptUpdateAt(content)
-    const cloudUpdateAt = Date.parse(script.updateAt)
-    if (!Number.isFinite(cloudUpdateAt)) {
-        return false
-    }
     if (localUpdateAt === null) {
         return true
     }
-    return localUpdateAt < cloudUpdateAt
+    return normalizeTimestampToMinute(localUpdateAt) < normalizeTimestampToMinute(script.updateAt)
 }
 
 /**
@@ -3196,27 +3200,28 @@ async function publishScript(fileName: string) {
             })
             ui.showSuccessMessage(t("script-list.script_publish_success"))
             await fetchScriptCategories()
+        }
 
-            if (result) {
-                const newHeader = replaceScriptHeader(content, {
-                    id: result.id,
-                    name: header.name || fileName.replace(/\.js$/, ""),
-                    desc: header.desc || "",
-                    author: result.user?.name || "",
-                    date: result.updateAt || undefined,
+        if (result?.updateAt) {
+            const nextScriptId = scriptId && scriptId !== "-" ? scriptId : result.id
+            const nextAuthor = result.user?.name || header.author || ""
+            const newHeader = replaceScriptHeader(content, {
+                id: nextScriptId,
+                name: header.name || fileName.replace(/\.js$/, ""),
+                desc: header.desc || "",
+                author: nextAuthor,
+                date: result.updateAt,
+            })
+            const filePath = `${scriptsDir.value}\\${fileName}`
+            await writeTextFile(filePath, newHeader)
+            await refreshOnlineScriptUpdateMap()
+
+            const tab = openedTabs.value.find(t => t.type === "local" && t.name === fileName)
+            if (tab) {
+                tab.content = newHeader
+                nextTick(() => {
+                    codeEditor.value?.safeUpdate(newHeader)
                 })
-
-                const filePath = `${scriptsDir.value}\\${fileName}`
-                await writeTextFile(filePath, newHeader)
-                await refreshOnlineScriptUpdateMap()
-
-                const tab = openedTabs.value.find(t => t.type === "local" && t.name === fileName)
-                if (tab) {
-                    tab.content = newHeader
-                    nextTick(() => {
-                        codeEditor.value?.safeUpdate(newHeader)
-                    })
-                }
             }
         }
     } catch (error) {
@@ -3867,11 +3872,7 @@ onUnmounted(async () => {
                             </div>
                             <div v-else class="space-y-1">
                                 <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
-                                    <span class="text-base-content/40 shrink-0">{{
-                                        new Date(log.timestamp).toLocaleTimeString("zh-CN", {
-                                            hour12: false,
-                                        })
-                                    }}</span>
+                                    <span class="text-base-content/40 shrink-0">{{ formatTimeOnly(log.timestamp) }}</span>
                                     <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message }}</span>
                                 </div>
                             </div>
@@ -4051,7 +4052,7 @@ onUnmounted(async () => {
                                             </button>
                                         </div>
                                         <div class="text-[11px] text-base-content/40">
-                                            {{ new Date(item.timestamp).toLocaleTimeString() }}
+                                            {{ formatDateTime(item.timestamp) }}
                                         </div>
                                         <div v-if="item.text" class="text-xs text-base-content/85 whitespace-pre-wrap break-all">
                                             {{ item.text }}

@@ -89,9 +89,9 @@ function calculateSkillLevelUp(skill: { 升级?: Record<string, number>[] }, cur
     targetLevel = Math.min(targetLevel, 10)
     if (!skill.升级) return {}
     const skillCost = {} as ResourceCost
-    // 计算从当前等级到目标等级所需的总经验
+    // 技能升级表按“当前等级 -> 下一等级”存储，因此 1→2 对应升级[0]，2→3 对应升级[1]
     for (let level = currentLevel; level < targetLevel; level++) {
-        mergeCost(skillCost, skill.升级[level])
+        mergeCost(skillCost, skill.升级[level - 1])
     }
     return skillCost
 }

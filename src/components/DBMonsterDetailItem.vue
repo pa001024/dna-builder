@@ -2,6 +2,7 @@
 import * as echarts from "echarts"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
+import { soloTreasureDropData } from "@/data/d/solotreasure.data"
 import { format100, formatBigNumber } from "@/util"
 import { abyssDungeonMap, Faction, Monster } from "../data"
 import dungeonData from "../data/d/dungeon.data"
@@ -69,6 +70,24 @@ const selectedDungeonName = ref<string>(allDungeonNames.value[0] || "")
 const selectedDungeons = computed(() => {
     return dungeonGroups.value[selectedDungeonName.value] || []
 })
+
+const soloTreasureDropEntries = computed(() => {
+    if (!props.monster) {
+        return []
+    }
+
+    const tags = new Set(props.monster.tags || [])
+    return Object.values(soloTreasureDropData).filter(entry => tags.has(entry.MonsterTag))
+})
+
+/**
+ * 获取掉落项的展示标题。
+ * @param entry 掉落项。
+ * @returns 标题文本。
+ */
+function getSoloTreasureDropTitle(entry: (typeof soloTreasureDropEntries.value)[number]): string {
+    return entry.DropMechanismId !== undefined ? `机制 ${entry.DropMechanismId}` : entry.KillScore !== undefined ? `击杀积分 ${entry.KillScore}` : "掉落信息"
+}
 
 /**
  * 校验当前选中的副本名称是否仍有效，避免切换怪物后出现悬空选项。
@@ -493,6 +512,22 @@ function getFactionName(faction: number | undefined): string {
         <div v-if="leveledMonster">
             <div class="text-xs text-base-content/70 mb-1">等级成长预览</div>
             <div ref="levelTrendChartRef" class="w-full h-72 rounded bg-base-200/40" />
+        </div>
+
+        <div v-if="soloTreasureDropEntries.length" class="space-y-3">
+            <h3 class="font-bold mb-2">搜打撤掉落</h3>
+            <div v-for="entry in soloTreasureDropEntries" :key="entry.MonsterTag" class="rounded bg-base-200 p-3 space-y-2">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="font-medium">{{ getSoloTreasureDropTitle(entry) }}</div>
+                    <CopyID :id="entry.MonsterTag" />
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div>怪物标签: {{ entry.MonsterTag }}</div>
+                    <div v-if="entry.DropMechanismId !== undefined">机制 ID: {{ entry.DropMechanismId }}</div>
+                    <div v-if="entry.BoxDropRate !== undefined">宝箱掉落率: {{ entry.BoxDropRate }}</div>
+                    <div v-if="entry.KillScore !== undefined">击杀积分: {{ entry.KillScore }}</div>
+                </div>
+            </div>
         </div>
 
         <div v-if="dungeons.length > 0">

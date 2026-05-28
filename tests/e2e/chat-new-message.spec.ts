@@ -243,18 +243,6 @@ async function scrollChatToBottom(page: Page) {
 }
 
 /**
- * @description 将聊天消息滚动容器滚动到顶部，用于制造“发送时不在底部”的回归场景。
- * @param page Playwright 页面对象。
- */
-async function scrollChatToTop(page: Page) {
-    await page.evaluate(selector => {
-        const node = document.querySelector(selector)
-        if (!(node instanceof HTMLElement)) return
-        node.scrollTop = 0
-    }, CHAT_VIEWPORT_SELECTOR)
-}
-
-/**
  * @description 断言聊天消息列表当前已严格滚动到底部，仅允许极小的像素误差。
  * @param page Playwright 页面对象。
  */

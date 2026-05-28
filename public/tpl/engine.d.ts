@@ -769,6 +769,22 @@ declare function readText(path: string, url?: string): string | undefined
 declare function downloadFile(url: string, filename: string, force?: boolean): Promise<void>
 
 /**
+ * 删除文件。
+ * @param path 文件路径（相对路径会按脚本目录解析）
+ * @returns 是否删除成功；文件不存在时返回 false
+ * @throws 删除过程中出现系统错误时抛出错误
+ */
+declare function deleteFile(path: string): boolean
+
+/**
+ * 检查文件是否存在。
+ * @param path 文件路径（相对路径会按脚本目录解析）
+ * @returns 文件是否存在
+ * @throws path 为空时抛出错误
+ */
+declare function existsFile(path: string): boolean
+
+/**
  * 初始化 OCR 模块（自动下载缺失资源到本地）。
  * @param localRootDir 本地资源目录（可选，默认使用程序数据目录）
  * @param cdnBaseUrl CDN 根地址（可选，默认 https://cdn.dna-builder.cn/ocr）

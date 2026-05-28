@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { resourceMap } from "@/data/d"
 import {
     collectModCharBreakthroughSources,
+    collectModPackSources,
     collectModQuestSources,
     collectResourceHardbossSources,
     collectResourceQuestSources,
@@ -67,5 +68,14 @@ describe("resource-source", () => {
         expect(matchedSource?.sourceTypeLabel).toBe("角色突破")
         expect(matchedSource?.detail).toBe("20级突破奖励")
         expect(matchedSource?.title).toBe("苏乙")
+    })
+
+    it("应该从道具箱中反查魔之楔来源", () => {
+        const sources = collectModPackSources(32004)
+
+        const matchedSource = sources.find(source => source.resourceId === 110019)
+        expect(matchedSource).toBeTruthy()
+        expect(matchedSource?.rewardId).toBe(350000)
+        expect(matchedSource?.resourceName).toContain("道具箱")
     })
 })

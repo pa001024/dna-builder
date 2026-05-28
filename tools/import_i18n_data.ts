@@ -61,10 +61,25 @@ const MAPPINGS: Mapping[] = [
     { source: "Dispatch", targetStem: "dynquest", targetVar: "t", locales: ["cn"] },
     { source: "Cutoff", targetStem: "cutoff", targetVar: "cutoffData", locales: ["cn"] },
     { source: "Event", targetStem: "event", targetVar: "eventData", locales: ["cn"] },
+    {
+        source: async () => {
+            const convertText = await readFile(path.join(OUT_ROOT, "ModConvertId2ModId.json"), "utf8")
+
+            return [
+                {
+                    targetVar: "modConvertData",
+                    text: formatTsValue(JSON.parse(convertText), 0),
+                },
+            ]
+        },
+        targetStem: "convert",
+        targetVar: "modConvertData",
+    },
     { source: "Fish", targetStem: "fish", targetVar: "fishs", locales: ["cn"] },
     { source: "FishingSpot", targetStem: "fish", targetVar: "fishingSpots", locales: ["cn"] },
     { source: "HardBoss", targetStem: "hardboss", targetVar: "hardBossMap", locales: ["cn"] },
     { source: "Hair", targetStem: "accessory", targetVar: "hairData", locales: ["cn"] },
+    { source: "IronTicket", targetStem: "iconticket", targetVar: "iconticketData", locales: ["cn"] },
     { source: "HeadSculpture", targetStem: "headsculpture", targetVar: "headSculptureData", locales: ["cn"] },
     { source: "HeadFrame", targetStem: "accessory", targetVar: "headFrameData", locales: ["cn"] },
     { source: "ImpressionShop", targetStem: "shop", targetVar: "imprShopData", locales: ["cn"] },
@@ -73,6 +88,14 @@ const MAPPINGS: Mapping[] = [
     { source: "MonsterStrongAffixes", targetStem: "monstertag", targetVar: "monsterTagData", locales: ["cn"] },
     { source: "Mount", targetStem: "mount", targetVar: "mountData", locales: ["cn"] },
     { source: "Npc", targetStem: "npc", targetVar: "npcData", locales: ["cn"] },
+    { source: "ExtractionTreasureMechanism", targetStem: "solotreasure", targetVar: "extractionTreasureMechanismData", locales: ["cn"] },
+    { source: "ExtractionTreasure", targetStem: "solotreasure", targetVar: "extractionTreasureData", locales: ["cn"] },
+    { source: "ExtractionTreasureBag", targetStem: "solotreasure", targetVar: "extractionTreasureBagData", locales: ["cn"] },
+    { source: "SoloTreasure", targetStem: "solotreasure", targetVar: "soloTreasureData", locales: ["cn"] },
+    { source: "SoloTreasureGamePlay", targetStem: "solotreasure", targetVar: "soloTreasureGamePlayData", locales: ["cn"] },
+    { source: "TreasureHuntProgress", targetStem: "solotreasure", targetVar: "treasureHuntProgressData", locales: ["cn"] },
+    { source: "TreasureHuntRepeatDungeon", targetStem: "solotreasure", targetVar: "treasureHuntRepeatDungeonData", locales: ["cn"] },
+    { source: "TreasureHuntStoryDungeon", targetStem: "solotreasure", targetVar: "treasureHuntStoryDungeonData", locales: ["cn"] },
     {
         source: "PartyTopic",
         targetStem: "partytopic",
@@ -195,6 +218,27 @@ const MAPPINGS: Mapping[] = [
         targetStem: "limitedprize",
         targetVar: "limitedPrizeCostRules",
     },
+    {
+        source: async () => {
+            const [ironSurvivalText, ironSurvivalDungeonText] = await Promise.all([
+                readFile(path.join(OUT_ROOT, "IronSurvival.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "IronSurvivalDungeon.json"), "utf8"),
+            ])
+
+            return [
+                {
+                    targetVar: "ironSurvivalData",
+                    text: formatTsValue(JSON.parse(ironSurvivalText), 0),
+                },
+                {
+                    targetVar: "ironSurvivalDungeonData",
+                    text: formatTsValue(JSON.parse(ironSurvivalDungeonText), 0),
+                },
+            ]
+        },
+        targetStem: "ironsurvival",
+        targetVar: "ironSurvivalData",
+    },
 ]
 
 const SKIPPED_SOURCES = [
@@ -258,18 +302,18 @@ function formatTsValue(value: unknown, indent = 0): string {
 }
 
 /**
- * 在变量初始化表达式中寻找第一个数组字面量。
+ * 在变量初始化表达式中寻找第一个数组或对象字面量。
  */
-function findFirstArrayLiteral(node: ts.Node): ts.ArrayLiteralExpression | null {
-    if (ts.isArrayLiteralExpression(node)) {
+function findFirstCollectionLiteral(node: ts.Node): ts.ArrayLiteralExpression | ts.ObjectLiteralExpression | null {
+    if (ts.isArrayLiteralExpression(node) || ts.isObjectLiteralExpression(node)) {
         return node
     }
-    let found: ts.ArrayLiteralExpression | null = null
+    let found: ts.ArrayLiteralExpression | ts.ObjectLiteralExpression | null = null
     ts.forEachChild(node, child => {
         if (found) {
             return
         }
-        const candidate = findFirstArrayLiteral(child)
+        const candidate = findFirstCollectionLiteral(child)
         if (candidate) {
             found = candidate
         }
@@ -289,15 +333,16 @@ function findReplacementSpan(sourceFile: ts.SourceFile, targetVar: string): { st
             if (!ts.isIdentifier(declaration.name) || declaration.name.text !== targetVar || !declaration.initializer) {
                 continue
             }
-            const arrayNode = ts.isArrayLiteralExpression(declaration.initializer)
-                ? declaration.initializer
-                : findFirstArrayLiteral(declaration.initializer)
-            if (!arrayNode) {
-                throw new Error(`在 ${sourceFile.fileName} 中找不到 ${targetVar} 的数组字面量`)
+            const collectionNode =
+                ts.isArrayLiteralExpression(declaration.initializer) || ts.isObjectLiteralExpression(declaration.initializer)
+                    ? declaration.initializer
+                    : findFirstCollectionLiteral(declaration.initializer)
+            if (!collectionNode) {
+                throw new Error(`在 ${sourceFile.fileName} 中找不到 ${targetVar} 的数组或对象字面量`)
             }
             return {
-                start: arrayNode.getStart(sourceFile),
-                end: arrayNode.getEnd(),
+                start: collectionNode.getStart(sourceFile),
+                end: collectionNode.getEnd(),
             }
         }
     }

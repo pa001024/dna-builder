@@ -1,4 +1,4 @@
-import type { BackpackPuzzleItem, BackpackPuzzleLevel } from "@/data/d"
+import type { BackpackPuzzleItem, BackpackPuzzleLevel } from "@/data/d/backpackpuzzle.data"
 
 type GridPoint = -1 | 0 | 1 | 2
 type ManualPlacement = {

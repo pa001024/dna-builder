@@ -30,7 +30,7 @@ export class MihanCommand implements BaseCommand {
             orderBy: desc(schema.missionsIngame.id),
         })
         if (!missionsIngame) return "数据异常"
-        const nextHour = next(new Date(missionsIngame.createdAt ?? 0).getTime())
+        const nextHour = next(missionsIngame.createdAt ?? 0)
         if (nextHour <= Date.now()) {
             return "数据过期"
         }

@@ -307,13 +307,13 @@ const t: Region[] = [
         mapMapping: [
             {
                 name: "WBP_Map_East_HaoJing_BG",
-                pos: [0, 0, 8192, 8192],
+                pos: [1864, 1444, 8192, 8192],
                 opacity: 1,
                 zOrder: -1,
             },
             {
                 name: "WBP_Map_East_HaoJing",
-                pos: [0, 0, 8192, 8192],
+                pos: [1864, 1444, 8192, 8192],
                 opacity: 1,
                 zOrder: 0,
             },
@@ -378,13 +378,13 @@ const t: Region[] = [
         mapMapping: [
             {
                 name: "WBP_Map_East_Shanwaishan_BG",
-                pos: [0, 0, 4096, 4096],
+                pos: [3912, 3492, 4096, 4096],
                 opacity: 1,
                 zOrder: -1,
             },
             {
                 name: "WBP_Map_East_Shanwaishan",
-                pos: [0, 0, 4096, 4096],
+                pos: [3912, 3492, 4096, 4096],
                 opacity: 1,
                 zOrder: 0,
             },
@@ -404,7 +404,7 @@ const t: Region[] = [
         mapMapping: [
             {
                 name: "WBP_Map_East_Tianrenlingmu",
-                pos: [0, 0, 4096, 2048],
+                pos: [412, 1016, 4096, 2048],
                 opacity: 1,
                 zOrder: 0,
             },
@@ -429,13 +429,13 @@ const t: Region[] = [
         mapMapping: [
             {
                 name: "WBP_Map_Reg_East_Youlaixiang_BG",
-                pos: [0, 0, 2048, 2048],
+                pos: [1436, 1016, 2048, 2048],
                 opacity: 1,
                 zOrder: -1,
             },
             {
                 name: "WBP_Map_East_Youlaixiang",
-                pos: [0, 0, 2048, 2048],
+                pos: [1436, 1016, 2048, 2048],
                 opacity: 1,
                 zOrder: 0,
             },
@@ -481,17 +481,74 @@ const t: Region[] = [
     },
     {
         id: 1060,
-        name: "第三章火车站",
+        name: "百花车站",
         type: "Main",
+        mapId: 205,
+        mapImage: "WBP_Map_Reg_Chapter03_Station_AG",
+        mapCenter: [-44610, 5350],
         mapScale: [0.5, 1.25],
-        isRandom: [106001, 106002, 106003, 106004, 106005, 106006, 106007, 106008],
+        isRandom: [106001],
+        alertDisable: true,
+        mapMapping: [
+            {
+                name: "WBP_Map_Chapter03_Station_L0",
+                pos: [4096, 2048, 8192, 4096],
+                opacity: 1,
+                zOrder: 0,
+            },
+        ],
     },
     {
         id: 1061,
-        name: "第三章野外",
+        name: "科赛托斯省远郊",
         type: "Main",
+        mapId: 205,
         mapScale: [0.5, 1.25],
         isRandom: [106101],
+    },
+    {
+        id: 1062,
+        name: "？？？",
+        type: "Main",
+        mapScale: [0.5, 1.25],
+        isRandom: [106201],
+    },
+    {
+        id: 1063,
+        name: "锻铁厂",
+        type: "Main",
+        mapId: 206,
+        mapImage: "WBP_Map_Reg_Chapter03_Station_UG",
+        mapCenter: [-44610, 5350],
+        mapScale: [0.5, 1.25],
+        isRandom: [106301],
+        alertDisable: true,
+        mapMapping: [
+            {
+                name: "WBP_Map_Chapter03_Station_L-1",
+                pos: [0, 0, 8192, 4096],
+                opacity: 1,
+                zOrder: 0,
+            },
+            {
+                name: "WBP_Map_Chapter03_Station_L-2",
+                pos: [0, 0, 8192, 4096],
+                opacity: 1,
+                zOrder: 0,
+            },
+            {
+                name: "WBP_Map_Chapter03_Station_L-3",
+                pos: [0, 0, 8192, 4096],
+                opacity: 1,
+                zOrder: 0,
+            },
+            {
+                name: "WBP_Map_Chapter03_Station_L-4",
+                pos: [0, 0, 8192, 4096],
+                opacity: 1,
+                zOrder: 0,
+            },
+        ],
     },
     {
         id: 1070,
@@ -541,6 +598,13 @@ const t: Region[] = [
         type: "Main",
         mapScale: [0.5, 1.25],
         isRandom: [107601],
+    },
+    {
+        id: 1081,
+        name: "艾利西安-莉莉寇修道院",
+        type: "Main",
+        mapScale: [0.5, 1.25],
+        isRandom: [108101],
     },
     {
         id: 2001,

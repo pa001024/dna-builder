@@ -1,3 +1,19 @@
+/**
+ * 将时间戳格式化为脚本头使用的本地化日期时间文本。
+ * @param timestamp 时间戳，支持秒或毫秒。
+ * @returns 日期时间文本
+ */
+function formatDateTime(timestamp: number, locale = "zh-CN"): string {
+    const normalized = timestamp >= 1e11 ? timestamp : timestamp * 1000
+    return new Date(normalized).toLocaleString(locale, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+    })
+}
+
 export function createScriptHeader(options: {
     id?: string
     name: string
@@ -5,8 +21,9 @@ export function createScriptHeader(options: {
     author?: string
     version?: string
     category?: string
-    date?: string
+    date?: number
 }) {
+    const date = options.date != null ? formatDateTime(options.date) : formatDateTime(Date.now())
     return `// ==UserScript==
 // @id ${options.id || "-"}
 // @name ${options.name}
@@ -14,7 +31,7 @@ export function createScriptHeader(options: {
 // @author ${options.author || "anonymous"}
 // @version ${options.version || "1.0.0"}
 // @category ${options.category || "其他"}
-// @date ${options.date || new Date().toLocaleString("zh-CN")}
+// @date ${date}
 // ==/UserScript==
 
 `
@@ -30,9 +47,19 @@ export function parseScriptHeader(header: string) {
     return { id, name, desc, author, version, category, date }
 }
 
+function parseScriptHeaderDate(dateHeader?: string): number | undefined {
+    if (!dateHeader) return undefined
+    if (/^\d+$/.test(dateHeader)) {
+        const timestamp = Number(dateHeader)
+        return Number.isFinite(timestamp) ? timestamp : undefined
+    }
+    const parsed = Date.parse(dateHeader)
+    return Number.isFinite(parsed) ? parsed : undefined
+}
+
 export function replaceScriptHeader(
     script: string,
-    options: { id?: string; name: string; desc?: string; author?: string; version?: string; category?: string; date?: string }
+    options: { id?: string; name: string; desc?: string; author?: string; version?: string; category?: string; date?: number }
 ) {
     // 匹配 UserScript header 的正则表达式，从 // ==UserScript== 到 // ==/UserScript==
     const headerRegex = /\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/
@@ -56,7 +83,7 @@ export function replaceScriptHeader(
         author: options.author ?? existingHeader.author,
         version: options.version ?? existingHeader.version,
         category: options.category ?? existingHeader.category,
-        date: options.date,
+        date: options.date ?? parseScriptHeaderDate(existingHeader.date),
     }
 
     // 创建新的 header

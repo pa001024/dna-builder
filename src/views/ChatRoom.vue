@@ -11,6 +11,7 @@ import { useUserStore } from "@/store/user"
 import { sleep } from "@/util"
 import { copyHtmlContent, isImage, sanitizeHTML } from "@/utils/html"
 import { fileToDataUrlWithRealMime, normalizeInlineImageDataUrlMime } from "@/utils/image-data-url"
+import { formatDateTime } from "@/utils/time"
 
 const route = useRoute()
 const roomId = computed(() => route.params.room as string)
@@ -318,7 +319,7 @@ async function addMessage(msg: Msg) {
     }
 }
 
-const input = ref<HTMLDivElement>(null as any)
+const input = ref<HTMLDivElement | null>(null)
 const inputForm = ref<HTMLDivElement>(null as any)
 const newMsgText = ref("")
 const replyingTo = ref<Msg | null>(null)
@@ -332,6 +333,7 @@ async function sendMessage(e: Event) {
     if (!html) return
     const content = sanitizeHTML(normalizeInlineImageDataUrlMime(html))
     if (!content) return
+    if (!input.value) return
     input.value.innerHTML = ""
     newMsgText.value = ""
     input.value.focus()
@@ -349,6 +351,7 @@ async function sendMessage(e: Event) {
 
 function insertEmoji(text: string) {
     const el = input.value
+    if (!el) return
     el.focus()
     const sel = window.getSelection()!
     const range = sel.getRangeAt(0)
@@ -409,6 +412,7 @@ async function insertImage() {
         if (!file) return
         const data = await fileToDataUrlWithRealMime(file)
         const el = input.value
+        if (!el) return
         el.focus()
         const sel = window.getSelection()!
         const range = sel.getRangeAt(0)
@@ -682,7 +686,7 @@ function cancelReply() {
                             <div class="flex-1"></div>
                             <div class="flex flex-col h-full" :class="{ 'items-end': user.id === item.user!.id }">
                                 <div class="hidden group-hover:block p-1 text-xs text-base-content/60 whitespace-nowrap">
-                                    {{ item.createdAt }}
+                                    {{ formatDateTime(item.createdAt || 0) }}
                                 </div>
                                 <div class="flex-1"></div>
                                 <div v-if="item.edited" class="text-xs text-base-content/60 whitespace-nowrap">
@@ -780,7 +784,7 @@ function cancelReply() {
                     :placeholder="$t('chat.chatPlaceholder')"
                     class="flex-1 overflow-hidden"
                     inner-class="min-h-20"
-                    @loadref="r => (input = r)"
+                    @loadref="(r: HTMLDivElement) => (input = r)"
                     @enter="sendMessage"
                 />
                 <!-- 操作栏 -->

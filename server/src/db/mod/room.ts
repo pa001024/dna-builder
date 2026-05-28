@@ -20,7 +20,7 @@ export const typeDefs = /* GraphQL */ `
         room(id: String!): Room
         rooms(name_like: String, limit: Int, offset: Int): [Room!]!
         roomsCount(name_like: String): Int!
-        timeOffset(t: Int!): Int!
+        timeOffset(t: Float!): Int!
     }
 
     type Subscription {
@@ -42,8 +42,8 @@ export const typeDefs = /* GraphQL */ `
         type: String
         ownerId: String!
         maxUsers: Int
-        createdAt: String
-        updateAt: String
+        createdAt: Float
+        updateAt: Float
 
         "房间创建者"
         owner: User

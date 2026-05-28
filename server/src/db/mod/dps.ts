@@ -14,8 +14,8 @@ export const typeDefs = /* GraphQL */ `
         dpsValue: Int!
         details: String
         userId: String!
-        createdAt: String!
-        updateAt: String!
+        createdAt: Float!
+        updateAt: Float!
         user: User
         build: Build
         timeline: Timeline
@@ -84,8 +84,8 @@ export const resolvers = {
 
             return result.map(dps => ({
                 ...dps,
-                createdAt: dps.createdAt ?? "",
-                updateAt: dps.updateAt ?? "",
+                createdAt: dps.createdAt ?? 0,
+                updateAt: dps.updateAt ?? 0,
             }))
         },
         dpsCount: async (_parent, args) => {
@@ -126,8 +126,8 @@ export const resolvers = {
 
             return result.map(dps => ({
                 ...dps,
-                createdAt: dps.createdAt ?? "",
-                updateAt: dps.updateAt ?? "",
+                createdAt: dps.createdAt ?? 0,
+                updateAt: dps.updateAt ?? 0,
             }))
         },
     },
@@ -165,8 +165,8 @@ export const resolvers = {
 
             return {
                 ...result,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
             }
         },
         updateDPS: async (_parent, args, context, info) => {
@@ -212,8 +212,8 @@ export const resolvers = {
 
             return {
                 ...result,
-                createdAt: result.createdAt ?? "",
-                updateAt: result.updateAt ?? "",
+                createdAt: result.createdAt ?? 0,
+                updateAt: result.updateAt ?? 0,
             }
         },
         deleteDPS: async (_parent, args, context) => {

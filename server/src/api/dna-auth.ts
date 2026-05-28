@@ -153,7 +153,7 @@ export const dnaAuthPlugin = () => {
             const code = generateCode()
             // const imageBuffer = await encodeCodeToImage(code)
 
-            const expiresAt = new Date(Date.now() + SESSION_EXPIRE_MINUTES * 60 * 1000)
+            const expiresAt = Date.now() + SESSION_EXPIRE_MINUTES * 60 * 1000
 
             const sessionId = id()
             const imageUrl = `/api/auth/dna/session/${sessionId}/image`
@@ -166,7 +166,7 @@ export const dnaAuthPlugin = () => {
                         code,
                         imageUrl,
                         dnaUid,
-                        expiresAt: expiresAt.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", hour12: false }),
+                        expiresAt,
                     })
                     .returning()
             )[0]

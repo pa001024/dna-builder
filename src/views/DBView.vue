@@ -44,6 +44,27 @@ const databaseItems = [
         color: "from-indigo-500/20 to-blue-600/20 text-indigo-500",
     },
     {
+        name: "database.forge",
+        path: "/db/forge",
+        desc: "database.forge_desc",
+        icon: "M9.767 6.1c0.94-1.947 1.393-4.104 2.233-6.1 0.837 1.999 1.296 4.15 2.227 6.103 1.181 1.327 2.842-0.17 4.162-0.496-0.316 1.305-1.552 2.614-0.961 3.986 1.184 1.287 3.362 1.327 4.555 2.407-1.187 1.077-3.371 1.123-4.555 2.407-0.584 1.372 0.645 2.677 0.961 3.986-1.32-0.332-2.979-1.832-4.159-0.496-0.934 1.953-1.393 4.104-2.23 6.103-0.84-1.999-1.296-4.156-2.233-6.11-1.174-1.363-2.842 0.192-4.159 0.502 0.313-1.257 1.378-2.443 1.056-3.779-1.019-1.555-3.45-1.46-4.646-2.617 1.211-1.153 3.621-1.059 4.646-2.608 0.313-1.333-0.73-2.531-1.059-3.785 1.324 0.323 2.985 1.838 4.162 0.496zM5.933 11.997c1.476 1.555 3.31 2.991 5.501 3.262 2.626 0.265 4.92-1.451 6.63-3.253-1.527-1.622-3.469-3.131-5.772-3.283-2.531-0.125-4.698 1.543-6.359 3.274z M11.175 9.977c1.667-0.825 3.672 1.181 2.851 2.848-0.514 1.412-2.553 1.853-3.569 0.721-1.132-1.022-0.694-3.052 0.718-3.569z",
+        color: "from-orange-500/20 to-amber-600/20 text-orange-500",
+    },
+    {
+        name: "database.ironsurvival",
+        path: "/db/ironsurvival",
+        desc: "database.ironsurvival_desc",
+        icon: "M9.767 6.1c0.94-1.947 1.393-4.104 2.233-6.1 0.837 1.999 1.296 4.15 2.227 6.103 1.181 1.327 2.842-0.17 4.162-0.496-0.316 1.305-1.552 2.614-0.961 3.986 1.184 1.287 3.362 1.327 4.555 2.407-1.187 1.077-3.371 1.123-4.555 2.407-0.584 1.372 0.645 2.677 0.961 3.986-1.32-0.332-2.979-1.832-4.159-0.496-0.934 1.953-1.393 4.104-2.23 6.103-0.84-1.999-1.296-4.156-2.233-6.11-1.174-1.363-2.842 0.192-4.159 0.502 0.313-1.257 1.378-2.443 1.056-3.779-1.019-1.555-3.45-1.46-4.646-2.617 1.211-1.153 3.621-1.059 4.646-2.608 0.313-1.333-0.73-2.531-1.059-3.785 1.324 0.323 2.985 1.838 4.162 0.496zM5.933 11.997c1.476 1.555 3.31 2.991 5.501 3.262 2.626 0.265 4.92-1.451 6.63-3.253-1.527-1.622-3.469-3.131-5.772-3.283-2.531-0.125-4.698 1.543-6.359 3.274z M11.175 9.977c1.667-0.825 3.672 1.181 2.851 2.848-0.514 1.412-2.553 1.853-3.569 0.721-1.132-1.022-0.694-3.052 0.718-3.569z",
+        color: "from-slate-500/20 to-stone-600/20 text-slate-500",
+    },
+    {
+        name: "database.ironsurvival",
+        path: "/db/ironsurvival",
+        desc: "database.ironsurvival_desc",
+        icon: "M9.767 6.1c0.94-1.947 1.393-4.104 2.233-6.1 0.837 1.999 1.296 4.15 2.227 6.103 1.181 1.327 2.842-0.17 4.162-0.496-0.316 1.305-1.552 2.614-0.961 3.986 1.184 1.287 3.362 1.327 4.555 2.407-1.187 1.077-3.371 1.123-4.555 2.407-0.584 1.372 0.645 2.677 0.961 3.986-1.32-0.332-2.979-1.832-4.159-0.496-0.934 1.953-1.393 4.104-2.23 6.103-0.84-1.999-1.296-4.156-2.233-6.11-1.174-1.363-2.842 0.192-4.159 0.502 0.313-1.257 1.378-2.443 1.056-3.779-1.019-1.555-3.45-1.46-4.646-2.617 1.211-1.153 3.621-1.059 4.646-2.608 0.313-1.333-0.73-2.531-1.059-3.785 1.324 0.323 2.985 1.838 4.162 0.496zM5.933 11.997c1.476 1.555 3.31 2.991 5.501 3.262 2.626 0.265 4.92-1.451 6.63-3.253-1.527-1.622-3.469-3.131-5.772-3.283-2.531-0.125-4.698 1.543-6.359 3.274z M11.175 9.977c1.667-0.825 3.672 1.181 2.851 2.848-0.514 1.412-2.553 1.853-3.569 0.721-1.132-1.022-0.694-3.052 0.718-3.569z",
+        color: "from-slate-500/20 to-stone-600/20 text-slate-500",
+    },
+    {
         name: "database.damage",
         path: "/db/damage",
         desc: "database.damage_desc",
@@ -119,6 +140,13 @@ const databaseItems = [
         desc: "database.event_desc",
         icon: "M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM11 6H13V13H11V6ZM11 15H13V17H11V15Z",
         color: "from-rose-500/20 to-orange-600/20 text-rose-500",
+    },
+    {
+        name: "database.solotreasure",
+        path: "/db/solotreasure",
+        desc: "database.solotreasure_desc",
+        icon: "M12 2L4 6V12C4 17 7.5 21.74 12 23C16.5 21.74 20 17 20 12V6L12 2ZM12 4.2L18 7.2V12C18 16.04 15.25 19.82 12 20.91C8.75 19.82 6 16.04 6 12V7.2L12 4.2ZM11 7V13H13V7H11ZM11 15V17H13V15H11Z",
+        color: "from-amber-500/20 to-orange-600/20 text-amber-500",
     },
     {
         name: "魔灵地图",
@@ -241,7 +269,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "围绕角色培养、装备搭配与养成素材，适合从 Build 视角快速定位核心资料。",
         badge: "Build",
         accentClass: "bg-violet-500",
-        paths: ["/db/char", "/db/weapon", "/db/resource", "/db/mod", "/db/damage", "/db/draft", "/db/pet", "/db/accessory"],
+        paths: ["/db/char", "/db/weapon", "/db/resource", "/db/mod", "/db/forge", "/db/damage", "/db/pet"],
     },
     {
         id: "explore",
@@ -249,7 +277,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "聚合区域、副本、刷新点位与采集相关资料，优先服务跑图、采集和副本路线查询。",
         badge: "Explore",
         accentClass: "bg-emerald-500",
-        paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/event", "/db/walnut"],
+        paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/event", "/db/solotreasure"],
     },
     {
         id: "world",
@@ -257,7 +285,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "把 NPC、动态任务、话题、声望与图鉴类内容整理到同一层，降低世界观检索成本。",
         badge: "World",
         accentClass: "bg-sky-500",
-        paths: ["/db/impr", "/db/npc", "/db/reputation", "/db/rank", "/db/questchain", "/db/dynquest", "/db/partytopic"],
+        paths: ["/db/impr", "/db/npc", "/db/draft", "/db/reputation", "/db/rank", "/db/questchain", "/db/dynquest", "/db/partytopic"],
     },
     {
         id: "challenge",
@@ -265,7 +293,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: "面向首领、怪物、成就与称号等目标型内容，方便围绕挑战目标进行连续检索。",
         badge: "Challenge",
         accentClass: "bg-amber-500",
-        paths: ["/db/monster", "/db/hardboss", "/db/achievement", "/db/title", "/db/book"],
+        paths: ["/db/monster", "/db/hardboss", "/db/achievement", "/db/title", "/db/book", "/db/walnut", "/db/accessory"],
     },
 ]
 

@@ -44,12 +44,12 @@ export const typeDefs = /* GraphQL */ `
         maxUser: Int!
         maxAge: Int
         userList: [String!]!
-        startTime: String
-        endTime: String
+        startTime: Float
+        endTime: Float
         roomId: String!
         userId: String!
-        createdAt: String
-        updateAt: String
+        createdAt: Float
+        updateAt: Float
         online: Boolean
         paused: Boolean
 

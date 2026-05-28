@@ -236,7 +236,7 @@ export class UserAPI extends DNASubModule {
     }
 
     async sendSms(mobile: string, vJson: string, isCaptcha: number | null) {
-        return await this._dna_request("user/getSmsCode", { mobile, isCaptcha, vJson })
+        return await this._dna_request("user/getSmsCode", { mobile, vJson, isCaptcha })
     }
 
     async signature(newSignature: string) {

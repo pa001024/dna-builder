@@ -6,12 +6,15 @@ import { draftMap, LeveledChar, LeveledMod, LeveledWeapon, resourceMap } from ".
 import { charMap, walnutMap } from "../data/d"
 import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "../data/d/accessory.data"
 import { headSculptureData } from "../data/d/headsculpture.data"
+import { iconticketData } from "../data/d/iconticket.data"
 import { getRewardTypeText, RewardItem as RewardItemType } from "../utils/reward-utils"
 
 // 递归
 defineOptions({
     name: "RewardItem",
 })
+
+const iconticketMap = new Map(iconticketData.map(ticket => [ticket.id, ticket]))
 
 // 定义组件接收的Props
 interface Props {
@@ -155,6 +158,9 @@ function getRewardLink(item: RewardItemType) {
     if (item.t === "Walnut") {
         return `/db/walnut/${item.id}`
     }
+    if (item.t === "IronTicket") {
+        return ""
+    }
 
     return ""
 }
@@ -240,6 +246,10 @@ function getRewardIcon(item: RewardItemType) {
         }
         return "/imgs/webp/T_Head_Empty.webp"
     }
+    if (item.t === "IronTicket") {
+        const ticket = iconticketMap.get(item.id)
+        return ticket?.icon ? `/imgs/res/${ticket.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    }
     return "/imgs/webp/T_Head_Empty.webp"
 }
 
@@ -252,6 +262,10 @@ function getRewardBackgroundColor(item: RewardItemType) {
     if (item.t === "Resource") {
         const resource = resourceMap.get(item.id)
         return getRarityGradientClass(resource?.rarity || 1)
+    }
+    if (item.t === "IronTicket") {
+        const ticket = iconticketMap.get(item.id)
+        return getRarityGradientClass(ticket?.rarity || 1)
     }
     if (["Skin", "HeadSculpture", "HeadFrame", "CharAccessory", "WeaponAccessory", "WeaponSkin"].includes(item.t)) {
         return getRarityGradientClass(
@@ -322,6 +336,10 @@ function getRewardDisplayName(item: RewardItemType) {
     }
     if (item.t === "Walnut") {
         return walnutMap.get(item.id)?.名称 || `ID: ${item.id}`
+    }
+    if (item.t === "IronTicket") {
+        const ticket = iconticketMap.get(item.id)
+        return ticket?.name || "深境罗盘"
     }
     return (item.n && t(item.n)) || (item.t === "Reward" ? `奖励组 ${item.id}` : `ID: ${item.id}`)
 }
@@ -431,14 +449,15 @@ function getDropModeText(mode: string): string {
                                 </span>
                                 <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
                             </span>
-                            <span v-if="item.c" class="text-base-content/70">x{{ item.c }}</span>
-                            <span v-if="item.p && item.m !== 'Independent'" class="text-base-content/70">
+                            <span v-if="item.c !== undefined" class="text-base-content/70">x{{ item.c }}</span>
+                            <span v-if="item.t === 'Reward' && item.c === undefined && item.m === 'Fixed'" class="text-base-content/70">固定</span>
+                            <span v-else-if="item.t !== 'Reward' && item.p && item.m !== 'Independent'" class="text-base-content/70">
                                 ({{ item.m === "Sequence" ? `容量:${item.p}` : `权重:${item.p}` }}
                                 {{ item.pp ? `比例:${+(item.pp * 100).toFixed(2)}%` : "" }}
                                 {{ item.times ? `每个期望:${+item.times.toFixed(2)}次` : "" }}
                                 )
                             </span>
-                            <span v-if="item.m === 'Independent'">独立掉落 {{ `概率:${+(item.p / 100).toFixed(2)}%` }}</span>
+                            <span v-if="item.t !== 'Reward' && item.m === 'Independent'">独立掉落 {{ `概率:${+(item.p / 100).toFixed(2)}%` }}</span>
                             <!-- 显示掉落模式 -->
                             <span
                                 v-if="item.t === 'Reward'"

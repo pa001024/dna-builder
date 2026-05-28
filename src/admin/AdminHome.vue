@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue"
 import { adminStatsQuery, recentActivitiesQuery } from "@/api/graphql"
+import { formatDateTime } from "@/utils/time"
 
 // 统计数据
 const stats = ref({
@@ -19,7 +20,7 @@ const recentActivities = ref<
         user: string
         action: string
         target: string
-        time: string
+        time: number
     }>
 >([])
 
@@ -52,6 +53,10 @@ async function loadRecentActivities() {
     } catch (error) {
         console.error("Failed to load recent activities:", error)
     }
+}
+
+function formatActivityTime(timestamp: number): string {
+    return formatDateTime(timestamp)
 }
 
 /**
@@ -232,7 +237,7 @@ onMounted(() => {
                             </p>
                             <p class="text-xs text-base-content/70 mt-1.5 flex items-center gap-1.5">
                                 <span class="ri:time-line text-base-content/50"></span>
-                                {{ activity.time }}
+                                {{ formatActivityTime(activity.time) }}
                             </p>
                         </div>
                     </div>

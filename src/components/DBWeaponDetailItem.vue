@@ -391,6 +391,44 @@ watch(
             </div>
         </div>
 
+        <div v-if="weapon.熔炉 && weapon.熔炉.length > 0" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">熔炉</div>
+            <div class="space-y-3">
+                <div v-for="forge in weapon.熔炉" :key="forge.lv">
+                    <div class="flex items-center justify-between gap-2 p-2">
+                        <div class="text-sm font-bold text-primary">Lv. {{ forge.lv }}</div>
+                    </div>
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm p-2">
+                        <ResourceCostItem v-for="(value, name) in forge.解锁" :key="name" :name="name" :value="value" />
+                    </div>
+                    <div v-if="forge.技能 && forge.技能.length > 0" class="mt-2 space-y-2">
+                        <div v-for="skill in forge.技能" :key="skill.id" class="p-2 bg-base-200 rounded">
+                            <div class="flex items-center gap-2">
+                                <div class="text-sm font-medium text-primary">{{ $t(skill.名称) }}</div>
+                                <CopyID :id="skill.id" />
+                            </div>
+                            <div v-if="skill.描述" class="mt-1 text-sm text-base-content/70">
+                                {{ skill.描述 }}
+                            </div>
+                            <div v-if="skill.加成" class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
+                                <div
+                                    v-for="(value, name) in skill.加成"
+                                    :key="name"
+                                    class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                                >
+                                    <span class="text-base-content/70">{{ $t(name) }}</span>
+                                    <span class="font-medium text-primary">{{ formatProp(name, value) }}</span>
+                                </div>
+                            </div>
+                            <div v-if="skill.解锁" class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
+                                <ResourceCostItem v-for="(value, name) in skill.解锁" :key="name" :name="name" :value="value" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div v-if="weaponSkillReplaceGroups.length > 0" class="p-3 bg-base-200 rounded">
             <div class="text-xs text-base-content/70 mb-2">招式魔之楔</div>
             <div class="space-y-3">

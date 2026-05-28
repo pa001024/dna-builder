@@ -24,8 +24,8 @@ function normalizeScriptCategory(category: typeof schema.scriptCategories.$infer
     return {
         ...category,
         description: category.description ?? "",
-        createdAt: category.createdAt ?? "",
-        updateAt: category.updateAt ?? "",
+        createdAt: category.createdAt ?? 0,
+        updateAt: category.updateAt ?? 0,
     }
 }
 
@@ -34,8 +34,8 @@ export const typeDefs = /* GraphQL */ `
         id: String!
         name: String!
         description: String
-        createdAt: String!
-        updateAt: String!
+        createdAt: Float!
+        updateAt: Float!
     }
 
     input ScriptCategoryInput {
@@ -46,7 +46,7 @@ export const typeDefs = /* GraphQL */ `
     type Query {
         scriptCategories: [ScriptCategory!]!
         scriptCategory(id: String!): ScriptCategory
-        scriptCategoriesCount: Int!
+        scriptCategoriesCount: Float!
     }
 
     type Mutation {

@@ -7,8 +7,24 @@ import {
     todosWithCountQuery,
     updateSystemTodoMutation,
 } from "@/api/graphql"
+import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
+
+/**
+ * 将后台时间输入转换为时间戳。
+ * @param value 时间输入值。
+ * @returns 可提交的时间戳；为空或无效时返回 undefined。
+ */
+function parseTodoDateTime(value: unknown): number | undefined {
+    const text = String(value ?? "").trim()
+    if (!text) {
+        return undefined
+    }
+
+    const timestamp = new Date(text.replace(" ", "T")).getTime()
+    return Number.isNaN(timestamp) ? undefined : timestamp
+}
 
 /**
  * 待办管理页配置
@@ -34,11 +50,11 @@ const config: AdminCrudConfig<Todo> = {
             title: "时间范围",
             accessor: item => ({ startTime: item.startTime, endTime: item.endTime }),
             formatter: value => {
-                const range = value as { startTime?: string; endTime?: string }
+                const range = value as { startTime?: number; endTime?: number }
                 if (!range.startTime || !range.endTime) {
                     return "-"
                 }
-                return `${range.startTime} ~ ${range.endTime}`
+                return `${formatDateTime(range.startTime)} ~ ${formatDateTime(range.endTime)}`
             },
         },
         {
@@ -51,7 +67,7 @@ const config: AdminCrudConfig<Todo> = {
             key: "createdAt",
             title: "创建时间",
             cellClass: "px-8 py-5 whitespace-nowrap text-sm text-base-content/70",
-            formatter: value => String(value || "-"),
+            formatter: value => (value ? formatDateTime(Number(value)) : "-"),
         },
     ],
     rowKey: item => item.id,
@@ -69,8 +85,8 @@ const config: AdminCrudConfig<Todo> = {
             items: (result?.todos || []).map(todo => ({
                 ...todo,
                 description: todo.description ?? "",
-                startTime: todo.startTime ?? "",
-                endTime: todo.endTime ?? "",
+                startTime: todo.startTime ?? 0,
+                endTime: todo.endTime ?? 0,
             })),
             total: result?.todosCount || 0,
         }
@@ -131,12 +147,8 @@ const config: AdminCrudConfig<Todo> = {
                 title: String(form.title),
                 description: form.description ? String(form.description) : undefined,
             }
-            if (form.startTime) {
-                input.startTime = String(form.startTime)
-            }
-            if (form.endTime) {
-                input.endTime = String(form.endTime)
-            }
+            input.startTime = parseTodoDateTime(form.startTime)
+            input.endTime = parseTodoDateTime(form.endTime)
             await createSystemTodoMutation({ input })
         },
         async update(item, form) {
@@ -144,12 +156,8 @@ const config: AdminCrudConfig<Todo> = {
                 title: String(form.title),
                 description: form.description ? String(form.description) : undefined,
             }
-            if (form.startTime) {
-                input.startTime = String(form.startTime)
-            }
-            if (form.endTime) {
-                input.endTime = String(form.endTime)
-            }
+            input.startTime = parseTodoDateTime(form.startTime)
+            input.endTime = parseTodoDateTime(form.endTime)
 
             await updateSystemTodoMutation({
                 id: item.id,

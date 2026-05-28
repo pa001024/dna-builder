@@ -281,6 +281,34 @@ function build_sa_header122(raw_sa: string, timestamp: number = Date.now()): str
     return out.join("")
 }
 
+function build_sa_header130(raw_sa: string, timestamp: number = Date.now()): string {
+    let sa = raw_sa
+    sa = swap_chars(sa, 1, 17)
+    sa = swap_chars(sa, 9, 20)
+    sa = swap_chars(sa, 15, 16)
+    sa = swap_chars(sa, 22, 27)
+
+    const ts = String(timestamp)
+    if (sa.length !== 30 || ts.length < 13) {
+        return sa
+    }
+
+    let timeIndex = 0
+    const out: string[] = []
+    for (let i = 0; i < sa.length; i++) {
+        if (i === 8 || i === 16) {
+            out.push(ts.slice(timeIndex, timeIndex + 5))
+            timeIndex += 5
+        } else if (i === 22) {
+            out.push(ts.slice(timeIndex, timeIndex + 3))
+            timeIndex += 3
+        }
+        out.push(sa[i])
+    }
+
+    return out.join("")
+}
+
 export function build_signature122(pk: string, payload: Record<string, any>, token?: string): Record<string, any> {
     const rk = rand_str(16)
 
@@ -316,6 +344,7 @@ export function build_signature122(pk: string, payload: Record<string, any>, tok
 export function build_signature130(pk: string, payload: Record<string, any>, token?: string): Record<string, any> {
     const rk = rand_str(16)
     const raw_sa = rand_digit_str(30)
+    const sa = build_sa_header130(raw_sa)
 
     const sign_params: Record<string, any> = {}
     for (const [k, v] of Object.entries(payload)) {
@@ -331,7 +360,7 @@ export function build_signature130(pk: string, payload: Record<string, any>, tok
     const rk_encrypted = rsa_encrypt(rk, pk)
     const tn = `${rk_encrypted},${sign_encoded}`
 
-    return { rk, tn, sa: raw_sa }
+    return { rk, tn, sa }
 }
 
 // 构建上传图片签名（返回签名和密钥）

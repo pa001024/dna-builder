@@ -17,6 +17,14 @@ export interface LimitedPrizeItem {
 export interface LimitedPrizePool {
     EventId: number
     LimitedPrizePoolId: number[]
+    BigPrizeBPPath?: string
+    BigPrizeMobileBPPath?: string
+    HistoryBPPath?: string
+    ProcessBPPath?: string
+    ProcessMobileBPPath?: string
+    ResultBPPath?: string
+    ResultMobileBPPath?: string
+    RoundBPPath?: string
 }
 
 /** 限时奖池成本规则，由 importdata 从 out 自动写入。 */
@@ -53,12 +61,64 @@ export const limitedPrizeItems: Record<number, LimitedPrizeItem> = {
         Probability: [8, 92, 100, 200, 1300, 1300, 3500, 3500],
         Type: [2, 4, 4, 4, 7, 8, 6, 6],
     },
+    "1003": {
+        CostRuleId: 1001,
+        Count: [1, 1, 1, 1, 1, 1, 3, 6],
+        Id: [[150201, 310101], [21011, 21012], [13037, 13039], [20082, 20084], [10037, 10038], [20008, 20009], [30112], [208]],
+        LimitedPrizePoolId: 1003,
+        Probability: [8, 92, 100, 200, 1300, 1300, 3500, 3500],
+        Type: [2, 4, 4, 4, 7, 8, 6, 6],
+    },
+    "1004": {
+        CostRuleId: 1002,
+        Count: [1, 1, 1, 1, 1, 1, 3, 6],
+        Id: [[150201, 310101], [21011, 21012], [13037, 13039], [20082, 20084], [10037, 10038], [20008, 20009], [30112], [208]],
+        LimitedPrizePoolId: 1004,
+        Probability: [8, 92, 100, 200, 1300, 1300, 3500, 3500],
+        Type: [2, 4, 4, 4, 7, 8, 6, 6],
+    },
 }
 
 /** 限时奖池活动映射表，由 importdata 从 out 自动写入。 */
 export const limitedPrizePools: Record<number, LimitedPrizePool> = {
     "103021": {
+        BigPrizeBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/PC/LimitedPrizePool/WBP_LimitedPrizePool_SelectPrize_P.WBP_LimitedPrizePool_SelectPrize_P'",
+        BigPrizeMobileBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Mobile/LimitedPrizePool/WBP_LimitedPrizePool_SelectPrize_M.WBP_LimitedPrizePool_SelectPrize_M'",
         EventId: 103021,
+        HistoryBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Widget/LimitedPrizePool/History/WBP_LimitedPrizePool_DetailHistoryContent.WBP_LimitedPrizePool_DetailHistoryContent'",
         LimitedPrizePoolId: [1001, 1002],
+        ProcessBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/PC/LimitedPrizePool/WBP_LimitedPrizePool_Gacha_P.WBP_LimitedPrizePool_Gacha_P'",
+        ProcessMobileBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Mobile/LimitedPrizePool/WBP_LimitedPrizePool_Gacha_M.WBP_LimitedPrizePool_Gacha_M'",
+        ResultBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/PC/LimitedPrizePool/WBP_LimitedPrizePool_GetReward_P.WBP_LimitedPrizePool_GetReward_P'",
+        ResultMobileBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Mobile/LimitedPrizePool/WBP_LimitedPrizePool_GetReward_M.WBP_LimitedPrizePool_GetReward_M'",
+        RoundBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Widget/LimitedPrizePool/WBP_LimitedPrizePool_RewardSwitchTip.WBP_LimitedPrizePool_RewardSwitchTip'",
+    },
+    "10302101": {
+        BigPrizeBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/PC/LimitedPrizePool/Nun/WBP_LimitedPrizePool_SelectPrize_Nun_P.WBP_LimitedPrizePool_SelectPrize_Nun_P'",
+        BigPrizeMobileBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Mobile/LimitedPrizePool/Nun/WBP_LimitedPrizePool_SelectPrize_Nun_M.WBP_LimitedPrizePool_SelectPrize_Nun_M'",
+        EventId: 10302101,
+        HistoryBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Widget/LimitedPrizePool/Nun/History/WBP_LimitedPrizePool_DetailHistoryContent_Nun.WBP_LimitedPrizePool_DetailHistoryContent_Nun'",
+        LimitedPrizePoolId: [1003, 1004],
+        ProcessBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/PC/LimitedPrizePool/Nun/WBP_LimitedPrizePool_Gacha_Nun_P.WBP_LimitedPrizePool_Gacha_Nun_P'",
+        ProcessMobileBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Mobile/LimitedPrizePool/Nun/WBP_LimitedPrizePool_Gacha_Nun_M.WBP_LimitedPrizePool_Gacha_Nun_M'",
+        ResultBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/PC/LimitedPrizePool/Nun/WBP_LimitedPrizePool_GetReward_Nun_P.WBP_LimitedPrizePool_GetReward_Nun_P'",
+        ResultMobileBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Mobile/LimitedPrizePool/Nun/WBP_LimitedPrizePool_GetReward_Nun_M.WBP_LimitedPrizePool_GetReward_Nun_M'",
+        RoundBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Widget/LimitedPrizePool/Nun/WBP_LimitedPrizePool_RewardSwitchTip_Nun.WBP_LimitedPrizePool_RewardSwitchTip_Nun'",
     },
 }

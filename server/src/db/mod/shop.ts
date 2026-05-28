@@ -38,8 +38,8 @@ export const typeDefs = /* GraphQL */ `
         rewardName: String!
         displayClass: String
         displayCss: String
-        createdAt: String
-        updateAt: String
+        createdAt: Float
+        updateAt: Float
     }
 
     type ShopProduct {
@@ -55,10 +55,10 @@ export const typeDefs = /* GraphQL */ `
         pointsCost: Int!
         sortOrder: Int!
         isActive: Boolean!
-        startTime: String
-        endTime: String
-        createdAt: String
-        updateAt: String
+        startTime: Float
+        endTime: Float
+        createdAt: Float
+        updateAt: Float
         asset: ShopAsset!
     }
 
@@ -66,7 +66,7 @@ export const typeDefs = /* GraphQL */ `
         id: String!
         userId: String!
         assetId: String!
-        createdAt: String
+        createdAt: Float
         asset: ShopAsset!
     }
 
@@ -85,7 +85,7 @@ export const typeDefs = /* GraphQL */ `
         productId: String!
         assetId: String!
         pointsCost: Int!
-        createdAt: String
+        createdAt: Float
         user: User
         product: ShopProduct
         asset: ShopAsset
@@ -117,8 +117,8 @@ export const typeDefs = /* GraphQL */ `
         displayCss: String
         sortOrder: Int!
         isActive: Boolean!
-        startTime: String
-        endTime: String
+        startTime: Float
+        endTime: Float
     }
 `
 
@@ -195,7 +195,8 @@ function serializeShopProduct(product: ShopProductRow | null | undefined) {
  * @param value 原始时间文本。
  * @returns 可比较的时间戳；为空时返回 `null`，格式非法时返回 `Number.NaN`。
  */
-function parseShopDateTime(value?: string | null): number | null {
+function parseShopDateTime(value?: string | number | null): number | null {
+    if (typeof value === "number" && Number.isFinite(value)) return value
     const text = String(value ?? "").trim()
     if (!text) return null
     const normalized = text.replace(" ", "T")
@@ -259,8 +260,8 @@ function normalizeShopProductInput(data: {
     displayCss?: string | null
     sortOrder: number
     isActive: boolean
-    startTime?: string | null
-    endTime?: string | null
+    startTime?: string | number | null
+    endTime?: string | number | null
 }) {
     const rewardType = normalizeRewardType(String(data.rewardType))
     const name = String(data.name ?? "").trim()
@@ -268,10 +269,8 @@ function normalizeShopProductInput(data: {
     const rewardName = String(data.rewardName ?? "").trim()
     const displayClass = String(data.displayClass ?? "").trim()
     const displayCss = String(data.displayCss ?? "").trim()
-    const startTime = String(data.startTime ?? "").trim()
-    const endTime = String(data.endTime ?? "").trim()
-    const parsedStartTime = parseShopDateTime(startTime)
-    const parsedEndTime = parseShopDateTime(endTime)
+    const parsedStartTime = parseShopDateTime(data.startTime)
+    const parsedEndTime = parseShopDateTime(data.endTime)
 
     if (!name) {
         throw createGraphQLError("商品名称不能为空")
@@ -311,8 +310,8 @@ function normalizeShopProductInput(data: {
             pointsCost: Math.floor(data.pointsCost),
             sortOrder: Math.floor(data.sortOrder),
             isActive: data.isActive ? 1 : 0,
-            startTime: startTime || null,
-            endTime: endTime || null,
+            startTime: parsedStartTime,
+            endTime: parsedEndTime,
         },
         asset: {
             rewardType,
@@ -387,10 +386,10 @@ function buildShopProductFilterConditions(
             conditions.push(eq(schema.shopProducts.isActive, 0))
         }
     } else {
-        const nowText = formatShopDateTimeForComparison()
+        const now = Date.now()
         const baseAvailabilityConditions = [
             eq(schema.shopProducts.isActive, 1),
-            or(isNull(schema.shopProducts.endTime), gte(schema.shopProducts.endTime, nowText))!,
+            or(isNull(schema.shopProducts.endTime), gte(schema.shopProducts.endTime, now))!,
         ] as const
 
         if (shouldFilterAvailability && ownedAssetIds.length > 0) {
