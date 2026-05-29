@@ -122,7 +122,7 @@ const cumulativeWaveRewardIds = computed(() => {
         return []
     }
 
-    return props.dungeon.r.slice(0, cumulativeWaveCount.value)
+    return props.dungeon.r?.slice(0, cumulativeWaveCount.value) || []
 })
 
 /**
@@ -487,7 +487,7 @@ watch(
 
         <div class="tabs tabs-box bg-base-200/60 p-1">
             <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'reward' }" @click="activeTab = 'reward'">
-                奖励 ({{ (dungeon.r?.length || 0) + (dungeon.sr?.length || 0) }})
+                奖励 ({{ (dungeon.ac?.length || dungeon.r?.length || 0) + (dungeon.sr?.length || 0) }})
             </button>
             <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'monster' }" @click="activeTab = 'monster'">
                 怪物 ({{ (dungeon.m?.length || 0) + (dungeon.sm?.length || 0) }})
@@ -756,7 +756,7 @@ watch(
 
                 <div v-else class="card bg-base-200 rounded-lg p-3 text-sm text-base-content/70">暂无波次数据</div>
             </template>
-            <DBIronSurvivalDetailItem
+            <DBIronSurvivalSpawn
                 v-if="ironSurvivalData[dungeon.id]"
                 :dungeon="ironSurvivalData[dungeon.id]"
                 hideTitle
@@ -765,88 +765,106 @@ watch(
         </template>
 
         <template v-else>
-            <div v-if="isEndlessDungeon && dungeon.r?.length" class="card bg-base-200 rounded-lg p-3">
-                <div class="mb-2 flex items-center justify-between">
-                    <h3 class="font-bold">波数累计奖励 (1~{{ cumulativeWaveCount }}波)</h3>
-                    <label class="label cursor-pointer gap-2 text-xs">
-                        <span>你好箱</span>
-                        <input v-model="useNihaoBoxBonus" type="checkbox" class="checkbox checkbox-xs" />
-                    </label>
-                </div>
-                <div v-if="cumulativeWaveRewards.length" class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-                    <ResourceCostItem
-                        v-for="item in cumulativeWaveRewards"
-                        :key="item.key"
-                        :name="item.name"
-                        :value="item.value"
-                        class="bg-base-200"
-                    />
-                </div>
-                <div v-else class="text-sm text-base-content/70">当前波次暂无可累计奖励</div>
-            </div>
-
-            <!-- 奖励列表 -->
-            <div v-if="dungeon.r?.length" class="card bg-base-200 rounded-lg p-3">
-                <div class="text-xs text-base-content/70 mb-2">{{ $t("奖励列表") }}</div>
-                <div class="space-y-3">
-                    <div
-                        v-for="item in mergedDungeonRewards"
-                        :key="`${item.reward.id}-${item.indices.join('-')}`"
-                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
-                    >
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm font-medium">{{ formatRewardIndexRanges(item.indices) }} 奖励组 {{ item.reward.id }}</span>
-
-                            <span
-                                class="text-xs px-1.5 py-0.5 rounded"
-                                :class="
-                                    getDropModeText(item.reward.m || '') === '独立'
-                                        ? 'bg-success text-success-content'
-                                        : 'bg-warning text-warning-content'
-                                "
-                            >
-                                {{ getDropModeText(item.reward.m || "") }}
-                                <span v-if="item.reward.totalP">总容量 {{ item.reward.totalP }}</span>
-                            </span>
-                        </div>
-                        <!-- 使用 RewardItem 组件显示奖励 -->
-                        <RewardItem :reward="item.reward" />
+            <template v-if="dungeon.ac?.length">
+                <div class="card bg-base-200 rounded-lg p-3">
+                    <div class="text-xs text-base-content/70 mb-2">{{ $t("奖励选择") }}</div>
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                        <ResourceCostItem v-for="item in dungeon.ac" :key="item.id" name="" :value="[item.c, item.id, 'Resource']" />
                     </div>
                 </div>
-            </div>
+            </template>
+            <template v-else>
+                <div v-if="isEndlessDungeon && dungeon.r?.length" class="card bg-base-200 rounded-lg p-3">
+                    <div class="mb-2 flex items-center justify-between">
+                        <h3 class="font-bold">波数累计奖励 (1~{{ cumulativeWaveCount }}波)</h3>
+                        <label class="label cursor-pointer gap-2 text-xs">
+                            <span>你好箱</span>
+                            <input v-model="useNihaoBoxBonus" type="checkbox" class="checkbox checkbox-xs" />
+                        </label>
+                    </div>
+                    <div v-if="cumulativeWaveRewards.length" class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                        <ResourceCostItem
+                            v-for="item in cumulativeWaveRewards"
+                            :key="item.key"
+                            :name="item.name"
+                            :value="item.value"
+                            class="bg-base-200"
+                        />
+                    </div>
+                    <div v-else class="text-sm text-base-content/70">当前波次暂无可累计奖励</div>
+                </div>
+                <!-- 深境探险奖励表 -->
+                <DBIronSurvivalDetailItem
+                    v-if="ironSurvivalData[dungeon.id]"
+                    :dungeon="ironSurvivalData[dungeon.id]"
+                    hideTitle
+                    :wave="selectedEndlessWave"
+                />
+                <!-- 奖励列表 -->
+                <div v-if="dungeon.r?.length" class="card bg-base-200 rounded-lg p-3">
+                    <div class="text-xs text-base-content/70 mb-2">{{ $t("奖励列表") }}</div>
+                    <div class="space-y-3">
+                        <div
+                            v-for="item in mergedDungeonRewards"
+                            :key="`${item.reward.id}-${item.indices.join('-')}`"
+                            class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                        >
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-medium"
+                                    >{{ formatRewardIndexRanges(item.indices) }} 奖励组 {{ item.reward.id }}</span
+                                >
 
-            <!-- 特殊奖励 -->
-            <div v-if="dungeon.sr?.length" class="card bg-base-200 rounded-lg p-3">
-                <h3 class="text-xs text-base-content/70 mb-2">特殊奖励 ({{ dungeon.sr.length }}组)</h3>
-                <div class="space-y-3">
-                    <div
-                        v-for="reward in dungeon.sr.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
-                        :key="reward.id"
-                        class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
-                    >
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm font-medium">特殊奖励组 {{ reward.id }}</span>
-                            <span
-                                class="text-xs px-1.5 py-0.5 rounded"
-                                :class="
-                                    getDropModeText(reward.m || '') === '独立'
-                                        ? 'bg-success text-success-content'
-                                        : 'bg-warning text-warning-content'
-                                "
-                            >
-                                {{ getDropModeText(reward.m || "") }}
-                                <span v-if="reward.totalP">总容量 {{ reward.totalP }}</span>
-                            </span>
+                                <span
+                                    class="text-xs px-1.5 py-0.5 rounded"
+                                    :class="
+                                        getDropModeText(item.reward.m || '') === '独立'
+                                            ? 'bg-success text-success-content'
+                                            : 'bg-warning text-warning-content'
+                                    "
+                                >
+                                    {{ getDropModeText(item.reward.m || "") }}
+                                    <span v-if="item.reward.totalP">总容量 {{ item.reward.totalP }}</span>
+                                </span>
+                            </div>
+                            <!-- 使用 RewardItem 组件显示奖励 -->
+                            <RewardItem :reward="item.reward" />
                         </div>
-                        <!-- 使用 RewardItem 组件显示奖励 -->
-                        <RewardItem :reward="reward" />
                     </div>
                 </div>
-            </div>
 
-            <div v-if="!dungeon.r?.length && !dungeon.sr?.length" class="card bg-base-200 rounded-lg p-3 text-sm text-base-content/70">
-                暂无奖励数据
-            </div>
+                <!-- 特殊奖励 -->
+                <div v-if="dungeon.sr?.length" class="card bg-base-200 rounded-lg p-3">
+                    <h3 class="text-xs text-base-content/70 mb-2">特殊奖励 ({{ dungeon.sr.length }}组)</h3>
+                    <div class="space-y-3">
+                        <div
+                            v-for="reward in dungeon.sr.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
+                            :key="reward.id"
+                            class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                        >
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-medium">特殊奖励组 {{ reward.id }}</span>
+                                <span
+                                    class="text-xs px-1.5 py-0.5 rounded"
+                                    :class="
+                                        getDropModeText(reward.m || '') === '独立'
+                                            ? 'bg-success text-success-content'
+                                            : 'bg-warning text-warning-content'
+                                    "
+                                >
+                                    {{ getDropModeText(reward.m || "") }}
+                                    <span v-if="reward.totalP">总容量 {{ reward.totalP }}</span>
+                                </span>
+                            </div>
+                            <!-- 使用 RewardItem 组件显示奖励 -->
+                            <RewardItem :reward="reward" />
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="!dungeon.r?.length && !dungeon.sr?.length" class="card bg-base-200 rounded-lg p-3 text-sm text-base-content/70">
+                    暂无奖励数据
+                </div>
+            </template>
         </template>
     </div>
 </template>

@@ -1,16 +1,15 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { dungeonMap, ironSurvivalDungeonData, LeveledChar, LeveledMonster, monsterLevelDropMap, rewardMap } from "@/data"
+import { dungeonMap, ironSurvivalDungeonData, LeveledChar, monsterLevelDropMap, rewardMap } from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
 import type { IronSurvival } from "@/data/d/ironsurvival.data"
-import { ironSurvivalMonsterSpawnData } from "@/data/d/ironsurvival.data"
 import type { Reward, RewardChild } from "@/data/data-types"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
 
 interface IronSurvivalRewardRow {
     threshold: number
-    rewardId: number | undefined
+    rewardId: number
 }
 
 interface MonsterLevelDropRow {
@@ -48,7 +47,6 @@ const dungeonDetail = computed(() => ironSurvivalDungeonData[props.dungeon.Dunge
 const dungeonBase = computed(() => dungeonMap.get(props.dungeon.DungeonId) || null)
 const IRON_SURVIVAL_LEVEL_STEP = 5
 const IRON_SURVIVAL_REWARD_BATCH_COUNT = 3
-const dungeonMonsterSpawnMap = computed(() => new Map(ironSurvivalMonsterSpawnData.map(spawn => [spawn.id, spawn])))
 const strongKillCount = computed(() => props.dungeon.StrongKillCount?.[0] || 50)
 const selectedWave = computed(() => Math.max(1, props.wave ?? 1))
 
@@ -204,15 +202,12 @@ const rewardRows = computed<IronSurvivalRewardRow[]>(() => {
 /**
  * 计算某个奖励阈值在当前波次范围内实际生效的波次数量。
  * @param threshold 当前奖励阈值
- * @param nextThreshold 下一个奖励阈值
  * @returns 生效波次数
  */
-function getRewardRowWaveCount(threshold: number, nextThreshold: number | undefined): number {
+function getRewardRowWaveCount(threshold: number): number {
     const baseLevel = dungeonBase.value?.lv || 1
     const startWave = Math.max(1, Math.ceil((threshold - baseLevel) / IRON_SURVIVAL_LEVEL_STEP) + 1)
-    const endWave = nextThreshold
-        ? Math.min(selectedWave.value, Math.ceil((nextThreshold - baseLevel) / IRON_SURVIVAL_LEVEL_STEP))
-        : selectedWave.value
+    const endWave = selectedWave.value
 
     if (endWave < startWave) {
         return 0
@@ -227,13 +222,18 @@ const roundsCumulativeRewards = computed<CumulativeRewardDisplayItem[]>(() => {
     }
 
     const buckets = new Map<string, CumulativeRewardBucket>()
-    rewardRows.value.forEach((row, index) => {
+    const currentThreshold = ironSurvivalMonsterLevel.value
+
+    rewardRows.value.forEach(row => {
         if (!row.rewardId) {
             return
         }
 
-        const nextThreshold = rewardRows.value[index + 1]?.threshold
-        const waveCount = getRewardRowWaveCount(row.threshold, nextThreshold)
+        if (row.threshold > currentThreshold) {
+            return
+        }
+
+        const waveCount = getRewardRowWaveCount(row.threshold)
         if (waveCount <= 0) {
             return
         }
@@ -278,15 +278,6 @@ const rewardRowDetails = computed(() => {
         reward: row.rewardId ? getRewardDetails(row.rewardId) : null,
     }))
 })
-
-/**
- * 根据生成器ID获取真正的怪物ID列表。
- * @param spawnId 生成器ID
- * @returns 怪物ID列表
- */
-function getSpawnMonsterIds(spawnId: number): number[] {
-    return dungeonMonsterSpawnMap.value.get(spawnId)?.m?.map(monster => monster.id) || []
-}
 </script>
 
 <template>
@@ -327,6 +318,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
 
         <div class="p-3 rounded bg-base-200">
             <div class="text-xs text-base-content/70 mb-2">等级奖励表</div>
+            <div class="text-xs text-base-content/60 mb-2">可获取小于等于当前等级的所有奖励</div>
             <div class="space-y-2">
                 <div
                     v-for="row in rewardRowDetails"
@@ -334,7 +326,10 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                     class="p-3 rounded bg-base-100 border border-base-200 flex items-start justify-between gap-3"
                 >
                     <div class="shrink-0">
-                        <div class="text-sm">Lv. {{ row.threshold }} 奖励组 {{ row.rewardId }}</div>
+                        <div class="text-sm">
+                            Lv. {{ row.threshold }}
+                            <CopyID :id="row.rewardId" />
+                        </div>
                         <RewardItem v-if="row.reward" :reward="row.reward" />
                     </div>
                 </div>
@@ -356,76 +351,13 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                         <span class="font-medium">Lv. {{ dropRow.level }}</span>
                         <span class="text-xs px-2 py-0.5 rounded bg-base-200">概率 {{ dropRow.probability / 100 }}%</span>
                         <span class="text-xs px-2 py-0.5 rounded bg-base-200">概率提升 {{ dropRow.probabilityUp / 100 }}%</span>
-                        <span class="text-xs px-2 py-0.5 rounded bg-primary text-primary-content">原型奖励 {{ dropRow.rewardId }}</span>
+                        <CopyID :id="dropRow.rewardId" />
                     </div>
                     <RewardItem v-if="dropRow.reward" :reward="dropRow.reward" />
                 </div>
             </div>
         </div>
 
-        <div class="p-3 rounded bg-base-200">
-            <div class="text-xs text-base-content/70 mb-2">普通刷怪</div>
-            <div class="space-y-2">
-                <div
-                    v-for="(spawnGroup, index) in dungeon.MonsterSpawnId"
-                    :key="index"
-                    class="p-3 rounded bg-base-100 border border-base-200"
-                >
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <div class="font-medium">第 {{ index + 1 }} 组</div>
-                        <span class="text-xs px-2 py-0.5 rounded bg-primary text-primary-content">怪物 ID 组</span>
-                    </div>
-                    <div class="space-y-2">
-                        <div v-for="spawnId in spawnGroup" :key="spawnId" class="rounded border border-base-200 bg-base-200/60 p-2">
-                            <div class="mb-2 flex items-center justify-between text-xs text-base-content/70">
-                                <span>生成器</span>
-                                <CopyID :id="spawnId" />
-                            </div>
-                            <div class="mb-2 text-xs text-base-content/70">{{ strongKillCount }} 小怪后生成 1 个精英</div>
-                            <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-                                <DBMonsterCompactCard
-                                    v-for="monsterId in getSpawnMonsterIds(spawnId)"
-                                    :key="`${spawnId}-${monsterId}`"
-                                    :monster="new LeveledMonster(monsterId, ironSurvivalMonsterLevel)"
-                                    :clickable="false"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="p-3 rounded bg-base-200">
-            <div class="text-xs text-base-content/70 mb-2">强敌刷怪</div>
-            <div class="space-y-2">
-                <div
-                    v-for="(spawnGroup, index) in dungeon.StrongLoopSpawnId"
-                    :key="index"
-                    class="p-3 rounded bg-base-100 border border-base-200"
-                >
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <div class="font-medium">阶段 {{ index + 1 }}</div>
-                        <span class="text-xs px-2 py-0.5 rounded bg-primary text-primary-content">强敌 ID 组</span>
-                    </div>
-                    <div class="space-y-2">
-                        <div v-for="spawnId in spawnGroup" :key="spawnId" class="rounded border border-base-200 bg-base-200/60 p-2">
-                            <div class="mb-2 flex items-center justify-between text-xs text-base-content/70">
-                                <span>生成器</span>
-                                <CopyID :id="spawnId" />
-                            </div>
-                            <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-                                <DBMonsterCompactCard
-                                    v-for="monsterId in getSpawnMonsterIds(spawnId)"
-                                    :key="`${spawnId}-${monsterId}`"
-                                    :monster="new LeveledMonster(monsterId, ironSurvivalMonsterLevel)"
-                                    :clickable="false"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <DBIronSurvivalSpawn v-if="!hideTitle" :dungeon="dungeon" :wave="wave" />
     </div>
 </template>

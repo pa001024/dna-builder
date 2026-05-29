@@ -615,7 +615,7 @@ function handleCardClick() {
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
             <SRouterLink v-if="getFashionLink(value[2], value[1])" :to="getFashionLink(value[2], value[1])" stop class="hover:underline">
-                {{ value[2] === 'Skin' ? getSkinDisplayName(value[1], nameString) : nameString }}
+                {{ value[2] === "Skin" ? getSkinDisplayName(value[1], nameString) : nameString }}
             </SRouterLink>
             <span v-else>{{ name }}</span>
         </span>

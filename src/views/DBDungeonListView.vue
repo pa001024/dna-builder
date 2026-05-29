@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { useLocalStorage } from "@vueuse/core"
+import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledChar } from "@/data"
@@ -11,9 +12,9 @@ const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDungeonId = useSearchParam<number>("id", 0)
 const selectedType = useSearchParam<string>("tp", "")
 const selectedLevel = useSearchParam<string>("lv", "")
-const onlyNightHandbook = ref(false)
-const showTypeFilter = ref(false)
-const showLevelFilter = ref(false)
+const onlyNightHandbook = useLocalStorage("dungeon.showNightHandbook", false)
+const showTypeFilter = useLocalStorage("dungeon.showTypeFilter", false)
+const showLevelFilter = useLocalStorage("dungeon.showLevelFilter", false)
 
 // 根据 ID 获取选中的副本
 const selectedDungeon = computed(() => {
