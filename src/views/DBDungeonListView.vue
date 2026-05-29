@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledChar } from "@/data"
@@ -11,6 +11,9 @@ const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDungeonId = useSearchParam<number>("id", 0)
 const selectedType = useSearchParam<string>("tp", "")
 const selectedLevel = useSearchParam<string>("lv", "")
+const onlyNightHandbook = ref(false)
+const showTypeFilter = ref(false)
+const showLevelFilter = ref(false)
 
 // 根据 ID 获取选中的副本
 const selectedDungeon = computed(() => {
@@ -34,6 +37,11 @@ const allLevels = computed(() => {
  */
 const filteredDungeons = computed(() => {
     return dungeonData.filter(d => {
+        const matchesNightHandbook = !onlyNightHandbook.value || d.mod != null
+        if (!matchesNightHandbook) {
+            return false
+        }
+
         const matchesType = selectedType.value === "" || d.t === selectedType.value
         if (!matchesType) {
             return false
@@ -76,6 +84,24 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
     selectedDungeonId.value = dungeon?.id || 0
 }
 
+/**
+ * 切换筛选项显示状态，关闭时清空对应筛选值。
+ * @param filterName 筛选项名称
+ * @param show 是否显示
+ */
+function toggleFilter(filterName: "type" | "level", show: boolean) {
+    if (show) {
+        return
+    }
+
+    if (filterName === "type") {
+        selectedType.value = ""
+        return
+    }
+
+    selectedLevel.value = ""
+}
+
 useInitialScrollToSelectedItem()
 </script>
 
@@ -96,9 +122,33 @@ useInitialScrollToSelectedItem()
 
                 <!-- 类型筛选Tab -->
                 <div class="p-2 border-b border-base-200">
-                    <div class="flex flex-wrap gap-1 pb-1">
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input v-model="onlyNightHandbook" type="checkbox" class="checkbox checkbox-xs" />
+                            <span class="text-xs text-base-content/70">夜航手册</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input
+                                v-model="showTypeFilter"
+                                type="checkbox"
+                                class="checkbox checkbox-xs"
+                                @change="toggleFilter('type', showTypeFilter)"
+                            />
+                            <span class="text-xs text-base-content/70">类型</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input
+                                v-model="showLevelFilter"
+                                type="checkbox"
+                                class="checkbox checkbox-xs"
+                                @change="toggleFilter('level', showLevelFilter)"
+                            />
+                            <span class="text-xs text-base-content/70">等级</span>
+                        </label>
+                    </div>
+                    <div v-show="showTypeFilter" class="flex flex-wrap gap-1 mb-2">
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedType = ''"
                         >
@@ -107,7 +157,7 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="type in allTypes.map(t => getDungeonType(t))"
                             :key="type.t"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                             :class="
                                 selectedType === type.t ? type.color + ' text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
                             "
@@ -116,9 +166,9 @@ useInitialScrollToSelectedItem()
                             {{ type.label }}
                         </button>
                     </div>
-                    <div class="flex flex-wrap gap-1 pt-2 pb-1">
+                    <div v-show="showLevelFilter" class="flex flex-wrap gap-1">
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                             :class="selectedLevel === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedLevel = ''"
                         >
@@ -127,7 +177,7 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="level in allLevels"
                             :key="level"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
                             :class="
                                 selectedLevel === `${level}` ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
                             "

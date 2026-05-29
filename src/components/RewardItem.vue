@@ -328,7 +328,7 @@ function getRewardDisplayName(item: RewardItemType) {
         const skin = skinMap.get(item.id)
         const charName = skin?.charId ? charMap.get(skin.charId)?.名称 : ""
         const skinName = item.n ? t(item.n) : skin?.name || `ID: ${item.id}`
-        return charName ? `${charName} · ${skinName}` : skinName
+        return charName ? `${t(charName)} · ${skinName}` : skinName
     }
     if (["Weapon", "HeadSculpture", "HeadFrame"].includes(item.t)) {
         return item.n ? t(item.n) : `ID: ${item.id}`

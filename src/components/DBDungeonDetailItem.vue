@@ -73,6 +73,7 @@ const activeTab = useSearchParam<DetailTab>("tab", getDefaultDetailTab(props.dun
  * @returns 是否为无尽任务
  */
 const isEndlessDungeon = computed(() => {
+    if (props.dungeon.t === "DefenceMove") return false
     return props.dungeon.n.includes("无尽") || props.dungeon.ts?.includes("无尽")
 })
 
@@ -472,6 +473,9 @@ watch(
                 </SRouterLink>
                 <CopyID :id="dungeon.id" />
                 <div class="flex-1"></div>
+                <span v-if="dungeon.mod != null" class="text-xs px-2 py-1 rounded bg-base-200 text-base-content">
+                    历练等级 {{ dungeon.mod }}
+                </span>
                 <span class="text-xs px-2 py-1 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">
                     Lv.{{ dungeon.lv }} {{ dungeon.t }}
                 </span>

@@ -97,10 +97,9 @@ const mhList = [
 )
 
 export function getDungeonName(dungeon: Dungeon) {
-    const yehang = ["DefenceMove", "ExtermPro", "SurvivalMiniPro"]
-    if (yehang.includes(dungeon.t) && dungeon.sr && dungeon.sm) {
-        if (dungeon.sm.length > 1) {
-            return `${t(dungeon.n)}(${t(monsterMap.get(dungeon.sm[0]!)!.n)} ${t("夜航手册")} 多号令)`
+    if (dungeon.mod != null && dungeon.sm?.length) {
+        if (dungeon.rush) {
+            return `${t(dungeon.n)}(${t(monsterMap.get(dungeon.sm[0]!)!.n)} ${t("夜航手册")} ${t("收获日")})`
         }
         return `${t(dungeon.n)}(${t(monsterMap.get(dungeon.sm[0])!.n)} ${t("夜航手册")})`
     }

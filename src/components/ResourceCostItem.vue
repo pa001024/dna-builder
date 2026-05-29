@@ -280,6 +280,24 @@ function getFashionMeta(type: FashionCostType, id: number | string): FashionCost
 }
 
 /**
+ * 获取皮肤条目的展示名称。
+ * @param id 皮肤ID
+ * @param fallback 兜底名称
+ * @returns 角色名与皮肤名组合后的展示文本
+ */
+function getSkinDisplayName(id: number | string, fallback: string): string {
+    const normalizedId = Number(id)
+    if (!Number.isFinite(normalizedId)) {
+        return fallback
+    }
+
+    const skin = skinMap.get(normalizedId)
+    const charName = skin?.charId ? charMap.get(skin.charId)?.名称 : ""
+    const skinName = skin?.name || fallback
+    return charName ? `${charName} · ${skinName}` : skinName
+}
+
+/**
  * 判断奖励项是否属于可直接按时装类型展示的分支。
  * @param type 奖励类型
  * @returns 是否为时装分支
@@ -597,7 +615,7 @@ function handleCardClick() {
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
             <SRouterLink v-if="getFashionLink(value[2], value[1])" :to="getFashionLink(value[2], value[1])" stop class="hover:underline">
-                {{ nameString }}
+                {{ value[2] === 'Skin' ? getSkinDisplayName(value[1], nameString) : nameString }}
             </SRouterLink>
             <span v-else>{{ name }}</span>
         </span>
