@@ -4747,14 +4747,6 @@ export const subRegionData: SubRegion[] = [
         map: "BattleTest_Exit",
     },
 ]
-// patch 106301
-;(() => {
-    const index = subRegionData.findIndex(v => v.id === 106301) // 锻铁厂
-    const index2 = subRegionData.findIndex(v => v.id === 106001) // 百花车站
-    if (index >= 0) {
-        subRegionData[index2].rc = subRegionData[index].rc
-    }
-})()
 
 export const subRegionMap = subRegionData.reduce((acc, cur) => {
     acc.set(cur.id, cur)
