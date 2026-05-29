@@ -47,6 +47,14 @@ export interface RewardItem {
 }
 
 /**
+ * 自选奖励组的原始结构。
+ */
+export interface OptRewardItem {
+    id: number
+    child: RewardItem[]
+}
+
+/**
  * 掉落模式类型
  */
 export type DropMode = "Fixed" | "Gender" | "Independent" | "Level" | "Once" | "Sequence" | "Weight"

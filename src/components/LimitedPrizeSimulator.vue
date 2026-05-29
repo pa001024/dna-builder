@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
 import { resourceMap } from "@/data"
-import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { skinMap } from "@/data/d"
+import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { charMap } from "@/data/d/index"
 import { limitedPrizeCostRules, limitedPrizeItems, limitedPrizePools } from "@/data/d/limitedprize.data"
@@ -213,7 +214,7 @@ function getPrizeName(type: LimitedPrizeType, id: number): string {
         return LeveledWeapon.idToUrl(id) ? `武器 ${id}` : `ID: ${id}`
     }
     if (type === "Skin") {
-        return skinData.find(item => item.id === id)?.name || `ID: ${id}`
+        return skinMap.get(id)?.name || `ID: ${id}`
     }
     if (type === "WeaponSkin") {
         return weaponSkinData.find(item => item.id === id)?.name || `ID: ${id}`
@@ -247,7 +248,7 @@ function getPrizeIcon(type: LimitedPrizeType, id: number): string {
         return LeveledWeapon.idToUrl(id)
     }
     if (type === "Skin") {
-        const icon = skinData.find(item => item.id === id)?.icon
+        const icon = skinMap.get(id)?.icon
         return icon ? resolveSkinIconUrl(icon) : "/imgs/webp/T_Head_Empty.webp"
     }
     if (type === "WeaponSkin") {

@@ -13,7 +13,8 @@ import {
     walnutMap,
     weaponMap,
 } from "@/data"
-import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { skinMap } from "@/data/d"
+import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Cutoff } from "@/data/d/cutoff.data"
 import { headSculptureMap } from "@/data/d/headsculpture.data"
 import { mountData } from "@/data/d/mount.data"
@@ -206,7 +207,7 @@ const itemDetail = computed(() => {
                 icon: `/imgs/webp/T_Head_Empty.webp`,
             }
         case "Skin":
-            const skin = skinData.find(item => item.id === props.item.typeId)
+            const skin = skinMap.get(props.item.typeId)
             if (!skin) {
                 return {
                     type: props.item.itemType,

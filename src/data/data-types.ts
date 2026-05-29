@@ -552,4 +552,9 @@ export interface RewardChild {
     n?: string
 }
 
+export interface OptReward {
+    id: number
+    child: RewardChild[]
+}
+
 export type { Dungeon } from "./d/dungeon.data"

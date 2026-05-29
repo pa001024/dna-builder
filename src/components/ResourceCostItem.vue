@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { LeveledChar, LeveledMod, resourceMap } from "@/data"
-import { charMap, draftMap, modMap, walnutMap, weaponMap } from "@/data/d"
-import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { charMap, draftMap, modMap, skinMap, walnutMap, weaponMap } from "@/data/d"
+import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { iconticketMap } from "@/data/d/iconticket.data"
@@ -257,7 +257,7 @@ function getFashionMeta(type: FashionCostType, id: number | string): FashionCost
     }
 
     if (type === "Skin") {
-        const item = skinData.find(entry => entry.id === normalizedId)
+        const item = skinMap.get(normalizedId)
         return item ? { icon: item.icon, rarity: item.rarity } : null
     }
 

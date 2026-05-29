@@ -3,8 +3,8 @@ import { t } from "i18next"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { draftMap, LeveledChar, LeveledMod, LeveledWeapon, resourceMap } from "../data"
-import { charMap, walnutMap } from "../data/d"
-import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "../data/d/accessory.data"
+import { charMap, modMap, skinMap, walnutMap } from "../data/d"
+import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData } from "../data/d/accessory.data"
 import { headSculptureData } from "../data/d/headsculpture.data"
 import { iconticketData } from "../data/d/iconticket.data"
 import { getRewardTypeText, RewardItem as RewardItemType } from "../utils/reward-utils"
@@ -95,7 +95,7 @@ function getSkinIconById(id: number | string): string {
         return "/imgs/webp/T_Head_Empty.webp"
     }
 
-    const skin = skinData.find(item => item.id === normalizedId)
+    const skin = skinMap.get(normalizedId)
     return skin?.icon ? resolveSkinIconUrl(skin.icon) : "/imgs/webp/T_Head_Empty.webp"
 }
 
@@ -151,6 +151,9 @@ function getRewardLink(item: RewardItemType) {
     if (item.t === "Resource") {
         const resource = resourceMap.get(item.id)
         return resource ? `/db/resource/${resource.id}` : ""
+    }
+    if (item.t === "Skin") {
+        return `/db/accessory/skin/${item.id}`
     }
     if (["CharAccessory", "WeaponAccessory"].includes(item.t)) {
         return `/db/accessory/${item.t === "CharAccessory" ? "char" : "weapon"}/${item.id}`
@@ -270,7 +273,7 @@ function getRewardBackgroundColor(item: RewardItemType) {
     if (["Skin", "HeadSculpture", "HeadFrame", "CharAccessory", "WeaponAccessory", "WeaponSkin"].includes(item.t)) {
         return getRarityGradientClass(
             item.t === "Skin"
-                ? skinData.find(entry => entry.id === item.id)?.rarity || 1
+                ? skinMap.get(item.id)?.rarity || 1
                 : item.t === "WeaponSkin"
                   ? weaponSkinData.find(entry => entry.id === item.id)?.rarity || 1
                   : item.t === "CharAccessory"
@@ -283,10 +286,10 @@ function getRewardBackgroundColor(item: RewardItemType) {
         )
     }
     if (item.t === "Mod") {
-        return "from-purple-900/80 to-purple-100/80"
+        return getRarityGradientClass(modMap.get(item.id)?.品质 ?? "金")
     }
     if (item.t === "Weapon") {
-        return "from-blue-900/80 to-blue-100/80"
+        return getRarityGradientClass(5)
     }
     if (item.t === "Char") {
         return getRarityGradientClass(5)
@@ -321,7 +324,13 @@ function getRewardDisplayName(item: RewardItemType) {
     if (item.t === "Char") {
         return charMap.get(item.id)?.名称 || item.n || `ID: ${item.id}`
     }
-    if (["Weapon", "Skin", "HeadSculpture", "HeadFrame"].includes(item.t)) {
+    if (item.t === "Skin") {
+        const skin = skinMap.get(item.id)
+        const charName = skin?.charId ? charMap.get(skin.charId)?.名称 : ""
+        const skinName = item.n ? t(item.n) : skin?.name || `ID: ${item.id}`
+        return charName ? `${charName} · ${skinName}` : skinName
+    }
+    if (["Weapon", "HeadSculpture", "HeadFrame"].includes(item.t)) {
         return item.n ? t(item.n) : `ID: ${item.id}`
     }
     if (["CharAccessory", "WeaponAccessory", "WeaponSkin"].includes(item.t)) {
@@ -450,14 +459,18 @@ function getDropModeText(mode: string): string {
                                 <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
                             </span>
                             <span v-if="item.c !== undefined" class="text-base-content/70">x{{ item.c }}</span>
-                            <span v-if="item.t === 'Reward' && item.c === undefined && item.m === 'Fixed'" class="text-base-content/70">固定</span>
+                            <span v-if="item.t === 'Reward' && item.c === undefined && item.m === 'Fixed'" class="text-base-content/70"
+                                >固定</span
+                            >
                             <span v-else-if="item.t !== 'Reward' && item.p && item.m !== 'Independent'" class="text-base-content/70">
                                 ({{ item.m === "Sequence" ? `容量:${item.p}` : `权重:${item.p}` }}
                                 {{ item.pp ? `比例:${+(item.pp * 100).toFixed(2)}%` : "" }}
                                 {{ item.times ? `每个期望:${+item.times.toFixed(2)}次` : "" }}
                                 )
                             </span>
-                            <span v-if="item.t !== 'Reward' && item.m === 'Independent'">独立掉落 {{ `概率:${+(item.p / 100).toFixed(2)}%` }}</span>
+                            <span v-if="item.t !== 'Reward' && item.m === 'Independent'"
+                                >独立掉落 {{ `概率:${+(item.p / 100).toFixed(2)}%` }}</span
+                            >
                             <!-- 显示掉落模式 -->
                             <span
                                 v-if="item.t === 'Reward'"
