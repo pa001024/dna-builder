@@ -181,7 +181,7 @@ export class LeveledSkill {
     getSummonAttrsMap(attrs?: CharAttr & { weapon?: WeaponAttr }) {
         if (this.召唤物) {
             const summon = this.召唤物
-            const atkspd = ((attrs?.weapon?.攻速 || 1) - 1) * (attrs?.召唤物攻击速度 || 1)
+            const atkspd = ((attrs?.weapon?.攻速 || 1) - 1) * (attrs?.召唤物攻击速度 || 0)
             const df = this.召唤物持续时间
             const duration = df ? (df.属性影响?.includes("技能耐久") ? df.值 * (attrs?.技能耐久 || 1) : df.值) : 0
             return {

@@ -183,34 +183,3 @@ export const resolvers = {
         },
     },
 } satisfies Resolver<CreateMobius<typeof typeDefs>, Context>
-
-/**
- * 格式化相对时间
- * 将时间字符串转换为相对时间描述（如"2分钟前"）
- */
-function formatRelativeTime(timestamp: number): string {
-    if (!timestamp) return "未知时间"
-
-    try {
-        const diffMs = Date.now() - timestamp
-        const diffSeconds = Math.floor(diffMs / 1000)
-        const diffMinutes = Math.floor(diffSeconds / 60)
-        const diffHours = Math.floor(diffMinutes / 60)
-        const diffDays = Math.floor(diffHours / 24)
-
-        if (diffSeconds < 60) {
-            return `${diffSeconds}秒前`
-        } else if (diffMinutes < 60) {
-            return `${diffMinutes}分钟前`
-        } else if (diffHours < 24) {
-            return `${diffHours}小时前`
-        } else if (diffDays < 7) {
-            return `${diffDays}天前`
-        } else {
-            // 超过7天返回日期
-            return new Date(timestamp).toLocaleString("zh-CN")
-        }
-    } catch {
-        return new Date(timestamp).toLocaleString("zh-CN")
-    }
-}

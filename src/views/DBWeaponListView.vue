@@ -269,7 +269,7 @@ useInitialScrollToSelectedItem()
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-sm font-medium">ID: {{ weapon.id }}</div>
+                                    <CopyID :id="weapon.id" />
                                 </div>
                             </div>
                             <div class="flex flex-wrap gap-2 mt-2 text-xs opacity-70">

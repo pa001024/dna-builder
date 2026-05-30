@@ -45,25 +45,8 @@ useInitialScrollToSelectedItem()
 
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
-                        <div
-                            v-for="forge in filteredForgeLevels"
-                            :key="forge.ForgeLevel"
-                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedForgeLevel === forge.ForgeLevel }"
-                            @click="selectedForgeLevel = forge.ForgeLevel"
-                        >
-                            <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <div class="font-medium">熔炼等级 {{ forge.ForgeLevel }}</div>
-                                    <div class="text-xs opacity-70 mt-1">最大同调卡牌等级: {{ forge.HyperWeaponMaxCardLevel }}</div>
-                                </div>
-                                <span class="text-xs px-2 py-0.5 rounded bg-primary text-primary-content">ID: {{ forge.ForgeLevel }}</span>
-                            </div>
-
-                            <div class="flex flex-wrap gap-2 mt-2 text-xs opacity-75">
-                                <span>任务 {{ forge.ForgeLevelQuestId.length }} 个</span>
-                                <span>奖励 {{ forge.ForgeLevelReward }}</span>
-                            </div>
+                        <div v-for="forge in filteredForgeLevels" :key="forge.ForgeLevel">
+                            <DBForgeDetailItem :forge="forge" />
                         </div>
                     </div>
                 </ScrollArea>
@@ -72,18 +55,6 @@ useInitialScrollToSelectedItem()
                     共 {{ filteredForgeLevels.length }} 个熔炼等级
                 </div>
             </div>
-
-            <div
-                v-if="selectedForge"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
-                @click="selectedForgeLevel = 0"
-            >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
-
-            <ScrollArea v-if="selectedForge" class="flex-1">
-                <DBForgeDetailItem :forge="selectedForge" />
-            </ScrollArea>
         </div>
     </div>
 </template>

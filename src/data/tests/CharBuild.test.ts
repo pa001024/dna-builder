@@ -368,6 +368,29 @@ describe("CharBuild类测试", () => {
             expect(result).toBeGreaterThanOrEqual(0)
         })
 
+        it("带熔炉的武器精炼应固定为0", () => {
+            const weapon = new LeveledWeapon({
+                id: 999999,
+                名称: "测试熔炉武器",
+                类型: ["近战", "长柄"],
+                伤害类型: "切割",
+                攻击: 10,
+                暴击: 0.1,
+                暴伤: 1.5,
+                触发: 0.2,
+                加成: { 攻击: 0.5 },
+                熔炼: ["A", "B", "C", "D", "E", "F"],
+                熔炉: [{ lv: 0, 解锁: {} }],
+            })
+            expect(weapon.精炼).toBe(0)
+
+            weapon.精炼 = 5
+            expect(weapon.精炼).toBe(0)
+
+            const cloned = weapon.clone()
+            expect(cloned.精炼).toBe(0)
+        })
+
         it("应该能够正确计算DPAPSM（每持续神智伤害）目标函数", () => {
             const charBuild = createCharBuild()
             charBuild.targetFunction = "每持续神智伤害"
@@ -1202,10 +1225,11 @@ describe("CharBuild类测试", () => {
                     ["菲娜4溯", 1],
                     ["菲娜助战", 1],
                     ["菲娜被动(自身)", 1],
-                    ["羽翼·鼓舞·专注(光/暗)", 10],
+                    ["羽翼·鼓舞·专注(光)", 10],
                     ["色散成霓", 10],
                 ],
                 customBuff: [],
+                customVariables: [],
                 team1: "-",
                 team1Weapon: "-",
                 team2: "-",

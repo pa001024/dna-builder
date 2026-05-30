@@ -205,21 +205,6 @@ function parseShopDateTime(value?: string | number | null): number | null {
 }
 
 /**
- * @description 将当前时间格式化为可与商城时间文本做字典序比较的本地时间字符串。
- * `datetime-local` 录入的 `YYYY-MM-DDTHH:mm` / `YYYY-MM-DDTHH:mm:ss` 在该格式下可安全比较。
- * @param nowTs 当前时间戳。
- * @returns 本地时间字符串。
- */
-function formatShopDateTimeForComparison(nowTs = Date.now()): string {
-    const date = new Date(nowTs)
-    const pad = (value: number) => String(value).padStart(2, "0")
-
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
-        date.getSeconds()
-    )}`
-}
-
-/**
  * @description 判断商品当前是否处于可展示/可兑换时间窗内。
  * @param product 商品记录。
  * @param nowTs 当前时间戳。

@@ -58,6 +58,48 @@ describe("evaluateAST函数测试", () => {
             expect(evalResult).toBe(30)
         })
 
+        it("应该使用自定义变量表达式参与求值", () => {
+            charBuild.customVariables = [["[花刺]层数", "2 + 3"]]
+
+            const result = charBuild.evaluateAST("10 + 4 * [花刺]层数", testAttrs)
+
+            expect(result).toBe(30)
+        })
+
+        it("技能格式表达式应该使用自定义变量", () => {
+            const floraBuild = new CharBuild({
+                char: new LeveledChar("芙罗拉"),
+                hpPercent: 1,
+                resonanceGain: 3,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "群花邀约",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[终章]蓄力攻击伤害",
+                skillLevel: 10,
+            })
+
+            floraBuild.customVariables = [["[花刺]层数", "0"]]
+            const noThornDamage = floraBuild.calculate()
+            floraBuild.customVariables = [["[花刺]层数", "12"]]
+            const fullThornDamage = floraBuild.calculate()
+
+            expect(fullThornDamage).toBeGreaterThan(noThornDamage)
+        })
+
+        it("循环引用的自定义变量应按0处理", () => {
+            charBuild.customVariables = [
+                ["A", "B + 1"],
+                ["B", "A + 1"],
+            ]
+
+            const result = charBuild.evaluateAST("A + B", testAttrs)
+
+            expect(result).toBe(3)
+        })
+
         it("应该正确执行减法运算", () => {
             const attrs = charBuild.calculateWeaponAttributes()
             const result = charBuild.evaluateAST("50 - 20", attrs)

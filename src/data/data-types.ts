@@ -119,7 +119,7 @@ export interface SkillWeapon {
     触发?: number
     攻速?: number
     技能?: Skill[]
-    skill?: 0 | 1 | 2
+    skill?: number[]
     filter?: string
     inherit?: "melee" | "ranged"
     atk?: "melee" | "ranged" | "all"
@@ -431,7 +431,7 @@ export enum DmgType {
     切割 = "切割",
     贯穿 = "贯穿",
     震荡 = "震荡",
-    灵能 = "灵能",
+    灾厄 = "灾厄",
 }
 
 export enum BulletType {

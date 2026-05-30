@@ -130,6 +130,7 @@ export interface CharBuildOptions {
     enemyLevel?: number
     enemyResistance?: number
     targetFunction?: string
+    customVariables?: [string, string][]
     skillLevel?: number
     timeline?: CharBuildTimeline
     timelineDPS?: boolean
@@ -170,17 +171,21 @@ export class CharBuild {
         if (this.char.同律武器) {
             try {
                 const uweaponData = this.char.同律武器[0]
-                const sourceSkill = this.skills[uweaponData.skill ?? 1]
+                const skillIds = uweaponData.skill ?? [1]
+                const sourceSkills = this.skills.filter((_, i) => skillIds.includes(i))
                 const uweaponSkillData = {
                     名称: uweaponData.名称,
                     类型: "同律武器伤害",
-                    icon: sourceSkill?.skillData.icon,
+                    icon: sourceSkills[0]?.skillData.icon,
                     字段: [],
                 } as Skill
-                // 固定获取Q技能的伤害字段
-                sourceSkill?.字段.forEach(field => {
-                    if (field.名称.match(uweaponData.filter || "伤害") && field.名称.endsWith("伤害")) uweaponSkillData.字段!.push(field)
-                })
+                // 获取所有技能的伤害字段
+                sourceSkills.forEach(sourceSkill =>
+                    sourceSkill.字段.forEach(field => {
+                        if (field.名称.match(uweaponData.filter || "伤害") && field.名称.endsWith("伤害"))
+                            uweaponSkillData.字段!.push(field)
+                    })
+                )
                 uweaponData.技能 = [uweaponSkillData]
                 this.skillWeapon = new LeveledSkillWeapon(uweaponData, this.skillLevel, this.char.等级)
             } catch (error) {
@@ -323,6 +328,7 @@ export class CharBuild {
         this._enemyResistance = value
     }
     public targetFunction: string
+    public customVariables: [string, string][] = []
     public skills!: LeveledSkill[]
     public skillWeapon?: LeveledSkillWeapon
     public timeline?: CharBuildTimeline
@@ -377,6 +383,7 @@ export class CharBuild {
         this.enemyId = options.enemyId ?? 130
         this.enemyResistance = options.enemyResistance || 0
         this.targetFunction = options.targetFunction || "伤害"
+        this.customVariables = options.customVariables || []
         this.timeline = options.timeline
         this.timelineDPS = options.timelineDPS || false
         this.teamWeaponCategories =
@@ -443,6 +450,7 @@ export class CharBuild {
             enemyLevel: charSettings.enemyLevel,
             enemyResistance: charSettings.enemyResistance,
             targetFunction: charSettings.targetFunction,
+            customVariables: charSettings.customVariables,
             timeline,
             timelineDPS: charSettings.timelineDPS,
             teamWeapons: [charSettings.team1Weapon, charSettings.team2Weapon],
@@ -1212,6 +1220,7 @@ export class CharBuild {
             const skillAttrs = new Map(this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)]))
             skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
             skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
+            const customVariableNames = new Set(this.getValidCustomVariables().map(([key]) => key))
             const getWeaponAttr = (fieldName: string, base?: string) =>
                 weaponAttrs?.get(base || this.baseName)?.[fieldName as keyof WeaponAttr] || 0
             const getSkillAttr = (fieldName: string, base?: string) =>
@@ -1223,6 +1232,7 @@ export class CharBuild {
                     case "property": {
                         const fieldName = node.name
                         if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) break
+                        if (!node.namespace && customVariableNames.has(fieldName)) break
                         // 检查是否是技能字段、属性或武器属性
                         const isSkillField = getSkillAttr(fieldName, node.namespace)
                         const isAttr = fieldName in attrs
@@ -1273,6 +1283,50 @@ export class CharBuild {
             return e.message || (e as string)
         }
     }
+
+    /**
+     * 验证自定义变量名称是否符合表达式标识符规则。
+     * @param key 自定义变量名称
+     * @returns 错误信息；合法时返回 undefined
+     */
+    validateCustomVariableKey(key: string): string | undefined {
+        const trimmedKey = key.trim()
+        if (!trimmedKey) return "变量名不能为空"
+        if (trimmedKey.includes("::") || trimmedKey.includes(".")) return `变量名不支持命名空间或成员访问: "${trimmedKey}"`
+        if (!/^[a-zA-Z_\u4e00-\u9fa5·[][\]a-zA-Z0-9_\u4e00-\u9fa5·]*$/.test(trimmedKey)) return `变量名不合法: "${trimmedKey}"`
+
+        try {
+            const ast = parseAST(trimmedKey, CharBuild.macros)
+            if (ast.type !== "property" || ast.name !== trimmedKey || ast.namespace) return `变量名不合法: "${trimmedKey}"`
+        } catch (e: any) {
+            return e.message || (e as string)
+        }
+        return undefined
+    }
+
+    /**
+     * 验证单个自定义变量配置。
+     * @param key 自定义变量名称
+     * @param value 自定义变量表达式
+     * @returns 错误信息；合法时返回 undefined
+     */
+    validateCustomVariable(key: string, value: string): string | undefined {
+        const keyError = this.validateCustomVariableKey(key)
+        if (keyError) return keyError
+        if (!value.trim()) return `变量 "${key.trim()}" 的表达式不能为空`
+        return this.validateAST(value)
+    }
+
+    /**
+     * 获取合法且非空的自定义变量配置。
+     * @returns 自定义变量键值对
+     */
+    private getValidCustomVariables() {
+        return this.customVariables
+            .map(([key, value]) => [key.trim(), value.trim()] as [string, string])
+            .filter(([key, value]) => key && value && !this.validateCustomVariableKey(key))
+    }
+
     /**
      * 解释AST表达式并计算结果
      * @param astInput AST表达式字符串
@@ -1280,7 +1334,12 @@ export class CharBuild {
      * @param attrs 武器属性对象
      * @returns 计算结果
      */
-    evaluateAST(astInput: string, inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>) {
+    evaluateAST(
+        astInput: string,
+        inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>,
+        resolvingVariables = new Set<string>(),
+        customVariableValueCache = new Map<string, number>()
+    ) {
         if (!astInput) return 0
         let ast = this.astCache.get(astInput)
         if (!ast) {
@@ -1343,7 +1402,7 @@ export class CharBuild {
          * @param baseValue 基础属性值（用于 {%} 占位符的乘法）
          * @returns 计算结果
          */
-        function evaluateExpression(format: string, value1: number, value2: number = 0, baseValue: number = 0): number {
+        const evaluateExpression = (format: string, value1: number, value2: number = 0, baseValue: number = 0): number => {
             // 使用统一计数器和单个正则表达式处理所有占位符
             let count = 0
 
@@ -1364,15 +1423,59 @@ export class CharBuild {
             expr = expr.replace(/×/g, "*")
 
             try {
-                // 使用 Function 构造函数安全计算表达式
-                // 只允许基本算术运算
-                const safeExpr = expr.replace(/[^0-9+\-*/.()\s]/g, "")
-                const result = new Function(`return ${safeExpr}`)()
+                const formatAst = parseAST(expr, CharBuild.macros)
+                const result = evaluate(formatAst)
                 return Number.isNaN(result) ? value1 * baseValue : result
             } catch {
-                // 如果解析失败，返回 value1 * baseValue
-                return value1 * baseValue
+                try {
+                    // 使用 Function 构造函数安全计算表达式
+                    // 只允许基本算术运算
+                    const safeExpr = expr.replace(/[^0-9+\-*/.()\s]/g, "")
+                    const result = new Function(`return ${safeExpr}`)()
+                    return Number.isNaN(result) ? value1 * baseValue : result
+                } catch {
+                    // 如果解析失败，返回 value1 * baseValue
+                    return value1 * baseValue
+                }
             }
+        }
+
+        const customVariableExpressions = new Map(this.getValidCustomVariables())
+        const evaluateCustomVariable = (fieldName: string) => {
+            const expression = customVariableExpressions.get(fieldName)
+            if (!expression) return undefined
+            if (customVariableValueCache.has(fieldName)) return customVariableValueCache.get(fieldName)!
+            if (resolvingVariables.has(fieldName)) return 0
+
+            resolvingVariables.add(fieldName)
+            const value = this.evaluateAST(expression, attrs, resolvingVariables, customVariableValueCache)
+            resolvingVariables.delete(fieldName)
+            const safeValue = Number.isFinite(value) ? value : 0
+            customVariableValueCache.set(fieldName, safeValue)
+            return safeValue
+        }
+
+        const evaluateIdentity = (fieldName: string, ns?: string) => {
+            if (!ns) {
+                const customValue = evaluateCustomVariable(fieldName)
+                if (customValue !== undefined) return customValue
+            }
+            if (ns) return evaluateSkill(fieldName, ns) || evaluateWeaponAttr(fieldName, ns) || evaluateAttr(fieldName) || 0
+            else return evaluateSkill(fieldName, ns) || evaluateAttr(fieldName) || evaluateWeaponAttr(fieldName, ns) || 0
+        }
+
+        function evaluateMember(memberName?: string, ns?: string) {
+            const damage = getDamage(ns)
+            if (memberName === "N") return damage.noHpDamage
+            if (memberName === "暴击") return damage.higherCritExpectedTrigger || damage.expectedDamage
+            if (memberName === "未暴击") return damage.lowerCritExpectedTrigger || damage.expectedDamage
+            if (memberName === "触发") return damage.expectedCritTrigger || damage.expectedDamage
+            if (memberName === "未触发") return damage.expectedCritNoTrigger || damage.expectedDamage
+            if (memberName === "暴击触发" || memberName === "触发暴击") return damage.higherCritTrigger || damage.expectedDamage
+            if (memberName === "未触发暴击" || memberName === "暴击未触发") return damage.higherCritNoTrigger || damage.expectedDamage
+            if (memberName === "触发未暴击" || memberName === "未暴击触发") return damage.lowerCritTrigger || damage.expectedDamage
+            if (memberName === "未暴击未触发" || memberName === "未触发未暴击") return damage.lowerCritNoTrigger || damage.expectedDamage
+            return damage.expectedDamage // 找不到成员默认期望伤害
         }
 
         /**
@@ -1382,9 +1485,9 @@ export class CharBuild {
          * @returns 计算结果
          */
         function evaluateSkill(fieldName: string, ns?: string) {
-            if (fieldName === "[攻击]") return attrs.攻击 + getWeaponAttr("攻击", ns)
-            else if (fieldName === "[防御]") return attrs.防御
-            else if (fieldName === "[生命]") return attrs.生命
+            if (fieldName === "[攻击]") return (attrs.攻击 + getWeaponAttr("攻击", ns)) * getDef(ns)
+            else if (fieldName === "[防御]") return attrs.防御 * getDef(ns)
+            else if (fieldName === "[生命]") return attrs.生命 * getDef(ns)
             const field = getSkillAttr(fieldName, ns)
 
             if (!field) return 0
@@ -1427,23 +1530,6 @@ export class CharBuild {
             if (fieldName === "武器攻击") fieldName = "攻击"
             return getWeaponAttr(fieldName, ns)
         }
-        const evaluateIdentity = (fieldName: string, ns?: string) => {
-            if (ns) return evaluateSkill(fieldName, ns) || evaluateWeaponAttr(fieldName, ns) || evaluateAttr(fieldName) || 0
-            else return evaluateSkill(fieldName, ns) || evaluateAttr(fieldName) || evaluateWeaponAttr(fieldName, ns) || 0
-        }
-        function evaluateMember(memberName?: string, ns?: string) {
-            const damage = getDamage(ns)
-            if (memberName === "N") return damage.noHpDamage
-            if (memberName === "暴击") return damage.higherCritExpectedTrigger || damage.expectedDamage
-            if (memberName === "未暴击") return damage.lowerCritExpectedTrigger || damage.expectedDamage
-            if (memberName === "触发") return damage.expectedCritTrigger || damage.expectedDamage
-            if (memberName === "未触发") return damage.expectedCritNoTrigger || damage.expectedDamage
-            if (memberName === "暴击触发" || memberName === "触发暴击") return damage.higherCritTrigger || damage.expectedDamage
-            if (memberName === "未触发暴击" || memberName === "暴击未触发") return damage.higherCritNoTrigger || damage.expectedDamage
-            if (memberName === "触发未暴击" || memberName === "未暴击触发") return damage.lowerCritTrigger || damage.expectedDamage
-            if (memberName === "未暴击未触发" || memberName === "未触发未暴击") return damage.lowerCritNoTrigger || damage.expectedDamage
-            return damage.expectedDamage // 找不到成员默认期望伤害
-        }
         // AST求值函数
         const evaluate = (node: ASTNode): number => {
             switch (node.type) {
@@ -1485,6 +1571,7 @@ export class CharBuild {
 
                 case "property": {
                     const value = evaluateIdentity(node.name, node.namespace)
+                    if (!node.namespace && customVariableExpressions.has(node.name)) return value
                     // 如果是技能字段（evaluateSkill返回值>0），需要乘以默认的伤害系数
                     const skillValue = evaluateSkill(node.name, node.namespace)
                     if (skillValue) {
@@ -1954,6 +2041,7 @@ export class CharBuild {
             enemyLevel: this.enemyLevel,
             enemyResistance: this.enemyResistance,
             targetFunction: this.targetFunction,
+            customVariables: this.customVariables.map(variable => [...variable] as [string, string]),
             skillLevel: this.skills[0].等级,
             timeline: this.timeline,
             timelineDPS: this.timelineDPS,

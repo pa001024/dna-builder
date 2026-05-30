@@ -149,6 +149,7 @@ export class LeveledChar {
     }
     static idToUrl(id?: number) {
         if (id === 160101) return LeveledChar.url("Nanzhu")
+        if (id === 120101) return LeveledChar.url("Nanzhu02")
         const icon = charMap.get(id || 0)?.icon || "Empty"
         return LeveledChar.url(icon)
     }

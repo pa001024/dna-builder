@@ -50,23 +50,11 @@ const forgeReward = computed(() => getRewardDetails(props.forge.ForgeLevelReward
 <template>
     <div class="p-3 space-y-3">
         <div class="flex items-center gap-3">
-            <div class="size-12 shrink-0 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold">
+            <div class="size-8 shrink-0 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold">
                 {{ forge.ForgeLevel }}
             </div>
             <div class="min-w-0 flex-1">
                 <div class="text-lg font-bold">熔炼等级 {{ forge.ForgeLevel }}</div>
-                <CopyID :id="forge.ForgeLevel" />
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div class="p-3 rounded bg-base-200">
-                <div class="text-xs text-base-content/70 mb-1">最大同调卡牌等级</div>
-                <div class="text-base font-medium">{{ forge.HyperWeaponMaxCardLevel }}</div>
-            </div>
-            <div class="p-3 rounded bg-base-200">
-                <div class="text-xs text-base-content/70 mb-1">等级奖励</div>
-                <div class="text-base font-medium">#{{ forge.ForgeLevelReward }}</div>
             </div>
         </div>
 
@@ -82,11 +70,9 @@ const forgeReward = computed(() => getRewardDetails(props.forge.ForgeLevelReward
                 <div v-for="row in forgeQuestRows" :key="row.id" class="p-3 rounded bg-base-100 border border-base-200">
                     <div v-if="row.detail" class="space-y-1">
                         <div class="flex items-center justify-between gap-2">
-                            <div class="font-medium">{{ row.detail.desc }}</div>
+                            <div class="font-medium">{{ row.detail.desc.replace(/<[H/]>/g, "") }}</div>
                             <CopyID :id="row.detail.id" />
                         </div>
-                        <div class="text-xs text-base-content/70">目标数量: {{ row.detail.target }}</div>
-                        <div class="text-xs text-base-content/70">任务 ID: {{ row.id }}</div>
                         <div class="mt-2">
                             <div class="text-xs text-base-content/70 mb-1">任务奖励</div>
                             <RewardItem v-if="row.detail.reward" :reward="row.detail.reward" />

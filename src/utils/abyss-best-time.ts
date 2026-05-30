@@ -66,6 +66,7 @@ function buildIconIdMap<T extends { id: number; icon?: string }>(items: Iterable
         map.set(item.icon, item.id)
     }
     map.set("Nanzhu", 160101)
+    map.set("Nanzhu02", 120101)
     return map
 }
 

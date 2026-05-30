@@ -404,6 +404,22 @@ describe("LeveledWeapon类测试", () => {
         expect(铸铁者精炼5级.基础暴击).toBe(0.2)
     })
 
+    // 测试10.1：带熔炉的武器加成不应随精炼等级缩放
+    it("带熔炉的武器加成不应随精炼等级变化", () => {
+        const 无止无休精炼0级 = new LeveledWeapon(10299, 0)
+        const 无止无休精炼5级 = new LeveledWeapon(10299, 5)
+
+        expect(无止无休精炼0级.技能威力).toBeCloseTo(0.45, 10)
+        expect(无止无休精炼0级.攻击).toBeCloseTo(0.9, 10)
+        expect(无止无休精炼0级.技能范围).toBeCloseTo(0.9, 10)
+        expect(无止无休精炼0级.昂扬).toBeCloseTo(0.35, 10)
+
+        expect(无止无休精炼5级.技能威力).toBeCloseTo(0.45, 10)
+        expect(无止无休精炼5级.攻击).toBeCloseTo(0.9, 10)
+        expect(无止无休精炼5级.技能范围).toBeCloseTo(0.9, 10)
+        expect(无止无休精炼5级.昂扬).toBeCloseTo(0.35, 10)
+    })
+
     // 测试10：获取完整属性
     it("获取武器完整属性包含等级和攻击信息", () => {
         const 铸铁者5级 = new LeveledWeapon(10302, 5)

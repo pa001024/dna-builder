@@ -11799,6 +11799,20 @@ function patchCWeapon() {
                 }),
             },
             {
+                id: 1102,
+                data: {
+                    同律武器: [
+                        {
+                            id: 110200,
+                            名称: "圆舞",
+                            skill: [0, 1, 2],
+                            类型: ["同律", "近战", "单手剑"],
+                            inherit: "melee",
+                        },
+                    ],
+                },
+            },
+            {
                 id: 1503,
                 data: {
                     同律武器: [
@@ -11820,7 +11834,7 @@ function patchCWeapon() {
                             id: 420110,
                             名称: "疑星落",
                             类型: ["同律", "近战", "长柄"],
-                            skill: 0,
+                            skill: [0],
                             filter: "疑星落|星河寥落",
                             inherit: "melee",
                             atk: "all",

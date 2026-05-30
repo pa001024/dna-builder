@@ -34,6 +34,9 @@ export class LeveledWeapon {
     // 等级和精炼属性
     _等级: number = 80 // 武器等级，默认80级
     _精炼: number = 5 // 武器精炼等级，默认5级
+    get hasForge() {
+        return !!(this._originalWeaponData.熔炉 && this._originalWeaponData.熔炉.length > 0)
+    }
     // 原始武器对象
     _originalWeaponData: Weapon
     // 精炼等级上限（目前武器精炼等级上限固定为5）
@@ -131,7 +134,7 @@ export class LeveledWeapon {
         this.基础弹药 = weaponData.最大弹药
 
         // 设置精炼等级（如果提供），否则设为5
-        this._精炼 = Math.max(0, Math.min(LeveledWeapon._maxRefineLevel, 精炼 ?? 5))
+        this._精炼 = this.hasForge ? 0 : Math.max(0, Math.min(LeveledWeapon._maxRefineLevel, 精炼 ?? 5))
 
         // 设置武器等级（如果提供），否则设为80
         this._等级 = Math.max(1, Math.min(80, 等级 ?? 80))
@@ -163,6 +166,11 @@ export class LeveledWeapon {
     }
 
     set 精炼(value: number) {
+        if (this.hasForge) {
+            this._精炼 = 0
+            this.updateProperties()
+            return
+        }
         // 确保精炼等级在0到精炼等级上限之间
         this._精炼 = Math.max(0, Math.min(LeveledWeapon._maxRefineLevel, value))
 
@@ -179,19 +187,23 @@ export class LeveledWeapon {
         const clampedLevel = Math.max(1, Math.min(80, this._等级))
         this.基础攻击 = +(this._originalWeaponData.攻击 * CommonLevelUp[clampedLevel - 1]).toFixed(2)
 
+        // 带熔炉的武器固定视为0级熔炼
+        const refineLevel = this.hasForge ? 0 : this._精炼
+        const shouldScaleAdditions = !this.hasForge
+
         // 根据精炼等级调整属性
         this.baseProperties.forEach(prop => {
             const originalValue = this._originalWeaponData.加成?.[prop]
             if (originalValue !== undefined) {
-                const currentValue = (originalValue / 5) * (this._精炼 + 5)
+                const currentValue = shouldScaleAdditions ? (originalValue / 5) * (refineLevel + 5) : originalValue
                 this[prop] = currentValue
-                this.效果 = this._originalWeaponData.熔炼?.[this._精炼] || ""
+                this.效果 = this._originalWeaponData.熔炼?.[refineLevel] || ""
                 this.效果 = this.效果.replace(/^.+?。/, "")
             }
         })
         if (this.buff) {
             const buff = this.buff
-            this.buff.ratio = (this._精炼 + 5) / 10
+            this.buff.ratio = (refineLevel + 5) / 10
             const props = this.buff.getProperties()
             this.buffProps = props
             if (buff._originalBuffData.描述.includes(`{%}`)) {
@@ -334,7 +346,7 @@ export class LeveledWeapon {
     }
 
     public clone(): LeveledWeapon {
-        const weapon = new LeveledWeapon(this._originalWeaponData, this._精炼, this._等级, this.effectLv)
+        const weapon = new LeveledWeapon(this._originalWeaponData, this.hasForge ? 0 : this._精炼, this._等级, this.effectLv)
         return weapon
     }
 

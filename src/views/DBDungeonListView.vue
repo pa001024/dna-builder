@@ -224,7 +224,9 @@ useInitialScrollToSelectedItem()
                                 <span>怪物: {{ (dungeon.m || []).length }}种</span>
                                 <span v-if="(dungeon.sm || []).length">特殊: {{ (dungeon.sm || []).length }}个</span>
                                 <span v-if="dungeon.r?.length"> 奖励: {{ getDungeonRewardNames(dungeon) }} </span>
-                                <span class="ml-auto">ID: {{ dungeon.id }}</span>
+                                <span class="ml-auto">
+                                    <CopyID :id="dungeon.id" />
+                                </span>
                             </div>
                         </div>
                     </div>

@@ -54,6 +54,7 @@ export function createDefaultCharSettings() {
         enemyResistance: 0,
         isRouge: false,
         targetFunction: "",
+        customVariables: [] as [string, string][],
         charSkillLevel: 10,
         meleeWeapon: 10206, //"枯朽",
         meleeWeaponLevel: 80,

@@ -560,7 +560,7 @@ watch(
         </template>
 
         <template v-else-if="activeTab === 'wave'">
-            <template v-if="dungeon.t === 'IronSubvival'">
+            <template v-if="dungeon.t !== 'IronSubvival'">
                 <div class="card bg-base-200 rounded-lg p-3">
                     <div class="flex items-center justify-between">
                         <span class="text-sm">刷新范围显示</span>
