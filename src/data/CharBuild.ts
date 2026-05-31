@@ -401,12 +401,10 @@ export class CharBuild {
     }
 
     /**
-     * 仅当同律武器声明 atk=all 时，将 inherit 型同律武器的伤害类型同步为当前继承武器的伤害类型。
-     * 其他 inherit 同律武器继续保留自身原始伤害类型，维持旧逻辑。
+     * 将 inherit 型同律武器的伤害类型同步为当前继承武器的伤害类型。
      */
     private syncInheritedSkillWeapon() {
         if (!this.skillWeapon?.inherit) return
-        if (this.skillWeapon.atk !== "all") return
 
         const inheritedWeapon = this.skillWeapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
         if (!inheritedWeapon) return

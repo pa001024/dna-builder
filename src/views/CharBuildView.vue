@@ -265,8 +265,9 @@ const charTabs = computed(() => {
 type WeaponTooltipData = {
     title: string
     mastery?: string[]
+    type?: string
     desc?: string
-    props: Record<string, number>
+    props: Record<string, number | string>
     effdesc?: string
 }
 
@@ -292,6 +293,7 @@ function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTool
         return {
             title: charBuild.value.char.名称,
             mastery: charBuild.value.char.精通,
+            type: charBuild.value.char.属性,
             props: pickNumericProps(charBuild.value.char.加成),
         }
     }
@@ -310,17 +312,18 @@ function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTool
     }
 
     const weaponData = weapon._originalWeaponData as Weapon | SkillWeapon
-    const props: Record<string, number> = {
-        // 基础攻击: weaponData.攻击 || 0,
-        // 基础暴击: weaponData.暴击 || 0,
-        // 基础暴伤: weaponData.暴伤 || 0,
-        // 基础触发: weaponData.触发 || 0,
-    }
-    if ("加成" in weaponData && weaponData.加成) Object.assign(props, weaponData.加成)
+    let props: Record<string, number | string> = weapon.getProperties()
+    if (weapon.inherit)
+        if (weapon.inherit === "melee") {
+            props = charBuild.value.meleeWeapon.getProperties()
+        } else {
+            props = charBuild.value.rangedWeapon.getProperties()
+        }
 
     return {
         title: weapon.名称,
         desc: "描述" in weaponData ? weaponData.描述 : undefined,
+        type: weapon.类别,
         props,
         effdesc:
             "熔炼" in weaponData && Array.isArray(weaponData.熔炼)
@@ -1280,6 +1283,9 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             <div class="text-sm font-bold">
                                                 {{ charTabTooltipMap[tab.name].title }}
                                             </div>
+                                            <div class="ml-auto text-sm text-primary">
+                                                {{ charTabTooltipMap[tab.name].type }}
+                                            </div>
                                         </div>
                                         <div v-if="charTabTooltipMap[tab.name].effdesc" class="ml-auto text-xs text-neutral-500">
                                             {{ charTabTooltipMap[tab.name].effdesc }}
@@ -1295,7 +1301,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                         <div
                                             v-for="[prop, val] in Object.entries(charTabTooltipMap[tab.name].props).filter(
-                                                ([, val]) => typeof val === 'number' && val !== 0
+                                                ([, val]) => val !== 0 && val != null
                                             )"
                                             :key="prop"
                                             class="flex justify-between items-center gap-2 text-sm"
