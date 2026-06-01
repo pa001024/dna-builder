@@ -5953,6 +5953,7 @@
         "all_files": "All Files",
         "beforeGame": "Execute Before Launch",
         "char": "Character",
+        "confirmUninstall": "This will delete all files and subdirectories inside EM and Engine under the game directory. Continue?",
         "custom": "Custom",
         "customTypeNameExists": "Custom type name already exists",
         "delete": "Delete",
@@ -5997,6 +5998,9 @@
         "selectPath": "Select Path",
         "setModFailed": "Failed to set MOD: {{ error }}",
         "title": "Game Launcher",
+        "uninstall": "Uninstall",
+        "uninstallFailed": "Uninstall failed: {{ error }}",
+        "uninstallSuccess": "Uninstall complete",
         "weapon": "Weapon"
     },
     "game-update": {

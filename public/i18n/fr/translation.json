@@ -6035,6 +6035,7 @@
         "cdn": "Noeud de téléchargement",
         "change": "Modifier",
         "channel": "Serveur",
+        "confirmUninstall": "Cela supprimera tous les fichiers et sous-dossiers dans EM et Engine du dossier du jeu. Continuer ?",
         "current_file": "Fichier actuel",
         "desc": "Mise à jour et téléchargement de la version du jeu",
         "download_complete": "Tous les fichiers ont été téléchargés et extraits avec succès, taille totale : {{size}}",

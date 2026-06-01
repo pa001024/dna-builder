@@ -589,6 +589,7 @@
         "all_files": "所有文件",
         "beforeGame": "启动前执行",
         "char": "角色",
+        "confirmUninstall": "将删除游戏目录下 EM 和 Engine 目录中的所有文件与子目录，是否继续？",
         "custom": "自定义",
         "customTypeNameExists": "自定义类型名称已存在",
         "delete": "删除",
@@ -633,6 +634,9 @@
         "selectPath": "选择路径",
         "setModFailed": "设置MOD失败: {{ error }}",
         "title": "游戏启动器",
+        "uninstall": "卸载",
+        "uninstallFailed": "卸载失败: {{ error }}",
+        "uninstallSuccess": "卸载完成",
         "weapon": "武器"
     },
     "game-update": {

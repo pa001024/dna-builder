@@ -6003,6 +6003,7 @@
         "cdn": "다운로드 노드",
         "change": "변경",
         "channel": "서버",
+        "confirmUninstall": "게임 디렉터리의 EM 및 Engine 폴더 안에 있는 모든 파일과 하위 디렉터리를 삭제합니다. 계속하시겠습니까?",
         "current_file": "현재 파일",
         "desc": "게임 버전 업데이트 및 다운로드",
         "download_complete": "모든 파일이 성공적으로 다운로드 및 추출되었습니다, 총 크기: {{size}}",

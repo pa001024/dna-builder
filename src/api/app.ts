@@ -33,6 +33,24 @@ export async function getGameInstall() {
     return await invoke<string>("get_game_install")
 }
 
+/**
+ * 判断路径是否存在。
+ * @param path 文件或目录路径
+ * @returns 是否存在
+ */
+export async function pathExists(path: string) {
+    return await invoke<boolean>("path_exists", { path })
+}
+
+/**
+ * 递归删除指定目录。
+ * @param path 目录路径
+ * @returns 成功消息
+ */
+export async function removeDirAll(path: string) {
+    return await invoke<string>("remove_dir_all", { path })
+}
+
 export async function isGameRunning(isRun: boolean) {
     return await invoke<string>("is_game_running", { isRun })
 }

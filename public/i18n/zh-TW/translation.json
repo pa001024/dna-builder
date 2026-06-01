@@ -5856,6 +5856,7 @@
         "cdn": "下載節點",
         "change": "修改",
         "channel": "伺服器",
+        "confirmUninstall": "將刪除遊戲目錄下 EM 和 Engine 目錄中的所有檔案與子目錄，是否繼續？",
         "current_file": "當前檔案",
         "desc": "遊戲版本更新與下載",
         "download_complete": "所有檔案下載和解壓縮成功，總大小: {{size}}",
