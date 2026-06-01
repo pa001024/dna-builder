@@ -89,6 +89,63 @@ describe("evaluateAST函数测试", () => {
             expect(fullThornDamage).toBeGreaterThan(noThornDamage)
         })
 
+        it("字段名携带蓄力攻击时应该吃近战蓄力增伤和独立增伤", () => {
+            const baseBuild = new CharBuild({
+                char: new LeveledChar("芙罗拉"),
+                hpPercent: 1,
+                resonanceGain: 3,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "群花邀约",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[终章]蓄力攻击伤害",
+                skillLevel: 10,
+            })
+            baseBuild.customVariables = [["[花刺]层数", "0"]]
+
+            const buffedBuild = baseBuild.clone()
+            buffedBuild.buffs = [
+                new LeveledBuff({
+                    名称: "测试近战蓄力加成",
+                    描述: "测试用",
+                    近战蓄力增伤: 1,
+                    近战蓄力独立增伤: 3,
+                }),
+            ]
+
+            expect(buffedBuild.calculateOneTime()).toBeCloseTo(baseBuild.calculateOneTime() * 8, 6)
+        })
+
+        it("蓄力加成不应该作用到普通攻击字段", () => {
+            const baseBuild = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 1,
+                resonanceGain: 3,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "普通攻击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "伤害",
+                skillLevel: 10,
+            })
+
+            const buffedBuild = baseBuild.clone()
+            buffedBuild.buffs = [
+                new LeveledBuff({
+                    名称: "测试近战蓄力加成",
+                    描述: "测试用",
+                    近战蓄力增伤: 3,
+                    近战蓄力独立增伤: 3,
+                }),
+            ]
+
+            expect(buffedBuild.calculate()).toBe(baseBuild.calculate())
+        })
+
         it("循环引用的自定义变量应按0处理", () => {
             charBuild.customVariables = [
                 ["A", "B + 1"],

@@ -188,7 +188,7 @@ export class LeveledWeapon {
         this.基础攻击 = +(this._originalWeaponData.攻击 * CommonLevelUp[clampedLevel - 1]).toFixed(2)
 
         // 带熔炉的武器固定视为0级熔炼
-        const refineLevel = this.hasForge ? 0 : this._精炼
+        const refineLevel = this.hasForge ? 5 : this._精炼
         const shouldScaleAdditions = !this.hasForge
 
         // 根据精炼等级调整属性

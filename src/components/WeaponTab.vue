@@ -133,7 +133,12 @@ const modAttributeBonusSources = computed(() => {
                     {{ $t(charBuild[`${wkey}Weapon`]!.名称 || "") }}
                     <Icon v-if="wkey !== 'skill'" icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />
                 </div>
-                <Select v-if="wkey !== 'skill'" v-model="charSettings[`${wkey}WeaponRefine`]" hidebtn class="text-sm text-primary">
+                <Select
+                    v-if="wkey !== 'skill' && !charBuild[`${wkey}Weapon`]._originalWeaponData.熔炉"
+                    v-model="charSettings[`${wkey}WeaponRefine`]"
+                    hidebtn
+                    class="text-sm text-primary"
+                >
                     <SelectItem v-for="i in [0, 1, 2, 3, 4, 5]" :key="i" :value="i">{{ $t("精炼") + i }}</SelectItem>
                 </Select>
             </div>

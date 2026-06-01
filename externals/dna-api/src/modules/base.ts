@@ -103,7 +103,7 @@ export class DNABaseAPI {
         if (this.mode === "android") {
             this.baseHeaders = {
                 countrycode: "CN",
-                version: this.server === "cn" ? "1.3.0" : "1.1.1",
+                version: this.server === "cn" ? "1.3.2" : "1.1.1",
                 versioncode: this.server === "cn" ? "10" : "5",
                 source: "android",
                 lang: this.lang,
@@ -113,7 +113,7 @@ export class DNABaseAPI {
         } else {
             this.baseHeaders = {
                 countrycode: "CN",
-                version: this.server === "cn" ? "1.3.0" : "1.1.1",
+                version: this.server === "cn" ? "1.3.2" : "1.1.1",
                 versioncode: this.server === "cn" ? "10" : "5",
                 source: "ios",
                 lang: this.lang,

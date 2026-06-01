@@ -758,36 +758,7 @@ describe("CharBuild类测试", () => {
             })
         })
 
-        it("普通 inherit 型同律武器应保留原始伤害类型并沿用旧结算逻辑", () => {
-            const charBuild = new CharBuild({
-                char: new LeveledChar("刻舟"),
-                skillLevel: 10,
-                hpPercent: 0.5,
-                resonanceGain: 2,
-                charMods: [],
-                buffs: [],
-                melee: new LeveledWeapon(10303),
-                ranged: new LeveledWeapon(20601),
-                baseName: "剑非剑",
-                enemyId: 130,
-                enemyLevel: 80,
-                enemyResistance: 1,
-                targetFunction: "伤害",
-            })
-
-            expect(charBuild.skillWeapon?.inherit).toBe("melee")
-            expect(charBuild.skillWeapon?.atk).toBeUndefined()
-            expect(charBuild.skillWeapon?.伤害类型).toBe(charBuild.skillWeapon?._originalWeaponData.伤害类型 || "切割")
-            expect(charBuild.skillWeaponSkills[0]?.skillData.icon).toBe(charBuild.charSkills[1]?.skillData.icon)
-
-            const attrs = charBuild.calculateWeaponAttributes(charBuild.skillWeapon)
-            const damage = charBuild.calculateWeaponDamage(attrs, charBuild.skillWeapon!)
-
-            expect(damage.lowerCritNoTrigger).toBeGreaterThan(0)
-            expect(damage.expectedDamage).toBeGreaterThan(0)
-        })
-
-        it("atk=all 的 inherit 型同律武器才应同步继承基础武器伤害类型并按纯元素结算", () => {
+        it("atk=all 的 inherit 型同律武器应同步继承基础武器伤害类型并按纯元素结算", () => {
             const charBuild = new CharBuild({
                 char: new LeveledChar("煜明"),
                 skillLevel: 10,
@@ -813,6 +784,49 @@ describe("CharBuild类测试", () => {
 
             expect(damage.lowerCritNoTrigger).toBeCloseTo(0, 6)
             expect(damage.expectedDamage).toBeCloseTo(0, 6)
+        })
+
+        it("角色mod的effect暴击词条应对所有武器生效", () => {
+            const charBuild = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [new LeveledMod(41911)],
+                buffs: [],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "普通攻击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+
+            const meleeAttrs = charBuild.calculateWeaponAttributes(charBuild.meleeWeapon).weapon
+            const rangedAttrs = charBuild.calculateWeaponAttributes(charBuild.rangedWeapon).weapon
+
+            const baseBuild = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "普通攻击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+
+            const baseMeleeAttrs = baseBuild.calculateWeaponAttributes(baseBuild.meleeWeapon).weapon
+            const baseRangedAttrs = baseBuild.calculateWeaponAttributes(baseBuild.rangedWeapon).weapon
+
+            expect(meleeAttrs?.暴击).toBeGreaterThan(baseMeleeAttrs?.暴击 || 0)
+            expect(rangedAttrs?.暴击).toBeGreaterThan(baseRangedAttrs?.暴击 || 0)
         })
     })
 

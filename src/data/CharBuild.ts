@@ -69,6 +69,13 @@ export interface WeaponAttr {
     武器倍率: number
 }
 
+const weaponAttackTypeMap = [
+    { prefix: "普攻", patterns: ["普通攻击"] },
+    { prefix: "蓄力", patterns: ["蓄力攻击"] },
+    { prefix: "下落", patterns: ["下落攻击"] },
+    { prefix: "滑行", patterns: ["滑行攻击"] },
+] as const
+
 import { groupBy } from "lodash-es"
 import type { RawTimelineData } from "../store/timeline"
 import type { DynamicMonster } from "."
@@ -859,9 +866,73 @@ export class CharBuild {
         return map
     }
 
+    /**
+     * 将细分武器前缀收敛到装备槽位，用于 MOD/武器归属过滤。
+     * @param prefix 属性前缀
+     * @returns 装备槽位前缀
+     */
+    private getAttributePrefixScope(prefix = "角色") {
+        if (prefix.startsWith("同律近战")) return "同律近战"
+        if (prefix.startsWith("同律远程")) return "同律远程"
+        if (prefix.startsWith("近战")) return "近战"
+        if (prefix.startsWith("远程")) return "远程"
+        return prefix
+    }
+
+    /**
+     * 根据技能名或字段名判断武器攻击细分乘区。
+     * @param baseName 技能名称
+     * @param fieldName 字段名称
+     * @returns 细分乘区前缀
+     */
+    private getWeaponAttackTypePrefix(baseName: string, fieldName?: string) {
+        const fieldPrefix = weaponAttackTypeMap.find(
+            ({ patterns }) => fieldName && patterns.some(pattern => fieldName.includes(pattern))
+        )?.prefix
+        if (fieldPrefix) return fieldPrefix
+        return weaponAttackTypeMap.find(({ patterns }) => patterns.some(pattern => baseName === pattern))?.prefix
+    }
+
+    /**
+     * 判断属性是否是武器攻击类型细分属性。
+     * @param attribute 属性名
+     * @param prefix 武器前缀
+     * @returns 是否为细分属性
+     */
+    private isWeaponAttackTypeAttribute(attribute: string, prefix: string) {
+        return weaponAttackTypeMap.some(({ prefix: attackTypePrefix }) => attribute.startsWith(`${prefix}${attackTypePrefix}`))
+    }
+
+    /**
+     * 获取当前武器伤害字段适用的细分加成。
+     * @param weaponPrefix 武器前缀
+     * @param baseName 技能名称
+     * @param fieldName 字段名称
+     * @param attribute 加成属性
+     * @returns 细分增伤加成
+     */
+    private getWeaponAttackTypeBonus(
+        weaponPrefix: string,
+        baseName: string,
+        fieldName: string | undefined,
+        attribute: "增伤" | "独立增伤"
+    ) {
+        const attackTypePrefix = this.getWeaponAttackTypePrefix(baseName, fieldName)
+        if (!attackTypePrefix) return 0
+        const prefixScope = this.getAttributePrefixScope(weaponPrefix)
+        const getBonus = attribute === "独立增伤" ? this.getTotalBonusMul.bind(this) : this.getTotalBonus.bind(this)
+        let bonus = getBonus(`${weaponPrefix}${attackTypePrefix}${attribute}`, prefixScope)
+        if (weaponPrefix.startsWith("同律")) {
+            const lowerPrefix = weaponPrefix.substring(2)
+            bonus += getBonus(`${lowerPrefix}${attackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix))
+        }
+        return bonus
+    }
+
     // 获取总加成
     public getTotalBonus(attribute: string, prefix = "角色"): number {
         let bonus = 0
+        const prefixScope = this.getAttributePrefixScope(prefix)
 
         // 添加角色自带加成
         if (prefix === "角色" || attribute !== "攻击") {
@@ -869,44 +940,50 @@ export class CharBuild {
         }
 
         // 添加近战武器加成
-        if ((prefix === "角色" || (prefix === "近战" && attribute !== "攻击")) && this.meleeWeapon) {
+        if ((prefixScope === "角色" || (prefixScope === "近战" && attribute !== "攻击")) && this.meleeWeapon) {
             if (typeof this.meleeWeapon[attribute] === "number") {
                 bonus += this.meleeWeapon[attribute]
             }
         }
         // 添加远程武器加成
-        if ((prefix === "角色" || (prefix === "远程" && attribute !== "攻击")) && this.rangedWeapon) {
+        if ((prefixScope === "角色" || (prefixScope === "远程" && attribute !== "攻击")) && this.rangedWeapon) {
             if (typeof this.rangedWeapon[attribute] === "number") {
                 bonus += this.rangedWeapon[attribute]
             }
         }
 
         // 添加MOD加成
-        if (prefix === "角色" || !attribute.startsWith(prefix))
+        if (prefix === "角色" || !attribute.startsWith(prefix) || this.isWeaponAttackTypeAttribute(attribute, prefix)) {
             this.mods.forEach(mod => {
-                if (prefix && mod.attrType !== prefix) return
+                if (
+                    ["暴击", "暴伤", "触发", "攻速"].includes(attribute)
+                        ? mod.attrType !== "角色" && mod.attrType !== prefixScope
+                        : prefixScope && mod.attrType !== prefixScope
+                )
+                    return
                 if (typeof mod.addAttr[attribute] === "number") {
                     bonus += mod.addAttr[attribute]
                 }
             })
+        }
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
-            if (prefix !== "角色" && ["攻击", "增伤"].includes(attribute)) return
+            if (prefixScope !== "角色" && ["攻击", "增伤"].includes(attribute)) return
             if (typeof buff[attribute] === "number") {
                 bonus += buff[attribute]
             }
         })
 
         Object.entries(this.rangedWeapon.buffProps).forEach(([key, value]) => {
-            if (prefix !== "角色" && ["攻击", "增伤"].includes(key)) return
+            if (prefixScope !== "角色" && ["攻击", "增伤"].includes(key)) return
             if (attribute === key && typeof value === "number") {
                 bonus += value
             }
         })
 
         Object.entries(this.meleeWeapon.buffProps).forEach(([key, value]) => {
-            if (prefix !== "角色" && ["攻击", "增伤"].includes(key)) return
+            if (prefixScope !== "角色" && ["攻击", "增伤"].includes(key)) return
             if (attribute === key && typeof value === "number") {
                 bonus += value
             }
@@ -917,11 +994,12 @@ export class CharBuild {
 
     public getModsBonus(mods: LeveledMod[], attribute: string, prefix = "角色"): number {
         let bonus = 0
+        const prefixScope = this.getAttributePrefixScope(prefix)
 
         // 添加MOD加成
         if (prefix === "角色" || !attribute.startsWith(prefix))
             mods.forEach(mod => {
-                if (prefix && mod.类型 !== prefix) return
+                if (prefixScope && mod.类型 !== prefixScope) return
                 if (typeof mod[attribute] === "number") {
                     bonus += mod[attribute]
                 }
@@ -933,6 +1011,7 @@ export class CharBuild {
     // 获取总加成
     private getTotalBonusMul(attribute: string, prefix = "角色"): number {
         let bonus = 1
+        const prefixScope = this.getAttributePrefixScope(prefix)
 
         // 添加角色自带加成
         if (typeof this.char.加成?.[attribute] === "number") {
@@ -940,17 +1019,18 @@ export class CharBuild {
         }
 
         // 添加MOD加成
-        if (prefix === "角色" || !attribute.startsWith(prefix))
+        if (prefix === "角色" || !attribute.startsWith(prefix) || this.isWeaponAttackTypeAttribute(attribute, prefix)) {
             this.mods.forEach(mod => {
-                if (prefix && mod.attrType !== prefix) return
+                if (prefixScope && mod.attrType !== prefixScope) return
                 if (typeof mod.addAttr[attribute] === "number") {
                     bonus *= 1 + mod.addAttr[attribute]
                 }
             })
+        }
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
-            if (prefix !== "角色" && attribute === "独立增伤") return
+            if (prefixScope !== "角色" && attribute === "独立增伤") return
             if (typeof buff[attribute] === "number") {
                 bonus *= 1 + buff[attribute]
             }
@@ -1371,16 +1451,38 @@ export class CharBuild {
         const getSkillAttr = (fieldName: string, base?: string) =>
             skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
         const damageCache = new Map<string, DamageResult>()
-        const getDamage = (base?: string) => {
+        const getWeaponAttackTypeBonus = (base: string | undefined, fieldName: string | undefined, attribute: "增伤" | "独立增伤") => {
             const key = base || this.baseName
-            if (damageCache.has(key)) return damageCache.get(key)!
+            const weapon = weaponsMap.get(key) || this.selectedWeapon || this.meleeWeapon
+            return this.getWeaponAttackTypeBonus(weapon.类型, key, fieldName, attribute)
+        }
+        const getDamage = (base?: string, fieldName?: string) => {
+            const key = base || this.baseName
+            const cacheKey = fieldName ? `${key}::${fieldName}` : key
+            if (damageCache.has(cacheKey)) return damageCache.get(cacheKey)!
             const weapon = weaponsMap.get(key)
             const weaponAttr = getCalculatedWeaponAttr(base)
+            const attackTypeDamageBonus = getWeaponAttackTypeBonus(base, fieldName, "增伤")
+            const attackTypeIndependentDamageBonus = getWeaponAttackTypeBonus(base, fieldName, "独立增伤")
             const damage =
                 weapon && weaponAttr
-                    ? this.calculateWeaponDamage({ ...attrs, weapon: weaponAttr }, weapon)
-                    : this.calculateSkillDamage(attrs)
-            damageCache.set(key, damage)
+                    ? this.calculateWeaponDamage(
+                          {
+                              ...attrs,
+                              weapon: {
+                                  ...weaponAttr,
+                                  增伤: weaponAttr.增伤 + attackTypeDamageBonus,
+                                  独立增伤: (1 + weaponAttr.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
+                              },
+                          },
+                          weapon
+                      )
+                    : this.calculateSkillDamage({
+                          ...attrs,
+                          增伤: attrs.增伤 + attackTypeDamageBonus,
+                          独立增伤: (1 + attrs.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
+                      })
+            damageCache.set(cacheKey, damage)
             return damage
         }
         const defCache = new Map<boolean, number>()
@@ -1462,8 +1564,8 @@ export class CharBuild {
             else return evaluateSkill(fieldName, ns) || evaluateAttr(fieldName) || evaluateWeaponAttr(fieldName, ns) || 0
         }
 
-        function evaluateMember(memberName?: string, ns?: string) {
-            const damage = getDamage(ns)
+        function evaluateMember(memberName?: string, ns?: string, fieldName?: string) {
+            const damage = getDamage(ns, fieldName)
             if (memberName === "N") return damage.noHpDamage
             if (memberName === "暴击") return damage.higherCritExpectedTrigger || damage.expectedDamage
             if (memberName === "未暴击") return damage.lowerCritExpectedTrigger || damage.expectedDamage
@@ -1573,7 +1675,7 @@ export class CharBuild {
                     // 如果是技能字段（evaluateSkill返回值>0），需要乘以默认的伤害系数
                     const skillValue = evaluateSkill(node.name, node.namespace)
                     if (skillValue) {
-                        return value * evaluateMember(undefined, node.namespace)
+                        return value * evaluateMember(undefined, node.namespace, node.name)
                     }
                     return value
                 }
