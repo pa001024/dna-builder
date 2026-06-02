@@ -75,6 +75,20 @@ const MAPPINGS: Mapping[] = [
         targetStem: "convert",
         targetVar: "modConvertData",
     },
+    {
+        source: async () => {
+            const dynamicRewardText = await readFile(path.join(OUT_ROOT, "DynamicReward.json"), "utf8")
+
+            return [
+                {
+                    targetVar: "dynamicRewardMap",
+                    text: formatTsValue(JSON.parse(dynamicRewardText), 0),
+                },
+            ]
+        },
+        targetStem: "hardboss",
+        targetVar: "dynamicRewardMap",
+    },
     { source: "Fish", targetStem: "fish", targetVar: "fishs", locales: ["cn"] },
     { source: "FishingSpot", targetStem: "fish", targetVar: "fishingSpots", locales: ["cn"] },
     { source: "HardBoss", targetStem: "hardboss", targetVar: "hardBossMap", locales: ["cn"] },
