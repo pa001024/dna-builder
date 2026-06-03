@@ -228,6 +228,7 @@ export class LevelUpCalculator {
         return {
             id: weapon.id,
             突破: weapon.突破,
+            熔炉: weapon.熔炉,
             walnut: weaponShopSourceMap.get(weapon.id) && 1,
             draft: weaponDraftMap.get(weapon.id),
         }

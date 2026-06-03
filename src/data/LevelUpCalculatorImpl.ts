@@ -1,5 +1,5 @@
 import { CashToExpRate, charLevelUpExpCost, weaponLevelUpExpCost } from "./d/levelup.data"
-import type { Draft } from "./data-types"
+import type { Draft, ForgeData } from "./data-types"
 import type {
     CharLevelUpConfig,
     LevelUpCalculatorConfig,
@@ -659,8 +659,31 @@ export interface WeaponExt {
     id: number
     draft?: Draft
     突破?: Array<ResourceCost>
+    熔炉?: ForgeData[]
     walnut?: 1
 }
+
+/**
+ * 计算灾厄武器熔炉养成消耗
+ * @param weapon 武器数据
+ * @param currentRefine 当前熔炼等级
+ * @param targetRefine 目标熔炼等级
+ * @returns 资源消耗
+ */
+function calculateWeaponForgeCost(weapon: WeaponExt, currentRefine: number, targetRefine: number): ResourceCost {
+    const cost: ResourceCost = {}
+    if (!weapon.熔炉 || weapon.熔炉.length === 0) return cost
+
+    for (const forge of weapon.熔炉) {
+        if (forge.lv <= currentRefine || forge.lv > targetRefine) continue
+        mergeCost(cost, forge.解锁 || {})
+        const firstSkillUnlock = forge.技能?.find(skill => skill.解锁)?.解锁
+        mergeCost(cost, firstSkillUnlock || {})
+    }
+
+    return cost
+}
+
 /**
  * 计算武器锻造消耗
  * @param weapon 武器数据
@@ -677,7 +700,8 @@ function calculateWeaponCraft(
 
     // 查找武器图纸
     const draft = weapon.draft
-    if (weapon.walnut) {
+    const hasForge = !!(weapon.熔炉 && weapon.熔炉.length > 0)
+    if (weapon.walnut && !hasForge) {
         cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * (needRefine + 1)
     }
     function calcDraftCost(d: Draft, n = 1) {
@@ -700,7 +724,11 @@ function calculateWeaponCraft(
         }
     }
     if (draft) {
-        calcDraftCost(draft, needRefine + 1)
+        calcDraftCost(draft, hasForge ? 1 : needRefine + 1)
+    }
+
+    if (hasForge) {
+        mergeCost(cost, calculateWeaponForgeCost(weapon, currentRefine, targetRefine))
     }
 
     return cost
