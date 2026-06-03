@@ -1,4 +1,4 @@
-import type { Buff, Char, Draft, Dungeon, Mod, Reward, RewardChild, Weapon } from "../data-types"
+import type { Buff, Char, Draft, Dungeon, Mod, OptReward, Reward, RewardChild, Weapon } from "../data-types"
 import { type AbyssBuff, type AbyssDungeon, abyssBuffs, abyssDungeons } from "./abyss.data"
 import buffData from "./buff.data"
 import charData from "./char.data"
@@ -6,9 +6,11 @@ import cutoffData from "./cutoff.data"
 import draftData from "./draft.data"
 import dungeonData from "./dungeon.data"
 import effectData from "./effect.data"
+import optRewardData from "./optreward.data"
 
 export { eventData } from "./event.data"
 
+import { skinData } from "./accessory.data"
 import modData from "./mod.data"
 import monsterData, { monsterMap } from "./monster.data"
 import rewardData from "./reward.data"
@@ -51,6 +53,7 @@ effectData.forEach(buff => {
 // 将所有武器数据转换为统一的Map
 export const weaponMap = new Map<number, Weapon>()
 export const weaponNameMap = new Map<string, Weapon>()
+export const skinMap = new Map<number, (typeof skinData)[number]>()
 
 // 添加近战武器到weaponMap
 weaponData.forEach(weapon => {
@@ -58,10 +61,20 @@ weaponData.forEach(weapon => {
     weaponNameMap.set(weapon.名称, weapon as Weapon)
 })
 
+skinData.forEach(skin => {
+    skinMap.set(skin.id, skin)
+})
+
 export const rewardMap = new Map<number, Reward>()
 
 rewardData.forEach(v => {
     rewardMap.set(v.id, v)
+})
+
+export const optRewardMap = new Map<number, OptReward>()
+
+optRewardData.forEach(v => {
+    optRewardMap.set(v.id, v)
 })
 
 export const modDraftMap = new Map<number, Draft>()

@@ -23,7 +23,7 @@ const replaceModLevels = ref<Record<number, number>>({})
 const weaponInfoTab = ref<"breakthrough" | "manufacture">("breakthrough")
 
 const leveledWeapon = computed(() => {
-    return new LeveledWeapon(props.weapon, currentRefine.value, currentLevel.value)
+    return new LeveledWeapon(props.weapon, props.weapon.熔炉 && props.weapon.熔炉.length > 0 ? 0 : currentRefine.value, currentLevel.value)
 })
 
 interface MeleeSkillComboSummary {
@@ -234,7 +234,7 @@ watch(
     () => props.weapon,
     () => {
         currentLevel.value = 80
-        currentRefine.value = 5
+        currentRefine.value = props.weapon.熔炉 && props.weapon.熔炉.length > 0 ? 0 : 5
         weaponInfoTab.value = "breakthrough"
         ensureReplaceModLevels()
     },
@@ -276,7 +276,7 @@ watch(
 
         <div class="p-3">
             <LevelSlider v-model="currentLevel" />
-            <div class="flex items-center gap-4">
+            <div v-if="!weapon.熔炉 || weapon.熔炉.length === 0" class="flex items-center gap-4">
                 <span class="text-sm min-w-20 flex-none grid grid-cols-2">
                     <span> 熔炼: </span>
                     <span> {{ ["0", "I", "II", "III", "IV", "V"][currentRefine] }} </span>
@@ -343,7 +343,10 @@ watch(
             </div>
         </div>
 
-        <div v-if="weapon.熔炼 && weapon.熔炼.length > 0" class="p-3 bg-base-200 rounded mb-3">
+        <div
+            v-if="weapon.熔炼 && weapon.熔炼.length > 0 && (!weapon.熔炉 || weapon.熔炉.length === 0)"
+            class="p-3 bg-base-200 rounded mb-3"
+        >
             <div class="text-xs text-base-content/70 mb-2">
                 {{ $t("属性") }}
             </div>
@@ -392,18 +395,27 @@ watch(
         </div>
 
         <div v-if="weapon.熔炉 && weapon.熔炉.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">熔炉</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("灾厄熔炼") }}</div>
             <div class="space-y-3">
                 <div v-for="forge in weapon.熔炉" :key="forge.lv">
                     <div class="flex items-center justify-between gap-2 p-2">
-                        <div class="text-sm font-bold text-primary">Lv. {{ forge.lv }}</div>
+                        <div class="text-sm font-bold text-primary border-l-2 border-l-primary px-2">Lv. {{ forge.lv }}</div>
                     </div>
-                    <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm p-2">
-                        <ResourceCostItem v-for="(value, name) in forge.解锁" :key="name" :name="name" :value="value" />
-                    </div>
-                    <div v-if="forge.技能 && forge.技能.length > 0" class="mt-2 space-y-2">
-                        <div v-for="skill in forge.技能" :key="skill.id" class="p-2 bg-base-200 rounded">
+                    <div
+                        v-if="forge.技能 && forge.技能.length > 0"
+                        class="space-y-2 mb-2 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]"
+                    >
+                        <div
+                            v-for="skill in forge.技能"
+                            :key="skill.id"
+                            class="p-2 bg-base-200 rounded hover:bg-base-300 trasnition-colors duration-300"
+                        >
                             <div class="flex items-center gap-2">
+                                <div
+                                    alt="技能图标"
+                                    class="size-10 rounded-full bg-base-content"
+                                    :style="{ mask: `url(${`/imgs/webp/${skill.icon}.webp`}) no-repeat center/contain` }"
+                                />
                                 <div class="text-sm font-medium text-primary">{{ $t(skill.名称) }}</div>
                                 <CopyID :id="skill.id" />
                             </div>
@@ -420,11 +432,18 @@ watch(
                                     <span class="font-medium text-primary">{{ formatProp(name, value) }}</span>
                                 </div>
                             </div>
-                            <div v-if="skill.解锁" class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
-                                <ResourceCostItem v-for="(value, name) in skill.解锁" :key="name" :name="name" :value="value" />
-                            </div>
                         </div>
                     </div>
+                    <div class="text-base-content/80 text-xs px-2" v-if="forge.解锁">解锁</div>
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm p-2">
+                        <ResourceCostItem v-for="(value, name) in forge.解锁" :key="name" :name="name" :value="value" />
+                    </div>
+                    <template v-if="forge.技能 && forge.技能.length > 0 && forge.技能[0].解锁">
+                        <div class="text-base-content/80 text-xs px-2">二次解锁</div>
+                        <div v-if="forge.技能[0].解锁" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm p-2">
+                            <ResourceCostItem v-for="(value, name) in forge.技能[0].解锁" :key="name" :name="name" :value="value" />
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>

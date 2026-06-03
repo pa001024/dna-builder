@@ -2,6 +2,7 @@
 import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
 import { fishMap } from "@/data"
+import { optRewardMap } from "@/data/d"
 import { booksData } from "@/data/d/book.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
@@ -13,7 +14,7 @@ import {
     collectResourceQuestSources,
     collectResourceShopSources,
 } from "@/utils/resource-source"
-import { getDropModeText, getRewardDetails } from "@/utils/reward-utils"
+import { getDropModeText, getRewardDetails, type RewardItem } from "@/utils/reward-utils"
 import type { Resource } from "../data/d/resource.data"
 
 interface ResourceSourceGroup {
@@ -60,6 +61,27 @@ const bookLink = computed<RouteLocationRaw | null>(() => {
     }
 })
 const packReward = computed(() => (props.resource.pack !== undefined ? getRewardDetails(props.resource.pack) : null))
+const optReward = computed(() => (props.resource.select !== undefined ? optRewardMap.get(props.resource.select) || null : null))
+const optRewardRoot = computed<RewardItem | null>(() => {
+    if (!optReward.value) {
+        return null
+    }
+
+    return {
+        id: optReward.value.id,
+        t: "Reward",
+        p: 10000,
+        child: optReward.value.child.map(item => ({
+            id: item.id,
+            t: item.t,
+            c: item.c,
+            d: item.d,
+            dp: item.dp,
+            p: item.p ?? 0,
+            n: item.n,
+        })),
+    }
+})
 const fishTarget = computed(() => {
     for (const fish of fishMap.values()) {
         if (fish.rid !== props.resource.id) {
@@ -175,7 +197,11 @@ function getResourceIconUrl(icon: string): string {
                 <span>奖励组 {{ packReward.id }}</span>
                 <span
                     class="px-1.5 py-0.5 rounded"
-                    :class="getDropModeText(packReward.m || '') === '独立' ? 'bg-success text-success-content' : 'bg-warning text-warning-content'"
+                    :class="
+                        getDropModeText(packReward.m || '') === '独立'
+                            ? 'bg-success text-success-content'
+                            : 'bg-warning text-warning-content'
+                    "
                 >
                     {{ getDropModeText(packReward.m || "") }}
                     <span v-if="typeof packReward.totalP === 'number'"> 总容量 {{ packReward.totalP }}</span>
@@ -184,6 +210,14 @@ function getResourceIconUrl(icon: string): string {
                 <span v-if="typeof packReward.times === 'number'">期望: {{ +packReward.times.toFixed(2) }}次</span>
             </div>
             <RewardItem :reward="packReward" />
+        </div>
+
+        <div v-if="optReward" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">自选箱</div>
+            <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-base-content/70">
+                <span>选项组 {{ optReward.id }}</span> <span class="px-1.5 py-0.5 rounded bg-warning text-warning-content"> 自选 </span>
+            </div>
+            <RewardItem v-if="optRewardRoot" :reward="optRewardRoot" />
         </div>
 
         <div v-if="bookLink && bookTarget" class="p-3 bg-base-200 rounded">

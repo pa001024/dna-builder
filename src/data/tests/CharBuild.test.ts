@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
+import { weaponData } from "../index"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
 
@@ -368,6 +369,29 @@ describe("CharBuild类测试", () => {
             expect(result).toBeGreaterThanOrEqual(0)
         })
 
+        it("带熔炉的武器精炼应固定为0", () => {
+            const weapon = new LeveledWeapon({
+                id: 999999,
+                名称: "测试熔炉武器",
+                类型: ["近战", "长柄"],
+                伤害类型: "切割",
+                攻击: 10,
+                暴击: 0.1,
+                暴伤: 1.5,
+                触发: 0.2,
+                加成: { 攻击: 0.5 },
+                熔炼: ["A", "B", "C", "D", "E", "F"],
+                熔炉: [{ lv: 0, 解锁: {} }],
+            })
+            expect(weapon.精炼).toBe(0)
+
+            weapon.精炼 = 5
+            expect(weapon.精炼).toBe(0)
+
+            const cloned = weapon.clone()
+            expect(cloned.精炼).toBe(0)
+        })
+
         it("应该能够正确计算DPAPSM（每持续神智伤害）目标函数", () => {
             const charBuild = createCharBuild()
             charBuild.targetFunction = "每持续神智伤害"
@@ -450,6 +474,66 @@ describe("CharBuild类测试", () => {
             const result = charBuild.calculate()
             expect(result).toBeTypeOf("number")
             expect(result).toBeGreaterThanOrEqual(0)
+        })
+
+        it("灾厄触发应由敌人抗性是否为0决定", () => {
+            const charBuild = createCharBuild()
+            const disasterWeapon = new LeveledWeapon({
+                id: 999998,
+                名称: "测试灾厄武器",
+                类型: ["近战", "单手剑"],
+                伤害类型: "灾厄",
+                攻击: 100,
+                暴击: 0,
+                暴伤: 2,
+                触发: 1,
+            })
+
+            charBuild.meleeWeapon = disasterWeapon
+            charBuild.enemyResistance = 0
+            const noResistanceAttrs = charBuild.calculateWeaponAttributes(disasterWeapon)
+            noResistanceAttrs.攻击 = 0
+            const noResistanceDamage = charBuild.calculateWeaponDamage(noResistanceAttrs, disasterWeapon)
+
+            charBuild.enemyResistance = 0.5
+            const resistanceAttrs = charBuild.calculateWeaponAttributes(disasterWeapon)
+            resistanceAttrs.攻击 = 0
+            const resistanceDamage = charBuild.calculateWeaponDamage(resistanceAttrs, disasterWeapon)
+
+            expect(resistanceDamage.lowerCritNoTrigger).toBeCloseTo(noResistanceDamage.lowerCritNoTrigger!)
+            expect(noResistanceDamage.lowerCritTrigger).toBeCloseTo(noResistanceDamage.lowerCritNoTrigger!)
+            expect(resistanceDamage.lowerCritTrigger).toBeGreaterThan(resistanceDamage.lowerCritNoTrigger!)
+            expect(resistanceDamage.expectedDamage).toBeGreaterThan(noResistanceDamage.expectedDamage)
+        })
+
+        it("字段伤害类型为灾厄时应按灾厄触发计算", () => {
+            const weapon = weaponData.find(item => item.id === 20599)
+            expect(weapon?.技能?.some(skill => skill.名称 === "寂灭")).toBe(true)
+
+            const charBuild = createCharBuild()
+            charBuild.rangedWeapon = new LeveledWeapon(20599)
+            charBuild.baseName = "寂灭"
+            charBuild.targetFunction = "[寂灭]伤害"
+
+            const field = charBuild.rangedWeaponSkills.find(skill => skill.名称 === "寂灭")?.字段.find(field => field.名称 === "[寂灭]伤害")
+            expect(field?.伤害类型).toBe("灾厄")
+
+            charBuild.enemyResistance = 0
+            const noResistanceDamage = charBuild.calculate()
+
+            charBuild.enemyResistance = 0.5
+            const averageDamage = charBuild.calculate()
+            const triggerDamage = charBuild.calculateTargetFunction(undefined, "[寂灭]伤害.触发")
+            const noTriggerDamage = charBuild.calculateTargetFunction(undefined, "[寂灭]伤害.未触发")
+
+            expect(noResistanceDamage).toBeGreaterThan(0)
+            expect(averageDamage).toBeGreaterThan(noTriggerDamage)
+            expect(averageDamage).toBeLessThan(triggerDamage)
+            expect(triggerDamage).toBeCloseTo(noTriggerDamage * 2)
+
+            charBuild.targetFunction = "[寂灭]伤害.触发"
+            const triggerDamage2 = charBuild.calculate()
+            expect(triggerDamage2).toBeCloseTo(triggerDamage, 0)
         })
     })
 
@@ -735,36 +819,7 @@ describe("CharBuild类测试", () => {
             })
         })
 
-        it("普通 inherit 型同律武器应保留原始伤害类型并沿用旧结算逻辑", () => {
-            const charBuild = new CharBuild({
-                char: new LeveledChar("刻舟"),
-                skillLevel: 10,
-                hpPercent: 0.5,
-                resonanceGain: 2,
-                charMods: [],
-                buffs: [],
-                melee: new LeveledWeapon(10303),
-                ranged: new LeveledWeapon(20601),
-                baseName: "剑非剑",
-                enemyId: 130,
-                enemyLevel: 80,
-                enemyResistance: 1,
-                targetFunction: "伤害",
-            })
-
-            expect(charBuild.skillWeapon?.inherit).toBe("melee")
-            expect(charBuild.skillWeapon?.atk).toBeUndefined()
-            expect(charBuild.skillWeapon?.伤害类型).toBe(charBuild.skillWeapon?._originalWeaponData.伤害类型 || "切割")
-            expect(charBuild.skillWeaponSkills[0]?.skillData.icon).toBe(charBuild.charSkills[1]?.skillData.icon)
-
-            const attrs = charBuild.calculateWeaponAttributes(charBuild.skillWeapon)
-            const damage = charBuild.calculateWeaponDamage(attrs, charBuild.skillWeapon!)
-
-            expect(damage.lowerCritNoTrigger).toBeGreaterThan(0)
-            expect(damage.expectedDamage).toBeGreaterThan(0)
-        })
-
-        it("atk=all 的 inherit 型同律武器才应同步继承基础武器伤害类型并按纯元素结算", () => {
+        it("atk=all 的 inherit 型同律武器应同步继承基础武器伤害类型并按纯元素结算", () => {
             const charBuild = new CharBuild({
                 char: new LeveledChar("煜明"),
                 skillLevel: 10,
@@ -790,6 +845,49 @@ describe("CharBuild类测试", () => {
 
             expect(damage.lowerCritNoTrigger).toBeCloseTo(0, 6)
             expect(damage.expectedDamage).toBeCloseTo(0, 6)
+        })
+
+        it("角色mod的effect暴击词条应对所有武器生效", () => {
+            const charBuild = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [new LeveledMod(41911)],
+                buffs: [],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "普通攻击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+
+            const meleeAttrs = charBuild.calculateWeaponAttributes(charBuild.meleeWeapon).weapon
+            const rangedAttrs = charBuild.calculateWeaponAttributes(charBuild.rangedWeapon).weapon
+
+            const baseBuild = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "普通攻击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+
+            const baseMeleeAttrs = baseBuild.calculateWeaponAttributes(baseBuild.meleeWeapon).weapon
+            const baseRangedAttrs = baseBuild.calculateWeaponAttributes(baseBuild.rangedWeapon).weapon
+
+            expect(meleeAttrs?.暴击).toBeGreaterThan(baseMeleeAttrs?.暴击 || 0)
+            expect(rangedAttrs?.暴击).toBeGreaterThan(baseRangedAttrs?.暴击 || 0)
         })
     })
 
@@ -1148,6 +1246,52 @@ describe("CharBuild类测试", () => {
             expect(dynamicAttrs.weapon?.追加伤害).toBe(100)
             expect(dynamicBuild.calculate()).toBeGreaterThan(baseBuild.calculate())
         })
+
+        it("动态attr属性应在最终阶段按表达式计算", () => {
+            const charBuild = createCharBuild()
+            charBuild.baseName = "射击"
+            const baseAttrs = charBuild.calculateAttributes()
+            const staticBuild = createCharBuild()
+            staticBuild.baseName = "射击"
+            staticBuild.buffs.push(
+                new LeveledBuff({
+                    名称: "测试静态属性字段",
+                    描述: "测试用静态属性",
+                    技能伤害: 0.2 * baseAttrs.技能威力,
+                    远程暴伤: 0.8 * baseAttrs.技能威力,
+                })
+            )
+            const buff = new LeveledBuff({
+                名称: "测试动态属性字段",
+                描述: "测试用动态属性",
+                attr: {
+                    技能伤害: "0.2*技能威力",
+                    远程暴伤: "0.8*技能威力",
+                },
+            })
+            charBuild.buffs.push(buff)
+
+            const attrs = charBuild.calculateAttributes()
+            const weaponAttrs = charBuild.calculateWeaponAttributes(charBuild.rangedWeapon).weapon
+            const optionBuff = new LeveledBuff({
+                名称: "测试动态属性选项",
+                描述: "测试用动态属性",
+                attr: {
+                    远程暴伤: "0.8*技能威力",
+                },
+            })
+            const preparedBuff = charBuild.prepareBuff(optionBuff)
+
+            expect(buff.技能伤害).toBeCloseTo(0.2 * baseAttrs.技能威力)
+            expect(buff.远程暴伤).toBeCloseTo(0.8 * baseAttrs.技能威力)
+            expect(preparedBuff.getProperties().远程暴伤).toBeCloseTo(0.8 * baseAttrs.技能威力)
+            expect(optionBuff.getProperties().远程暴伤).toBeUndefined()
+            expect(charBuild.calcIncome(optionBuff)).toBeCloseTo(charBuild.calcIncome(preparedBuff))
+            expect(charBuild.calcIncome(buff, true)).toBeGreaterThan(0)
+            expect(charBuild.calcIncome(buff, true)).toBeCloseTo(charBuild.calcEquippedBuffIncome(buff))
+            expect(attrs.技能伤害).toBeCloseTo(staticBuild.calculateAttributes().技能伤害)
+            expect(weaponAttrs?.暴伤).toBeCloseTo(staticBuild.calculateWeaponAttributes(staticBuild.rangedWeapon).weapon?.暴伤 || 0)
+        })
     })
 
     describe("E2E", () => {
@@ -1202,10 +1346,11 @@ describe("CharBuild类测试", () => {
                     ["菲娜4溯", 1],
                     ["菲娜助战", 1],
                     ["菲娜被动(自身)", 1],
-                    ["羽翼·鼓舞·专注(光/暗)", 10],
+                    ["羽翼·鼓舞·专注(光)", 10],
                     ["色散成霓", 10],
                 ],
                 customBuff: [],
+                customVariables: [],
                 team1: "-",
                 team1Weapon: "-",
                 team2: "-",

@@ -956,7 +956,6 @@ const projectedSubRegions = computed<ProjectedSubRegionPoint[]>(() => {
 
     return result
 })
-const totalTeleportPointCount = computed(() => projectedSubRegions.value.reduce((sum, subRegion) => sum + subRegion.tpPointCount, 0))
 const resourceOptions = computed<ResourceFilterOption[]>(() => {
     const regionId = currentProfile.value.regionId
     return resourceData
@@ -987,15 +986,6 @@ const teleportIconOptions = computed<TeleportIconFilterOption[]>(() => {
 const isTeleportPointFilterActive = computed(
     () => selectedTeleportIcons.value.size > 0 && selectedTeleportIcons.value.size === teleportIconOptions.value.length
 )
-const visibleTeleportPointCount = computed(() => {
-    if (!showTeleportPoints.value) return 0
-    if (isTeleportPointFilterActive.value) return totalTeleportPointCount.value
-    let count = 0
-    for (const subRegion of projectedSubRegions.value) {
-        count += subRegion.tpPoints.filter(tpPoint => selectedTeleportIcons.value.has(tpPoint.icon)).length
-    }
-    return count
-})
 const selectedSubRegion = computed(() => {
     if (selectedSubRegionId.value === null) return null
     return projectedSubRegions.value.find(item => item.id === selectedSubRegionId.value) ?? null
@@ -3013,15 +3003,11 @@ onUnmounted(() => {
                 <button class="btn btn-circle btn-sm" title="重置视图" @click="resetView"><Icon icon="ri:crosshair-line" /></button>
             </div>
 
-            <div class="absolute top-3 right-3 z-10 space-y-2 max-w-90">
-                <div class="badge badge-neutral badge-lg">
-                    缩放 {{ (zoom * 100).toFixed(0) }}% | 图层 {{ activeLayers.length }} | 点位 {{ projectedSubRegions.length }} | TP
-                    {{ visibleTeleportPointCount }}
-                </div>
+            <div class="absolute bottom-3 right-3 z-10 space-y-2 max-w-90 flex flex-col">
                 <div v-if="hoverCoordinateInfo" class="rounded-md border border-base-300 bg-base-100/90 px-3 py-2 text-xs leading-5 shadow">
-                    <div>Map: {{ hoverCoordinateInfo.mapX.toFixed(2) }}, {{ hoverCoordinateInfo.mapY.toFixed(2) }}</div>
-                    <div>World: {{ hoverCoordinateInfo.worldX.toFixed(2) }}, {{ hoverCoordinateInfo.worldY.toFixed(2) }}</div>
+                    <div>{{ hoverCoordinateInfo.worldX.toFixed(2) }}, {{ hoverCoordinateInfo.worldY.toFixed(2) }}</div>
                 </div>
+                <div class="badge badge-neutral badge-sm ml-auto">{{ (zoom * 100).toFixed(0) }}%</div>
             </div>
 
             <div v-if="isImageLoading" class="absolute inset-0 z-20 grid place-items-center bg-base-100/45 backdrop-blur-[1px]">

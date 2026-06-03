@@ -131,8 +131,19 @@ function hasRealSkillWeaponIcon(weapon: LeveledSkillWeapon): boolean {
  * @returns 技能图标 URL
  */
 function getSkillWeaponMaskUrl(weapon: LeveledSkillWeapon): string {
-    const sourceSkill = leveledChar.value.技能[weapon._originalWeaponData.skill ?? 1]
+    const sourceSkill = leveledChar.value.技能[(weapon._originalWeaponData.skill ?? [1])[0]]
     return sourceSkill?.url || weapon.技能?.[0]?.url || ""
+}
+
+/**
+ * 获取同律武器继承描述。
+ * @param weapon 同律武器
+ * @returns 继承描述文本
+ */
+function getSkillWeaponInheritDescription(weapon: LeveledSkillWeapon): string {
+    if (weapon.inherit === "melee") return "继承近战武器属性"
+    if (weapon.inherit === "ranged") return "继承远程武器属性"
+    return ""
 }
 const localizedCharExtData = ref<CharExt[]>(charExtData)
 const localizedCharVoiceData = ref<CharVoice[]>(charVoiceData)
@@ -699,7 +710,10 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div class="text-xs text-base-content/70 mb-2">{{ $t("char-build.base_attr") }}</div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <div v-if="leveledWeapon.inherit" class="p-2 bg-base-300 rounded text-sm text-base-content/90">
+                        {{ getSkillWeaponInheritDescription(leveledWeapon) }}
+                    </div>
+                    <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-2">
                         <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
                             <span class="text-base-content/70">{{ $t("攻击") }}</span>
                             <span class="font-medium text-primary">{{ +leveledWeapon.基础攻击.toFixed(2) }}</span>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { LeveledChar, LeveledMod, resourceMap } from "@/data"
-import { charMap, draftMap, modMap, walnutMap, weaponMap } from "@/data/d"
-import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { charMap, draftMap, modMap, skinMap, walnutMap, weaponMap } from "@/data/d"
+import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { iconticketMap } from "@/data/d/iconticket.data"
@@ -257,7 +257,7 @@ function getFashionMeta(type: FashionCostType, id: number | string): FashionCost
     }
 
     if (type === "Skin") {
-        const item = skinData.find(entry => entry.id === normalizedId)
+        const item = skinMap.get(normalizedId)
         return item ? { icon: item.icon, rarity: item.rarity } : null
     }
 
@@ -277,6 +277,24 @@ function getFashionMeta(type: FashionCostType, id: number | string): FashionCost
     }
 
     return null
+}
+
+/**
+ * 获取皮肤条目的展示名称。
+ * @param id 皮肤ID
+ * @param fallback 兜底名称
+ * @returns 角色名与皮肤名组合后的展示文本
+ */
+function getSkinDisplayName(id: number | string, fallback: string): string {
+    const normalizedId = Number(id)
+    if (!Number.isFinite(normalizedId)) {
+        return fallback
+    }
+
+    const skin = skinMap.get(normalizedId)
+    const charName = skin?.charId ? charMap.get(skin.charId)?.名称 : ""
+    const skinName = skin?.name || fallback
+    return charName ? `${charName} · ${skinName}` : skinName
 }
 
 /**
@@ -597,7 +615,7 @@ function handleCardClick() {
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
             <SRouterLink v-if="getFashionLink(value[2], value[1])" :to="getFashionLink(value[2], value[1])" stop class="hover:underline">
-                {{ nameString }}
+                {{ value[2] === "Skin" ? getSkinDisplayName(value[1], nameString) : nameString }}
             </SRouterLink>
             <span v-else>{{ name }}</span>
         </span>

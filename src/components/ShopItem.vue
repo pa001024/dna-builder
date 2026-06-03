@@ -13,7 +13,8 @@ import {
     walnutMap,
     weaponMap,
 } from "@/data"
-import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { skinMap } from "@/data/d"
+import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Cutoff } from "@/data/d/cutoff.data"
 import { headSculptureMap } from "@/data/d/headsculpture.data"
 import { mountData } from "@/data/d/mount.data"
@@ -206,7 +207,7 @@ const itemDetail = computed(() => {
                 icon: `/imgs/webp/T_Head_Empty.webp`,
             }
         case "Skin":
-            const skin = skinData.find(item => item.id === props.item.typeId)
+            const skin = skinMap.get(props.item.typeId)
             if (!skin) {
                 return {
                     type: props.item.itemType,
@@ -312,7 +313,11 @@ function getPriceIcon(name: string) {
                             <template #tooltip>
                                 <div class="flex flex-col gap-2 min-w-28">
                                     <div class="text-sm font-bold">现实货币</div>
-                                    <div v-for="currency in payInfo.currencies" :key="currency.code" class="flex items-center justify-between gap-3 text-sm">
+                                    <div
+                                        v-for="currency in payInfo.currencies"
+                                        :key="currency.code"
+                                        class="flex items-center justify-between gap-3 text-sm"
+                                    >
                                         <span class="text-xs text-neutral-500 whitespace-nowrap">{{ currency.code }}</span>
                                         <span class="font-medium text-primary">{{ currency.value }}</span>
                                     </div>
@@ -362,8 +367,12 @@ function getPriceIcon(name: string) {
                     </div>
                 </div>
                 <div class="grid grid-cols-4 gap-2 text-xs">
-                    <div><span class="text-base-content/70">ID:</span> {{ item.id }}</div>
-                    <div><span class="text-base-content/70">物品ID:</span> {{ item.typeId }}</div>
+                    <div>
+                        <CopyID :id="item.id" />
+                    </div>
+                    <div>
+                        <CopyID :id="item.typeId" name="物品ID" />
+                    </div>
                     <div><span class="text-base-content/70">限购:</span> {{ item.limit || "∞" }}</div>
                     <div v-if="item.lv"><span class="text-base-content/70">解锁等级:</span> {{ item.lv }}</div>
                     <div v-if="item.cond"><span class="text-base-content/70">解锁条件:</span> {{ item.cond }}</div>

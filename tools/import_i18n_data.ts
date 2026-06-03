@@ -75,6 +75,20 @@ const MAPPINGS: Mapping[] = [
         targetStem: "convert",
         targetVar: "modConvertData",
     },
+    {
+        source: async () => {
+            const dynamicRewardText = await readFile(path.join(OUT_ROOT, "DynamicReward.json"), "utf8")
+
+            return [
+                {
+                    targetVar: "dynamicRewardMap",
+                    text: formatTsValue(JSON.parse(dynamicRewardText), 0),
+                },
+            ]
+        },
+        targetStem: "hardboss",
+        targetVar: "dynamicRewardMap",
+    },
     { source: "Fish", targetStem: "fish", targetVar: "fishs", locales: ["cn"] },
     { source: "FishingSpot", targetStem: "fish", targetVar: "fishingSpots", locales: ["cn"] },
     { source: "HardBoss", targetStem: "hardboss", targetVar: "hardBossMap", locales: ["cn"] },
@@ -88,6 +102,7 @@ const MAPPINGS: Mapping[] = [
     { source: "MonsterStrongAffixes", targetStem: "monstertag", targetVar: "monsterTagData", locales: ["cn"] },
     { source: "Mount", targetStem: "mount", targetVar: "mountData", locales: ["cn"] },
     { source: "Npc", targetStem: "npc", targetVar: "npcData", locales: ["cn"] },
+    { source: "OptReward", targetStem: "optreward", targetVar: "optRewardData", locales: ["cn"] },
     { source: "ExtractionTreasureMechanism", targetStem: "solotreasure", targetVar: "extractionTreasureMechanismData", locales: ["cn"] },
     { source: "ExtractionTreasure", targetStem: "solotreasure", targetVar: "extractionTreasureData", locales: ["cn"] },
     { source: "ExtractionTreasureBag", targetStem: "solotreasure", targetVar: "extractionTreasureBagData", locales: ["cn"] },

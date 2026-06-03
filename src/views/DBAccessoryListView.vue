@@ -2,6 +2,7 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
+import { charMap } from "@/data"
 import {
     type Accessory,
     charAccessoryData,
@@ -406,7 +407,12 @@ useInitialScrollToSelectedItem()
                                     <div class="min-w-0">
                                         <div class="font-medium wrap-break-word">{{ $t(accessory.name) }}</div>
                                         <div class="text-xs opacity-70 mt-1 line-clamp-1">
-                                            {{ getAccessoryUnlockText(accessory) ? $t(getAccessoryUnlockText(accessory)) : "-" }}
+                                            <span v-if="accessory.accessoryType === 'skin'">{{
+                                                $t(charMap.get(accessory.charId)?.名称 ?? "")
+                                            }}</span>
+                                            <span v-else>
+                                                {{ getAccessoryUnlockText(accessory) ? $t(getAccessoryUnlockText(accessory)) : "-" }}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

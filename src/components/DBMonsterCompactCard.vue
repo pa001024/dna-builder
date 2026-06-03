@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import type { RouteLocationRaw } from "vue-router"
 import { useRouter } from "vue-router"
 import { Faction } from "@/data"
 import type { Monster } from "@/data/d/monster.data"
@@ -50,7 +51,7 @@ const displayMonster = computed(() => {
             return props.monster
         }
 
-        return new LeveledMonster(props.monster.id, props.level, props.monster.isRouge)
+        return new LeveledMonster(props.monster.id, props.level, props.monster.isRouge, props.monster.hpMultiplier)
     }
 
     return new LeveledMonster(props.monster, props.level)
@@ -148,6 +149,34 @@ const dropMechanisms = computed(() => {
 })
 
 /**
+ * 获取怪物详情跳转地址。
+ * @returns 怪物详情路由
+ */
+const monsterDetailRoute = computed<RouteLocationRaw>(() => {
+    const monster = displayMonster.value
+    const query: Record<string, string> = {}
+
+    if (isLeveledMonster(monster)) {
+        if (monster.等级 !== 180) {
+            query.level = String(monster.等级)
+        }
+        if (monster.isRouge) {
+            query.rouge = "true"
+        }
+        if (monster.hpMultiplier === 8) {
+            query.hp8 = "true"
+        }
+    } else if (props.level !== undefined && props.level !== 180) {
+        query.level = String(props.level)
+    }
+
+    return {
+        path: `/db/monster/${monster.id}`,
+        query,
+    }
+})
+
+/**
  * 格式化提取宝藏奖励文本。
  * @returns 奖励文本
  */
@@ -183,7 +212,7 @@ function handleClickMonsterCard(): void {
         return
     }
 
-    router.push(`/db/monster/${displayMonster.value.id}`)
+    router.push(monsterDetailRoute.value)
 }
 </script>
 
@@ -199,7 +228,7 @@ function handleClickMonsterCard(): void {
             <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-1.5">
                     <SRouterLink
-                        :to="`/db/monster/${displayMonster.id}`"
+                        :to="monsterDetailRoute"
                         class="truncate text-sm font-semibold text-base-content hover:text-primary"
                         @click.stop
                         :title="displayMonster.n"

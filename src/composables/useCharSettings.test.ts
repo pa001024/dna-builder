@@ -17,5 +17,6 @@ describe("useCharSettings helpers", () => {
         expect(settings.baseName).toBe("普通攻击")
         expect(settings.buffs).toEqual([["助战50攻", 1]])
         expect(settings.customBuff).toEqual([])
+        expect(settings.customVariables).toEqual([])
     })
 })

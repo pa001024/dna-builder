@@ -9,6 +9,7 @@ export type AbyssDungeonElementKey = (typeof ABYSS_DUNGEON_ELEMENT_KEYS)[number]
 // 获取副本类型信息
 export function getDungeonType(type: string): { t: string; label: string; color: string } {
     const typeMap: Record<string, { t: string; label: string; color: string }> = {
+        AsyncCombat: { t: "AsyncCombat", label: "联袂演绎", color: "bg-purple-500" },
         Capture: { t: "Capture", label: "追缉", color: "bg-red-500" },
         Defence: { t: "Defence", label: "扼守", color: "bg-blue-500" },
         DefenceMove: { t: "DefenceMove", label: "扼守M", color: "bg-blue-500" },
@@ -97,10 +98,9 @@ const mhList = [
 )
 
 export function getDungeonName(dungeon: Dungeon) {
-    const yehang = ["DefenceMove", "ExtermPro", "SurvivalMiniPro"]
-    if (yehang.includes(dungeon.t) && dungeon.sr && dungeon.sm) {
-        if (dungeon.sm.length > 1) {
-            return `${t(dungeon.n)}(${t(monsterMap.get(dungeon.sm[0]!)!.n)} ${t("夜航手册")} 多号令)`
+    if (dungeon.mod != null && dungeon.sm?.length) {
+        if (dungeon.rush) {
+            return `${t(dungeon.n)}(${t(monsterMap.get(dungeon.sm[0]!)!.n)} ${t("夜航手册")} ${t("收获日")})`
         }
         return `${t(dungeon.n)}(${t(monsterMap.get(dungeon.sm[0])!.n)} ${t("夜航手册")})`
     }

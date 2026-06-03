@@ -154,7 +154,9 @@ function sha256(input: string) {
  * @returns 上传时使用的角色 ID。
  */
 function normalizeAbyssCharId(charId: number): number {
-    return charId === 160101 ? 1601 : charId
+    if (charId === 120101) return 1201
+    if (charId === 160101) return 1601
+    return charId
 }
 
 /**

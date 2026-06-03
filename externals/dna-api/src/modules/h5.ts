@@ -103,6 +103,16 @@ export interface DNAEmoji {
 }
 
 export class H5API extends DNASubModule {
+    /**
+     * 发送 H5 版短信验证码。
+     * @param mobile 手机号
+     * @param vJson 阿里云验证码校验参数
+     * @returns 请求响应
+     */
+    async getSmsCode(mobile: string, vJson: string) {
+        return await this._dna_request_h5("user/getSmsCode", { mobile, vJson }, { sign: true })
+    }
+
     async getMapMatterCategorizeOptions() {
         return await this._dna_request_h5<DNAMapMatterCategorizeOption[]>("map/matter/categorize/getOptions")
     }

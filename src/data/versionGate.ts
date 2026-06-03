@@ -1,5 +1,5 @@
 export const DNA_CURRENT_VERSION_GLOBAL_KEY = "__DNA_CURRENT_VERSION__"
-export const DNA_SAFE_VERSION_LIMIT = 1.3
+export const DNA_SAFE_VERSION_LIMIT = 1.4
 
 type VersionedItem = {
     版本?: string
@@ -24,6 +24,8 @@ export function getCurrentVersionLimit(): number {
         if (storedValue !== null) {
             return storedValue === "false" ? Number.POSITIVE_INFINITY : DNA_SAFE_VERSION_LIMIT
         }
+    } else {
+        return Number.POSITIVE_INFINITY
     }
 
     return DNA_SAFE_VERSION_LIMIT

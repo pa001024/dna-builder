@@ -78,15 +78,28 @@ interface DynamicAttrSource {
 }
 
 /**
- * 通过“移除单个动态BUFF后重算”的方式，得到每个动态来源对武器属性的实际数值贡献。
+ * 获取当前武器面板对应的BUFF属性前缀。
+ * @returns BUFF属性前缀
+ */
+function getBuffWeaponPrefix() {
+    if (props.wkey === "skill") {
+        return props.charBuild.skillWeapon?.inherit === "melee" ? "近战" : props.charBuild.skillWeapon?.inherit === "ranged" ? "远程" : "同律"
+    }
+    return props.wkey === "melee" ? "近战" : "远程"
+}
+
+/**
+ * 记录动态BUFF对武器属性的显示来源。
+ * code型BUFF用移除后重算的差值，attr型BUFF直接显示写入字段值。
  */
 const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() => {
     const sourceMap: Record<string, DynamicAttrSource[]> = {}
     const epsilon = 1e-10
+    const buffWeaponPrefix = getBuffWeaponPrefix()
 
-    props.charBuild.dynamicBuffs.forEach((buff, buffIndex) => {
+    props.charBuild.dynamicBuffs.forEach(buff => {
         const buildWithoutBuff = props.charBuild.clone()
-        buildWithoutBuff.dynamicBuffs = props.charBuild.dynamicBuffs.filter((_, index) => index !== buffIndex).map(item => item.clone())
+        buildWithoutBuff.dynamicBuffs = buildWithoutBuff.dynamicBuffs.filter(item => item.名称 !== buff.名称)
         const weaponWithoutBuff = buildWithoutBuff[`${props.wkey}Weapon`]
         const weaponAttrsWithoutBuff = weaponWithoutBuff ? buildWithoutBuff.calculateWeaponAttributes(weaponWithoutBuff).weapon : undefined
         if (!weaponAttrsWithoutBuff) return
@@ -105,6 +118,24 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
             })
         })
     })
+
+    props.charBuild.buffs
+        .filter(buff => buff.attr)
+        .forEach(buff => {
+            const preparedBuff = props.charBuild.prepareBuff(buff)
+            Object.entries(preparedBuff.getProperties()).forEach(([attrKey, attrValue]) => {
+                if (!attrKey.startsWith(buffWeaponPrefix) || typeof attrValue !== "number") return
+                const weaponAttrKey = attrKey.slice(buffWeaponPrefix.length)
+                if (!weaponAttrKey || !(weaponAttrKey in weaponAttrs.value)) return
+                if (Math.abs(attrValue) < epsilon) return
+
+                sourceMap[weaponAttrKey] ||= []
+                sourceMap[weaponAttrKey].push({
+                    sourceName: buff.名称,
+                    value: attrValue,
+                })
+            })
+        })
 
     return sourceMap
 })
@@ -133,7 +164,12 @@ const modAttributeBonusSources = computed(() => {
                     {{ $t(charBuild[`${wkey}Weapon`]!.名称 || "") }}
                     <Icon v-if="wkey !== 'skill'" icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />
                 </div>
-                <Select v-if="wkey !== 'skill'" v-model="charSettings[`${wkey}WeaponRefine`]" hidebtn class="text-sm text-primary">
+                <Select
+                    v-if="wkey !== 'skill' && !charBuild[`${wkey}Weapon`]._originalWeaponData.熔炉"
+                    v-model="charSettings[`${wkey}WeaponRefine`]"
+                    hidebtn
+                    class="text-sm text-primary"
+                >
                     <SelectItem v-for="i in [0, 1, 2, 3, 4, 5]" :key="i" :value="i">{{ $t("精炼") + i }}</SelectItem>
                 </Select>
             </div>

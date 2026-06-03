@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { CharAttr } from "../CharBuild"
-import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledMonster, LeveledWeapon } from "../leveled"
 
 // 测试LeveledMod类
 describe("LeveledMod类测试", () => {
@@ -234,6 +234,19 @@ describe("LeveledMod乘算反向属性测试", () => {
     })
 })
 
+describe("LeveledMonster", () => {
+    it("生命倍率应同时作用于生命和护盾", () => {
+        const normal = new LeveledMonster(115, 10)
+        const multiplied = new LeveledMonster(115, 10, false, 8)
+
+        expect(multiplied.hp).toBe(normal.hp * 8)
+        expect(multiplied.es).toBe((normal.es || 0) * 8)
+        expect(multiplied.currentHP).toBe(multiplied.hp)
+        expect(multiplied.currentShield).toBe(multiplied.es)
+        expect(multiplied.getHPByLevel(10)).toBe(normal.getHPByLevel(10) * 8)
+    })
+})
+
 // LeveledChar 测试套件
 describe("LeveledChar", () => {
     it("应该能够创建角色实例", () => {
@@ -402,6 +415,22 @@ describe("LeveledWeapon类测试", () => {
         // 基础暴击属性应该始终保持原始值0.2，不受精炼等级影响
         expect(铸铁者精炼0级.基础暴击).toBe(0.2)
         expect(铸铁者精炼5级.基础暴击).toBe(0.2)
+    })
+
+    // 测试10.1：带熔炉的武器加成不应随精炼等级缩放
+    it("带熔炉的武器加成不应随精炼等级变化", () => {
+        const 无止无休精炼0级 = new LeveledWeapon(10299, 0)
+        const 无止无休精炼5级 = new LeveledWeapon(10299, 5)
+
+        expect(无止无休精炼0级.技能威力).toBeCloseTo(0.45, 10)
+        expect(无止无休精炼0级.攻击).toBeCloseTo(0.9, 10)
+        expect(无止无休精炼0级.技能范围).toBeCloseTo(0.9, 10)
+        expect(无止无休精炼0级.昂扬).toBeCloseTo(0.35, 10)
+
+        expect(无止无休精炼5级.技能威力).toBeCloseTo(0.45, 10)
+        expect(无止无休精炼5级.攻击).toBeCloseTo(0.9, 10)
+        expect(无止无休精炼5级.技能范围).toBeCloseTo(0.9, 10)
+        expect(无止无休精炼5级.昂扬).toBeCloseTo(0.35, 10)
     })
 
     // 测试10：获取完整属性

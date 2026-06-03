@@ -69,6 +69,13 @@ export interface WeaponAttr {
     武器倍率: number
 }
 
+const weaponAttackTypeMap = [
+    { prefix: "普攻", patterns: ["普通攻击"] },
+    { prefix: "蓄力", patterns: ["蓄力攻击"] },
+    { prefix: "下落", patterns: ["下落攻击"] },
+    { prefix: "滑行", patterns: ["滑行攻击"] },
+] as const
+
 import { groupBy } from "lodash-es"
 import type { RawTimelineData } from "../store/timeline"
 import type { DynamicMonster } from "."
@@ -130,6 +137,7 @@ export interface CharBuildOptions {
     enemyLevel?: number
     enemyResistance?: number
     targetFunction?: string
+    customVariables?: [string, string][]
     skillLevel?: number
     timeline?: CharBuildTimeline
     timelineDPS?: boolean
@@ -170,17 +178,21 @@ export class CharBuild {
         if (this.char.同律武器) {
             try {
                 const uweaponData = this.char.同律武器[0]
-                const sourceSkill = this.skills[uweaponData.skill ?? 1]
+                const skillIds = uweaponData.skill ?? [1]
+                const sourceSkills = this.skills.filter((_, i) => skillIds.includes(i))
                 const uweaponSkillData = {
                     名称: uweaponData.名称,
                     类型: "同律武器伤害",
-                    icon: sourceSkill?.skillData.icon,
+                    icon: sourceSkills[0]?.skillData.icon,
                     字段: [],
                 } as Skill
-                // 固定获取Q技能的伤害字段
-                sourceSkill?.字段.forEach(field => {
-                    if (field.名称.match(uweaponData.filter || "伤害") && field.名称.endsWith("伤害")) uweaponSkillData.字段!.push(field)
-                })
+                // 获取所有技能的伤害字段
+                sourceSkills.forEach(sourceSkill =>
+                    sourceSkill.字段.forEach(field => {
+                        if (field.名称.match(uweaponData.filter || "伤害") && field.名称.endsWith("伤害"))
+                            uweaponSkillData.字段!.push(field)
+                    })
+                )
                 uweaponData.技能 = [uweaponSkillData]
                 this.skillWeapon = new LeveledSkillWeapon(uweaponData, this.skillLevel, this.char.等级)
             } catch (error) {
@@ -323,6 +335,7 @@ export class CharBuild {
         this._enemyResistance = value
     }
     public targetFunction: string
+    public customVariables: [string, string][] = []
     public skills!: LeveledSkill[]
     public skillWeapon?: LeveledSkillWeapon
     public timeline?: CharBuildTimeline
@@ -377,6 +390,7 @@ export class CharBuild {
         this.enemyId = options.enemyId ?? 130
         this.enemyResistance = options.enemyResistance || 0
         this.targetFunction = options.targetFunction || "伤害"
+        this.customVariables = options.customVariables || []
         this.timeline = options.timeline
         this.timelineDPS = options.timelineDPS || false
         this.teamWeaponCategories =
@@ -394,12 +408,10 @@ export class CharBuild {
     }
 
     /**
-     * 仅当同律武器声明 atk=all 时，将 inherit 型同律武器的伤害类型同步为当前继承武器的伤害类型。
-     * 其他 inherit 同律武器继续保留自身原始伤害类型，维持旧逻辑。
+     * 将 inherit 型同律武器的伤害类型同步为当前继承武器的伤害类型。
      */
     private syncInheritedSkillWeapon() {
         if (!this.skillWeapon?.inherit) return
-        if (this.skillWeapon.atk !== "all") return
 
         const inheritedWeapon = this.skillWeapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
         if (!inheritedWeapon) return
@@ -443,6 +455,7 @@ export class CharBuild {
             enemyLevel: charSettings.enemyLevel,
             enemyResistance: charSettings.enemyResistance,
             targetFunction: charSettings.targetFunction,
+            customVariables: charSettings.customVariables,
             timeline,
             timelineDPS: charSettings.timelineDPS,
             teamWeapons: [charSettings.team1Weapon, charSettings.team2Weapon],
@@ -493,7 +506,7 @@ export class CharBuild {
     }
 
     // 计算角色所有属性（基础属性和其他属性）
-    public calculateAttributes(nocode = false): CharAttr {
+    public calculateAttributes(nocode = false, attrApplied = false): CharAttr {
         const char = this.char
 
         // 计算各种加成
@@ -618,6 +631,9 @@ export class CharBuild {
         if (this.applyCondition(attrs, condMods)) {
             return this.calculateAttributes(nocode)
         }
+        if (!attrApplied && this.applyBuffAttr(attrs)) {
+            return this.calculateAttributes(nocode, true)
+        }
         // 应用MOD条件
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0) {
@@ -630,6 +646,40 @@ export class CharBuild {
             }
         }
         return attrs
+    }
+
+    /**
+     * 根据当前最终角色属性刷新 BUFF 的动态属性字段。
+     * @param attrs 当前角色属性
+     * @returns 是否发生字段变更
+     */
+    private applyBuffAttr(attrs: CharAttr) {
+        let changed = false
+        this.buffs.forEach(buff => {
+            changed ||= this.applyBuffAttrValue(buff, attrs)
+        })
+        return changed
+    }
+
+    /**
+     * 按当前构筑上下文刷新单个 BUFF 的动态属性字段。
+     * @param buff 目标BUFF
+     * @param attrs 当前角色属性
+     * @returns 是否发生字段变更
+     */
+    public applyBuffAttrValue(buff: LeveledBuff, attrs = this.calculateAttributes(true)) {
+        return buff.applyAttr(attrs, expression => this.evaluateAST(expression, { ...attrs }))
+    }
+
+    /**
+     * 返回已刷新动态属性字段的 BUFF 副本，用于展示和收益预览。
+     * @param buff 目标BUFF
+     * @returns 刷新后的BUFF副本
+     */
+    public prepareBuff(buff: LeveledBuff) {
+        const prepared = buff.clone()
+        this.applyBuffAttrValue(prepared)
+        return prepared
     }
 
     public applyCondition(attrs: CharAttr, mods: LeveledMod[]) {
@@ -853,9 +903,87 @@ export class CharBuild {
         return map
     }
 
+    /**
+     * 将细分武器前缀收敛到装备槽位，用于 MOD/武器归属过滤。
+     * @param prefix 属性前缀
+     * @returns 装备槽位前缀
+     */
+    private getAttributePrefixScope(prefix = "角色") {
+        if (prefix.startsWith("同律近战")) return "同律近战"
+        if (prefix.startsWith("同律远程")) return "同律远程"
+        if (prefix.startsWith("近战")) return "近战"
+        if (prefix.startsWith("远程")) return "远程"
+        return prefix
+    }
+
+    /**
+     * 判断BUFF属性是否匹配当前属性作用域。
+     * @param attribute 属性名
+     * @param prefixScope 当前属性作用域
+     * @returns 是否应参与汇总
+     */
+    private isBuffAttributeInScope(attribute: string, prefixScope: string) {
+        const attributeScope = this.getAttributePrefixScope(attribute)
+        if (attributeScope === "近战" || attributeScope === "远程" || attributeScope.startsWith("同律")) {
+            return prefixScope === attributeScope
+        }
+        return true
+    }
+
+    /**
+     * 根据技能名或字段名判断武器攻击细分乘区。
+     * @param baseName 技能名称
+     * @param fieldName 字段名称
+     * @returns 细分乘区前缀
+     */
+    private getWeaponAttackTypePrefix(baseName: string, fieldName?: string) {
+        const fieldPrefix = weaponAttackTypeMap.find(
+            ({ patterns }) => fieldName && patterns.some(pattern => fieldName.includes(pattern))
+        )?.prefix
+        if (fieldPrefix) return fieldPrefix
+        return weaponAttackTypeMap.find(({ patterns }) => patterns.some(pattern => baseName === pattern))?.prefix
+    }
+
+    /**
+     * 判断属性是否是武器攻击类型细分属性。
+     * @param attribute 属性名
+     * @param prefix 武器前缀
+     * @returns 是否为细分属性
+     */
+    private isWeaponAttackTypeAttribute(attribute: string, prefix: string) {
+        return weaponAttackTypeMap.some(({ prefix: attackTypePrefix }) => attribute.startsWith(`${prefix}${attackTypePrefix}`))
+    }
+
+    /**
+     * 获取当前武器伤害字段适用的细分加成。
+     * @param weaponPrefix 武器前缀
+     * @param baseName 技能名称
+     * @param fieldName 字段名称
+     * @param attribute 加成属性
+     * @returns 细分增伤加成
+     */
+    private getWeaponAttackTypeBonus(
+        weaponPrefix: string,
+        baseName: string,
+        fieldName: string | undefined,
+        attribute: "增伤" | "独立增伤"
+    ) {
+        const attackTypePrefix = this.getWeaponAttackTypePrefix(baseName, fieldName)
+        if (!attackTypePrefix) return 0
+        const prefixScope = this.getAttributePrefixScope(weaponPrefix)
+        const getBonus = attribute === "独立增伤" ? this.getTotalBonusMul.bind(this) : this.getTotalBonus.bind(this)
+        let bonus = getBonus(`${weaponPrefix}${attackTypePrefix}${attribute}`, prefixScope)
+        if (weaponPrefix.startsWith("同律")) {
+            const lowerPrefix = weaponPrefix.substring(2)
+            bonus += getBonus(`${lowerPrefix}${attackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix))
+        }
+        return bonus
+    }
+
     // 获取总加成
     public getTotalBonus(attribute: string, prefix = "角色"): number {
         let bonus = 0
+        const prefixScope = this.getAttributePrefixScope(prefix)
 
         // 添加角色自带加成
         if (prefix === "角色" || attribute !== "攻击") {
@@ -863,44 +991,51 @@ export class CharBuild {
         }
 
         // 添加近战武器加成
-        if ((prefix === "角色" || (prefix === "近战" && attribute !== "攻击")) && this.meleeWeapon) {
+        if ((prefixScope === "角色" || (prefixScope === "近战" && attribute !== "攻击")) && this.meleeWeapon) {
             if (typeof this.meleeWeapon[attribute] === "number") {
                 bonus += this.meleeWeapon[attribute]
             }
         }
         // 添加远程武器加成
-        if ((prefix === "角色" || (prefix === "远程" && attribute !== "攻击")) && this.rangedWeapon) {
+        if ((prefixScope === "角色" || (prefixScope === "远程" && attribute !== "攻击")) && this.rangedWeapon) {
             if (typeof this.rangedWeapon[attribute] === "number") {
                 bonus += this.rangedWeapon[attribute]
             }
         }
 
         // 添加MOD加成
-        if (prefix === "角色" || !attribute.startsWith(prefix))
+        if (prefix === "角色" || !attribute.startsWith(prefix) || this.isWeaponAttackTypeAttribute(attribute, prefix)) {
             this.mods.forEach(mod => {
-                if (prefix && mod.attrType !== prefix) return
+                if (
+                    ["暴击", "暴伤", "触发", "攻速"].includes(attribute)
+                        ? mod.attrType !== "角色" && mod.attrType !== prefixScope
+                        : prefixScope && mod.attrType !== prefixScope
+                )
+                    return
                 if (typeof mod.addAttr[attribute] === "number") {
                     bonus += mod.addAttr[attribute]
                 }
             })
+        }
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
-            if (prefix !== "角色" && ["攻击", "增伤"].includes(attribute)) return
+            if (!this.isBuffAttributeInScope(attribute, prefixScope)) return
+            if (prefixScope !== "角色" && ["攻击", "增伤"].includes(attribute)) return
             if (typeof buff[attribute] === "number") {
                 bonus += buff[attribute]
             }
         })
 
         Object.entries(this.rangedWeapon.buffProps).forEach(([key, value]) => {
-            if (prefix !== "角色" && ["攻击", "增伤"].includes(key)) return
+            if (prefixScope !== "角色" && ["攻击", "增伤"].includes(key)) return
             if (attribute === key && typeof value === "number") {
                 bonus += value
             }
         })
 
         Object.entries(this.meleeWeapon.buffProps).forEach(([key, value]) => {
-            if (prefix !== "角色" && ["攻击", "增伤"].includes(key)) return
+            if (prefixScope !== "角色" && ["攻击", "增伤"].includes(key)) return
             if (attribute === key && typeof value === "number") {
                 bonus += value
             }
@@ -911,11 +1046,12 @@ export class CharBuild {
 
     public getModsBonus(mods: LeveledMod[], attribute: string, prefix = "角色"): number {
         let bonus = 0
+        const prefixScope = this.getAttributePrefixScope(prefix)
 
         // 添加MOD加成
         if (prefix === "角色" || !attribute.startsWith(prefix))
             mods.forEach(mod => {
-                if (prefix && mod.类型 !== prefix) return
+                if (prefixScope && mod.类型 !== prefixScope) return
                 if (typeof mod[attribute] === "number") {
                     bonus += mod[attribute]
                 }
@@ -927,6 +1063,7 @@ export class CharBuild {
     // 获取总加成
     private getTotalBonusMul(attribute: string, prefix = "角色"): number {
         let bonus = 1
+        const prefixScope = this.getAttributePrefixScope(prefix)
 
         // 添加角色自带加成
         if (typeof this.char.加成?.[attribute] === "number") {
@@ -934,17 +1071,19 @@ export class CharBuild {
         }
 
         // 添加MOD加成
-        if (prefix === "角色" || !attribute.startsWith(prefix))
+        if (prefix === "角色" || !attribute.startsWith(prefix) || this.isWeaponAttackTypeAttribute(attribute, prefix)) {
             this.mods.forEach(mod => {
-                if (prefix && mod.attrType !== prefix) return
+                if (prefixScope && mod.attrType !== prefixScope) return
                 if (typeof mod.addAttr[attribute] === "number") {
                     bonus *= 1 + mod.addAttr[attribute]
                 }
             })
+        }
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
-            if (prefix !== "角色" && attribute === "独立增伤") return
+            if (!this.isBuffAttributeInScope(attribute, prefixScope)) return
+            if (prefixScope !== "角色" && attribute === "独立增伤") return
             if (typeof buff[attribute] === "number") {
                 bonus *= 1 + buff[attribute]
             }
@@ -1044,24 +1183,38 @@ export class CharBuild {
     // 计算武器伤害
     public calculateWeaponDamage(
         attrs: ReturnType<typeof this.calculateWeaponAttributes>,
-        weapon: LeveledWeapon | LeveledSkillWeapon
+        weapon: LeveledWeapon | LeveledSkillWeapon,
+        damageType = weapon.伤害类型
     ): DamageResult {
         const weaponAttrs = attrs.weapon!
         // 计算武器基础伤害
         const weaponAttackMultiplier = 1 // 倍率 这里设为1 使用动态计算
         const totalWeaponDamage = attrs.攻击 + weaponAttrs.攻击
         const inheritAllSkillWeapon = weapon instanceof LeveledSkillWeapon && !!weapon.inherit && weapon.atk === "all"
-        const weaponDamagePhysical = inheritAllSkillWeapon ? 0 : (weaponAttackMultiplier * weaponAttrs.攻击) / totalWeaponDamage
-        const weaponDamageElemental = inheritAllSkillWeapon ? 1 : (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
+        const convertElementalToPhysical = damageType === "灾厄"
+        const weaponDamagePhysical = convertElementalToPhysical
+            ? 1
+            : inheritAllSkillWeapon
+              ? 0
+              : (weaponAttackMultiplier * weaponAttrs.攻击) / totalWeaponDamage
+        const weaponDamageElemental = convertElementalToPhysical
+            ? 0
+            : inheritAllSkillWeapon
+              ? 1
+              : (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
 
         // 计算触发伤害期望
         const triggerDamageMultiplier =
-            weapon.伤害类型 === this.hpTypeDMG[this.enemy.currentHPType]
-                ? this.hpTypeCoefficients[this.enemy.currentHPType] + this.getTotalBonus("触发倍率")
-                : 0
+            damageType === "灾厄"
+                ? this.enemyResistance !== 0
+                    ? 1 + this.getTotalBonus("触发倍率")
+                    : 0
+                : damageType === this.hpTypeDMG[this.enemy.currentHPType]
+                  ? this.hpTypeCoefficients[this.enemy.currentHPType] + this.getTotalBonus("触发倍率")
+                  : 0
         const triggerRate = weaponAttrs.触发
         const triggerDamageAdd = triggerDamageMultiplier
-        const triggerExpectedDamageAdd = triggerDamageMultiplier * triggerRate
+        const triggerExpectedDamageAdd = triggerDamageAdd * triggerRate
 
         // 计算暴击伤害期望
         const critRate = weaponAttrs.暴击
@@ -1087,22 +1240,28 @@ export class CharBuild {
         const elementalPart = weaponDamageElemental * resistance
         const triggerablePart = inheritAllSkillWeapon ? elementalPart : weaponDamagePhysical
         const nonTriggerPart = inheritAllSkillWeapon ? 0 : elementalPart
+        const allPart = triggerablePart + nonTriggerPart
+        const lowerCritNoTrigger = allPart * lowerCritDamage * commonMore
+        const higherCritNoTrigger = allPart * higherCritDamage * commonMore
+        const expectedCritNoTrigger = allPart * critExpectedDamage * commonMore
+        const lowerCritTrigger = lowerCritNoTrigger * (1 + triggerDamageAdd)
+        const higherCritTrigger = higherCritNoTrigger * (1 + triggerDamageAdd)
+        const lowerCritExpectedTrigger = lowerCritNoTrigger * (1 + triggerExpectedDamageAdd)
+        const higherCritExpectedTrigger = higherCritNoTrigger * (1 + triggerExpectedDamageAdd)
+        const expectedCritTrigger = expectedCritNoTrigger * (1 + triggerDamageAdd)
+        const expectedDamage = expectedCritNoTrigger * (1 + triggerExpectedDamageAdd)
+        const noHpDamage = allPart * critExpectedDamage * otherMore * (1 + triggerExpectedDamageAdd)
         return {
-            lowerCritNoTrigger: (triggerablePart + nonTriggerPart) * lowerCritDamage * commonMore,
-            higherCritNoTrigger: (triggerablePart + nonTriggerPart) * higherCritDamage * commonMore,
-            lowerCritTrigger: (triggerablePart * (lowerCritDamage + triggerDamageAdd) + nonTriggerPart * lowerCritDamage) * commonMore,
-            higherCritTrigger: (triggerablePart * (higherCritDamage + triggerDamageAdd) + nonTriggerPart * higherCritDamage) * commonMore,
-            lowerCritExpectedTrigger:
-                (triggerablePart * (lowerCritDamage + triggerExpectedDamageAdd) + nonTriggerPart * lowerCritDamage) * commonMore,
-            higherCritExpectedTrigger:
-                (triggerablePart * (higherCritDamage + triggerExpectedDamageAdd) + nonTriggerPart * higherCritDamage) * commonMore,
-            expectedCritTrigger: (triggerablePart + nonTriggerPart) * critExpectedDamage * commonMore,
-            expectedCritNoTrigger:
-                (triggerablePart * (critExpectedDamage + triggerDamageAdd) + nonTriggerPart * critExpectedDamage) * commonMore,
-            expectedDamage:
-                (triggerablePart * (critExpectedDamage + triggerExpectedDamageAdd) + nonTriggerPart * critExpectedDamage) * commonMore,
-            noHpDamage:
-                (triggerablePart * (critExpectedDamage + triggerExpectedDamageAdd) + nonTriggerPart * critExpectedDamage) * otherMore,
+            lowerCritNoTrigger,
+            higherCritNoTrigger,
+            lowerCritTrigger,
+            higherCritTrigger,
+            lowerCritExpectedTrigger,
+            higherCritExpectedTrigger,
+            expectedCritTrigger,
+            expectedCritNoTrigger,
+            expectedDamage,
+            noHpDamage,
         }
     }
 
@@ -1212,6 +1371,7 @@ export class CharBuild {
             const skillAttrs = new Map(this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)]))
             skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
             skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
+            const customVariableNames = new Set(this.getValidCustomVariables().map(([key]) => key))
             const getWeaponAttr = (fieldName: string, base?: string) =>
                 weaponAttrs?.get(base || this.baseName)?.[fieldName as keyof WeaponAttr] || 0
             const getSkillAttr = (fieldName: string, base?: string) =>
@@ -1223,6 +1383,7 @@ export class CharBuild {
                     case "property": {
                         const fieldName = node.name
                         if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) break
+                        if (!node.namespace && customVariableNames.has(fieldName)) break
                         // 检查是否是技能字段、属性或武器属性
                         const isSkillField = getSkillAttr(fieldName, node.namespace)
                         const isAttr = fieldName in attrs
@@ -1273,6 +1434,50 @@ export class CharBuild {
             return e.message || (e as string)
         }
     }
+
+    /**
+     * 验证自定义变量名称是否符合表达式标识符规则。
+     * @param key 自定义变量名称
+     * @returns 错误信息；合法时返回 undefined
+     */
+    validateCustomVariableKey(key: string): string | undefined {
+        const trimmedKey = key.trim()
+        if (!trimmedKey) return "变量名不能为空"
+        if (trimmedKey.includes("::") || trimmedKey.includes(".")) return `变量名不支持命名空间或成员访问: "${trimmedKey}"`
+        if (!/^[a-zA-Z_\u4e00-\u9fa5·[][\]a-zA-Z0-9_\u4e00-\u9fa5·]*$/.test(trimmedKey)) return `变量名不合法: "${trimmedKey}"`
+
+        try {
+            const ast = parseAST(trimmedKey, CharBuild.macros)
+            if (ast.type !== "property" || ast.name !== trimmedKey || ast.namespace) return `变量名不合法: "${trimmedKey}"`
+        } catch (e: any) {
+            return e.message || (e as string)
+        }
+        return undefined
+    }
+
+    /**
+     * 验证单个自定义变量配置。
+     * @param key 自定义变量名称
+     * @param value 自定义变量表达式
+     * @returns 错误信息；合法时返回 undefined
+     */
+    validateCustomVariable(key: string, value: string): string | undefined {
+        const keyError = this.validateCustomVariableKey(key)
+        if (keyError) return keyError
+        if (!value.trim()) return `变量 "${key.trim()}" 的表达式不能为空`
+        return this.validateAST(value)
+    }
+
+    /**
+     * 获取合法且非空的自定义变量配置。
+     * @returns 自定义变量键值对
+     */
+    private getValidCustomVariables() {
+        return this.customVariables
+            .map(([key, value]) => [key.trim(), value.trim()] as [string, string])
+            .filter(([key, value]) => key && value && !this.validateCustomVariableKey(key))
+    }
+
     /**
      * 解释AST表达式并计算结果
      * @param astInput AST表达式字符串
@@ -1280,7 +1485,12 @@ export class CharBuild {
      * @param attrs 武器属性对象
      * @returns 计算结果
      */
-    evaluateAST(astInput: string, inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>) {
+    evaluateAST(
+        astInput: string,
+        inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>,
+        resolvingVariables = new Set<string>(),
+        customVariableValueCache = new Map<string, number>()
+    ) {
         if (!astInput) return 0
         let ast = this.astCache.get(astInput)
         if (!ast) {
@@ -1314,16 +1524,40 @@ export class CharBuild {
         const getSkillAttr = (fieldName: string, base?: string) =>
             skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
         const damageCache = new Map<string, DamageResult>()
-        const getDamage = (base?: string) => {
+        const getWeaponAttackTypeBonus = (base: string | undefined, fieldName: string | undefined, attribute: "增伤" | "独立增伤") => {
             const key = base || this.baseName
-            if (damageCache.has(key)) return damageCache.get(key)!
+            const weapon = weaponsMap.get(key) || this.selectedWeapon || this.meleeWeapon
+            return this.getWeaponAttackTypeBonus(weapon.类型, key, fieldName, attribute)
+        }
+        const getDamage = (base?: string, fieldName?: string) => {
+            const key = base || this.baseName
+            const cacheKey = fieldName ? `${key}::${fieldName}` : key
+            if (damageCache.has(cacheKey)) return damageCache.get(cacheKey)!
             const weapon = weaponsMap.get(key)
             const weaponAttr = getCalculatedWeaponAttr(base)
+            const fieldDamageType = fieldName ? getSkillAttr(fieldName, base)?.伤害类型 : undefined
+            const attackTypeDamageBonus = getWeaponAttackTypeBonus(base, fieldName, "增伤")
+            const attackTypeIndependentDamageBonus = getWeaponAttackTypeBonus(base, fieldName, "独立增伤")
             const damage =
                 weapon && weaponAttr
-                    ? this.calculateWeaponDamage({ ...attrs, weapon: weaponAttr }, weapon)
-                    : this.calculateSkillDamage(attrs)
-            damageCache.set(key, damage)
+                    ? this.calculateWeaponDamage(
+                          {
+                              ...attrs,
+                              weapon: {
+                                  ...weaponAttr,
+                                  增伤: weaponAttr.增伤 + attackTypeDamageBonus,
+                                  独立增伤: (1 + weaponAttr.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
+                              },
+                          },
+                          weapon,
+                          fieldDamageType
+                      )
+                    : this.calculateSkillDamage({
+                          ...attrs,
+                          增伤: attrs.增伤 + attackTypeDamageBonus,
+                          独立增伤: (1 + attrs.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
+                      })
+            damageCache.set(cacheKey, damage)
             return damage
         }
         const defCache = new Map<boolean, number>()
@@ -1343,7 +1577,7 @@ export class CharBuild {
          * @param baseValue 基础属性值（用于 {%} 占位符的乘法）
          * @returns 计算结果
          */
-        function evaluateExpression(format: string, value1: number, value2: number = 0, baseValue: number = 0): number {
+        const evaluateExpression = (format: string, value1: number, value2: number = 0, baseValue: number = 0): number => {
             // 使用统一计数器和单个正则表达式处理所有占位符
             let count = 0
 
@@ -1364,15 +1598,59 @@ export class CharBuild {
             expr = expr.replace(/×/g, "*")
 
             try {
-                // 使用 Function 构造函数安全计算表达式
-                // 只允许基本算术运算
-                const safeExpr = expr.replace(/[^0-9+\-*/.()\s]/g, "")
-                const result = new Function(`return ${safeExpr}`)()
+                const formatAst = parseAST(expr, CharBuild.macros)
+                const result = evaluate(formatAst)
                 return Number.isNaN(result) ? value1 * baseValue : result
             } catch {
-                // 如果解析失败，返回 value1 * baseValue
-                return value1 * baseValue
+                try {
+                    // 使用 Function 构造函数安全计算表达式
+                    // 只允许基本算术运算
+                    const safeExpr = expr.replace(/[^0-9+\-*/.()\s]/g, "")
+                    const result = new Function(`return ${safeExpr}`)()
+                    return Number.isNaN(result) ? value1 * baseValue : result
+                } catch {
+                    // 如果解析失败，返回 value1 * baseValue
+                    return value1 * baseValue
+                }
             }
+        }
+
+        const customVariableExpressions = new Map(this.getValidCustomVariables())
+        const evaluateCustomVariable = (fieldName: string) => {
+            const expression = customVariableExpressions.get(fieldName)
+            if (!expression) return undefined
+            if (customVariableValueCache.has(fieldName)) return customVariableValueCache.get(fieldName)!
+            if (resolvingVariables.has(fieldName)) return 0
+
+            resolvingVariables.add(fieldName)
+            const value = this.evaluateAST(expression, attrs, resolvingVariables, customVariableValueCache)
+            resolvingVariables.delete(fieldName)
+            const safeValue = Number.isFinite(value) ? value : 0
+            customVariableValueCache.set(fieldName, safeValue)
+            return safeValue
+        }
+
+        const evaluateIdentity = (fieldName: string, ns?: string) => {
+            if (!ns) {
+                const customValue = evaluateCustomVariable(fieldName)
+                if (customValue !== undefined) return customValue
+            }
+            if (ns) return evaluateSkill(fieldName, ns) || evaluateWeaponAttr(fieldName, ns) || evaluateAttr(fieldName) || 0
+            else return evaluateSkill(fieldName, ns) || evaluateAttr(fieldName) || evaluateWeaponAttr(fieldName, ns) || 0
+        }
+
+        function evaluateMember(memberName?: string, ns?: string, fieldName?: string) {
+            const damage = getDamage(ns, fieldName)
+            if (memberName === "N") return damage.noHpDamage
+            if (memberName === "暴击") return damage.higherCritExpectedTrigger || damage.expectedDamage
+            if (memberName === "未暴击") return damage.lowerCritExpectedTrigger || damage.expectedDamage
+            if (memberName === "触发") return damage.expectedCritTrigger || damage.expectedDamage
+            if (memberName === "未触发") return damage.expectedCritNoTrigger || damage.expectedDamage
+            if (memberName === "暴击触发" || memberName === "触发暴击") return damage.higherCritTrigger || damage.expectedDamage
+            if (memberName === "未触发暴击" || memberName === "暴击未触发") return damage.higherCritNoTrigger || damage.expectedDamage
+            if (memberName === "触发未暴击" || memberName === "未暴击触发") return damage.lowerCritTrigger || damage.expectedDamage
+            if (memberName === "未暴击未触发" || memberName === "未触发未暴击") return damage.lowerCritNoTrigger || damage.expectedDamage
+            return damage.expectedDamage // 找不到成员默认期望伤害
         }
 
         /**
@@ -1382,9 +1660,9 @@ export class CharBuild {
          * @returns 计算结果
          */
         function evaluateSkill(fieldName: string, ns?: string) {
-            if (fieldName === "[攻击]") return attrs.攻击 + getWeaponAttr("攻击", ns)
-            else if (fieldName === "[防御]") return attrs.防御
-            else if (fieldName === "[生命]") return attrs.生命
+            if (fieldName === "[攻击]") return (attrs.攻击 + getWeaponAttr("攻击", ns)) * getDef(ns)
+            else if (fieldName === "[防御]") return attrs.防御 * getDef(ns)
+            else if (fieldName === "[生命]") return attrs.生命 * getDef(ns)
             const field = getSkillAttr(fieldName, ns)
 
             if (!field) return 0
@@ -1427,23 +1705,6 @@ export class CharBuild {
             if (fieldName === "武器攻击") fieldName = "攻击"
             return getWeaponAttr(fieldName, ns)
         }
-        const evaluateIdentity = (fieldName: string, ns?: string) => {
-            if (ns) return evaluateSkill(fieldName, ns) || evaluateWeaponAttr(fieldName, ns) || evaluateAttr(fieldName) || 0
-            else return evaluateSkill(fieldName, ns) || evaluateAttr(fieldName) || evaluateWeaponAttr(fieldName, ns) || 0
-        }
-        function evaluateMember(memberName?: string, ns?: string) {
-            const damage = getDamage(ns)
-            if (memberName === "N") return damage.noHpDamage
-            if (memberName === "暴击") return damage.higherCritExpectedTrigger || damage.expectedDamage
-            if (memberName === "未暴击") return damage.lowerCritExpectedTrigger || damage.expectedDamage
-            if (memberName === "触发") return damage.expectedCritTrigger || damage.expectedDamage
-            if (memberName === "未触发") return damage.expectedCritNoTrigger || damage.expectedDamage
-            if (memberName === "暴击触发" || memberName === "触发暴击") return damage.higherCritTrigger || damage.expectedDamage
-            if (memberName === "未触发暴击" || memberName === "暴击未触发") return damage.higherCritNoTrigger || damage.expectedDamage
-            if (memberName === "触发未暴击" || memberName === "未暴击触发") return damage.lowerCritTrigger || damage.expectedDamage
-            if (memberName === "未暴击未触发" || memberName === "未触发未暴击") return damage.lowerCritNoTrigger || damage.expectedDamage
-            return damage.expectedDamage // 找不到成员默认期望伤害
-        }
         // AST求值函数
         const evaluate = (node: ASTNode): number => {
             switch (node.type) {
@@ -1485,10 +1746,11 @@ export class CharBuild {
 
                 case "property": {
                     const value = evaluateIdentity(node.name, node.namespace)
+                    if (!node.namespace && customVariableExpressions.has(node.name)) return value
                     // 如果是技能字段（evaluateSkill返回值>0），需要乘以默认的伤害系数
                     const skillValue = evaluateSkill(node.name, node.namespace)
                     if (skillValue) {
-                        return value * evaluateMember(undefined, node.namespace)
+                        return value * evaluateMember(undefined, node.namespace, node.name)
                     }
                     return value
                 }
@@ -1532,7 +1794,14 @@ export class CharBuild {
 
                     const memberName = node.property
                     // 成员访问用于修改伤害计算方式
-                    return objectValue * evaluateMember(memberName, objectNode.type === "property" ? objectNode.namespace : undefined)
+                    return (
+                        objectValue *
+                        evaluateMember(
+                            memberName,
+                            objectNode.type === "property" ? objectNode.namespace : undefined,
+                            objectNode.type === "property" ? objectNode.name : undefined
+                        )
+                    )
                 }
 
                 default:
@@ -1830,6 +2099,9 @@ export class CharBuild {
      * @returns 单属性值
      */
     public calcIncome(props: AbstractMod | LeveledBuff, minus = false): number {
+        if (props instanceof LeveledBuff && props.attr) {
+            props = this.prepareBuff(props)
+        }
         if (minus) {
             let mval = 0
             if (props instanceof LeveledBuff) {
@@ -1840,6 +2112,8 @@ export class CharBuild {
                     }
                     mval = this.calculate()
                     this.dynamicBuffs.push(props)
+                } else if (props.attr) {
+                    return this.calcEquippedBuffIncome(props)
                 } else {
                     this.buffs.push(props.minusAttr)
                     mval = this.calculate()
@@ -1888,6 +2162,21 @@ export class CharBuild {
             }
             return mval / this.calculate() - 1
         }
+    }
+
+    /**
+     * 精确计算已装备BUFF的边际收益。
+     * @param buff 目标BUFF
+     * @returns 移除该BUFF后的边际收益
+     */
+    public calcEquippedBuffIncome(buff: LeveledBuff) {
+        const baseValue = this.calculate()
+        const copyBuild = this.clone()
+        copyBuild.buffs = copyBuild.buffs.filter(item => item.名称 !== buff.名称)
+        copyBuild.dynamicBuffs = copyBuild.dynamicBuffs.filter(item => item.名称 !== buff.名称)
+        const withoutValue = copyBuild.calculate()
+        if (Math.abs(withoutValue) < Number.EPSILON) return 0
+        return baseValue / withoutValue - 1
     }
 
     /**
@@ -1946,7 +2235,7 @@ export class CharBuild {
             meleeMods: this.meleeMods.map(m => (m ? m.clone() : null)),
             rangedMods: this.rangedMods.map(m => (m ? m.clone() : null)),
             skillMods: this.skillMods.map(m => (m ? m.clone() : null)),
-            buffs: [...this.buffs, ...this.dynamicBuffs].map(b => new LeveledBuff(b.名称, b.等级)),
+            buffs: [...this.buffs, ...this.dynamicBuffs].map(b => b.clone()),
             melee: this.meleeWeapon.clone(),
             ranged: this.rangedWeapon.clone(),
             baseName: this.baseName,
@@ -1954,6 +2243,7 @@ export class CharBuild {
             enemyLevel: this.enemyLevel,
             enemyResistance: this.enemyResistance,
             targetFunction: this.targetFunction,
+            customVariables: this.customVariables.map(variable => [...variable] as [string, string]),
             skillLevel: this.skills[0].等级,
             timeline: this.timeline,
             timelineDPS: this.timelineDPS,

@@ -7,8 +7,10 @@ import { cloneDeep, debounce, groupBy } from "lodash-es"
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
+import FullTooltip from "@/components/FullTooltip.vue"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
 import { env } from "@/env"
+import { formatProp } from "@/util"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 import { CharSettings, createDefaultCharSettings, normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
@@ -27,6 +29,7 @@ import {
     monsterMap,
     weaponData,
 } from "../data"
+import type { SkillWeapon, Weapon } from "../data/data-types"
 import { waitForInitialLoad } from "../i18n"
 import { useInvStore } from "../store/inv"
 import { useSettingStore } from "../store/setting"
@@ -209,6 +212,7 @@ const charBuild = computed(() => {
             enemyLevel: charSettings.value.enemyLevel,
             enemyResistance: charSettings.value.enemyResistance,
             targetFunction: charSettings.value.targetFunction,
+            customVariables: charSettings.value.customVariables,
             timeline: charSettings.value.actions.enable ? getInlineActions() : getTimelineByName(charSettings.value.baseName),
             teamWeapons: [charSettings.value.team1Weapon, charSettings.value.team2Weapon],
         })
@@ -257,6 +261,86 @@ const charTabs = computed(() => {
 
     return tabs
 })
+
+type WeaponTooltipData = {
+    title: string
+    mastery?: string[]
+    type?: string
+    desc?: string
+    props: Record<string, number | string>
+    effdesc?: string
+}
+
+/**
+ * 将属性对象过滤为仅包含数值的记录。
+ * @param props 原始属性对象
+ * @returns 仅包含数值的属性对象
+ */
+function pickNumericProps(props?: Record<string, number | undefined>) {
+    return Object.fromEntries(Object.entries(props || {}).filter(([, value]) => typeof value === "number" && value !== 0)) as Record<
+        string,
+        number
+    >
+}
+
+/**
+ * 获取页签 tooltip 数据。
+ * @param tab 页签信息
+ * @returns tooltip 数据
+ */
+function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTooltipData | undefined {
+    if (tab.name === "角色") {
+        return {
+            title: charBuild.value.char.名称,
+            mastery: charBuild.value.char.精通,
+            type: charBuild.value.char.属性,
+            props: pickNumericProps(charBuild.value.char.加成),
+        }
+    }
+
+    const weapon =
+        tab.name === "近战"
+            ? charBuild.value.meleeWeapon
+            : tab.name === "远程"
+              ? charBuild.value.rangedWeapon
+              : tab.name === "同律"
+                ? charBuild.value.skillWeapon
+                : undefined
+
+    if (!weapon) {
+        return undefined
+    }
+
+    const weaponData = weapon._originalWeaponData as Weapon | SkillWeapon
+    let props: Record<string, number | string> = weapon.getProperties()
+    if (weapon.inherit)
+        if (weapon.inherit === "melee") {
+            props = charBuild.value.meleeWeapon.getProperties()
+        } else {
+            props = charBuild.value.rangedWeapon.getProperties()
+        }
+
+    return {
+        title: weapon.名称,
+        desc: "描述" in weaponData ? weaponData.描述 : undefined,
+        type: weapon.类别,
+        props,
+        effdesc:
+            "熔炼" in weaponData && Array.isArray(weaponData.熔炼)
+                ? weaponData.熔炼[weapon instanceof LeveledWeapon ? weapon.精炼 : 0] || ""
+                : "",
+    }
+}
+
+const charTabTooltipMap = computed<Record<string, WeaponTooltipData>>(() =>
+    charTabs.value.reduce<Record<string, WeaponTooltipData>>((map, tab) => {
+        map[tab.name] = getCharTabTooltipData(tab) || {
+            title: tab.name,
+            props: {},
+        }
+        return map
+    }, {})
+)
 
 function selectMod(type: string, slotIndex: number, modId: number, lv: number) {
     if (type === "角色") {
@@ -573,6 +657,9 @@ function updateCharBuild() {
     pad(charSettings.value.meleeMods, 8, null)
     pad(charSettings.value.rangedMods, 8, null)
     pad(charSettings.value.skillWeaponMods, 4, null)
+    charSettings.value.customVariables = charSettings.value.customVariables.filter(
+        variable => Array.isArray(variable) && typeof variable[0] === "string" && typeof variable[1] === "string"
+    )
     function pad<T>(arr: T[], length: number, value: T) {
         if (arr.length > length) {
             arr.length = length
@@ -802,6 +889,23 @@ const charTab = ref(charBuild.value.selectedSkillType)
 
 function addSkill(skillName: string) {
     targetFunction.value += skillName.replace(/\//g, "_")
+}
+
+/**
+ * 添加一行自定义表达式变量。
+ * @returns void
+ */
+function addCustomVariable() {
+    charSettings.value.customVariables.push(["", ""])
+}
+
+/**
+ * 删除指定自定义表达式变量。
+ * @param index 变量索引
+ * @returns void
+ */
+function removeCustomVariable(index: number) {
+    charSettings.value.customVariables.splice(index, 1)
 }
 
 const targetFunction = ref(charSettings.value.targetFunction)
@@ -1172,27 +1276,67 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 <div class="flex flex-col gap-4">
                     <div data-tour="char-tabs" class="flex m-auto gap-2 overflow-x-auto pb-2">
                         <div v-for="tab in charTabs" :key="tab.name" class="flex items-center gap-2 shrink-0">
-                            <div
-                                class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
-                                :class="{ 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name }"
-                                @click="charTab = tab.name"
-                            >
-                                <ImageFallback
-                                    v-if="!tab.skillMaskUrl"
-                                    :src="tab.url"
-                                    alt="角色头像"
-                                    class="w-full h-full object-cover object-top"
-                                >
-                                    <Icon icon="kezhou" class="w-full h-full" />
-                                </ImageFallback>
+                            <FullTooltip side="bottom">
+                                <template #tooltip>
+                                    <div class="flex flex-col gap-2 max-w-75 min-w-28">
+                                        <div class="flex">
+                                            <div class="text-sm font-bold">
+                                                {{ charTabTooltipMap[tab.name].title }}
+                                            </div>
+                                            <div class="ml-auto text-sm text-primary">
+                                                {{ charTabTooltipMap[tab.name].type }}
+                                            </div>
+                                        </div>
+                                        <div v-if="charTabTooltipMap[tab.name].effdesc" class="ml-auto text-xs text-neutral-500">
+                                            {{ charTabTooltipMap[tab.name].effdesc }}
+                                        </div>
+                                        <div
+                                            v-if="charTabTooltipMap[tab.name].mastery?.length"
+                                            class="flex justify-between items-center gap-2 text-sm"
+                                        >
+                                            <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("武器精通") }}</div>
+                                            <div class="font-medium text-primary">
+                                                {{ charTabTooltipMap[tab.name].mastery?.map(m => $t(m)).join("、") }}
+                                            </div>
+                                        </div>
+                                        <div
+                                            v-for="[prop, val] in Object.entries(charTabTooltipMap[tab.name].props).filter(
+                                                ([, val]) => val !== 0 && val != null
+                                            )"
+                                            :key="prop"
+                                            class="flex justify-between items-center gap-2 text-sm"
+                                        >
+                                            <div class="text-xs text-neutral-500 whitespace-nowrap">
+                                                {{ prop.startsWith("基础") ? `${$t("基础")}${$t(prop.slice(2))}` : $t(prop) }}
+                                            </div>
+                                            <div class="font-medium text-primary">
+                                                {{ formatProp(prop, val) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
                                 <div
-                                    v-else
-                                    alt="技能图标"
-                                    class="flex h-full w-full items-center justify-center bg-base-content"
-                                    :style="{ mask: `url(${tab.skillMaskUrl}) no-repeat center/68%` }"
-                                />
-                                <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
-                            </div>
+                                    class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
+                                    :class="{ 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name }"
+                                    @click="charTab = tab.name"
+                                >
+                                    <ImageFallback
+                                        v-if="!tab.skillMaskUrl"
+                                        :src="tab.url"
+                                        alt="角色头像"
+                                        class="w-full h-full object-cover object-top"
+                                    >
+                                        <Icon icon="kezhou" class="w-full h-full" />
+                                    </ImageFallback>
+                                    <div
+                                        v-else
+                                        alt="技能图标"
+                                        class="flex h-full w-full items-center justify-center bg-base-content"
+                                        :style="{ mask: `url(${tab.skillMaskUrl}) no-repeat center/68%` }"
+                                    />
+                                    <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
+                                </div>
+                            </FullTooltip>
                         </div>
                     </div>
                     <!-- 角色 -->
@@ -1306,6 +1450,45 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     </div>
                                 </div>
                                 <input v-model="isTimeline" type="checkbox" class="toggle toggle-secondary" />
+                            </div>
+                            <div v-if="!isTimeline" class="space-y-2">
+                                <div
+                                    v-for="(variable, index) in charSettings.customVariables"
+                                    :key="index"
+                                    class="grid grid-cols-[1fr_1fr_auto] gap-2"
+                                >
+                                    <input
+                                        v-model="variable[0]"
+                                        type="text"
+                                        class="input input-sm input-bordered"
+                                        placeholder="变量名"
+                                        @change="updateCharBuild"
+                                    />
+                                    <input
+                                        v-model="variable[1]"
+                                        type="text"
+                                        class="input input-sm input-bordered"
+                                        placeholder="表达式"
+                                        @change="updateCharBuild"
+                                    />
+                                    <button class="btn btn-sm btn-ghost btn-square" @click="removeCustomVariable(index)">
+                                        <Icon icon="codicon:chrome-close" />
+                                    </button>
+                                </div>
+                                <button class="btn btn-sm btn-primary w-full" @click="addCustomVariable">
+                                    <Icon icon="ri:add-line" />
+                                    变量
+                                </button>
+                                <template v-for="(variable, index) in charSettings.customVariables" :key="`variable-error-${index}`">
+                                    <div
+                                        v-if="
+                                            variable[0] || variable[1] ? charBuild.validateCustomVariable(variable[0], variable[1]) : false
+                                        "
+                                        class="flex text-xs items-center text-red-500"
+                                    >
+                                        {{ charBuild.validateCustomVariable(variable[0], variable[1]) }}
+                                    </div>
+                                </template>
                             </div>
                             <label v-if="!isTimeline" class="input input-sm input-primary text-sm flex justify-between">
                                 <input v-model="targetFunction" type="text" :placeholder="$t('char-build.damage')" class="grow" />

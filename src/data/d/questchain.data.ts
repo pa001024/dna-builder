@@ -259,6 +259,18 @@ const questChainDataRaw: QuestChain[] = [
         reward: [50502],
         quests: [
             {
+                id: 10010311,
+                next: {
+                    Success: 10010312,
+                },
+            },
+            {
+                id: 10010312,
+                next: {
+                    Success: 10010301,
+                },
+            },
+            {
                 id: 10010301,
                 next: {
                     Success: 10010302,
@@ -299,6 +311,12 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 10010310,
+                next: {
+                    Success: 10010307,
+                },
+            },
+            {
                 id: 10010307,
                 next: {
                     Success: 10010308,
@@ -306,24 +324,6 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 10010308,
-            },
-            {
-                id: 10010310,
-                next: {
-                    Success: 10010307,
-                },
-            },
-            {
-                id: 10010311,
-                next: {
-                    Success: 10010312,
-                },
-            },
-            {
-                id: 10010312,
-                next: {
-                    Success: 10010301,
-                },
             },
         ],
     },
@@ -742,6 +742,19 @@ const questChainDataRaw: QuestChain[] = [
         reward: [50512],
         quests: [
             {
+                id: 10020651,
+                next: {
+                    Success: 10020652,
+                },
+            },
+            {
+                id: 10020652,
+                sr: 101101,
+                next: {
+                    Success: 10020602,
+                },
+            },
+            {
                 id: 10020602,
                 next: {
                     Success: 10020603,
@@ -807,19 +820,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 10020615,
             },
-            {
-                id: 10020651,
-                next: {
-                    Success: 10020652,
-                },
-            },
-            {
-                id: 10020652,
-                sr: 101101,
-                next: {
-                    Success: 10020602,
-                },
-            },
         ],
     },
     {
@@ -878,6 +878,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 10020710,
+                sr: 101103,
+                next: {
+                    Success: 10020708,
+                },
+            },
+            {
                 id: 10020708,
                 sr: 101103,
                 next: {
@@ -886,13 +893,6 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 10020709,
-            },
-            {
-                id: 10020710,
-                sr: 101103,
-                next: {
-                    Success: 10020708,
-                },
             },
         ],
     },
@@ -1013,6 +1013,20 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 10030198,
+                sr: 101101,
+                next: {
+                    Success: 10030197,
+                },
+            },
+            {
+                id: 10030197,
+                sr: 101101,
+                next: {
+                    Success: 10030108,
+                },
+            },
+            {
                 id: 10030108,
                 next: {
                     Success: 10030109,
@@ -1063,20 +1077,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 10030116,
             },
-            {
-                id: 10030197,
-                sr: 101101,
-                next: {
-                    Success: 10030108,
-                },
-            },
-            {
-                id: 10030198,
-                sr: 101101,
-                next: {
-                    Success: 10030197,
-                },
-            },
         ],
     },
     {
@@ -1090,6 +1090,12 @@ const questChainDataRaw: QuestChain[] = [
         icon: "T_Chapter_Icon01",
         reward: [50522],
         quests: [
+            {
+                id: 10030299,
+                next: {
+                    Success: 10030201,
+                },
+            },
             {
                 id: 10030201,
                 next: {
@@ -1142,12 +1148,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 10030214,
             },
-            {
-                id: 10030299,
-                next: {
-                    Success: 10030201,
-                },
-            },
         ],
     },
     {
@@ -1165,31 +1165,10 @@ const questChainDataRaw: QuestChain[] = [
         },
         quests: [
             {
-                id: 10030301,
-            },
-            {
-                id: 10030394,
-                sr: 101108,
+                id: 10030399,
+                sr: 101101,
                 next: {
-                    Success: 10030301,
-                },
-            },
-            {
-                id: 10030395,
-                next: {
-                    Success: 10030394,
-                },
-            },
-            {
-                id: 10030396,
-                next: {
-                    Success: 10030395,
-                },
-            },
-            {
-                id: 10030397,
-                next: {
-                    Success: 10030396,
+                    Success: 10030398,
                 },
             },
             {
@@ -1200,11 +1179,32 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 10030399,
-                sr: 101101,
+                id: 10030397,
                 next: {
-                    Success: 10030398,
+                    Success: 10030396,
                 },
+            },
+            {
+                id: 10030396,
+                next: {
+                    Success: 10030395,
+                },
+            },
+            {
+                id: 10030395,
+                next: {
+                    Success: 10030394,
+                },
+            },
+            {
+                id: 10030394,
+                sr: 101108,
+                next: {
+                    Success: 10030301,
+                },
+            },
+            {
+                id: 10030301,
             },
         ],
     },
@@ -1222,6 +1222,18 @@ const questChainDataRaw: QuestChain[] = [
             "10030404": 4000016,
         },
         quests: [
+            {
+                id: 10030498,
+                next: {
+                    Success: 10030499,
+                },
+            },
+            {
+                id: 10030499,
+                next: {
+                    Success: 10030401,
+                },
+            },
             {
                 id: 10030401,
                 sr: 101101,
@@ -1249,18 +1261,6 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 10030405,
-            },
-            {
-                id: 10030498,
-                next: {
-                    Success: 10030499,
-                },
-            },
-            {
-                id: 10030499,
-                next: {
-                    Success: 10030401,
-                },
             },
         ],
     },
@@ -1419,6 +1419,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 10040116,
+                sr: 101101,
+                next: {
+                    Success: 10040103,
+                },
+            },
+            {
                 id: 10040103,
                 sr: 106001,
                 next: {
@@ -1471,13 +1478,6 @@ const questChainDataRaw: QuestChain[] = [
                 id: 10040112,
                 sr: 106001,
             },
-            {
-                id: 10040116,
-                sr: 101101,
-                next: {
-                    Success: 10040103,
-                },
-            },
         ],
     },
     {
@@ -1498,45 +1498,6 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 10040202,
-                sr: 106001,
-                next: {
-                    Success: 10040209,
-                },
-            },
-            {
-                id: 10040203,
-                sr: 106001,
-                next: {
-                    Success: 10040210,
-                },
-            },
-            {
-                id: 10040204,
-                sr: 106001,
-                next: {
-                    Success: 10040206,
-                },
-            },
-            {
-                id: 10040205,
-                sr: 106301,
-                next: {
-                    Success: 10040207,
-                },
-            },
-            {
-                id: 10040206,
-                sr: 106001,
-                next: {
-                    Success: 10040205,
-                },
-            },
-            {
-                id: 10040207,
-                sr: 106001,
-            },
-            {
                 id: 10040208,
                 sr: 106001,
                 next: {
@@ -1544,10 +1505,31 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 10040202,
+                sr: 106001,
+                next: {
+                    Success: 10040209,
+                },
+            },
+            {
                 id: 10040209,
                 sr: 106001,
                 next: {
                     Success: 10040214,
+                },
+            },
+            {
+                id: 10040214,
+                sr: 106001,
+                next: {
+                    Success: 10040203,
+                },
+            },
+            {
+                id: 10040203,
+                sr: 106001,
+                next: {
+                    Success: 10040210,
                 },
             },
             {
@@ -1565,11 +1547,29 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 10040214,
+                id: 10040204,
                 sr: 106001,
                 next: {
-                    Success: 10040203,
+                    Success: 10040206,
                 },
+            },
+            {
+                id: 10040206,
+                sr: 106001,
+                next: {
+                    Success: 10040205,
+                },
+            },
+            {
+                id: 10040205,
+                sr: 106301,
+                next: {
+                    Success: 10040207,
+                },
+            },
+            {
+                id: 10040207,
+                sr: 106001,
             },
         ],
     },
@@ -1605,13 +1605,6 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 10040304,
-                sr: 106001,
-                next: {
-                    Success: 10040306,
-                },
-            },
-            {
                 id: 10040305,
                 sr: 106001,
                 next: {
@@ -1619,10 +1612,24 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 10040304,
+                sr: 106001,
+                next: {
+                    Success: 10040306,
+                },
+            },
+            {
                 id: 10040306,
                 sr: 106001,
                 next: {
                     Success: 10040313,
+                },
+            },
+            {
+                id: 10040313,
+                sr: 106001,
+                next: {
+                    Success: 10040307,
                 },
             },
             {
@@ -1664,13 +1671,6 @@ const questChainDataRaw: QuestChain[] = [
                 id: 10040312,
                 sr: 106001,
             },
-            {
-                id: 10040313,
-                sr: 106001,
-                next: {
-                    Success: 10040307,
-                },
-            },
         ],
     },
     {
@@ -1705,10 +1705,24 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 10040422,
+                sr: 106101,
+                next: {
+                    Success: 10040404,
+                },
+            },
+            {
                 id: 10040404,
                 sr: 106101,
                 next: {
                     Success: 10040423,
+                },
+            },
+            {
+                id: 10040423,
+                sr: 106101,
+                next: {
+                    Success: 10040405,
                 },
             },
             {
@@ -1723,6 +1737,13 @@ const questChainDataRaw: QuestChain[] = [
                 sr: 106101,
                 next: {
                     Success: 10040424,
+                },
+            },
+            {
+                id: 10040424,
+                sr: 106101,
+                next: {
+                    Success: 10040407,
                 },
             },
             {
@@ -1824,29 +1845,11 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 10040422,
+                id: 10040428,
                 sr: 106101,
                 next: {
-                    Success: 10040404,
+                    Success: 10040427,
                 },
-            },
-            {
-                id: 10040423,
-                sr: 106101,
-                next: {
-                    Success: 10040405,
-                },
-            },
-            {
-                id: 10040424,
-                sr: 106101,
-                next: {
-                    Success: 10040407,
-                },
-            },
-            {
-                id: 10040426,
-                sr: 106101,
             },
             {
                 id: 10040427,
@@ -1856,11 +1859,8 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 10040428,
+                id: 10040426,
                 sr: 106101,
-                next: {
-                    Success: 10040427,
-                },
             },
         ],
     },
@@ -1903,10 +1903,24 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 10040514,
+                sr: 106101,
+                next: {
+                    Success: 10040506,
+                },
+            },
+            {
                 id: 10040506,
                 sr: 106101,
                 next: {
                     Success: 10040512,
+                },
+            },
+            {
+                id: 10040512,
+                sr: 106101,
+                next: {
+                    Success: 10040507,
                 },
             },
             {
@@ -1924,6 +1938,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 10040511,
+                sr: 106001,
+                next: {
+                    Success: 10040509,
+                },
+            },
+            {
                 id: 10040509,
                 sr: 106101,
                 next: {
@@ -1933,27 +1954,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 10040510,
                 sr: 210101,
-            },
-            {
-                id: 10040511,
-                sr: 106001,
-                next: {
-                    Success: 10040509,
-                },
-            },
-            {
-                id: 10040512,
-                sr: 106101,
-                next: {
-                    Success: 10040507,
-                },
-            },
-            {
-                id: 10040514,
-                sr: 106101,
-                next: {
-                    Success: 10040506,
-                },
             },
         ],
     },
@@ -1969,17 +1969,17 @@ const questChainDataRaw: QuestChain[] = [
         reward: [50515],
         quests: [
             {
-                id: 11010101,
-                sr: 100104,
-                next: {
-                    Success: 11010104,
-                },
-            },
-            {
                 id: 11010103,
                 sr: 210101,
                 next: {
                     Success: 11010101,
+                },
+            },
+            {
+                id: 11010101,
+                sr: 100104,
+                next: {
+                    Success: 11010104,
                 },
             },
             {
@@ -2035,24 +2035,17 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 11010303,
+                id: 11010311,
                 sr: 102101,
                 next: {
-                    Success: 11010312,
+                    Success: 11010314,
                 },
             },
             {
-                id: 11010305,
+                id: 11010314,
                 sr: 102101,
                 next: {
-                    Success: 11010306,
-                },
-            },
-            {
-                id: 11010306,
-                sr: 102101,
-                next: {
-                    Success: 11010309,
+                    Success: 11010307,
                 },
             },
             {
@@ -2063,21 +2056,10 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 11010308,
-                sr: 102101,
-            },
-            {
-                id: 11010309,
+                id: 11010303,
                 sr: 102101,
                 next: {
-                    Success: 11010308,
-                },
-            },
-            {
-                id: 11010311,
-                sr: 102101,
-                next: {
-                    Success: 11010314,
+                    Success: 11010312,
                 },
             },
             {
@@ -2095,11 +2077,29 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 11010314,
+                id: 11010305,
                 sr: 102101,
                 next: {
-                    Success: 11010307,
+                    Success: 11010306,
                 },
+            },
+            {
+                id: 11010306,
+                sr: 102101,
+                next: {
+                    Success: 11010309,
+                },
+            },
+            {
+                id: 11010309,
+                sr: 102101,
+                next: {
+                    Success: 11010308,
+                },
+            },
+            {
+                id: 11010308,
+                sr: 102101,
             },
         ],
     },
@@ -2122,10 +2122,10 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 11010502,
+                id: 11010525,
                 sr: 102101,
                 next: {
-                    Success: 11010520,
+                    Success: 11010505,
                 },
             },
             {
@@ -2133,6 +2133,34 @@ const questChainDataRaw: QuestChain[] = [
                 sr: 102101,
                 next: {
                     Success: 11010518,
+                },
+            },
+            {
+                id: 11010518,
+                sr: 102101,
+                next: {
+                    Success: 11010524,
+                },
+            },
+            {
+                id: 11010524,
+                sr: 102101,
+                next: {
+                    Success: 11010502,
+                },
+            },
+            {
+                id: 11010502,
+                sr: 102101,
+                next: {
+                    Success: 11010520,
+                },
+            },
+            {
+                id: 11010520,
+                sr: 102101,
+                next: {
+                    Success: 11010507,
                 },
             },
             {
@@ -2157,10 +2185,58 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 11010521,
+                sr: 102102,
+                next: {
+                    Success: 11010522,
+                },
+            },
+            {
+                id: 11010522,
+                sr: 102102,
+                next: {
+                    Success: 11010523,
+                },
+            },
+            {
+                id: 11010523,
+                sr: 102102,
+                next: {
+                    Success: 11010526,
+                },
+            },
+            {
+                id: 11010526,
+                sr: 102102,
+                next: {
+                    Success: 11010511,
+                },
+            },
+            {
                 id: 11010511,
                 sr: 102102,
                 next: {
                     Success: 11010528,
+                },
+            },
+            {
+                id: 11010528,
+                sr: 102102,
+                next: {
+                    Success: 11010527,
+                },
+            },
+            {
+                id: 11010527,
+                sr: 102102,
+                next: {
+                    Success: 11010529,
+                },
+            },
+            {
+                id: 11010529,
+                next: {
+                    Success: 11010512,
                 },
             },
             {
@@ -2185,6 +2261,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 11010519,
+                sr: 102102,
+                next: {
+                    Success: 11010515,
+                },
+            },
+            {
                 id: 11010515,
                 sr: 102102,
                 next: {
@@ -2194,89 +2277,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 11010516,
                 sr: 102102,
-            },
-            {
-                id: 11010518,
-                sr: 102101,
-                next: {
-                    Success: 11010524,
-                },
-            },
-            {
-                id: 11010519,
-                sr: 102102,
-                next: {
-                    Success: 11010515,
-                },
-            },
-            {
-                id: 11010520,
-                sr: 102101,
-                next: {
-                    Success: 11010507,
-                },
-            },
-            {
-                id: 11010521,
-                sr: 102102,
-                next: {
-                    Success: 11010522,
-                },
-            },
-            {
-                id: 11010522,
-                sr: 102102,
-                next: {
-                    Success: 11010523,
-                },
-            },
-            {
-                id: 11010523,
-                sr: 102102,
-                next: {
-                    Success: 11010526,
-                },
-            },
-            {
-                id: 11010524,
-                sr: 102101,
-                next: {
-                    Success: 11010502,
-                },
-            },
-            {
-                id: 11010525,
-                sr: 102101,
-                next: {
-                    Success: 11010505,
-                },
-            },
-            {
-                id: 11010526,
-                sr: 102102,
-                next: {
-                    Success: 11010511,
-                },
-            },
-            {
-                id: 11010527,
-                sr: 102102,
-                next: {
-                    Success: 11010529,
-                },
-            },
-            {
-                id: 11010528,
-                sr: 102102,
-                next: {
-                    Success: 11010527,
-                },
-            },
-            {
-                id: 11010529,
-                next: {
-                    Success: 11010512,
-                },
             },
         ],
     },
@@ -2302,17 +2302,17 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 11010704,
-                sr: 102102,
-                next: {
-                    Success: 11010706,
-                },
-            },
-            {
                 id: 11010705,
                 sr: 102102,
                 next: {
                     Success: 11010704,
+                },
+            },
+            {
+                id: 11010704,
+                sr: 102102,
+                next: {
+                    Success: 11010706,
                 },
             },
             {
@@ -2333,6 +2333,55 @@ const questChainDataRaw: QuestChain[] = [
         reward: [50519],
         quests: [
             {
+                id: 11010808,
+                sr: 102102,
+                next: {
+                    Success: 11010809,
+                },
+            },
+            {
+                id: 11010809,
+                sr: 102102,
+                next: {
+                    Success: 11010815,
+                },
+            },
+            {
+                id: 11010815,
+                sr: 102102,
+                next: {
+                    Success: 11010810,
+                },
+            },
+            {
+                id: 11010810,
+                sr: 102102,
+                next: {
+                    Success: 11010813,
+                },
+            },
+            {
+                id: 11010813,
+                sr: 102102,
+                next: {
+                    Success: 11010812,
+                },
+            },
+            {
+                id: 11010812,
+                sr: 102102,
+                next: {
+                    Success: 11010814,
+                },
+            },
+            {
+                id: 11010814,
+                sr: 102102,
+                next: {
+                    Success: 11010801,
+                },
+            },
+            {
                 id: 11010801,
                 sr: 102103,
                 next: {
@@ -2351,55 +2400,6 @@ const questChainDataRaw: QuestChain[] = [
                 sr: 102103,
                 next: {
                     Success: 11010816,
-                },
-            },
-            {
-                id: 11010808,
-                sr: 102102,
-                next: {
-                    Success: 11010809,
-                },
-            },
-            {
-                id: 11010809,
-                sr: 102102,
-                next: {
-                    Success: 11010815,
-                },
-            },
-            {
-                id: 11010810,
-                sr: 102102,
-                next: {
-                    Success: 11010813,
-                },
-            },
-            {
-                id: 11010812,
-                sr: 102102,
-                next: {
-                    Success: 11010814,
-                },
-            },
-            {
-                id: 11010813,
-                sr: 102102,
-                next: {
-                    Success: 11010812,
-                },
-            },
-            {
-                id: 11010814,
-                sr: 102102,
-                next: {
-                    Success: 11010801,
-                },
-            },
-            {
-                id: 11010815,
-                sr: 102102,
-                next: {
-                    Success: 11010810,
                 },
             },
             {
@@ -2427,6 +2427,20 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 11010907,
+                sr: 102104,
+                next: {
+                    Success: 11010908,
+                },
+            },
+            {
+                id: 11010908,
+                sr: 102104,
+                next: {
+                    Success: 11010903,
+                },
+            },
+            {
                 id: 11010903,
                 sr: 102104,
                 next: {
@@ -2438,6 +2452,13 @@ const questChainDataRaw: QuestChain[] = [
                 sr: 102104,
                 next: {
                     Success: 11010910,
+                },
+            },
+            {
+                id: 11010910,
+                sr: 102104,
+                next: {
+                    Success: 11010905,
                 },
             },
             {
@@ -2455,29 +2476,8 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 11010907,
-                sr: 102104,
-                next: {
-                    Success: 11010908,
-                },
-            },
-            {
-                id: 11010908,
-                sr: 102104,
-                next: {
-                    Success: 11010903,
-                },
-            },
-            {
                 id: 11010909,
                 sr: 101901,
-            },
-            {
-                id: 11010910,
-                sr: 102104,
-                next: {
-                    Success: 11010905,
-                },
             },
         ],
     },
@@ -2788,6 +2788,20 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 12010250,
+                sr: 104110,
+                next: {
+                    Success: 12010254,
+                },
+            },
+            {
+                id: 12010254,
+                sr: 104107,
+                next: {
+                    Success: 12010207,
+                },
+            },
+            {
                 id: 12010207,
                 next: {
                     Success: 12010208,
@@ -2801,10 +2815,31 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 12010253,
+                sr: 104103,
+                next: {
+                    Success: 12010209,
+                },
+            },
+            {
                 id: 12010209,
                 sr: 104103,
                 next: {
                     Success: 12010252,
+                },
+            },
+            {
+                id: 12010252,
+                sr: 104103,
+                next: {
+                    Success: 12010251,
+                },
+            },
+            {
+                id: 12010251,
+                sr: 104103,
+                next: {
+                    Success: 12010210,
                 },
             },
             {
@@ -2837,41 +2872,6 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 12010214,
-            },
-            {
-                id: 12010250,
-                sr: 104110,
-                next: {
-                    Success: 12010254,
-                },
-            },
-            {
-                id: 12010251,
-                sr: 104103,
-                next: {
-                    Success: 12010210,
-                },
-            },
-            {
-                id: 12010252,
-                sr: 104103,
-                next: {
-                    Success: 12010251,
-                },
-            },
-            {
-                id: 12010253,
-                sr: 104103,
-                next: {
-                    Success: 12010209,
-                },
-            },
-            {
-                id: 12010254,
-                sr: 104107,
-                next: {
-                    Success: 12010207,
-                },
             },
         ],
     },
@@ -2937,10 +2937,31 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 12010322,
+                sr: 104109,
+                next: {
+                    Success: 12010309,
+                },
+            },
+            {
                 id: 12010309,
                 sr: 104105,
                 next: {
                     Success: 12010351,
+                },
+            },
+            {
+                id: 12010351,
+                sr: 104105,
+                next: {
+                    Success: 12010352,
+                },
+            },
+            {
+                id: 12010352,
+                sr: 104105,
+                next: {
+                    Success: 12010310,
                 },
             },
             {
@@ -2979,6 +3000,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 12010320,
+                sr: 104110,
+                next: {
+                    Success: 12010315,
+                },
+            },
+            {
                 id: 12010315,
                 sr: 104110,
                 next: {
@@ -3000,34 +3028,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 12010318,
                 sr: 104110,
-            },
-            {
-                id: 12010320,
-                sr: 104110,
-                next: {
-                    Success: 12010315,
-                },
-            },
-            {
-                id: 12010322,
-                sr: 104109,
-                next: {
-                    Success: 12010309,
-                },
-            },
-            {
-                id: 12010351,
-                sr: 104105,
-                next: {
-                    Success: 12010352,
-                },
-            },
-            {
-                id: 12010352,
-                sr: 104105,
-                next: {
-                    Success: 12010310,
-                },
             },
         ],
     },
@@ -3207,6 +3207,24 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 12010517,
+                next: {
+                    Success: 12010518,
+                },
+            },
+            {
+                id: 12010518,
+                next: {
+                    Success: 12010519,
+                },
+            },
+            {
+                id: 12010519,
+                next: {
+                    Success: 12010513,
+                },
+            },
+            {
                 id: 12010513,
                 sr: 104102,
                 next: {
@@ -3230,24 +3248,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 12010516,
                 sr: 104102,
-            },
-            {
-                id: 12010517,
-                next: {
-                    Success: 12010518,
-                },
-            },
-            {
-                id: 12010518,
-                next: {
-                    Success: 12010519,
-                },
-            },
-            {
-                id: 12010519,
-                next: {
-                    Success: 12010513,
-                },
             },
         ],
     },
@@ -3328,6 +3328,13 @@ const questChainDataRaw: QuestChain[] = [
         startTime: 1764036000,
         quests: [
             {
+                id: 12011150,
+                sr: 101105,
+                next: {
+                    Success: 12011101,
+                },
+            },
+            {
                 id: 12011101,
                 sr: 101105,
                 next: {
@@ -3387,13 +3394,6 @@ const questChainDataRaw: QuestChain[] = [
                     Success: 12011107,
                 },
             },
-            {
-                id: 12011150,
-                sr: 101105,
-                next: {
-                    Success: 12011101,
-                },
-            },
         ],
     },
     {
@@ -3407,6 +3407,13 @@ const questChainDataRaw: QuestChain[] = [
         reward: [50593],
         startTime: 1764122400,
         quests: [
+            {
+                id: 12011250,
+                sr: 101105,
+                next: {
+                    Success: 12011201,
+                },
+            },
             {
                 id: 12011201,
                 sr: 101105,
@@ -3460,13 +3467,6 @@ const questChainDataRaw: QuestChain[] = [
                     Success: 12011205,
                 },
             },
-            {
-                id: 12011250,
-                sr: 101105,
-                next: {
-                    Success: 12011201,
-                },
-            },
         ],
     },
     {
@@ -3480,6 +3480,13 @@ const questChainDataRaw: QuestChain[] = [
         reward: [50594],
         startTime: 1764208800,
         quests: [
+            {
+                id: 12011350,
+                sr: 101105,
+                next: {
+                    Success: 12011301,
+                },
+            },
             {
                 id: 12011301,
                 sr: 101105,
@@ -3517,20 +3524,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 12011307,
-                next: {
-                    Success: 12011308,
-                },
-            },
-            {
                 id: 12011308,
                 sr: 101105,
             },
             {
-                id: 12011350,
-                sr: 101105,
+                id: 12011307,
                 next: {
-                    Success: 12011301,
+                    Success: 12011308,
                 },
             },
         ],
@@ -3546,6 +3546,13 @@ const questChainDataRaw: QuestChain[] = [
         reward: [50595],
         startTime: 1764295200,
         quests: [
+            {
+                id: 12011450,
+                sr: 101105,
+                next: {
+                    Success: 12011401,
+                },
+            },
             {
                 id: 12011401,
                 sr: 101105,
@@ -3617,6 +3624,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 12011415,
+                sr: 101101,
+                next: {
+                    Success: 12011412,
+                },
+            },
+            {
                 id: 12011412,
                 sr: 101105,
                 next: {
@@ -3636,23 +3650,9 @@ const questChainDataRaw: QuestChain[] = [
                 sr: 101105,
             },
             {
-                id: 12011415,
-                sr: 101101,
-                next: {
-                    Success: 12011412,
-                },
-            },
-            {
                 id: 12011420,
                 next: {
                     Success: 12011414,
-                },
-            },
-            {
-                id: 12011450,
-                sr: 101105,
-                next: {
-                    Success: 12011401,
                 },
             },
         ],
@@ -3727,10 +3727,38 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 12020122,
+                sr: 104502,
+                next: {
+                    Success: 12020109,
+                },
+            },
+            {
                 id: 12020109,
                 sr: 104503,
                 next: {
                     Success: 12020125,
+                },
+            },
+            {
+                id: 12020125,
+                sr: 104503,
+                next: {
+                    Success: 12020123,
+                },
+            },
+            {
+                id: 12020123,
+                sr: 104503,
+                next: {
+                    Success: 12020124,
+                },
+            },
+            {
+                id: 12020124,
+                sr: 104503,
+                next: {
+                    Success: 12020110,
                 },
             },
             {
@@ -3750,34 +3778,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 12020112,
                 sr: 104503,
-            },
-            {
-                id: 12020122,
-                sr: 104502,
-                next: {
-                    Success: 12020109,
-                },
-            },
-            {
-                id: 12020123,
-                sr: 104503,
-                next: {
-                    Success: 12020124,
-                },
-            },
-            {
-                id: 12020124,
-                sr: 104503,
-                next: {
-                    Success: 12020110,
-                },
-            },
-            {
-                id: 12020125,
-                sr: 104503,
-                next: {
-                    Success: 12020123,
-                },
             },
         ],
     },
@@ -3820,6 +3820,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 12020214,
+                sr: 104503,
+                next: {
+                    Success: 12020205,
+                },
+            },
+            {
                 id: 12020205,
                 sr: 105101,
                 next: {
@@ -3838,6 +3845,13 @@ const questChainDataRaw: QuestChain[] = [
                 sr: 105101,
                 next: {
                     Success: 12020213,
+                },
+            },
+            {
+                id: 12020213,
+                sr: 105101,
+                next: {
+                    Success: 12020208,
                 },
             },
             {
@@ -3864,20 +3878,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 12020212,
                 sr: 104503,
-            },
-            {
-                id: 12020213,
-                sr: 105101,
-                next: {
-                    Success: 12020208,
-                },
-            },
-            {
-                id: 12020214,
-                sr: 104503,
-                next: {
-                    Success: 12020205,
-                },
             },
         ],
     },
@@ -3945,6 +3945,20 @@ const questChainDataRaw: QuestChain[] = [
                 sr: 104505,
                 next: {
                     Success: 12020323,
+                },
+            },
+            {
+                id: 12020323,
+                sr: 104505,
+                next: {
+                    Success: 12020322,
+                },
+            },
+            {
+                id: 12020322,
+                sr: 104505,
+                next: {
+                    Success: 12020309,
                 },
             },
             {
@@ -4034,20 +4048,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 12020321,
                 sr: 105201,
-            },
-            {
-                id: 12020322,
-                sr: 104505,
-                next: {
-                    Success: 12020309,
-                },
-            },
-            {
-                id: 12020323,
-                sr: 104505,
-                next: {
-                    Success: 12020322,
-                },
             },
         ],
     },
@@ -4685,6 +4685,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 12030708,
+                sr: 104504,
+                next: {
+                    Success: 12030704,
+                },
+            },
+            {
                 id: 12030704,
                 sr: 104504,
                 next: {
@@ -4708,13 +4715,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 12030707,
                 sr: 104506,
-            },
-            {
-                id: 12030708,
-                sr: 104504,
-                next: {
-                    Success: 12030704,
-                },
             },
         ],
     },
@@ -4878,6 +4878,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 20010409,
+                sr: 101103,
+                next: {
+                    Success: 20010402,
+                },
+            },
+            {
                 id: 20010402,
                 sr: 101103,
                 next: {
@@ -4920,17 +4927,6 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20010408,
-                sr: 101107,
-            },
-            {
-                id: 20010409,
-                sr: 101103,
-                next: {
-                    Success: 20010402,
-                },
-            },
-            {
                 id: 20010410,
                 sr: 101702,
                 next: {
@@ -4943,6 +4939,10 @@ const questChainDataRaw: QuestChain[] = [
                 next: {
                     Success: 20010408,
                 },
+            },
+            {
+                id: 20010408,
+                sr: 101107,
             },
         ],
     },
@@ -5010,10 +5010,31 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 20020312,
+                sr: 101101,
+                next: {
+                    Success: 20020313,
+                },
+            },
+            {
+                id: 20020313,
+                sr: 101101,
+                next: {
+                    Success: 20020302,
+                },
+            },
+            {
                 id: 20020302,
                 sr: 101101,
                 next: {
                     Success: 20020314,
+                },
+            },
+            {
+                id: 20020314,
+                sr: 101101,
+                next: {
+                    Success: 20020303,
                 },
             },
             {
@@ -5038,34 +5059,6 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20020309,
-            },
-            {
-                id: 20020310,
-                sr: 101101,
-            },
-            {
-                id: 20020312,
-                sr: 101101,
-                next: {
-                    Success: 20020313,
-                },
-            },
-            {
-                id: 20020313,
-                sr: 101101,
-                next: {
-                    Success: 20020302,
-                },
-            },
-            {
-                id: 20020314,
-                sr: 101101,
-                next: {
-                    Success: 20020303,
-                },
-            },
-            {
                 id: 20020319,
                 sr: 101101,
                 next: {
@@ -5073,11 +5066,18 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 20020309,
+            },
+            {
                 id: 20020320,
                 sr: 101101,
                 next: {
                     Success: 20020310,
                 },
+            },
+            {
+                id: 20020310,
+                sr: 101101,
             },
         ],
     },
@@ -5158,10 +5158,6 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20020506,
-                sr: 101101,
-            },
-            {
                 id: 20020507,
                 sr: 100101,
                 next: {
@@ -5173,6 +5169,12 @@ const questChainDataRaw: QuestChain[] = [
                 sr: 100101,
                 next: {
                     Success: 20020512,
+                },
+            },
+            {
+                id: 20020512,
+                next: {
+                    Success: 20020509,
                 },
             },
             {
@@ -5190,10 +5192,8 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20020512,
-                next: {
-                    Success: 20020509,
-                },
+                id: 20020506,
+                sr: 101101,
             },
         ],
     },
@@ -5230,6 +5230,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 20020609,
+                sr: 101101,
+                next: {
+                    Success: 20020606,
+                },
+            },
+            {
                 id: 20020606,
                 sr: 101101,
                 next: {
@@ -5246,13 +5253,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 20020608,
                 sr: 101107,
-            },
-            {
-                id: 20020609,
-                sr: 101101,
-                next: {
-                    Success: 20020606,
-                },
             },
         ],
     },
@@ -5303,15 +5303,15 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20020706,
-                sr: 101101,
-            },
-            {
                 id: 20020707,
                 sr: 101305,
                 next: {
                     Success: 20020706,
                 },
+            },
+            {
+                id: 20020706,
+                sr: 101101,
             },
         ],
     },
@@ -5367,13 +5367,6 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20020904,
-                sr: 101101,
-                next: {
-                    Success: 20020905,
-                },
-            },
-            {
                 id: 20020905,
                 sr: 101106,
                 next: {
@@ -5383,6 +5376,13 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 20020906,
                 sr: 101101,
+            },
+            {
+                id: 20020904,
+                sr: 101101,
+                next: {
+                    Success: 20020905,
+                },
             },
         ],
     },
@@ -5394,6 +5394,13 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50561],
         quests: [
+            {
+                id: 20021007,
+                sr: 101702,
+                next: {
+                    Success: 20021001,
+                },
+            },
             {
                 id: 20021001,
                 sr: 101702,
@@ -5418,13 +5425,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 20021004,
                 sr: 101103,
-            },
-            {
-                id: 20021007,
-                sr: 101702,
-                next: {
-                    Success: 20021001,
-                },
             },
         ],
     },
@@ -5499,17 +5499,6 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20021202,
-                sr: 101101,
-                next: {
-                    Success: 20021203,
-                },
-            },
-            {
-                id: 20021203,
-                sr: 101101,
-            },
-            {
                 id: 20021205,
                 sr: 101103,
                 next: {
@@ -5526,6 +5515,17 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 20021207,
+                sr: 101101,
+            },
+            {
+                id: 20021202,
+                sr: 101101,
+                next: {
+                    Success: 20021203,
+                },
+            },
+            {
+                id: 20021203,
                 sr: 101101,
             },
         ],
@@ -5606,6 +5606,12 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 20021510,
+                next: {
+                    Success: 20021502,
+                },
+            },
+            {
                 id: 20021502,
                 sr: 101103,
                 next: {
@@ -5627,6 +5633,12 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 20021509,
+                next: {
+                    Success: 20021506,
+                },
+            },
+            {
                 id: 20021506,
                 sr: 101103,
                 next: {
@@ -5642,18 +5654,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 20021508,
                 sr: 101101,
-            },
-            {
-                id: 20021509,
-                next: {
-                    Success: 20021506,
-                },
-            },
-            {
-                id: 20021510,
-                next: {
-                    Success: 20021502,
-                },
             },
         ],
     },
@@ -5701,6 +5701,13 @@ const questChainDataRaw: QuestChain[] = [
         reward: [50570],
         quests: [
             {
+                id: 20021904,
+                sr: 101101,
+                next: {
+                    Success: 20021901,
+                },
+            },
+            {
                 id: 20021901,
                 sr: 101103,
                 next: {
@@ -5719,13 +5726,6 @@ const questChainDataRaw: QuestChain[] = [
                 sr: 101103,
                 next: {
                     Success: 20021905,
-                },
-            },
-            {
-                id: 20021904,
-                sr: 101101,
-                next: {
-                    Success: 20021901,
                 },
             },
             {
@@ -5806,6 +5806,12 @@ const questChainDataRaw: QuestChain[] = [
         reward: [50572],
         quests: [
             {
+                id: 20022105,
+                next: {
+                    Success: 20022101,
+                },
+            },
+            {
                 id: 20022101,
                 next: {
                     Success: 20022102,
@@ -5825,12 +5831,6 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 20022104,
-            },
-            {
-                id: 20022105,
-                next: {
-                    Success: 20022101,
-                },
             },
         ],
     },
@@ -5994,11 +5994,11 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20022702,
+                id: 20022703,
                 sr: 101101,
             },
             {
-                id: 20022703,
+                id: 20022702,
                 sr: 101101,
             },
         ],
@@ -6328,9 +6328,6 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20023602,
-            },
-            {
                 id: 20023603,
                 next: {
                     已合成: 20023604,
@@ -6339,6 +6336,9 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 20023604,
+            },
+            {
+                id: 20023602,
             },
         ],
     },
@@ -6384,15 +6384,15 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20023801,
-                sr: 210101,
-            },
-            {
                 id: 20023802,
                 sr: 210101,
                 next: {
                     Success: 20023801,
                 },
+            },
+            {
+                id: 20023801,
+                sr: 210101,
             },
         ],
     },
@@ -6415,15 +6415,15 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20023901,
-                sr: 210101,
-            },
-            {
                 id: 20023902,
                 sr: 210101,
                 next: {
                     Success: 20023901,
                 },
+            },
+            {
+                id: 20023901,
+                sr: 210101,
             },
         ],
     },
@@ -6446,15 +6446,15 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20024001,
-                sr: 210101,
-            },
-            {
                 id: 20024002,
                 sr: 210101,
                 next: {
                     Success: 20024001,
                 },
+            },
+            {
+                id: 20024001,
+                sr: 210101,
             },
         ],
     },
@@ -6483,17 +6483,17 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20030103,
-                sr: 104105,
-                next: {
-                    Success: 20030106,
-                },
-            },
-            {
                 id: 20030104,
                 sr: 104105,
                 next: {
                     Success: 20030103,
+                },
+            },
+            {
+                id: 20030103,
+                sr: 104105,
+                next: {
+                    Success: 20030106,
                 },
             },
             {
@@ -6697,6 +6697,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 20030509,
+                sr: 104110,
+                next: {
+                    Success: 20030502,
+                },
+            },
+            {
                 id: 20030502,
                 sr: 104110,
                 next: {
@@ -6741,13 +6748,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 20030508,
                 sr: 104110,
-            },
-            {
-                id: 20030509,
-                sr: 104110,
-                next: {
-                    Success: 20030502,
-                },
             },
         ],
     },
@@ -6896,6 +6896,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 20030906,
+                sr: 104106,
+                next: {
+                    Success: 20030904,
+                },
+            },
+            {
                 id: 20030904,
                 sr: 104106,
                 next: {
@@ -6905,13 +6912,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 20030905,
                 sr: 104104,
-            },
-            {
-                id: 20030906,
-                sr: 104106,
-                next: {
-                    Success: 20030904,
-                },
             },
         ],
     },
@@ -6985,15 +6985,15 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
-                id: 20031102,
-                sr: 104110,
-            },
-            {
                 id: 20031103,
                 sr: 104108,
                 next: {
                     Success: 20031102,
                 },
+            },
+            {
+                id: 20031102,
+                sr: 104110,
             },
         ],
     },
@@ -7022,6 +7022,13 @@ const questChainDataRaw: QuestChain[] = [
                 },
             },
             {
+                id: 20031204,
+                sr: 104110,
+                next: {
+                    Success: 20031202,
+                },
+            },
+            {
                 id: 20031202,
                 sr: 104110,
                 next: {
@@ -7031,13 +7038,6 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 20031203,
                 sr: 104110,
-            },
-            {
-                id: 20031204,
-                sr: 104110,
-                next: {
-                    Success: 20031202,
-                },
             },
         ],
     },

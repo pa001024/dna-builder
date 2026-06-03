@@ -5,6 +5,15 @@ import type { LeveledChar, LeveledSkillWeapon, LeveledWeapon } from "."
 import { getMinusAttrValue } from "./minusAttr"
 
 /**
+ * 安全归一化动态属性计算结果。
+ * @param value 表达式计算值
+ * @returns 有效数值，不合法时返回0
+ */
+function normalizeDynamicAttrValue(value: number) {
+    return Number.isFinite(value) ? value : 0
+}
+
+/**
  * LeveledBuff类 - 继承Buff接口，添加等级属性和动态属性计算
  */
 export class LeveledBuff implements Buff {
@@ -63,6 +72,9 @@ export class LeveledBuff implements Buff {
         // 检查动态属性代码
         if (this._originalBuffData.code) {
             this.code = this._originalBuffData.code
+        }
+        if (this._originalBuffData.attr) {
+            this.attr = this._originalBuffData.attr
         }
     }
 
@@ -143,6 +155,25 @@ export class LeveledBuff implements Buff {
             } = result
             return { ...attrs, weapon: weaponAttr }
         } else return { ...attrs, weapon: weaponAttr }
+    }
+
+    /**
+     * 根据当前属性上下文刷新attr字段生成的BUFF属性。
+     * @param attrs 当前角色属性
+     * @param evaluateAttr 表达式求值函数
+     * @returns 是否发生字段变更
+     */
+    applyAttr(attrs: CharAttr, evaluateAttr: (expression: string, attrs: CharAttr) => number) {
+        if (!this.attr) return false
+        let changed = false
+        Object.entries(this.attr as Record<string, string>).forEach(([key, expression]) => {
+            const value = normalizeDynamicAttrValue(evaluateAttr(expression, attrs))
+            if (this[key] !== value) {
+                this[key] = value
+                changed = true
+            }
+        })
+        return changed
     }
 
     /**
@@ -239,6 +270,7 @@ export class LeveledBuff implements Buff {
         "pid",
         "pt",
         "code",
+        "attr",
         "_ratio",
     ])
     get properties(): string[] {

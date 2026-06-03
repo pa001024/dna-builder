@@ -12,6 +12,7 @@ import {
     getFileSize,
     listDirectories,
     listFiles,
+    pathExists,
     readTextFile,
     renameFile,
     writeTextFile,
@@ -75,6 +76,8 @@ const optionalPackEntries = ref<
         files: HotUpdatePakFileInfo[]
     }>
 >([])
+const optionalPackDownloadQueue = ref<string[]>([])
+const isProcessingOptionalPackQueue = ref(false)
 const downloadingOptionalSign = ref("")
 
 // 解压缩进度相关状态
@@ -124,6 +127,7 @@ const channels = [
 const selectedChannel = useLocalStorage("selectedChannel", channels[0].value)
 const customChannel = useLocalStorage("selectedChannel.custom", "")
 const channelGamePathMap = useLocalStorage<Record<string, string>>("game.path_by_channel", {})
+const gameInstalled = ref(false)
 
 /**
  * 兼容旧版全局路径存储，首次迁移到当前服务器专属配置。
@@ -159,6 +163,14 @@ function saveChannelGamePath(path: string) {
         ...channelGamePathMap.value,
         [channel]: path,
     }
+}
+
+/**
+ * 刷新当前游戏路径是否真实存在。
+ */
+async function refreshGameInstalled() {
+    gameInstalled.value = !!gameStore.path && (await pathExists(gameStore.path))
+    gameStore.installed = gameInstalled.value
 }
 
 /**
@@ -204,6 +216,7 @@ watch(
     () => gameStore.path,
     path => {
         saveChannelGamePath(path)
+        void refreshGameInstalled()
     }
 )
 
@@ -224,6 +237,7 @@ watch([selectedChannel, customChannel, selectedCDN], async () => {
     }
     syncGamePathByChannel()
     saveChannelGamePath(gameStore.path)
+    await refreshGameInstalled()
     if (!availableCDN.value.find(cdn => cdn.url === selectedCDN.value)) {
         selectedCDN.value = availableCDN.value[0].url
     }
@@ -402,10 +416,19 @@ function isOptionalPackDownloaded(sign: string, version: number) {
 }
 
 /**
- * 下载指定语音包。
+ * 判断语音包是否已在队列中或正在下载。
+ * @param sign 语音包签名
+ * @returns 是否已排队
+ */
+function isOptionalPackQueued(sign: string) {
+    return downloadingOptionalSign.value === sign || optionalPackDownloadQueue.value.includes(sign)
+}
+
+/**
+ * 执行单个语音包下载任务。
  * @param sign 语音包签名
  */
-async function downloadOptionalPack(sign: string) {
+async function downloadOptionalPackTask(sign: string) {
     const activeChannel = getActiveChannel()
     if (!activeChannel) {
         ui.showErrorMessage("请先填写自定义 channel")
@@ -479,9 +502,59 @@ async function downloadOptionalPack(sign: string) {
         console.error("语音包下载失败:", err)
     } finally {
         downloadingOptionalSign.value = ""
-        isDownloading.value = false
         downloadSpeed.value = ""
     }
+}
+
+/**
+ * 顺序处理语音包下载队列。
+ */
+async function processOptionalPackDownloadQueue() {
+    if (isProcessingOptionalPackQueue.value) return
+    isProcessingOptionalPackQueue.value = true
+    isDownloading.value = true
+    try {
+        while (optionalPackDownloadQueue.value.length > 0) {
+            const nextSign = optionalPackDownloadQueue.value.shift()
+            if (!nextSign) continue
+            await downloadOptionalPackTask(nextSign)
+        }
+    } finally {
+        isProcessingOptionalPackQueue.value = false
+        isDownloading.value = false
+    }
+}
+
+/**
+ * 将语音包加入下载队列，并按顺序执行。
+ * @param sign 语音包签名
+ */
+async function downloadOptionalPack(sign: string) {
+    const activeChannel = getActiveChannel()
+    if (!activeChannel) {
+        ui.showErrorMessage("请先填写自定义 channel")
+        return
+    }
+    if (!gamePath.value) {
+        ui.showErrorMessage(t("game-update.select_game_dir_first"))
+        return
+    }
+
+    const entry = optionalPackEntries.value.find(item => item.sign === sign)
+    if (!entry) {
+        ui.showErrorMessage("未找到可下载的语音包")
+        return
+    }
+    if (isOptionalPackDownloaded(sign, entry.version)) {
+        ui.showSuccessMessage(`${getOptionalPackLabel(sign)} 已下载`)
+        return
+    }
+    if (isOptionalPackQueued(sign)) {
+        return
+    }
+
+    optionalPackDownloadQueue.value.push(sign)
+    void processOptionalPackDownloadQueue()
 }
 
 function formatSize(bytes: number): string {
@@ -777,6 +850,7 @@ async function selectGameDir() {
             const emExePath = `${selected}\\DNA Game\\EM.exe`
             gameStore.path = emExePath
             saveChannelGamePath(emExePath)
+            await refreshGameInstalled()
             ui.showSuccessMessage(`游戏目录设置成功: ${emExePath}`)
             if (versionList.value) {
                 await checkForUpdates()
@@ -1138,8 +1212,8 @@ onMounted(async () => {
     })
 })
 const launchGame = async () => {
-    if (!gameStore.path) {
-        ui.showErrorMessage(t("game-launcher.selectGameFileFirst"))
+    if (!gameInstalled.value) {
+        ui.showErrorMessage(t("game-launcher.selectGamePathFirst"))
         return
     }
     try {
@@ -1342,10 +1416,10 @@ const launchGame = async () => {
                             <button
                                 v-if="!isOptionalPackDownloaded(pack.sign, pack.version)"
                                 @click="downloadOptionalPack(pack.sign)"
-                                :disabled="isDownloading || downloadingOptionalSign === pack.sign"
+                                :disabled="isOptionalPackQueued(pack.sign)"
                                 class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold disabled:opacity-50"
                             >
-                                {{ downloadingOptionalSign === pack.sign ? "下载中" : "下载" }}
+                                {{ downloadingOptionalSign === pack.sign ? "下载中" : optionalPackDownloadQueue.includes(pack.sign) ? "排队中" : "下载" }}
                             </button>
                             <span v-else class="text-xs text-success">已下载</span>
                         </div>

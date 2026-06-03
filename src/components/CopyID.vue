@@ -3,6 +3,7 @@ import { copyText } from "@/util"
 
 defineProps<{
     id: string | number
+    name?: string
 }>()
 </script>
 <template>
@@ -12,6 +13,6 @@ defineProps<{
         title="点击复制ID"
         @click.stop="copyText(`${id}`)"
     >
-        ID {{ id }}
+        {{ name ?? "ID" }} {{ id }}
     </button>
 </template>

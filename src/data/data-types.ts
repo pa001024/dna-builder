@@ -20,7 +20,9 @@ export interface Buff {
     lx?: number
     mx?: number
     code?: string
-    [key: string]: string | number | number[] | undefined
+    attr?: Record<string, string>
+    display?: Record<string, string>
+    [key: string]: string | number | number[] | undefined | Record<string, string>
 }
 
 export interface AbstractMod {
@@ -119,7 +121,7 @@ export interface SkillWeapon {
     触发?: number
     攻速?: number
     技能?: Skill[]
-    skill?: 0 | 1 | 2
+    skill?: number[]
     filter?: string
     inherit?: "melee" | "ranged"
     atk?: "melee" | "ranged" | "all"
@@ -153,7 +155,7 @@ export interface Weapon {
 
 export interface ForgeData {
     lv: number
-    解锁: Record<string, number>
+    解锁?: Record<string, number>
     技能?: ForgeSkill[]
 }
 
@@ -410,6 +412,7 @@ export interface SkillCreatureShape {
 export interface SkillField {
     名称: string
     影响?: string
+    伤害类型?: keyof typeof DmgType
     值: number[] | number
     格式?: string
     值2?: number[] | number
@@ -431,7 +434,7 @@ export enum DmgType {
     切割 = "切割",
     贯穿 = "贯穿",
     震荡 = "震荡",
-    灵能 = "灵能",
+    灾厄 = "灾厄",
 }
 
 export enum BulletType {
@@ -550,6 +553,11 @@ export interface RewardChild {
     dp?: 1 //是否是Drop类型
     p?: number
     n?: string
+}
+
+export interface OptReward {
+    id: number
+    child: RewardChild[]
 }
 
 export type { Dungeon } from "./d/dungeon.data"

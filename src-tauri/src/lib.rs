@@ -908,7 +908,9 @@ fn get_game_install() -> String {
                 let parts: Vec<&str> = file.split("\\").collect();
                 let dir = &parts[..parts.len() - 1].join("\\");
                 let game_dir = dir.to_string() + "\\DNA Game\\EM.exe";
-                return game_dir;
+                if Path::new(&game_dir).exists() {
+                    return game_dir;
+                }
             }
         }
     }
@@ -2146,6 +2148,18 @@ async fn delete_file(file_path: String, force: Option<bool>) -> Result<String, S
     }
 }
 
+/// 递归删除指定目录。
+#[tauri::command]
+async fn remove_dir_all(path: String) -> Result<String, String> {
+    let target = Path::new(&path);
+    if !target.exists() {
+        return Ok(format!("目录不存在: {}", path));
+    }
+
+    fs::remove_dir_all(target).map_err(|e| format!("删除目录失败: {}", e))?;
+    Ok(format!("目录已删除: {}", path))
+}
+
 #[tauri::command]
 fn get_os_version() -> String {
     use sysinfo::System;
@@ -2156,6 +2170,11 @@ fn get_os_version() -> String {
     } else {
         "".to_string()
     }
+}
+
+#[tauri::command]
+fn path_exists(path: String) -> bool {
+    Path::new(&path).exists()
 }
 mod submodules;
 
@@ -2981,6 +3000,8 @@ pub fn run() {
         get_documents_dir,
         rename_file,
         delete_file,
+        path_exists,
+        remove_dir_all,
         watch_file,
         unwatch_file,
         list_files,
