@@ -12,6 +12,7 @@ const props = defineProps<{
 
 const dungeonBase = computed(() => dungeonMap.get(props.dungeon.DungeonId) || null)
 const IRON_SURVIVAL_LEVEL_STEP = 5
+const IRON_SURVIVAL_MONSTER_HP_MULTIPLIER = 8
 const dungeonMonsterSpawnMap = computed(() => new Map(ironSurvivalMonsterSpawnData.map(spawn => [spawn.id, spawn])))
 const strongKillCount = computed(() => props.dungeon.StrongKillCount?.[0] || 50)
 const selectedWave = computed(() => Math.max(1, props.wave ?? 1))
@@ -61,7 +62,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                                 <DBMonsterCompactCard
                                     v-for="monsterId in getSpawnMonsterIds(spawnId)"
                                     :key="`${spawnId}-${monsterId}`"
-                                    :monster="new LeveledMonster(monsterId, ironSurvivalMonsterLevel)"
+                                    :monster="new LeveledMonster(monsterId, ironSurvivalMonsterLevel, false, IRON_SURVIVAL_MONSTER_HP_MULTIPLIER)"
                                     :clickable="false"
                                 />
                             </div>
@@ -93,7 +94,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                                 <DBMonsterCompactCard
                                     v-for="monsterId in getSpawnMonsterIds(spawnId)"
                                     :key="`${spawnId}-${monsterId}`"
-                                    :monster="new LeveledMonster(monsterId, ironSurvivalMonsterLevel)"
+                                    :monster="new LeveledMonster(monsterId, ironSurvivalMonsterLevel, false, IRON_SURVIVAL_MONSTER_HP_MULTIPLIER)"
                                     :clickable="false"
                                 />
                             </div>

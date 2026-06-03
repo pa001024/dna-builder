@@ -4,6 +4,7 @@ import type { Skill, SkillField } from "../data-types"
 export interface LeveledSkillField {
     名称: string
     影响?: string
+    伤害类型?: SkillField["伤害类型"]
     值: number
     格式?: string
     基础?: string

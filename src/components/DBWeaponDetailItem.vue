@@ -343,7 +343,10 @@ watch(
             </div>
         </div>
 
-        <div v-if="weapon.熔炼 && weapon.熔炼.length > 0 && (!weapon.熔炉 || weapon.熔炉.length === 0)" class="p-3 bg-base-200 rounded mb-3">
+        <div
+            v-if="weapon.熔炼 && weapon.熔炼.length > 0 && (!weapon.熔炉 || weapon.熔炉.length === 0)"
+            class="p-3 bg-base-200 rounded mb-3"
+        >
             <div class="text-xs text-base-content/70 mb-2">
                 {{ $t("属性") }}
             </div>
@@ -431,7 +434,7 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <div class="text-base-content/80 text-xs px-2">解锁</div>
+                    <div class="text-base-content/80 text-xs px-2" v-if="forge.解锁">解锁</div>
                     <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm p-2">
                         <ResourceCostItem v-for="(value, name) in forge.解锁" :key="name" :name="name" :value="value" />
                     </div>

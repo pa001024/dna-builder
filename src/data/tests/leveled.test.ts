@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { CharAttr } from "../CharBuild"
-import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledMonster, LeveledWeapon } from "../leveled"
 
 // 测试LeveledMod类
 describe("LeveledMod类测试", () => {
@@ -231,6 +231,19 @@ describe("LeveledMod乘算反向属性测试", () => {
         const minusAttr = mod.minusAttr
 
         expect(minusAttr.独立增伤).toBeCloseTo(-(mod.独立增伤 / (1 + mod.独立增伤)), 10)
+    })
+})
+
+describe("LeveledMonster", () => {
+    it("生命倍率应同时作用于生命和护盾", () => {
+        const normal = new LeveledMonster(115, 10)
+        const multiplied = new LeveledMonster(115, 10, false, 8)
+
+        expect(multiplied.hp).toBe(normal.hp * 8)
+        expect(multiplied.es).toBe((normal.es || 0) * 8)
+        expect(multiplied.currentHP).toBe(multiplied.hp)
+        expect(multiplied.currentShield).toBe(multiplied.es)
+        expect(multiplied.getHPByLevel(10)).toBe(normal.getHPByLevel(10) * 8)
     })
 })
 

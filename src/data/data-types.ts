@@ -155,7 +155,7 @@ export interface Weapon {
 
 export interface ForgeData {
     lv: number
-    解锁: Record<string, number>
+    解锁?: Record<string, number>
     技能?: ForgeSkill[]
 }
 
@@ -412,6 +412,7 @@ export interface SkillCreatureShape {
 export interface SkillField {
     名称: string
     影响?: string
+    伤害类型?: keyof typeof DmgType
     值: number[] | number
     格式?: string
     值2?: number[] | number

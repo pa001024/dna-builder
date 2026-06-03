@@ -1183,24 +1183,38 @@ export class CharBuild {
     // 计算武器伤害
     public calculateWeaponDamage(
         attrs: ReturnType<typeof this.calculateWeaponAttributes>,
-        weapon: LeveledWeapon | LeveledSkillWeapon
+        weapon: LeveledWeapon | LeveledSkillWeapon,
+        damageType = weapon.伤害类型
     ): DamageResult {
         const weaponAttrs = attrs.weapon!
         // 计算武器基础伤害
         const weaponAttackMultiplier = 1 // 倍率 这里设为1 使用动态计算
         const totalWeaponDamage = attrs.攻击 + weaponAttrs.攻击
         const inheritAllSkillWeapon = weapon instanceof LeveledSkillWeapon && !!weapon.inherit && weapon.atk === "all"
-        const weaponDamagePhysical = inheritAllSkillWeapon ? 0 : (weaponAttackMultiplier * weaponAttrs.攻击) / totalWeaponDamage
-        const weaponDamageElemental = inheritAllSkillWeapon ? 1 : (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
+        const convertElementalToPhysical = damageType === "灾厄"
+        const weaponDamagePhysical = convertElementalToPhysical
+            ? 1
+            : inheritAllSkillWeapon
+              ? 0
+              : (weaponAttackMultiplier * weaponAttrs.攻击) / totalWeaponDamage
+        const weaponDamageElemental = convertElementalToPhysical
+            ? 0
+            : inheritAllSkillWeapon
+              ? 1
+              : (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
 
         // 计算触发伤害期望
         const triggerDamageMultiplier =
-            weapon.伤害类型 === this.hpTypeDMG[this.enemy.currentHPType]
-                ? this.hpTypeCoefficients[this.enemy.currentHPType] + this.getTotalBonus("触发倍率")
-                : 0
+            damageType === "灾厄"
+                ? this.enemyResistance !== 0
+                    ? 1 + this.getTotalBonus("触发倍率")
+                    : 0
+                : damageType === this.hpTypeDMG[this.enemy.currentHPType]
+                  ? this.hpTypeCoefficients[this.enemy.currentHPType] + this.getTotalBonus("触发倍率")
+                  : 0
         const triggerRate = weaponAttrs.触发
         const triggerDamageAdd = triggerDamageMultiplier
-        const triggerExpectedDamageAdd = triggerDamageMultiplier * triggerRate
+        const triggerExpectedDamageAdd = triggerDamageAdd * triggerRate
 
         // 计算暴击伤害期望
         const critRate = weaponAttrs.暴击
@@ -1226,22 +1240,28 @@ export class CharBuild {
         const elementalPart = weaponDamageElemental * resistance
         const triggerablePart = inheritAllSkillWeapon ? elementalPart : weaponDamagePhysical
         const nonTriggerPart = inheritAllSkillWeapon ? 0 : elementalPart
+        const allPart = triggerablePart + nonTriggerPart
+        const lowerCritNoTrigger = allPart * lowerCritDamage * commonMore
+        const higherCritNoTrigger = allPart * higherCritDamage * commonMore
+        const expectedCritNoTrigger = allPart * critExpectedDamage * commonMore
+        const lowerCritTrigger = lowerCritNoTrigger * (1 + triggerDamageAdd)
+        const higherCritTrigger = higherCritNoTrigger * (1 + triggerDamageAdd)
+        const lowerCritExpectedTrigger = lowerCritNoTrigger * (1 + triggerExpectedDamageAdd)
+        const higherCritExpectedTrigger = higherCritNoTrigger * (1 + triggerExpectedDamageAdd)
+        const expectedCritTrigger = expectedCritNoTrigger * (1 + triggerDamageAdd)
+        const expectedDamage = expectedCritNoTrigger * (1 + triggerExpectedDamageAdd)
+        const noHpDamage = allPart * critExpectedDamage * otherMore * (1 + triggerExpectedDamageAdd)
         return {
-            lowerCritNoTrigger: (triggerablePart + nonTriggerPart) * lowerCritDamage * commonMore,
-            higherCritNoTrigger: (triggerablePart + nonTriggerPart) * higherCritDamage * commonMore,
-            lowerCritTrigger: (triggerablePart * (lowerCritDamage + triggerDamageAdd) + nonTriggerPart * lowerCritDamage) * commonMore,
-            higherCritTrigger: (triggerablePart * (higherCritDamage + triggerDamageAdd) + nonTriggerPart * higherCritDamage) * commonMore,
-            lowerCritExpectedTrigger:
-                (triggerablePart * (lowerCritDamage + triggerExpectedDamageAdd) + nonTriggerPart * lowerCritDamage) * commonMore,
-            higherCritExpectedTrigger:
-                (triggerablePart * (higherCritDamage + triggerExpectedDamageAdd) + nonTriggerPart * higherCritDamage) * commonMore,
-            expectedCritTrigger: (triggerablePart + nonTriggerPart) * critExpectedDamage * commonMore,
-            expectedCritNoTrigger:
-                (triggerablePart * (critExpectedDamage + triggerDamageAdd) + nonTriggerPart * critExpectedDamage) * commonMore,
-            expectedDamage:
-                (triggerablePart * (critExpectedDamage + triggerExpectedDamageAdd) + nonTriggerPart * critExpectedDamage) * commonMore,
-            noHpDamage:
-                (triggerablePart * (critExpectedDamage + triggerExpectedDamageAdd) + nonTriggerPart * critExpectedDamage) * otherMore,
+            lowerCritNoTrigger,
+            higherCritNoTrigger,
+            lowerCritTrigger,
+            higherCritTrigger,
+            lowerCritExpectedTrigger,
+            higherCritExpectedTrigger,
+            expectedCritTrigger,
+            expectedCritNoTrigger,
+            expectedDamage,
+            noHpDamage,
         }
     }
 
@@ -1515,6 +1535,7 @@ export class CharBuild {
             if (damageCache.has(cacheKey)) return damageCache.get(cacheKey)!
             const weapon = weaponsMap.get(key)
             const weaponAttr = getCalculatedWeaponAttr(base)
+            const fieldDamageType = fieldName ? getSkillAttr(fieldName, base)?.伤害类型 : undefined
             const attackTypeDamageBonus = getWeaponAttackTypeBonus(base, fieldName, "增伤")
             const attackTypeIndependentDamageBonus = getWeaponAttackTypeBonus(base, fieldName, "独立增伤")
             const damage =
@@ -1528,7 +1549,8 @@ export class CharBuild {
                                   独立增伤: (1 + weaponAttr.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
                               },
                           },
-                          weapon
+                          weapon,
+                          fieldDamageType
                       )
                     : this.calculateSkillDamage({
                           ...attrs,
@@ -1772,7 +1794,14 @@ export class CharBuild {
 
                     const memberName = node.property
                     // 成员访问用于修改伤害计算方式
-                    return objectValue * evaluateMember(memberName, objectNode.type === "property" ? objectNode.namespace : undefined)
+                    return (
+                        objectValue *
+                        evaluateMember(
+                            memberName,
+                            objectNode.type === "property" ? objectNode.namespace : undefined,
+                            objectNode.type === "property" ? objectNode.name : undefined
+                        )
+                    )
                 }
 
                 default:

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
+import { weaponData } from "../index"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
 
@@ -473,6 +474,66 @@ describe("CharBuild类测试", () => {
             const result = charBuild.calculate()
             expect(result).toBeTypeOf("number")
             expect(result).toBeGreaterThanOrEqual(0)
+        })
+
+        it("灾厄触发应由敌人抗性是否为0决定", () => {
+            const charBuild = createCharBuild()
+            const disasterWeapon = new LeveledWeapon({
+                id: 999998,
+                名称: "测试灾厄武器",
+                类型: ["近战", "单手剑"],
+                伤害类型: "灾厄",
+                攻击: 100,
+                暴击: 0,
+                暴伤: 2,
+                触发: 1,
+            })
+
+            charBuild.meleeWeapon = disasterWeapon
+            charBuild.enemyResistance = 0
+            const noResistanceAttrs = charBuild.calculateWeaponAttributes(disasterWeapon)
+            noResistanceAttrs.攻击 = 0
+            const noResistanceDamage = charBuild.calculateWeaponDamage(noResistanceAttrs, disasterWeapon)
+
+            charBuild.enemyResistance = 0.5
+            const resistanceAttrs = charBuild.calculateWeaponAttributes(disasterWeapon)
+            resistanceAttrs.攻击 = 0
+            const resistanceDamage = charBuild.calculateWeaponDamage(resistanceAttrs, disasterWeapon)
+
+            expect(resistanceDamage.lowerCritNoTrigger).toBeCloseTo(noResistanceDamage.lowerCritNoTrigger!)
+            expect(noResistanceDamage.lowerCritTrigger).toBeCloseTo(noResistanceDamage.lowerCritNoTrigger!)
+            expect(resistanceDamage.lowerCritTrigger).toBeGreaterThan(resistanceDamage.lowerCritNoTrigger!)
+            expect(resistanceDamage.expectedDamage).toBeGreaterThan(noResistanceDamage.expectedDamage)
+        })
+
+        it("字段伤害类型为灾厄时应按灾厄触发计算", () => {
+            const weapon = weaponData.find(item => item.id === 20599)
+            expect(weapon?.技能?.some(skill => skill.名称 === "寂灭")).toBe(true)
+
+            const charBuild = createCharBuild()
+            charBuild.rangedWeapon = new LeveledWeapon(20599)
+            charBuild.baseName = "寂灭"
+            charBuild.targetFunction = "[寂灭]伤害"
+
+            const field = charBuild.rangedWeaponSkills.find(skill => skill.名称 === "寂灭")?.字段.find(field => field.名称 === "[寂灭]伤害")
+            expect(field?.伤害类型).toBe("灾厄")
+
+            charBuild.enemyResistance = 0
+            const noResistanceDamage = charBuild.calculate()
+
+            charBuild.enemyResistance = 0.5
+            const averageDamage = charBuild.calculate()
+            const triggerDamage = charBuild.calculateTargetFunction(undefined, "[寂灭]伤害.触发")
+            const noTriggerDamage = charBuild.calculateTargetFunction(undefined, "[寂灭]伤害.未触发")
+
+            expect(noResistanceDamage).toBeGreaterThan(0)
+            expect(averageDamage).toBeGreaterThan(noTriggerDamage)
+            expect(averageDamage).toBeLessThan(triggerDamage)
+            expect(triggerDamage).toBeCloseTo(noTriggerDamage * 2)
+
+            charBuild.targetFunction = "[寂灭]伤害.触发"
+            const triggerDamage2 = charBuild.calculate()
+            expect(triggerDamage2).toBeCloseTo(triggerDamage, 0)
         })
     })
 

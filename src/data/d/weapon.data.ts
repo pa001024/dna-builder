@@ -1925,6 +1925,17 @@ const t: Weapon[] = [
         ],
         熔炉: [
             {
+                lv: 0,
+                技能: [
+                    {
+                        id: 10299001,
+                        名称: "无止·出征",
+                        icon: "T_Rouge_Talent_Machinegun_Zaie",
+                        描述: "使用此武器造成伤害时，获得1.0点灾厄值，使用此武器造成下落攻击或滑行攻击伤害时，额外获得1.0点灾厄值，灾厄值上限为100点。\n灾厄值达到上限时，消耗全部灾厄值，触发1次[送行挽歌]：对半径10.0米内的敌人造成1000.0%灾厄伤害，视为近战武器伤害。",
+                    },
+                ],
+            },
+            {
                 lv: 1,
                 解锁: {
                     无止无休的原型: 36,
@@ -8049,6 +8060,17 @@ const t: Weapon[] = [
         ],
         熔炉: [
             {
+                lv: 0,
+                技能: [
+                    {
+                        id: 20599001,
+                        名称: "荆刺·初绽",
+                        icon: "T_Rouge_Talent_Polearm_Zaie",
+                        描述: "使用此武器造成伤害时，获得2.0点灾厄值，灾厄值上限为100点。\n灾厄值达到上限时，消耗全部灾厄值，触发1次[寂灭]：对半径3.0米内的敌人造成1000.0%灾厄伤害，视为远程武器伤害，并将伤害目标拉向范围中心。",
+                    },
+                ],
+            },
+            {
                 lv: 1,
                 解锁: {
                     棘刺绝响的原型: 36,
@@ -8760,4 +8782,53 @@ const t: Weapon[] = [
         射击间隔: 0.4,
     },
 ]
+
+/**
+ * 批量更新指定武器数据。
+ * @param patches 需要更新的武器补丁列表。
+ */
+function patch(
+    patches: Array<{ id: number; data: Partial<Weapon> | ((weapon: Weapon) => Partial<Weapon>) }>,
+    cb: (weapon: Weapon, patch: { id: number; data: Partial<Weapon> | ((weapon: Weapon) => Partial<Weapon>) }) => void
+) {
+    for (const patch of patches) {
+        for (const weapon of t) {
+            if (weapon.id !== patch.id) {
+                continue
+            }
+            cb(weapon, patch)
+            break
+        }
+    }
+}
+
+patch(
+    [
+        {
+            id: 20599,
+            data: weapon => ({
+                技能: [
+                    ...(weapon.技能 || []),
+                    {
+                        id: 2059902,
+                        名称: "寂灭",
+                        类型: "武器伤害",
+                        字段: [
+                            {
+                                名称: "[寂灭]伤害",
+                                伤害类型: "灾厄",
+                                值: 10,
+                            },
+                        ],
+                    },
+                ],
+            }),
+        },
+    ],
+    (weapon, patch) => {
+        const data = typeof patch.data === "function" ? patch.data(weapon) : patch.data
+        Object.assign(weapon, data)
+    }
+)
+
 export default applyVersionGate(t)

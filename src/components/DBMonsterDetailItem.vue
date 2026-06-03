@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import * as echarts from "echarts"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
 import { soloTreasureDropData } from "@/data/d/solotreasure.data"
 import { format100, formatBigNumber } from "@/util"
@@ -15,14 +16,16 @@ const props = defineProps<{
     defaultLevel?: number
 }>()
 
-const currentLevel = ref(props.defaultLevel || 180)
-const showRougeStats = ref(false)
+const currentLevel = useSearchParam("level", props.defaultLevel || 180)
+const showRougeStats = useSearchParam("rouge", false)
+const useEightHpMultiplier = useSearchParam("hp8", false)
 const levelTrendChartRef = ref<HTMLElement | null>(null)
 let levelTrendChartInstance: echarts.ECharts | null = null
+const monsterHpMultiplier = computed(() => (useEightHpMultiplier.value ? 8 : 1))
 
 const leveledMonster = computed(() => {
     if (!props.monster) return null
-    return new LeveledMonster(props.monster, currentLevel.value, showRougeStats.value)
+    return new LeveledMonster(props.monster, currentLevel.value, showRougeStats.value, monsterHpMultiplier.value)
 })
 
 const dungeons = computed(() => {
@@ -86,7 +89,11 @@ const soloTreasureDropEntries = computed(() => {
  * @returns 标题文本。
  */
 function getSoloTreasureDropTitle(entry: (typeof soloTreasureDropEntries.value)[number]): string {
-    return entry.DropMechanismId !== undefined ? `机制 ${entry.DropMechanismId}` : entry.KillScore !== undefined ? `击杀积分 ${entry.KillScore}` : "掉落信息"
+    return entry.DropMechanismId !== undefined
+        ? `机制 ${entry.DropMechanismId}`
+        : entry.KillScore !== undefined
+          ? `击杀积分 ${entry.KillScore}`
+          : "掉落信息"
 }
 
 /**
@@ -185,7 +192,7 @@ const levelTrendData = computed(() => {
     const levelDamageReductionRateList: number[] = []
 
     for (let level = 1; level <= MaxMonsterLevelLimit; level++) {
-        const leveled = new LeveledMonster(props.monster, level, showRougeStats.value)
+        const leveled = new LeveledMonster(props.monster, level, showRougeStats.value, monsterHpMultiplier.value)
         const currentHP = leveled.hp
         const currentShield = leveled.es || 0
         const currentDefenseDamageReductionRate = leveled.def / (300 + leveled.def)
@@ -425,6 +432,10 @@ function getFactionName(faction: number | undefined): string {
             <label class="ml-auto flex items-center gap-1 text-xs">
                 <input v-model="showRougeStats" type="checkbox" class="toggle toggle-sm toggle-primary" />
                 <span>迷津</span>
+            </label>
+            <label class="flex items-center gap-1 text-xs">
+                <input v-model="useEightHpMultiplier" type="checkbox" class="checkbox checkbox-xs checkbox-primary" />
+                <span>8倍血量</span>
             </label>
         </div>
 

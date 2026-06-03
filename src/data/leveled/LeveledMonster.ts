@@ -266,7 +266,8 @@ export class LeveledMonster implements DynamicMonster {
     constructor(
         id: number | Monster,
         等级 = 180,
-        public isRouge = false
+        public isRouge = false,
+        public hpMultiplier = 1
     ) {
         let mData = typeof id === "number" ? monsterMap.get(id) : id
         if (!mData) {
@@ -280,9 +281,9 @@ export class LeveledMonster implements DynamicMonster {
         this.f = mData.f || Faction.其他
         this.atk = mData.atk
         this.def = mData.def
-        this.hp = mData.hp
+        this.hp = Math.round(mData.hp * this.hpMultiplier)
         if (mData.t !== undefined) this.t = mData.t
-        if (mData.es !== undefined) this.es = mData.es
+        if (mData.es !== undefined) this.es = Math.round(mData.es * this.hpMultiplier)
         if (mData.tn !== undefined) this.tn = mData.tn
 
         this.currentHP = this.hp
@@ -333,10 +334,11 @@ export class LeveledMonster implements DynamicMonster {
         const multiplier = MOB_LEVEL_UP[clampedLevel - 1]
 
         this.atk = Math.round(this._baseData.atk * multiplier.atk)
-        this.hp = Math.round(this._baseData.hp * (this.isRouge ? multiplier.rhp : multiplier.hp))
+        this.hp = Math.round(this._baseData.hp * (this.isRouge ? multiplier.rhp : multiplier.hp) * this.hpMultiplier)
         if (this.es !== undefined) {
-            this.es = Math.round((this._baseData.es || 0) * (this.isRouge ? multiplier.res : multiplier.es))
+            this.es = Math.round((this._baseData.es || 0) * (this.isRouge ? multiplier.res : multiplier.es) * this.hpMultiplier)
         }
+        this.resetHP()
     }
 
     static properties = ["n", "t", "f", "atk", "def", "hp", "es", "tn"] as const
@@ -350,7 +352,7 @@ export class LeveledMonster implements DynamicMonster {
     }
 
     getHPByLevel(level: number): number {
-        return Math.round(this._baseData.hp * (this.isRouge ? MOB_LEVEL_UP[level - 1].rhp : MOB_LEVEL_UP[level - 1].hp))
+        return Math.round(this._baseData.hp * (this.isRouge ? MOB_LEVEL_UP[level - 1].rhp : MOB_LEVEL_UP[level - 1].hp) * this.hpMultiplier)
     }
 
     get url() {

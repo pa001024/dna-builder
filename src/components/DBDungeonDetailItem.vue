@@ -14,6 +14,7 @@ const props = defineProps<{
 const currentLevel = ref(props.dungeon.lv)
 const ENDLESS_MAX_WAVE = 99
 const ENDLESS_LEVEL_STEP = 5
+const IRON_SURVIVAL_MONSTER_HP_MULTIPLIER = 8
 const maxMonsterLevel = computed(() => {
     return props.dungeon.t === "IronSurvival" ? IronSurvivalMonsterLevelLimit : MonsterLevelUpperLimit
 })
@@ -76,6 +77,14 @@ const isEndlessDungeon = computed(() => {
     if (props.dungeon.t === "DefenceMove") return false
     return props.dungeon.n.includes("无尽") || props.dungeon.ts?.includes("无尽")
 })
+
+/**
+ * 获取当前副本怪物生命倍率。
+ * @returns 生命与护盾倍率
+ */
+function getDungeonMonsterHpMultiplier(): number {
+    return props.dungeon.t === "IronSurvival" ? IRON_SURVIVAL_MONSTER_HP_MULTIPLIER : 1
+}
 
 /**
  * 计算当前设定波次对应的等级基数（每波 +5，最大 180）。
@@ -537,7 +546,7 @@ watch(
                     <DBMonsterCompactCard
                         v-for="monsterId in dungeon.m"
                         :key="monsterId"
-                        :monster="new LeveledMonster(monsterId, monsterTabLevel)"
+                        :monster="new LeveledMonster(monsterId, monsterTabLevel, false, getDungeonMonsterHpMultiplier())"
                     />
                 </div>
             </div>
@@ -549,7 +558,7 @@ watch(
                     <DBMonsterCompactCard
                         v-for="monsterId in dungeon.sm"
                         :key="monsterId"
-                        :monster="new LeveledMonster(monsterId, monsterTabLevel)"
+                        :monster="new LeveledMonster(monsterId, monsterTabLevel, false, getDungeonMonsterHpMultiplier())"
                     />
                 </div>
             </div>
