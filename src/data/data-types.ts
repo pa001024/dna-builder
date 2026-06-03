@@ -20,7 +20,9 @@ export interface Buff {
     lx?: number
     mx?: number
     code?: string
-    [key: string]: string | number | number[] | undefined
+    attr?: Record<string, string>
+    display?: Record<string, string>
+    [key: string]: string | number | number[] | undefined | Record<string, string>
 }
 
 export interface AbstractMod {

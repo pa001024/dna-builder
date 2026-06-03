@@ -1185,6 +1185,52 @@ describe("CharBuild类测试", () => {
             expect(dynamicAttrs.weapon?.追加伤害).toBe(100)
             expect(dynamicBuild.calculate()).toBeGreaterThan(baseBuild.calculate())
         })
+
+        it("动态attr属性应在最终阶段按表达式计算", () => {
+            const charBuild = createCharBuild()
+            charBuild.baseName = "射击"
+            const baseAttrs = charBuild.calculateAttributes()
+            const staticBuild = createCharBuild()
+            staticBuild.baseName = "射击"
+            staticBuild.buffs.push(
+                new LeveledBuff({
+                    名称: "测试静态属性字段",
+                    描述: "测试用静态属性",
+                    技能伤害: 0.2 * baseAttrs.技能威力,
+                    远程暴伤: 0.8 * baseAttrs.技能威力,
+                })
+            )
+            const buff = new LeveledBuff({
+                名称: "测试动态属性字段",
+                描述: "测试用动态属性",
+                attr: {
+                    技能伤害: "0.2*技能威力",
+                    远程暴伤: "0.8*技能威力",
+                },
+            })
+            charBuild.buffs.push(buff)
+
+            const attrs = charBuild.calculateAttributes()
+            const weaponAttrs = charBuild.calculateWeaponAttributes(charBuild.rangedWeapon).weapon
+            const optionBuff = new LeveledBuff({
+                名称: "测试动态属性选项",
+                描述: "测试用动态属性",
+                attr: {
+                    远程暴伤: "0.8*技能威力",
+                },
+            })
+            const preparedBuff = charBuild.prepareBuff(optionBuff)
+
+            expect(buff.技能伤害).toBeCloseTo(0.2 * baseAttrs.技能威力)
+            expect(buff.远程暴伤).toBeCloseTo(0.8 * baseAttrs.技能威力)
+            expect(preparedBuff.getProperties().远程暴伤).toBeCloseTo(0.8 * baseAttrs.技能威力)
+            expect(optionBuff.getProperties().远程暴伤).toBeUndefined()
+            expect(charBuild.calcIncome(optionBuff)).toBeCloseTo(charBuild.calcIncome(preparedBuff))
+            expect(charBuild.calcIncome(buff, true)).toBeGreaterThan(0)
+            expect(charBuild.calcIncome(buff, true)).toBeCloseTo(charBuild.calcEquippedBuffIncome(buff))
+            expect(attrs.技能伤害).toBeCloseTo(staticBuild.calculateAttributes().技能伤害)
+            expect(weaponAttrs?.暴伤).toBeCloseTo(staticBuild.calculateWeaponAttributes(staticBuild.rangedWeapon).weapon?.暴伤 || 0)
+        })
     })
 
     describe("E2E", () => {

@@ -506,7 +506,7 @@ export class CharBuild {
     }
 
     // 计算角色所有属性（基础属性和其他属性）
-    public calculateAttributes(nocode = false): CharAttr {
+    public calculateAttributes(nocode = false, attrApplied = false): CharAttr {
         const char = this.char
 
         // 计算各种加成
@@ -631,6 +631,9 @@ export class CharBuild {
         if (this.applyCondition(attrs, condMods)) {
             return this.calculateAttributes(nocode)
         }
+        if (!attrApplied && this.applyBuffAttr(attrs)) {
+            return this.calculateAttributes(nocode, true)
+        }
         // 应用MOD条件
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0) {
@@ -643,6 +646,40 @@ export class CharBuild {
             }
         }
         return attrs
+    }
+
+    /**
+     * 根据当前最终角色属性刷新 BUFF 的动态属性字段。
+     * @param attrs 当前角色属性
+     * @returns 是否发生字段变更
+     */
+    private applyBuffAttr(attrs: CharAttr) {
+        let changed = false
+        this.buffs.forEach(buff => {
+            changed ||= this.applyBuffAttrValue(buff, attrs)
+        })
+        return changed
+    }
+
+    /**
+     * 按当前构筑上下文刷新单个 BUFF 的动态属性字段。
+     * @param buff 目标BUFF
+     * @param attrs 当前角色属性
+     * @returns 是否发生字段变更
+     */
+    public applyBuffAttrValue(buff: LeveledBuff, attrs = this.calculateAttributes(true)) {
+        return buff.applyAttr(attrs, expression => this.evaluateAST(expression, { ...attrs }))
+    }
+
+    /**
+     * 返回已刷新动态属性字段的 BUFF 副本，用于展示和收益预览。
+     * @param buff 目标BUFF
+     * @returns 刷新后的BUFF副本
+     */
+    public prepareBuff(buff: LeveledBuff) {
+        const prepared = buff.clone()
+        this.applyBuffAttrValue(prepared)
+        return prepared
     }
 
     public applyCondition(attrs: CharAttr, mods: LeveledMod[]) {
@@ -880,6 +917,20 @@ export class CharBuild {
     }
 
     /**
+     * 判断BUFF属性是否匹配当前属性作用域。
+     * @param attribute 属性名
+     * @param prefixScope 当前属性作用域
+     * @returns 是否应参与汇总
+     */
+    private isBuffAttributeInScope(attribute: string, prefixScope: string) {
+        const attributeScope = this.getAttributePrefixScope(attribute)
+        if (attributeScope === "近战" || attributeScope === "远程" || attributeScope.startsWith("同律")) {
+            return prefixScope === attributeScope
+        }
+        return true
+    }
+
+    /**
      * 根据技能名或字段名判断武器攻击细分乘区。
      * @param baseName 技能名称
      * @param fieldName 字段名称
@@ -969,6 +1020,7 @@ export class CharBuild {
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
+            if (!this.isBuffAttributeInScope(attribute, prefixScope)) return
             if (prefixScope !== "角色" && ["攻击", "增伤"].includes(attribute)) return
             if (typeof buff[attribute] === "number") {
                 bonus += buff[attribute]
@@ -1030,6 +1082,7 @@ export class CharBuild {
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
+            if (!this.isBuffAttributeInScope(attribute, prefixScope)) return
             if (prefixScope !== "角色" && attribute === "独立增伤") return
             if (typeof buff[attribute] === "number") {
                 bonus *= 1 + buff[attribute]
@@ -2017,6 +2070,9 @@ export class CharBuild {
      * @returns 单属性值
      */
     public calcIncome(props: AbstractMod | LeveledBuff, minus = false): number {
+        if (props instanceof LeveledBuff && props.attr) {
+            props = this.prepareBuff(props)
+        }
         if (minus) {
             let mval = 0
             if (props instanceof LeveledBuff) {
@@ -2027,6 +2083,8 @@ export class CharBuild {
                     }
                     mval = this.calculate()
                     this.dynamicBuffs.push(props)
+                } else if (props.attr) {
+                    return this.calcEquippedBuffIncome(props)
                 } else {
                     this.buffs.push(props.minusAttr)
                     mval = this.calculate()
@@ -2075,6 +2133,21 @@ export class CharBuild {
             }
             return mval / this.calculate() - 1
         }
+    }
+
+    /**
+     * 精确计算已装备BUFF的边际收益。
+     * @param buff 目标BUFF
+     * @returns 移除该BUFF后的边际收益
+     */
+    public calcEquippedBuffIncome(buff: LeveledBuff) {
+        const baseValue = this.calculate()
+        const copyBuild = this.clone()
+        copyBuild.buffs = copyBuild.buffs.filter(item => item.名称 !== buff.名称)
+        copyBuild.dynamicBuffs = copyBuild.dynamicBuffs.filter(item => item.名称 !== buff.名称)
+        const withoutValue = copyBuild.calculate()
+        if (Math.abs(withoutValue) < Number.EPSILON) return 0
+        return baseValue / withoutValue - 1
     }
 
     /**
@@ -2133,7 +2206,7 @@ export class CharBuild {
             meleeMods: this.meleeMods.map(m => (m ? m.clone() : null)),
             rangedMods: this.rangedMods.map(m => (m ? m.clone() : null)),
             skillMods: this.skillMods.map(m => (m ? m.clone() : null)),
-            buffs: [...this.buffs, ...this.dynamicBuffs].map(b => new LeveledBuff(b.名称, b.等级)),
+            buffs: [...this.buffs, ...this.dynamicBuffs].map(b => b.clone()),
             melee: this.meleeWeapon.clone(),
             ranged: this.rangedWeapon.clone(),
             baseName: this.baseName,

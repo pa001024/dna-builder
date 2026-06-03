@@ -560,7 +560,13 @@ watch(
         </template>
 
         <template v-else-if="activeTab === 'wave'">
-            <template v-if="dungeon.t !== 'IronSubvival'">
+            <DBIronSurvivalSpawn
+                v-if="ironSurvivalData[dungeon.id]"
+                :dungeon="ironSurvivalData[dungeon.id]"
+                hideTitle
+                :wave="selectedEndlessWave"
+            />
+            <template v-else>
                 <div class="card bg-base-200 rounded-lg p-3">
                     <div class="flex items-center justify-between">
                         <span class="text-sm">刷新范围显示</span>
@@ -756,12 +762,6 @@ watch(
 
                 <div v-else class="card bg-base-200 rounded-lg p-3 text-sm text-base-content/70">暂无波次数据</div>
             </template>
-            <DBIronSurvivalSpawn
-                v-if="ironSurvivalData[dungeon.id]"
-                :dungeon="ironSurvivalData[dungeon.id]"
-                hideTitle
-                :wave="selectedEndlessWave"
-            />
         </template>
 
         <template v-else>

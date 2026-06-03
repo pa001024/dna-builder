@@ -4,6 +4,7 @@ import { formatProp } from "../util"
 withDefaults(
     defineProps<{
         props: Record<string, any>
+        attr?: Record<string, string>
         code?: string
         side?: "top" | "bottom" | "left" | "right"
         title?: string
@@ -68,8 +69,13 @@ function getQualityColor(quality: string): string {
                     <div class="text-xs text-neutral-500 whitespace-nowrap">
                         {{ prop.startsWith("基础") ? `${$t("基础")}${$t(prop.slice(2))}` : $t(prop) }}
                     </div>
-                    <div class="font-medium text-primary">
-                        {{ formatProp(prop, val) }}
+                    <div class="flex flex-col items-end">
+                        <div class="font-medium text-primary">
+                            {{ formatProp(prop, val) }}
+                        </div>
+                        <div v-if="attr?.[prop]" class="text-[11px] text-neutral-500">
+                            {{ attr[prop] }}
+                        </div>
                     </div>
                 </div>
                 <div

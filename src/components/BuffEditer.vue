@@ -122,6 +122,15 @@ const selectedBuffs = computed(() => {
     const query = searchKeyword.value.trim()
     return props.buffOptions.filter(buff => props.selectedBuffs.some(v => v.名称 === buff.label) && matchBuffOptionQuery(buff, query))
 })
+
+/**
+ * 获取已按当前构筑刷新动态属性的BUFF。
+ * @param buff BUFF实例
+ * @returns 展示用BUFF实例
+ */
+function getDisplayBuff(buff: LeveledBuff) {
+    return props.charBuild?.prepareBuff(buff) || buff
+}
 </script>
 <template>
     <div class="space-y-3">
@@ -141,7 +150,7 @@ const selectedBuffs = computed(() => {
                     v-for="buff in selectedBuffs"
                     :key="buff.label"
                     :title="buff.label"
-                    :buff="buff.value"
+                    :buff="getDisplayBuff(buff.value)"
                     :lv="buff.lv"
                     selected
                     :income="charBuild?.calcIncome(buff.value, true) || 0"
@@ -153,7 +162,7 @@ const selectedBuffs = computed(() => {
                     v-for="buff in sortedBuffs"
                     :key="buff.label"
                     :title="buff.label"
-                    :buff="buff.value"
+                    :buff="getDisplayBuff(buff.value)"
                     :lv="buff.lv"
                     :income="charBuild?.calcIncome(buff.value, false) || 0"
                     @set-buff-lv="setBuffLv"
