@@ -201,6 +201,7 @@ export class CharBuild {
         } else {
             this.skillWeapon = undefined
         }
+        this.syncWeaponForgeEffective()
     }
     get charSkills() {
         return this.skills.slice(0, 3)
@@ -300,8 +301,22 @@ export class CharBuild {
     public skillMods: (LeveledMod | null)[]
     public buffs: LeveledBuff[]
     public dynamicBuffs: LeveledBuff[]
-    public meleeWeapon: LeveledWeapon
-    public rangedWeapon: LeveledWeapon
+    private _meleeWeapon!: LeveledWeapon
+    private _rangedWeapon!: LeveledWeapon
+    get meleeWeapon() {
+        return this._meleeWeapon
+    }
+    set meleeWeapon(weapon: LeveledWeapon) {
+        this._meleeWeapon = weapon
+        weapon.setForgeEffective(!this._char || this.isWeaponForgeEffective(weapon))
+    }
+    get rangedWeapon() {
+        return this._rangedWeapon
+    }
+    set rangedWeapon(weapon: LeveledWeapon) {
+        this._rangedWeapon = weapon
+        weapon.setForgeEffective(!this._char || this.isWeaponForgeEffective(weapon))
+    }
     public teamWeaponCategories: string[] = []
     public baseName = ""
     public imbalance = false
@@ -384,6 +399,7 @@ export class CharBuild {
         this.imbalance = options.imbalance || false
         this.meleeWeapon = options.melee
         this.rangedWeapon = options.ranged
+        this.syncWeaponForgeEffective()
         this.syncInheritedSkillWeapon()
         this.baseName = options.baseName
         this.enemyLevel = options.enemyLevel || 80
@@ -417,6 +433,33 @@ export class CharBuild {
         if (!inheritedWeapon) return
 
         this.skillWeapon.伤害类型 = inheritedWeapon.伤害类型
+    }
+
+    /**
+     * 按当前角色精通刷新灾厄熔炼潜能的生效状态。
+     */
+    private syncWeaponForgeEffective() {
+        if (!this._meleeWeapon || !this._rangedWeapon || !this._char) return
+        this.meleeWeapon.setForgeEffective(this.isWeaponCategoryMastered(this.meleeWeapon))
+        this.rangedWeapon.setForgeEffective(this.isWeaponCategoryMastered(this.rangedWeapon))
+    }
+
+    /**
+     * 判断角色精通是否匹配武器类型。
+     * @param weapon 目标武器
+     * @returns 是否匹配精通类型
+     */
+    public isWeaponCategoryMastered(weapon: Pick<LeveledWeapon | LeveledSkillWeapon, "类别">) {
+        return this.char.精通.includes(weapon.类别) || this.char.精通.includes("全部类型")
+    }
+
+    /**
+     * 判断武器潜能是否在当前角色精通下生效。
+     * @param weapon 目标武器
+     * @returns 是否生效
+     */
+    public isWeaponForgeEffective(weapon: LeveledWeapon) {
+        return !weapon.hasForge || this.isWeaponCategoryMastered(weapon)
     }
 
     static fromCharSetting(
@@ -777,7 +820,7 @@ export class CharBuild {
 
             let atkRatio = 1
             // 角色精通
-            if (this.char.精通.includes(weapon.类别) || this.char.精通.includes("全部类型")) {
+            if (this.isWeaponCategoryMastered(weapon)) {
                 atkRatio = 1.2
             }
             // 计算武器属性
@@ -992,13 +1035,13 @@ export class CharBuild {
 
         // 添加近战武器加成
         if ((prefixScope === "角色" || (prefixScope === "近战" && attribute !== "攻击")) && this.meleeWeapon) {
-            if (typeof this.meleeWeapon[attribute] === "number") {
+            if (this.isWeaponForgeEffective(this.meleeWeapon) && typeof this.meleeWeapon[attribute] === "number") {
                 bonus += this.meleeWeapon[attribute]
             }
         }
         // 添加远程武器加成
         if ((prefixScope === "角色" || (prefixScope === "远程" && attribute !== "攻击")) && this.rangedWeapon) {
-            if (typeof this.rangedWeapon[attribute] === "number") {
+            if (this.isWeaponForgeEffective(this.rangedWeapon) && typeof this.rangedWeapon[attribute] === "number") {
                 bonus += this.rangedWeapon[attribute]
             }
         }
@@ -1241,16 +1284,21 @@ export class CharBuild {
         const triggerablePart = inheritAllSkillWeapon ? elementalPart : weaponDamagePhysical
         const nonTriggerPart = inheritAllSkillWeapon ? 0 : elementalPart
         const allPart = triggerablePart + nonTriggerPart
-        const lowerCritNoTrigger = allPart * lowerCritDamage * commonMore
-        const higherCritNoTrigger = allPart * higherCritDamage * commonMore
-        const expectedCritNoTrigger = allPart * critExpectedDamage * commonMore
-        const lowerCritTrigger = lowerCritNoTrigger * (1 + triggerDamageAdd)
-        const higherCritTrigger = higherCritNoTrigger * (1 + triggerDamageAdd)
-        const lowerCritExpectedTrigger = lowerCritNoTrigger * (1 + triggerExpectedDamageAdd)
-        const higherCritExpectedTrigger = higherCritNoTrigger * (1 + triggerExpectedDamageAdd)
-        const expectedCritTrigger = expectedCritNoTrigger * (1 + triggerDamageAdd)
-        const expectedDamage = expectedCritNoTrigger * (1 + triggerExpectedDamageAdd)
-        const noHpDamage = allPart * critExpectedDamage * otherMore * (1 + triggerExpectedDamageAdd)
+        const lowerCritNoTriggerBase = lowerCritDamage * commonMore
+        const higherCritNoTriggerBase = higherCritDamage * commonMore
+        const expectedCritNoTriggerBase = critExpectedDamage * commonMore
+        const lowerCritNoTrigger = allPart * lowerCritNoTriggerBase
+        const higherCritNoTrigger = allPart * higherCritNoTriggerBase
+        const expectedCritNoTrigger = allPart * expectedCritNoTriggerBase
+        const triggerAllPart = triggerablePart * (1 + triggerDamageAdd) + nonTriggerPart
+        const expectedTriggerAllPart = triggerablePart * (1 + triggerExpectedDamageAdd) + nonTriggerPart
+        const lowerCritTrigger = triggerAllPart * lowerCritNoTriggerBase
+        const higherCritTrigger = triggerAllPart * higherCritNoTriggerBase
+        const lowerCritExpectedTrigger = expectedTriggerAllPart * lowerCritNoTriggerBase
+        const higherCritExpectedTrigger = expectedTriggerAllPart * higherCritNoTriggerBase
+        const expectedCritTrigger = expectedTriggerAllPart * expectedCritNoTriggerBase
+        const expectedDamage = expectedTriggerAllPart * expectedCritNoTriggerBase
+        const noHpDamage = expectedTriggerAllPart * critExpectedDamage * otherMore
         return {
             lowerCritNoTrigger,
             higherCritNoTrigger,
@@ -2134,8 +2182,10 @@ export class CharBuild {
             ) {
                 const temp = this.meleeWeapon
                 this.meleeWeapon = props
+                this.syncWeaponForgeEffective()
                 mval = this.calculate()
                 this.meleeWeapon = temp
+                this.syncWeaponForgeEffective()
             } else if (
                 props instanceof LeveledWeapon &&
                 props.类型 === "远程" &&
@@ -2143,8 +2193,10 @@ export class CharBuild {
             ) {
                 const temp = this.rangedWeapon
                 this.rangedWeapon = props
+                this.syncWeaponForgeEffective()
                 mval = this.calculate()
                 this.rangedWeapon = temp
+                this.syncWeaponForgeEffective()
             } else if (props instanceof LeveledBuff) {
                 if (props.code) {
                     this.dynamicBuffs.push(props)

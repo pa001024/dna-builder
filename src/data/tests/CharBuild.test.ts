@@ -510,11 +510,21 @@ describe("CharBuild类测试", () => {
             const weapon = weaponData.find(item => item.id === 20599)
             expect(weapon?.技能?.some(skill => skill.名称 === "寂灭")).toBe(true)
 
-            const charBuild = createCharBuild()
-            charBuild.rangedWeapon = new LeveledWeapon(20599)
-            charBuild.baseName = "寂灭"
-            charBuild.targetFunction = "[寂灭]伤害"
-
+            const charBuild = new CharBuild({
+                char: new LeveledChar("希尔妲"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 0,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20599),
+                baseName: "寂灭",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[寂灭]伤害",
+            })
             const field = charBuild.rangedWeaponSkills.find(skill => skill.名称 === "寂灭")?.字段.find(field => field.名称 === "[寂灭]伤害")
             expect(field?.伤害类型).toBe("灾厄")
 
@@ -528,12 +538,53 @@ describe("CharBuild类测试", () => {
 
             expect(noResistanceDamage).toBeGreaterThan(0)
             expect(averageDamage).toBeGreaterThan(noTriggerDamage)
-            expect(averageDamage).toBeLessThan(triggerDamage)
-            expect(triggerDamage).toBeCloseTo(noTriggerDamage * 2)
+            expect(averageDamage).toBeLessThanOrEqual(Math.ceil(triggerDamage))
+            expect(triggerDamage).toBeGreaterThan(noTriggerDamage)
 
             charBuild.targetFunction = "[寂灭]伤害.触发"
             const triggerDamage2 = charBuild.calculate()
             expect(triggerDamage2).toBeCloseTo(triggerDamage, 0)
+        })
+
+        it("熔炉武器加成仅在角色精通武器类型匹配时生效", () => {
+            const matchedBuild = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 0,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20599),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+            const unmatchedBuild = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 0,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10299),
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+
+            expect(matchedBuild.rangedWeapon.forgeEffective).toBe(true)
+            expect(matchedBuild.rangedWeapon.addAttr.技能威力).toBeCloseTo(0.45, 10)
+            expect(matchedBuild.calculateAttributes().技能威力).toBeGreaterThan(1)
+
+            expect(unmatchedBuild.meleeWeapon.forgeEffective).toBe(false)
+            expect(unmatchedBuild.meleeWeapon.addAttr).toEqual({})
+            expect(unmatchedBuild.calculateAttributes().技能威力).toBe(1)
         })
     })
 

@@ -20,6 +20,8 @@ export class LeveledWeapon {
     [key: string]: any
     buff?: LeveledBuff
     buffProps: Record<string, number> = {}
+    _effectiveBuffProps: Record<string, number> = {}
+    forgeEffective = true
     // 新增属性
     倍率 = 1
     弹片数?: number
@@ -205,7 +207,8 @@ export class LeveledWeapon {
             const buff = this.buff
             this.buff.ratio = (refineLevel + 5) / 10
             const props = this.buff.getProperties()
-            this.buffProps = props
+            this._effectiveBuffProps = props
+            this.buffProps = this.forgeEffective ? props : {}
             if (buff._originalBuffData.描述.includes(`{%}`)) {
                 const vals: number[] = Object.values(props)
                 let i = 0
@@ -259,6 +262,8 @@ export class LeveledWeapon {
         "_等级",
         "_originalWeaponData",
         "buffProps",
+        "_effectiveBuffProps",
+        "forgeEffective",
     ])
     static _exclude_simple_properties = new Set([
         "id",
@@ -287,6 +292,8 @@ export class LeveledWeapon {
         "_等级",
         "_originalWeaponData",
         "buffProps",
+        "_effectiveBuffProps",
+        "forgeEffective",
     ])
     static _exclude_base_properties = new Set([
         "id",
@@ -347,6 +354,7 @@ export class LeveledWeapon {
 
     public clone(): LeveledWeapon {
         const weapon = new LeveledWeapon(this._originalWeaponData, this.hasForge ? 0 : this._精炼, this._等级, this.effectLv)
+        weapon.setForgeEffective(this.forgeEffective)
         return weapon
     }
 
@@ -356,11 +364,23 @@ export class LeveledWeapon {
         return this
     }
 
+    /**
+     * 设置灾厄熔炼潜能是否在当前角色精通下生效。
+     * @param effective 当前角色精通是否匹配武器类型
+     * @returns 当前武器实例
+     */
+    setForgeEffective(effective: boolean) {
+        this.forgeEffective = !this.hasForge || effective
+        this.buffProps = this.forgeEffective ? this._effectiveBuffProps : {}
+        return this
+    }
+
     get attrType() {
         return "角色" as const
     }
     get addAttr(): Record<string, number> {
         const r: Record<string, number> = {}
+        if (!this.forgeEffective) return r
         this.baseProperties.forEach(prop => {
             r[prop] = this[prop]
         })
