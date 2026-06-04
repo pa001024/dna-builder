@@ -113,6 +113,32 @@ function hasEmptyFilterOption(filter: { options?: Array<{ value: string | number
 }
 
 /**
+ * 将字段值标准化为表单控件可接受的值。
+ * @param field 字段配置
+ * @param value 原始字段值
+ * @returns 表单字段值
+ */
+function normalizeFormFieldValue(field: AdminCrudFieldConfig, value: unknown) {
+    if (field.type !== "datetime-local" || value === null || value === undefined || value === "") {
+        return value
+    }
+
+    const date =
+        value instanceof Date
+            ? value
+            : typeof value === "number" || /^\d+$/.test(String(value).trim())
+              ? new Date(Number(value))
+              : new Date(String(value).replace(" ", "T"))
+
+    if (Number.isNaN(date.getTime())) {
+        return ""
+    }
+
+    const pad = (item: number) => String(item).padStart(2, "0")
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+/**
  * 重置表单
  * @param form 表单对象
  * @param fields 字段配置
@@ -126,7 +152,7 @@ function resetForm(form: Record<string, any>, fields: AdminCrudFieldConfig[], va
 
     for (const field of fields) {
         if (values[field.key] !== undefined) {
-            form[field.key] = values[field.key]
+            form[field.key] = normalizeFormFieldValue(field, values[field.key])
             continue
         }
 

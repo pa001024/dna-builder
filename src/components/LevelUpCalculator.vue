@@ -700,7 +700,9 @@ const isTimeEstimateConfigOpen = ref(false)
                                         </div>
                                     </div>
                                     <div class="flex-1">
-                                        <h4 class="text-md font-semibold">{{ charMap.get(char.id)?.名称 }}</h4>
+                                        <SRouterLink :to="`/db/char/${char.id}`" class="text-md font-semibold hover:underline">
+                                            {{ charMap.get(char.id)?.名称 }}
+                                        </SRouterLink>
                                         <div class="mt-1">
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs opacity-80">选择等级</span>
@@ -809,7 +811,9 @@ const isTimeEstimateConfigOpen = ref(false)
                                         />
                                     </div>
                                     <div class="flex-1">
-                                        <h4 class="text-md font-semibold">{{ weaponMap.get(weapon.id)?.名称 }}</h4>
+                                        <SRouterLink :to="`/db/weapon/${weapon.id}`" class="text-md font-semibold hover:underline">
+                                            {{ weaponMap.get(weapon.id)?.名称 }}
+                                        </SRouterLink>
                                         <div class="mt-1 flex gap-4">
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs opacity-80">选择等级</span>
@@ -874,7 +878,9 @@ const isTimeEstimateConfigOpen = ref(false)
                                     <div class="flex-1">
                                         <div class="mt-1 flex items-center gap-4">
                                             <div class="flex flex-1 justify-between">
-                                                <h4 class="text-md font-semibold">{{ modMap.get(mod.id)?.名称 }}</h4>
+                                                <SRouterLink :to="`/db/mod/${mod.id}`" class="text-md font-semibold hover:underline">
+                                                    {{ modMap.get(mod.id)?.名称 }}
+                                                </SRouterLink>
                                             </div>
                                             <label class="flex flex-col gap-1">
                                                 <span class="text-xs opacity-80">选择等级</span>

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest"
+import { collectResourceQuestSources, collectResourceShopSources } from "../../utils/resource-source"
+import { weaponDraftMap } from "../d"
 import modData from "../d/mod.data"
+import resourceData from "../d/resource.data"
+import weaponData from "../d/weapon.data"
 import { LevelUpCalculator, type ResourceCost } from "../LevelUpCalculator"
-import { calculateCharLevelUp, estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
+import { calculateCharLevelUp, calculateWeaponLevelUp, estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
 
 describe("LevelUpCalculator", () => {
     const mockResourceNeeds: ResourceCost = {
@@ -121,5 +125,157 @@ describe("LevelUpCalculator", () => {
             A: 1,
             B: 1,
         })
+    })
+
+    it("should count calamity weapon forge materials by smelting level", () => {
+        const result = calculateWeaponLevelUp(
+            [
+                {
+                    id: 1,
+                    draft: {
+                        id: 1,
+                        n: "测试武器",
+                        r: 5,
+                        v: "1.0",
+                        t: "Weapon",
+                        c: 1,
+                        p: 1,
+                        d: 1,
+                        s: 1,
+                        x: [
+                            {
+                                id: 1,
+                                n: "本体材料",
+                                c: 9,
+                                t: "Resource",
+                            },
+                        ],
+                        m: 100,
+                    },
+                    熔炉: [
+                        {
+                            lv: 0,
+                        },
+                        {
+                            lv: 1,
+                            解锁: {
+                                A: 2,
+                            },
+                            技能: [
+                                {
+                                    id: 101,
+                                    名称: "测试技能一",
+                                    icon: "test",
+                                    解锁: {
+                                        B: 3,
+                                    },
+                                },
+                                {
+                                    id: 102,
+                                    名称: "测试技能二",
+                                    icon: "test",
+                                    解锁: {
+                                        B: 3,
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            lv: 2,
+                            解锁: {
+                                A: 5,
+                            },
+                            技能: [
+                                {
+                                    id: 103,
+                                    名称: "测试技能三",
+                                    icon: "test",
+                                    解锁: {
+                                        C: 7,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+            {},
+            {
+                weapons: [
+                    {
+                        currentLevel: 1,
+                        targetLevel: 1,
+                        currentRefine: 0,
+                        targetRefine: 2,
+                    },
+                ],
+            }
+        )
+
+        expect(result.details.craft).toEqual({
+            铜币: 100,
+            本体材料: 9,
+            A: 7,
+            B: 3,
+            C: 7,
+        })
+    })
+
+    it("should calculate real calamity weapon forge materials and list smelting mould sources", () => {
+        const weapon = weaponData.find(item => item.名称 === "棘刺绝响")
+        const smeltingMould = resourceData.find(item => item.name === "熔炼模具")
+
+        expect(weapon).toBeDefined()
+        expect(smeltingMould).toBeDefined()
+
+        const result = calculateWeaponLevelUp(
+            [{ ...weapon!, draft: weaponDraftMap.get(weapon!.id) }],
+            {},
+            {
+                weapons: [
+                    {
+                        currentLevel: 1,
+                        targetLevel: 1,
+                        currentRefine: 0,
+                        targetRefine: 5,
+                    },
+                ],
+            }
+        )
+        const shopSources = collectResourceShopSources(smeltingMould!)
+        const questSources = collectResourceQuestSources(smeltingMould!)
+
+        console.log("棘刺绝响熔炼0-5锻造消耗", result.details.craft)
+        console.log(
+            "熔炼模具商店来源",
+            shopSources.map(source => ({
+                detail: source.detail,
+                shopName: source.shopName,
+                price: source.price,
+                priceName: source.priceName,
+                limit: source.limit,
+                num: source.num,
+                timeStart: source.timeStart,
+                timeEnd: source.timeEnd,
+            }))
+        )
+        console.log(
+            "熔炼模具任务来源",
+            questSources.map(source => ({
+                questChainName: source.questChainName,
+                chapterName: source.chapterName,
+                episode: source.episode,
+                rewardId: source.rewardId,
+                num: source.num,
+                timeStart: source.timeStart,
+                timeEnd: source.timeEnd,
+            }))
+        )
+
+        expect(result.details.craft?.熔炼模具).toBe(1)
+        expect(result.details.craft?.铜币).toBe(500000)
+        expect(result.details.craft?.熔铸突击枪的领悟).toBe(5)
+        expect(result.details.craft?.棘刺绝响的原型).toBe(450)
+        expect(shopSources.length + questSources.length).toBeGreaterThan(0)
     })
 })

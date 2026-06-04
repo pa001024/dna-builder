@@ -269,6 +269,7 @@ type WeaponTooltipData = {
     desc?: string
     props: Record<string, number | string>
     effdesc?: string
+    ineffectiveProps?: Set<string>
 }
 
 /**
@@ -281,6 +282,29 @@ function pickNumericProps(props?: Record<string, number | undefined>) {
         string,
         number
     >
+}
+
+/**
+ * 获取未生效的武器加成属性集合。
+ * @param weapon 目标武器
+ * @returns 未生效的属性名集合
+ */
+function getIneffectiveWeaponBonusProps(weapon: LeveledWeapon) {
+    if (charBuild.value.isWeaponForgeEffective(weapon)) return new Set<string>()
+    return new Set([...weapon.baseProperties, ...Object.keys(weapon._effectiveBuffProps)])
+}
+
+/**
+ * 获取页签 tooltip 使用的武器属性，未生效时保留特效属性用于删除线展示。
+ * @param weapon 目标武器
+ * @returns tooltip 展示属性
+ */
+function getWeaponTooltipProps(weapon: LeveledWeapon) {
+    const props = weapon.getProperties()
+    if (!charBuild.value.isWeaponForgeEffective(weapon)) {
+        Object.assign(props, weapon._effectiveBuffProps)
+    }
+    return props
 }
 
 /**
@@ -312,12 +336,15 @@ function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTool
     }
 
     const weaponData = weapon._originalWeaponData as Weapon | SkillWeapon
-    let props: Record<string, number | string> = weapon.getProperties()
+    let props: Record<string, number | string> = weapon instanceof LeveledWeapon ? getWeaponTooltipProps(weapon) : weapon.getProperties()
+    let ineffectiveProps = weapon instanceof LeveledWeapon ? getIneffectiveWeaponBonusProps(weapon) : new Set<string>()
     if (weapon.inherit)
         if (weapon.inherit === "melee") {
-            props = charBuild.value.meleeWeapon.getProperties()
+            props = getWeaponTooltipProps(charBuild.value.meleeWeapon)
+            ineffectiveProps = getIneffectiveWeaponBonusProps(charBuild.value.meleeWeapon)
         } else {
-            props = charBuild.value.rangedWeapon.getProperties()
+            props = getWeaponTooltipProps(charBuild.value.rangedWeapon)
+            ineffectiveProps = getIneffectiveWeaponBonusProps(charBuild.value.rangedWeapon)
         }
 
     return {
@@ -325,6 +352,7 @@ function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTool
         desc: "描述" in weaponData ? weaponData.描述 : undefined,
         type: weapon.类别,
         props,
+        ineffectiveProps,
         effdesc:
             "熔炼" in weaponData && Array.isArray(weaponData.熔炼)
                 ? weaponData.熔炼[weapon instanceof LeveledWeapon ? weapon.精炼 : 0] || ""
@@ -1306,10 +1334,16 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             :key="prop"
                                             class="flex justify-between items-center gap-2 text-sm"
                                         >
-                                            <div class="text-xs text-neutral-500 whitespace-nowrap">
+                                            <div
+                                                class="text-xs text-neutral-500 whitespace-nowrap"
+                                                :class="{ 'line-through': charTabTooltipMap[tab.name].ineffectiveProps?.has(prop) }"
+                                            >
                                                 {{ prop.startsWith("基础") ? `${$t("基础")}${$t(prop.slice(2))}` : $t(prop) }}
                                             </div>
-                                            <div class="font-medium text-primary">
+                                            <div
+                                                class="font-medium text-primary"
+                                                :class="{ 'line-through': charTabTooltipMap[tab.name].ineffectiveProps?.has(prop) }"
+                                            >
                                                 {{ formatProp(prop, val) }}
                                             </div>
                                         </div>
