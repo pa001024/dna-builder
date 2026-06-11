@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import * as dialog from "@tauri-apps/plugin-dialog"
 import type { CSSProperties } from "vue"
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue"
 import { useRouter } from "vue-router"
-import { deleteFile, getDocumentsDir, importPic, runScript, stopScriptByPath, writeTextFile } from "@/api/app"
+import { execScript, importPic, writeTextFile } from "@/api/app"
 import { env } from "@/env"
 import type { ScriptColorToolState } from "@/store/db"
 import { db } from "@/store/db"
@@ -152,7 +153,7 @@ let persistStateTimer: ReturnType<typeof setTimeout> | null = null
 const REALTIME_TEST_STATUS_RESULT = "result"
 const REALTIME_TEST_STATUS_IMAGE = "img"
 const REALTIME_TEST_STATUS_FPS = "fps"
-const REALTIME_TEST_SCRIPT_FILE_NAME = "__script_color_tool_realtime_test__.js"
+const SINGLE_SCREENSHOT_STATUS_IMAGE = "snapshot"
 
 const referenceImage = computed(() => loadedImages.value[activeImageIndex.value] ?? null)
 /**
@@ -214,9 +215,6 @@ function shouldAcceptRealtimeTestScopedEvent(scope?: string | null): boolean {
 const realtimeTestStatuses = computed(() =>
     scriptRuntime.scriptStatuses.filter(status => shouldAcceptRealtimeTestScopedEvent(status.scope))
 )
-const runningScriptFileNameSet = computed(
-    () => new Set(scriptRuntime.runningScriptPaths.map(path => getScriptFileNameFromPath(path)).filter(Boolean))
-)
 const realtimeTestResultStatus = computed(
     () => realtimeTestStatuses.value.find(status => status.title === REALTIME_TEST_STATUS_RESULT) ?? null
 )
@@ -227,7 +225,7 @@ const realtimeTestFpsStatus = computed(() => realtimeTestStatuses.value.find(sta
 const realtimeTestResultText = computed(() => realtimeTestResultStatus.value?.text ?? "")
 const realtimeTestFpsText = computed(() => realtimeTestFpsStatus.value?.text ?? "")
 const realtimeTestImageUrl = computed(() => realtimeTestImageStatus.value?.image ?? realtimeTestImageStatus.value?.images?.[0] ?? "")
-const isRealtimeTesting = computed(() => runningScriptFileNameSet.value.has(REALTIME_TEST_SCRIPT_FILE_NAME))
+const isRealtimeTesting = computed(() => Boolean(realtimeTestScriptPath.value))
 const referenceImageStyle = computed<CSSProperties>(() => {
     const image = referenceImage.value
     if (!image) {
@@ -2047,11 +2045,13 @@ async function copyClassificationCode() {
 }
 
 /**
- * 构建图色工具实时测试脚本内容。
+ * 构建图色工具实时测试单帧脚本内容。
  * @param checkStateCode 分类函数代码
- * @returns 实时测试脚本文本
+ * @param fpsText 可选 FPS 文本
+ * @returns 实时测试单帧脚本
  */
-function buildRealtimeTestScript(checkStateCode: string): string {
+function buildRealtimeTestScript(checkStateCode: string, fpsText?: string): string {
+    const fpsLine = fpsText ? `setStatus(${JSON.stringify(REALTIME_TEST_STATUS_FPS)}, ${JSON.stringify(fpsText)})\n` : ""
     return `const cloud = ${realtimeTestCloudMode.value ? "true" : "false"}
 const hwnd = cloud ? getCGWindow() : getWindowByProcessName("EM-Win64-Shipping.exe")
 if (!hwnd) throw new Error("未找到窗口")
@@ -2059,25 +2059,11 @@ checkSize(hwnd)
 
 ${checkStateCode}
 
-async function main() {
-    let i = 0
-    const timer = new Timer()
-    while (true) {
-        const frame = captureWindowWGC(hwnd)
-        const state = checkState(frame)
-        setStatus(${JSON.stringify(REALTIME_TEST_STATUS_RESULT)}, state)
-        setStatus(${JSON.stringify(REALTIME_TEST_STATUS_IMAGE)}, frame)
-        if (timer.elapsed() > 1000) {
-            setStatus(${JSON.stringify(REALTIME_TEST_STATUS_FPS)}, i)
-            i = 0
-            timer.reset()
-        }
-        i++
-        await sleep(30)
-    }
-}
-main()
-`
+const frame = captureWindowWGC(hwnd)
+const state = checkState(frame)
+setStatus(${JSON.stringify(REALTIME_TEST_STATUS_RESULT)}, state)
+setStatus(${JSON.stringify(REALTIME_TEST_STATUS_IMAGE)}, frame)
+${fpsLine}`
 }
 
 /**
@@ -2095,17 +2081,138 @@ function getRealtimeTestCheckStateCode(): string | null {
 }
 
 /**
- * 获取图色工具实时测试脚本路径。
- * @returns 脚本路径
+ * 生成实时测试作用域。
+ * @returns 唯一作用域字符串
  */
-async function ensureRealtimeTestScriptPath(): Promise<string> {
-    if (realtimeTestScriptPath.value) {
-        return realtimeTestScriptPath.value
+function buildRealtimeTestScope(): string {
+    const timestamp = Date.now().toString(36)
+    const randomSuffix = Math.random().toString(36).slice(2, 8)
+    return `__script_color_tool_realtime_test__-${timestamp}-${randomSuffix}`
+}
+
+/**
+ * 构建图色工具单次截图脚本内容。
+ * @returns 单次截图脚本文本
+ */
+function buildSingleScreenshotScript(): string {
+    return `const hwnd = getCGWindow() || getWindowByProcessName("EM-Win64-Shipping.exe")
+if (!hwnd) throw new Error("未找到窗口")
+checkSize(hwnd, 1600, 930)
+const frame = captureWindow(hwnd, 0, 30, 1600, 900)
+setStatus(${JSON.stringify(SINGLE_SCREENSHOT_STATUS_IMAGE)}, frame)
+`
+}
+
+/**
+ * 生成单次截图作用域。
+ * @returns 唯一作用域字符串
+ */
+function buildSingleScreenshotScope(): string {
+    const timestamp = Date.now().toString(36)
+    const randomSuffix = Math.random().toString(36).slice(2, 8)
+    return `__script_color_tool_screenshot__-${timestamp}-${randomSuffix}`
+}
+
+interface SingleScreenshotWatcher {
+    imagePromise: Promise<string>
+    dispose: () => void
+}
+
+/**
+ * 预先监听单次截图脚本的状态事件，避免事件先到、监听后挂的竞态。
+ * @param scope 单次截图作用域
+ * @param startTime 等待起始时间戳
+ * @returns 监听器与图片等待 promise
+ */
+async function createSingleScreenshotWatcher(scope: string, startTime: number): Promise<SingleScreenshotWatcher> {
+    let unlisten: UnlistenFn | null = null
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+    let settled = false
+    let resolveImage: (imageUrl: string) => void = () => {}
+    let rejectImage: (error: unknown) => void = () => {}
+
+    const imagePromise = new Promise<string>((resolve, reject) => {
+        resolveImage = resolve
+        rejectImage = reject
+    })
+
+    const finish = (callback: () => void) => {
+        if (settled) {
+            return
+        }
+        settled = true
+        if (timeoutId) {
+            clearTimeout(timeoutId)
+            timeoutId = null
+        }
+        if (unlisten) {
+            unlisten()
+            unlisten = null
+        }
+        callback()
     }
-    const documentsDir = env.isApp ? await getDocumentsDir() : "C:\\Users\\Public\\Documents"
-    const scriptPath = `${documentsDir}\\dob-scripts\\${REALTIME_TEST_SCRIPT_FILE_NAME}`
-    realtimeTestScriptPath.value = scriptPath
-    return scriptPath
+
+    try {
+        unlisten = await listen<{
+            scope?: string
+            action?: "upsert" | "remove"
+            title?: string
+            text?: string
+            image?: string
+            images?: string[]
+            timestamp?: number
+        }>("script-status", event => {
+            const payload = event.payload
+            if (!payload || payload.action === "remove") {
+                return
+            }
+            if (normalizeScriptEventScope(payload.scope) !== scope || payload.title !== SINGLE_SCREENSHOT_STATUS_IMAGE) {
+                return
+            }
+            if ((payload.timestamp ?? 0) < startTime) {
+                return
+            }
+
+            const imageUrl = payload.image ?? payload.images?.[0] ?? ""
+            if (!imageUrl) {
+                return
+            }
+
+            finish(() => resolveImage(imageUrl))
+        })
+    } catch (error) {
+        finish(() => rejectImage(error))
+        throw error
+    }
+
+    timeoutId = setTimeout(() => {
+        finish(() => rejectImage(new Error("截图超时")))
+    }, 5000)
+
+    return {
+        imagePromise,
+        dispose() {
+            finish(() => {})
+        },
+    }
+}
+
+/**
+ * 执行一次窗口截图并回传图片 data URL。
+ * @returns 截图 data URL
+ */
+async function captureSingleScreenshot(): Promise<string> {
+    const scriptContent = buildSingleScreenshotScript()
+    const scriptScope = buildSingleScreenshotScope()
+    scriptRuntime.removeScriptStatus(SINGLE_SCREENSHOT_STATUS_IMAGE, scriptScope)
+    const startTime = Date.now()
+    const watcher = await createSingleScreenshotWatcher(scriptScope, startTime)
+    try {
+        await execScript(scriptContent, scriptScope, 5000)
+        return await watcher.imagePromise
+    } finally {
+        watcher.dispose()
+    }
 }
 
 /**
@@ -2119,15 +2226,27 @@ async function startRealtimeTest() {
 
     try {
         await scriptRuntime.initRuntimeTracking({ includeConfigListeners: false })
-        const scriptPath = await ensureRealtimeTestScriptPath()
-        const scriptContent = buildRealtimeTestScript(checkStateCode)
-        await writeTextFile(scriptPath, scriptContent)
-        void runScript(scriptPath).catch(error => {
-            console.error("图色工具实时测试脚本运行失败", error)
-            ui.showErrorMessage(`实时测试运行失败: ${String(error)}`)
-        })
+        const scriptScope = buildRealtimeTestScope()
+        realtimeTestScriptPath.value = scriptScope
+        scriptRuntime.clearScriptStatusesByScope(scriptScope)
+        let fpsCount = 0
+        let fpsWindowStartedAt = Date.now()
+        while (realtimeTestScriptPath.value === scriptScope) {
+            const now = Date.now()
+            let fpsText = ""
+            if (now - fpsWindowStartedAt >= 1000) {
+                fpsText = String(fpsCount)
+                fpsCount = 0
+                fpsWindowStartedAt = now
+            }
+            const scriptContent = buildRealtimeTestScript(checkStateCode, fpsText)
+            await execScript(scriptContent, scriptScope, 5000)
+            fpsCount++
+            await new Promise(resolve => setTimeout(resolve, 30))
+        }
     } catch (error) {
         console.error("启动图色工具实时测试失败", error)
+        realtimeTestScriptPath.value = ""
         ui.showErrorMessage(`启动实时测试失败: ${String(error)}`)
     }
 }
@@ -2137,14 +2256,11 @@ async function startRealtimeTest() {
  */
 async function stopRealtimeTest() {
     try {
-        const scriptPath = await ensureRealtimeTestScriptPath()
-        await stopScriptByPath(scriptPath)
-        try {
-            await deleteFile(scriptPath)
-        } catch (deleteError) {
-            console.error("删除图色工具实时测试临时脚本失败", deleteError)
-        }
+        const scriptScope = realtimeTestScriptPath.value
         realtimeTestScriptPath.value = ""
+        if (scriptScope) {
+            scriptRuntime.clearScriptStatusesByScope(scriptScope)
+        }
     } catch (error) {
         console.error("停止图色工具实时测试失败", error)
         ui.showErrorMessage(`停止实时测试失败: ${String(error)}`)
@@ -2163,19 +2279,16 @@ async function toggleRealtimeTest() {
 }
 
 /**
- * 将实时测试最新截图加入图片列表。
+ * 将当前截图加入图片列表，未开启实时测试时执行一次窗口截图。
  */
 async function addRealtimeTestScreenshot() {
-    const imageUrl = realtimeTestImageUrl.value
-    if (!imageUrl) {
-        ui.showErrorMessage("当前没有可添加的实时截图")
-        return
-    }
-
+    const realtimeImageUrl = realtimeTestImageUrl.value
     loading.value = true
     try {
+        const imageUrl = realtimeImageUrl || (await captureSingleScreenshot())
         const baseIndex = loadedImages.value.length
-        const snapshotName = `realtime-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.png`
+        const snapshotPrefix = realtimeImageUrl ? "realtime" : "snapshot"
+        const snapshotName = `${snapshotPrefix}-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.png`
         const item = await loadImageDataUrl(imageUrl, snapshotName, baseIndex)
         loadedImages.value = [...loadedImages.value, item]
         appendImageLabels([item])
@@ -2183,10 +2296,10 @@ async function addRealtimeTestScreenshot() {
             activeImageIndex.value = 0
         }
         schedulePersistScriptColorToolState()
-        ui.showSuccessMessage("已添加实时截图到图片列表")
+        ui.showSuccessMessage("已添加截图到图片列表")
     } catch (error) {
-        console.error("添加实时截图失败", error)
-        ui.showErrorMessage(`添加实时截图失败: ${String(error)}`)
+        console.error("添加截图失败", error)
+        ui.showErrorMessage(`添加截图失败: ${String(error)}`)
     } finally {
         loading.value = false
     }
@@ -2323,7 +2436,6 @@ async function initTauriDragEvents() {
 onMounted(async () => {
     if (env.isApp) {
         await scriptRuntime.initRuntimeTracking({ includeConfigListeners: false })
-        await ensureRealtimeTestScriptPath()
     }
     await restoreScriptColorToolState()
     initTauriDragEvents()
@@ -2352,13 +2464,7 @@ onUnmounted(() => {
             <button class="btn btn-sm btn-ghost" @click="clearPoints" :disabled="points.length === 0">清空点位</button>
             <button class="btn btn-sm btn-ghost" @click="openProjectImportPicker">导入工程</button>
             <button class="btn btn-sm btn-ghost" @click="exportProject">导出工程</button>
-            <button
-                class="btn btn-sm btn-ghost"
-                @click="addRealtimeTestScreenshot"
-                :disabled="!env.isApp || !realtimeTestImageUrl || loading"
-            >
-                截图
-            </button>
+            <button class="btn btn-sm btn-ghost" @click="addRealtimeTestScreenshot" :disabled="!env.isApp || loading">截图</button>
             <button
                 class="btn btn-sm"
                 :class="isRealtimeTesting ? 'btn-warning' : 'btn-success'"
@@ -2730,6 +2836,5 @@ onUnmounted(() => {
                 <div class="text-xs text-base-content/70 mt-1">支持 png / jpg / jpeg / webp / bmp / gif / tiff / ico</div>
             </div>
         </div>
-
     </div>
 </template>

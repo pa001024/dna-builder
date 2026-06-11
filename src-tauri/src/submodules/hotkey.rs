@@ -55,6 +55,8 @@ pub struct ScriptHotkeyBinding {
     pub hot_if_win_active: String,
     #[serde(default)]
     pub hold_to_loop: bool,
+    #[serde(default)]
+    pub toggle_to_loop: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -126,6 +128,7 @@ struct RuntimeHotkeyBinding {
     hot_if_win_active: Option<String>,
     hot_if_win_active_criteria: Option<Vec<HotIfWinActiveCriteria>>,
     hold_to_loop: bool,
+    toggle_to_loop: bool,
     parsed: ParsedHotkey,
 }
 
@@ -1112,6 +1115,67 @@ fn _spawn_hold_loop(binding: RuntimeHotkeyBinding, app_handle: tauri::AppHandle)
     });
 }
 
+/// 启动“切换循环”热键任务。
+fn _spawn_toggle_loop(binding: RuntimeHotkeyBinding, app_handle: tauri::AppHandle) {
+    let loop_flag = Arc::new(AtomicBool::new(true));
+    if let Ok(mut guard) = _hotkey_state().hold_loop_flags.lock() {
+        if let Some(prev) = guard.insert(binding.script_path.clone(), loop_flag.clone()) {
+            prev.store(false, Ordering::Release);
+        }
+    }
+
+    let script_path = binding.script_path.clone();
+    let hotkey_text = binding.hotkey.clone();
+    tauri::async_runtime::spawn(async move {
+        let _ = app_handle.emit(
+            "script-console",
+            serde_json::json!({
+                "scope": script_path.clone(),
+                "level": "info",
+                "message": format!("热键切换循环开始: {} ({})", script_path, hotkey_text),
+            }),
+        );
+
+        loop {
+            if !loop_flag.load(Ordering::Acquire) {
+                break;
+            }
+
+            if !_binding_condition_matches(&binding) {
+                break;
+            }
+
+            if let Err(error) = run_script_file(script_path.clone(), app_handle.clone()).await {
+                let _ = app_handle.emit(
+                    "script-console",
+                    serde_json::json!({
+                        "scope": script_path.clone(),
+                        "level": "error",
+                        "message": format!("热键切换循环执行失败: {}，错误: {}", script_path, error),
+                    }),
+                );
+                break;
+            }
+        }
+
+        if let Ok(mut guard) = _hotkey_state().hold_loop_flags.lock() {
+            if let Some(current_flag) = guard.get(&script_path) {
+                if Arc::ptr_eq(current_flag, &loop_flag) {
+                    guard.remove(&script_path);
+                }
+            }
+        }
+        let _ = app_handle.emit(
+            "script-console",
+            serde_json::json!({
+                "scope": script_path.clone(),
+                "level": "info",
+                "message": format!("热键切换循环结束: {} ({})", script_path, hotkey_text),
+            }),
+        );
+    });
+}
+
 fn _trigger_hotkey_scripts(vk: u32, is_key_down: bool, pressed: &HashSet<u32>) {
     let bindings = {
         if let Ok(guard) = _hotkey_state().bindings.read() {
@@ -1144,6 +1208,16 @@ fn _trigger_hotkey_scripts(vk: u32, is_key_down: bool, pressed: &HashSet<u32>) {
     for binding in matched {
         if binding.hold_to_loop {
             _spawn_hold_loop(binding, app_handle.clone());
+            continue;
+        }
+        if binding.toggle_to_loop {
+            if let Ok(guard) = _hotkey_state().hold_loop_flags.lock() {
+                if let Some(flag) = guard.get(&binding.script_path) {
+                    flag.store(false, Ordering::Release);
+                    continue;
+                }
+            }
+            _spawn_toggle_loop(binding, app_handle.clone());
             continue;
         }
 
@@ -1523,9 +1597,12 @@ pub fn sync_script_hotkey_bindings(
         let normalized_script_path = normalize_script_path(script_path.clone())?;
         let parsed =
             _parse_ahk_hotkey(&hotkey).map_err(|e| format!("热键 `{hotkey}` 无效：{e}"))?;
-        if binding.hold_to_loop && parsed.trigger_on_key_up {
+        if binding.hold_to_loop && binding.toggle_to_loop {
+            return Err(format!("热键 `{hotkey}` 不能同时配置按住循环和切换循环"));
+        }
+        if (binding.hold_to_loop || binding.toggle_to_loop) && parsed.trigger_on_key_up {
             return Err(format!(
-                "热键 `{hotkey}` 配置了按住循环，但 `Up` 抬起触发不支持按住循环"
+                "热键 `{hotkey}` 配置了循环模式，但 `Up` 抬起触发不支持循环模式"
             ));
         }
         let hot_if_win_active = {
@@ -1546,6 +1623,7 @@ pub fn sync_script_hotkey_bindings(
                 hot_if_win_active,
                 hot_if_win_active_criteria,
                 hold_to_loop: binding.hold_to_loop,
+                toggle_to_loop: binding.toggle_to_loop,
                 parsed,
             },
         );
@@ -1578,6 +1656,7 @@ pub fn get_script_hotkey_bindings() -> Vec<ScriptHotkeyBinding> {
                 hotkey: binding.hotkey.clone(),
                 hot_if_win_active: binding.hot_if_win_active.clone().unwrap_or_default(),
                 hold_to_loop: binding.hold_to_loop,
+                toggle_to_loop: binding.toggle_to_loop,
             })
             .collect();
     }

@@ -46,7 +46,7 @@ const props = defineProps<{
 const dungeonDetail = computed(() => ironSurvivalDungeonData[props.dungeon.DungeonId] || null)
 const dungeonBase = computed(() => dungeonMap.get(props.dungeon.DungeonId) || null)
 const IRON_SURVIVAL_LEVEL_STEP = 5
-const IRON_SURVIVAL_REWARD_BATCH_COUNT = 3
+const IRON_SURVIVAL_REWARD_BATCH_COUNT = 1
 const strongKillCount = computed(() => props.dungeon.StrongKillCount?.[0] || 50)
 const selectedWave = computed(() => Math.max(1, props.wave ?? 1))
 

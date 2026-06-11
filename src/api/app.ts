@@ -424,6 +424,7 @@ export interface ScriptHotkeyBinding {
     hotkey: string
     hotIfWinActive?: string
     holdToLoop?: boolean
+    toggleToLoop?: boolean
 }
 
 /**
