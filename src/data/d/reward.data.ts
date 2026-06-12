@@ -69623,7 +69623,7 @@ const t: import("../data-types").Reward[] = [
                 id: 52010,
                 t: "Mod",
                 c: 1,
-                p: 10,
+                p: 30,
                 d: 1,
                 n: "专注·迅捷",
             },

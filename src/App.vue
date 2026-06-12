@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getCurrentWindow } from "@tauri-apps/api/window"
 import { provideClient } from "@urql/vue"
 import { onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
@@ -20,6 +21,7 @@ const user = useUserStore()
 const ONLINE_EXPERIENCE_TICK_MS = 60 * 1000
 const ONLINE_EXPERIENCE_RETRY_AT_KEY = "user_online_experience_retry_at"
 let onlineExperienceTimer: number | null = null
+const isMainWindow = env.isApp ? getCurrentWindow().label === "main" : true
 
 /**
  * 上报页面访问统计，不阻塞主流程。
@@ -336,7 +338,7 @@ onBeforeUnmount(() => {
             <Sidebar />
         </template>
     </ResizeableWindow>
-    <ScriptRuntimeFloatingBar />
+    <ScriptRuntimeFloatingBar v-if="isMainWindow" />
 </template>
 
 <style>

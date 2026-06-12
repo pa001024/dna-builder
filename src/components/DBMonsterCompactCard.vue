@@ -231,7 +231,7 @@ function handleClickMonsterCard(): void {
                         :to="monsterDetailRoute"
                         class="truncate text-sm font-semibold text-base-content hover:text-primary"
                         @click.stop
-                        :title="displayMonster.n"
+                        :title="`${displayMonster.n} ${displayMonster.id}`"
                     >
                         {{ $t(displayMonster.n) }}
                     </SRouterLink>

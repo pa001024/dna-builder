@@ -52,6 +52,7 @@ interface ScriptHotkeyConfig {
     hotkey: string
     hotIfWinActive: string
     holdToLoop: boolean
+    toggleToLoop: boolean
     enabled: boolean
 }
 
@@ -220,6 +221,15 @@ function normalizeScriptHotkeyHoldToLoopValue(value: unknown): boolean {
 }
 
 /**
+ * 规范化“切换循环”配置值。
+ * @param value 原始值
+ * @returns 布尔值
+ */
+function normalizeScriptHotkeyToggleToLoopValue(value: unknown): boolean {
+    return Boolean(value)
+}
+
+/**
  * 规范化热键启用状态。
  * @param value 原始值
  * @returns 布尔值（默认启用）
@@ -242,6 +252,7 @@ function normalizeScriptHotkeyConfig(raw: unknown): ScriptHotkeyConfig | null {
             hotkey,
             hotIfWinActive: "",
             holdToLoop: false,
+            toggleToLoop: false,
             enabled: true,
         }
     }
@@ -250,10 +261,15 @@ function normalizeScriptHotkeyConfig(raw: unknown): ScriptHotkeyConfig | null {
     const maybeConfig = raw as Partial<ScriptHotkeyConfig>
     const hotkey = normalizeScriptHotkeyValue(maybeConfig.hotkey ?? "")
     if (!hotkey) return null
+    const holdToLoop = normalizeScriptHotkeyHoldToLoopValue(maybeConfig.holdToLoop)
+    const toggleToLoop = holdToLoop
+        ? false
+        : normalizeScriptHotkeyToggleToLoopValue((maybeConfig as { toggleToLoop?: unknown }).toggleToLoop)
     return {
         hotkey,
         hotIfWinActive: normalizeScriptHotIfWinActiveValue(maybeConfig.hotIfWinActive ?? ""),
-        holdToLoop: normalizeScriptHotkeyHoldToLoopValue(maybeConfig.holdToLoop),
+        holdToLoop,
+        toggleToLoop,
         enabled: normalizeScriptHotkeyEnabledValue((maybeConfig as { enabled?: unknown }).enabled),
     }
 }
@@ -360,6 +376,9 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             if (config.holdToLoop) {
                 return `${base} [按住循环]`
             }
+            if (config.toggleToLoop) {
+                return `${base} [切换循环]`
+            }
             return base
         },
 
@@ -375,6 +394,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
                 hotkey: string
                 hotIfWinActive: string
                 holdToLoop: boolean
+                toggleToLoop: boolean
             }> = []
             const localScriptSet = new Set(localScripts)
             for (const [scriptName, config] of Object.entries(this.scriptHotkeyStore)) {
@@ -382,11 +402,14 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
                 if (!config.enabled) continue
                 const normalizedHotkey = normalizeScriptHotkeyValue(config.hotkey)
                 if (!normalizedHotkey) continue
+                const holdToLoop = normalizeScriptHotkeyHoldToLoopValue(config.holdToLoop)
+                const toggleToLoop = holdToLoop ? false : normalizeScriptHotkeyToggleToLoopValue(config.toggleToLoop)
                 payload.push({
                     scriptPath: `${scriptsDir}\\${scriptName}`,
                     hotkey: normalizedHotkey,
                     hotIfWinActive: normalizeScriptHotIfWinActiveValue(config.hotIfWinActive),
-                    holdToLoop: normalizeScriptHotkeyHoldToLoopValue(config.holdToLoop),
+                    holdToLoop,
+                    toggleToLoop,
                 })
             }
             return payload
@@ -450,6 +473,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
                 hotkey: string
                 hotIfWinActive: string
                 holdToLoop: boolean
+                toggleToLoop: boolean
                 enabled?: boolean
             },
             localScripts: string[],
@@ -462,10 +486,13 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             }
 
             const enabled = config.enabled ?? previousConfig?.enabled ?? true
+            const holdToLoop = normalizeScriptHotkeyHoldToLoopValue(config.holdToLoop)
+            const toggleToLoop = holdToLoop ? false : normalizeScriptHotkeyToggleToLoopValue(config.toggleToLoop)
             this.scriptHotkeyStore[scriptName] = {
                 hotkey,
                 hotIfWinActive: normalizeScriptHotIfWinActiveValue(config.hotIfWinActive),
-                holdToLoop: normalizeScriptHotkeyHoldToLoopValue(config.holdToLoop),
+                holdToLoop,
+                toggleToLoop,
                 enabled,
             }
 
