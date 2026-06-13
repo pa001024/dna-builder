@@ -1,5 +1,14 @@
-import { LeveledBuff, LeveledChar, LeveledMod, LeveledMonster, LeveledSkill, LeveledSkillWeapon, LeveledWeapon } from "./leveled"
-import type { LeveledModWithCount } from "./leveled/LeveledMod"
+import { groupBy } from "lodash-es"
+import type { RawTimelineData } from "../store/timeline"
+import { type ASTNode, parseAST } from "./ast"
+import type { AbstractMod, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
+import { LeveledBuff } from "./leveled/LeveledBuff"
+import type { LeveledChar } from "./leveled/LeveledChar"
+import type { LeveledMod, LeveledModWithCount } from "./leveled/LeveledMod"
+import { type DynamicMonster, LeveledMonster } from "./leveled/LeveledMonster"
+import { LeveledSkill } from "./leveled/LeveledSkill"
+import { LeveledSkillWeapon } from "./leveled/LeveledSkillWeapon"
+import { LeveledWeapon } from "./leveled/LeveledWeapon"
 
 // 本地实现base36Pad函数，避免依赖浏览器API
 function base36Pad(num: number): string {
@@ -76,11 +85,18 @@ const weaponAttackTypeMap = [
     { prefix: "滑行", patterns: ["滑行攻击"] },
 ] as const
 
-import { groupBy } from "lodash-es"
-import type { RawTimelineData } from "../store/timeline"
-import type { DynamicMonster } from "."
-import { type ASTNode, parseAST } from "./ast"
-import type { AbstractMod, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
+const DEFAULT_ENEMY_DATA: DynamicMonster = {
+    id: 130,
+    n: "生命木桩130",
+    f: 1,
+    atk: 10,
+    def: 130,
+    hp: 1000000000,
+    tn: 150,
+    currentHP: 1000000000,
+    currentShield: 0,
+    currentTN: 150,
+}
 export class CharBuildTimeline {
     totalTime: number = 0
     hp: [number, number][] = []
@@ -116,6 +132,7 @@ export interface CharBuildTimelineItem {
     time: number // 单位秒
     duration: number // 单位秒
     lv?: number // 如果是BUFF则有此项
+    buff?: LeveledBuff
 }
 
 export interface CharBuildOptions {
@@ -133,6 +150,7 @@ export interface CharBuildOptions {
     melee: LeveledWeapon
     ranged: LeveledWeapon
     baseName: string
+    enemy?: LeveledMonster
     enemyId?: number
     enemyLevel?: number
     enemyResistance?: number
@@ -146,6 +164,13 @@ export interface CharBuildOptions {
 }
 
 export class CharBuild {
+    static fromCharSetting: (
+        selectedChar: string,
+        charSettings: typeof import("../composables/useCharSettings").defaultCharSettings,
+        inv?: ReturnType<typeof import("../store/inv").useInvStore>,
+        timeline?: CharBuildTimeline
+    ) => CharBuild
+
     // 静态宏定义: 用于AST表达式的宏替换
     static macros: Record<string, string> = {
         ATK: "攻击",
@@ -326,12 +351,6 @@ export class CharBuild {
     }
     set enemyId(value: number) {
         this._enemyId = value
-        try {
-            this.enemy = new LeveledMonster(value, this.enemyLevel)
-        } catch (error) {
-            console.error(`敌人 ${value} 初始化失败:`, error)
-            this.enemy = new LeveledMonster(130, this.enemyLevel)
-        }
     }
     public enemy!: LeveledMonster
     _enemyLevel: number = 180
@@ -404,23 +423,14 @@ export class CharBuild {
         this.baseName = options.baseName
         this.enemyLevel = options.enemyLevel || 80
         this.enemyId = options.enemyId ?? 130
+        this.enemy = options.enemy || new LeveledMonster(DEFAULT_ENEMY_DATA, this.enemyLevel)
+        this.enemy.等级 = this.enemyLevel
         this.enemyResistance = options.enemyResistance || 0
         this.targetFunction = options.targetFunction || "伤害"
         this.customVariables = options.customVariables || []
         this.timeline = options.timeline
         this.timelineDPS = options.timelineDPS || false
-        this.teamWeaponCategories =
-            options.teamWeaponCategories ||
-            (options.teamWeapons || [])
-                .map(weapon => {
-                    if (!weapon || weapon === "-") return undefined
-                    try {
-                        return new LeveledWeapon(weapon).类别
-                    } catch {
-                        return undefined
-                    }
-                })
-                .filter((category): category is string => !!category)
+        this.teamWeaponCategories = options.teamWeaponCategories || []
     }
 
     /**
@@ -460,49 +470,6 @@ export class CharBuild {
      */
     public isWeaponForgeEffective(weapon: LeveledWeapon) {
         return !weapon.hasForge || this.isWeaponCategoryMastered(weapon)
-    }
-
-    static fromCharSetting(
-        selectedChar: string,
-        charSettings: typeof import("../composables/useCharSettings").defaultCharSettings,
-        inv?: ReturnType<typeof import("../store/inv").useInvStore>,
-        timeline?: CharBuildTimeline
-    ) {
-        const char = new LeveledChar(selectedChar, charSettings.charLevel)
-        return new CharBuild({
-            char,
-            auraMod: new LeveledMod(charSettings.auraMod),
-            charMods: charSettings.charMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
-            meleeMods: charSettings.meleeMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
-            rangedMods: charSettings.rangedMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
-            skillMods: charSettings.skillWeaponMods.filter(mod => mod !== null).map(v => new LeveledMod(v[0], v[1], inv?.getBuffLv(v[0]))),
-            skillLevel: charSettings.charSkillLevel,
-            buffs: charSettings.buffs.map(v => new LeveledBuff(v[0], v[1])),
-            melee: new LeveledWeapon(
-                charSettings.meleeWeapon,
-                charSettings.meleeWeaponRefine,
-                charSettings.meleeWeaponLevel,
-                inv?.getWBuffLv(charSettings.meleeWeapon, char.属性)
-            ),
-            ranged: new LeveledWeapon(
-                charSettings.rangedWeapon,
-                charSettings.rangedWeaponRefine,
-                charSettings.rangedWeaponLevel,
-                inv?.getWBuffLv(charSettings.rangedWeapon, char.属性)
-            ),
-            baseName: charSettings.baseName,
-            imbalance: charSettings.imbalance,
-            hpPercent: charSettings.hpPercent,
-            resonanceGain: charSettings.resonanceGain,
-            enemyId: charSettings.enemyId,
-            enemyLevel: charSettings.enemyLevel,
-            enemyResistance: charSettings.enemyResistance,
-            targetFunction: charSettings.targetFunction,
-            customVariables: charSettings.customVariables,
-            timeline,
-            timelineDPS: charSettings.timelineDPS,
-            teamWeapons: [charSettings.team1Weapon, charSettings.team2Weapon],
-        })
     }
 
     get mods() {
@@ -1971,7 +1938,14 @@ export class CharBuild {
         }
 
         let totalDamage = 0
-        const buffItems = timeline.items.filter(i => i.lv).map(i => ({ ...i, buff: new LeveledBuff(i.name, i.lv) }))
+        const buffItems = timeline.items
+            .filter(i => i.lv)
+            .map(i => {
+                if (!i.buff) {
+                    throw new Error(`时间线 BUFF "${i.name}" 缺少预构建实例`)
+                }
+                return { ...i, buff: i.buff }
+            })
         const skillItems = timeline.items.filter(i => !i.lv)
         const skillLayers = groupBy(skillItems, i => i.track)
         const skillLayerKeys = Object.keys(skillLayers).map(Number).sort()
@@ -2278,7 +2252,7 @@ export class CharBuild {
 
     clone() {
         const cloned = new CharBuild({
-            char: new LeveledChar(this.char.名称, this.char.等级),
+            char: this.char.clone(),
             hpPercent: this.hpPercent,
             resonanceGain: this.resonanceGain,
             imbalance: this.imbalance,
@@ -2292,6 +2266,7 @@ export class CharBuild {
             ranged: this.rangedWeapon.clone(),
             baseName: this.baseName,
             enemyId: this.enemyId,
+            enemy: this.enemy.clone(),
             enemyLevel: this.enemyLevel,
             enemyResistance: this.enemyResistance,
             targetFunction: this.targetFunction,

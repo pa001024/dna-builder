@@ -1,8 +1,15 @@
-import { petMap } from "../d"
 import type { PetSkill } from "../d/pet.data"
 import type { Pet } from "../data-types"
 
 const PET_BREAKTHROUGH_MAX_LEVEL = 4
+
+export type LeveledPetResolver = (id: number) => Pet | undefined
+
+let leveledPetResolver: LeveledPetResolver | undefined
+
+export function setLeveledPetResolver(resolver: LeveledPetResolver) {
+    leveledPetResolver = resolver
+}
 
 export class LeveledPet implements Pet {
     id: number
@@ -22,18 +29,10 @@ export class LeveledPet implements Pet {
     private _等级: number = 0
     private _originalPetData: Pet
 
-    static from(id: number, level?: number) {
-        const petData = petMap.get(id)
-        if (!petData) {
-            return null
-        }
-        return new LeveledPet(petData, level)
-    }
-
     constructor(petid: number | Pet, level?: number) {
-        const petData = typeof petid === "number" ? petMap.get(petid) : petid
+        const petData = typeof petid === "number" ? leveledPetResolver?.(petid) : petid
         if (!petData) {
-            throw new Error(`魔灵 ID "${petid}" 未在静态表中找到`)
+            throw new Error(typeof petid === "number" ? `魔灵 ID "${petid}" 未在静态表中找到` : "魔灵数据不能为空")
         }
 
         this._originalPetData = petData

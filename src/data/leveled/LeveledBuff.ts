@@ -1,8 +1,18 @@
 import type { CharAttr, CharBuild, WeaponAttr } from "../CharBuild"
-import { buffMap } from "../d"
 import type { Buff } from "../data-types"
-import type { LeveledChar, LeveledMonster, LeveledSkillWeapon, LeveledWeapon } from "."
+import type { LeveledChar } from "./LeveledChar"
+import type { LeveledMonster } from "./LeveledMonster"
+import type { LeveledSkillWeapon } from "./LeveledSkillWeapon"
+import type { LeveledWeapon } from "./LeveledWeapon"
 import { getMinusAttrValue } from "./minusAttr"
+
+export type LeveledBuffResolver = (name: string) => Buff | undefined
+
+let leveledBuffResolver: LeveledBuffResolver | undefined
+
+export function setLeveledBuffResolver(resolver: LeveledBuffResolver) {
+    leveledBuffResolver = resolver
+}
 
 /**
  * 安全归一化动态属性计算结果。
@@ -44,10 +54,9 @@ export class LeveledBuff implements Buff {
      * @param 等级 可选的buff等级
      */
     constructor(名称: string | Buff, 等级?: number) {
-        // 从Map中获取对应的Buff对象
-        const buffData = typeof 名称 === "string" ? buffMap.get(名称) : 名称
+        const buffData = typeof 名称 === "string" ? leveledBuffResolver?.(名称) : 名称
         if (!buffData) {
-            throw new Error(`Buff "${名称}" 未在静态表中找到`)
+            throw new Error(typeof 名称 === "string" ? `Buff "${名称}" 未在静态表中找到` : "Buff 数据不能为空")
         }
 
         // 保存原始Buff对象

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
 import type { AbyssDungeon, Char } from "@/data"
-import { AbyssMonsterLevelLimit, charMap, LeveledChar, LeveledMonster } from "@/data"
+import { AbyssMonsterLevelLimit, charMap, LeveledChar, LeveledMonsterHelper } from "@/data"
 import { getAbyssCumulativeRewardItems, getAbyssStarCountByActCount, getImmortalMonsterLevelByActCount } from "../utils/abyss-utils"
 import { ABYSS_DUNGEON_ELEMENT_KEYS, formatAbyssDungeonMbValue, getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
 import { getDropModeText, getRewardDetails, type RewardItem } from "../utils/reward-utils"
@@ -384,7 +384,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                 <DBMonsterCompactCard
                     v-for="monsterId in dungeon.m"
                     :key="monsterId"
-                    :monster="new LeveledMonster(monsterId, monsterDisplayLevel, false)"
+                    :monster="LeveledMonsterHelper.fromId(monsterId, monsterDisplayLevel, false)"
                 />
             </div>
         </div>

@@ -2,7 +2,7 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { LeveledMod, LeveledWeapon, modMap, resourceMap, weaponMap } from "@/data"
+import { LeveledMod, LeveledWeaponHelper, modMap, resourceMap, weaponMap } from "@/data"
 import walnutData, { Walnut } from "../data/d/walnut.data"
 import { matchPinyin } from "../utils/pinyin-utils"
 
@@ -64,7 +64,7 @@ function getWalnutProductIcon(walnut: Walnut): string {
     }
 
     if (reward.type === "Weapon") {
-        return LeveledWeapon.idToUrl(weaponMap.get(reward.id)?.id ?? reward.id)
+        return LeveledWeaponHelper.idToUrl(weaponMap.get(reward.id)?.id ?? reward.id)
     }
 
     if (reward.type === "Resource") {

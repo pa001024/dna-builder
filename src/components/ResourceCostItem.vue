@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import { LeveledChar, LeveledMod, resourceMap } from "@/data"
+import { LeveledChar, LeveledCharHelper, LeveledMod, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "@/data"
 import { charMap, draftMap, modMap, skinMap, walnutMap, weaponMap } from "@/data/d"
 import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
@@ -416,7 +416,7 @@ function getNormalizedId(id: number | string): number {
  * @returns 带等级的模组对象
  */
 function createLeveledMod(id: number | string) {
-    return new LeveledMod(getNormalizedId(id))
+    return LeveledModHelper.fromId(getNormalizedId(id))
 }
 
 /**
@@ -425,7 +425,7 @@ function createLeveledMod(id: number | string) {
  * @returns 带等级的武器对象
  */
 function createLeveledWeapon(id: number | string) {
-    return new LeveledWeapon(getNormalizedId(id))
+    return LeveledWeaponHelper.fromId(getNormalizedId(id) as number)
 }
 
 /**
@@ -434,7 +434,7 @@ function createLeveledWeapon(id: number | string) {
  * @returns 带等级的角色对象
  */
 function createLeveledChar(id: number | string) {
-    return new LeveledChar(id)
+    return LeveledCharHelper.fromId(id)
 }
 
 /**
@@ -479,7 +479,7 @@ function handleCardClick() {
         :key="weapon.id"
         :props="weapon.getProperties()"
         :title="$t(weapon.名称)"
-        :type="weapon._originalWeaponData.类型.map(type => $t(type)).join(',')"
+        :type="weapon._originalWeaponData.类型.map((type: string) => $t(type)).join(',')"
         :effdesc="weapon.效果"
         :link="`/db/weapon/${weapon.id}`"
     >

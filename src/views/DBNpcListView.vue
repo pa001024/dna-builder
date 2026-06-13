@@ -3,7 +3,7 @@ import Fuse, { type FuseResultMatch } from "fuse.js"
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { LeveledChar } from "@/data"
+import { LeveledCharHelper } from "@/data"
 import npcData, { type NPC, npcMap } from "@/data/d/npc.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
@@ -312,7 +312,7 @@ function passesNpcSwitchFilters(npc: NPC): boolean {
  * @returns 头像地址
  */
 function getNpcCharIconUrl(npc: NPC): string {
-    return npc.charId ? LeveledChar.idToUrl(npc.charId) : ""
+    return npc.charId ? LeveledCharHelper.idToUrl(npc.charId) : ""
 }
 
 /**

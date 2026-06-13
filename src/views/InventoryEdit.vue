@@ -4,7 +4,7 @@ import { computed, ref } from "vue"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { copyText, pasteText } from "@/util"
-import { LeveledMod, LeveledWeapon, modData, weaponData } from "../data"
+import { LeveledMod, LeveledModHelper, LeveledWeapon, LeveledWeaponHelper, modData, weaponData } from "../data"
 import { useInvStore } from "../store/inv"
 import { matchPinyin } from "../utils/pinyin-utils"
 
@@ -17,7 +17,7 @@ const weaponSearchQuery = ref("")
 const filteredWeapons = computed(() => {
     const mappedWeapons = allWeapons
         .filter(v => inv.enableWeapons[v.类型[0] as keyof typeof inv.enableWeapons])
-        .map(v => new LeveledWeapon(v.id, v.id in inv.weapons ? inv.weapons[v.id] : 5))
+        .map(v => LeveledWeaponHelper.fromId(v.id, v.id in inv.weapons ? inv.weapons[v.id] : 5))
     if (!weaponSearchQuery.value) return mappedWeapons
 
     const query = weaponSearchQuery.value.trim()
@@ -38,7 +38,7 @@ const filteredInvWeapons = computed(() => {
     const query = weaponSearchQuery.value.trim()
     return Object.keys(inv.weapons).filter(v => {
         try {
-            const weapon = new LeveledWeapon(+v)
+            const weapon = LeveledWeaponHelper.fromId(+v)
             if (!inv.enableWeapons[weapon.类型 as keyof typeof inv.enableWeapons]) return false
             // 直接中文匹配
             if (weapon.名称.includes(query) || weapon.类别.includes(query)) {
@@ -58,12 +58,12 @@ const filteredInvWeapons = computed(() => {
     })
 })
 // MOD
-const allMods = modData.map(v => new LeveledMod(v.id))
+const allMods = modData.map(v => LeveledModHelper.fromId(v.id))
 const modSearchQuery = ref("")
 const filteredMods = computed(() => {
     const mappedMods = allMods
         .filter(v => inv.enableMods[v.品质 as keyof typeof inv.enableMods])
-        .map(v => new LeveledMod(v.id, v.id in inv.mods ? inv.mods[v.id][0] : undefined))
+        .map(v => LeveledModHelper.fromId(v.id, v.id in inv.mods ? inv.mods[v.id][0] : undefined))
     if (!modSearchQuery.value) return mappedMods
 
     const query = modSearchQuery.value.trim()
@@ -93,21 +93,21 @@ const filteredSelectedMods = computed(() => {
     const query = modSearchQuery.value.trim()
     return Object.keys(inv.mods).filter(v => {
         try {
-            const mod = new LeveledMod(+v)
+            const mod = LeveledModHelper.fromId(+v)
             // 直接中文匹配
             if (
-                selectTypes.has(LeveledMod.getQuality(Number(v))) &&
+                selectTypes.has(LeveledModHelper.getQuality(Number(v))) &&
                 (mod.名称.includes(query) || mod.属性?.includes(query) || mod.系列.includes(query))
             ) {
                 return true
             }
             // 拼音匹配（全拼/首字母）
             const nameMatch = matchPinyin(mod.名称, query).match
-            if (nameMatch && selectTypes.has(LeveledMod.getQuality(Number(v)))) return true
+            if (nameMatch && selectTypes.has(LeveledModHelper.getQuality(Number(v)))) return true
             const propMatch = mod.属性 ? matchPinyin(mod.属性, query).match : false
-            if (propMatch && selectTypes.has(LeveledMod.getQuality(Number(v)))) return true
+            if (propMatch && selectTypes.has(LeveledModHelper.getQuality(Number(v)))) return true
             const seriesMatch = matchPinyin(mod.系列, query).match
-            if (seriesMatch && selectTypes.has(LeveledMod.getQuality(Number(v)))) return true
+            if (seriesMatch && selectTypes.has(LeveledModHelper.getQuality(Number(v)))) return true
             return false
         } catch {
             delete inv.mods[+v]
@@ -136,7 +136,7 @@ function toggleSelectMod(modId: number, quality: string) {
     if (modId in inv.mods) {
         delete inv.mods[modId]
     } else {
-        const mod = new LeveledMod(+modId)
+        const mod = LeveledModHelper.fromId(+modId)
         inv.mods[modId] = [LeveledMod.getMaxLevel(quality), mod.系列 === "契约者" ? 8 : 1]
     }
 }
@@ -250,7 +250,7 @@ const allItemsWithBuffs = computed(() => {
     const allWeapons = [...Object.keys(inv.meleeWeapons), ...Object.keys(inv.rangedWeapons)]
         .map(id => {
             try {
-                return new LeveledWeapon(+id)
+                return LeveledWeaponHelper.fromId(+id)
             } catch {
                 delete inv.meleeWeapons[+id]
                 delete inv.rangedWeapons[+id]
@@ -261,7 +261,7 @@ const allItemsWithBuffs = computed(() => {
 
     // 获取所有MOD
     const allMods = Object.keys(inv.mods).map(id => {
-        return new LeveledMod(+id)
+        return LeveledModHelper.fromId(+id)
     })
 
     // 合并所有物品

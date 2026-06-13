@@ -30,7 +30,8 @@
             },
             "complexity": {
                 "noCommaOperator": "off",
-                "noBannedTypes": "off"
+                "noBannedTypes": "off",
+                "noStaticOnlyClass": "off"
             }
         }
     },

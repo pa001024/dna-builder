@@ -2,7 +2,7 @@
 import { DNAAPI, DNAWeaponDetailBean } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { LeveledMod } from "../data"
+import { LeveledModHelper } from "../data"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
 
@@ -174,7 +174,7 @@ async function loadWeaponDetail() {
                     <div class="card-body p-6">
                         <h3 class="text-lg font-semibold mb-4">模式</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <ModItem v-for="(mode, index) in weaponDetail.modes" :key="index" :mod="LeveledMod.fromDNA(mode)" />
+                            <ModItem v-for="(mode, index) in weaponDetail.modes" :key="index" :mod="LeveledModHelper.fromDNA(mode)" />
                         </div>
                     </div>
                 </div>

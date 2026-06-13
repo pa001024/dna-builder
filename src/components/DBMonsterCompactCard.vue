@@ -2,7 +2,7 @@
 import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
 import { useRouter } from "vue-router"
-import { Faction } from "@/data"
+import { Faction, LeveledMonsterHelper } from "@/data"
 import type { Monster } from "@/data/d/monster.data"
 import { type ExtractionTreasureMechanism, extractionTreasureMechanismData, type SoloTreasureDropEntry } from "@/data/d/solotreasure.data"
 import { LeveledMonster } from "@/data/leveled/LeveledMonster"
@@ -51,7 +51,7 @@ const displayMonster = computed(() => {
             return props.monster
         }
 
-        return new LeveledMonster(props.monster.id, props.level, props.monster.isRouge, props.monster.hpMultiplier)
+        return LeveledMonsterHelper.fromId(props.monster.id, props.level, props.monster.isRouge, props.monster.hpMultiplier)
     }
 
     return new LeveledMonster(props.monster, props.level)

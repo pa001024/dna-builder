@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
-import { LeveledMod, LeveledWeapon, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
+import { LeveledMod, LeveledWeaponHelper, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
 import { Walnut } from "../data/d/walnut.data"
 import { WalnutSequenceSimulator } from "../utils/walnut-utils"
 
@@ -99,7 +99,7 @@ function getRewardIcon(reward: Walnut["奖励"][number]): string {
         }
 
         if (draft.t === "Weapon") {
-            return LeveledWeapon.idToUrl(draft.p)
+            return LeveledWeaponHelper.idToUrl(draft.p)
         }
 
         return "/imgs/webp/T_Head_Empty.webp"
@@ -110,7 +110,7 @@ function getRewardIcon(reward: Walnut["奖励"][number]): string {
     }
 
     if (reward.type === "Weapon") {
-        return LeveledWeapon.idToUrl(reward.id)
+        return LeveledWeaponHelper.idToUrl(reward.id)
     }
 
     if (reward.type === "Resource") {
@@ -154,7 +154,7 @@ function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
         const weapon = weaponMap.get(reward.id)
         if (weapon) {
             links.push({
-                icon: LeveledWeapon.idToUrl(weapon.id),
+                icon: LeveledWeaponHelper.idToUrl(weapon.id),
                 text: weapon.名称,
                 to: `/db/weapon/${weapon.id}`,
             })

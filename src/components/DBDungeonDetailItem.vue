@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import type { Dungeon, RewardChild } from "@/data"
-import { ironSurvivalData, LeveledChar, LeveledMonster, MonsterLevelUpperLimit, rewardMap } from "@/data"
+import { ironSurvivalData, LeveledChar, LeveledMonsterHelper, MonsterLevelUpperLimit, rewardMap } from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
@@ -546,7 +546,7 @@ watch(
                     <DBMonsterCompactCard
                         v-for="monsterId in dungeon.m"
                         :key="monsterId"
-                        :monster="new LeveledMonster(monsterId, monsterTabLevel, false, getDungeonMonsterHpMultiplier())"
+                        :monster="LeveledMonsterHelper.fromId(monsterId, monsterTabLevel, false, getDungeonMonsterHpMultiplier())"
                     />
                 </div>
             </div>
@@ -558,7 +558,7 @@ watch(
                     <DBMonsterCompactCard
                         v-for="monsterId in dungeon.sm"
                         :key="monsterId"
-                        :monster="new LeveledMonster(monsterId, monsterTabLevel, false, getDungeonMonsterHpMultiplier())"
+                        :monster="LeveledMonsterHelper.fromId(monsterId, monsterTabLevel, false, getDungeonMonsterHpMultiplier())"
                     />
                 </div>
             </div>
@@ -637,7 +637,7 @@ watch(
                                                 class="space-y-1"
                                             >
                                                 <DBMonsterCompactCard
-                                                    :monster="new LeveledMonster(spawnMonster.id, getSpawnMonsterLevel(spawnMonster))"
+                                                    :monster="LeveledMonsterHelper.fromId(spawnMonster.id, getSpawnMonsterLevel(spawnMonster))"
                                                 />
                                                 <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1 text-xs">
                                                     <span class="text-base-content/70">数量</span>
@@ -719,7 +719,7 @@ watch(
                                                             class="space-y-1"
                                                         >
                                                             <DBMonsterCompactCard
-                                                                :monster="new LeveledMonster(groupMonster.id, getSpawnLevelBase())"
+                                                                :monster="LeveledMonsterHelper.fromId(groupMonster.id, getSpawnLevelBase())"
                                                             />
                                                             <div
                                                                 class="flex items-center justify-between rounded bg-base-200 px-2 py-1 text-xs"
@@ -749,7 +749,7 @@ watch(
                                             >
                                                 <DBMonsterCompactCard
                                                     :monster="
-                                                        new LeveledMonster(spawnTagMonster.id, getSpawnTagMonsterLevel(spawnTagMonster))
+                                                        LeveledMonsterHelper.fromId(spawnTagMonster.id, getSpawnTagMonsterLevel(spawnTagMonster))
                                                     "
                                                 />
                                                 <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1 text-xs">

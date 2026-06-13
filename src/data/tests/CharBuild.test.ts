@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
+import { createCharBuildFromSettings } from "../CharBuildHelper"
 import { weaponData } from "../index"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
@@ -1365,7 +1366,7 @@ describe("CharBuild类测试", () => {
 
     describe("E2E", () => {
         it("clone 的计算结果应该相同", () => {
-            const build = CharBuild.fromCharSetting("苏乙", {
+            const build = createCharBuildFromSettings("苏乙", {
                 charLevel: 80,
                 baseName: "射击",
                 hpPercent: 1,

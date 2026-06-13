@@ -21,9 +21,12 @@ import {
     charData,
     charMap,
     LeveledBuff,
+    LeveledBuffHelper,
     LeveledChar,
-    LeveledMod,
+    LeveledCharHelper,
+    LeveledModHelper,
     LeveledWeapon,
+    LeveledWeaponHelper,
     modData,
     monsterData,
     monsterMap,
@@ -92,7 +95,7 @@ function reorderGameStyleModes<T>(modes: T[]): (T | null)[] {
 }
 const _buffOptions = reactive(
     buffData.map(buff => ({
-        value: new LeveledBuff(buff.名称),
+        value: LeveledBuffHelper.fromName(buff.名称),
         label: buff.名称,
         limit: buff.限定,
         description: buff.描述,
@@ -132,21 +135,23 @@ const rangedWeaponOptions = weaponData
     }))
 
 // 状态变量
-const selectedCharMods = computed(() => charSettings.value.charMods.map(v => (v ? LeveledMod.from(v[0], v[1], inv.getBuffLv(v[0])) : null)))
+const selectedCharMods = computed(() =>
+    charSettings.value.charMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+)
 const selectedMeleeMods = computed(() =>
-    charSettings.value.meleeMods.map(v => (v ? LeveledMod.from(v[0], v[1], inv.getBuffLv(v[0])) : null))
+    charSettings.value.meleeMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
 )
 const selectedRangedMods = computed(() =>
-    charSettings.value.rangedMods.map(v => (v ? LeveledMod.from(v[0], v[1], inv.getBuffLv(v[0])) : null))
+    charSettings.value.rangedMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
 )
 const selectedSkillWeaponMods = computed(() =>
-    charSettings.value.skillWeaponMods.map(v => (v ? LeveledMod.from(v[0], v[1], inv.getBuffLv(v[0])) : null))
+    charSettings.value.skillWeaponMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
 )
 const selectedBuffs = computed(() =>
     charSettings.value.buffs
         .map(v => {
             try {
-                const b = new LeveledBuff(v[0], v[1])
+                const b = LeveledBuffHelper.fromName(v[0], v[1])
                 return b
             } catch (error) {
                 console.error(error)
@@ -186,14 +191,14 @@ const getInlineActions = () => {
 // 创建CharBuild实例
 const charBuild = computed(() => {
     try {
-        const char = new LeveledChar(selectedChar.value, charSettings.value.charLevel)
-        const melee = new LeveledWeapon(
+        const char = LeveledCharHelper.fromId(selectedChar.value, charSettings.value.charLevel)
+        const melee = LeveledWeaponHelper.fromId(
             charSettings.value.meleeWeapon,
             charSettings.value.meleeWeaponRefine,
             charSettings.value.meleeWeaponLevel,
             inv.getWBuffLv(charSettings.value.meleeWeapon, char.属性)
         )
-        const ranged = new LeveledWeapon(
+        const ranged = LeveledWeaponHelper.fromId(
             charSettings.value.rangedWeapon,
             charSettings.value.rangedWeaponRefine,
             charSettings.value.rangedWeaponLevel,
@@ -201,7 +206,7 @@ const charBuild = computed(() => {
         )
         const b = new CharBuild({
             char,
-            auraMod: new LeveledMod(charSettings.value.auraMod),
+            auraMod: LeveledModHelper.fromId(charSettings.value.auraMod),
             charMods: selectedCharMods.value,
             meleeMods: selectedMeleeMods.value,
             rangedMods: selectedRangedMods.value,
@@ -729,7 +734,7 @@ function syncCustomBuff(customBuff: [string, number][]) {
 
     const index = _buffOptions.findIndex(buff => buff.label === "自定义BUFF")
     if (index > -1) {
-        _buffOptions[index].value = new LeveledBuff("自定义BUFF")
+        _buffOptions[index].value = LeveledBuffHelper.fromName("自定义BUFF")
     }
     charSettings.value.buffs = [...charSettings.value.buffs]
 }
@@ -1040,7 +1045,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             return
         }
         const weapon = await dna.getWeaponDetail(id, weapons[id].weaponEid)
-        const lw = new LeveledWeapon(id)
+        const lw = LeveledWeaponHelper.fromId(id)
         if (!weapon.success || !weapon.data) {
             ui.showErrorMessage(t("char-build.fetch_weapon_info_failed"))
             return
@@ -1050,7 +1055,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             .map(m => {
                 try {
                     if (!m?.id) return null
-                    const mod = new LeveledMod(+m.id, inv.getModLv(+m.id))
+                    const mod = LeveledModHelper.fromId(+m.id, inv.getModLv(+m.id))
                     return [+m.id, mod.等级] as [number, number]
                 } catch {
                     return null
@@ -1079,7 +1084,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             .map(m => {
                 try {
                     if (!m?.id) return null
-                    const mod = new LeveledMod(+m.id, m.level)
+                    const mod = LeveledModHelper.fromId(+m.id, m.level)
                     return [+m.id, mod.等级] as [number, number]
                 } catch {
                     return null
@@ -1627,9 +1632,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                             @change="updateCharBuild"
                                         >
-                                            <SelectItem v-for="hp in hpPercentOptions" :key="hp" :value="hp / 100">
-                                                {{ hp }}%
-                                            </SelectItem>
+                                            <SelectItem v-for="hp in hpPercentOptions" :key="hp" :value="hp / 100"> {{ hp }}% </SelectItem>
                                         </Select>
                                     </div>
                                     <div class="flex-1">

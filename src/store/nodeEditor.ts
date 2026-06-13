@@ -5,8 +5,8 @@ import { defineStore } from "pinia"
 import { computed, ref } from "vue"
 import { writeTextFile } from "@/api/app"
 import { env } from "@/env"
+import { type LeveledBuff, LeveledBuffHelper, LeveledCharHelper, type LeveledMod, LeveledModHelper, LeveledWeaponHelper } from "../data"
 import { CharBuild } from "../data/CharBuild"
-import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../data/leveled"
 import type { NodeEditorGraph, UNodeEditorGraph } from "./db"
 import { db } from "./db"
 import { useUIStore } from "./ui"
@@ -924,7 +924,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                         const charLevel = charData.charLevel || 80
 
                         // 创建角色实例
-                        const char = new LeveledChar(charId, charLevel)
+                        const char = LeveledCharHelper.fromId(charId, charLevel)
 
                         // 创建武器实例（近战和远程）
                         const meleeWeaponId = weaponData.meleeWeapon
@@ -943,9 +943,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                             throw new Error("缺少远程武器信息")
                         }
 
-                        const meleeWeapon = new LeveledWeapon(meleeWeaponId, meleeRefine, meleeLevel)
+                        const meleeWeapon = LeveledWeaponHelper.fromId(meleeWeaponId, meleeRefine, meleeLevel)
 
-                        const rangedWeapon = new LeveledWeapon(rangedWeaponId, rangedRefine, rangedLevel)
+                        const rangedWeapon = LeveledWeaponHelper.fromId(rangedWeaponId, rangedRefine, rangedLevel)
 
                         // 创建CharBuildOptions
                         // 使用节点中保存的selectedSkill作为baseName，如果没有则使用默认值
@@ -971,7 +971,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                             const mods: LeveledMod[] = []
                             modData.mods.forEach((modId: number | null, index: number) => {
                                 if (modId) {
-                                    const mod = new LeveledMod(modId, modLevels[index])
+                                    const mod = LeveledModHelper.fromId(modId, modLevels[index])
                                     mods.push(mod)
                                 }
                             })
@@ -981,7 +981,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
 
                         if (buffData.buffs && Array.isArray(buffData.buffs)) {
                             charBuild.buffs = buffData.buffs
-                                .map((id: string, index: number) => (id ? new LeveledBuff(id, buffData.buffLevels[index]) : null))
+                                .map((id: string, index: number) =>
+                                    id ? LeveledBuffHelper.fromName(id, buffData.buffLevels[index]) : null
+                                )
                                 .filter((buff: LeveledBuff | null) => buff !== null) as LeveledBuff[]
                             console.log(charBuild.buffs, buffData)
                         }

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { dungeonMap, LeveledMonster } from "@/data"
+import { dungeonMap, LeveledMonsterHelper } from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
 import type { IronSurvival } from "@/data/d/ironsurvival.data"
 import { ironSurvivalMonsterSpawnData } from "@/data/d/ironsurvival.data"
@@ -62,7 +62,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                                 <DBMonsterCompactCard
                                     v-for="monsterId in getSpawnMonsterIds(spawnId)"
                                     :key="`${spawnId}-${monsterId}`"
-                                    :monster="new LeveledMonster(monsterId, ironSurvivalMonsterLevel, false, IRON_SURVIVAL_MONSTER_HP_MULTIPLIER)"
+                                    :monster="LeveledMonsterHelper.fromId(monsterId, ironSurvivalMonsterLevel, false, IRON_SURVIVAL_MONSTER_HP_MULTIPLIER)"
                                     :clickable="false"
                                 />
                             </div>
@@ -94,7 +94,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                                 <DBMonsterCompactCard
                                     v-for="monsterId in getSpawnMonsterIds(spawnId)"
                                     :key="`${spawnId}-${monsterId}`"
-                                    :monster="new LeveledMonster(monsterId, ironSurvivalMonsterLevel, false, IRON_SURVIVAL_MONSTER_HP_MULTIPLIER)"
+                                    :monster="LeveledMonsterHelper.fromId(monsterId, ironSurvivalMonsterLevel, false, IRON_SURVIVAL_MONSTER_HP_MULTIPLIER)"
                                     :clickable="false"
                                 />
                             </div>
