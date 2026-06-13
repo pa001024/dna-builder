@@ -1,7 +1,7 @@
 import type { CharAttr, CharBuild, WeaponAttr } from "../CharBuild"
 import { buffMap } from "../d"
 import type { Buff } from "../data-types"
-import type { LeveledChar, LeveledSkillWeapon, LeveledWeapon } from "."
+import type { LeveledChar, LeveledMonster, LeveledSkillWeapon, LeveledWeapon } from "."
 import { getMinusAttrValue } from "./minusAttr"
 
 /**
@@ -84,12 +84,14 @@ export class LeveledBuff implements Buff {
      * @param attrs 角色属性
      * @param weapon 武器
      * @param weaponAttrs 武器属性
+     * @param enemy 目标怪物
      */
     applyDynamicAttr(
         char: LeveledChar,
         attrs: CharAttr,
         weapons: (LeveledWeapon | LeveledSkillWeapon | undefined)[],
-        wAttrs?: (WeaponAttr | undefined)[]
+        wAttrs?: (WeaponAttr | undefined)[],
+        enemy?: LeveledMonster
     ): ReturnType<CharBuild["calculateWeaponAttributes"]> {
         const [weapon, meleeWeapon, rangedWeapon, skillWeapon] = weapons
         const [weaponAttr, meleeWeaponAttr, rangedWeaponAttr, skillWeaponAttr] = wAttrs || []
@@ -132,6 +134,7 @@ export class LeveledBuff implements Buff {
             meleeWeaponAttr,
             rangedWeaponAttr,
             skillWeaponAttr,
+            enemy,
         } as any
         const func = new Function("attr", `with(attr){${this.code};return attr}`)
         let result = null
@@ -151,6 +154,7 @@ export class LeveledBuff implements Buff {
                 meleeWeaponAttr,
                 rangedWeaponAttr,
                 skillWeaponAttr,
+                enemy,
                 ...attrs
             } = result
             return { ...attrs, weapon: weaponAttr }

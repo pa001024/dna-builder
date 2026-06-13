@@ -1298,6 +1298,24 @@ describe("CharBuild类测试", () => {
             expect(dynamicBuild.calculate()).toBeGreaterThan(baseBuild.calculate())
         })
 
+        it("追加伤害BUG应按怪物等级减伤再次降低追加伤害", () => {
+            const charBuild = createCharBuild()
+            charBuild.baseName = "射击"
+            charBuild.enemyLevel = 200
+            charBuild.dynamicBuffs.push(
+                new LeveledBuff({
+                    名称: "测试追加伤害",
+                    描述: "测试用追加伤害",
+                    code: "weaponAttr.追加伤害=2",
+                }),
+                new LeveledBuff("追加伤害BUG")
+            )
+
+            const dynamicAttrs = charBuild.calculateWeaponAttributes()
+
+            expect(dynamicAttrs.weapon?.追加伤害).toBeCloseTo(2 / (1 + (200 - 190) * 0.05))
+        })
+
         it("动态attr属性应在最终阶段按表达式计算", () => {
             const charBuild = createCharBuild()
             charBuild.baseName = "射击"

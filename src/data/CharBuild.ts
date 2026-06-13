@@ -683,7 +683,7 @@ export class CharBuild {
             const all = this.getAllWeaponsAttrs()
             if (this.dynamicBuffs.length > 0) {
                 for (const b of this.dynamicBuffs) {
-                    const { weapon, ...rest } = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all)
+                    const { weapon, ...rest } = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all, this.enemy)
                     attrs = rest
                 }
             }
@@ -874,7 +874,7 @@ export class CharBuild {
             const all = this.getAllWeaponsAttrs(weapon, attrs.weapon)
             if (this.dynamicBuffs.length > 0) {
                 for (const b of this.dynamicBuffs) {
-                    attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all)
+                    attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all, this.enemy)
                 }
             }
         }

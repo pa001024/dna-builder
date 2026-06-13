@@ -171,6 +171,12 @@ const team2Options = computed(() =>
 const teamWeaponOptions = computed(() =>
     [{ value: "-", label: "无", type: "", icon: `/imgs/1.png` }].concat(meleeWeaponOptions.concat(rangedWeaponOptions))
 )
+const hpPercentOptions = [1, ...Array.from({ length: 20 }, (_, i) => (i + 1) * 5)]
+const resonanceGainOptions = [0, 0.5, 1, 1.5, 2, 2.5, 3]
+const enemyResistanceOptions = [0, 0.5, -4]
+const groupedTeam1Options = computed(() => groupBy(team1Options.value, "elm"))
+const groupedTeam2Options = computed(() => groupBy(team2Options.value, "elm"))
+const groupedTeamWeaponOptions = computed(() => groupBy(teamWeaponOptions.value, "type"))
 
 const getInlineActions = () => {
     const raw = inlineActionsToTimeline(charSettings.value.actions, selectedChar.value)
@@ -268,6 +274,7 @@ type WeaponTooltipData = {
     type?: string
     desc?: string
     props: Record<string, number | string>
+    propEntries: [string, number | string][]
     effdesc?: string
     ineffectiveProps?: Set<string>
 }
@@ -314,11 +321,13 @@ function getWeaponTooltipProps(weapon: LeveledWeapon) {
  */
 function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTooltipData | undefined {
     if (tab.name === "角色") {
+        const props = pickNumericProps(charBuild.value.char.加成)
         return {
             title: charBuild.value.char.名称,
             mastery: charBuild.value.char.精通,
             type: charBuild.value.char.属性,
-            props: pickNumericProps(charBuild.value.char.加成),
+            props,
+            propEntries: Object.entries(props).filter(([, val]) => val !== 0 && val != null),
         }
     }
 
@@ -352,6 +361,7 @@ function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTool
         desc: "描述" in weaponData ? weaponData.描述 : undefined,
         type: weapon.类别,
         props,
+        propEntries: Object.entries(props).filter(([, val]) => val !== 0 && val != null),
         ineffectiveProps,
         effdesc:
             "熔炼" in weaponData && Array.isArray(weaponData.熔炼)
@@ -365,6 +375,7 @@ const charTabTooltipMap = computed<Record<string, WeaponTooltipData>>(() =>
         map[tab.name] = getCharTabTooltipData(tab) || {
             title: tab.name,
             props: {},
+            propEntries: [],
         }
         return map
     }, {})
@@ -1328,9 +1339,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             </div>
                                         </div>
                                         <div
-                                            v-for="[prop, val] in Object.entries(charTabTooltipMap[tab.name].props).filter(
-                                                ([, val]) => val !== 0 && val != null
-                                            )"
+                                            v-for="[prop, val] in charTabTooltipMap[tab.name].propEntries"
                                             :key="prop"
                                             class="flex justify-between items-center gap-2 text-sm"
                                         >
@@ -1578,6 +1587,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <CollapsibleSection
                         :title="$t('char-build.share_build')"
                         :is-open="!collapsedSections.share"
+                        lazy
                         @toggle="toggleSection('share')"
                     >
                         <DOBBuildShow
@@ -1591,6 +1601,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <CollapsibleSection
                         :title="$t('dna-role-detail.title')"
                         :is-open="!collapsedSections.detail"
+                        lazy
                         @toggle="toggleSection('detail')"
                     >
                         <CharIntronShow :char="charBuild.char" />
@@ -1600,6 +1611,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <CollapsibleSection
                         :title="$t('char-build.basic_settings')"
                         :is-open="!collapsedSections.basic"
+                        lazy
                         @toggle="toggleSection('basic')"
                     >
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-2">
@@ -1615,11 +1627,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                             @change="updateCharBuild"
                                         >
-                                            <SelectItem
-                                                v-for="hp in [1, ...Array.from({ length: 20 }, (_, i) => (i + 1) * 5)]"
-                                                :key="hp"
-                                                :value="hp / 100"
-                                            >
+                                            <SelectItem v-for="hp in hpPercentOptions" :key="hp" :value="hp / 100">
                                                 {{ hp }}%
                                             </SelectItem>
                                         </Select>
@@ -1633,7 +1641,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                             @change="updateCharBuild"
                                         >
-                                            <SelectItem v-for="rg in [0, 0.5, 1, 1.5, 2, 2.5, 3]" :key="rg" :value="rg">
+                                            <SelectItem v-for="rg in resonanceGainOptions" :key="rg" :value="rg">
                                                 {{ rg * 100 }}%
                                             </SelectItem>
                                         </Select>
@@ -1674,7 +1682,9 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
                                             @change="updateCharBuild"
                                         >
-                                            <SelectItem v-for="res in [0, 0.5, -4]" :key="res" :value="res"> {{ res * 100 }}% </SelectItem>
+                                            <SelectItem v-for="res in enemyResistanceOptions" :key="res" :value="res">
+                                                {{ res * 100 }}%
+                                            </SelectItem>
                                         </Select>
                                     </div>
                                 </div>
@@ -1729,6 +1739,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         :title="`${$t('魔之楔')} (${charBuild.getModCostMax(charTab)}/${charBuild.getModCap(charTab)})`"
                         :badge="`${charBuild.getModCostTransfer(charTab).length}模块`"
                         :is-open="!collapsedSections.mods"
+                        lazy
                         @toggle="toggleSection('mods')"
                     >
                         <div class="mt-2">
@@ -1825,6 +1836,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         :title="$t('char-build.special_effect_config')"
                         :badge="charBuild.modsWithWeapons.filter(v => v.buff).length"
                         :is-open="!collapsedSections.effects"
+                        lazy
                         @toggle="toggleSection('effects')"
                     >
                         <div class="mt-2">
@@ -1837,13 +1849,14 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         :title="$t('char-build.buff_list')"
                         :badge="selectedBuffs.length"
                         :is-open="!collapsedSections.buffs"
+                        lazy
                         @toggle="toggleSection('buffs')"
                     >
                         <!-- 协战选择 -->
                         <div class="flex flex-wrap items-center gap-4 my-2 p-3 bg-base-200/50 rounded-lg">
                             <span class="text-sm font-semibold">{{ $t("char-build.team") }}</span>
                             <Select v-model="charSettings.team1" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
-                                <template v-for="charWithElm in groupBy(team1Options, 'elm')" :key="charWithElm[0].elm">
+                                <template v-for="charWithElm in groupedTeam1Options" :key="charWithElm[0].elm">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                         {{ $t(charWithElm[0].elm + "属性") }}
                                     </SelectLabel>
@@ -1855,7 +1868,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 </template>
                             </Select>
                             <Select v-model="charSettings.team1Weapon" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
-                                <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
+                                <template v-for="weaponWithType in groupedTeamWeaponOptions" :key="weaponWithType[0].type">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                         {{ $t(weaponWithType[0].type) }}
                                     </SelectLabel>
@@ -1867,7 +1880,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 </template>
                             </Select>
                             <Select v-model="charSettings.team2" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
-                                <template v-for="charWithElm in groupBy(team2Options, 'elm')" :key="charWithElm[0].elm">
+                                <template v-for="charWithElm in groupedTeam2Options" :key="charWithElm[0].elm">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                         {{ $t(charWithElm[0].elm + "属性") }}
                                     </SelectLabel>
@@ -1879,7 +1892,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 </template>
                             </Select>
                             <Select v-model="charSettings.team2Weapon" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
-                                <template v-for="weaponWithType in groupBy(teamWeaponOptions, 'type')" :key="weaponWithType[0].type">
+                                <template v-for="weaponWithType in groupedTeamWeaponOptions" :key="weaponWithType[0].type">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                         {{ $t(weaponWithType[0].type) }}
                                     </SelectLabel>
@@ -1914,6 +1927,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <CollapsibleSection
                         :title="$t('char-build.actions')"
                         :is-open="!collapsedSections.actions"
+                        lazy
                         @toggle="toggleSection('actions')"
                     >
                         <CharActionEditor :char-name="selectedChar" :char-build="charBuild" />
@@ -1923,6 +1937,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <CollapsibleSection
                         :title="$t('char-build.equipment_preview')"
                         :is-open="!collapsedSections.preview"
+                        lazy
                         @toggle="toggleSection('preview')"
                     >
                         <EquipmentPreview
