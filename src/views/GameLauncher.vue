@@ -108,6 +108,8 @@ const uninstallGame = async () => {
 
     try {
         await deleteFile(game.path, true)
+        await deleteFile(`${game.gameDir}BaseVersion.json`, true)
+        await deleteFile(`${game.gameDir}.extracting`, true)
         await removeDirAll(`${game.gameDir}EM`)
         await removeDirAll(`${game.gameDir}Engine`)
         await game.refreshGameInstalled()

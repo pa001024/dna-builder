@@ -1,9 +1,10 @@
 use std::{
+    collections::HashSet,
     fs::{self, File},
     io::{self, Read, Seek, SeekFrom, Write},
-    path::{Path, PathBuf},
+    path::{Component, Path, PathBuf},
     sync::Arc,
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 use hotwatch::{Event, EventKind, Hotwatch};
@@ -34,6 +35,8 @@ lazy_static! {
             .expect("Failed to create HTTP client")
     );
     static ref DOWNLOAD_PROGRESS_LOCK: Mutex<()> = Mutex::new(());
+    static ref PAUSED_DOWNLOADS: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
+    static ref ACTIVE_DOWNLOADS: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -73,6 +76,107 @@ struct DownloadProgress {
     num_chunks: usize,
     /// 各分块进度
     chunks: Vec<ChunkProgress>,
+}
+
+/// 下载进度查询结果
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DownloadProgressSnapshot {
+    filename: String,
+    downloaded: u64,
+    total: u64,
+    progress: u64,
+    has_progress_file: bool,
+    active: bool,
+    paused: bool,
+}
+
+/// 下载活跃状态守卫。
+struct ActiveDownloadGuard {
+    filename: String,
+}
+
+impl ActiveDownloadGuard {
+    fn try_new(filename: &str) -> Result<Self, String> {
+        let mut active_downloads = ACTIVE_DOWNLOADS.lock().unwrap();
+        if active_downloads.contains(filename) {
+            return Err("download_already_active".to_string());
+        }
+        active_downloads.insert(filename.to_string());
+        Ok(Self {
+            filename: filename.to_string(),
+        })
+    }
+}
+
+impl Drop for ActiveDownloadGuard {
+    fn drop(&mut self) {
+        ACTIVE_DOWNLOADS.lock().unwrap().remove(&self.filename);
+    }
+}
+
+/// 将下载文件名归一化为后端状态表使用的 key。
+fn get_download_state_key(filename: &str) -> Result<String, String> {
+    let current_dir =
+        std::env::current_dir().map_err(|e| format!("Failed to get current directory: {}", e))?;
+    let mut normalized = PathBuf::new();
+    for component in current_dir.join(filename).components() {
+        match component {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                normalized.pop();
+            }
+            other => normalized.push(other.as_os_str()),
+        }
+    }
+    Ok(normalized
+        .to_string_lossy()
+        .replace('/', "\\")
+        .to_lowercase())
+}
+
+/// 下载进度事件节流器。
+struct DownloadProgressEmitter {
+    app_handle: tauri::AppHandle,
+    filename: String,
+    total_size: u64,
+    last_emit: std::sync::Mutex<Instant>,
+}
+
+impl DownloadProgressEmitter {
+    fn new(app_handle: tauri::AppHandle, filename: &str, total_size: u64) -> Self {
+        Self {
+            app_handle,
+            filename: filename.to_string(),
+            total_size,
+            last_emit: std::sync::Mutex::new(Instant::now() - Duration::from_millis(250)),
+        }
+    }
+
+    fn emit(&self, downloaded: u64, force: bool) -> Result<(), String> {
+        let now = Instant::now();
+        let mut last_emit = self.last_emit.lock().unwrap();
+        if !force && now.duration_since(*last_emit) < Duration::from_millis(250) {
+            return Ok(());
+        }
+        *last_emit = now;
+        let progress_percent = if self.total_size > 0 {
+            (downloaded * 100) / self.total_size
+        } else {
+            0
+        };
+        self.app_handle
+            .emit(
+                "download_progress",
+                serde_json::json!({
+                    "filename": self.filename,
+                    "progress": progress_percent,
+                    "downloaded": downloaded,
+                    "total": self.total_size,
+                }),
+            )
+            .map_err(|e| format!("发送进度事件失败: {}", e))
+    }
 }
 
 /// 云游戏受控窗口的可选配置。
@@ -1417,6 +1521,70 @@ fn delete_progress_file(file_path: &Path) {
     let _ = fs::remove_file(progress_path);
 }
 
+/// 判断指定下载是否已被暂停。
+fn is_download_paused(filename: &str) -> bool {
+    match get_download_state_key(filename) {
+        Ok(key) => PAUSED_DOWNLOADS.lock().unwrap().contains(&key),
+        Err(_) => false,
+    }
+}
+
+/// 清除指定下载的暂停标记。
+fn clear_download_paused(filename: &str) {
+    if let Ok(key) = get_download_state_key(filename) {
+        PAUSED_DOWNLOADS.lock().unwrap().remove(&key);
+    }
+}
+
+/// 查询下载进度文件中的当前进度。
+#[tauri::command]
+async fn get_download_progress(filename: String) -> Result<DownloadProgressSnapshot, String> {
+    let current_dir =
+        std::env::current_dir().map_err(|e| format!("Failed to get current directory: {}", e))?;
+    let file_path = current_dir.join(&filename);
+    let download_key = get_download_state_key(&filename)?;
+    let active = ACTIVE_DOWNLOADS.lock().unwrap().contains(&download_key);
+    let paused = PAUSED_DOWNLOADS.lock().unwrap().contains(&download_key);
+    if let Some(progress) = read_progress_file(&file_path) {
+        let downloaded = progress.chunks.iter().map(|chunk| chunk.downloaded).sum();
+        let progress_percent = if progress.total_size > 0 {
+            (downloaded * 100) / progress.total_size
+        } else {
+            0
+        };
+        return Ok(DownloadProgressSnapshot {
+            filename,
+            downloaded,
+            total: progress.total_size,
+            progress: progress_percent,
+            has_progress_file: true,
+            active,
+            paused,
+        });
+    }
+
+    let total = get_file_size(filename.clone()).await.unwrap_or(0);
+    Ok(DownloadProgressSnapshot {
+        filename,
+        downloaded: total,
+        total,
+        progress: if total > 0 { 100 } else { 0 },
+        has_progress_file: false,
+        active,
+        paused,
+    })
+}
+
+/// 暂停指定下载，保留进度文件用于后续续传。
+#[tauri::command]
+async fn pause_download(filename: String) -> Result<String, String> {
+    PAUSED_DOWNLOADS
+        .lock()
+        .unwrap()
+        .insert(get_download_state_key(&filename)?);
+    Ok(format!("已暂停下载: {}", filename))
+}
+
 /// 多线程下载单个分块，支持断点续传和自动重试
 async fn download_chunk(
     url: &str,
@@ -1425,6 +1593,9 @@ async fn download_chunk(
     file_path: &Path,
     chunk_index: usize,
     resume_offset: u64, // 断点续传的偏移量
+    filename: &str,
+    event_progress: Arc<std::sync::atomic::AtomicU64>,
+    progress_emitter: Arc<DownloadProgressEmitter>,
 ) -> Result<u64, String> {
     const MAX_RETRIES: u32 = 3; // 最大重试次数
     const RETRY_DELAY_MS: u64 = 1000; // 重试延迟（毫秒）
@@ -1444,6 +1615,10 @@ async fn download_chunk(
 
     // 重试循环
     for retry in 0..MAX_RETRIES {
+        if is_download_paused(filename) {
+            return Err("download_paused".to_string());
+        }
+
         // 发送 Range 请求
         let response = client
             .get(url)
@@ -1470,6 +1645,9 @@ async fn download_chunk(
 
                     // 读取并写入文件
                     while let Some(chunk) = stream.next().await {
+                        if is_download_paused(filename) {
+                            return Err("download_paused".to_string());
+                        }
                         let chunk = chunk
                             .map_err(|e| format!("分块 {} 读取数据失败: {}", chunk_index, e))?;
 
@@ -1477,6 +1655,20 @@ async fn download_chunk(
                             .map_err(|e| format!("分块 {} 写入文件失败: {}", chunk_index, e))?;
 
                         downloaded += chunk.len() as u64;
+                        let current_chunk_downloaded = resume_offset + downloaded;
+                        update_chunk_progress(
+                            file_path,
+                            chunk_index,
+                            current_chunk_downloaded,
+                            current_chunk_downloaded >= end - start + 1,
+                        )
+                        .map_err(|e| format!("更新进度文件失败: {}", e))?;
+
+                        let old_progress = event_progress
+                            .fetch_add(chunk.len() as u64, std::sync::atomic::Ordering::Relaxed);
+                        let new_progress = old_progress + chunk.len() as u64;
+                        progress_emitter
+                            .emit(new_progress, current_chunk_downloaded >= end - start + 1)?;
                     }
 
                     // 返回总共下载的字节数（包括之前已下载的部分）
@@ -1582,10 +1774,14 @@ async fn download_file_multithreaded(
     let file_path = file_path.to_path_buf();
     let url = url.to_string();
     let filename = filename.to_string();
-    let total_size_clone = total_size; // 克隆 total_size 以便在 async 块中使用
 
     // 创建进度跟踪（用于发送进度事件）
     let event_progress = Arc::new(std::sync::atomic::AtomicU64::new(0));
+    let progress_emitter = Arc::new(DownloadProgressEmitter::new(
+        app_handle.clone(),
+        &filename,
+        total_size,
+    ));
 
     // 计算已下载的总字节数
     let initial_downloaded: u64 = progress_info.chunks.iter().map(|c| c.downloaded).sum();
@@ -1611,10 +1807,9 @@ async fn download_file_multithreaded(
         let url_clone = url.clone();
         let file_path_clone = file_path.clone();
         let filename_clone = filename.clone();
-        let app_handle_clone = app_handle.clone();
         let event_progress_clone = event_progress.clone();
+        let progress_emitter_clone = progress_emitter.clone();
         let semaphore_clone = semaphore.clone();
-        let total_size_for_task = total_size_clone; // 为每个任务创建 total_size 的副本
 
         let task = tokio::spawn(async move {
             // 获取信号量许可
@@ -1624,39 +1819,22 @@ async fn download_file_multithreaded(
                 .map_err(|e| format!("获取并发许可失败: {}", e))?;
 
             // 下载分块（传入断点续传偏移量）
-            let downloaded =
-                download_chunk(&url_clone, start, end, &file_path_clone, i, resume_offset).await?;
+            let downloaded = download_chunk(
+                &url_clone,
+                start,
+                end,
+                &file_path_clone,
+                i,
+                resume_offset,
+                &filename_clone,
+                event_progress_clone,
+                progress_emitter_clone,
+            )
+            .await?;
 
-            // 更新进度文件
+            // 确保分块完成状态落盘。
             update_chunk_progress(&file_path_clone, i, downloaded, true)
                 .map_err(|e| format!("更新进度文件失败: {}", e))?;
-
-            // 更新事件进度
-            let old_progress = event_progress_clone.fetch_add(
-                downloaded - resume_offset,
-                std::sync::atomic::Ordering::Relaxed,
-            );
-            let new_progress = old_progress + (downloaded - resume_offset);
-
-            // 计算进度百分比
-            let progress_percent = if total_size_for_task > 0 {
-                (new_progress * 100) / total_size_for_task
-            } else {
-                0
-            };
-
-            // 发送进度事件
-            app_handle_clone
-                .emit(
-                    "download_progress",
-                    serde_json::json!({
-                        "filename": &filename_clone,
-                        "progress": progress_percent,
-                        "downloaded": new_progress,
-                        "total": total_size_for_task,
-                    }),
-                )
-                .map_err(|e| format!("发送进度事件失败: {}", e))?;
 
             Ok::<u64, String>(downloaded)
         });
@@ -1664,17 +1842,26 @@ async fn download_file_multithreaded(
         tasks.push(task);
     }
 
-    // 等待所有任务完成
+    // 等待所有任务完成。暂停时不能提前返回，否则仍在运行的分块会和续传任务同时写同一个文件。
+    let mut first_error: Option<String> = None;
     for task in tasks {
         match task.await {
             Ok(Ok(_downloaded)) => {}
             Ok(Err(e)) => {
-                return Err(format!("下载分块失败: {}", e));
+                if first_error.is_none() {
+                    first_error = Some(format!("下载分块失败: {}", e));
+                }
             }
             Err(e) => {
-                return Err(format!("任务执行失败: {}", e));
+                if first_error.is_none() {
+                    first_error = Some(format!("任务执行失败: {}", e));
+                }
             }
         }
+    }
+
+    if let Some(error) = first_error {
+        return Err(error);
     }
 
     // 下载完成，删除进度文件
@@ -1692,6 +1879,9 @@ async fn download_file(
     filename: String,
     concurrent_threads: usize,
 ) -> Result<String, String> {
+    let download_key = get_download_state_key(&filename)?;
+    let _active_download_guard = ActiveDownloadGuard::try_new(&download_key)?;
+    clear_download_paused(&filename);
     let client = HTTP_CLIENT.clone();
 
     // 发送 HEAD 请求获取文件信息和 Range 支持
@@ -1833,15 +2023,20 @@ async fn download_file(
 
     // 创建文件
     let mut file = File::create(&file_path).map_err(|e| format!("Failed to create file: {}", e))?;
+    let _ = create_progress_file(&file_path, total_size, total_size.max(1), 1)?;
 
     // 获取响应体流
     let mut stream = response.bytes_stream();
+    let progress_emitter = DownloadProgressEmitter::new(app_handle.clone(), &filename, total_size);
 
     // 已下载字节数
     let mut downloaded = 0u64;
 
     // 读取并写入文件，同时发送进度更新
     while let Some(chunk) = stream.next().await {
+        if is_download_paused(&filename) {
+            return Err("download_paused".to_string());
+        }
         let chunk = chunk.map_err(|e| format!("Failed to read chunk: {}", e))?;
 
         // 写入文件
@@ -1850,27 +2045,12 @@ async fn download_file(
 
         // 更新已下载字节数
         downloaded += chunk.len() as u64;
+        update_chunk_progress(&file_path, 0, downloaded, downloaded >= total_size)
+            .map_err(|e| format!("更新进度文件失败: {}", e))?;
 
-        // 计算进度百分比
-        let progress = if total_size > 0 {
-            (downloaded * 100) / total_size
-        } else {
-            0
-        };
-
-        // 发送进度事件
-        app_handle
-            .emit(
-                "download_progress",
-                serde_json::json!({
-                    "filename": &filename,
-                    "progress": progress,
-                    "downloaded": downloaded,
-                    "total": total_size,
-                }),
-            )
-            .map_err(|e| format!("Failed to emit progress event: {}", e))?;
+        progress_emitter.emit(downloaded, downloaded >= total_size)?;
     }
+    delete_progress_file(&file_path);
 
     Ok(format!(
         "Successfully downloaded file to {}",
@@ -3029,6 +3209,8 @@ pub fn run() {
         stop_heartbeat,
         send_ws_msg,
         download_file,
+        get_download_progress,
+        pause_download,
         extract_game_assets,
         get_file_size,
         get_file_hash,

@@ -56,6 +56,12 @@ export interface DownloadProgress {
     total: number
 }
 
+export interface DownloadProgressSnapshot extends DownloadProgress {
+    hasProgressFile: boolean
+    active: boolean
+    paused: boolean
+}
+
 export interface GameVersionListWithPre {
     subVersion: string
     gameVersionList: GameVersionListRes
@@ -103,10 +109,69 @@ export interface OptionalPatchSignsRes {
     optionalPatchInfos: Record<string, OptionalPatchInfo>
 }
 
+type RawHotUpdatePakFileInfo = Partial<HotUpdatePakFileInfo> & {
+    FileName?: unknown
+    Hash?: unknown
+    PakOptionalSign?: unknown
+    FileSize?: unknown
+    BExamineIgnore?: unknown
+}
+
+type RawHotUpdatePakFilesInfoRes = Partial<HotUpdatePakFilesInfoRes> & {
+    PakFilesMap?: unknown
+}
+
+type RawOptionalPatchInfo = Partial<OptionalPatchInfo> & {
+    State?: unknown
+    Version?: unknown
+}
+
+type RawOptionalPatchSignsRes = Partial<OptionalPatchSignsRes> & {
+    OptionalPatchInfos?: unknown
+}
+
 /**
  * 下载进度回调函数
  */
 export type ProgressCallback = (progress: DownloadProgress) => void
+
+/**
+ * 判断下载错误是否来自用户暂停。
+ * @param error 下载错误
+ * @returns 是否为暂停错误
+ */
+export function isDownloadPausedError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    return message.includes("download_paused")
+}
+
+/**
+ * 判断下载错误是否来自已有同文件下载任务。
+ * @param error 下载错误
+ * @returns 是否为重复下载错误
+ */
+export function isDownloadAlreadyActiveError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    return message.includes("download_already_active")
+}
+
+/**
+ * 查询后端保存的下载进度。
+ * @param filename 下载目标文件路径
+ * @returns 下载进度快照
+ */
+export async function getDownloadProgress(filename: string) {
+    return await invoke<DownloadProgressSnapshot>("get_download_progress", { filename })
+}
+
+/**
+ * 暂停指定下载。
+ * @param filename 下载目标文件路径
+ * @returns 暂停结果
+ */
+export async function pauseDownload(filename: string) {
+    return await invoke<string>("pause_download", { filename })
+}
 
 /**
  * 将资源清单统一归一化为同一套字段名。
@@ -147,6 +212,81 @@ export function resolveLocalVersions(localContent: string): Record<string, GameA
         return normalizeGameAssetsMap(localVersionList.GameVersionList["1"].GameVersionList)
     }
     return null
+}
+
+/**
+ * 归一化热更 PakFilesInfo，兼容本地缓存和远端清单的字段名差异。
+ * @param pakInfo 原始热更文件清单
+ * @returns 标准字段名热更文件清单
+ */
+export function normalizeHotUpdatePakFilesInfo(pakInfo: unknown): HotUpdatePakFilesInfoRes {
+    const rawInfo = pakInfo as RawHotUpdatePakFilesInfoRes
+    const rawPakFilesMap = rawInfo.pakFilesMap ?? rawInfo.PakFilesMap
+    const pakFilesMap: HotUpdatePakFilesInfoRes["pakFilesMap"] = {}
+
+    if (!rawPakFilesMap || typeof rawPakFilesMap !== "object") {
+        return { pakFilesMap }
+    }
+
+    for (const [platform, rawPlatformInfo] of Object.entries(rawPakFilesMap as Record<string, unknown>)) {
+        if (!rawPlatformInfo || typeof rawPlatformInfo !== "object") continue
+        const platformInfo = rawPlatformInfo as Record<string, unknown>
+        const rawFiles = platformInfo.pakFileInfos ?? platformInfo.PakFileInfos
+        if (!Array.isArray(rawFiles)) continue
+
+        pakFilesMap[platform] = {
+            pakFileInfos: rawFiles
+                .map(rawFile => {
+                    if (!rawFile || typeof rawFile !== "object") return null
+                    const file = rawFile as RawHotUpdatePakFileInfo
+                    const fileName = file.fileName ?? file.FileName
+                    const hash = file.hash ?? file.Hash
+                    const pakOptionalSign = file.pakOptionalSign ?? file.PakOptionalSign ?? ""
+                    const fileSize = file.fileSize ?? file.FileSize
+                    const bExamineIgnore = file.bExamineIgnore ?? file.BExamineIgnore ?? false
+                    if (typeof fileName !== "string" || typeof hash !== "string" || typeof fileSize !== "number") return null
+                    return {
+                        fileName,
+                        hash,
+                        pakOptionalSign: typeof pakOptionalSign === "string" ? pakOptionalSign : String(pakOptionalSign ?? ""),
+                        fileSize,
+                        bExamineIgnore: Boolean(bExamineIgnore),
+                    }
+                })
+                .filter((file): file is HotUpdatePakFileInfo => file !== null),
+        }
+    }
+
+    return { pakFilesMap }
+}
+
+/**
+ * 归一化 OptionalPatchSigns.json，兼容游戏本地文件字段名。
+ * @param signs 原始语音包状态缓存
+ * @returns 标准字段名语音包状态缓存
+ */
+export function normalizeOptionalPatchSigns(signs: unknown): OptionalPatchSignsRes {
+    const rawSigns = signs as RawOptionalPatchSignsRes
+    const rawOptionalPatchInfos = rawSigns.optionalPatchInfos ?? rawSigns.OptionalPatchInfos
+    const optionalPatchInfos: OptionalPatchSignsRes["optionalPatchInfos"] = {}
+
+    if (!rawOptionalPatchInfos || typeof rawOptionalPatchInfos !== "object") {
+        return { optionalPatchInfos }
+    }
+
+    for (const [sign, rawInfo] of Object.entries(rawOptionalPatchInfos as Record<string, unknown>)) {
+        if (!rawInfo || typeof rawInfo !== "object") continue
+        const info = rawInfo as RawOptionalPatchInfo
+        const state = info.state ?? info.State
+        const version = info.version ?? info.Version
+        if (typeof state !== "string" || typeof version !== "number") continue
+        optionalPatchInfos[sign] = {
+            state,
+            version,
+        }
+    }
+
+    return { optionalPatchInfos }
 }
 
 /**
@@ -299,6 +439,9 @@ export async function downloadHotUpdateAssets(
 
         return result
     } catch (error) {
+        if (isDownloadPausedError(error) || isDownloadAlreadyActiveError(error)) {
+            throw error
+        }
         console.error("下载热更资源失败:", error)
         throw new Error(`下载 ${filename} 失败: ${error instanceof Error ? error.message : String(error)}`)
     } finally {
@@ -398,6 +541,9 @@ export async function downloadAssets(
 
         return result
     } catch (error) {
+        if (isDownloadPausedError(error) || isDownloadAlreadyActiveError(error)) {
+            throw error
+        }
         console.error("下载资源失败:", error)
         throw new Error(`下载 ${filename} 失败: ${error instanceof Error ? error.message : String(error)}`)
     } finally {
