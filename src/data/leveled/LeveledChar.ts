@@ -1,6 +1,14 @@
-import { charMap } from "../d"
-import type { CommonAttr, SkillWeapon } from "../data-types"
-import { CommonLevelUp, LeveledSkill } from "."
+import type { Char, CommonAttr, SkillWeapon } from "../data-types"
+import { CommonLevelUp } from "./CommonLevelUp"
+import { LeveledSkill } from "./LeveledSkill"
+
+export type LeveledCharResolver = (id: string | number) => Char | undefined
+
+let leveledCharResolver: LeveledCharResolver | undefined
+
+export function setLeveledCharResolver(resolver: LeveledCharResolver) {
+    leveledCharResolver = resolver
+}
 
 /**
  * LeveledChar类 - 继承Char接口，添加等级属性和动态属性计算
@@ -30,18 +38,20 @@ export class LeveledChar {
     _baseATK: number
     _baseHP: number
     _baseShield: number
+    _originalCharData: Char
 
     /**
      * 构造函数
      * @param id 角色的名称
      * @param 等级 可选的角色等级
      */
-    constructor(id: string | number, 等级?: number) {
-        // 从Map中获取对应的Char对象
-        const charData = charMap.get(id)
+    constructor(id: string | number | Char, 等级?: number) {
+        const charData = typeof id === "string" || typeof id === "number" ? leveledCharResolver?.(id) : id
         if (!charData) {
-            throw new Error(`角色 "${id}" 未在静态表中找到`)
+            throw new Error(typeof id === "string" || typeof id === "number" ? `角色 "${id}" 未在静态表中找到` : "角色数据不能为空")
         }
+
+        this._originalCharData = charData
 
         // 复制基础属性
         this.id = charData.id
@@ -67,15 +77,6 @@ export class LeveledChar {
         this._baseShield = charData.基础护盾
 
         this.等级 = 等级 ?? 80
-    }
-
-    static getSkillNames(角色名: string) {
-        return charMap.get(角色名)?.技能.map(skill => skill.名称) || []
-    }
-    static getSkillNamesWithSub(角色名: string) {
-        const skills = charMap.get(角色名)?.技能.map(skill => new LeveledSkill(skill)) || []
-        // 拼接主技能和子技能
-        return skills.flatMap(skill => [skill.名称, ...skill.子技能.map(subSkill => `${skill.名称}[${subSkill}]`)])
     }
 
     /**
@@ -147,12 +148,6 @@ export class LeveledChar {
     static url(icon?: string) {
         return icon ? `/imgs/webp/T_Head_${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
     }
-    static idToUrl(id?: number) {
-        if (id === 160101) return LeveledChar.url("Nanzhu")
-        if (id === 120101) return LeveledChar.url("Nanzhu02")
-        const icon = charMap.get(id || 0)?.icon || "Empty"
-        return LeveledChar.url(icon)
-    }
     get elementUrl() {
         return LeveledChar.elementUrl(this.属性)
     }
@@ -170,6 +165,10 @@ export class LeveledChar {
 
     get bg() {
         return `https://herobox-img.yingxiong.com/role/config/character/illustration_1/${bgMap[this.名称]}`
+    }
+
+    public clone() {
+        return new LeveledChar(this._originalCharData, this._等级)
     }
 }
 

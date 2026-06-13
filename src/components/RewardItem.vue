@@ -2,7 +2,7 @@
 import { t } from "i18next"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
-import { draftMap, LeveledChar, LeveledMod, LeveledWeapon, resourceMap } from "../data"
+import { draftMap, LeveledChar, LeveledCharHelper, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "../data"
 import { charMap, modMap, skinMap, walnutMap } from "../data/d"
 import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData } from "../data/d/accessory.data"
 import { headSculptureData } from "../data/d/headsculpture.data"
@@ -54,11 +54,11 @@ function getDraftIcon(id: number) {
     }
 
     if (draft.t === "Mod") {
-        return LeveledMod.getUrl(draft.p)
+        return LeveledModHelper.getUrl(draft.p)
     }
 
     if (draft.t === "Weapon") {
-        return LeveledWeapon.idToUrl(draft.p)
+        return LeveledWeaponHelper.idToUrl(draft.p)
     }
 
     return "/imgs/webp/T_Head_Empty.webp"
@@ -184,13 +184,13 @@ function isAccessoryRewardType(type: string): type is "CharAccessory" | "WeaponA
  */
 function getRewardIcon(item: RewardItemType) {
     if (item.t === "Mod") {
-        return LeveledMod.getUrl(item.id)
+        return LeveledModHelper.getUrl(item.id)
     }
     if (item.t === "Weapon") {
-        return LeveledWeapon.idToUrl(item.id)
+        return LeveledWeaponHelper.idToUrl(item.id)
     }
     if (item.t === "Char") {
-        return LeveledChar.idToUrl(item.id)
+        return LeveledCharHelper.idToUrl(item.id)
     }
     if (item.t === "Skin") {
         return getSkinIconById(item.id)
@@ -223,10 +223,10 @@ function getRewardIcon(item: RewardItemType) {
         const reward = walnut?.奖励?.[0]
         if (!reward) return "/imgs/webp/T_Head_Empty.webp"
         if (reward.type === "Mod") {
-            return LeveledMod.getUrl(reward.id)
+            return LeveledModHelper.getUrl(reward.id)
         }
         if (reward.type === "Weapon") {
-            return LeveledWeapon.idToUrl(reward.id)
+            return LeveledWeaponHelper.idToUrl(reward.id)
         }
         if (reward.type === "Resource") {
             const resource = resourceMap.get(reward.id)

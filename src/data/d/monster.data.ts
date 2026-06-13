@@ -25,7 +25,7 @@ export enum Faction {
 export interface DynamicMonster extends Monster {
     currentHP: number
     currentShield: number
-    currentWarPose: number
+    currentTN: number
 }
 
 const mock: Monster[] = [

@@ -13,9 +13,13 @@ import {
     charData,
     charMap,
     LeveledBuff,
+    LeveledBuffHelper,
     LeveledChar,
+    LeveledCharHelper,
     LeveledMod,
+    LeveledModHelper,
     LeveledWeapon,
+    LeveledWeaponHelper,
     modData,
     monsterMap,
     weaponData,
@@ -100,22 +104,22 @@ const buffOptions = computed(() =>
 )
 
 const selectedCharMods = computed(() =>
-    charSettings.value.charMods.map(item => (item ? LeveledMod.from(item[0], item[1], inv.getBuffLv(item[0])) : null))
+    charSettings.value.charMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], inv.getBuffLv(item[0])) : null))
 )
 const selectedMeleeMods = computed(() =>
-    charSettings.value.meleeMods.map(item => (item ? LeveledMod.from(item[0], item[1], inv.getBuffLv(item[0])) : null))
+    charSettings.value.meleeMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], inv.getBuffLv(item[0])) : null))
 )
 const selectedRangedMods = computed(() =>
-    charSettings.value.rangedMods.map(item => (item ? LeveledMod.from(item[0], item[1], inv.getBuffLv(item[0])) : null))
+    charSettings.value.rangedMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], inv.getBuffLv(item[0])) : null))
 )
 const selectedSkillWeaponMods = computed(() =>
-    charSettings.value.skillWeaponMods.map(item => (item ? LeveledMod.from(item[0], item[1], inv.getBuffLv(item[0])) : null))
+    charSettings.value.skillWeaponMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], inv.getBuffLv(item[0])) : null))
 )
 const selectedBuffs = computed(() =>
     charSettings.value.buffs
         .map(item => {
             try {
-                return new LeveledBuff(item[0], item[1])
+                return LeveledBuffHelper.fromName(item[0], item[1])
             } catch (error) {
                 console.error(error)
                 return null
@@ -178,14 +182,14 @@ const teamWeaponOptions = computed(() =>
  * @returns 用于页面展示的角色构筑实例
  */
 const charBuild = computed(() => {
-    const char = new LeveledChar(selectedCharName.value, charSettings.value.charLevel)
-    const melee = new LeveledWeapon(
+    const char = LeveledCharHelper.fromId(selectedCharName.value, charSettings.value.charLevel)
+    const melee = LeveledWeaponHelper.fromId(
         charSettings.value.meleeWeapon,
         charSettings.value.meleeWeaponRefine,
         charSettings.value.meleeWeaponLevel,
         inv.getWBuffLv(charSettings.value.meleeWeapon, char.属性)
     )
-    const ranged = new LeveledWeapon(
+    const ranged = LeveledWeaponHelper.fromId(
         charSettings.value.rangedWeapon,
         charSettings.value.rangedWeaponRefine,
         charSettings.value.rangedWeaponLevel,
@@ -194,7 +198,7 @@ const charBuild = computed(() => {
 
     return new CharBuild({
         char,
-        auraMod: new LeveledMod(charSettings.value.auraMod),
+        auraMod: LeveledModHelper.fromId(charSettings.value.auraMod),
         charMods: selectedCharMods.value,
         meleeMods: selectedMeleeMods.value,
         rangedMods: selectedRangedMods.value,
@@ -810,7 +814,7 @@ const availableModChoices = computed(() => {
             return true
         })
         .map(mod => {
-            const leveled = new LeveledMod(mod.id, inv.getModLv(mod.id, mod.品质) ?? 10, inv.getBuffLv(mod.id))
+            const leveled = LeveledModHelper.fromId(mod.id, inv.getModLv(mod.id, mod.品质) ?? 10, inv.getBuffLv(mod.id))
             return {
                 mod: leveled,
                 income: charBuild.value.calcIncome(leveled),
@@ -1358,7 +1362,7 @@ onMounted(() => {
                                 v-if="editingModId"
                                 class="pointer-events-none absolute inset-0 opacity-20"
                                 :style="{
-                                    backgroundImage: `url(${new LeveledMod(editingModId, editingModLv, inv.getBuffLv(editingModId)).url})`,
+                                    backgroundImage: `url(${LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).url})`,
                                     backgroundSize: 'cover',
                                     backgroundPosition: 'center',
                                 }"
@@ -1372,17 +1376,17 @@ onMounted(() => {
                             <template v-if="editingModId">
                                 <div class="relative z-10 mt-3 flex items-start gap-4">
                                     <img
-                                        :src="new LeveledMod(editingModId, editingModLv, inv.getBuffLv(editingModId)).url"
-                                        :alt="new LeveledMod(editingModId, editingModLv, inv.getBuffLv(editingModId)).名称"
+                                        :src="LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).url"
+                                        :alt="LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).名称"
                                         class="h-20 w-20 rounded-md border border-white/10 object-cover"
                                     />
                                     <div>
                                         <div class="text-2xl font-['Cormorant_Garamond',serif]">
-                                            {{ new LeveledMod(editingModId, editingModLv, inv.getBuffLv(editingModId)).名称 }}
+                                            {{ LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).名称 }}
                                         </div>
                                         <div class="mt-2 text-sm text-white/65">
-                                            {{ new LeveledMod(editingModId, editingModLv, inv.getBuffLv(editingModId)).系列 }} /
-                                            {{ new LeveledMod(editingModId, editingModLv, inv.getBuffLv(editingModId)).品质 }}
+                                            {{ LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).系列 }} /
+                                            {{ LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).品质 }}
                                         </div>
                                     </div>
                                 </div>

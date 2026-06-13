@@ -2,6 +2,7 @@
 
 export * from "./CharBuild"
 export * from "./leveled"
+export * from "./leveled/LeveledHelpers"
 
 import charData from "./d/char.data"
 

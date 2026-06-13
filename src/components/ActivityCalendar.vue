@@ -17,6 +17,7 @@ const uiStore = useUIStore()
  */
 interface Activity {
     id?: number
+    postId?: string | null
     title: string
     description: string
     begin_at: number
@@ -181,6 +182,13 @@ const getTimeDistance = (endAt: number) => {
     }
 }
 
+/**
+ * 获取远端活动对应的官方社区帖子链接。
+ * @param postId 官方社区帖子ID
+ * @returns 官方社区帖子详情链接
+ */
+const getRemoteActivityUrl = (postId: string) => `https://dnabbs.yingxiong.com/pc/detail/${encodeURIComponent(postId)}`
+
 // 活动块的 ref 映射
 const activityRefs = ref<Map<number, HTMLElement>>(new Map())
 // 需要显示粘性内容的索引集合
@@ -271,6 +279,7 @@ const loadActivities = async () => {
             { requestPolicy: "network-only" }
         )
         const data = rawData?.map(activity => ({
+            postId: activity.postId,
             title: activity.name,
             description: activity.desc,
             begin_at: ~~(activity.startTime / 1000),
@@ -722,10 +731,19 @@ onMounted(() => {
                                         </div>
                                         <!-- 活动标题 -->
                                         <h3 class="font-bold text-sm sm:text-base mb-1 text-base-content line-clamp-1">
+                                            <a
+                                                v-if="item.activity.postId"
+                                                :href="getRemoteActivityUrl(item.activity.postId)"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="relative z-20 pointer-events-auto hover:underline"
+                                            >
+                                                {{ item.activity.title }}
+                                            </a>
                                             <SRouterLink
-                                                v-if="item.activity.id"
+                                                v-else-if="item.activity.id"
                                                 :to="`/db/event/${item.activity.id}`"
-                                                class="hover:underline z-20"
+                                                class="relative z-20 pointer-events-auto hover:underline"
                                             >
                                                 {{ item.activity.title }}
                                             </SRouterLink>
@@ -848,8 +866,17 @@ onMounted(() => {
 
                                         <!-- 活动标题 -->
                                         <h3 class="font-bold text-sm sm:text-base mb-1 text-base-content line-clamp-1">
+                                            <a
+                                                v-if="item.activity.postId"
+                                                :href="getRemoteActivityUrl(item.activity.postId)"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="hover:underline"
+                                            >
+                                                {{ item.activity.title }}
+                                            </a>
                                             <SRouterLink
-                                                v-if="item.activity.id"
+                                                v-else-if="item.activity.id"
                                                 :to="`/db/event/${item.activity.id}`"
                                                 class="hover:underline"
                                             >

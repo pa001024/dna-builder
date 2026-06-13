@@ -15,10 +15,9 @@ import type {
     AbyssWeaponUsageStat,
 } from "@/api/gen/api-types"
 import { abyssUsageLineupStatsQuery, abyssUsageSubmissionsQuery, submitAbyssUsageMutation } from "@/api/graphql"
-import { abyssDungeonMap, charMap, petMap, weaponMap } from "@/data"
+import { abyssDungeonMap, charMap, LeveledCharHelper, LeveledWeaponHelper, petMap, weaponMap } from "@/data"
 import { LeveledChar } from "@/data/leveled/LeveledChar"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
-import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
@@ -95,7 +94,7 @@ const seasonRoleName = computed(() => {
 
 const seasonRoleIcon = computed(() => {
     const charId = seasonInfo.value?.bindCharId
-    return charId ? LeveledChar.idToUrl(charId) : ""
+    return charId ? LeveledCharHelper.idToUrl(charId) : ""
 })
 
 const seasonDungeonElementKeys = computed(() => {
@@ -283,11 +282,11 @@ function getWeaponName(weaponId?: number) {
 }
 
 function getCharIcon(charId?: number) {
-    return charId ? LeveledChar.idToUrl(charId) : ""
+    return charId ? LeveledCharHelper.idToUrl(charId) : ""
 }
 
 function getWeaponIcon(weaponId?: number) {
-    return weaponId ? LeveledWeapon.idToUrl(weaponId) : ""
+    return weaponId ? LeveledWeaponHelper.idToUrl(weaponId) : ""
 }
 
 function getPetName(petId?: number) {

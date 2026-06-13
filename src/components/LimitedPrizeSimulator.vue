@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
-import { resourceMap } from "@/data"
+import { LeveledWeaponHelper, resourceMap } from "@/data"
 import { skinMap } from "@/data/d"
 import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { charMap } from "@/data/d/index"
 import { limitedPrizeCostRules, limitedPrizeItems, limitedPrizePools } from "@/data/d/limitedprize.data"
 import { LeveledChar } from "@/data/leveled/LeveledChar"
-import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import type { RewardItem } from "@/utils/reward-utils"
 
@@ -211,7 +210,7 @@ function getPrizeName(type: LimitedPrizeType, id: number): string {
         return charMap.get(id)?.名称 || `ID: ${id}`
     }
     if (type === "Weapon") {
-        return LeveledWeapon.idToUrl(id) ? `武器 ${id}` : `ID: ${id}`
+        return LeveledWeaponHelper.idToUrl(id) ? `武器 ${id}` : `ID: ${id}`
     }
     if (type === "Skin") {
         return skinMap.get(id)?.name || `ID: ${id}`
@@ -245,7 +244,7 @@ function getPrizeIcon(type: LimitedPrizeType, id: number): string {
         return LeveledChar.url(charMap.get(id)?.icon)
     }
     if (type === "Weapon") {
-        return LeveledWeapon.idToUrl(id)
+        return LeveledWeaponHelper.idToUrl(id)
     }
     if (type === "Skin") {
         const icon = skinMap.get(id)?.icon

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
 import {
     formatBuffClipboardText,
     matchBuffOptionQuery,
@@ -8,6 +8,7 @@ import {
     splitBuffClipboardTokens,
 } from "@/utils/buff-editor"
 import { CharBuild } from "../data/CharBuild"
+import type { CharBuildWorkerSnapshot } from "../data/CharBuild.worker"
 import { LeveledBuff } from "../data/leveled"
 import { useUIStore } from "../store/ui"
 import { copyText, pasteText } from "../util"
@@ -19,6 +20,10 @@ interface BuffOption {
     limit?: string
     description?: string
 }
+
+interface BuffDisplayOption extends BuffOption {
+    income: number
+}
 const props = defineProps<{
     buffOptions: BuffOption[]
     selectedBuffs: LeveledBuff[]
@@ -27,6 +32,9 @@ const props = defineProps<{
 }>()
 const ui = useUIStore()
 const searchKeyword = ref("")
+const incomeMap = ref<Record<string, number>>({})
+const workerRef = shallowRef<Worker>()
+let workerRequestId = 0
 
 const emit = defineEmits<{
     toggleBuff: [buff: LeveledBuff]
@@ -124,6 +132,143 @@ const selectedBuffs = computed(() => {
 })
 
 /**
+ * 将当前构筑转换为 worker 可结构化克隆的快照。
+ * @param charBuild 当前构筑
+ * @returns worker 构筑快照
+ */
+function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnapshot {
+    const createModSnapshot = (mod: CharBuild["charMods"][number]) =>
+        mod
+            ? {
+                  data: mod.originalModData,
+                  level: mod.等级,
+                  buffLv: mod.buffLv,
+                  effect: mod.buff?._originalBuffData,
+              }
+            : null
+    const createWeaponSnapshot = (weapon: CharBuild["meleeWeapon"]) => ({
+        data: weapon._originalWeaponData,
+        refine: weapon.精炼,
+        level: weapon.等级,
+        effectLv: weapon.effectLv,
+        effect: weapon.buff?._originalBuffData,
+        forgeEffective: weapon.forgeEffective,
+    })
+
+    return {
+        char: {
+            data: charBuild.char._originalCharData,
+            level: charBuild.char.等级,
+        },
+        skillLevel: charBuild.skillLevel,
+        hpPercent: charBuild.hpPercent,
+        resonanceGain: charBuild.resonanceGain,
+        auraMod: createModSnapshot(charBuild.auraMod || null),
+        charMods: charBuild.charMods.map(createModSnapshot),
+        meleeMods: charBuild.meleeMods.map(createModSnapshot),
+        rangedMods: charBuild.rangedMods.map(createModSnapshot),
+        skillMods: charBuild.skillMods.map(createModSnapshot),
+        buffs: [...charBuild.buffs, ...charBuild.dynamicBuffs].map(buff => ({
+            data: buff._originalBuffData,
+            level: buff.等级,
+        })),
+        melee: createWeaponSnapshot(charBuild.meleeWeapon),
+        ranged: createWeaponSnapshot(charBuild.rangedWeapon),
+        baseName: charBuild.baseName,
+        imbalance: charBuild.imbalance,
+        enemy: {
+            data: charBuild.enemy._baseData,
+            level: charBuild.enemy.等级,
+            isRouge: charBuild.enemy.isRouge,
+            hpMultiplier: charBuild.enemy.hpMultiplier,
+        },
+        enemyId: charBuild.enemyId,
+        enemyLevel: charBuild.enemyLevel,
+        enemyResistance: charBuild.enemyResistance,
+        targetFunction: charBuild.targetFunction,
+        customVariables: charBuild.customVariables,
+        timelineDPS: charBuild.timelineDPS,
+        teamWeaponCategories: charBuild.teamWeaponCategories,
+    }
+}
+
+function getIncomeKey(buff: BuffOption, minus: boolean) {
+    return `${minus ? "minus" : "add"}:${buff.label}:${buff.lv}`
+}
+
+function getIncome(buff: BuffOption, minus: boolean) {
+    return incomeMap.value[getIncomeKey(buff, minus)] ?? 0
+}
+
+const selectedBuffItems = computed<BuffDisplayOption[]>(() =>
+    selectedBuffs.value.map(buff => ({
+        ...buff,
+        income: getIncome(buff, true),
+    }))
+)
+
+const sortedBuffItems = computed<BuffDisplayOption[]>(() =>
+    sortedBuffs.value.map(buff => ({
+        ...buff,
+        income: getIncome(buff, false),
+    }))
+)
+
+/**
+ * 将 Vue proxy 与类实例快照转为 worker 可克隆的普通 JSON 数据。
+ * @param value 原始数据
+ * @returns 普通数据
+ */
+function cloneForWorker<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value)) as T
+}
+
+/**
+ * 刷新当前可见 BUFF 的收益。
+ */
+function refreshIncomes() {
+    if (!props.charBuild) {
+        incomeMap.value = {}
+        return
+    }
+    const visibleBuffs = [
+        ...selectedBuffs.value.map(buff => ({ ...buff, minus: true })),
+        ...sortedBuffs.value.map(buff => ({ ...buff, minus: false })),
+    ]
+    const worker = workerRef.value || new Worker(new URL("../data/CharBuild.worker.ts", import.meta.url), { type: "module" })
+    workerRef.value = worker
+    const id = ++workerRequestId
+    worker.onmessage = (event: MessageEvent<{ id: number; incomes?: Record<string, number>; error?: string }>) => {
+        if (event.data.id !== workerRequestId) return
+        if (event.data.error) {
+            console.error("BUFF收益worker计算失败", event.data.error)
+            return
+        }
+        incomeMap.value = event.data.incomes || {}
+    }
+    worker.postMessage(cloneForWorker({
+        id,
+        build: createWorkerSnapshot(props.charBuild),
+        buffs: visibleBuffs.map(buff => ({
+            key: getIncomeKey(buff, buff.minus),
+            data: buff.value._originalBuffData,
+            level: buff.value.等级,
+            minus: buff.minus,
+        })),
+    }))
+}
+
+watch(
+    () => [props.charBuild, selectedBuffs.value, sortedBuffs.value],
+    () => refreshIncomes(),
+    { immediate: true, deep: true }
+)
+
+onBeforeUnmount(() => {
+    workerRef.value?.terminate()
+})
+
+/**
  * 获取已按当前构筑刷新动态属性的BUFF。
  * @param buff BUFF实例
  * @returns 展示用BUFF实例
@@ -147,24 +292,24 @@ function getDisplayBuff(buff: LeveledBuff) {
             <transition-group name="list" tag="div" class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                 <!-- 已选择的BUFF -->
                 <BuffCell
-                    v-for="buff in selectedBuffs"
+                    v-for="buff in selectedBuffItems"
                     :key="buff.label"
                     :title="buff.label"
                     :buff="getDisplayBuff(buff.value)"
                     :lv="buff.lv"
                     selected
-                    :income="charBuild?.calcIncome(buff.value, true) || 0"
+                    :income="buff.income"
                     @set-buff-lv="setBuffLv"
                     @click="toggleBuff(buff.value)"
                 />
                 <!-- 未选择的BUFF -->
                 <BuffCell
-                    v-for="buff in sortedBuffs"
+                    v-for="buff in sortedBuffItems"
                     :key="buff.label"
                     :title="buff.label"
                     :buff="getDisplayBuff(buff.value)"
                     :lv="buff.lv"
-                    :income="charBuild?.calcIncome(buff.value, false) || 0"
+                    :income="buff.income"
                     @set-buff-lv="setBuffLv"
                     @click="toggleBuff(buff.value)"
                 />

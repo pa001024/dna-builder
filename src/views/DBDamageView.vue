@@ -2,7 +2,8 @@
 import { useLocalStorage } from "@vueuse/core"
 import { computed, onBeforeUnmount, reactive, ref } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
-import { CharBuild, CharBuildTimeline, LeveledChar } from "../data"
+import { CharBuild, CharBuildTimeline, LeveledCharHelper } from "../data"
+import { createCharBuildFromSettings } from "../data/CharBuildHelper"
 import { useInvStore } from "../store/inv"
 import { useTimeline } from "../store/timeline"
 import { useUIStore } from "../store/ui"
@@ -515,7 +516,7 @@ function createBuildFromCurrentCharView(): CharBuild {
     }
 
     const rawSettings = charSettingsForImport.value
-    const fallbackChar = new LeveledChar(charName, rawSettings.charLevel)
+    const fallbackChar = LeveledCharHelper.fromId(charName, rawSettings.charLevel)
     const baseName = rawSettings.baseName || fallbackChar.技能[0]?.名称 || ""
     if (!baseName) {
         throw new Error("当前构筑未配置技能")
@@ -526,7 +527,7 @@ function createBuildFromCurrentCharView(): CharBuild {
         baseName,
     }
     const timeline = resolveTimelineFromCurrentBuild(charName, baseName, normalizedSettings.actions)
-    return CharBuild.fromCharSetting(charName, normalizedSettings, inv, timeline)
+    return createCharBuildFromSettings(charName, normalizedSettings, inv, timeline)
 }
 
 /**

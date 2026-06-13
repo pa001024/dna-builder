@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { monsterData } from "@/data"
-import { LeveledMonster } from "@/data/leveled"
+import { LeveledMonsterHelper, monsterData } from "@/data"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 import { formatBigNumber } from "@/util"
 import BaseNode from "./BaseNode.vue"
@@ -40,7 +39,7 @@ const enemyOptions = computed<EnemyOption[]>(() => {
 
 // 当前选中的敌人
 const selectedEnemy = computed(() => {
-    return new LeveledMonster(enemyId.value, enemyLevel.value)
+    return LeveledMonsterHelper.fromId(enemyId.value, enemyLevel.value)
 })
 
 // 更新store

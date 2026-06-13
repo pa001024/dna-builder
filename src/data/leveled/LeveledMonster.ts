@@ -1,5 +1,30 @@
-import { monsterMap } from "../d"
-import { type DynamicMonster, Faction, type Monster } from "../d/monster.data"
+export interface Monster {
+    id: number
+    n: string
+    t?: "Rescue_Elite_Monster" | "Elite_Monster" | "Boss"
+    f?: number
+    atk: number
+    def: number
+    hp: number
+    es?: number
+    tn?: number
+    icon?: string
+    tags?: string[]
+}
+
+export interface DynamicMonster extends Monster {
+    currentHP: number
+    currentShield: number
+    currentTN: number
+}
+
+export type LeveledMonsterResolver = (id: number) => Monster | undefined
+
+let leveledMonsterResolver: LeveledMonsterResolver | undefined
+
+export function setLeveledMonsterResolver(resolver: LeveledMonsterResolver) {
+    leveledMonsterResolver = resolver
+}
 
 // a.map(v=>({ atk: v.ATKMon, hp: v.MaxHpMon, es: v.MaxESMon, rhp: v.RougeMaxHpMon, res: v.RougeMaxESMon}))
 export const MOB_LEVEL_UP = [
@@ -249,7 +274,7 @@ export class LeveledMonster implements DynamicMonster {
     id: number
     n: string
     t?: "Rescue_Elite_Monster" | "Elite_Monster" | "Boss"
-    f: Faction
+    f: number
     atk: number
     def: number
     hp: number
@@ -261,7 +286,7 @@ export class LeveledMonster implements DynamicMonster {
 
     currentHP: number
     currentShield: number
-    currentWarPose: number
+    currentTN: number
 
     constructor(
         id: number | Monster,
@@ -269,16 +294,15 @@ export class LeveledMonster implements DynamicMonster {
         public isRouge = false,
         public hpMultiplier = 1
     ) {
-        let mData = typeof id === "number" ? monsterMap.get(id) : id
+        const mData = typeof id === "number" ? leveledMonsterResolver?.(id) : id
         if (!mData) {
-            console.error(`怪物 "${id}" 未在静态表中找到`)
-            mData = monsterMap.get(130)!
+            throw new Error(typeof id === "number" ? `怪物 "${id}" 未在静态表中找到` : "怪物数据不能为空")
         }
         this._baseData = mData
 
         this.id = mData.id
         this.n = mData.n
-        this.f = mData.f || Faction.其他
+        this.f = mData.f || 0
         this.atk = mData.atk
         this.def = mData.def
         this.hp = Math.round(mData.hp * this.hpMultiplier)
@@ -288,7 +312,7 @@ export class LeveledMonster implements DynamicMonster {
 
         this.currentHP = this.hp
         this.currentShield = this.es || 0
-        this.currentWarPose = this.tn || 0
+        this.currentTN = this.tn || 0
 
         if (等级 > 1) {
             this.等级 = 等级
@@ -312,6 +336,14 @@ export class LeveledMonster implements DynamicMonster {
     resetHP() {
         this.currentHP = this.hp
         this.currentShield = this.es || 0
+    }
+
+    public clone() {
+        const monster = new LeveledMonster(this._baseData, this._等级, this.isRouge, this.hpMultiplier)
+        monster.currentHP = this.currentHP
+        monster.currentShield = this.currentShield
+        monster.currentTN = this.currentTN
+        return monster
     }
 
     get 等级(): number {

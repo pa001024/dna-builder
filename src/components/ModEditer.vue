@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { t } from "i18next"
 import { computed, ref } from "vue"
+import { LeveledMod, LeveledModHelper } from "../data"
 import { CharBuild } from "../data/CharBuild"
-import { LeveledMod } from "../data/leveled"
 import { useInvStore } from "../store/inv"
 import { copyText, pasteText } from "../util"
 
@@ -40,7 +40,7 @@ const auraModOptions = computed(() => {
      */
     if (props.auraMod && !options.some(option => option.value === props.auraMod)) {
         try {
-            const aura = new LeveledMod(props.auraMod)
+            const aura = LeveledModHelper.fromId(props.auraMod)
             options.unshift({
                 value: aura.id,
                 label: aura.名称,
@@ -99,7 +99,7 @@ const sortedModOptions = computed(() => {
 
     // 过滤选项：如果mod属于已装备的互斥系列或同名非契约者MOD，则不显示
     const filteredOptions = props.modOptions.filter(option => {
-        const mod = new LeveledMod(option.value, option.lv, option.bufflv)
+        const mod = LeveledModHelper.fromId(option.value, option.lv, option.bufflv)
 
         if (mod.系列 === "羽蛇") return false
         // 1. 过滤互斥系列的MOD
@@ -137,7 +137,7 @@ const sortedModOptions = computed(() => {
     // 按收益降序排序
     return filteredOptions
         .map(option => {
-            const mod = new LeveledMod(option.value, option.lv, option.bufflv)
+            const mod = LeveledModHelper.fromId(option.value, option.lv, option.bufflv)
             const income = props.charBuild.calcIncome(mod)
             return {
                 income,
@@ -246,7 +246,7 @@ async function handleImportCode() {
         if (result) {
             for (let i = 0; i < result.mods.length; i++) {
                 if (result.mods[i]) {
-                    emit("selectMod", [i, result.mods[i], inv.getModLv(result.mods[i], LeveledMod.getQuality(result.mods[i])) ?? 10])
+                    emit("selectMod", [i, result.mods[i], inv.getModLv(result.mods[i], LeveledModHelper.getQuality(result.mods[i])) ?? 10])
                 } else {
                     emit("removeMod", i)
                 }
@@ -259,7 +259,7 @@ async function handleImportCode() {
 }
 
 const aMod = computed(() => {
-    return props.auraMod ? new LeveledMod(props.auraMod) : undefined
+    return props.auraMod ? LeveledModHelper.fromId(props.auraMod) : undefined
 })
 const mod_model_show = ref(false)
 </script>
@@ -294,8 +294,8 @@ const mod_model_show = ref(false)
                                         <ModItem
                                             v-for="mod in sortedModOptions.filter(m => quality === '全部' || m.quality === quality)"
                                             :key="mod.value"
-                                            :mod="new LeveledMod(mod.value, mod.lv, mod.bufflv)"
-                                            :income="charBuild.calcIncome(new LeveledMod(mod.value, mod.lv, mod.bufflv))"
+                                            :mod="LeveledModHelper.fromId(mod.value, mod.lv, mod.bufflv)"
+                                            :income="charBuild.calcIncome(LeveledModHelper.fromId(mod.value, mod.lv, mod.bufflv))"
                                             :noremove="true"
                                             :char-build="charBuild"
                                             @click="handleSelectMod(localSelectedSlot, mod.value, mod.lv ?? 10)"

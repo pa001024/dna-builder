@@ -9,11 +9,11 @@ import { renderBuildAgentSystemPrompt } from "@/shared/buildAgentSystemPrompt"
 import type { CharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
     buffData,
-    CharBuild,
     charData,
     effectMap,
-    LeveledChar,
-    LeveledMod,
+    LeveledCharHelper,
+    type LeveledMod,
+    LeveledModHelper,
     type LeveledSkill,
     type LeveledSkillField,
     LeveledSkillWeapon,
@@ -23,6 +23,7 @@ import {
     weaponData,
     weaponMap,
 } from "../data"
+import { createCharBuildFromSettings } from "../data/CharBuildHelper"
 import type { useInvStore } from "../store/inv"
 import type { OpenAIConfig } from "./openai"
 
@@ -810,7 +811,7 @@ export class BuildAgent {
     private setMod(modType: "角色" | "近战" | "远程" | "同律", slotIndex: number, modId: number, level?: number): string {
         let mod: LeveledMod
         try {
-            mod = new LeveledMod(modId, level ?? 10)
+            mod = LeveledModHelper.fromId(modId, level ?? 10)
         } catch {
             return `MOD ${modId} 无效`
         }
@@ -1000,7 +1001,7 @@ export class BuildAgent {
             }
         }
 
-        const leveledChar = new LeveledChar(charName, level)
+        const leveledChar = LeveledCharHelper.fromId(charName, level)
         const leveledSkillWeapons = (baseChar.同律武器 || []).map(weapon => new LeveledSkillWeapon(weapon, skillLevel, level))
 
         return {
@@ -1367,7 +1368,7 @@ export class BuildAgent {
      */
     private setBaseAndTargetFunction(params: { baseName?: string; targetFunction?: string }): string {
         const currentSettings = this.charSettings.value
-        const currentBuild = CharBuild.fromCharSetting(this.selectedChar.value, currentSettings, this.inv)
+        const currentBuild = createCharBuildFromSettings(this.selectedChar.value, currentSettings, this.inv)
         const fallbackBaseName = currentSettings.baseName || currentBuild.charSkills[0]?.名称 || ""
         const requestedBaseName = params.baseName?.trim()
         const requestedTargetFunction = params.targetFunction?.trim()
@@ -1380,7 +1381,7 @@ export class BuildAgent {
             baseName: nextBaseName,
             targetFunction: nextTargetFunction,
         }
-        const probeBuild = CharBuild.fromCharSetting(this.selectedChar.value, probeSettings, this.inv)
+        const probeBuild = createCharBuildFromSettings(this.selectedChar.value, probeSettings, this.inv)
         const availableSkillNames = probeBuild.allSkills.map(skill => skill.名称)
 
         if (requestedBaseName && !availableSkillNames.includes(requestedBaseName)) {
@@ -1414,7 +1415,7 @@ export class BuildAgent {
             targetFunction: nextTargetFunction,
         }
 
-        const finalBuild = CharBuild.fromCharSetting(this.selectedChar.value, this.charSettings.value, this.inv)
+        const finalBuild = createCharBuildFromSettings(this.selectedChar.value, this.charSettings.value, this.inv)
         const targetPreview = finalBuild.calculateTargetFunction(finalBuild.calculateWeaponAttributes())
 
         return JSON.stringify(
@@ -1437,7 +1438,7 @@ export class BuildAgent {
      * 工具实现: 获取当前配置
      */
     private getCurrentConfig(): string {
-        const build = CharBuild.fromCharSetting(this.selectedChar.value, this.charSettings.value, this.inv)
+        const build = createCharBuildFromSettings(this.selectedChar.value, this.charSettings.value, this.inv)
         const baseName = this.charSettings.value.baseName || build.charSkills[0]?.名称 || ""
         const targetFunction = this.charSettings.value.targetFunction || "伤害"
         const targetFunctionError = build.validateAST(targetFunction)
@@ -1451,10 +1452,12 @@ export class BuildAgent {
             目标函数标识符: build.getIdentifierNames(targetFunction),
             目标函数预估值: Number.isFinite(targetPreview) ? Number(targetPreview.toFixed(4)) : targetPreview,
             可用技能: build.allSkills.map(skill => skill.名称),
-            角色MOD: this.charSettings.value.charMods.filter(m => m !== null).map(m => new LeveledMod(m[0], m[1]).toString()),
-            近战MOD: this.charSettings.value.meleeMods.filter(m => m !== null).map(m => new LeveledMod(m[0], m[1]).toString()),
-            远程MOD: this.charSettings.value.rangedMods.filter(m => m !== null).map(m => new LeveledMod(m[0], m[1]).toString()),
-            同律MOD: this.charSettings.value.skillWeaponMods.filter(m => m !== null).map(m => new LeveledMod(m[0], m[1]).toString()),
+            角色MOD: this.charSettings.value.charMods.filter(m => m !== null).map(m => LeveledModHelper.fromId(m[0], m[1]).toString()),
+            近战MOD: this.charSettings.value.meleeMods.filter(m => m !== null).map(m => LeveledModHelper.fromId(m[0], m[1]).toString()),
+            远程MOD: this.charSettings.value.rangedMods.filter(m => m !== null).map(m => LeveledModHelper.fromId(m[0], m[1]).toString()),
+            同律MOD: this.charSettings.value.skillWeaponMods
+                .filter(m => m !== null)
+                .map(m => LeveledModHelper.fromId(m[0], m[1]).toString()),
             BUFF列表: this.charSettings.value.buffs.map(b => b[0]),
         }
         return JSON.stringify(rst, null, 2)
@@ -1494,7 +1497,7 @@ export class BuildAgent {
         const enableLog = params.enableLog ?? true
         const apply = params.apply ?? false
 
-        const build = CharBuild.fromCharSetting(this.selectedChar.value, this.charSettings.value, this.inv)
+        const build = createCharBuildFromSettings(this.selectedChar.value, this.charSettings.value, this.inv)
         const final = {
             includeTypes,
             preserveTypes,

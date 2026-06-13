@@ -10,9 +10,11 @@ import {
     CharBuild,
     CharBuildTimeline,
     LeveledBuff,
-    LeveledChar,
+    LeveledBuffHelper,
+    LeveledCharHelper,
     LeveledMod,
-    LeveledWeapon,
+    LeveledModHelper,
+    LeveledWeaponHelper,
     modData,
     WeaponAttr,
 } from "../data"
@@ -40,7 +42,7 @@ const modOptions = modData
 
 const _buffOptions = reactive(
     buffData.map(buff => ({
-        value: new LeveledBuff(buff.名称),
+        value: LeveledBuffHelper.fromName(buff.名称),
         label: buff.名称,
         limit: buff.限定,
         description: buff.描述,
@@ -68,7 +70,7 @@ interface BuildConfiguration {
  */
 function createLeveledBuff(name: string, level: number, customBuff: [string, number][] = []) {
     if (name !== "自定义BUFF") {
-        return new LeveledBuff(name, level)
+        return LeveledBuffHelper.fromName(name, level)
     }
     const buffObj: Buff = {
         名称: "自定义BUFF",
@@ -192,31 +194,31 @@ const baseCharBuilds = computed(() => {
         }
 
         // Create character build from project settings
-        const char = new LeveledChar(config.selectedChar, settings.charLevel)
+        const char = LeveledCharHelper.fromId(config.selectedChar, settings.charLevel)
         return new CharBuild({
             char,
-            auraMod: new LeveledMod(settings.auraMod),
+            auraMod: LeveledModHelper.fromId(settings.auraMod),
             charMods: settings.charMods
-                .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             meleeMods: settings.meleeMods
-                .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             rangedMods: settings.rangedMods
-                .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             skillMods: settings.skillWeaponMods
-                .map((v: any) => (v ? new LeveledMod(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             skillLevel: settings.charSkillLevel,
             buffs: settings.buffs.map((v: any) => createLeveledBuff(v[0], v[1], settings.customBuff)),
-            melee: new LeveledWeapon(
+            melee: LeveledWeaponHelper.fromId(
                 settings.meleeWeapon,
                 settings.meleeWeaponRefine,
                 settings.meleeWeaponLevel,
                 inv.getWBuffLv(settings.meleeWeapon, char.属性)
             ),
-            ranged: new LeveledWeapon(
+            ranged: LeveledWeaponHelper.fromId(
                 settings.rangedWeapon,
                 settings.rangedWeaponRefine,
                 settings.rangedWeaponLevel,
@@ -243,10 +245,10 @@ const charBuilds = computed(() => {
         if (!baseBuild) {
             // Create a dummy CharBuild instance if baseBuild is null
             return new CharBuild({
-                char: new LeveledChar(config.selectedChar, 10),
-                melee: new LeveledWeapon(10302, 0, 1, 0),
-                ranged: new LeveledWeapon(20601, 0, 1, 0),
-                auraMod: new LeveledMod(0),
+                char: LeveledCharHelper.fromId(config.selectedChar, 10),
+                melee: LeveledWeaponHelper.fromId(10302, 0, 1, 0),
+                ranged: LeveledWeaponHelper.fromId(20601, 0, 1, 0),
+                auraMod: undefined,
                 charMods: [],
                 meleeMods: [],
                 rangedMods: [],
@@ -273,25 +275,25 @@ const charBuilds = computed(() => {
         // Add additional MODs for this configuration, ensuring we don't exceed 8 slots for each type
         config.additionalMods[0].forEach(mod => {
             if (mod && combinedCharMods.length < 8) {
-                combinedCharMods.push(new LeveledMod(mod[0], mod[1], inv.getBuffLv(mod[0])))
+                combinedCharMods.push(LeveledModHelper.fromId(mod[0], mod[1], inv.getBuffLv(mod[0])))
             }
         })
 
         config.additionalMods[1].forEach(mod => {
             if (mod && combinedMeleeMods.length < 8) {
-                combinedMeleeMods.push(new LeveledMod(mod[0], mod[1], inv.getBuffLv(mod[0])))
+                combinedMeleeMods.push(LeveledModHelper.fromId(mod[0], mod[1], inv.getBuffLv(mod[0])))
             }
         })
 
         config.additionalMods[2].forEach(mod => {
             if (mod && combinedRangedMods.length < 8) {
-                combinedRangedMods.push(new LeveledMod(mod[0], mod[1], inv.getBuffLv(mod[0])))
+                combinedRangedMods.push(LeveledModHelper.fromId(mod[0], mod[1], inv.getBuffLv(mod[0])))
             }
         })
 
         config.additionalMods[3].forEach(mod => {
             if (mod && combinedSkillWeaponMods.length < 4) {
-                combinedSkillWeaponMods.push(new LeveledMod(mod[0], mod[1], inv.getBuffLv(mod[0])))
+                combinedSkillWeaponMods.push(LeveledModHelper.fromId(mod[0], mod[1], inv.getBuffLv(mod[0])))
             }
         })
 
@@ -529,8 +531,8 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <div v-if="getModSlotCounts(index)[0] > 0" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.char_mod_config')"
-                                    :mods="config.additionalMods[0].map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
-                                    :other-mods="config.charSettings.charMods.map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :mods="config.additionalMods[0].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
+                                    :other-mods="config.charSettings.charMods.map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             m =>
@@ -557,8 +559,8 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             >
                                 <ModEditer
                                     :title="$t('char-build.melee_weapon_mod_config')"
-                                    :mods="config.additionalMods[1].map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
-                                    :other-mods="config.charSettings.meleeMods.map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :mods="config.additionalMods[1].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
+                                    :other-mods="config.charSettings.meleeMods.map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             m =>
@@ -580,8 +582,8 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <div v-if="getModSlotCounts(index)[2] > 0 && baseCharBuilds[index]?.isRangedWeapon" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.ranged_weapon_mod_config')"
-                                    :mods="config.additionalMods[2].map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
-                                    :other-mods="config.charSettings.rangedMods.map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :mods="config.additionalMods[2].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
+                                    :other-mods="config.charSettings.rangedMods.map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             m =>
@@ -604,8 +606,8 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             <div v-if="getModSlotCounts(index)[3] > 0 && baseCharBuilds[index]?.isSkillWeapon" class="mb-4">
                                 <ModEditer
                                     :title="$t('char-build.skill_weapon_mod_config')"
-                                    :mods="config.additionalMods[3].map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
-                                    :other-mods="config.charSettings.skillWeaponMods.map(m => (m ? new LeveledMod(m[0], m[1]) : null))"
+                                    :mods="config.additionalMods[3].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
+                                    :other-mods="config.charSettings.skillWeaponMods.map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             m =>

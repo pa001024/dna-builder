@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
+import { createCharBuildFromSettings } from "../CharBuildHelper"
 import { weaponData } from "../index"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
@@ -1298,6 +1299,24 @@ describe("CharBuild类测试", () => {
             expect(dynamicBuild.calculate()).toBeGreaterThan(baseBuild.calculate())
         })
 
+        it("追加伤害BUG应按怪物等级减伤再次降低追加伤害", () => {
+            const charBuild = createCharBuild()
+            charBuild.baseName = "射击"
+            charBuild.enemyLevel = 200
+            charBuild.dynamicBuffs.push(
+                new LeveledBuff({
+                    名称: "测试追加伤害",
+                    描述: "测试用追加伤害",
+                    code: "weaponAttr.追加伤害=2",
+                }),
+                new LeveledBuff("追加伤害BUG")
+            )
+
+            const dynamicAttrs = charBuild.calculateWeaponAttributes()
+
+            expect(dynamicAttrs.weapon?.追加伤害).toBeCloseTo(2 / (1 + (200 - 190) * 0.05))
+        })
+
         it("动态attr属性应在最终阶段按表达式计算", () => {
             const charBuild = createCharBuild()
             charBuild.baseName = "射击"
@@ -1347,7 +1366,7 @@ describe("CharBuild类测试", () => {
 
     describe("E2E", () => {
         it("clone 的计算结果应该相同", () => {
-            const build = CharBuild.fromCharSetting("苏乙", {
+            const build = createCharBuildFromSettings("苏乙", {
                 charLevel: 80,
                 baseName: "射击",
                 hpPercent: 1,

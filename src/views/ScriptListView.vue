@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
-import { register, unregisterAll } from "@tauri-apps/plugin-global-shortcut"
+import { register, unregister } from "@tauri-apps/plugin-global-shortcut"
 import { t } from "i18next"
 import { debounce } from "lodash-es"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
@@ -83,6 +83,7 @@ async function main() {
 main()
 `
 const newScriptContent = ref(DEFAULT_SCRIPT_CONTENT)
+const SCRIPT_LIST_GLOBAL_SHORTCUT_STORAGE_KEY = "script-list-global-shortcut-enabled"
 
 const categoryOptions = computed(() => [
     { value: "all", label: "全部" },
@@ -3335,7 +3336,47 @@ async function restartAsAdmin() {
 /**
  * 全局快捷键状态
  */
-const globalShortcutEnabled = ref(false)
+const globalShortcutEnabled = ref(localStorage.getItem(SCRIPT_LIST_GLOBAL_SHORTCUT_STORAGE_KEY) === "true")
+
+/**
+ * 持久化脚本列表 F10 全局快捷键状态。
+ * @param enabled 是否启用全局快捷键
+ */
+function persistGlobalShortcutEnabled(enabled: boolean) {
+    localStorage.setItem(SCRIPT_LIST_GLOBAL_SHORTCUT_STORAGE_KEY, enabled ? "true" : "false")
+}
+
+/**
+ * 注册脚本列表 F10 全局快捷键。
+ */
+async function registerScriptListGlobalShortcut() {
+    await register("F10", e => {
+        if (e.state === "Pressed") {
+            // 当按下 F10 时，运行当前脚本
+            runCurrentTab()
+        }
+    })
+}
+
+/**
+ * 注销脚本列表 F10 全局快捷键。
+ */
+async function unregisterScriptListGlobalShortcut() {
+    try {
+        await unregister("F10")
+    } catch (error) {
+        console.warn("注销脚本列表全局快捷键失败", error)
+    }
+}
+
+/**
+ * 按本地持久状态同步脚本列表 F10 全局快捷键。
+ */
+async function syncScriptListGlobalShortcut() {
+    await unregisterScriptListGlobalShortcut()
+    if (!globalShortcutEnabled.value) return
+    await registerScriptListGlobalShortcut()
+}
 
 /**
  * 切换全局快捷键状态
@@ -3344,18 +3385,15 @@ async function toggleGlobalShortcut() {
     try {
         if (globalShortcutEnabled.value) {
             // 禁用快捷键
-            await unregisterAll()
+            await unregisterScriptListGlobalShortcut()
             globalShortcutEnabled.value = false
+            persistGlobalShortcutEnabled(false)
             ui.showSuccessMessage(t("script-list.global_shortcut_disabled"))
         } else {
             // 启用快捷键
-            await register("F10", e => {
-                if (e.state === "Pressed") {
-                    // 当按下 F10 时，运行当前脚本
-                    runCurrentTab()
-                }
-            })
+            await registerScriptListGlobalShortcut()
             globalShortcutEnabled.value = true
+            persistGlobalShortcutEnabled(true)
             ui.showSuccessMessage(t("script-list.global_shortcut_enabled"))
         }
     } catch (error) {
@@ -3436,6 +3474,7 @@ onMounted(async () => {
     loadScriptMcpPortConfig()
     loadScriptConfigItems()
     scriptRuntime.loadScriptHotkeys()
+    await syncScriptListGlobalShortcut()
     await fetchLocalScripts()
     document.addEventListener("keydown", handleKeyDown)
     await initFileChangeListener()
@@ -3464,8 +3503,7 @@ onUnmounted(async () => {
     // 停止所有文件监听
     const stopPromises = Array.from(watchedFiles.value).map(fileName => stopWatchingFile(fileName))
     await Promise.all(stopPromises)
-    // 注销所有全局快捷键
-    await unregisterAll()
+    await unregisterScriptListGlobalShortcut()
 })
 </script>
 

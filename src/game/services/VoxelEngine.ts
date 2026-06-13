@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import { type CharBuild, type DynamicMonster, LeveledMonster } from "../../data/index"
+import { type CharBuild, type DynamicMonster, LeveledMonsterHelper } from "../../data/index"
 import type { FloatingText, GameSettings, Monster, PlayerStats, VoxelData } from "../types"
 import { Generators } from "../utils/voxelGenerators"
 import type { BaseSkill } from "./BaseSkill"
@@ -379,7 +379,7 @@ export class VoxelEngine {
             tn: 0,
             currentHP: target.currentHP,
             currentShield: target.currentShield,
-            currentWarPose: 0,
+            currentTN: 0,
             等级: target.level,
         } as DynamicMonster // Cast to unknown first to bypass type check
 
@@ -589,7 +589,7 @@ export class VoxelEngine {
         const level = this.settings.monsterLevel
 
         // 使用LeveledMonster根据等级计算新怪物的属性
-        const newMonster = new LeveledMonster(this.settings.monsterId, level) // 130 is "生命木桩" ID, used as base
+        const newMonster = LeveledMonsterHelper.fromId(this.settings.monsterId, level) // 130 is "生命木桩" ID, used as base
 
         this.monsters.push({
             id: Math.random().toString(),

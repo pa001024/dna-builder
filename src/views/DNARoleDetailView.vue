@@ -2,7 +2,7 @@
 import { DNAAPI, DNACharDetailBean } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { CharBuild, LeveledChar, LeveledMod, LeveledWeapon } from "../data"
+import { CharBuild, LeveledCharHelper, LeveledModHelper, LeveledWeapon } from "../data"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
 
@@ -32,7 +32,7 @@ function getTraceOrdinal(index: number): string {
  * 角色详情魔之楔列表（统一转换后复用到展示和生效计算）
  */
 const roleMods = computed(() => {
-    return charDetail.value?.modes.map(mode => LeveledMod.fromDNA(mode)) || []
+    return charDetail.value?.modes.map(mode => LeveledModHelper.fromDNA(mode)) || []
 })
 
 /**
@@ -41,7 +41,7 @@ const roleMods = computed(() => {
 const roleCharBuild = computed(() => {
     if (!charDetail.value) return null
     try {
-        const leveledChar = new LeveledChar(charDetail.value.charId, Number(charDetail.value.level))
+        const leveledChar = LeveledCharHelper.fromId(charDetail.value.charId, Number(charDetail.value.level))
         return new CharBuild({
             char: leveledChar,
             hpPercent: 1,

@@ -1,6 +1,16 @@
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
-import { effectMap, LeveledModWithCount, LeveledWeapon, type ModTypeKey, ModTypeMap, modData, modMap, weaponData, weaponMap } from "../data"
+import {
+    effectMap,
+    LeveledModHelper,
+    LeveledWeaponHelper,
+    type ModTypeKey,
+    ModTypeMap,
+    modData,
+    modMap,
+    weaponData,
+    weaponMap,
+} from "../data"
 
 export const useInvStore = defineStore("inv", {
     state: () => {
@@ -77,34 +87,36 @@ export const useInvStore = defineStore("inv", {
                 ? (Object.entries(this.mods)
                       .map(([modId, [lv, count]]) => {
                           try {
-                              const mc = new LeveledModWithCount(Number(modId), lv, this.getBuffLv(Number(modId)), count)
+                              const mc = LeveledModHelper.withCountFromId(Number(modId), lv, this.getBuffLv(Number(modId)), count)
                               return mc
                           } catch {
                               return undefined
                           }
                       })
-                      .filter(mod => mod && this.enableMods[mod.品质 as keyof typeof this.enableMods]) as LeveledModWithCount[])
+                      .filter(mod => mod && this.enableMods[mod.品质 as keyof typeof this.enableMods]) as ReturnType<
+                      typeof LeveledModHelper.withCountFromId
+                  >[])
                 : []
 
-            return [...noInv.map(mod => new LeveledModWithCount(mod, undefined, this.getBuffLv(mod.id), 8)), ...invMods]
+            return [...noInv.map(mod => LeveledModHelper.withCount(mod, undefined, this.getBuffLv(mod.id), 8)), ...invMods]
         },
         getMeleeWeapons(useInv: boolean, elm: string) {
             return useInv && this.enableWeapons.近战
                 ? Object.entries(this.meleeWeapons)
                       .filter(([id]) => !Number.isNaN(+id))
-                      .map(([id, level]) => new LeveledWeapon(+id, level, undefined, this.getWBuffLv(+id, elm)))
+                      .map(([id, level]) => LeveledWeaponHelper.fromId(+id, level, undefined, this.getWBuffLv(+id, elm)))
                 : weaponData
                       .filter(weapon => weapon.类型[0] === "近战")
-                      .map(weapon => new LeveledWeapon(weapon.id, undefined, undefined, this.getWBuffLv(weapon.id, elm)))
+                      .map(weapon => LeveledWeaponHelper.fromId(weapon.id, undefined, undefined, this.getWBuffLv(weapon.id, elm)))
         },
         getRangedWeapons(useInv: boolean, elm: string) {
             return useInv && this.enableWeapons.远程
                 ? Object.entries(this.rangedWeapons)
                       .filter(([id]) => !Number.isNaN(+id))
-                      .map(([id, level]) => new LeveledWeapon(+id, level, undefined, this.getWBuffLv(+id, elm)))
+                      .map(([id, level]) => LeveledWeaponHelper.fromId(+id, level, undefined, this.getWBuffLv(+id, elm)))
                 : weaponData
                       .filter(weapon => weapon.类型[0] === "远程")
-                      .map(weapon => new LeveledWeapon(weapon.id, undefined, undefined, this.getWBuffLv(weapon.id, elm)))
+                      .map(weapon => LeveledWeaponHelper.fromId(weapon.id, undefined, undefined, this.getWBuffLv(weapon.id, elm)))
         },
     },
 })

@@ -7,9 +7,11 @@ const props = withDefaults(
         title: string
         badge?: string | number
         isOpen?: boolean
+        lazy?: boolean
     }>(),
     {
         isOpen: false,
+        lazy: false,
     }
 )
 
@@ -54,7 +56,7 @@ function toggle() {
                 <Icon icon="tabler:arrow-bar-to-right" class="swap-off" />
             </span>
         </div>
-        <div class="collapse-content">
+        <div v-if="!lazy || isOpen" class="collapse-content">
             <slot />
         </div>
     </div>

@@ -1,9 +1,16 @@
 import { t as translate } from "i18next"
 import type { CharAttr } from "../CharBuild"
-import { effectMap, modMap } from "../d"
-import { type Mod, Quality, type WeaponSkill } from "../data-types"
-import { LeveledBuff } from "."
+import { type Buff, type Mod, Quality, type WeaponSkill } from "../data-types"
+import { LeveledBuff } from "./LeveledBuff"
 import { getMinusAttrValue } from "./minusAttr"
+
+export type LeveledModResolver = (id: number) => { mod: Mod; effect?: Buff } | undefined
+
+let leveledModResolver: LeveledModResolver | undefined
+
+export function setLeveledModResolver(resolver: LeveledModResolver) {
+    leveledModResolver = resolver
+}
 
 /**
  * LeveledMod类 - 继承Mod接口，添加等级属性和动态属性计算
@@ -40,34 +47,6 @@ export class LeveledMod implements Mod {
     // 等级上限
     maxLevel: number
 
-    static from(id: number, level: number, bufLv?: number) {
-        const modData = modMap.get(id)
-        if (!modData) {
-            return null
-        }
-        return new LeveledMod(modData, level, bufLv)
-    }
-
-    /**
-     * 判断是否存在指定ID的MOD
-     * @param id MOD的ID
-     * @returns 如果存在则返回true，否则返回false
-     */
-    static fromDNA(dnaMod: import("dna-api").DNAModesBean) {
-        if (modMap.has(+dnaMod.id)) {
-            return new LeveledMod(+dnaMod.id, dnaMod.level)
-        }
-        if (+dnaMod.id === -1) return null
-        return new LeveledMod({
-            id: +dnaMod.id,
-            名称: dnaMod.name || "?",
-            系列: "?",
-            品质: (dnaMod.quality && ["白", "绿", "蓝", "紫", "金"][dnaMod.quality - 1]) || "白",
-            耐受: 1,
-            类型: "?",
-        })
-    }
-
     toString() {
         return `[${this.id}]${this.系列}之${this.名称}(${this.品质}) Lv.${this.等级}`
     }
@@ -81,12 +60,14 @@ export class LeveledMod implements Mod {
     constructor(
         modid: number | Mod,
         modLv?: number,
-        public buffLv?: number
+        public buffLv?: number,
+        effectData?: Buff
     ) {
-        // 从Map中获取对应的Mod对象
-        const modData = typeof modid === "number" ? modMap.get(modid) : modid
+        const resolved = typeof modid === "number" ? leveledModResolver?.(modid) : { mod: modid, effect: effectData }
+        const modData = resolved?.mod
+        effectData = resolved?.effect ?? effectData
         if (!modData) {
-            throw new Error(`MOD ID "${modid}" 未在静态表中找到`)
+            throw new Error(typeof modid === "number" ? `MOD ID "${modid}" 未在静态表中找到` : "MOD 数据不能为空")
         }
 
         // 保存原始MOD对象
@@ -105,10 +86,9 @@ export class LeveledMod implements Mod {
         if (modData.效果) this.效果 = modData.效果
         if (modData.消耗) this.消耗 = modData.消耗
         if (modData.技能替换) this.技能替换 = modData.技能替换
-        if (effectMap.has(this.名称)) {
-            const effect = effectMap.get(this.名称)!
-            if (!effect.品质 || effect.品质 === this.品质) {
-                this.buff = new LeveledBuff(effect, buffLv)
+        if (effectData) {
+            if (!effectData.品质 || effectData.品质 === this.品质) {
+                this.buff = new LeveledBuff(effectData, buffLv)
                 this.buff.pid = this.id
                 this.buff.pt = "Mod"
             }
@@ -126,6 +106,10 @@ export class LeveledMod implements Mod {
 
     get fullName(): string {
         return `${this.系列}之${this.名称}`
+    }
+
+    get originalModData() {
+        return this._originalModData
     }
 
     get excludeSeries() {
@@ -488,21 +472,12 @@ export class LeveledMod implements Mod {
         return icon ? `/imgs/webp/T_Mod_${icon}.webp` : ""
     }
 
-    static getUrl(modId: number) {
-        const mod = new LeveledMod(modId)
-        return mod.url
-    }
-
-    static getQuality(id: number): Quality {
-        return (modMap.get(id)?.品质 as Quality) || "紫"
-    }
-
     static getMaxLevel(quality: string) {
         return LeveledMod.modQualityMaxLevel[quality] || 1
     }
 
     public clone(): LeveledMod {
-        const mod = new LeveledMod(this._originalModData, this._等级, this.buffLv)
+        const mod = new LeveledMod(this._originalModData, this._等级, this.buffLv, this.buff?._originalBuffData)
         this.properties.forEach(prop => {
             mod[prop] = this[prop]
         })
@@ -535,8 +510,8 @@ export class LeveledMod implements Mod {
 
 export class LeveledModWithCount extends LeveledMod {
     count: number
-    constructor(modid: number | Mod, 等级?: number, buffLv?: number, count?: number) {
-        super(modid, 等级, buffLv)
+    constructor(modData: number | Mod, 等级?: number, buffLv?: number, count?: number, effectData?: Buff) {
+        super(modData, 等级, buffLv, effectData)
         this.count = count || 0
     }
 }

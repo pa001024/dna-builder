@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DNAWeaponBean } from "dna-api"
-import { LeveledWeapon } from "@/data"
+import { LeveledWeaponHelper } from "@/data"
 import { useUIStore } from "../store/ui"
 
 defineProps<{
@@ -18,7 +18,7 @@ const ui = useUIStore()
         <div class="card-body bg-linear-30 from-purple-300/50 to-purple-600/50 rounded-2xl relative p-2">
             <img
                 class="absolute inset-0 h-full object-cover pointer-events-none mask-b-from-60%"
-                :src="LeveledWeapon.idToUrl(weapon.weaponId)"
+                :src="LeveledWeaponHelper.idToUrl(weapon.weaponId)"
             />
             <div class="absolute size-8 aura-pulse-dark">
                 <span class="aura-pulse-aura"></span>

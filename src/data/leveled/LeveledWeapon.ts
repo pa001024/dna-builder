@@ -1,6 +1,15 @@
-import { effectMap, weaponMap, weaponNameMap } from "../d"
-import type { DmgType, Skill, SkillField, Weapon } from "../data-types"
-import { CommonLevelUp, LeveledBuff, LeveledSkill } from "."
+import type { Buff, DmgType, Skill, SkillField, Weapon } from "../data-types"
+import { CommonLevelUp } from "./CommonLevelUp"
+import { LeveledBuff } from "./LeveledBuff"
+import { LeveledSkill } from "./LeveledSkill"
+
+export type LeveledWeaponResolver = (id: number | string) => { weapon: Weapon; effect?: Buff } | undefined
+
+let leveledWeaponResolver: LeveledWeaponResolver | undefined
+
+export function setLeveledWeaponResolver(resolver: LeveledWeaponResolver) {
+    leveledWeaponResolver = resolver
+}
 
 /**
  * LeveledWeapon类 - 继承Weapon接口，添加等级和精炼属性和动态属性计算
@@ -82,14 +91,19 @@ export class LeveledWeapon {
         weaponId: number | string | Weapon,
         精炼?: number,
         等级?: number,
-        public effectLv?: number
+        public effectLv?: number,
+        effectData?: Buff
     ) {
-        // 从统一的武器Map中获取武器数据
-        const weaponData =
-            typeof weaponId === "number" ? weaponMap.get(weaponId) : typeof weaponId === "string" ? weaponNameMap.get(weaponId) : weaponId
-
+        const resolved =
+            typeof weaponId === "number" || typeof weaponId === "string"
+                ? leveledWeaponResolver?.(weaponId)
+                : { weapon: weaponId, effect: effectData }
+        const weaponData = resolved?.weapon
+        effectData = resolved?.effect ?? effectData
         if (!weaponData) {
-            throw new Error(`武器名称 "${weaponId}" 未在静态表中找到`)
+            throw new Error(
+                typeof weaponId === "number" || typeof weaponId === "string" ? `武器 "${weaponId}" 未在静态表中找到` : "武器数据不能为空"
+            )
         }
         // 保存原始武器对象和类型
         this._originalWeaponData = weaponData
@@ -122,8 +136,8 @@ export class LeveledWeapon {
             this.弹道类型 = weaponData.技能.some(v => LeveledWeapon.hasRayDamageField(v.字段)) ? "非弹道" : "弹道"
         }
 
-        if (effectMap.has(this.名称)) {
-            this.buff = new LeveledBuff(effectMap.get(this.名称)!, effectLv)
+        if (effectData) {
+            this.buff = new LeveledBuff(effectData, effectLv)
             this.buff.pid = this.id
             this.buff.pt = "Weapon"
         }
@@ -329,10 +343,6 @@ export class LeveledWeapon {
     static url(icon?: string) {
         return icon ? `/imgs/webp/T_Head_${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
     }
-    static idToUrl(id?: number) {
-        const icon = weaponMap.get(id || 0)?.icon || ""
-        return LeveledWeapon.url(icon)
-    }
 
     static typeUrl(type: string) {
         const typeMap: Record<string, string> = {
@@ -353,7 +363,13 @@ export class LeveledWeapon {
     }
 
     public clone(): LeveledWeapon {
-        const weapon = new LeveledWeapon(this._originalWeaponData, this.hasForge ? 0 : this._精炼, this._等级, this.effectLv)
+        const weapon = new LeveledWeapon(
+            this._originalWeaponData,
+            this.hasForge ? 0 : this._精炼,
+            this._等级,
+            this.effectLv,
+            this.buff?._originalBuffData
+        )
         weapon.setForgeEffective(this.forgeEffective)
         return weapon
     }
