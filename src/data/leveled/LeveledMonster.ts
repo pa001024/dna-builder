@@ -299,7 +299,6 @@ export class LeveledMonster implements DynamicMonster {
             throw new Error(typeof id === "number" ? `怪物 "${id}" 未在静态表中找到` : "怪物数据不能为空")
         }
         this._baseData = mData
-
         this.id = mData.id
         this.n = mData.n
         this.f = mData.f || 0

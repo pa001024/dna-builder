@@ -10,7 +10,7 @@ import { buildQuery, createBuildMutation } from "@/api/graphql"
 import FullTooltip from "@/components/FullTooltip.vue"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
 import { env } from "@/env"
-import { formatProp } from "@/util"
+import { formatBigNumber, formatProp } from "@/util"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 import { CharSettings, createDefaultCharSettings, normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
@@ -1722,8 +1722,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">
                                             {{ $t("生命") }}
                                         </div>
-                                        <div class="text-primary font-bold text-right">
-                                            {{ charBuild.enemy.hp }}
+                                        <div class="text-primary font-bold text-right" :title="`${charBuild.enemy.hp}`">
+                                            {{ formatBigNumber(charBuild.enemy.hp) }}
                                         </div>
                                     </div>
                                     <div class="flex-1">
@@ -1735,11 +1735,14 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">
+                                        <div
+                                            class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap"
+                                            :title="`${charBuild.enemy.es || 0}`"
+                                        >
                                             {{ $t("护盾") }}
                                         </div>
                                         <div class="text-primary font-bold text-right">
-                                            {{ charBuild.enemy.es || 0 }}
+                                            {{ formatBigNumber(charBuild.enemy.es || 0) }}
                                         </div>
                                     </div>
                                 </div>

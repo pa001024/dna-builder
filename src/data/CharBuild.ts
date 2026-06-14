@@ -85,18 +85,6 @@ const weaponAttackTypeMap = [
     { prefix: "滑行", patterns: ["滑行攻击"] },
 ] as const
 
-const DEFAULT_ENEMY_DATA: DynamicMonster = {
-    id: 130,
-    n: "生命木桩130",
-    f: 1,
-    atk: 10,
-    def: 130,
-    hp: 1000000000,
-    tn: 150,
-    currentHP: 1000000000,
-    currentShield: 0,
-    currentTN: 150,
-}
 export class CharBuildTimeline {
     totalTime: number = 0
     hp: [number, number][] = []
@@ -423,8 +411,7 @@ export class CharBuild {
         this.baseName = options.baseName
         this.enemyLevel = options.enemyLevel || 80
         this.enemyId = options.enemyId ?? 130
-        this.enemy = options.enemy || new LeveledMonster(DEFAULT_ENEMY_DATA, this.enemyLevel)
-        this.enemy.等级 = this.enemyLevel
+        this.enemy = options.enemy || new LeveledMonster(this.enemyId, this.enemyLevel)
         this.enemyResistance = options.enemyResistance || 0
         this.targetFunction = options.targetFunction || "伤害"
         this.customVariables = options.customVariables || []
