@@ -21,12 +21,12 @@ export function format1000(n: number, di = 0) {
 }
 
 // 返回10K,10M,10B格式的大数字
-export function formatBigNumber(n: number) {
+export function formatBigNumber(n: number, d = 3) {
     if (i18next.language.startsWith("zh")) {
-        if (n >= 1e8) return `${+(n / 1e8).toFixed(3)}E`
+        if (n >= 1e8) return `${+(n / 1e8).toFixed(d)}E`
         if (n >= 1e5) return `${+(n / 1e4).toFixed(3)}W`
     } else {
-        if (n >= 1e9) return `${+(n / 1e9).toFixed(3)}B`
+        if (n >= 1e9) return `${+(n / 1e9).toFixed(d)}B`
         if (n >= 1e6) return `${+(n / 1e6).toFixed(3)}M`
         // if (n >= 1e3) return `${+(n / 1e3).toFixed(2)}K`
     }

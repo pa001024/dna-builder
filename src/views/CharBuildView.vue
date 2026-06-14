@@ -753,6 +753,19 @@ watch(
 // 计算属性
 const attributes = computed(() => charBuild.value.calculateAttributes())
 
+/**
+ * 计算自定义变量表达式的当前结果。
+ * @param variable 自定义变量配置
+ * @returns 格式化后的计算结果
+ */
+function getCustomVariableResult(variable: [string, string]) {
+    if (!variable[0] || !variable[1] || charBuild.value.validateCustomVariable(variable[0], variable[1])) return "-"
+
+    const value = charBuild.value.evaluateAST(variable[1])
+    if (!Number.isFinite(value)) return "0"
+    return `${+value.toFixed(4)}`
+}
+
 //#region Tour
 const tour = ref<typeof VTour>()
 
@@ -1512,13 +1525,18 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         placeholder="变量名"
                                         @change="updateCharBuild"
                                     />
-                                    <input
-                                        v-model="variable[1]"
-                                        type="text"
-                                        class="input input-sm input-bordered"
-                                        placeholder="表达式"
-                                        @change="updateCharBuild"
-                                    />
+                                    <FullTooltip side="top">
+                                        <template #tooltip>
+                                            <span class="font-mono">{{ getCustomVariableResult(variable) }}</span>
+                                        </template>
+                                        <input
+                                            v-model="variable[1]"
+                                            type="text"
+                                            class="input input-sm input-bordered w-full"
+                                            placeholder="表达式"
+                                            @change="updateCharBuild"
+                                        />
+                                    </FullTooltip>
                                     <button class="btn btn-sm btn-ghost btn-square" @click="removeCustomVariable(index)">
                                         <Icon icon="codicon:chrome-close" />
                                     </button>
@@ -1577,9 +1595,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             </div>
                             <div v-else data-tour="damage-result" class="flex justify-between items-center p-1">
                                 <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
-                                <div class="text-primary font-bold text-md font-orbitron">
-                                    {{ charBuild.calculate() }}
-                                </div>
+                                <DamageShow :value="charBuild.calculate()" />
                             </div>
                         </div>
                     </div>

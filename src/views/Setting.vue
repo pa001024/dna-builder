@@ -2,7 +2,6 @@
 import { t } from "i18next"
 import { ref, watch } from "vue"
 import { MATERIALS } from "@/api/app"
-import { listModels, validateApiKey } from "@/api/openai"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
 import { env } from "@/env"
 import { i18nLanguages } from "@/i18n"
@@ -226,63 +225,6 @@ async function clearServiceWorkers(): Promise<void> {
 }
 
 //#endregion
-
-//#region AI
-// AI大模型设置相关状态
-const isTestingConnection = ref(false)
-const connectionStatus = ref<"success" | "failed" | null>(null)
-const aiModelOptions = ref([] as { label: string; value: string }[])
-
-async function loadAiModelOptions() {
-    if (!setting.aiApiKey || !setting.aiBaseUrl) return
-
-    const config = setting.getOpenAIConfig()
-
-    try {
-        const models = await listModels(config)
-        aiModelOptions.value = models.map(model => ({
-            label: model.id,
-            value: model.id,
-        }))
-    } catch (error) {
-        console.error("Failed to load AI models:", error)
-        aiModelOptions.value = []
-    }
-}
-
-// 测试AI连接
-async function testAiConnection() {
-    if (!setting.aiApiKey || !setting.aiBaseUrl) return
-
-    isTestingConnection.value = true
-    connectionStatus.value = null
-
-    try {
-        const config = setting.getOpenAIConfig()
-
-        const isValid = await validateApiKey(config)
-        connectionStatus.value = isValid ? "success" : "failed"
-    } catch (error) {
-        console.error("AI connection test failed:", error)
-        connectionStatus.value = "failed"
-    } finally {
-        isTestingConnection.value = false
-    }
-}
-
-// 打开AI设置重置对话框
-async function openResetAiDialog() {
-    if (await ui.showDialog(t("setting.aiReset"), t("setting.resetConfirm"))) {
-        resetAiSettings()
-    }
-}
-
-// 重置AI设置
-function resetAiSettings() {
-    setting.resetAiSettings()
-    connectionStatus.value = null
-}
-//#endregion
 </script>
 
 <template>
@@ -450,115 +392,6 @@ function resetAiSettings() {
                             <SelectItem value="female">女</SelectItem>
                             <SelectItem value="male">男</SelectItem>
                         </Select>
-                    </div>
-                </div>
-            </article>
-
-            <article>
-                <h2 class="text-sm font-bold m-2">
-                    {{ $t("setting.ai") }}
-                </h2>
-                <div class="bg-base-100 p-2 rounded-lg space-y-3">
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.showAIChat") }}
-                        </span>
-                        <input v-model="setting.showAIChat" type="checkbox" class="toggle toggle-secondary" />
-                    </div>
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.aiBaseUrl") }}
-                            <div class="text-xs text-base-content/50">{{ $t("setting.aiBaseUrlTip") }}</div>
-                        </span>
-                        <input
-                            v-model="setting.aiBaseUrl"
-                            type="text"
-                            :placeholder="$t('setting.aiBaseUrl')"
-                            class="input input-bordered input-sm w-64"
-                        />
-                    </div>
-
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.aiApiKey") }}
-                            <div class="text-xs text-base-content/50">{{ $t("setting.aiApiKeyTip") }}</div>
-                        </span>
-                        <input
-                            v-model="setting.aiApiKey"
-                            type="text"
-                            :placeholder="$t('setting.aiApiKey')"
-                            class="input input-bordered input-sm w-64"
-                        />
-                    </div>
-
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.aiModelName") }}
-                            <div class="text-xs text-base-content/50">{{ $t("setting.aiModelNameTip") }}</div>
-                        </span>
-                        <Combobox
-                            v-model="setting.aiModelName"
-                            type="text"
-                            :placeholder="$t('setting.aiModelName')"
-                            :empty-message="$t('setting.noModelAvailable')"
-                            :options="aiModelOptions"
-                            class="w-64"
-                            :class="{ disabled: !setting.aiApiKey || !setting.aiBaseUrl }"
-                            @open="loadAiModelOptions"
-                        />
-                    </div>
-
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.aiMaxTokens") }}
-                            <div class="text-xs text-base-content/50">{{ $t("setting.aiMaxTokensTip") }}</div>
-                        </span>
-                        <input
-                            v-model.number="setting.aiMaxTokens"
-                            type="number"
-                            min="1"
-                            max="8192"
-                            :placeholder="$t('setting.aiMaxTokens')"
-                            class="input input-bordered input-sm w-32"
-                        />
-                    </div>
-
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.aiTemperature") }}
-                            <div class="text-xs text-base-content/50">{{ $t("setting.aiTemperatureTip") }}</div>
-                        </span>
-                        <input
-                            v-model.number="setting.aiTemperature"
-                            type="number"
-                            min="0"
-                            max="1"
-                            step="0.1"
-                            :placeholder="$t('setting.aiTemperature')"
-                            class="input input-bordered input-sm w-32"
-                        />
-                    </div>
-
-                    <div class="flex justify-between items-center pt-2 border-t border-base-300">
-                        <div class="flex items-center gap-2 p-2 flex-1">
-                            <button
-                                :disabled="isTestingConnection || !setting.aiApiKey || !setting.aiBaseUrl"
-                                class="btn btn-secondary btn-sm"
-                                @click="testAiConnection"
-                            >
-                                {{ isTestingConnection ? "Loading..." : $t("setting.aiTestConnection") }}
-                            </button>
-
-                            <div v-if="connectionStatus === 'success'" class="text-success text-sm">
-                                {{ $t("setting.aiConnectionSuccess") }}
-                            </div>
-                            <div v-else-if="connectionStatus === 'failed'" class="text-error text-sm">
-                                {{ $t("setting.aiConnectionFailed") }}
-                            </div>
-                            <button class="ml-auto btn btn-outline btn-error btn-sm" @click="openResetAiDialog">
-                                {{ $t("setting.aiReset") }}
-                            </button>
-                        </div>
                     </div>
                 </div>
             </article>

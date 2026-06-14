@@ -1934,7 +1934,7 @@ export class CharBuild {
         this.enemy.resetHP()
         const timeline = this.timeline
         if (!timeline) {
-            return Math.round(this.calculateOneTime())
+            return this.calculateOneTime()
         }
 
         let totalDamage = 0
@@ -2029,7 +2029,7 @@ export class CharBuild {
         if (this.timelineDPS) {
             totalDamage /= timeline.totalTime
         }
-        return Math.round(totalDamage)
+        return totalDamage
     }
     charModsExclusiveSeries = new Set<string>()
     meleeModsExclusiveSeries = new Set<string>()
