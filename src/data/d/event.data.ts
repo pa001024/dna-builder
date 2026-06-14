@@ -456,7 +456,7 @@ export const eventData: EventItem[] = [
         name: "沉浸式戏剧",
         desc: "我们将决定剧中故事的走向，沉浸于我们的剧目，共同迎接故事的完美终局。",
         startTime: 1781748000,
-        endTime: 1783544400,
+        endTime: 1785142800,
     },
     {
         id: 1020012,

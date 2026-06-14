@@ -120,13 +120,16 @@ function createFinder(objects) {
 }
 
 /**
- * 取导出对象里的资源名。
+ * 取导出对象里的资源引用。
  */
-function getResourceName(imageObject) {
+function getResourceObject(imageObject) {
     const resourceObject = imageObject?.Properties?.Brush?.ResourceObject?.ObjectName
     if (!resourceObject) return ""
     const match = /'([^']+)'/.exec(resourceObject)
-    return match ? match[1] : resourceObject
+    return {
+        name: match ? match[1] : resourceObject,
+        path: imageObject?.Properties?.Brush?.ResourceObject?.ObjectPath || "",
+    }
 }
 
 /**
@@ -196,12 +199,15 @@ function getOverlaySlotLayout(slotObject) {
 /**
  * 解析资源名到本地图片路径，优先使用真实同名资源。
  */
-function resolveResourceSrc(resourceName) {
+function resolveResourceSrc(resourceName, resourcePath = "") {
     if (!resourceName) return ""
     if (RESOURCE_SRC_MAP[resourceName]) return RESOURCE_SRC_MAP[resourceName]
 
     const miMatch = /^MI_PersonalInfo_Title_(\d+)$/.exec(resourceName)
     if (miMatch) {
+        const textureName = `T_PersonalInfo_Title_${miMatch[1]}`
+        if (resourcePath.includes("/Vx/03/")) return `/imgs/rank/vx03/${textureName}.webp`
+        if (resourcePath.includes("/Vx/")) return `/imgs/rank/vx/${textureName}.webp`
         const fallbackName = `T_PersonalInfo_Title_${miMatch[1]}`
         if (RESOURCE_SRC_MAP[fallbackName]) return RESOURCE_SRC_MAP[fallbackName]
         return `/imgs/rank/${fallbackName}.webp`
@@ -338,7 +344,8 @@ function buildFrame(frameKey, fileName) {
         const image = findObject("Image", widgetName, parseOuterHint(widgetRef) || "WidgetTree")
         if (!image) continue
 
-        const resourceName = getResourceName(image)
+        const resource = getResourceObject(image)
+        const resourceName = resource.name
         const maskColor = getBrushTintColor(image)
         const imageSize = getBrushImageSize(image)
         const renderTranslation = getRenderTranslation(image)
@@ -348,7 +355,7 @@ function buildFrame(frameKey, fileName) {
             key: widgetName,
             resourceName,
             zIndex: index,
-            resourceSrc: resolveResourceSrc(resourceName) || RESOURCE_FALLBACK[frameKey],
+            resourceSrc: resolveResourceSrc(resourceName, resource.path) || RESOURCE_FALLBACK[frameKey],
             renderMode: isMaskResource(resourceName) ? "blend" : "image",
             maskColor: maskColor || undefined,
             imageWidth: imageSize.width,
@@ -385,8 +392,8 @@ function buildFrame(frameKey, fileName) {
     }
 
     return {
-        width: Math.max(frameSize.width, 512),
-        height: Math.max(frameSize.height, 128),
+        width: frameSize.width || 512,
+        height: frameSize.height || 128,
         loopMs: sceneByName.get("Loop") ? ticksToMs(sceneByName.get("Loop").Properties.PlaybackRange.Value.UpperBound.Value.Value) : 0,
         introMs: sceneByName.get("In") ? ticksToMs(sceneByName.get("In").Properties.PlaybackRange.Value.UpperBound.Value.Value) : 0,
         layers,

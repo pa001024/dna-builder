@@ -16,6 +16,7 @@ type Mapping = {
     targetVar: string
     locales?: readonly string[]
     targetVars?: Partial<Record<Locale, string>>
+    postProcess?: (value: unknown) => unknown
 }
 
 type GeneratedReplacement = {
@@ -60,7 +61,23 @@ const MAPPINGS: Mapping[] = [
     { source: "Dungeon", targetStem: "dungeon", targetVar: "dungeonsData", locales: ["cn"] },
     { source: "Dispatch", targetStem: "dynquest", targetVar: "t", locales: ["cn"] },
     { source: "Cutoff", targetStem: "cutoff", targetVar: "cutoffData", locales: ["cn"] },
-    { source: "Event", targetStem: "event", targetVar: "eventData", locales: ["cn"] },
+    {
+        source: "Event",
+        targetStem: "event",
+        targetVar: "eventData",
+        locales: ["cn"],
+        postProcess: value => {
+            if (!Array.isArray(value)) {
+                throw new Error("Event 后处理只支持数组源")
+            }
+            const event = value.find(row => isRecord(row) && row.id === 1030031)
+            if (!isRecord(event)) {
+                throw new Error("后处理找不到 Event[1030031]")
+            }
+            event.startTime = 1785142800
+            return value
+        },
+    },
     {
         source: async () => {
             const convertText = await readFile(path.join(OUT_ROOT, "ModConvertId2ModId.json"), "utf8")
@@ -140,8 +157,65 @@ const MAPPINGS: Mapping[] = [
         },
         locales: ["cn", "en", "fr", "jp", "kr", "tc"],
     },
-    { source: "RaidBuff", targetStem: "raid", targetVar: "RaidBuff", locales: ["cn"] },
-    { source: "Region", targetStem: "region", targetVar: "t", locales: ["cn"] },
+    {
+        source: async () => {
+            const [raidCalculationText, raidDungeonText, raidSeasonText] = await Promise.all([
+                readFile(path.join(OUT_ROOT, "RaidCalculation.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "RaidDungeon.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "RaidSeason.json"), "utf8"),
+            ])
+
+            return [
+                {
+                    targetVar: "RaidCalculation",
+                    text: formatTsValue(JSON.parse(raidCalculationText), 0),
+                },
+                {
+                    targetVar: "RaidDungeon",
+                    text: formatTsValue(JSON.parse(raidDungeonText), 0),
+                },
+                {
+                    targetVar: "RaidSeason",
+                    text: formatTsValue(JSON.parse(raidSeasonText), 0),
+                },
+            ]
+        },
+        targetStem: "raid",
+        targetVar: "RaidCalculation",
+    },
+    {
+        source: "RaidBuff",
+        targetStem: "raid",
+        targetVar: "RaidBuff",
+        locales: ["cn"],
+        postProcess: value => {
+            if (!Array.isArray(value)) {
+                throw new Error("RaidBuff 后处理只支持数组源")
+            }
+            const raidBuff = value.find(row => isRecord(row) && row.RaidBuffID === 14)
+            if (!isRecord(raidBuff)) {
+                throw new Error("后处理找不到 RaidBuff[14]")
+            }
+            raidBuff.RaidBuffParameter = ["12%", "10%", "50%"]
+            return value
+        },
+    },
+    {
+        source: "Region",
+        targetStem: "region",
+        targetVar: "t",
+        locales: ["cn"],
+        postProcess: value => {
+            if (!Array.isArray(value)) {
+                throw new Error("Region 后处理只支持数组源")
+            }
+            const nextValue = value.filter(row => !isRecord(row) || row.id !== 3001)
+            if (nextValue.length === value.length) {
+                throw new Error("后处理找不到 Region[3001]")
+            }
+            return nextValue
+        },
+    },
     { source: "RegionReputation", targetStem: "reputation", targetVar: "reputationData", locales: ["cn"] },
     { source: "Resource", targetStem: "resource", targetVar: "resourceData", locales: ["cn"] },
     { source: "Reward", targetStem: "reward", targetVar: "t", locales: ["cn"] },
@@ -314,6 +388,15 @@ function formatTsValue(value: unknown, indent = 0): string {
         default:
             throw new Error(`不支持的 JSON 值类型: ${String(value)}`)
     }
+}
+
+/**
+ * 判断任意值是否为普通对象。
+ * @param value 待判断的值。
+ * @returns 是否为普通对象。
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return Boolean(value) && typeof value === "object" && !Array.isArray(value)
 }
 
 /**
@@ -525,7 +608,8 @@ async function main() {
 
                 const sourcePath = path.join(SOURCE_ROOT, locale, `${mapping.source}.json`)
                 const jsonText = await readFile(sourcePath, "utf-8")
-                const parsed = JSON.parse(jsonText)
+                const sourceValue = JSON.parse(jsonText)
+                const parsed = mapping.postProcess?.(sourceValue) ?? sourceValue
                 const targetVar = mapping.targetVars?.[locale] ?? mapping.targetVar
                 const span = findReplacementSpan(sourceFile, targetVar)
                 replacements.push({

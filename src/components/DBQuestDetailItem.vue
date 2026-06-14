@@ -6,7 +6,7 @@ import type { QuestChain } from "@/data/d/questchain.data"
 import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import { useSettingStore } from "@/store/setting"
 import { getQuestTypeDisplay } from "@/utils/quest-utils"
-import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
+import { getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
 interface QuestNextOption {
@@ -408,29 +408,13 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
             <h3 class="font-bold mb-2">奖励信息</h3>
             <div class="space-y-3">
                 <div
-                    v-for="(reward, index) in questChain.reward
+                    v-for="reward in questChain.reward
                         .map(id => getRewardDetails(id))
                         .filter((rewardItem): rewardItem is RewardItemType => !!rewardItem)"
                     :key="reward.id"
                     class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                 >
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium">#{{ index + 1 }} 奖励组 {{ reward.id }}</span>
-
-                        <span
-                            class="text-sm px-1.5 py-0.5 rounded"
-                            :class="
-                                getDropModeText(reward.m || '') === '独立'
-                                    ? 'bg-success text-success-content'
-                                    : 'bg-warning text-warning-content'
-                            "
-                        >
-                            {{ getDropModeText(reward.m || "") }}
-                            <span v-if="reward.totalP"> 总概率 {{ reward.totalP }}</span>
-                        </span>
-                    </div>
-
-                    <RewardItem :reward="reward" />
+                    <RewardItem :reward="reward" header />
                 </div>
             </div>
         </div>
