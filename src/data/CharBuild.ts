@@ -2348,8 +2348,10 @@ export class CharBuild {
             .join("")
             .padEnd(slots * 4, "0")
         const auraMod = base36Pad(this.auraMod?.id || 0).padEnd(4, "0")
-        const flag = type === "角色" ? "C" : "W"
-        return `${flag}${base36Pad(this.char.id || 0)}${mods}${auraMod}`
+        const isChar = type === "角色"
+        const id = isChar ? this.char.id : type === "近战" ? this.meleeWeapon.id : this.rangedWeapon.id
+        const flag = isChar ? "C" : "W"
+        return `${flag}${base36Pad(id)}${mods}${isChar ? auraMod : ""}`
     }
     codeSwapR(ids: number[], len = 8) {
         const rst = Array(len).fill(0)
