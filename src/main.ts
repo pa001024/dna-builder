@@ -1,12 +1,12 @@
 import { createApp, type VNode } from "vue"
 import "./style.css"
-import { registerSW } from "virtual:pwa-register"
 import * as Sentry from "@sentry/vue"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
 import packageJson from "../package.json"
 import { dataPackBootstrapLoading } from "./data/data-pack-bridge"
-import { bootstrapDataPack } from "./data/data-pack-runtime"
+import { bootstrapDataPack, getLoadedDataPackImgsManifest } from "./data/data-pack-runtime"
+import { mountImgsToVirtualPath } from "./data/imgs-runtime"
 import { DNA_SAFE_VERSION_LIMIT, setCurrentVersionLimit } from "./data/versionGate"
 
 import { env } from "./env"
@@ -14,6 +14,20 @@ import { applyLanguageFontClass, initI18n } from "./i18n"
 import { router } from "./router"
 import "@globalhive/vuejs-tour/dist/style.css"
 import { createPinia } from "pinia"
+
+/**
+ * 注册图片服务工作线程。
+ */
+async function registerImgsServiceWorker(): Promise<void> {
+    if (typeof navigator === "undefined" || !navigator.serviceWorker) {
+        return
+    }
+
+    await navigator.serviceWorker.register(new URL("/sw.js", window.location.origin).toString(), {
+        scope: "/",
+        updateViaCache: "none",
+    })
+}
 
 initI18n(localStorage.getItem("setting_lang") || navigator.language)
 setCurrentVersionLimit(localStorage.getItem("setting_safe_mode") === "false" ? Number.POSITIVE_INFINITY : DNA_SAFE_VERSION_LIMIT)
@@ -68,9 +82,18 @@ async function bootstrap() {
     dataPackBootstrapLoading.value = true
     app.mount("#app")
     requestAnimationFrame(() => {
-        void bootstrapDataPack().finally(() => {
-            dataPackBootstrapLoading.value = false
-        })
+        bootstrapDataPack()
+            .then(() => {
+                return mountImgsToVirtualPath({
+                    manifest: getLoadedDataPackImgsManifest(),
+                })
+            })
+            .then(() => {
+                return registerImgsServiceWorker()
+            })
+            .finally(() => {
+                dataPackBootstrapLoading.value = false
+            })
     })
 }
 
@@ -79,12 +102,6 @@ export function renderVueNode(vnode: VNode, container: HTMLElement) {
     appInstance.use(createPinia()).use(I18NextVue, { i18next }).use(router)
     appInstance.mount(container)
     return appInstance
-}
-
-if (!env.isApp) {
-    registerSW({
-        immediate: true,
-    })
 }
 
 void bootstrap()

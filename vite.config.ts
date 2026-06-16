@@ -1,3 +1,4 @@
+import fs from "node:fs"
 import { resolve } from "node:path"
 import tailwindcss from "@tailwindcss/vite"
 import vue from "@vitejs/plugin-vue"
@@ -7,11 +8,27 @@ import graphqlTag from "rollup-plugin-graphql-tag"
 import Component from "unplugin-vue-components/vite"
 import { defineConfig } from "vite"
 import { chunkSplitPlugin } from "vite-plugin-chunk-split"
-import { VitePWA } from "vite-plugin-pwa"
 import { dataPackRewritePlugin } from "./src/data/data-pack-rewrite-plugin"
 
 const host = process.env.TAURI_DEV_HOST
 const mockDataPackDir = resolve(__dirname, "mock/data-pack")
+
+/**
+ * 从构建产物中剔除 public/imgs 资源。
+ */
+function stripPublicImgsPlugin(): import("vite").Plugin {
+    let outDir = resolve(__dirname, "dist")
+
+    return {
+        name: "dna-builder-strip-public-imgs",
+        configResolved(config) {
+            outDir = resolve(config.root, config.build.outDir)
+        },
+        closeBundle() {
+            fs.rmSync(resolve(outDir, "imgs"), { recursive: true, force: true })
+        },
+    }
+}
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
@@ -30,6 +47,7 @@ export default defineConfig(async () => ({
         },
     },
     plugins: [
+        stripPublicImgsPlugin(),
         dataPackRewritePlugin(),
         vue(),
         vueJsx(),
@@ -53,74 +71,6 @@ export default defineConfig(async () => ({
         }),
         graphqlTag({
             include: ["src/**/*.{vue,js,ts}"],
-        }),
-        VitePWA({
-            registerType: "autoUpdate",
-            includeAssets: [],
-            manifest: {
-                name: "DNA Builder",
-                short_name: "DNA Builder",
-                description: "A character builder and damage calculator for Duet Night Abyss",
-                theme_color: "#ffffff",
-                icons: [
-                    {
-                        src: "app-icon.png",
-                        sizes: "192x192",
-                        type: "image/png",
-                    },
-                    {
-                        src: "app-icon.png",
-                        sizes: "512x512",
-                        type: "image/png",
-                    },
-                    {
-                        src: "app-icon.png",
-                        sizes: "512x512",
-                        type: "image/png",
-                        purpose: "any maskable",
-                    },
-                ],
-            },
-            workbox: {
-                navigateFallbackDenylist: [/^\/graphql/, /^\/api/],
-                maximumFileSizeToCacheInBytes: 12000000,
-                globPatterns: ["**/*.{js,css,html,json}"],
-                runtimeCaching: [
-                    // {
-                    //     urlPattern: /^https:\/\/xn--chq26veyq\.icu\/api\/.+/,
-                    //     handler: "NetworkFirst",
-                    //     options: {
-                    //         cacheName: "api-cache",
-                    //         expiration: {
-                    //             maxEntries: 50,
-                    //             maxAgeSeconds: 60 * 60 * 24, // 1 day
-                    //         },
-                    //     },
-                    // },
-                    {
-                        urlPattern: /\.json$/,
-                        handler: "StaleWhileRevalidate",
-                        options: {
-                            cacheName: "res-cache",
-                            expiration: {
-                                maxEntries: 60,
-                                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-                            },
-                        },
-                    },
-                    {
-                        urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
-                        handler: "CacheFirst",
-                        options: {
-                            cacheName: "image-cache",
-                            expiration: {
-                                maxEntries: 60,
-                                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-                            },
-                        },
-                    },
-                ],
-            },
         }),
     ],
     build: {
