@@ -307,6 +307,8 @@ onBeforeUnmount(() => {
 <template>
     <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
     <Updater />
+    <DataPackLanding />
+    <ScriptRuntimeFloatingBar v-if="isMainWindow" />
     <ResizeableWindow
         id="main-window"
         :title="
@@ -346,7 +348,6 @@ onBeforeUnmount(() => {
         <span>{{ $t("ai.loading") }}</span>
         <span class="loading loading-dots" />
     </div>
-    <ScriptRuntimeFloatingBar v-if="isMainWindow" />
 </template>
 
 <style>

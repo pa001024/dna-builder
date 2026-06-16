@@ -604,6 +604,7 @@ async function loadLocalVersion(version: string): Promise<boolean> {
     state.readyVersion = version
     state.manifest = manifest
     state.moduleCache = modules
+    hydrateLoadedDataPackBindings()
     return true
 }
 
@@ -952,9 +953,6 @@ export async function bootstrapDataPack(): Promise<{ ready: boolean; manifest: D
 
     if (bootstrapState.promise) {
         const ready = await bootstrapState.promise
-        if (ready) {
-            hydrateLoadedDataPackBindings()
-        }
         return {
             ready,
             manifest: getLoadedDataPackManifest(),
@@ -964,9 +962,6 @@ export async function bootstrapDataPack(): Promise<{ ready: boolean; manifest: D
     bootstrapState.promise = ensureDataPackReady()
     const ready = await bootstrapState.promise
     bootstrapState.promise = null
-    if (ready) {
-        hydrateLoadedDataPackBindings()
-    }
     return {
         ready,
         manifest: getLoadedDataPackManifest(),
