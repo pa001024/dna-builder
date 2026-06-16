@@ -1,9 +1,11 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, ref } from "vue"
 import { useRouter } from "vue-router"
 import { type DBGlobalSearchOption, GlobalSearchService } from "@/utils/global-search"
 
 const router = useRouter()
+const { t } = useTranslation()
 
 /**
  * 跳转到指定资料库页面。
@@ -149,9 +151,9 @@ const databaseItems = [
         color: "from-amber-500/20 to-orange-600/20 text-amber-500",
     },
     {
-        name: "魔灵地图",
+        name: "database.mapLocal",
         path: "/db/map-local",
-        desc: "详细魔灵刷新点位",
+        desc: "database.mapLocal_desc",
         icon: "M3 3H21V21H3V3ZM5 5V19H19V5H5ZM7 7H11V11H7V7ZM13 7H17V11H13V7ZM7 13H11V17H7V13ZM13 13H17V17H13V13Z",
         color: "from-cyan-500/20 to-sky-600/20 text-cyan-500",
     },
@@ -265,33 +267,33 @@ const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/db/map-local", "/d
 const databaseSectionConfigs: DatabaseSectionConfig[] = [
     {
         id: "build",
-        title: "构筑与养成",
-        description: "围绕角色培养、装备搭配与养成素材，适合从 Build 视角快速定位核心资料。",
-        badge: "Build",
+        title: t("view.section.build.title"),
+        description: t("view.section.build.description"),
+        badge: t("view.section.build.badge"),
         accentClass: "bg-violet-500",
         paths: ["/db/char", "/db/weapon", "/db/resource", "/db/mod", "/db/forge", "/db/damage", "/db/pet"],
     },
     {
         id: "explore",
-        title: "地图与探索",
-        description: "聚合区域、副本、刷新点位与采集相关资料，优先服务跑图、采集和副本路线查询。",
-        badge: "Explore",
+        title: t("view.section.explore.title"),
+        description: t("view.section.explore.description"),
+        badge: t("view.section.explore.badge"),
         accentClass: "bg-emerald-500",
         paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/event", "/db/solotreasure"],
     },
     {
         id: "world",
-        title: "任务与世界",
-        description: "把 NPC、动态任务、话题、声望与图鉴类内容整理到同一层，降低世界观检索成本。",
-        badge: "World",
+        title: t("view.section.world.title"),
+        description: t("view.section.world.description"),
+        badge: t("view.section.world.badge"),
         accentClass: "bg-sky-500",
         paths: ["/db/impr", "/db/npc", "/db/draft", "/db/reputation", "/db/rank", "/db/questchain", "/db/dynquest", "/db/partytopic"],
     },
     {
         id: "challenge",
-        title: "挑战与收藏",
-        description: "面向首领、怪物、成就与称号等目标型内容，方便围绕挑战目标进行连续检索。",
-        badge: "Challenge",
+        title: t("view.section.challenge.title"),
+        description: t("view.section.challenge.description"),
+        badge: t("view.section.challenge.badge"),
         accentClass: "bg-amber-500",
         paths: ["/db/monster", "/db/hardboss", "/db/achievement", "/db/title", "/db/book", "/db/walnut", "/db/accessory"],
     },
@@ -303,7 +305,7 @@ const selectedSearchSectionIds = ref(databaseSectionConfigs.map(section => secti
 
 const searchScopeOptions = computed<SearchScopeOption[]>(() => {
     return [
-        { id: "all", label: "全部" },
+        { id: "all", label: t("view.all") },
         ...databaseSectionConfigs.map(section => ({
             id: section.id,
             label: section.title,
@@ -352,17 +354,19 @@ const searchOptions = computed<DBGlobalSearchOption[]>(() => {
  * 生成搜索状态提示文案，兼顾空状态、命中状态与无结果状态。
  */
 const searchStatusText = computed(() => {
-    const searchScopeText = isAllSearchSectionsSelected.value ? "全部模块" : `已选 ${selectedSearchSectionIds.value.length} 个模块`
+    const searchScopeText = isAllSearchSectionsSelected.value
+        ? t("view.allModules")
+        : t("view.moduleCount", { count: selectedSearchSectionIds.value.length })
 
     if (!searchKeyword.value.trim()) {
-        return `当前搜索范围：${searchScopeText}`
+        return t("view.searchScope", { scope: searchScopeText })
     }
 
     if (searchOptions.value.length) {
-        return `${searchScopeText} · 已命中 ${searchOptions.value.length} 个结果`
+        return `${searchScopeText} · ${t("view.matchCount", { count: searchOptions.value.length })}`
     }
 
-    return "没有找到匹配内容，试试角色、地图、任务、副本或怪物等关键词"
+    return t("view.noResult")
 })
 
 /**
@@ -371,11 +375,11 @@ const searchStatusText = computed(() => {
 const liveStats = computed(() => {
     return [
         {
-            label: "资料入口",
+            label: t("view.databaseEntryCount"),
             value: `${databaseItems.length}`,
         },
         {
-            label: "内容分区",
+            label: t("view.contentCount"),
             value: `${databaseSectionConfigs.length}`,
         },
     ]
@@ -473,7 +477,7 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                             <div class="glass-subtle relative z-30 rounded-3xl p-4 shadow-sm shadow-base-content/5 md:p-5">
                                 <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                                     <div>
-                                        <div class="text-sm font-semibold text-base-content">全局检索入口</div>
+                                        <div class="text-sm font-semibold text-base-content">{{ $t("view.globalSearchEntry") }}</div>
                                     </div>
                                 </div>
 
@@ -497,8 +501,8 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                                 <DBGlobalSearchAutocomplete
                                     v-model="searchKeyword"
                                     :options="searchOptions"
-                                    placeholder="搜索已选模块..."
-                                    empty-text="未找到匹配的资料库条目"
+                                    :placeholder="$t('view.placeholder')"
+                                    :empty-text="$t('view.noResultEntries')"
                                     :max-visible="14"
                                     class="w-full"
                                     input-class="db-search-input"
@@ -515,9 +519,9 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                             <div class="glass-subtle rounded-3xl p-5 shadow-sm shadow-base-content/5">
                                 <div class="flex items-center justify-between gap-4">
                                     <div>
-                                        <div class="text-sm font-semibold text-base-content">推荐入口</div>
+                                        <div class="text-sm font-semibold text-base-content">{{ $t("view.featuredEntry") }}</div>
                                     </div>
-                                    <span class="badge badge-ghost badge-sm">{{ featuredItems.length }} 项</span>
+                                    <span class="badge badge-ghost badge-sm">{{ featuredItems.length }} {{ $t("view.databaseEntryCount") }}</span>
                                 </div>
 
                                 <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
@@ -566,13 +570,11 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                             <div>
                                 <div class="flex items-center gap-3">
                                     <span class="h-3 w-3 rounded-full" :class="section.accentClass" />
-                                    <span class="text-xs font-semibold uppercase tracking-[0.22em] text-base-content/45">{{
-                                        section.badge
-                                    }}</span>
+                                    <span class="text-xs font-semibold uppercase tracking-[0.22em] text-base-content/45">{{ section.badge }}</span>
                                 </div>
                                 <h2 class="mt-3 text-2xl font-bold text-base-content">{{ section.title }}</h2>
                             </div>
-                            <span class="badge badge-ghost badge-lg shrink-0">{{ section.items.length }} 个入口</span>
+                            <span class="badge badge-ghost badge-lg shrink-0">{{ section.items.length }} {{ $t("view.databaseEntryCount") }}</span>
                         </div>
 
                         <div class="mt-5 grid gap-4 md:grid-cols-2">
@@ -622,10 +624,10 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                 <section
                     class="glass-subtle rounded-[28px] p-5 text-sm leading-7 text-base-content/60 shadow-sm shadow-base-content/5 md:p-6"
                 >
-                    <div class="text-sm font-semibold text-base-content">内容授权说明</div>
-                    <p class="mt-3">除特别注明的内容外，本站文字内容遵循 CC BY-SA 3.0 协议，图片等媒体内容则遵循其原有协议。</p>
+                    <div class="text-sm font-semibold text-base-content">{{ $t("view.contentAuthorizationTitle") }}</div>
+                    <p class="mt-3">{{ $t("view.contentAuthorizationDesc") }}</p>
                     <p class="mt-2">
-                        利用本站内容时，您必须给出适当署名，并提供指向本许可协议的链接，同时标明是否对原始作品作了修改；不得以任何方式暗示本站为您或您的使用背书。
+                        {{ $t("view.contentAuthorizationDesc2") }}
                     </p>
                 </section>
             </div>

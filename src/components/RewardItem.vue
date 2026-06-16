@@ -431,7 +431,7 @@ function getCharacterFragmentIcon(name?: string): string {
 <template>
     <div class="space-y-1">
         <div class="flex items-center gap-2 mb-1" v-if="reward && header">
-            <span class="text-sm font-medium">{{ typeof header === "string" ? header : "奖励组" }} <CopyID :id="reward.id" /></span>
+            <span class="text-xs font-medium">{{ typeof header === "string" ? header : "奖励组" }} <CopyID :id="reward.id" /></span>
             <slot></slot>
             <span
                 class="text-xs px-1.5 py-0.5 rounded"

@@ -1,4 +1,5 @@
 import { register, unregister } from "@tauri-apps/plugin-global-shortcut"
+import i18next from "i18next"
 import { defineStore } from "pinia"
 import { DEFAULT_COUNTER_RESET_CRON, getNextCronOccurrence, normalizeCronExpression } from "@/utils/cron"
 
@@ -27,19 +28,19 @@ interface PersistedCounterState {
 const COUNTER_STORAGE_KEY = "counter-view-state-v1"
 const DEFAULT_COUNTERS: Omit<CounterItem, "id" | "lastResetAt" | "triggers">[] = [
     {
-        name: "无尽副本魔灵",
+        name: "counter.defaults.endlessDungeonMoling",
         value: 0,
         maxValue: 30,
         resetCron: DEFAULT_COUNTER_RESET_CRON,
     },
     {
-        name: "副本魔灵",
+        name: "counter.defaults.dungeonMoling",
         value: 0,
         maxValue: 20,
         resetCron: DEFAULT_COUNTER_RESET_CRON,
     },
     {
-        name: "钓鱼额外奖励",
+        name: "counter.defaults.fishingBonus",
         value: 0,
         maxValue: 30,
         resetCron: DEFAULT_COUNTER_RESET_CRON,
@@ -201,7 +202,14 @@ function ensureDefaultCounters(counters: CounterItem[]): CounterItem[] {
     }
     return DEFAULT_COUNTERS.map(counter => ({
         id: createLocalId(),
-        name: counter.name,
+        name: i18next.t(counter.name, {
+            defaultValue:
+                counter.name === "counter.defaults.endlessDungeonMoling"
+                    ? "无尽副本魔灵"
+                    : counter.name === "counter.defaults.dungeonMoling"
+                      ? "副本魔灵"
+                      : "钓鱼额外奖励",
+        }),
         value: counter.value,
         maxValue: counter.maxValue,
         resetCron: counter.resetCron,

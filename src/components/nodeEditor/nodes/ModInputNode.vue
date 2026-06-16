@@ -88,16 +88,16 @@ function updateModLevel(index: number, value: number) {
         <div class="space-y-3">
             <!-- MOD类型筛选 -->
             <div class="space-y-2">
-                <label class="text-sm text-base-content/60 block mb-1">MOD类型</label>
+                <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.modInput.type") }}</label>
                 <Select v-model="modType" class="w-full input input-sm">
                     <SelectItem v-for="modTypeItem in modTypes" :key="modTypeItem" :value="modTypeItem">
-                        {{ modTypeItem }}
+                        {{ $t(modTypeItem) }}
                     </SelectItem>
                 </Select>
-                <label class="text-sm text-base-content/60 block mb-1">MOD元素</label>
+                <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.modInput.element") }}</label>
                 <Select v-model="modElm" class="w-full input input-sm">
                     <SelectItem v-for="modElmItem in modElms" :key="modElmItem" :value="modElmItem">
-                        {{ modElmItem }}
+                        {{ $t(modElmItem) }}
                     </SelectItem>
                 </Select>
             </div>
@@ -109,7 +109,7 @@ function updateModLevel(index: number, value: number) {
                         <Select
                             v-model="selectedMods[index]"
                             class="flex-1 input input-sm"
-                            placeholder="选择MOD"
+                            :placeholder="$t('node-editor.modInput.chooseMod')"
                             @update:model-value="updateMod(index, $event)"
                         >
                             <SelectItem v-for="option in modOptions" :key="option.id" :value="option.id">
@@ -119,7 +119,7 @@ function updateModLevel(index: number, value: number) {
                         <Select
                             v-model="modLevels[index]"
                             class="flex-1 input input-sm"
-                            placeholder="选择等级"
+                            :placeholder="$t('node-editor.modInput.chooseLevel')"
                             @update:model-value="updateModLevel(index, $event)"
                         >
                             <SelectItem v-for="lv in 10" :key="lv" :value="lv">
@@ -135,7 +135,7 @@ function updateModLevel(index: number, value: number) {
                 <!-- 添加MOD槽位按钮 -->
                 <button class="btn btn-sm btn-outline w-full" @click="addModSlot">
                     <Icon icon="ri:add-line" class="mr-1" />
-                    添加MOD槽位
+                    {{ $t("node-editor.modInput.addModSlot") }}
                 </button>
             </div>
         </div>

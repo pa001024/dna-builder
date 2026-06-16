@@ -67,7 +67,7 @@ const getAnimationDelay = (index: number) => {
                 <input
                     v-model="searchQuery"
                     type="text"
-                    :placeholder="$t('搜索角色名称、别名、阵营（支持拼音）...')"
+                    :placeholder="$t('char-list.searchPlaceholder')"
                     class="input input-bordered w-full pl-10 pr-4 focus:input-primary transition-all duration-200"
                 />
                 <Icon icon="ri:search-line" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 w-5 h-5" />
@@ -94,7 +94,7 @@ const getAnimationDelay = (index: number) => {
             <div v-if="filteredChars.length === 0" class="flex flex-col items-center justify-center h-full text-base-content/50 py-20">
                 <Icon icon="ri:emotion-sad-line" class="w-16 h-16 mb-4" />
                 <p class="text-lg">
-                    {{ $t("没有找到匹配的角色") }}
+                    {{ $t("char-list.empty") }}
                 </p>
             </div>
 
@@ -165,11 +165,15 @@ const getAnimationDelay = (index: number) => {
 
                         <!-- 底部属性条 -->
                         <div class="grid grid-cols-2 gap-1 pt-2 border-t border-base-200">
-                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-primary transition-colors duration-200">
+                            <div
+                                class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-primary transition-colors duration-200"
+                            >
                                 <span>⚔️</span>
                                 <span>{{ char.基础攻击 }}</span>
                             </div>
-                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-success transition-colors duration-200">
+                            <div
+                                class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-success transition-colors duration-200"
+                            >
                                 <span>❤️</span>
                                 <span>{{ char.基础生命 }}</span>
                             </div>
@@ -191,10 +195,10 @@ const getAnimationDelay = (index: number) => {
             <span
                 >{{ $t("共") }} {{ filteredChars.length }}
 
-                {{ $t("个角色") }}</span
+                {{ $t("char-list.totalSuffix") }}</span
             >
-            <div class="text-xs text-base-content/60">未上线内容可能会发生改变</div>
-            <span v-if="activeTab !== '全部'" class="badge badge-primary badge-sm">{{ activeTab }}</span>
+            <div class="text-xs text-base-content/60">{{ $t("char-list.unreleasedHint") }}</div>
+            <span v-if="activeTab !== '全部'" class="badge badge-primary badge-sm">{{ $t(activeTab) }}</span>
         </div>
     </div>
 </template>

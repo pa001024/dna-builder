@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { EventItem } from "@/data/d/event.data"
+import { limitedPrizePools } from "@/data/d/limitedprize.data"
 import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments, type StoryTextSegment } from "@/utils/story-text"
 import { formatTimeRange } from "@/utils/time"
 
@@ -32,7 +33,7 @@ function parseEventText(text?: string): StoryTextSegment[] {
         </div>
 
         <div class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">描述</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.description") }}</div>
             <div class="text-sm leading-6 whitespace-pre-wrap break-all">
                 <template v-for="(segment, index) in parseEventText(event.desc)" :key="`desc-${index}-${segment.tone}`">
                     <span
@@ -49,7 +50,7 @@ function parseEventText(text?: string): StoryTextSegment[] {
         </div>
 
         <div v-if="event.rule" class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">规则</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("event.rule") }}</div>
             <div class="text-sm leading-6 whitespace-pre-wrap break-all">
                 <template v-for="(segment, index) in parseEventText(event.rule)" :key="`rule-${index}-${segment.tone}`">
                     <span
@@ -67,7 +68,7 @@ function parseEventText(text?: string): StoryTextSegment[] {
 
         <BackpackPuzzle v-if="event.id === 103015" :event-id="event.id" />
 
-        <LimitedPrizeSimulator v-if="event.id === 103021" :event-id="event.id" />
+        <LimitedPrizeSimulator v-if="event.id in limitedPrizePools" :event-id="event.id" />
 
         <div v-if="event.boxDrop" class="rounded-md bg-base-200 p-3">
             <BoxDropItem :box-drop="event.boxDrop" />

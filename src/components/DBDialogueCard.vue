@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import type { Dialogue, DialogueOption } from "@/data/d/quest.data"
-import { getImprType, getRegionType } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
+import { getImprType, getRegionType } from "@/utils/quest-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
 const props = defineProps<{

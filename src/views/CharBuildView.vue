@@ -32,6 +32,7 @@ import {
     monsterMap,
     weaponData,
 } from "../data"
+import { dataPackHydrationKey, isDataPackHydrated } from "../data/data-pack-bridge"
 import type { SkillWeapon, Weapon } from "../data/data-types"
 import { waitForInitialLoad } from "../i18n"
 import { useInvStore } from "../store/inv"
@@ -48,9 +49,50 @@ const ui = useUIStore()
 const route = useRoute()
 const tourStore = useTourStore()
 const { t } = useTranslation()
+const dataPackTick = computed(() => dataPackHydrationKey.value)
+const isCharBuildReady = computed(() => {
+    dataPackTick.value
+    return isDataPackHydrated() && !!charMap.get(+route.params.charId)
+})
+
+/**
+ * 创建数据包未就绪时使用的空构筑占位对象。
+ * @returns 空构筑对象
+ */
+function createEmptyCharBuild() {
+    return {
+        char: {
+            id: 0,
+            名称: selectedChar.value || "",
+            属性: "",
+            技能: [],
+            加成: {},
+            精通: [],
+            url: "",
+        },
+        meleeWeapon: { url: "", _originalWeaponData: { icon: "" } },
+        rangedWeapon: { url: "", _originalWeaponData: { icon: "" } },
+        skillWeapon: undefined,
+        skillWeaponSkills: [],
+        selectedSkillType: "角色",
+        selectedSkill: undefined,
+        skills: [],
+        charSkills: [],
+        targetFunction: "",
+        isWeaponForgeEffective: () => true,
+        validateAST: () => "",
+        validateCustomVariable: () => "",
+        calculateAttributes: () => ({}),
+        calculate: () => 0,
+        getIdentifierNames: () => [],
+    } as unknown as CharBuild
+}
 
 // 路由
-const selectedChar = computed(() => charMap.get(+route.params.charId)?.名称 || "")
+const selectedChar = computed(() => {
+    dataPackTick.value
+    return charMap.get(+route.params.charId)?.名称 || ""
+})
 const charSettings = useCharSettings(selectedChar)
 const charProjectKey = computed(() => `project.${selectedChar.value}`)
 const charProject = useLocalStorage(charProjectKey, {
@@ -59,25 +101,31 @@ const charProject = useLocalStorage(charProjectKey, {
 })
 
 // 获取实际数据
-const charOptions = charData.map(char => ({
-    value: char.名称,
-    label: char.名称,
-    elm: char.属性,
-    icon: LeveledChar.url(char.icon),
-}))
-const modOptions = modData
-    .map(mod => ({
-        value: mod.id,
-        label: mod.名称,
-        quality: mod.品质,
-        type: mod.类型,
-        limit: mod.属性 || mod.限定,
-        ser: mod.系列,
-        count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
-        bufflv: inv.getBuffLv(mod.id),
-        lv: inv.getModLv(mod.id, mod.品质),
+const charOptions = computed(() => {
+    dataPackTick.value
+    return charData.map(char => ({
+        value: char.名称,
+        label: char.名称,
+        elm: char.属性,
+        icon: LeveledChar.url(char.icon),
     }))
-    .filter(mod => mod.count)
+})
+const modOptions = computed(() => {
+    dataPackTick.value
+    return modData
+        .map(mod => ({
+            value: mod.id,
+            label: mod.名称,
+            quality: mod.品质,
+            type: mod.类型,
+            limit: mod.属性 || mod.限定,
+            ser: mod.系列,
+            count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
+            bufflv: inv.getBuffLv(mod.id),
+            lv: inv.getModLv(mod.id, mod.品质),
+        }))
+        .filter(mod => mod.count)
+})
 
 /**
  * 游戏内魔之楔面板的线性返回顺序。
@@ -101,8 +149,9 @@ const _buffOptions = reactive(
         description: buff.描述,
     }))
 )
-const buffOptions = computed(() =>
-    _buffOptions
+const buffOptions = computed(() => {
+    dataPackTick.value
+    return _buffOptions
         .filter(buff => !buff.limit || buff.limit === selectedChar.value || buff.limit === charBuild.value.char.属性)
         .map(v => {
             const b = charSettings.value.buffs.find(b => b[0] === v.label)
@@ -115,40 +164,51 @@ const buffOptions = computed(() =>
                 lv,
             }
         })
-)
+})
 // 近战和远程武器选项
-const meleeWeaponOptions = weaponData
-    .filter(weapon => weapon.类型[0] === "近战")
-    .map(weapon => ({
-        value: weapon.名称,
-        label: weapon.名称,
-        type: weapon.类型[1],
-        icon: LeveledWeapon.url(weapon.icon),
-    }))
-const rangedWeaponOptions = weaponData
-    .filter(weapon => weapon.类型[0] === "远程")
-    .map(weapon => ({
-        value: weapon.名称,
-        label: weapon.名称,
-        type: weapon.类型[1],
-        icon: LeveledWeapon.url(weapon.icon),
-    }))
+const meleeWeaponOptions = computed(() => {
+    dataPackTick.value
+    return weaponData
+        .filter(weapon => weapon.类型[0] === "近战")
+        .map(weapon => ({
+            value: weapon.名称,
+            label: weapon.名称,
+            type: weapon.类型[1],
+            icon: LeveledWeapon.url(weapon.icon),
+        }))
+})
+const rangedWeaponOptions = computed(() => {
+    dataPackTick.value
+    return weaponData
+        .filter(weapon => weapon.类型[0] === "远程")
+        .map(weapon => ({
+            value: weapon.名称,
+            label: weapon.名称,
+            type: weapon.类型[1],
+            icon: LeveledWeapon.url(weapon.icon),
+        }))
+})
 
 // 状态变量
-const selectedCharMods = computed(() =>
-    charSettings.value.charMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
-)
-const selectedMeleeMods = computed(() =>
-    charSettings.value.meleeMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
-)
-const selectedRangedMods = computed(() =>
-    charSettings.value.rangedMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
-)
-const selectedSkillWeaponMods = computed(() =>
-    charSettings.value.skillWeaponMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
-)
-const selectedBuffs = computed(() =>
-    charSettings.value.buffs
+const selectedCharMods = computed(() => {
+    dataPackTick.value
+    return charSettings.value.charMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+})
+const selectedMeleeMods = computed(() => {
+    dataPackTick.value
+    return charSettings.value.meleeMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+})
+const selectedRangedMods = computed(() => {
+    dataPackTick.value
+    return charSettings.value.rangedMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+})
+const selectedSkillWeaponMods = computed(() => {
+    dataPackTick.value
+    return charSettings.value.skillWeaponMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+})
+const selectedBuffs = computed(() => {
+    dataPackTick.value
+    return charSettings.value.buffs
         .map(v => {
             try {
                 const b = LeveledBuffHelper.fromName(v[0], v[1])
@@ -160,21 +220,21 @@ const selectedBuffs = computed(() =>
             }
         })
         .filter(b => b !== null)
-)
+})
 
 const team1Options = computed(() =>
     [{ value: "-", label: "无", elm: "", icon: `/imgs/1.png` }].concat(
-        charOptions.filter(char => char.label !== selectedChar.value && char.label !== charSettings.value.team2)
+        charOptions.value.filter(char => char.label !== selectedChar.value && char.label !== charSettings.value.team2)
     )
 )
 const team2Options = computed(() =>
     [{ value: "-", label: "无", elm: "", icon: `/imgs/1.png` }].concat(
-        charOptions.filter(char => char.label !== selectedChar.value && char.label !== charSettings.value.team1)
+        charOptions.value.filter(char => char.label !== selectedChar.value && char.label !== charSettings.value.team1)
     )
 )
 
 const teamWeaponOptions = computed(() =>
-    [{ value: "-", label: "无", type: "", icon: `/imgs/1.png` }].concat(meleeWeaponOptions.concat(rangedWeaponOptions))
+    [{ value: "-", label: "无", type: "", icon: `/imgs/1.png` }].concat(meleeWeaponOptions.value.concat(rangedWeaponOptions.value))
 )
 const hpPercentOptions = [1, ...Array.from({ length: 20 }, (_, i) => (i + 1) * 5)]
 const resonanceGainOptions = [0, 0.5, 1, 1.5, 2, 2.5, 3]
@@ -190,6 +250,10 @@ const getInlineActions = () => {
 
 // 创建CharBuild实例
 const charBuild = computed(() => {
+    dataPackTick.value
+    if (!isCharBuildReady.value) {
+        return createEmptyCharBuild()
+    }
     try {
         const char = LeveledCharHelper.fromId(selectedChar.value, charSettings.value.charLevel)
         const melee = LeveledWeaponHelper.fromId(
@@ -230,8 +294,7 @@ const charBuild = computed(() => {
         return b
     } catch {
         localStorage.removeItem(`build.${selectedChar.value}`)
-        location.reload()
-        return {} as CharBuild
+        return createEmptyCharBuild()
     }
 })
 
@@ -691,10 +754,13 @@ onMounted(async () => {
 
 // 更新CharBuild实例
 function updateCharBuild() {
+    if (!isCharBuildReady.value) {
+        return
+    }
     if (!monsterMap.has(charSettings.value.enemyId)) {
         charSettings.value.enemyId = 130
     }
-    if (!charSettings.value.baseName) {
+    if (!charSettings.value.baseName && charBuild.value.char.技能[0]) {
         charSettings.value.baseName = charBuild.value.char.技能[0].名称
     }
     pad(charSettings.value.charMods, 8, null)
@@ -715,7 +781,15 @@ function updateCharBuild() {
         return arr
     }
 }
-updateCharBuild()
+watch(
+    () => isCharBuildReady.value,
+    ready => {
+        if (ready) {
+            updateCharBuild()
+        }
+    },
+    { immediate: true }
+)
 
 /**
  * 将当前角色的自定义 BUFF 配置同步到运行时 buffMap。

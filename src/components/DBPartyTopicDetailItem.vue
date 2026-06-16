@@ -4,11 +4,12 @@ import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reac
 import { charMap, LeveledCharHelper } from "@/data"
 import { npcMap } from "@/data/d/npc.data"
 import type { PartyTopic } from "@/data/d/partytopic.data"
-import { type Dialogue, type DialogueOption, getImprType, getRegionType } from "@/data/d/quest.data"
+import { type Dialogue, type DialogueOption } from "@/data/d/quest.data"
 import { questChainMap } from "@/data/d/questchain.data"
 import { resourceMap } from "@/data/d/resource.data"
 import { useSettingStore } from "@/store/setting"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
+import { getImprType, getRegionType } from "@/utils/quest-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 

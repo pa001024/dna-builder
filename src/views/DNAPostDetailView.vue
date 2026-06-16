@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DNAAPI, type DNAPostCommentListBean, type DNAPostDetailResponse } from "dna-api"
+import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useSettingStore } from "../store/setting"
@@ -7,6 +8,7 @@ import { useUIStore } from "../store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()
+const { t } = useTranslation()
 let api: DNAAPI
 const router = useRouter()
 const route = useRoute()
@@ -25,7 +27,7 @@ const postId = computed(() => route.params.postId as string)
 onMounted(async () => {
     const p = await setting.getDNAAPI()
     if (!p) {
-        ui.showErrorMessage("请先登录")
+        ui.showErrorMessage(t("dna-post.loginFirst"))
         router.push("/game-accounts")
         return
     }
@@ -44,10 +46,10 @@ async function loadPostDetail(softReload = false) {
             commentHasNext.value = res.data.hasNext === 1
             commentPageIndex.value = 1
         } else {
-            ui.showErrorMessage(res.msg || "获取帖子详情失败")
+            ui.showErrorMessage(res.msg || t("dna-post.postDetailFailed"))
         }
     } catch (e) {
-        ui.showErrorMessage("获取帖子详情失败", e)
+        ui.showErrorMessage(t("dna-post.postDetailFailed"), e)
     } finally {
         loading.value = false
     }
@@ -69,10 +71,10 @@ async function loadMoreComments() {
             commentPageIndex.value = nextPage
             commentHasNext.value = res.data.hasNext === 1
         } else {
-            ui.showErrorMessage(res.msg || "加载更多评论失败")
+            ui.showErrorMessage(res.msg || t("dna-post.loadMoreCommentsFailed"))
         }
     } catch (e) {
-        ui.showErrorMessage("加载更多评论失败", e)
+        ui.showErrorMessage(t("dna-post.loadMoreCommentsFailed"), e)
     } finally {
         moreLoading.value = false
     }
@@ -87,7 +89,7 @@ async function follow(userId: string, unfollow?: boolean) {
 
 async function submitComment() {
     if (!commentContent.value.trim()) {
-        ui.showErrorMessage("评论内容不能为空")
+        ui.showErrorMessage(t("dna-post.commentRequired"))
         return
     }
 
@@ -111,12 +113,12 @@ async function submitComment() {
             commentContent.value = ""
             // 重新加载帖子详情以获取最新评论
             await loadPostDetail()
-            ui.showSuccessMessage("评论发布成功")
+            ui.showSuccessMessage(t("dna-post.commentPublished"))
         } else {
-            ui.showErrorMessage(res.msg || "评论发布失败")
+            ui.showErrorMessage(res.msg || t("dna-post.commentPublishFailed"))
         }
     } catch (e) {
-        ui.showErrorMessage("评论发布失败", e)
+        ui.showErrorMessage(t("dna-post.commentPublishFailed"), e)
     } finally {
         commentLoading.value = false
     }
@@ -133,7 +135,7 @@ async function submitComment() {
             </button>
             <h1 class="text-xl font-bold inline-flex justify-center items-center gap-4">
                 <img :src="postRes?.postDetail?.gameForumVo.iconUrl" class="size-8" />
-                {{ postRes?.postDetail?.gameForumVo.name || "帖子详情" }}
+                {{ postRes?.postDetail?.gameForumVo.name || $t("dna-post.postDetailTitle") }}
             </h1>
             <div class="w-12" />
             <!-- Spacer -->
@@ -153,7 +155,7 @@ async function submitComment() {
                             <SRouterLink :to="`/dna/mine/${postRes.postDetail.postUserId}`" class="cursor-pointer">
                                 <img
                                     :src="postRes.postDetail.headCodeUrl"
-                                    alt="用户头像"
+                                    :alt="$t('dna-post.userAvatar')"
                                     class="w-10 h-10 rounded-full object-cover border border-base-300"
                                 />
                             </SRouterLink>
@@ -166,7 +168,7 @@ async function submitComment() {
                                 </div>
                             </div>
                             <div class="btn" @click="follow(postRes.postDetail.postUserId, !!postRes.isFollow)">
-                                {{ postRes.isFollow ? "取消关注" : "关注" }}
+                                {{ postRes.isFollow ? $t("dna-post.cancelFollow") : $t("dna-post.follow") }}
                             </div>
                         </div>
                         <!-- 帖子标题 -->
@@ -177,17 +179,17 @@ async function submitComment() {
                         <!-- 帖子元信息 -->
                         <div class="flex flex-wrap gap-2 mb-4 text-sm text-base-content/70">
                             <span class="text-xs text-base-content/50">
-                                <span>浏览: {{ postRes.postDetail.browseCount }}</span>
-                                <span>评论: {{ postRes.postDetail.commentCount }}</span>
-                                <span>点赞: {{ postRes.postDetail.likeCount }}</span>
-                                <span>收藏: {{ postRes.postDetail.collectionCount }}</span></span
+                                <span>{{ $t("dna-post.browse") }}: {{ postRes.postDetail.browseCount }}</span>
+                                <span>{{ $t("dna-post.comment") }}: {{ postRes.postDetail.commentCount }}</span>
+                                <span>{{ $t("dna-post.like") }}: {{ postRes.postDetail.likeCount }}</span>
+                                <span>{{ $t("dna-post.favorite") }}: {{ postRes.postDetail.collectionCount }}</span></span
                             >
                         </div>
 
                         <!-- 帖子标签 -->
                         <div class="flex flex-wrap gap-2">
-                            <span v-if="postRes.postDetail.isElite === 1" class="badge badge-secondary text-xs">精华</span>
-                            <span v-if="postRes.postDetail.isOfficial === 1" class="badge badge-info text-xs">官方</span>
+                            <span v-if="postRes.postDetail.isElite === 1" class="badge badge-secondary text-xs">{{ $t("dna-post.featured") }}</span>
+                            <span v-if="postRes.postDetail.isOfficial === 1" class="badge badge-info text-xs">{{ $t("dna-post.official") }}</span>
                             <span v-for="(topic, index) in postRes.postDetail.topics" :key="index" class="badge badge-outline text-xs">
                                 <Icon icon="ri:hashtag" />
                                 {{ topic.topicName }}</span
@@ -208,7 +210,7 @@ async function submitComment() {
                 <!-- 评论区 -->
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body">
-                        <h3 class="card-title text-xl mb-4">评论 ({{ comments.length }})</h3>
+                        <h3 class="card-title text-xl mb-4">{{ $t("dna-post.commentsTitle", { count: comments.length }) }}</h3>
 
                         <!-- 评论列表 -->
                         <div class="space-y-4">

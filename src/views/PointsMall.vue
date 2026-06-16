@@ -50,9 +50,9 @@ function isNameCardProduct(product: ShopProduct): boolean {
  * @param product 商品
  */
 function getRewardTypeLabel(product: ShopProduct): string {
-    if (isTitleProduct(product)) return "称号"
-    if (isNameCardProduct(product)) return "名字特效"
-    return product.rewardType || "其他"
+    if (isTitleProduct(product)) return t("points-mall.rewardType.title")
+    if (isNameCardProduct(product)) return t("points-mall.rewardType.nameCard")
+    return product.rewardType || t("points-mall.other")
 }
 
 /**
@@ -196,8 +196,8 @@ async function fetchProducts(): Promise<void> {
         const result = await shopProductsQuery({ limit: 200, offset: 0 }, { requestPolicy: "network-only" })
         products.value = result ?? []
     } catch (error) {
-        console.error("拉取积分商城商品失败:", error)
-        ui.showErrorMessage("拉取商品失败，请稍后重试")
+        console.error("获取商品列表失败:", error)
+        ui.showErrorMessage(t("points-mall.fetchProductsError"))
         products.value = []
     } finally {
         loadingProducts.value = false
@@ -218,8 +218,8 @@ async function fetchSummary(): Promise<void> {
         const result = await myShopSummaryQuery(undefined, { requestPolicy: "network-only" })
         summary.value = result ?? null
     } catch (error) {
-        console.error("拉取积分商城摘要失败:", error)
-        ui.showErrorMessage("拉取积分信息失败，请稍后重试")
+        console.error("获取积分摘要失败:", error)
+        ui.showErrorMessage(t("points-mall.fetchSummaryError"))
         summary.value = null
     } finally {
         loadingSummary.value = false
@@ -232,33 +232,33 @@ async function fetchSummary(): Promise<void> {
  */
 async function redeemProduct(product: ShopProduct): Promise<void> {
     if (!user.jwtToken) {
-        ui.showErrorMessage("请先登录 DNA Builder 账号")
+        ui.showErrorMessage(t("points-mall.loginFirst"))
         return
     }
     if (!summary.value) {
-        ui.showErrorMessage("当前无法获取积分信息，请稍后重试")
+        ui.showErrorMessage(t("points-mall.summaryNotReady"))
         return
     }
     if (!isProductPurchasable(product)) {
-        ui.showErrorMessage("该商品当前不在可兑换时间范围内")
+        ui.showErrorMessage(t("points-mall.notInRedeemWindow"))
         return
     }
 
-    const ok = await ui.showDialog("确认兑换", `确定花费 ${formatPoints(product.pointsCost)} 积分兑换「${product.name}」吗？`)
+    const ok = await ui.showDialog(t("points-mall.confirmRedeem"), t("points-mall.confirmRedeemDesc", { cost: formatPoints(product.pointsCost), name: product.name }))
     if (!ok) return
 
     actionProductId.value = product.id
     try {
         const result = await redeemShopProductMutation({ productId: product.id })
         if (result?.success) {
-            ui.showSuccessMessage(result.message || "兑换成功")
+            ui.showSuccessMessage(result.message || t("points-mall.redeemSuccess"))
             await fetchSummary()
         } else {
-            ui.showErrorMessage(result?.message || "兑换失败")
+            ui.showErrorMessage(result?.message || t("points-mall.redeemFailed"))
         }
     } catch (error) {
         console.error("兑换商品失败:", error)
-        ui.showErrorMessage("兑换失败，请稍后重试")
+        ui.showErrorMessage(t("points-mall.redeemFailedRetry"))
     } finally {
         actionProductId.value = null
     }
@@ -270,11 +270,11 @@ async function redeemProduct(product: ShopProduct): Promise<void> {
  */
 async function equipProduct(product: ShopProduct): Promise<void> {
     if (!user.jwtToken) {
-        ui.showErrorMessage("请先登录 DNA Builder 账号")
+        ui.showErrorMessage(t("points-mall.loginFirst"))
         return
     }
     if (!ownedIdSet.value.has(product.assetId)) {
-        ui.showErrorMessage("请先兑换该商品")
+        ui.showErrorMessage(t("points-mall.equipAfterRedeem"))
         return
     }
 
@@ -282,14 +282,14 @@ async function equipProduct(product: ShopProduct): Promise<void> {
     try {
         const result = await equipShopAssetMutation({ assetId: product.assetId })
         if (result?.success) {
-            ui.showSuccessMessage(result.message || "已应用装扮")
+            ui.showSuccessMessage(result.message || t("points-mall.equipSuccess"))
             await fetchSummary()
         } else {
-            ui.showErrorMessage(result?.message || "应用装扮失败")
+            ui.showErrorMessage(result?.message || t("points-mall.equipFailed"))
         }
     } catch (error) {
-        console.error("应用装扮失败:", error)
-        ui.showErrorMessage("应用装扮失败，请稍后重试")
+        console.error("装备商品失败:", error)
+        ui.showErrorMessage(t("points-mall.equipFailedRetry"))
     } finally {
         actionProductId.value = null
     }
@@ -321,15 +321,15 @@ watch(
     <div class="h-full flex flex-col">
         <div class="bg-base-300/50 backdrop-blur-sm p-4 border-b border-base-200">
             <div class="flex items-center gap-2">
-                <div class="text-lg font-bold">积分商城</div>
+                <div class="text-lg font-bold">{{ $t("points-mall.title") }}</div>
                 <div class="ml-auto flex items-center gap-2">
                     <button class="btn btn-outline btn-sm" :disabled="loadingProducts || loadingSummary" @click="refreshAll">
                         <Icon icon="ri:refresh-line" class="w-4 h-4" />
-                        刷新
+                        {{ $t("points-mall.refresh") }}
                     </button>
                     <RouterLink to="/setting" class="btn btn-primary btn-sm">
                         <Icon icon="ri:settings-3-line" class="w-4 h-4" />
-                        账号设置
+                        {{ $t("points-mall.accountSettings") }}
                     </RouterLink>
                 </div>
             </div>
@@ -343,17 +343,17 @@ watch(
                         <div class="card-body p-4">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <div class="text-sm text-base-content/60">积分余额</div>
+                                    <div class="text-sm text-base-content/60">{{ $t("points-mall.balance") }}</div>
                                     <div class="text-3xl font-extrabold leading-tight">
                                         <span v-if="loadingSummary" class="loading loading-spinner loading-sm" />
                                         <span v-else>{{ pointsBalance === null ? "--" : formatPoints(pointsBalance) }}</span>
                                     </div>
                                 </div>
-                                <div class="badge badge-primary badge-outline">POINTS</div>
+                                <div class="badge badge-primary badge-outline">{{ $t("points-mall.points") }}</div>
                             </div>
                             <div class="text-xs text-base-content/50 mt-2">
-                                <span v-if="!user.jwtToken">登录后可查看积分并兑换装扮。</span>
-                                <span v-else>积分用于兑换称号、名字特效等装扮。</span>
+                                <span v-if="!user.jwtToken">{{ $t("points-mall.loginHint") }}</span>
+                                <span v-else>{{ $t("points-mall.pointsHint") }}</span>
                             </div>
                         </div>
                     </div>
@@ -361,13 +361,13 @@ watch(
                     <div class="card bg-base-100 shadow-lg">
                         <div class="card-body p-4">
                             <div class="flex items-center justify-between">
-                                <div class="text-sm font-bold">当前装扮</div>
-                                <div class="text-xs text-base-content/50">预览以当前选择为准</div>
+                                <div class="text-sm font-bold">{{ $t("points-mall.currentAppearance") }}</div>
+                                <div class="text-xs text-base-content/50">{{ $t("points-mall.previewHint") }}</div>
                             </div>
 
                             <div class="mt-3 rounded-xl bg-base-200/50 p-4">
                                 <div class="flex items-start gap-2">
-                                    <QQAvatar class="mt-2 size-8" :qq="user.qq || ''" :name="user.name || '用户'" />
+                                    <QQAvatar class="mt-2 size-8" :qq="user.qq || ''" :name="user.name || $t('points-mall.userFallback')" />
                                     <div class="min-w-0 flex-1">
                                         <div class="flex min-h-5 w-full items-center gap-1.5 text-sm text-base-content/80">
                                             <span
@@ -376,7 +376,7 @@ watch(
                                                 LV{{ getPreviewUserLevel() }}
                                             </span>
                                             <span class="truncate" :class="selectedNameCard?.displayClass || ''">
-                                                {{ user.name || "用户" }}
+                                                {{ user.name || $t("points-mall.userFallback") }}
                                             </span>
                                             <span v-if="selectedTitle?.rewardName" :class="selectedTitle?.displayClass || ''">
                                                 {{ selectedTitle.rewardName }}
@@ -385,24 +385,26 @@ watch(
                                         <div
                                             class="safe-html mt-1 inline-flex max-w-80 select-text flex-col gap-2 rounded-lg bg-base-100 p-2 text-sm text-base-content"
                                         >
-                                            气泡预览
+                                            {{ $t("points-mall.bubblePreview") }}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mt-3 text-xs opacity-90">名字特效：{{ selectedNameCard?.rewardName || "默认" }}</div>
+                                <div class="mt-3 text-xs opacity-90">
+                                    {{ $t("points-mall.nameEffect") }}：{{ selectedNameCard?.rewardName || $t("points-mall.default") }}
+                                </div>
                             </div>
 
-                            <div class="mt-3 text-xs text-base-content/50">你可以在商品列表中兑换并点击“使用”来切换装扮。</div>
+                            <div class="mt-3 text-xs text-base-content/50">{{ $t("points-mall.useHint") }}</div>
                         </div>
                     </div>
 
                     <div class="card bg-base-100 shadow-lg">
                         <div class="card-body p-4">
-                            <div class="text-sm font-bold">说明</div>
+                            <div class="text-sm font-bold">{{ $t("points-mall.instructionTitle") }}</div>
                             <div class="text-xs text-base-content/60 mt-2 space-y-1">
-                                <div>称号会展示在昵称旁边，用于体现成就或身份。</div>
-                                <div>名字特效会影响聊天中昵称的显示特效。</div>
-                                <div>兑换与装备都需要登录账号。</div>
+                                <div>{{ $t("points-mall.instructionTitleBadge") }}</div>
+                                <div>{{ $t("points-mall.instructionNameEffect") }}</div>
+                                <div>{{ $t("points-mall.instructionLogin") }}</div>
                             </div>
                         </div>
                     </div>
@@ -413,11 +415,13 @@ watch(
                     <div class="card bg-base-100 shadow-lg">
                         <div class="card-body p-4">
                             <div class="flex items-center gap-2">
-                                <div class="text-sm font-bold">商品列表</div>
+                                <div class="text-sm font-bold">{{ $t("points-mall.productList") }}</div>
                                 <div class="ml-auto tabs tabs-box">
-                                    <a class="tab" :class="{ 'tab-active': tab === 'all' }" @click="tab = 'all'">全部</a>
-                                    <a class="tab" :class="{ 'tab-active': tab === 'title' }" @click="tab = 'title'">称号</a>
-                                    <a class="tab" :class="{ 'tab-active': tab === 'name_card' }" @click="tab = 'name_card'">名字特效</a>
+                                    <a class="tab" :class="{ 'tab-active': tab === 'all' }" @click="tab = 'all'">{{ $t("points-mall.all") }}</a>
+                                    <a class="tab" :class="{ 'tab-active': tab === 'title' }" @click="tab = 'title'">{{ $t("points-mall.rewardType.title") }}</a>
+                                    <a class="tab" :class="{ 'tab-active': tab === 'name_card' }" @click="tab = 'name_card'">
+                                        {{ $t("points-mall.rewardType.nameCard") }}
+                                    </a>
                                 </div>
                             </div>
 
@@ -425,7 +429,7 @@ watch(
                                 <span class="loading loading-spinner" />
                             </div>
                             <div v-else-if="filteredProducts.length === 0" class="py-10 text-center text-base-content/50">
-                                暂无可兑换商品
+                                {{ $t("points-mall.noProducts") }}
                             </div>
                             <div v-else class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div v-for="p in filteredProducts" :key="p.id" class="card bg-base-200/40 border border-base-200">
@@ -435,15 +439,15 @@ watch(
                                                 <div class="font-bold text-base truncate">{{ p.name }}</div>
                                                 <div class="mt-1 flex items-center gap-2">
                                                     <span class="badge badge-outline">{{ getRewardTypeLabel(p) }}</span>
-                                                    <span v-if="ownedIdSet.has(p.assetId)" class="badge badge-success">已拥有</span>
-                                                    <span v-else class="badge badge-ghost">未拥有</span>
+                                                    <span v-if="ownedIdSet.has(p.assetId)" class="badge badge-success">{{ $t("points-mall.owned") }}</span>
+                                                    <span v-else class="badge badge-ghost">{{ $t("points-mall.notOwned") }}</span>
                                                 </div>
                                             </div>
                                             <div class="text-right">
-                                                <div class="text-xs text-base-content/60">价格</div>
+                                                <div class="text-xs text-base-content/60">{{ $t("points-mall.price") }}</div>
                                                 <div class="font-extrabold">
                                                     {{ formatPoints(p.pointsCost) }}
-                                                    <span class="text-xs font-normal text-base-content/60">积分</span>
+                                                    <span class="text-xs font-normal text-base-content/60">{{ $t("points-mall.points") }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -452,14 +456,16 @@ watch(
                                             {{ p.description }}
                                         </div>
 
-                                        <div class="mt-3 text-xs text-base-content/55">投放时间：{{ formatProductAvailability(p) }}</div>
+                                        <div class="mt-3 text-xs text-base-content/55">
+                                            {{ $t("points-mall.availability") }}：{{ formatProductAvailability(p) }}
+                                        </div>
 
                                         <!-- 预览区 -->
                                         <div class="mt-3">
                                             <div v-if="isTitleProduct(p)" class="rounded-lg bg-base-200/50 p-3">
-                                                <div class="text-xs opacity-90 mb-2">预览</div>
+                                                <div class="text-xs opacity-90 mb-2">{{ $t("points-mall.preview") }}</div>
                                                 <div class="flex items-start gap-2">
-                                                    <QQAvatar class="mt-2 size-8" :qq="user.qq || ''" :name="user.name || '用户'" />
+                                                    <QQAvatar class="mt-2 size-8" :qq="user.qq || ''" :name="user.name || $t('points-mall.userFallback')" />
                                                     <div class="min-w-0 flex-1">
                                                         <div class="flex min-h-5 w-full items-center gap-1.5 text-sm text-base-content/80">
                                                             <span
@@ -468,7 +474,7 @@ watch(
                                                                 LV{{ getPreviewUserLevel() }}
                                                             </span>
                                                             <span class="truncate" :class="selectedNameCard?.displayClass || ''">
-                                                                {{ user.name || "用户" }}
+                                                                {{ user.name || $t("points-mall.userFallback") }}
                                                             </span>
                                                             <span :class="p.displayClass || ''">
                                                                 {{ p.rewardName || p.name }}
@@ -477,15 +483,15 @@ watch(
                                                         <div
                                                             class="safe-html mt-1 inline-flex max-w-80 select-text flex-col gap-2 rounded-lg bg-base-100 p-2 text-sm text-base-content"
                                                         >
-                                                            装备后显示称号
+                                                            {{ $t("points-mall.previewTitle") }}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div v-else-if="isNameCardProduct(p)" class="rounded-lg bg-base-200/50 p-3">
-                                                <div class="text-xs opacity-90 mb-2">预览</div>
+                                                <div class="text-xs opacity-90 mb-2">{{ $t("points-mall.preview") }}</div>
                                                 <div class="flex items-start gap-2">
-                                                    <QQAvatar class="mt-2 size-8" :qq="user.qq || ''" :name="user.name || '用户'" />
+                                                    <QQAvatar class="mt-2 size-8" :qq="user.qq || ''" :name="user.name || $t('points-mall.userFallback')" />
                                                     <div class="min-w-0 flex-1">
                                                         <div class="flex min-h-5 w-full items-center gap-1.5 text-sm text-base-content/80">
                                                             <span
@@ -494,7 +500,7 @@ watch(
                                                                 LV{{ getPreviewUserLevel() }}
                                                             </span>
                                                             <span class="truncate" :class="p.displayClass || ''">{{
-                                                                user.name || "用户"
+                                                                user.name || $t("points-mall.userFallback")
                                                             }}</span>
                                                             <span
                                                                 v-if="selectedTitle?.rewardName"
@@ -506,13 +512,13 @@ watch(
                                                         <div
                                                             class="safe-html mt-1 inline-flex max-w-80 select-text flex-col gap-2 rounded-lg bg-base-100 p-2 text-sm text-base-content"
                                                         >
-                                                            装备后显示昵称特效
+                                                            {{ $t("points-mall.previewNameCard") }}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div v-else class="rounded-lg bg-base-100/70 border border-base-200 p-3">
-                                                <div class="text-xs text-base-content/60">暂无预览</div>
+                                                <div class="text-xs text-base-content/60">{{ $t("points-mall.noPreview") }}</div>
                                             </div>
                                         </div>
 
@@ -529,19 +535,19 @@ watch(
                                                 "
                                                 :title="
                                                     !user.jwtToken
-                                                        ? '请先登录'
+                                                        ? $t('points-mall.loginFirst')
                                                         : pointsBalance === null
-                                                          ? '积分信息未就绪'
+                                                          ? $t('points-mall.summaryNotReady')
                                                           : !isProductPurchasable(p)
-                                                            ? '商品尚未开始兑换或已结束'
+                                                            ? $t('points-mall.notInRedeemWindow')
                                                             : pointsBalance < p.pointsCost
-                                                              ? '积分不足'
+                                                              ? $t('points-mall.insufficientPoints')
                                                               : ''
                                                 "
                                                 @click="redeemProduct(p)"
                                             >
                                                 <span v-if="actionProductId === p.id" class="loading loading-spinner loading-xs" />
-                                                <span v-else>兑换</span>
+                                                <span v-else>{{ $t("points-mall.redeem") }}</span>
                                             </button>
 
                                             <button
@@ -556,16 +562,16 @@ watch(
                                             >
                                                 <span v-if="actionProductId === p.id" class="loading loading-spinner loading-xs" />
                                                 <span v-else>
-                                                    <span v-if="isTitleProduct(p) && p.assetId === equippedTitleId">已使用</span>
-                                                    <span v-else-if="isNameCardProduct(p) && p.assetId === equippedNameCardId">已使用</span>
-                                                    <span v-else>使用</span>
+                                                    <span v-if="isTitleProduct(p) && p.assetId === equippedTitleId">{{ $t("points-mall.used") }}</span>
+                                                    <span v-else-if="isNameCardProduct(p) && p.assetId === equippedNameCardId">{{ $t("points-mall.used") }}</span>
+                                                    <span v-else>{{ $t("points-mall.use") }}</span>
                                                 </span>
                                             </button>
 
                                             <div class="ml-auto text-xs text-base-content/50">
-                                                <span v-if="isTitleProduct(p)">称号</span>
-                                                <span v-else-if="isNameCardProduct(p)">名片</span>
-                                                <span v-else>其他</span>
+                                                <span v-if="isTitleProduct(p)">{{ $t("points-mall.rewardType.title") }}</span>
+                                                <span v-else-if="isNameCardProduct(p)">{{ $t("points-mall.rewardType.nameCard") }}</span>
+                                                <span v-else>{{ $t("points-mall.other") }}</span>
                                                 · ID: {{ p.id }}
                                             </div>
                                         </div>

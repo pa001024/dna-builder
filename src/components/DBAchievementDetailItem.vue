@@ -38,33 +38,33 @@ function getQualityIcon(quality: number): string {
         </div>
 
         <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">基本信息</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("achievement-detail.basicInfo") }}</div>
             <div class="space-y-2 text-sm">
                 <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">名称</div>
+                    <div class="col-span-1 opacity-70">{{ $t("achievement-detail.name") }}</div>
                     <div class="col-span-2 font-medium">{{ $t(achievement.名称) }}</div>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">描述</div>
+                    <div class="col-span-1 opacity-70">{{ $t("achievement-detail.desc") }}</div>
                     <div class="col-span-2">{{ $t(achievement.描述) }}</div>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">分类</div>
+                    <div class="col-span-1 opacity-70">{{ $t("achievement-detail.category") }}</div>
                     <div class="col-span-2 font-medium">{{ $t(achievement.分类) }}</div>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">版本</div>
+                    <div class="col-span-1 opacity-70">{{ $t("achievement-detail.version") }}</div>
                     <div class="col-span-2 font-medium">{{ achievement.版本 }}</div>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-1 opacity-70">品质</div>
+                    <div class="col-span-1 opacity-70">{{ $t("achievement-detail.quality") }}</div>
                     <div class="col-span-2 font-medium">{{ getQualityLabel(achievement.品质) }}</div>
                 </div>
             </div>
         </div>
 
         <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">奖励</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("achievement-detail.reward") }}</div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem v-for="(value, key) in achievement.奖励" :name="key" :value="value!" :key="key" />
             </div>

@@ -18,9 +18,9 @@ import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weapon
 import type { Cutoff } from "@/data/d/cutoff.data"
 import { headSculptureMap } from "@/data/d/headsculpture.data"
 import { mountData } from "@/data/d/mount.data"
-import { getImprType, getRegionType } from "@/data/d/quest.data"
 import type { ShopItem } from "@/data/d/shop.data"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getImprType, getRegionType } from "@/utils/quest-utils"
 import { getRewardDetails, getRewardTypeText } from "@/utils/reward-utils"
 import { formatDateTime } from "@/utils/time"
 

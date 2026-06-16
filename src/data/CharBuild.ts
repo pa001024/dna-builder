@@ -970,9 +970,15 @@ export class CharBuild {
         const prefixScope = this.getAttributePrefixScope(weaponPrefix)
         const getBonus = attribute === "独立增伤" ? this.getTotalBonusMul.bind(this) : this.getTotalBonus.bind(this)
         let bonus = getBonus(`${weaponPrefix}${attackTypePrefix}${attribute}`, prefixScope)
+        if (weaponPrefix.includes("近战")) {
+            bonus += getBonus(`${attackTypePrefix}${attribute}`, prefixScope)
+        }
         if (weaponPrefix.startsWith("同律")) {
             const lowerPrefix = weaponPrefix.substring(2)
             bonus += getBonus(`${lowerPrefix}${attackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix))
+            if (lowerPrefix.includes("近战")) {
+                bonus += getBonus(`${attackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix))
+            }
         }
         return bonus
     }

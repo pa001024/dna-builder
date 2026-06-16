@@ -18,7 +18,8 @@ export { weaponData }
 
 import monsterData from "./d/monster.data"
 
-export { type DynamicMonster, Faction, type Monster } from "./d/monster.data"
+export type { DynamicMonster, Monster } from "./d/monster.data"
+export { Faction } from "./game-const"
 export { monsterData }
 
 import buffData from "./d/buff.data"

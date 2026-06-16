@@ -99,12 +99,12 @@ function buffDesc(buffName: string) {
 </script>
 
 <template>
-    <BaseNode :id="id" :data="data" :type="type" :selected="selected">
+    <BaseNode :id="id" :data="data" :type="type" :selected="selected" :title="$t('node-editor.buffInput.title')" :description="$t('node-editor.buffInput.description')">
         <div class="space-y-3">
             <!-- Buff类型筛选 -->
             <div>
-                <label class="text-sm text-base-content/60 block mb-1">搜索(支持拼音)</label>
-                <input v-model="buffType" type="text" class="flex-1 input input-sm" placeholder="输入Buff名称或拼音" />
+                <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.buffInput.search") }}</label>
+                <input v-model="buffType" type="text" class="flex-1 input input-sm" :placeholder="$t('node-editor.buffInput.searchPlaceholder')" />
             </div>
 
             <!-- Buff选择列表 -->
@@ -114,7 +114,7 @@ function buffDesc(buffName: string) {
                         <Select
                             v-model="selectedBuffNames[index]"
                             class="flex-1 input input-sm"
-                            placeholder="选择Buff"
+                            :placeholder="$t('node-editor.buffInput.selectBuff')"
                             @update:model-value="updateBuff(index, $event)"
                         >
                             <SelectItem v-for="option in buffOptions" :key="option.value" :value="option.value">
@@ -142,7 +142,7 @@ function buffDesc(buffName: string) {
                 </div>
 
                 <!-- 添加Buff槽位按钮 -->
-                <button class="btn btn-sm btn-outline w-full" @click="addBuffSlot">添加Buff槽位</button>
+                <button class="btn btn-sm btn-outline w-full" @click="addBuffSlot">{{ $t("node-editor.buffInput.addBuffSlot") }}</button>
             </div>
         </div>
     </BaseNode>

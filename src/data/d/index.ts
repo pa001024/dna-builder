@@ -10,6 +10,7 @@ import optRewardData from "./optreward.data"
 
 export { eventData } from "./event.data"
 
+import { isDataPackHydrated, registerDataPackHydrationCallback } from "../data-pack-bridge"
 import { skinData } from "./accessory.data"
 import modData from "./mod.data"
 import monsterData, { monsterMap } from "./monster.data"
@@ -18,90 +19,34 @@ import weaponData from "./weapon.data"
 
 export { hairData, headFrameData } from "./accessory.data"
 
-// 将静态表转换为Map，提高查找效率
 export const charMap = new Map<number | string, Char>()
-charData.forEach(char => {
-    charMap.set(char.名称, char as Char)
-    charMap.set(char.id, char as Char)
-})
 
 export { cutoffData, monsterData, monsterMap }
 
 export const cutoffMap = new Map<number, (typeof cutoffData)[number]>()
-cutoffData.forEach(cutoff => {
-    cutoffMap.set(cutoff.itemId, cutoff)
-})
 
-// 将mod数据转换为Map
 export const modMap = new Map<number, Mod>()
-modData.forEach(mod => {
-    modMap.set(mod.id, mod as Mod)
-})
 
-// 将buff数据转换为Map
 export const buffMap = new Map<string, Buff>()
-buffData.forEach(buff => {
-    buffMap.set(buff.名称, buff as Buff)
-})
 
-// 将effect数据转换为Map
 export const effectMap = new Map<string, Buff>()
-effectData.forEach(buff => {
-    effectMap.set(buff.名称, buff as Buff)
-})
 
-// 将所有武器数据转换为统一的Map
 export const weaponMap = new Map<number, Weapon>()
 export const weaponNameMap = new Map<string, Weapon>()
 export const skinMap = new Map<number, (typeof skinData)[number]>()
 
-// 添加近战武器到weaponMap
-weaponData.forEach(weapon => {
-    weaponMap.set(weapon.id, weapon as Weapon)
-    weaponNameMap.set(weapon.名称, weapon as Weapon)
-})
-
-skinData.forEach(skin => {
-    skinMap.set(skin.id, skin)
-})
-
 export const rewardMap = new Map<number, Reward>()
 
-rewardData.forEach(v => {
-    rewardMap.set(v.id, v)
-})
-
 export const optRewardMap = new Map<number, OptReward>()
-
-optRewardData.forEach(v => {
-    optRewardMap.set(v.id, v)
-})
 
 export const modDraftMap = new Map<number, Draft>()
 export const weaponDraftMap = new Map<number, Draft>()
 export const draftMap = new Map<number, Draft>()
 export const resourceDraftMap = new Map<number, Draft>()
 
-draftData.forEach(v => {
-    if (v.t === "Mod") modDraftMap.set(v.p, v)
-    if (v.t === "Weapon") weaponDraftMap.set(v.p, v)
-    if (v.t === "Resource") resourceDraftMap.set(v.p, v)
-    draftMap.set(v.id, v)
-})
-
 export const abyssBuffMap = new Map<number, AbyssBuff>()
-abyssBuffs.forEach(v => abyssBuffMap.set(v.id, v))
 export const abyssDungeonMap = new Map<number, AbyssDungeon>()
-abyssDungeons.forEach(v => {
-    // 转换buffID为AbyssBuff对象
-    v.buff = v.b.map(id => abyssBuffMap.get(id)!)
-    // 转换角色ID为角色名称
-    const cname = v.cid ? charMap.get(v.cid)?.名称 : undefined
-    if (cname) v.cname = cname
-    abyssDungeonMap.set(v.id, v)
-})
 
-// 将副本数据转换为Map，并建立Mod到副本的反向映射
 export const dungeonMap = new Map<number, Dungeon>()
 export const modDungeonMap = new Map<number, Dungeon[]>()
 export const draftDungeonMap = new Map<number, Dungeon[]>()
@@ -134,41 +79,8 @@ function findModRewards(child: RewardChild[], modIds: Set<number>, draftIds: Set
     }
 }
 
-dungeonData.forEach(dungeon => {
-    dungeonMap.set(dungeon.id, dungeon as Dungeon)
-    // 获取副本的所有奖励ID
-    const rewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
-    if (rewardIds.length > 0) {
-        rewardIds.forEach(rewardId => {
-            const reward = rewardMap.get(rewardId)
-            if (reward?.child) {
-                // 递归查找Mod类型的奖励
-                const modIds = new Set<number>()
-                const draftIds = new Set<number>()
-                findModRewards(reward.child, modIds, draftIds)
-
-                // 建立Mod ID到Dungeon的映射
-                modIds.forEach(modId => {
-                    if (!modDungeonMap.has(modId)) {
-                        modDungeonMap.set(modId, [])
-                    }
-                    modDungeonMap.get(modId)!.push(dungeon as Dungeon)
-                })
-                // 建立Draft ID到Dungeon的映射
-                draftIds.forEach(draftId => {
-                    if (!draftDungeonMap.has(draftId)) {
-                        draftDungeonMap.set(draftId, [])
-                    }
-                    draftDungeonMap.get(draftId)!.push(dungeon as Dungeon)
-                })
-            }
-        })
-    }
-})
-
 import petData, { type Pet } from "./pet.data"
 export const petMap = new Map<number, Pet>()
-petData.forEach(v => petMap.set(v.id, v))
 
 export type { DBMap, DBMapMarker } from "./map.data"
 
@@ -176,21 +88,142 @@ export { type Walnut, type WalnutReward, walnutMap, walnutRewardMap } from "./wa
 
 import { type Fish, type FishingSpot, fishingSpots, fishs } from "./fish.data"
 export const fishMap = new Map<number, Fish>()
-fishs.forEach(v => fishMap.set(v.id, v))
 
 export const fishingSpotMap = new Map<number, FishingSpot>()
-fishingSpots.forEach(v => fishingSpotMap.set(v.id, v))
 
 export const fish2SpotMap = new Map<number, { spotId: number; weight: number }[]>()
-fishingSpots.forEach(v =>
-    v.fishIds.forEach((id, index) => {
-        if (!fish2SpotMap.has(id)) {
-            fish2SpotMap.set(id, [])
-        }
-        fish2SpotMap.get(id)!.push({ spotId: v.id, weight: v.weights[index] })
-    })
-)
 
 export { AbyssMonsterLevelLimit, MonsterLevelUpperLimit } from "./const.data"
 export { type Resource, resourceData, resourceMap } from "./resource.data"
 export type { Fish, FishingSpot }
+
+/**
+ * 重建静态索引。
+ */
+function rebuildStaticIndexes(): void {
+    charMap.clear()
+    for (const char of charData) {
+        charMap.set(char.名称, char as Char)
+        charMap.set(char.id, char as Char)
+    }
+
+    cutoffMap.clear()
+    for (const cutoff of cutoffData) {
+        cutoffMap.set(cutoff.itemId, cutoff)
+    }
+
+    modMap.clear()
+    for (const mod of modData) {
+        modMap.set(mod.id, mod as Mod)
+    }
+
+    buffMap.clear()
+    for (const buff of buffData) {
+        buffMap.set(buff.名称, buff as Buff)
+    }
+
+    effectMap.clear()
+    for (const buff of effectData) {
+        effectMap.set(buff.名称, buff as Buff)
+    }
+
+    weaponMap.clear()
+    weaponNameMap.clear()
+    for (const weapon of weaponData) {
+        weaponMap.set(weapon.id, weapon as Weapon)
+        weaponNameMap.set(weapon.名称, weapon as Weapon)
+    }
+
+    skinMap.clear()
+    for (const skin of skinData) {
+        skinMap.set(skin.id, skin)
+    }
+
+    rewardMap.clear()
+    for (const reward of rewardData) {
+        rewardMap.set(reward.id, reward)
+    }
+
+    optRewardMap.clear()
+    for (const reward of optRewardData) {
+        optRewardMap.set(reward.id, reward)
+    }
+
+    modDraftMap.clear()
+    weaponDraftMap.clear()
+    draftMap.clear()
+    resourceDraftMap.clear()
+    for (const draft of draftData) {
+        if (draft.t === "Mod") modDraftMap.set(draft.p, draft)
+        if (draft.t === "Weapon") weaponDraftMap.set(draft.p, draft)
+        if (draft.t === "Resource") resourceDraftMap.set(draft.p, draft)
+        draftMap.set(draft.id, draft)
+    }
+
+    abyssBuffMap.clear()
+    for (const abyssBuff of abyssBuffs) {
+        abyssBuffMap.set(abyssBuff.id, abyssBuff)
+    }
+
+    abyssDungeonMap.clear()
+    for (const dungeon of abyssDungeons) {
+        dungeon.buff = dungeon.b.map(id => abyssBuffMap.get(id)!)
+        const cname = dungeon.cid ? charMap.get(dungeon.cid)?.名称 : undefined
+        if (cname) dungeon.cname = cname
+        abyssDungeonMap.set(dungeon.id, dungeon)
+    }
+
+    dungeonMap.clear()
+    modDungeonMap.clear()
+    draftDungeonMap.clear()
+    for (const dungeon of dungeonData) {
+        dungeonMap.set(dungeon.id, dungeon as Dungeon)
+        const rewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
+        if (rewardIds.length === 0) continue
+        for (const rewardId of rewardIds) {
+            const reward = rewardMap.get(rewardId)
+            if (!reward?.child) continue
+            const modIds = new Set<number>()
+            const draftIds = new Set<number>()
+            findModRewards(reward.child, modIds, draftIds)
+            for (const modId of modIds) {
+                if (!modDungeonMap.has(modId)) {
+                    modDungeonMap.set(modId, [])
+                }
+                modDungeonMap.get(modId)!.push(dungeon as Dungeon)
+            }
+            for (const draftId of draftIds) {
+                if (!draftDungeonMap.has(draftId)) {
+                    draftDungeonMap.set(draftId, [])
+                }
+                draftDungeonMap.get(draftId)!.push(dungeon as Dungeon)
+            }
+        }
+    }
+
+    petMap.clear()
+    for (const pet of petData) {
+        petMap.set(pet.id, pet)
+    }
+
+    fishMap.clear()
+    fishingSpotMap.clear()
+    fish2SpotMap.clear()
+    for (const fish of fishs) {
+        fishMap.set(fish.id, fish)
+    }
+    for (const spot of fishingSpots) {
+        fishingSpotMap.set(spot.id, spot)
+        spot.fishIds.forEach((id, index) => {
+            if (!fish2SpotMap.has(id)) {
+                fish2SpotMap.set(id, [])
+            }
+            fish2SpotMap.get(id)!.push({ spotId: spot.id, weight: spot.weights[index] })
+        })
+    }
+}
+
+rebuildStaticIndexes()
+if (!isDataPackHydrated()) {
+    registerDataPackHydrationCallback(rebuildStaticIndexes)
+}

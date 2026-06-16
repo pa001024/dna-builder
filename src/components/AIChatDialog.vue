@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
+import { useTranslation } from "i18next-vue"
 import { nextTick, ref, watch } from "vue"
 import { BuildAgent } from "../api/buildAgent"
 import { useCharSettings } from "../composables/useCharSettings"
@@ -16,6 +17,7 @@ const inv = useInvStore()
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
 const charSettings = useCharSettings(selectedChar)
 const settingStore = useSettingStore()
+const { t } = useTranslation()
 
 const isOpen = ref(false)
 const messages = ref<BuildAgentChatMessage[]>([])
@@ -27,6 +29,7 @@ const lastFailedMessage = ref<string>("") // 保存最后一次失败的消息
 const collapsedReasoning = ref<Set<number>>(new Set()) // 跟踪哪些消息的思考过程被折叠
 const AUTOMATION_DONE_TAG = "[[AUTOMATION_DONE]]"
 const AUTOMATION_CONTINUE_TAG = "[[AUTOMATION_CONTINUE]]"
+const RETRY_TAG = "[[RETRY]]"
 const MAX_AUTOMATION_ROUNDS = 4
 const BUILD_AGENT_CHAT_ID_PREFIX = "build-agent-chat:"
 
@@ -45,17 +48,10 @@ function getBuildAgentChatId(charName: string): string {
  */
 function getWelcomeMessageContent(): string {
     const charElm = props.charBuild?.char?.属性 || ""
-    return `你好！我是配装助手，可以帮你优化角色配置。
-
-当前角色: ${selectedChar.value} (${charElm}属性)
-
-你可以问我：
-- ${selectedChar.value}怎么配MOD伤害最高？
-- 带${charElm}属性的MOD有哪些？
-- 如何提升${selectedChar.value}的暴击伤害？
-- ${selectedChar.value}在带扶疏的情况下伤害最大化的MOD要怎么配
-
-默认会自动执行完整配装流程并尝试直接应用配置。`
+    return t("ai-chat.welcome", {
+        charName: selectedChar.value,
+        charElm,
+    })
 }
 
 /**
@@ -86,7 +82,7 @@ async function loadPersistedChat(): Promise<void> {
         })
         collapsedReasoning.value = collapsed
     } catch (error) {
-        console.error("加载配装助手历史对话失败:", error)
+        console.error("加载配装助手历史对话失败", error)
         messages.value = []
         collapsedReasoning.value = new Set()
     }
@@ -119,11 +115,11 @@ async function savePersistedChat(): Promise<void> {
                 })
                 return
             } catch (fallbackError) {
-                console.error("保存配装助手历史对话失败(兜底后):", fallbackError)
+                console.error("保存配装助手历史对话失败(兜底后)", fallbackError)
                 return
             }
         }
-        console.error("保存配装助手历史对话失败:", error)
+        console.error("保存配装助手历史对话失败", error)
     }
 }
 
@@ -148,7 +144,7 @@ async function clearPersistedChat(): Promise<void> {
     try {
         await db.buildAgentChats.delete(getBuildAgentChatId(selectedChar.value))
     } catch (error) {
-        console.error("清除配装助手历史对话失败:", error)
+        console.error("清除配装助手历史对话失败", error)
     }
 }
 
@@ -158,16 +154,11 @@ async function clearPersistedChat(): Promise<void> {
  * @returns 自动化提示词
  */
 function createAutomationPrompt(userMessage: string): string {
-    return `你现在处于“配装自动化执行模式”。
-请严格遵守：
-1. 必须调用工具执行真实配置，不要只给文字建议。
-2. 如果要计算最优配装，优先使用autoBuild，并且最终需要apply=true写入配置。
-3. 涉及带特效MOD/武器时，先调用queryEffectConfig确认状态，必要时用setEffectConfig调整后再autoBuild。
-4. 本轮完成全部自动化后，在最后单独一行输出 ${AUTOMATION_DONE_TAG}。
-5. 如果还需要下一轮继续，在最后单独一行输出 ${AUTOMATION_CONTINUE_TAG}。
-
-用户需求：
-${userMessage}`
+    return t("ai-chat.automationPrompt", {
+        doneTag: AUTOMATION_DONE_TAG,
+        continueTag: AUTOMATION_CONTINUE_TAG,
+        userMessage,
+    })
 }
 
 /**
@@ -176,11 +167,11 @@ ${userMessage}`
  * @returns 续跑提示词
  */
 function createAutomationContinuePrompt(round: number): string {
-    return `继续执行上一轮未完成的自动化配装流程（第${round}轮）。
-要求：
-1. 继续调用必要工具推进流程。
-2. 完成时输出 ${AUTOMATION_DONE_TAG}。
-3. 未完成时输出 ${AUTOMATION_CONTINUE_TAG}。`
+    return t("ai-chat.automationContinuePrompt", {
+        round,
+        doneTag: AUTOMATION_DONE_TAG,
+        continueTag: AUTOMATION_CONTINUE_TAG,
+    })
 }
 
 /**
@@ -285,14 +276,9 @@ async function initAgent() {
     // 都没有配置
     messages.value.push({
         role: "assistant",
-        content: `AI服务未配置。
-
-请选择以下方式之一配置AI：
-1. 在设置中配置API密钥（推荐）
-2. 联系管理员配置服务端AI
-
-当前状态：
-- 用户API密钥: ${hasUserConfig ? "✓ 已配置" : "✗ 未配置"}`,
+        content: t("ai-chat.noConfigMessage", {
+            hasUserConfig,
+        }),
     })
 }
 
@@ -349,7 +335,7 @@ async function sendMessage(retryMessage = "") {
         }
 
         if (!agent) {
-            throw new Error("AI助手未初始化，请先配置AI设置")
+            throw new Error(t("ai-chat.assistantNotInitialized"))
         }
 
         // 流式响应
@@ -370,7 +356,7 @@ async function sendMessage(retryMessage = "") {
             let roundContent = ""
 
             if (round > 1) {
-                assistantMessage += `\n\n【自动执行第${round}轮】\n`
+                assistantMessage += `\n\n${t("ai-chat.automationRoundTag", { round })}\n`
                 messages.value[messageIndex].content = sanitizeAutomationTags(assistantMessage)
             }
 
@@ -407,7 +393,7 @@ async function sendMessage(retryMessage = "") {
         messages.value[messageIndex].content = sanitizeAutomationTags(assistantMessage)
 
         if (!automationDone) {
-            const warning = "⚠️ 未在预期轮次内确认流程完成。你可以继续发送“继续”让我接着跑。"
+            const warning = t("ai-chat.automationIncompleteWarning")
             messages.value[messageIndex].content = messages.value[messageIndex].content
                 ? `${messages.value[messageIndex].content}\n\n${warning}`
                 : warning
@@ -419,42 +405,41 @@ async function sendMessage(retryMessage = "") {
         }
         await savePersistedChat()
     } catch (error) {
-        console.error("发送消息失败:", error)
+        console.error("发送消息失败", error)
         lastFailedMessage.value = userMessage // 保存失败的消息
 
         // 生成友好的错误消息
-        let errorMessage = "抱歉，处理请求时出错。"
+        let errorMessage = t("ai-chat.error.generic")
 
         if (error instanceof Error) {
             const errorMsg = error.message.toLowerCase()
 
             // 根据错误类型提供具体的解决方案
             if (errorMsg.includes("api密钥") || errorMsg.includes("api key") || errorMsg.includes("401")) {
-                errorMessage =
-                    "❌ API密钥无效或未配置\n\n请检查：\n1. 设置中的API密钥是否正确\n2. 是否有足够的API配额\n\n你可以在设置中重新配置API密钥。"
+                errorMessage = t("ai-chat.error.apiKey")
             } else if (
                 errorMsg.includes("网络") ||
                 errorMsg.includes("network") ||
                 errorMsg.includes("fetch") ||
                 errorMsg.includes("econnrefused")
             ) {
-                errorMessage = "❌ 网络连接失败\n\n请检查：\n1. 网络连接是否正常\n2. API服务是否可用\n3. 代理设置是否正确"
+                errorMessage = t("ai-chat.error.network")
             } else if (errorMsg.includes("timeout") || errorMsg.includes("超时")) {
-                errorMessage = "❌ 请求超时\n\n响应时间过长，请检查网络连接或尝试简化你的问题"
+                errorMessage = t("ai-chat.error.timeout")
             } else if (errorMsg.includes("rate limit") || errorMsg.includes("请求过多") || errorMsg.includes("429")) {
-                errorMessage = "❌ 请求过于频繁\n\nAPI调用次数已达限制，请等待一段时间后重试"
+                errorMessage = t("ai-chat.error.rateLimit")
             } else if (errorMsg.includes("private member")) {
-                errorMessage = "❌ SDK兼容性问题\n\n请刷新页面重试，如果问题持续，请清除浏览器缓存并重新启动应用"
+                errorMessage = t("ai-chat.error.sdk")
             } else {
                 // 显示原始错误消息（但简化）
-                errorMessage = `❌ 请求失败\n\n${error.message}`
+                errorMessage = t("ai-chat.error.requestFailed", { message: error.message })
             }
         } else {
-            errorMessage = "❌ 发生未知错误\n\n请查看控制台获取详细信息，或尝试刷新页面。"
+            errorMessage = t("ai-chat.error.unknown")
         }
 
         // 添加重试提示
-        errorMessage += "\n\n[点击重试]"
+        errorMessage += `\n\n${RETRY_TAG}`
 
         // 更新现有的空消息或添加新错误消息
         const lastMessage = messages.value[messages.value.length - 1]
@@ -540,8 +525,8 @@ async function clearChat() {
         >
             <!-- 头部 -->
             <div class="flex items-center justify-between p-4 border-b border-base-content/20 bg-base-200 rounded-t-xl">
-                <div class="flex items-center gap-2">
-                    <span class="font-semibold">配装助手</span>
+                    <div class="flex items-center gap-2">
+                    <span class="font-semibold">{{ $t("ai-chat.title") }}</span>
                 </div>
                 <div class="flex gap-2">
                     <button class="btn btn-ghost btn-sm" :disabled="isLoading" @click="clearChat">
@@ -596,7 +581,7 @@ async function clearChat() {
                                         >
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                         </svg>
-                                        <span class="text-xs">思考过程</span>
+                                        <span class="text-xs">{{ $t("ai-chat.reasoning") }}</span>
                                     </button>
                                     <div
                                         v-if="!collapsedReasoning.has(index)"
@@ -608,8 +593,8 @@ async function clearChat() {
                             </template>
 
                             <!-- 显示错误消息和重试按钮 -->
-                            <template v-if="message.content.includes('[点击重试]') && message.role === 'assistant'">
-                                <div>{{ message.content.replace("[点击重试]", "") }}</div>
+                            <template v-if="message.content.includes(RETRY_TAG) && message.role === 'assistant'">
+                                <div>{{ message.content.replace(RETRY_TAG, "") }}</div>
                                 <button class="btn btn-sm btn-primary mt-2" :disabled="isLoading" @click="retryMessage">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -625,7 +610,7 @@ async function clearChat() {
                                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                                         />
                                     </svg>
-                                    重试
+                                    {{ $t("ai-chat.retry") }}
                                 </button>
                             </template>
                             <!-- 普通消息 -->
@@ -645,13 +630,13 @@ async function clearChat() {
             <!-- 输入区域 -->
             <div class="p-4 border-t border-base-content/20 bg-base-200">
                 <div class="flex gap-2">
-                    <input
-                        v-model="inputMessage"
-                        type="text"
-                        placeholder="问我任何配装问题..."
-                        class="input input-bordered input-sm flex-1"
-                        :disabled="isLoading"
-                        @keyup.enter="handleKeyPress"
+                        <input
+                            v-model="inputMessage"
+                            type="text"
+                            :placeholder="$t('ai-chat.inputPlaceholder')"
+                            class="input input-bordered input-sm flex-1"
+                            :disabled="isLoading"
+                            @keyup.enter="handleKeyPress"
                     />
                     <button class="btn btn-primary btn-sm" :disabled="isLoading || !inputMessage.trim()" @click="handleKeyPress">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -659,7 +644,7 @@ async function clearChat() {
                         </svg>
                     </button>
                 </div>
-                <div class="text-xs text-base-content/60 mt-2">提示: 可以问"赛琪怎么配MOD"、"带扶疏的配装"等</div>
+                <div class="text-xs text-base-content/60 mt-2">{{ $t("ai-chat.tip") }}</div>
             </div>
         </div>
     </div>

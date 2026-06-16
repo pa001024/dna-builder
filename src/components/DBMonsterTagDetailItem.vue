@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, ref } from "vue"
 import type { MonsterTag } from "@/data/d/monstertag.data"
 import { getMonsterTagGroupByTagId, getRelatedMonstersByMonsterTagId } from "@/utils/monster-tag-utils"
@@ -6,6 +7,7 @@ import { getMonsterTagGroupByTagId, getRelatedMonstersByMonsterTagId } from "@/u
 const props = defineProps<{
     monsterTag: MonsterTag
 }>()
+const { t } = useTranslation()
 
 /**
  * 当前号令者所在的分组信息。
@@ -57,7 +59,7 @@ function formatVarValue(key: string, value: unknown): string {
         }
 
         if (shouldFormatAsMeter(key)) {
-            return `${formatDecimalNumber(value / 10)}米`
+            return `${formatDecimalNumber(value / 10)}${t("monster-tag-detail.meterSuffix")}`
         }
 
         return formatDecimalNumber(value)
@@ -149,14 +151,14 @@ function formatBonusValue(value: number): string {
         </div>
 
         <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">描述</div>
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-tag-detail.description") }}</div>
             <div class="text-sm whitespace-pre-line">
                 {{ monsterTag.desc }}
             </div>
         </div>
 
         <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">参数</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("monster-tag-detail.params") }}</div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 text-sm">
                 <div v-for="[key, value] in baseVars" :key="key" class="p-2 rounded bg-base-100">
                     <div class="text-xs text-base-content/70 mb-1">{{ key }}</div>
@@ -165,7 +167,7 @@ function formatBonusValue(value: number): string {
             </div>
 
             <div v-if="bonusVars.length > 0" class="mt-3">
-                <div class="text-xs text-base-content/70 mb-2">加成</div>
+                <div class="text-xs text-base-content/70 mb-2">{{ $t("monster-tag-detail.bonus") }}</div>
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2 text-sm">
                     <div v-for="[name, value] in bonusVars" :key="name" class="p-2 rounded bg-base-100">
                         <div class="text-xs text-base-content/70 mb-1">{{ name }}</div>
@@ -176,7 +178,7 @@ function formatBonusValue(value: number): string {
         </div>
 
         <div v-if="currentTags.length > 1" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">同类词条</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("monster-tag-detail.sameTags") }}</div>
             <div class="flex flex-wrap gap-2">
                 <SRouterLink
                     v-for="tag in currentTags"
@@ -191,7 +193,7 @@ function formatBonusValue(value: number): string {
         </div>
 
         <div v-if="relatedMonsters.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">关联怪物</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("monster-tag-detail.relatedMonsters") }}</div>
             <div class="mb-3 flex items-center gap-4">
                 <span class="text-sm min-w-12">Lv. {{ relatedMonsterLevel }}</span>
                 <input

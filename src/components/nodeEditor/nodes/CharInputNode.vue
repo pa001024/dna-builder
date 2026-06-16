@@ -43,17 +43,17 @@ const resonanceGain = computed({
     <BaseNode v-bind="{ id, data, type, selected }">
         <div class="space-y-2">
             <div>
-                <label class="text-sm text-base-content/60 block mb-1">角色</label>
+                <label class="text-sm text-base-content/60 block mb-1">{{ $t("角色") }}</label>
                 <CharSelect v-model="charName" />
             </div>
 
             <div>
-                <label class="text-sm text-base-content/60 block mb-1">等级</label>
+                <label class="text-sm text-base-content/60 block mb-1">{{ $t("char-build.level") }}</label>
                 <input v-model.number="charLevel" type="number" class="input input-bordered input-sm w-full" placeholder="80" />
             </div>
 
             <div>
-                <label class="text-sm text-base-content/60 block mb-1">技能等级</label>
+                <label class="text-sm text-base-content/60 block mb-1">{{ $t("char-build.skill_level") }}</label>
                 <input v-model.number="charSkillLevel" type="number" class="input input-bordered input-sm w-full" placeholder="12" />
             </div>
 

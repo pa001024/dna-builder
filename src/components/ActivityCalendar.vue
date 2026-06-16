@@ -78,7 +78,7 @@ const getTheaterTimes = () => {
 
     // 生成当前活动信息
     const current = {
-        title: t("activity-calendar.theater_title", "沉浸式戏剧"),
+        title: t("activity-calendar.theater_title"),
         description: t("activity-calendar.theater_desc", {
             charName: t(currentCharName),
         }),
@@ -90,7 +90,7 @@ const getTheaterTimes = () => {
 
     // 生成下一个活动信息
     const next = {
-        title: t("activity-calendar.theater_title", "沉浸式戏剧"),
+        title: t("activity-calendar.theater_title"),
         description: t("activity-calendar.theater_desc", { charName: nextCharName }),
         begin_at: nextDungeon?.st || Math.floor(now + 7 * 24 * 60 * 60),
         end_at: nextDungeon?.et || Math.floor(now + 14 * 24 * 60 * 60),
@@ -176,9 +176,9 @@ const getTimeDistance = (endAt: number) => {
     const nowMs = uiStore.timeNow
 
     if (nowMs >= endMs) {
-        return uiStore.timeDistancePassed(endMs) + t("activity-calendar.ended_suffix", "结束")
+        return uiStore.timeDistancePassed(endMs) + t("activity-calendar.ended_suffix")
     } else {
-        return uiStore.timeDistanceFuture(endMs) + t("activity-calendar.end_suffix", "结束")
+        return uiStore.timeDistanceFuture(endMs) + t("activity-calendar.end_suffix")
     }
 }
 
@@ -331,10 +331,10 @@ const sortedActivities = computed(() => {
 
     // 添加当前周期的魔灵刷新活动
     const currentMolingActivity: Activity = {
-        title: t("activity-calendar.moling_refresh", "魔灵刷新"),
+        title: t("activity-calendar.moling_refresh"),
         description: isMolingCompleted.value
-            ? t("activity-calendar.moling_completed", "本周期魔灵已完成")
-            : t("activity-calendar.moling_desc", "每3天刷新一次"),
+            ? t("activity-calendar.moling_completed")
+            : t("activity-calendar.moling_desc"),
         begin_at: molingTimes.current.begin_at,
         end_at: molingTimes.current.end_at,
         isMoling: true,
@@ -343,8 +343,8 @@ const sortedActivities = computed(() => {
 
     // 添加下一个周期的魔灵刷新活动
     const nextMolingActivity: Activity = {
-        title: t("activity-calendar.moling_refresh_next", "下一周期魔灵刷新"),
-        description: t("activity-calendar.moling_desc", "每3天刷新一次"),
+        title: t("activity-calendar.moling_refresh_next"),
+        description: t("activity-calendar.moling_desc"),
         begin_at: molingTimes.next.begin_at,
         end_at: molingTimes.next.end_at,
         isMoling: false,
@@ -642,14 +642,14 @@ onMounted(() => {
                     <Icon icon="ri:calendar-event-line" class="w-6 h-6" />
                     {{ $t("activity-calendar.title") }}
                     <div class="flex items-center ml-auto text-sm gap-2">
-                        <span :class="{ 'text-base-content': activitySource === 'local' }">本地</span>
+                        <span :class="{ 'text-base-content': activitySource === 'local' }">{{ $t("activity-calendar.local") }}</span>
                         <input
                             type="checkbox"
                             class="toggle toggle-primary"
                             :checked="activitySource === 'remote'"
                             @change="switchActivitySource(($event.target as HTMLInputElement).checked ? 'remote' : 'local')"
                         />
-                        <span :class="{ 'text-base-content': activitySource === 'remote' }">远端</span>
+                        <span :class="{ 'text-base-content': activitySource === 'remote' }">{{ $t("activity-calendar.remote") }}</span>
                     </div>
                 </h2>
                 <!-- 加载状态 -->
@@ -674,7 +674,7 @@ onMounted(() => {
                     <!-- 拖动提示 -->
                     <div class="text-xs text-gray-400 mb-2 flex items-center gap-1">
                         <Icon icon="ri:drag-move-line" class="w-4 h-4" />
-                        {{ t("activity-calendar.drag_hint", "可左右拖动查看") }}
+                        {{ t("activity-calendar.drag_hint") }}
                     </div>
 
                     <!-- 时间轴容器（非滚动容器） -->
@@ -713,7 +713,7 @@ onMounted(() => {
                                             >
                                                 {{
                                                     item.activity.isMoling && isMolingCompleted
-                                                        ? $t("activity-calendar.moling_completed", "本周期魔灵已完成")
+                                                        ? $t("activity-calendar.moling_completed")
                                                         : getActivityStatus(item.activity) === "upcoming"
                                                           ? $t("activity-calendar.status_upcoming")
                                                           : getActivityStatus(item.activity) === "ongoing"
@@ -847,7 +847,7 @@ onMounted(() => {
                                             >
                                                 {{
                                                     item.activity.isMoling && isMolingCompleted
-                                                        ? $t("activity-calendar.moling_completed", "本周期魔灵已完成")
+                                                        ? $t("activity-calendar.moling_completed")
                                                         : getActivityStatus(item.activity) === "upcoming"
                                                           ? $t("activity-calendar.status_upcoming")
                                                           : getActivityStatus(item.activity) === "ongoing"
@@ -893,7 +893,7 @@ onMounted(() => {
                                             "
                                             class="text-xs text-gray-400"
                                         >
-                                            {{ $t("activity-calendar.click_to_complete", "点击标记完成") }}
+                                            {{ $t("activity-calendar.click_to_complete") }}
                                         </div>
                                         <!-- 活动描述 -->
                                         <p v-else-if="item.activity.description" class="text-xs text-gray-600 line-clamp-2">

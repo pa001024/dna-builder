@@ -74,6 +74,7 @@
     "拾取范围": "拾取范围",
     "属性穿透": "属性穿透",
     "属性伤": "属性攻击",
+    "同律": "同律",
     "同律近战": "近战同律武器",
     "同律远程": "远程同律武器",
     "无视防御": "无视防御",
@@ -109,8 +110,72 @@
         "title": "深渊列表"
     },
     "abyss-usage": {
+        "allLevels": "全部等级",
+        "assistant": "配队助手",
+        "assistantDesc": "查询角色常用阵容",
+        "available": "可用",
+        "buildUploadDataFailed": "无法生成深渊上传数据",
+        "createdAt": "创建时间",
         "desc": "深渊阵容与角色武器统计",
-        "title": "深渊使用率"
+        "emptyUploadResult": "上传结果为空",
+        "export": "导出",
+        "exportFailed": "导出深渊提交失败",
+        "exportSuccess": "深渊提交已导出",
+        "level": "等级",
+        "levelDistribution": "历练等级分布",
+        "loadDefaultRoleFailed": "获取默认角色信息失败",
+        "loadLatestRoleInfoFailed": "获取最新角色信息失败",
+        "loadStatsFailed": "加载深渊统计失败",
+        "loginFirst": "请先登录",
+        "mainChar": "主角色",
+        "mainCharId": "主角色ID",
+        "mainOnly": "仅主控",
+        "meleeWeapon": "近战武器",
+        "meleeWeaponId": "近战武器ID",
+        "missingUid": "缺少 UID",
+        "mostUsedLineup": "最常用阵容",
+        "mostUsedLineupDesc": "出战数最高的阵容",
+        "noExportableSubmissions": "没有可导出的深渊提交",
+        "noResult": "暂无结果",
+        "noUploadData": "没有可上传的深渊数据",
+        "pet": "魔灵",
+        "petId": "魔灵ID",
+        "rangedWeapon": "远程武器",
+        "rangedWeaponId": "远程武器ID",
+        "refresh": "刷新",
+        "roleParticipation": "角色参与",
+        "roleSourceDistribution": "角色溯源分布",
+        "roleType": "角色类型",
+        "roleUsage": "角色使用率",
+        "seasonId": "赛季ID",
+        "selectRole": "请选择角色",
+        "sheetRole": "角色参与",
+        "sheetSubmission": "提交",
+        "sheetWeapon": "武器参与",
+        "skillLevel": "技能等级",
+        "stars": "星级",
+        "submissionsFrom": "本页面全部数据分析自 {{count}} 名玩家。使用率=上场该角色玩家数÷持有该角色玩家数",
+        "submitCount": "{{count}} 次提交",
+        "submitId": "提交ID",
+        "support1": "助战1",
+        "support1Id": "助战1ID",
+        "support2": "助战2",
+        "support2Id": "助战2ID",
+        "supportWeapon1": "助战武器1",
+        "supportWeapon1Id": "助战武器1ID",
+        "supportWeapon2": "助战武器2",
+        "supportWeapon2Id": "助战武器2ID",
+        "title": "深渊使用率",
+        "uidSha256": "UID_SHA256",
+        "updatedAt": "更新时间",
+        "upload": "上传",
+        "uploadFailed": "深渊数据上传失败",
+        "uploadSuccess": "深渊数据上传成功",
+        "uploadSuccessWithReward": "深渊数据上传成功，经验+{{exp}}，积分+{{points}}",
+        "weaponForgeDistribution": "武器熔铸分布",
+        "weaponId": "武器ID",
+        "weaponName": "武器名称",
+        "weaponParticipation": "武器参与"
     },
     "accessory": {
         "category": "分类",
@@ -178,7 +243,14 @@
         "unnamedAchievement": "未命名成就"
     },
     "achievement-detail": {
-        "title": "成就详情"
+        "basicInfo": "基本信息",
+        "category": "分类",
+        "desc": "描述",
+        "name": "名称",
+        "quality": "品质",
+        "reward": "奖励",
+        "title": "成就详情",
+        "version": "版本"
     },
     "achievement-list": {
         "desc": "游戏成就解锁统计",
@@ -191,11 +263,13 @@
         "end_suffix": "结束",
         "ended_suffix": "结束",
         "load_error": "加载活动数据失败",
+        "local": "本地",
         "moling_completed": "本周期魔灵已完成",
         "moling_desc": "每3天刷新一次",
         "moling_refresh": "魔灵刷新",
         "moling_refresh_next": "下一周期魔灵刷新",
         "no_activities": "暂无活动",
+        "remote": "远端",
         "start": "开始时间",
         "status_ended": "已结束",
         "status_ongoing": "进行中",
@@ -211,20 +285,213 @@
         "commandInputPlaceholder": "发消息或输入/选择指令，支持粘贴或拖拽图片",
         "desc": "使用AI智能体与游戏互动",
         "inputMessage": "输入消息，按 Enter 发送",
+        "loading": "用力加载中...",
         "mcp_manual_stop_message": "MCP 服务器需要手动结束进程。\n\n在任务管理器中结束 'dna_mcp_server.exe' 进程。\n\n是否打开任务管理器？",
+        "mcpAppOnly": "仅限桌面应用",
+        "mcpNoResponse": "MCP服务器无响应",
+        "mcpNotStarted": "MCP服务器未启动",
+        "mcpRunning": "MCP服务器已启动",
+        "mcpStartedButNoResponse": "MCP服务器已启动但无响应",
+        "mcpStartFailed": "MCP服务器启动失败",
+        "mcpStarting": "正在启动MCP服务器...",
+        "mcpStopFailed": "MCP服务器停止失败",
+        "mcpStopped": "MCP服务器已停止",
+        "mcpStopping": "正在停止MCP服务器...",
+        "mcpTitle": "MCP 服务器",
+        "newConversation": "新对话",
+        "recentConversations": "最近对话",
+        "startMcp": "启动MCP服务器",
+        "startMcpAdminTooltip": "以管理员权限启动 MCP 服务器",
+        "stopMcp": "停止",
         "title": "AI智能体"
+    },
+    "ai-chat": {
+        "assistantNotInitialized": "AI助手未初始化，请先配置AI设置",
+        "automationContinuePrompt": "继续执行上一轮未完成的自动化配装流程（第{{round}}轮）。\n要求：\n1. 继续调用必要工具推进流程。\n2. 完成时输出 {{doneTag}}。\n3. 未完成时输出 {{continueTag}}。",
+        "automationIncompleteWarning": "⚠️ 未在预期轮次内确认流程完成。你可以继续发送\"继续\"让我接着跑。",
+        "automationPrompt": "你现在处于\"配装自动化执行模式\"。\n请严格遵守：\n1. 必须调用工具执行真实配置，不要只给文字建议。\n2. 如果要计算最优配装，优先使用autoBuild，并且最终需要apply=true写入配置。\n3. 涉及带特效MOD/武器时，先调用queryEffectConfig确认状态，必要时用setEffectConfig调整后再autoBuild。\n4. 本轮完成全部自动化后，在最后单独一行输出 {{doneTag}}。\n5. 如果还需要下一轮继续，在最后单独一行输出 {{continueTag}}。\n\n用户需求：\n{{userMessage}}",
+        "automationRoundTag": "【自动执行第{{round}}轮】",
+        "clearChatFailed": "清除配装助手历史对话失败",
+        "error": {
+            "apiKey": "❌ API密钥无效或未配置\n\n请检查：\n1. 设置中的API密钥是否正确\n2. 是否有足够的API配额\n\n你可以在设置中重新配置API密钥。",
+            "generic": "抱歉，处理请求时出错。",
+            "network": "❌ 网络连接失败\n\n请检查：\n1. 网络连接是否正常\n2. API服务是否可用\n3. 代理设置是否正确",
+            "rateLimit": "❌ 请求过于频繁\n\nAPI调用次数已达限制，请等待一段时间后重试",
+            "requestFailed": "❌ 请求失败\n\n{{message}}",
+            "sdk": "❌ SDK兼容性问题\n\n请刷新页面重试，如果问题持续，请清除浏览器缓存并重新启动应用",
+            "timeout": "❌ 请求超时\n\n响应时间过长，请检查网络连接或尝试简化你的问题",
+            "unknown": "❌ 发生未知错误\n\n请查看控制台获取详细信息，或尝试刷新页面。"
+        },
+        "initProxyAgent": "使用服务端代理初始化AI Agent",
+        "initProxyAgentFailed": "使用代理初始化AI Agent失败:",
+        "initUserAgent": "使用用户配置的API密钥初始化AI Agent",
+        "initUserAgentFailed": "使用用户配置初始化AI Agent失败:",
+        "inputPlaceholder": "问我任何配装问题...",
+        "loadChatFailed": "加载配装助手历史对话失败",
+        "noConfigMessage": "AI服务未配置。\n\n请选择以下方式之一配置AI：\n1. 在设置中配置API密钥（推荐）\n2. 联系管理员配置服务端AI\n\n当前状态：\n- 用户API密钥: {{hasUserConfig}}",
+        "reasoning": "思考过程",
+        "retry": "重试",
+        "saveChatFailed": "保存配装助手历史对话失败",
+        "saveChatFailedFallback": "保存配装助手历史对话失败(兜底后)",
+        "sendMessageFailed": "发送消息失败",
+        "tip": "提示: 可以问\"赛琪怎么配MOD\"、\"带扶疏的配装\"等",
+        "title": "配装助手",
+        "welcome": "你好！我是配装助手，可以帮你优化角色配置。\n\n当前角色: {{charName}} ({{charElm}}属性)\n\n你可以问我：\n- {{charName}}怎么配MOD伤害最高？\n- 带{{charElm}}属性的MOD有哪些？\n- 如何提升{{charName}}的暴击伤害？\n- {{charName}}在带扶疏的情况下伤害最大化的MOD要怎么配\n\n默认会自动执行完整配装流程并尝试直接应用配置。"
+    },
+    "app": {
+        "initScriptHotkeysFailed": "启动时注册脚本热键失败:",
+        "syncLaunchAtStartupFailed": "同步开机启动状态失败:",
+        "title": "应用"
+    },
+    "ast-help": {
+        "apply": "应用表达式",
+        "astPlaceholder": "输入表达式后显示AST树结构",
+        "astTitle": "AST 树结构",
+        "clear": "清空",
+        "examples": {
+            "baseStats": "基础属性",
+            "complex": "复杂表达式",
+            "critDamage": "暴击伤害",
+            "expectedDamage": "期望伤害",
+            "functions": "函数使用",
+            "namespace": "命名空间",
+            "specialValue": "特殊值"
+        },
+        "examplesTitle": "示例表达式",
+        "functions": {
+            "ceil": "向上取整",
+            "floor": "向下取整",
+            "hp": "计算背水昂扬乘区(x为血量比例0~1)",
+            "log": "自然对数",
+            "max": "最大值",
+            "min": "最小值",
+            "or": "或运算",
+            "power": "幂运算"
+        },
+        "functionsTitle": "函数说明",
+        "inputLabel": "表达式输入",
+        "inputPlaceholder": "输入表达式，如: 攻击 + 防御",
+        "macrosTitle": "内置宏",
+        "members": {
+            "crit": "暴击伤害",
+            "critTrigger": "暴击且触发",
+            "n": "不计算背水昂扬乘区",
+            "noCrit": "未暴击伤害",
+            "noCritNoTrigger": "未暴击且未触发",
+            "noTrigger": "未触发伤害",
+            "noTriggerCrit": "暴击且未触发",
+            "trigger": "触发伤害",
+            "triggerNoCrit": "未暴击且触发"
+        },
+        "membersTitle": "伤害类型说明",
+        "namespacesTitle": "命名空间说明",
+        "operators": {
+            "add": "加法",
+            "div": "除法",
+            "floordiv": "整除",
+            "mod": "取模",
+            "mul": "乘法",
+            "sub": "减法"
+        },
+        "operatorsTitle": "运算符说明",
+        "parseError": "表达式解析错误",
+        "syntaxDesc": "表达式用于计算伤害、属性值等，支持以下语法：",
+        "syntaxItems": {
+            "function": {
+                "desc": "min(), max(), floor(), ceil(), or(), log(), power()",
+                "label": "函数"
+            },
+            "member": {
+                "desc": "使用 . 访问伤害类型，如 .暴击、.未暴击",
+                "label": "成员访问"
+            },
+            "namespace": {
+                "desc": "使用 :: 访问命名空间，如 伊卡洛斯::伤害",
+                "label": "命名空间"
+            },
+            "number": {
+                "desc": "直接输入数字，如 100, 1.5",
+                "label": "数字"
+            },
+            "operator": {
+                "desc": "+, -, *, /, %, //",
+                "label": "运算符"
+            },
+            "property": {
+                "desc": "角色属性名，如 攻击、防御、生命",
+                "label": "属性"
+            },
+            "skill": {
+                "desc": "技能伤害字段，如 [幻象]伤害",
+                "label": "技能"
+            },
+            "special": {
+                "desc": "倍率固定为100%(不受威力影响)，用于自定义技能倍率，如 [攻击]*1.2 模拟120%倍率、以及[防御]、[生命]等",
+                "label": "特殊值"
+            }
+        },
+        "syntaxTitle": "表达式语法",
+        "title": "表达式帮助"
     },
     "autobuild": {
         "charMods": "角色MOD",
+        "desc": "根据当前MOD配置自动构建最优MOD组合",
+        "includeMelee": "自动更换近战",
+        "includeRanged": "自动更换远程",
+        "includeTypes": "包含MOD类型",
+        "log": "日志",
         "meleeMods": "近战MOD",
+        "preserveTypes": "保留当前MOD",
         "rangedMods": "远程MOD",
-        "skillWeaponMods": "同律MOD"
+        "skillWeaponMods": "同律MOD",
+        "useInv": "使用用户库存"
     },
     "book-detail": {
-        "title": "读物详情"
+        "countSuffix": "条目数: {{count}}",
+        "entryCount": "条目数",
+        "mechanismId": "机制 ID",
+        "notFound": "未找到读物",
+        "point": "坐标点",
+        "region": "所属地区",
+        "subRegion": "子区域",
+        "summary": "读物简介",
+        "title": "读物详情",
+        "treasurePoint": "藏宝点",
+        "treasurePointSuffix": "藏宝点",
+        "type": {
+            "drop": "探索拾取",
+            "read": "直接获取",
+            "treasureChest": "宝箱获取",
+            "unknown": "未知类型"
+        }
     },
     "book-list": {
-        "title": "读物列表"
+        "allRegions": "全部地区",
+        "enableFullTextSearch": "启用正文检索（不支持拼音）",
+        "searchPlaceholder": "搜索读物ID/名称/描述/正文...",
+        "searchPlaceholderPinyin": "搜索读物ID/名称/描述（支持拼音）...",
+        "title": "读物列表",
+        "totalCount": "共 {{count}} 本读物"
+    },
+    "box-drop": {
+        "boxMaximum": "总上限",
+        "boxPerDay": "每日上限",
+        "consume": "消耗",
+        "draw": "抽奖",
+        "draw1": "抽1次",
+        "draw10": "抽10次",
+        "lastResult": "最近结果",
+        "limit": "限量",
+        "quantity": "个",
+        "rewardCount": "{{count}}个",
+        "rewardIndex": "奖励组",
+        "rewardList": "奖励列表",
+        "rewardSet": "奖励组",
+        "simulation": "模拟",
+        "simulationCount": "模拟次数",
+        "statistics": "统计",
+        "title": "抽奖",
+        "totalCapacity": "总容量"
     },
     "build-compare": {
         "additional_buff_list": "额外BUFF列表",
@@ -358,14 +625,36 @@
         "title": "角色详情"
     },
     "char-list": {
-        "title": "角色列表"
+        "empty": "没有找到匹配的角色",
+        "searchPlaceholder": "搜索角色名称、别名、阵营（支持拼音）...",
+        "tabs": {
+            "all": "全部",
+            "control": "控制",
+            "defense": "防御",
+            "heal": "治疗",
+            "homologyWeapon": "同律武器",
+            "maxHp": "最大生命",
+            "output": "输出",
+            "sanityRegen": "神智回复",
+            "shield": "护盾",
+            "skillDamage": "技能伤害",
+            "summon": "召唤物",
+            "support": "辅助",
+            "weaponDamage": "武器伤害"
+        },
+        "title": "角色列表",
+        "totalSuffix": "个角色",
+        "unreleasedHint": "未上线内容可能会发生改变"
     },
     "chat": {
         "addRoom": "创建新房间",
+        "ai": "AI",
         "autoJoin": "自动加入",
         "block": "屏蔽",
+        "blockSuccess": "已屏蔽 {{name}}",
         "cancelReply": "取消回复",
         "chatPlaceholder": "输入聊天内容",
+        "confirm": "确认",
         "copy": "复制",
         "deleteRoomConfirm": "确认要删除房间吗?",
         "deleteRoomFailed": "删除失败",
@@ -374,11 +663,14 @@
         "edited": "(已编辑)",
         "follow": "关注",
         "hello": "大家好",
+        "imagePreview": "[图片]",
         "insertImage": "发送图片",
         "joinFailed": "加入失败",
         "joinFailedTip": "可能是房间已满",
         "keyboardShortcut": "快捷键加入|右键设置键位",
         "keyboardShortcutSetting": "快捷键设置",
+        "latest": "最近消息",
+        "messagePreview": "[消息]",
         "micOn": "开启麦克风",
         "needLogin": "聊天功能需要登录",
         "newRoomBanner": "还没有人发言，快来做第一个吧！",
@@ -396,17 +688,51 @@
         "send": "发送",
         "sendTask": "发送UID(剪贴板)|右键自动发送",
         "sound": "提示音",
+        "system": "系统",
         "title": "聊天",
         "unblock": "取消屏蔽",
+        "unblockSuccess": "已取消屏蔽 {{name}}",
         "unlimited": "不限制",
+        "user": "我",
         "you": "你"
+    },
+    "cloudgame": {
+        "closeWindowFailed": "关闭云游戏窗口失败",
+        "openWindowFailed": "打开云游戏窗口失败"
     },
     "common": {
         "delete": "删除"
     },
     "counter": {
+        "action": {
+            "count": "计数 {{amount}}",
+            "reset": "重置"
+        },
+        "addTrigger": "新增触发器",
+        "create": "新增计数器",
+        "defaultName": "计数器 {{index}}",
+        "defaults": {
+            "dungeonMoling": "副本魔灵",
+            "endlessDungeonMoling": "无尽副本魔灵",
+            "fishingBonus": "钓鱼额外奖励"
+        },
+        "deleteCounter": "删除计数器",
         "desc": "计数器",
-        "title": "计数器"
+        "dragTrigger": "拖动触发器",
+        "expandSettings": "展开计数器设置",
+        "hotkeyPlaceholder": "设置热键",
+        "maxValue": "设置上限",
+        "moving": "正在移动",
+        "resetAll": "重置全部",
+        "resetCounter": "重置计数器",
+        "resetCron": "重置周期",
+        "title": "计数器",
+        "triggers": "触发器",
+        "unlimited": "不限制"
+    },
+    "damage": {
+        "desc": "逐步拆解 CharBuild 伤害公式并支持手动覆盖",
+        "title": "伤害拆解"
     },
     "damageResult": {
         "critDamage": {
@@ -465,6 +791,8 @@
         "impr_desc": "查看任务、NPC、派遣委托的印象增加信息",
         "map": "地图",
         "map_desc": "查看地图标点",
+        "mapLocal": "魔灵地图",
+        "mapLocal_desc": "详细魔灵刷新点位",
         "mod": "魔之楔",
         "mod_desc": "查看魔之楔信息和属性",
         "monster": "怪物",
@@ -497,10 +825,6 @@
         "weapon": "武器",
         "weapon_desc": "查看武器信息和属性"
     },
-    "db-damage": {
-        "desc": "逐步拆解 CharBuild 伤害公式并支持手动覆盖",
-        "title": "伤害拆解"
-    },
     "dna-announcement": {
         "empty": "暂无公告数据",
         "fetch_failed": "获取公告失败",
@@ -514,6 +838,16 @@
     },
     "dna-home": {
         "desc": "游戏信息/签到/浏览帖子",
+        "lastUpdate": "最后更新",
+        "loadMineFailed": "获取用户信息失败",
+        "refreshCurrentPage": "刷新当前页面",
+        "tabs": {
+            "announcement": "公告",
+            "flowQuery": "流水查询",
+            "forum": "论坛",
+            "gameInfo": "游戏信息",
+            "signIn": "签到"
+        },
         "title": "皎皎角"
     },
     "dna-post-detail": {
@@ -547,18 +881,66 @@
     "dna-weapon-detail": {
         "title": "武器详情"
     },
+    "dps-view": {
+        "buildId": "构建ID",
+        "createdAt": "创建时间",
+        "details": "详细信息",
+        "empty": "暂无DPS数据",
+        "rankList": "角色DPS列表",
+        "rankTitle": "角色DPS排行榜",
+        "searchPlaceholder": "搜索角色...",
+        "sortByCreatedAt": "按创建时间排序",
+        "sortByDpsValue": "按DPS值排序",
+        "tierCount": "{{count}}个角色",
+        "tierList": "Tier List",
+        "timelineId": "时间线ID"
+    },
     "draft-list": {
         "title": "图纸列表"
     },
     "dungeon-detail": {
-        "title": "副本详情"
+        "allMonster": "普通怪物",
+        "allReward": "奖励",
+        "count": "共 {{count}} 种",
+        "currentMonsterLevelBase": "当前怪物等级基数 Lv.{{level}}（每波 +{{step}}，最高 {{max}}）",
+        "emptyMonster": "暂无怪物数据",
+        "emptyReward": "暂无奖励数据",
+        "endlessDungeonLevelControlledByWave": "无尽副本等级由上方波次滑块控制",
+        "endlessWave": "无尽波次",
+        "groupMonster": "组刷怪",
+        "groupMonsterCount": "组成员 ({{count}}种)",
+        "groupReward": "奖励组",
+        "monster": "怪物",
+        "monsterCount": "怪物: {{count}}种",
+        "monsterWave": "怪物波次",
+        "noWaveData": "暂无波次数据",
+        "pumpkingTitle": "你好箱",
+        "refreshRange": "刷新范围 ({{platform}})",
+        "refreshRangeDisplay": "刷新范围显示",
+        "rewardList": "奖励列表",
+        "specialMonster": "特殊怪物",
+        "specialReward": "特殊奖励",
+        "title": "副本详情",
+        "totalWaveReward": "波数累计奖励 (1~{{count}}波)",
+        "wave": "波次"
     },
     "dungeon-list": {
-        "title": "副本列表"
+        "level": "等级",
+        "monster": "怪物",
+        "nightHandbook": "夜航手册",
+        "reward": "奖励",
+        "searchPlaceholder": "搜索副本ID/名称/描述/等级/奖励（支持拼音）...",
+        "special": "特殊",
+        "title": "副本列表",
+        "totalCount": "共 {{count}} 个副本",
+        "type": "类型"
     },
     "errorBoundary": {
         "retry": "重试",
         "title": "组件渲染出错"
+    },
+    "event": {
+        "rule": "规则"
     },
     "event-detail": {
         "title": "活动详情"
@@ -797,6 +1179,18 @@
         "update_log": "版本更新日志",
         "welcome": "欢迎使用 DNA Builder"
     },
+    "impr": {
+        "all": "全部",
+        "count": "共 {{count}} 条印象",
+        "region": "地区",
+        "searchPlaceholder": "搜索印象条目",
+        "source": "来源",
+        "sourceDynquest": "派遣委托",
+        "sourceNpc": "NPC",
+        "sourceQuest": "任务",
+        "title": "区域声名",
+        "type": "五维"
+    },
     "inventory": {
         "desc": "自定义你的魔之楔和武器配置",
         "title": "库存管理"
@@ -811,10 +1205,17 @@
         "btn_unpin_window": "取消置顶"
     },
     "map-detail": {
+        "notFound": "未找到地图",
         "title": "地图"
     },
     "map-list": {
         "title": "地图列表"
+    },
+    "map-list-page": {
+        "searchPlaceholder": "搜索地图ID/名称/描述...",
+        "showList": "显示地图列表",
+        "title": "地图列表",
+        "totalCount": "共 {{count}} 个地图"
     },
     "map-local": {
         "title": "地图"
@@ -828,18 +1229,172 @@
     "modEditor": {
         "inputCode": "请输入角色或武器代码"
     },
+    "monster": {
+        "dropInfo": "掉落信息",
+        "dropRate": "掉率 {{rate}}%",
+        "faction": "阵营{{faction}}",
+        "killScore": "积分 {{score}}",
+        "mechanism": "机制 {{id}}"
+    },
     "monster-detail": {
-        "title": "怪物详情"
+        "appearingAbyss": "出现深渊",
+        "appearingDungeon": "出现副本",
+        "attack": "攻击",
+        "badgeTitle": "迷津",
+        "defense": "防御",
+        "defenseDamageReductionRate": "防御减伤率",
+        "drop": "搜打撤掉落",
+        "dropMechanismId": "机制 ID",
+        "dropMonsterTag": "怪物标签",
+        "dropRate": "宝箱掉落率",
+        "effectiveHealth": "有效生命",
+        "factionOther": "其他",
+        "factionPrefix": "阵营",
+        "growthPreview": "等级成长预览",
+        "hp": "生命",
+        "killScore": "击杀积分",
+        "level": "等级",
+        "levelDamageReductionRate": "等级减伤率",
+        "monsterTagInfo": "号令者信息",
+        "shield": "护盾",
+        "showDetail": "查看详情",
+        "showEightHp": "8倍血量",
+        "stance": "战姿",
+        "title": "怪物详情",
+        "value": "数值"
     },
     "monster-list": {
         "title": "怪物列表"
     },
     "monster-tag-detail": {
+        "bonus": "加成",
+        "description": "描述",
+        "params": "参数",
+        "relatedMonsters": "关联怪物",
+        "sameTags": "同类词条",
         "title": "号令者详情"
     },
     "more": {
         "desc": "更多功能",
         "title": "更多"
+    },
+    "node-editor": {
+        "addCalc": {
+            "description": "计算输入值的总和",
+            "result": "结果",
+            "title": "加法计算",
+            "waiting": "等待输入..."
+        },
+        "astExpression": {
+            "description": "验证 AST 表达式",
+            "expression": "表达式",
+            "expressionPlaceholder": "伤害",
+            "missingCore": "缺少核心计算节点",
+            "result": "结果",
+            "title": "AST 表达式",
+            "unknownError": "未知错误",
+            "waiting": "等待输入..."
+        },
+        "attrCalc": {
+            "base": "基础属性",
+            "other": "其他属性",
+            "title": "属性计算",
+            "waiting": "等待输入..."
+        },
+        "buffInput": {
+            "addBuffSlot": "添加Buff槽位",
+            "description": "搜索与选择 Buff",
+            "search": "搜索(支持拼音)",
+            "searchPlaceholder": "输入Buff名称或拼音",
+            "selectBuff": "选择Buff",
+            "title": "Buff 输入"
+        },
+        "coreCalc": {
+            "currentAvailable": "当前可用",
+            "defaultSkill": "选择默认技能：",
+            "errorInfo": "错误信息：",
+            "missingInputs": "缺少必要输入：",
+            "selectSkill": "请选择技能",
+            "waiting": "等待输入"
+        },
+        "enemyInput": {
+            "attack": "攻击",
+            "attributes": "敌人属性（当前等级）",
+            "defense": "防御",
+            "enemy": "敌人",
+            "enemyLevel": "敌人等级",
+            "enemyResistance": "敌人抗性",
+            "hp": "生命",
+            "stance": "战姿"
+        },
+        "expressionCalc": {
+            "expression": "表达式",
+            "expressionPlaceholder": "例如: a + b * c",
+            "inputCount": "输入数量:",
+            "result": "结果"
+        },
+        "fullCalc": {
+            "description": "基于核心计算节点的完整伤害计算",
+            "result": "结果",
+            "title": "完整计算",
+            "waiting": "等待输入..."
+        },
+        "meleeWeaponInput": {
+            "chooseLevel": "选择等级",
+            "chooseWeapon": "选择近战武器",
+            "description": "近战武器选择",
+            "refineLevel": "精炼等级",
+            "title": "近战武器输入",
+            "weapon": "近战武器",
+            "weaponLevel": "武器等级"
+        },
+        "modInput": {
+            "addModSlot": "添加MOD槽位",
+            "chooseLevel": "选择等级",
+            "chooseMod": "选择MOD",
+            "element": "MOD元素",
+            "type": "MOD类型"
+        },
+        "multiplyCalc": {
+            "description": "计算输入值的乘积",
+            "result": "结果",
+            "title": "乘法计算",
+            "waiting": "等待输入..."
+        },
+        "rangedWeaponInput": {
+            "chooseLevel": "选择等级",
+            "chooseWeapon": "选择远程武器",
+            "description": "远程武器选择",
+            "refineLevel": "精炼等级",
+            "title": "远程武器输入",
+            "weapon": "远程武器",
+            "weaponLevel": "武器等级"
+        },
+        "skillDmg": {
+            "description": "计算技能伤害",
+            "expectedDamage": "期望伤害",
+            "noHpDamage": "无血量因数伤害",
+            "result": "伤害结果",
+            "waiting": "等待输入..."
+        },
+        "weaponAttr": {
+            "attack": "攻击",
+            "attackSpeed": "攻击速度",
+            "critDamage": "暴击伤害",
+            "critRate": "暴击率",
+            "multiShot": "多重射击",
+            "result": "武器属性",
+            "triggerRate": "触发率",
+            "waiting": "等待输入..."
+        },
+        "weaponDmg": {
+            "description": "计算武器伤害",
+            "expectedDamage": "期望伤害",
+            "higherCrit": "高级暴击",
+            "lowerCrit": "低级暴击",
+            "result": "武器伤害",
+            "waiting": "等待输入..."
+        }
     },
     "notfound": {
         "back_home": "返回首页",
@@ -890,6 +1445,62 @@
     "pet-list": {
         "title": "魔灵列表"
     },
+    "points-mall": {
+        "accountSettings": "账号设置",
+        "all": "全部",
+        "availability": "投放时间",
+        "balance": "积分余额",
+        "bubblePreview": "气泡预览",
+        "confirmRedeem": "确认兑换",
+        "confirmRedeemDesc": "确定花费 {{cost}} 积分兑换\"{{name}}\"吗？",
+        "currentAppearance": "当前装扮",
+        "default": "默认",
+        "equipAfterRedeem": "请先兑换该商品",
+        "equipFailed": "应用装扮失败",
+        "equipFailedRetry": "应用装扮失败，请稍后重试",
+        "equipSuccess": "已应用装扮",
+        "fetchProductsError": "拉取商品失败，请稍后重试",
+        "fetchProductsFailed": "拉取积分商城商品失败",
+        "fetchSummaryError": "拉取积分信息失败，请稍后重试",
+        "fetchSummaryFailed": "拉取积分商城摘要失败",
+        "instructionLogin": "兑换与装备都需要登录账号。",
+        "instructionNameEffect": "名字特效会影响聊天中昵称的显示特效。",
+        "instructionTitle": "说明",
+        "instructionTitleBadge": "称号会展示在昵称旁边，用于体现成就或身份。",
+        "insufficientPoints": "积分不足",
+        "loginFirst": "请先登录 DNA Builder 账号",
+        "loginHint": "登录后可查看积分并兑换装扮。",
+        "nameEffect": "名字特效",
+        "noPreview": "暂无预览",
+        "noProducts": "暂无可兑换商品",
+        "notInRedeemWindow": "该商品当前不在可兑换时间范围内",
+        "notOwned": "未拥有",
+        "other": "其他",
+        "owned": "已拥有",
+        "points": "积分",
+        "pointsHint": "积分用于兑换称号、名字特效等装扮。",
+        "preview": "预览",
+        "previewHint": "预览以当前选择为准",
+        "previewNameCard": "装备后显示昵称特效",
+        "previewTitle": "装备后显示称号",
+        "price": "价格",
+        "productList": "商品列表",
+        "redeem": "兑换",
+        "redeemFailed": "兑换失败",
+        "redeemFailedRetry": "兑换失败，请稍后重试",
+        "redeemSuccess": "兑换成功",
+        "refresh": "刷新",
+        "rewardType": {
+            "nameCard": "名字特效",
+            "title": "称号"
+        },
+        "summaryNotReady": "当前无法获取积分信息，请稍后重试",
+        "title": "积分商城",
+        "use": "使用",
+        "used": "已使用",
+        "useHint": "你可以在商品列表中兑换并点击\"使用\"来切换装扮。",
+        "userFallback": "用户"
+    },
     "questchain-detail": {
         "title": "任务剧情详情"
     },
@@ -938,12 +1549,21 @@
     },
     "resource": {
         "background": "背景",
+        "book": "所属读物",
         "description": "描述",
+        "fish": "所属鱼类",
         "icon": "图标",
         "id": "ID",
+        "mapPointCount": "个点位",
+        "mapPoints": "地图点位",
+        "mapPointsJump": "地图点位 (点击跳转)",
         "name": "名称",
+        "optionGroup": "选项组",
+        "packReward": "道具箱",
         "rarity": "稀有度",
         "searchPlaceholder": "搜索资源ID/名称（支持拼音）...",
+        "selectReward": "自选箱",
+        "selectRewardTag": "自选",
         "source": "来源",
         "title": "资源"
     },
@@ -1125,21 +1745,52 @@
         "appearance": "外观设置",
         "cancel": "取消",
         "confirm": "确认",
+        "current": "当前",
+        "customSource": "自定义",
         "darkTheme": "深色主题",
+        "dataPackManagement": "数据包管理",
+        "dataPackSourceAddress": "数据包来源地址",
         "desc": "自定义应用程序设置",
+        "download": "下载",
+        "downloaded": "已下载",
+        "female": "女",
+        "initScriptHotkeysAtStartup": "启动时初始化脚本热键",
         "lang": "语言",
         "launchAtStartup": "开机启动",
         "launchAtStartupTip": "系统登录后自动启动桌面应用",
         "lightTheme": "亮色主题",
+        "male": "男",
+        "missingDragDataPack": "未找到可拖拽的数据包:",
+        "noAvailableVersions": "暂无可用版本",
+        "noDescription": "无说明",
         "noModelAvailable": "暂无可用模型",
+        "noSafeModeQuestion": "当前没有可校验的问题",
+        "officialSource": "官方源",
         "other": "其他设置",
+        "prepareDragDataPackFailed": "准备拖拽数据包失败",
+        "protagonistGender1": "主角性别1",
+        "protagonistGender2": "主角性别2",
+        "protagonistName1": "主角名称1",
+        "protagonistName2": "主角名称2",
+        "refresh": "刷新",
         "reset": "重置所有设置",
         "resetConfirm": "确认重置所有设置吗？",
         "resetTip": "如果页面出错可以尝试重置",
+        "safeMode": "安全模式",
+        "safeModeAnswerWrong": "回答错误，安全模式仍保持开启",
+        "safeModeHint": "你知道的太多了",
         "showAIChat": "显示AI配装助手",
+        "storyText": "剧情文本",
         "theme": "主题",
         "title": "设置",
         "uiScale": "UI缩放",
+        "uninstall": "卸载",
+        "uninstallDataPack": "卸载数据包",
+        "uninstallDataPackConfirm": "确定要卸载 {{version}} 吗？",
+        "unknown": "未知",
+        "updateLaunchAtStartupFailed": "更新开机启动设置失败",
+        "use": "使用",
+        "versionList": "版本列表",
         "windowTrasnparent": "透明效果",
         "windowTrasnparentTip": "窗口和表面显示半透明",
         "winMaterial": "窗口材质"
@@ -1160,18 +1811,71 @@
         "title": "商店"
     },
     "timeline": {
+        "addTrack": "添加轨道",
+        "addTrackError": "添加轨道过程中发生错误:",
+        "addTrackFailed": "添加轨道失败，请重试",
+        "addTrackLimitReached": "轨道数量已达到上限 ({{max}})，无法添加更多轨道！",
+        "addTrackNameTypeError": "添加轨道失败：轨道名称必须是字符串类型",
+        "attributeImpact": "属性影响",
+        "brushMode": "画笔模式",
+        "buffTooltip": "BUFF只会对同一轨道或其上方的技能生效",
+        "buffTrack": "BUFF",
+        "cleanupDragStateError": "清理拖拽状态时发生错误:",
+        "clear": "清除",
+        "clearItemSelectionError": "清除单个项目选中状态时出错:",
+        "clearSelectionError": "清除选中状态时发生错误:",
         "click_to_load": "点击加载",
+        "damagePlaceholder": "伤害",
+        "deleteItemError": "删除项目过程中发生错误:",
+        "deleteItemNotFound": "删除确认时未找到要删除的项目",
+        "deleteMode": "删除模式",
+        "deleteSelectedItemsError": "删除选中项目时发生错误:",
         "desc": "自定义角色的战斗逻辑(打轴)",
+        "dragAdjustDuration": "拖拽调整持续时间",
+        "dragAdjustStartTime": "拖拽调整开始时间",
         "export_json": "导出JSON",
+        "generateSample": "生成示例",
+        "handleTrackClickError": "处理轨道点击时发生错误:",
+        "healthCurve": "血量曲线",
+        "healthLabel": "血量",
+        "horizontalScrollError": "水平滚动时发生错误:",
         "import_json": "加载JSON",
+        "importJsonFailed": "导入JSON失败",
+        "invalidTrackIndex": "无效的轨道索引:",
         "load_save": "加载/保存",
         "new_scheme": "新建方案",
         "overwrite_confirm_message": "时间线 {{name}} 已存在，是否覆盖？",
         "overwrite_confirm_title": "确认覆盖",
+        "removeLastTrackNotAllowed": "不能删除最后一个轨道！",
+        "removeTrackError": "删除轨道过程中发生错误:",
+        "removeTrackFailed": "删除轨道失败，请重试",
+        "removeTrackInvalidIndex": "删除轨道失败：无效的轨道索引",
         "rename": "重命名",
+        "renameTrackError": "重命名轨道过程中发生错误:",
+        "renameTrackFailed": "重命名轨道失败，请重试",
+        "renameTrackIndexRangeError": "重命名轨道失败：轨道索引超出有效范围",
+        "renameTrackIndexTypeError": "重命名轨道失败：轨道索引必须是数字类型",
+        "renameTrackNameTypeError": "重命名轨道失败：轨道名称必须是字符串类型",
+        "resetView": "重置视图",
         "save": "保存",
         "save_scheme": "保存方案",
-        "title": "时间线"
+        "selectMode": "选择模式",
+        "skillNotFound": "未找到技能 {{base}}",
+        "skillPrefix": "技能",
+        "skillTrack": "技能",
+        "stopPropagationError": "停止事件冒泡时出错:",
+        "timeLabel": "时间",
+        "timelineNameConflictsWithSkill": "时间线名称不能与技能名称相同",
+        "timelineNameInvalidChars": "时间线名称不能包含 ()+-*/. 等符号",
+        "title": "时间线",
+        "trackNameDefault": "轨道 {{number}}",
+        "trackNameDuplicate": "已存在相同名称的轨道！",
+        "trackNameExists": "轨道名称 \"{{name}}\" 已存在，请使用其他名称！",
+        "trackNameRequired": "轨道名称不能为空！",
+        "trackNameTooLong": "轨道名称不能超过30个字符！",
+        "updateDragPreviewError": "更新拖拽预览位置时发生错误:",
+        "zoomIn": "放大",
+        "zoomOut": "缩小"
     },
     "todo": {
         "completeFailed": "标记完成失败",
@@ -1215,6 +1919,11 @@
         "desc": "读取并导出 pak 文件",
         "title": "解包"
     },
+    "update": {
+        "checkFailed": "检查更新失败:",
+        "downloadInstallFailed": "下载安装更新失败:",
+        "noUpdateAvailable": "没有可用的更新"
+    },
     "updater": {
         "newVersionFound": "发现新版本 v{{version}}",
         "newVersionMessage": "\n\n{{body}}\n\n是否自动下载并安装更新？",
@@ -1228,6 +1937,45 @@
         "updateFailed": "更新失败",
         "updating": "更新中..."
     },
+    "view": {
+        "all": "全部",
+        "allModules": "全部模块",
+        "contentAuthorizationDesc": "除特别注明的内容外，本站文字内容遵循 CC BY-SA 3.0 协议，图片等媒体内容则遵循其原有协议。",
+        "contentAuthorizationDesc2": "利用本站内容时，您必须给出适当署名，并提供指向本许可协议的链接，同时标明是否对原始作品作了修改；不得以任何方式暗示本站为您或您的使用背书。",
+        "contentAuthorizationTitle": "内容授权说明",
+        "contentCount": "内容分区",
+        "databaseEntryCount": "资料入口",
+        "featuredEntry": "推荐入口",
+        "globalSearchEntry": "全局检索入口",
+        "matchCount": "已命中 {{count}} 个结果",
+        "moduleCount": "已选 {{count}} 个模块",
+        "noResult": "没有找到匹配内容，试试角色、地图、任务、副本或怪物等关键词",
+        "noResultEntries": "未找到匹配的资料库条目",
+        "placeholder": "搜索已选模块...",
+        "searchScope": "当前搜索范围：{{scope}}",
+        "section": {
+            "build": {
+                "badge": "Build",
+                "description": "围绕角色培养、装备搭配与养成素材，适合从 Build 视角快速定位核心资料。",
+                "title": "构筑与养成"
+            },
+            "challenge": {
+                "badge": "Challenge",
+                "description": "面向首领、怪物、成就与称号等目标型内容，方便围绕挑战目标进行连续检索。",
+                "title": "挑战与收藏"
+            },
+            "explore": {
+                "badge": "Explore",
+                "description": "聚合区域、副本、刷新点位与采集相关资料，优先服务跑图、采集和副本路线查询。",
+                "title": "地图与探索"
+            },
+            "world": {
+                "badge": "World",
+                "description": "把 NPC、动态任务、话题、声名与图鉴类内容整理到同一层，降低世界观检索成本。",
+                "title": "任务与世界"
+            }
+        }
+    },
     "walnut-list": {
         "title": "密函列表"
     },
@@ -1235,9 +1983,11 @@
         "title": "武器详情"
     },
     "weapon-list": {
+        "defaultOrder": "默认顺序",
         "income": "收益",
         "noResults": "没有找到匹配的武器",
         "searchPlaceholder": "搜索武器名称、类型（支持拼音）...",
+        "sortByIncome": "收益排序：高→低",
         "title": "武器列表"
     }
 }

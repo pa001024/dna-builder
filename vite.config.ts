@@ -8,8 +8,10 @@ import Component from "unplugin-vue-components/vite"
 import { defineConfig } from "vite"
 import { chunkSplitPlugin } from "vite-plugin-chunk-split"
 import { VitePWA } from "vite-plugin-pwa"
+import { dataPackRewritePlugin } from "./src/data/data-pack-rewrite-plugin"
 
 const host = process.env.TAURI_DEV_HOST
+const mockDataPackDir = resolve(__dirname, "mock/data-pack")
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
@@ -28,6 +30,7 @@ export default defineConfig(async () => ({
         },
     },
     plugins: [
+        dataPackRewritePlugin(),
         vue(),
         vueJsx(),
         tailwindcss(),
@@ -159,6 +162,37 @@ export default defineConfig(async () => ({
                 changeOrigin: true,
                 secure: false,
             },
+        },
+        fs: {
+            allow: ["."],
+        },
+        middlewareMode: false,
+        configureServer(server) {
+            server.middlewares.use("/mock/data-pack", (req, res, next) => {
+                const url = req.url || "/"
+                const filePath = url === "/" ? "latest.json" : url.replace(/^\//, "")
+                const absPath = resolve(mockDataPackDir, filePath)
+                if (!absPath.startsWith(mockDataPackDir)) {
+                    res.statusCode = 403
+                    res.end("Forbidden")
+                    return
+                }
+
+                fs.readFile(absPath, (error, buffer) => {
+                    if (error) {
+                        next()
+                        return
+                    }
+
+                    res.statusCode = 200
+                    if (absPath.endsWith(".json")) {
+                        res.setHeader("Content-Type", "application/json; charset=utf-8")
+                    } else if (absPath.endsWith(".zip")) {
+                        res.setHeader("Content-Type", "application/zip")
+                    }
+                    res.end(buffer)
+                })
+            })
         },
         watch: {
             // 3. tell Vite to ignore watching `src-tauri`

@@ -32,7 +32,7 @@ async function enterRoom(room: Room) {
     router.push({ name: "room", params: { room: room.id } })
 }
 async function deleteRoom(room: Room) {
-    if ((await ui.showDialog("确认", t("chat.deleteRoomConfirm"))) && (await deleteRoomMutation({ id: room.id }))) {
+    if ((await ui.showDialog(t("chat.confirm"), t("chat.deleteRoomConfirm"))) && (await deleteRoomMutation({ id: room.id }))) {
         await reloadRooms()
     } else {
         ui.showErrorMessage(t("chat.deleteRoomFailed"))

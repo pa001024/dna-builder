@@ -43,12 +43,12 @@ const tracks = reactive<TimelineTrack[]>([
     {
         id: "track-0",
         index: 0,
-        name: "技能",
+        name: t("timeline.skillTrack"),
     },
     {
         id: "track-1",
         index: 1,
-        name: "BUFF",
+        name: t("timeline.buffTrack"),
     },
 ])
 const trackHeight = ref(60)
@@ -116,7 +116,7 @@ const addTrack = (name?: string) => {
         // 限制轨道数量，防止性能问题
         const MAX_TRACKS = 50
         if (tracks.length >= MAX_TRACKS) {
-            ui.showErrorMessage(`轨道数量已达到上限 (${MAX_TRACKS})，无法添加更多轨道！`)
+            ui.showErrorMessage(t("timeline.addTrackLimitReached", { max: MAX_TRACKS }))
             return -1
         }
 
@@ -124,11 +124,11 @@ const addTrack = (name?: string) => {
         const trackNumber = newIndex + 1
 
         // 验证名称唯一性
-        const trackName = name?.trim() || `轨道 ${trackNumber}`
+        const trackName = name?.trim() || t("timeline.trackNameDefault", { number: trackNumber })
         const nameExists = tracks.some(track => track.name === trackName)
 
         if (nameExists) {
-            ui.showErrorMessage(`轨道名称 "${trackName}" 已存在，请使用其他名称！`)
+            ui.showErrorMessage(t("timeline.trackNameExists", { name: trackName }))
             return -1
         }
 
@@ -145,7 +145,7 @@ const addTrack = (name?: string) => {
         return newIndex // 返回新轨道的索引
     } catch (error) {
         console.error("添加轨道过程中发生错误:", error)
-        ui.showErrorMessage("添加轨道失败，请重试")
+        ui.showErrorMessage(t("timeline.addTrackFailed"))
         return -1
     }
 }
@@ -160,7 +160,7 @@ const removeTrack = (trackIndex: number) => {
         }
 
         if (tracks.length <= 1) {
-            ui.showErrorMessage("不能删除最后一个轨道！")
+            ui.showErrorMessage(t("timeline.removeLastTrackNotAllowed"))
             return false // 至少保留一条轨道
         }
 
@@ -191,7 +191,7 @@ const removeTrack = (trackIndex: number) => {
         return true
     } catch (error) {
         console.error("删除轨道过程中发生错误:", error)
-        ui.showErrorMessage("删除轨道失败，请重试")
+        ui.showErrorMessage(t("timeline.removeTrackFailed"))
         return false
     }
 }
@@ -218,13 +218,13 @@ const renameTrack = (trackIndex: number, newName: string) => {
         // 验证名称
         const trimmedName = newName.trim()
         if (!trimmedName) {
-            ui.showErrorMessage("轨道名称不能为空！")
+            ui.showErrorMessage(t("timeline.trackNameRequired"))
             return false
         }
 
         // 限制名称长度
         if (trimmedName.length > 30) {
-            ui.showErrorMessage("轨道名称不能超过30个字符！")
+            ui.showErrorMessage(t("timeline.trackNameTooLong"))
             return false
         }
 
@@ -232,7 +232,7 @@ const renameTrack = (trackIndex: number, newName: string) => {
         const nameExists = tracks.some((track, idx) => idx !== trackIndex && track.name === trimmedName)
 
         if (nameExists) {
-            ui.showErrorMessage("已存在相同名称的轨道！")
+            ui.showErrorMessage(t("timeline.trackNameDuplicate"))
             return false
         }
 
@@ -240,7 +240,7 @@ const renameTrack = (trackIndex: number, newName: string) => {
         return true
     } catch (error) {
         console.error("重命名轨道过程中发生错误:", error)
-        ui.showErrorMessage("重命名轨道失败，请重试")
+        ui.showErrorMessage(t("timeline.renameTrackFailed"))
         return false
     }
 }
@@ -1429,12 +1429,12 @@ const finishEditTimelineName = () => {
         }
         // 检查重名
         if (baseOptions.value.some(base => base.value === editTimelineName.value)) {
-            ui.showErrorMessage(`时间线名称不能与技能名称相同`)
+            ui.showErrorMessage(t("timeline.timelineNameConflictsWithSkill"))
             return
         }
         // 检查非法符号 ()+-*/.
         if (/[()+\-*/.]/.test(editTimelineName.value)) {
-            ui.showErrorMessage(`时间线名称不能包含 ()+-*/. 等符号`)
+            ui.showErrorMessage(t("timeline.timelineNameInvalidChars"))
             return
         }
         timelineData.value[editingTimelineIndex.value].name = editTimelineName.value
@@ -1519,7 +1519,7 @@ const importTimelineJson = () => {
                                 ? 'bg-blue-600 text-white shadow-inner shadow-blue-700/30'
                                 : 'bg-base-300 hover:bg-base-content/50 text-base-content/80 hover:text-white'
                         "
-                        title="选择模式"
+                        :title="$t('timeline.selectMode')"
                         @click="selectTool('select')"
                     >
                         <Icon icon="ri:drag-move-line" class="h-5 w-5" />
@@ -1532,7 +1532,7 @@ const importTimelineJson = () => {
                                 ? 'bg-green-600 text-white shadow-inner shadow-green-700/30'
                                 : 'bg-base-300 hover:bg-base-content/50 text-base-content/80 hover:text-base-100'
                         "
-                        title="画笔模式"
+                        :title="$t('timeline.brushMode')"
                         @click="selectTool('brush')"
                     >
                         <Icon icon="ri:edit-line" class="h-5 w-5" />
@@ -1545,7 +1545,7 @@ const importTimelineJson = () => {
                                 ? 'bg-red-600 text-white shadow-inner shadow-red-700/30'
                                 : 'bg-base-300 hover:bg-base-content/50 text-base-content/80 hover:text-base-100'
                         "
-                        title="删除模式"
+                        :title="$t('timeline.deleteMode')"
                         @click="selectTool('delete')"
                     >
                         <Icon icon="ri:delete-bin-line" class="h-5 w-5" />
@@ -1606,7 +1606,7 @@ const importTimelineJson = () => {
                     <Combobox
                         v-model="targetFunction"
                         type="text"
-                        placeholder="伤害"
+                        :placeholder="$t('timeline.damagePlaceholder')"
                         :options="
                             (charBuild.allSkills.find(s => s.名称 === baseName)?.字段 || []).map(f => ({
                                 label: f.名称,
@@ -1619,25 +1619,25 @@ const importTimelineJson = () => {
             </div>
             <!-- 右侧操作按钮 -->
             <div class="flex space-x-3 ml-auto items-center">
-                <div class="tooltip tooltip-bottom" data-tip="BUFF只会对同一轨道或其上方的技能生效">
+                <div class="tooltip tooltip-bottom" :data-tip="$t('timeline.buffTooltip')">
                     <button class="btn btn-sm btn-square btn-circle">?</button>
                 </div>
                 <!-- 血量曲线控制 -->
                 <div class="flex items-center gap-2">
                     <label class="label">
-                        <span class="label-text text-sm font-semibold text-secondary whitespace-nowrap">血量曲线</span>
+                        <span class="label-text text-sm font-semibold text-secondary whitespace-nowrap">{{ $t("timeline.healthCurve") }}</span>
                         <input v-model="showHealthCurve" type="checkbox" class="toggle toggle-secondary" />
                     </label>
-                    <button class="btn btn-xs btn-secondary" @click="generateSampleHealthCurve">生成示例</button>
-                    <button v-if="healthPoints.length > 0" class="btn btn-xs btn-error" @click="clearHealthCurve">清除</button>
+                    <button class="btn btn-xs btn-secondary" @click="generateSampleHealthCurve">{{ $t("timeline.generateSample") }}</button>
+                    <button v-if="healthPoints.length > 0" class="btn btn-xs btn-error" @click="clearHealthCurve">{{ $t("timeline.clear") }}</button>
                 </div>
                 <div class="p-2 font-orbitron">{{ zoomLevel }}x</div>
-                <div class="btn btn-ghost btn-square border-0" title="缩小" @click="zoomOut">
+                <div class="btn btn-ghost btn-square border-0" :title="$t('timeline.zoomOut')" @click="zoomOut">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
                     </svg>
                 </div>
-                <div class="btn btn-ghost btn-square border-0" title="放大" @click="zoomIn">
+                <div class="btn btn-ghost btn-square border-0" :title="$t('timeline.zoomIn')" @click="zoomIn">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path
                             fill-rule="evenodd"
@@ -1646,7 +1646,7 @@ const importTimelineJson = () => {
                         />
                     </svg>
                 </div>
-                <div class="btn btn-ghost btn-square border-0" title="重置视图" @click="resetView">
+                <div class="btn btn-ghost btn-square border-0" :title="$t('timeline.resetView')" @click="resetView">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path
                             fill-rule="evenodd"
@@ -1736,7 +1736,7 @@ const importTimelineJson = () => {
                             clip-rule="evenodd"
                         />
                     </svg>
-                    <span class="font-medium text-sm">添加轨道</span>
+                    <span class="font-medium text-sm">{{ $t("timeline.addTrack") }}</span>
                 </div>
                 <!-- 轨道列表 -->
                 <div
@@ -1902,8 +1902,10 @@ const importTimelineJson = () => {
                                                 v-if="val.属性影响"
                                                 class="justify-between items-center gap-4 text-sm flex max-h-0 overflow-hidden group-hover:max-h-32 transition-all duration-300"
                                             >
-                                                <div class="text-xs text-neutral-500">属性影响</div>
-                                                <div class="text-xs ml-auto font-medium text-neutral-500">技能{{ val.属性影响 }}</div>
+                                                <div class="text-xs text-neutral-500">{{ $t("timeline.attributeImpact") }}</div>
+                                                <div class="text-xs ml-auto font-medium text-neutral-500">
+                                                    {{ $t("timeline.skillPrefix") }}{{ val.属性影响 }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1955,7 +1957,7 @@ const importTimelineJson = () => {
                                     <!-- 左侧拖拽区域 -->
                                     <div
                                         class="group absolute left-0 top-0 h-full w-3 cursor-col-resize z-50 flex items-center justify-center hover:bg-white/10 rounded-l-md transition-colors duration-150"
-                                        :title="'拖拽调整开始时间'"
+                                        :title="$t('timeline.dragAdjustStartTime')"
                                         @mousedown.stop="e => startResize(e, item, 'left')"
                                     >
                                         <span class="text-white opacity-0 group-hover:opacity-100 text-sm transition-opacity duration-150">
@@ -1966,7 +1968,7 @@ const importTimelineJson = () => {
                                     <!-- 右侧拖拽区域 -->
                                     <div
                                         class="group absolute right-0 top-0 h-full w-3 cursor-col-resize z-50 flex items-center justify-center hover:bg-white/10 rounded-r-md transition-colors duration-150"
-                                        :title="'拖拽调整持续时间'"
+                                        :title="$t('timeline.dragAdjustDuration')"
                                         @mousedown.stop="e => startResize(e, item, 'right')"
                                     >
                                         <span class="text-white opacity-0 group-hover:opacity-100 text-sm transition-opacity duration-150">
@@ -2089,12 +2091,16 @@ const importTimelineJson = () => {
                                     stroke-width="1"
                                 />
                                 <!-- 血量数值 -->
-                                <text x="5" y="20" font-size="12" fill="#ffffff">血量: {{ hoverHealthValue.toFixed(2) }}%</text>
+                                <text x="5" y="20" font-size="12" fill="#ffffff">
+                                    {{ $t("timeline.healthLabel") }}: {{ hoverHealthValue.toFixed(2) }}%
+                                </text>
                                 <!-- 时间数值 -->
-                                <text x="5" y="40" font-size="12" fill="#ffffff">时间: {{ hoverTime.toFixed(2) }}s</text>
+                                <text x="5" y="40" font-size="12" fill="#ffffff">
+                                    {{ $t("timeline.timeLabel") }}: {{ hoverTime.toFixed(2) }}s
+                                </text>
                             </g>
                         </svg>
-                        <div class="absolute top-1 left-2 text-xs text-red-400 font-semibold">血量</div>
+                        <div class="absolute top-1 left-2 text-xs text-red-400 font-semibold">{{ $t("timeline.healthLabel") }}</div>
                     </div>
                 </div>
             </div>

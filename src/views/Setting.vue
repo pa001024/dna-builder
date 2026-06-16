@@ -1,68 +1,52 @@
 <script lang="ts" setup>
 import { t } from "i18next"
-import { ref, watch } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 import { MATERIALS } from "@/api/app"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
 import { env } from "@/env"
 import { i18nLanguages } from "@/i18n"
+import { useDataPackStore } from "@/store/dataPack"
 import { db } from "@/store/db"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()
+const dataPack = useDataPackStore()
 const isUpdatingLaunchAtStartup = ref(false)
 const safeModeGuardDialogRef = ref<HTMLDialogElement | null>(null)
 const safeModeAnswer = ref("")
+const dataPackFileInput = ref<HTMLInputElement | null>(null)
+const dataPackSourceBaseUrl = ref("")
+const dataPackSourceKind = ref<"official" | "custom">("custom")
 const questions = [
-    {
-        question: "What is the ultimate answer to the universe?",
-        answer: "42",
-    },
-    {
-        question: "What is the current game version?",
-        answer: String(DNA_SAFE_VERSION_LIMIT),
-    },
-    {
-        question: "What is the game server opening date? (8-digit number)",
-        answer: "20251028",
-    },
-    {
-        question: "What time do daily tasks refresh every day? (1-digit number)",
-        answer: "5",
-    },
-    {
-        question: "What color is the sky on a clear day?",
-        answer: "blue",
-    },
-    {
-        question: "Type the word 'unlock' backwards.",
-        answer: "kcolnu",
-    },
-    {
-        question: "What is the second day of the week in English?",
-        answer: "Tuesday",
-    },
-    {
-        question: "What is the first month of the year?",
-        answer: "January",
-    },
-    {
-        question: "What is the color of a banana?",
-        answer: "yellow",
-    },
-    {
-        question: "What is the opposite of cold?",
-        answer: "hot",
-    },
-    {
-        question: "How many days are in a week?",
-        answer: "7",
-    },
+    { question: "What is the ultimate answer to the universe?", answer: "42" },
+    { question: "What is the current game version?", answer: String(DNA_SAFE_VERSION_LIMIT) },
+    { question: "What is the game server opening date? (8-digit number)", answer: "20251028" },
+    { question: "What time do daily tasks refresh every day? (1-digit number)", answer: "5" },
+    { question: "What color is the sky on a clear day?", answer: "blue" },
+    { question: "Type the word 'unlock' backwards.", answer: "kcolnu" },
+    { question: "What is the second day of the week in English?", answer: "Tuesday" },
+    { question: "What is the first month of the year?", answer: "January" },
+    { question: "What is the color of a banana?", answer: "yellow" },
+    { question: "What is the opposite of cold?", answer: "hot" },
+    { question: "How many days are in a week?", answer: "7" },
 ]
 const currentSafeModeQuestion = ref<(typeof questions)[number] | null>(null)
+const CDN_DATA_PACK_BASE_URL = "https://cdn.dna-builder.cn/data-pack"
+const versionDragUrls = ref<Record<string, string>>({})
+const sourceSaveTimer = ref<number | null>(null)
+const isApplyingSourceUpdate = ref(false)
 
-//#region UI
+const dataPackVersions = computed(() => {
+    const versions = dataPack.status?.versions || []
+    return [...versions].sort((a, b) => b.version.localeCompare(a.version, "zh-CN", { numeric: true }))
+})
+
+const installedDataPackVersions = computed(() => {
+    return new Set(dataPack.installedVersions)
+})
+
 const lightThemes = [
     "light",
     "lofi",
@@ -84,42 +68,71 @@ const lightThemes = [
     "acid",
     "lemonade",
 ]
-const darkThemes = [
-    "dark",
-    "black",
-    "synthwave",
-    "halloween",
-    "forest",
-    "dracula",
-    "business",
-    "night",
-    "coffee",
-    //
-]
+const darkThemes = ["dark", "black", "synthwave", "halloween", "forest", "dracula", "business", "night", "coffee"]
 
 watch(
     () => setting.winMaterial,
     v => setting.setWinMaterial(v)
 )
 
-// 首字母大写
+watch(
+    () => dataPack.sourceInfo?.baseUrl,
+    v => {
+        dataPackSourceBaseUrl.value = v || ""
+    },
+    { immediate: true }
+)
+
+watch(
+    () => dataPack.sourceInfo?.sourceKind,
+    v => {
+        dataPackSourceKind.value = v || "custom"
+    },
+    { immediate: true }
+)
+
+watch(
+    () => dataPackSourceKind.value,
+    kind => {
+        if (kind === "official") {
+            dataPackSourceBaseUrl.value = CDN_DATA_PACK_BASE_URL
+        } else if (!dataPackSourceBaseUrl.value || dataPackSourceBaseUrl.value === CDN_DATA_PACK_BASE_URL) {
+            dataPackSourceBaseUrl.value = "/mock/data-pack"
+        }
+    },
+    { immediate: true }
+)
+
+watch(
+    () => dataPackSourceBaseUrl.value,
+    () => {
+        if (isApplyingSourceUpdate.value) {
+            return
+        }
+
+        if (sourceSaveTimer.value) {
+            window.clearTimeout(sourceSaveTimer.value)
+        }
+
+        if (dataPackSourceKind.value === "official") {
+            return
+        }
+
+        sourceSaveTimer.value = window.setTimeout(() => {
+            void saveSourceBaseUrl()
+        }, 600)
+    }
+)
+
 function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-/**
- * 应用安全模式状态并刷新页面，使 data 层导出重新按当前版本门控生效。
- * @param enabled 是否开启安全模式
- */
 function applySafeMode(enabled: boolean) {
     setting.safeMode = enabled
     location.reload()
 }
 
-/**
- * 处理安全模式开关。关闭前要求先完成校验表单。
- * @param enabled 目标开关状态
- */
 function handleSafeModeToggle(enabled: boolean) {
     if (enabled) {
         applySafeMode(true)
@@ -131,26 +144,20 @@ function handleSafeModeToggle(enabled: boolean) {
     safeModeGuardDialogRef.value?.showModal()
 }
 
-/**
- * 取消关闭安全模式，保持当前开启状态。
- */
 function cancelDisableSafeMode() {
     safeModeGuardDialogRef.value?.close()
     safeModeAnswer.value = ""
     setting.safeMode = true
 }
 
-/**
- * 提交关闭安全模式校验表单，只有回答正确且填写原因后才允许关闭。
- */
 function confirmDisableSafeMode() {
     if (!currentSafeModeQuestion.value) {
-        ui.showErrorMessage("当前没有可校验的问题")
+        ui.showErrorMessage(t("setting.noSafeModeQuestion"))
         return
     }
 
     if (safeModeAnswer.value.trim() !== currentSafeModeQuestion.value.answer) {
-        ui.showErrorMessage("回答错误，安全模式仍保持开启")
+        ui.showErrorMessage(t("setting.safeModeAnswerWrong"))
         return
     }
 
@@ -162,7 +169,6 @@ function confirmDisableSafeMode() {
 async function resetStorage() {
     localStorage.clear()
     db.delete()
-    // 清除所有Service Worker
     await clearServiceWorkers()
     location.reload()
 }
@@ -173,102 +179,199 @@ async function openResetConfirmDialog() {
     }
 }
 
-/**
- * 更新开机启动开关，并在失败时保留原状态。
- * @param enabled 是否启用开机启动
- */
 async function updateLaunchAtStartup(enabled: boolean) {
     isUpdatingLaunchAtStartup.value = true
     try {
         await setting.setLaunchAtStartup(enabled)
     } catch (error) {
-        console.error("更新开机启动设置失败:", error)
+        console.error("更新开机启动设置失败", error)
         ui.showErrorMessage(error instanceof Error ? error.message : String(error))
     } finally {
         isUpdatingLaunchAtStartup.value = false
     }
 }
 
-/**
- * 清除当前注册的所有Service Worker
- */
 async function clearServiceWorkers(): Promise<void> {
-    // 检查浏览器是否支持Service Worker
     if ("serviceWorker" in navigator) {
-        try {
-            // 获取所有注册的Service Worker
-            const registrations = await navigator.serviceWorker.getRegistrations()
-
-            // 取消注册所有Service Worker
-            for (const registration of registrations) {
-                await registration.unregister()
-                console.log("Service Worker 已取消注册:", registration.scope)
-            }
-
-            // 清除所有缓存
-            if ("caches" in window) {
-                const cacheNames = await caches.keys()
-                for (const cacheName of cacheNames) {
-                    await caches.delete(cacheName)
-                    console.log("缓存已清除:", cacheName)
-                }
-            }
-
-            console.log("所有Service Worker和缓存已清除")
-        } catch (error) {
-            console.error("清除Service Worker失败:", error)
-            throw error
+        const registrations = await navigator.serviceWorker.getRegistrations()
+        for (const registration of registrations) {
+            await registration.unregister()
         }
-    } else {
-        console.log("当前浏览器不支持Service Worker")
+        if ("caches" in window) {
+            for (const cacheName of await caches.keys()) {
+                await caches.delete(cacheName)
+            }
+        }
     }
 }
 
-//#endregion
+async function refreshDataPackStatus(forceRefresh = false) {
+    await dataPack.refreshStatus(forceRefresh)
+    dataPackSourceBaseUrl.value = dataPack.sourceInfo?.baseUrl || ""
+}
+
+async function downloadDataPack(version: string) {
+    await dataPack.downloadVersion(version)
+    await refreshDataPackStatus()
+}
+
+async function importDataPack() {
+    dataPackFileInput.value?.click()
+}
+
+async function onImportFileChange(event: Event) {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ""
+    if (!file) {
+        return
+    }
+    await dataPack.importFromFile(file)
+    await refreshDataPackStatus()
+}
+
+async function saveSourceBaseUrl() {
+    isApplyingSourceUpdate.value = true
+    try {
+        await dataPack.setSourceBaseUrl(dataPackSourceBaseUrl.value.trim())
+        await refreshDataPackStatus()
+    } finally {
+        isApplyingSourceUpdate.value = false
+    }
+}
+
+async function saveSourceKind(kind: "official" | "custom") {
+    isApplyingSourceUpdate.value = true
+    dataPackSourceKind.value = kind
+    try {
+        await dataPack.setSourceKind(kind)
+        if (kind === "official") {
+            dataPackSourceBaseUrl.value = CDN_DATA_PACK_BASE_URL
+        }
+        await refreshDataPackStatus(true)
+    } finally {
+        isApplyingSourceUpdate.value = false
+    }
+}
+
+async function refreshDataPackVersions() {
+    await refreshDataPackStatus(true)
+}
+
+function formatVersionDate(date: string | undefined) {
+    if (!date) {
+        return t("setting.unknown")
+    }
+
+    return new Intl.DateTimeFormat("zh-CN", {
+        dateStyle: "medium",
+        timeStyle: "short",
+    }).format(new Date(date))
+}
+
+function getVersionLabel(version: string) {
+    return version
+}
+
+function isDownloadedVersion(version: string) {
+    return version === dataPack.status?.version || installedDataPackVersions.value.has(version)
+}
+
+function isCurrentDataPackVersion(version: string) {
+    return dataPack.status?.version === version
+}
+
+function onVersionDragStart(event: DragEvent, version: string) {
+    if (!event.dataTransfer || !isDownloadedVersion(version)) {
+        event.preventDefault()
+        return
+    }
+
+    try {
+        const file = dataPack.versionFiles[version]
+        if (!file) {
+            throw new Error(`${t("setting.missingDragDataPack")} ${version}`)
+        }
+        event.dataTransfer.effectAllowed = "copy"
+        event.dataTransfer.items.clear()
+        event.dataTransfer.items.add(file)
+        const fileUrl = versionDragUrls.value[version] || URL.createObjectURL(file)
+        versionDragUrls.value[version] = fileUrl
+        event.dataTransfer.setData("DownloadURL", `application/zip:${version}.zip:${fileUrl}`)
+    } catch (error) {
+        console.error("准备拖拽数据包失败", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+        event.preventDefault()
+    }
+}
+
+function onVersionDragEnd(version: string) {
+    const fileUrl = versionDragUrls.value[version]
+    if (fileUrl) {
+        window.setTimeout(() => {
+            URL.revokeObjectURL(fileUrl)
+            delete versionDragUrls.value[version]
+        }, 5000)
+    }
+}
+
+async function useDataPackVersion(version: string) {
+    if (isCurrentDataPackVersion(version)) {
+        return
+    }
+
+    await dataPack.useVersion(version)
+    await refreshDataPackStatus(true)
+}
+
+async function uninstallDataPackVersion(version: string) {
+    if (!isDownloadedVersion(version)) {
+        return
+    }
+
+    if (!(await ui.showDialog(t("setting.uninstallDataPack"), t("setting.uninstallDataPackConfirm", { version })))) {
+        return
+    }
+
+    await dataPack.uninstallVersion(version)
+    await refreshDataPackStatus(true)
+}
+onMounted(() => {
+    dataPack.bootstrap()
+})
 </script>
 
 <template>
     <div class="w-full h-full overflow-y-auto">
         <div class="p-4 flex flex-col gap-4 max-w-xl m-auto">
             <article>
-                <h2 class="text-sm font-bold m-2">
-                    {{ $t("setting.appearance") }}
-                </h2>
+                <h2 class="text-sm font-bold m-2">{{ $t("setting.appearance") }}</h2>
                 <div class="bg-base-100 p-2 rounded-lg">
-                    <div class="flex justify-between items-center p-2">
+                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
                         <span class="label-text">{{ $t("setting.theme") }}</span>
                         <Select
                             v-model="setting.theme"
                             class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
-                            :placeholder="$t('setting.theme')"
                         >
-                            <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                {{ $t("setting.lightTheme") }}
-                            </SelectLabel>
+                            <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.lightTheme") }}</SelectLabel>
                             <SelectGroup>
-                                <SelectItem v-for="th in lightThemes" :key="th" :value="th">
-                                    {{ capitalize(th) }}
-                                </SelectItem>
+                                <SelectItem v-for="th in lightThemes" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
                             </SelectGroup>
                             <SelectSeparator />
-                            <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                {{ $t("setting.darkTheme") }}
-                            </SelectLabel>
+                            <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.darkTheme") }}</SelectLabel>
                             <SelectGroup>
-                                <SelectItem v-for="th in darkThemes" :key="th" :value="th">
-                                    {{ capitalize(th) }}
-                                </SelectItem>
+                                <SelectItem v-for="th in darkThemes" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
                             </SelectGroup>
                         </Select>
                     </div>
-                    <div class="flex justify-between items-center p-2">
+                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
                         <span class="label-text">
                             {{ $t("setting.windowTrasnparent") }}
                             <div class="text-xs text-base-content/50">{{ $t("setting.windowTrasnparentTip") }}</div>
                         </span>
                         <input v-model="setting.windowTrasnparent" type="checkbox" class="toggle toggle-secondary" />
                     </div>
-                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
+                    <div class="flex justify-between items-center p-2">
                         <span class="label-text">
                             {{ $t("setting.launchAtStartup") }}
                             <div class="text-xs text-base-content/50">{{ $t("setting.launchAtStartupTip") }}</div>
@@ -281,35 +384,25 @@ async function clearServiceWorkers(): Promise<void> {
                             @change="updateLaunchAtStartup(($event.target as HTMLInputElement).checked)"
                         />
                     </div>
-                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.winMaterial") }}
-                        </span>
-
+                    <div class="flex justify-between items-center p-2">
+                        <span class="label-text">{{ $t("setting.winMaterial") }}</span>
                         <Select
                             v-model="setting.winMaterial"
                             class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                             :placeholder="$t('setting.winMaterial')"
                         >
-                            <SelectItem v-for="th in MATERIALS" :key="th" :value="th">
-                                {{ th }}
-                            </SelectItem>
+                            <SelectItem v-for="th in MATERIALS" :key="th" :value="th">{{ th }}</SelectItem>
                         </Select>
                     </div>
                     <div class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.lang") }}
-                        </span>
-
+                        <span class="label-text">{{ $t("setting.lang") }}</span>
                         <Select
                             v-model="setting.lang"
                             class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
                             :placeholder="$t('setting.lang')"
                             @update:model-value="setting.setLang($event)"
                         >
-                            <SelectItem v-for="lang in i18nLanguages" :key="lang.code" :value="lang.code">
-                                {{ lang.name }}
-                            </SelectItem>
+                            <SelectItem v-for="lang in i18nLanguages" :key="lang.code" :value="lang.code">{{ lang.name }}</SelectItem>
                         </Select>
                     </div>
                     <div class="flex justify-between items-center p-2">
@@ -336,8 +429,8 @@ async function clearServiceWorkers(): Promise<void> {
                     </div>
                     <div class="flex justify-between items-center p-2">
                         <span class="label-text">
-                            安全模式
-                            <div class="text-xs text-base-content/50">你知道的太多了</div>
+                            {{ $t("setting.safeMode") }}
+                            <div class="text-xs text-base-content/50">{{ $t("setting.safeModeHint") }}</div>
                         </span>
                         <input
                             :checked="setting.safeMode"
@@ -347,69 +440,178 @@ async function clearServiceWorkers(): Promise<void> {
                         />
                     </div>
                     <div v-if="!setting.safeMode" class="flex justify-between items-center p-2">
-                        <span class="label-text"> 启动时初始化脚本热键 </span>
+                        <span class="label-text"> {{ $t("setting.initScriptHotkeysAtStartup") }} </span>
                         <input v-model="setting.initScriptHotkeysAtStartup" type="checkbox" class="toggle toggle-secondary" />
                     </div>
                 </div>
             </article>
 
             <article>
-                <h2 class="text-sm font-bold m-2">
-                    {{ $t("setting.account") }}
-                </h2>
+                <h2 class="text-sm font-bold m-2">{{ $t("setting.dataPackManagement") }}</h2>
+                <div class="bg-base-100 p-2 rounded-lg">
+                    <div class="p-2 flex flex-col gap-2">
+                        <div class="flex items-center gap-2">
+                            <Select
+                                v-model="dataPackSourceKind"
+                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
+                                @update:model-value="saveSourceKind($event as 'official' | 'custom')"
+                            >
+                                <SelectItem value="official">{{ $t("setting.officialSource") }}</SelectItem>
+                                <SelectItem value="custom">{{ $t("setting.customSource") }}</SelectItem>
+                            </Select>
+                            <input
+                                v-model="dataPackSourceBaseUrl"
+                                :disabled="dataPackSourceKind === 'official'"
+                                type="text"
+                                class="input input-bordered input-sm flex-1"
+                                :placeholder="
+                                    dataPackSourceKind === 'official' ? CDN_DATA_PACK_BASE_URL : $t('setting.dataPackSourceAddress')
+                                "
+                                @input="dataPackSourceKind === 'custom' && saveSourceBaseUrl()"
+                            />
+                            <button class="btn btn-sm" @click="importDataPack">{{ $t("achievement.import") }}</button>
+                        </div>
+                    </div>
+
+                    <div class="px-2 pb-2 flex items-center justify-between gap-2">
+                        <div class="text-xs text-base-content/60">{{ $t("setting.versionList") }}</div>
+                        <button class="btn btn-ghost btn-xs" :disabled="dataPack.isBootstrapping" @click="refreshDataPackVersions">
+                            {{ $t("setting.refresh") }}
+                        </button>
+                    </div>
+
+                    <div class="px-2 pb-2">
+                        <div
+                            v-if="dataPackVersions.length === 0"
+                            class="rounded-md border border-base-300 px-3 py-6 text-sm text-base-content/60 text-center"
+                        >
+                            {{ $t("setting.noAvailableVersions") }}
+                        </div>
+                        <div v-else class="flex flex-col gap-2">
+                            <div
+                                v-for="version in dataPackVersions"
+                                :key="version.version"
+                                class="rounded-md border border-base-300 bg-base-100/60 px-3 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+                                :class="{
+                                    'border-primary': isCurrentDataPackVersion(version.version),
+                                    'opacity-80': isDownloadedVersion(version.version),
+                                }"
+                                :draggable="isDownloadedVersion(version.version)"
+                                @dragstart="onVersionDragStart($event, version.version)"
+                                @dragend="onVersionDragEnd(version.version)"
+                            >
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <div class="font-medium break-all">{{ getVersionLabel(version.version) }}</div>
+                                        <span
+                                            v-if="isCurrentDataPackVersion(version.version)"
+                                            class="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary"
+                                            >{{ $t("setting.current") }}</span
+                                        >
+                                        <span
+                                            v-else-if="isDownloadedVersion(version.version)"
+                                            class="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-medium text-success"
+                                            >{{ $t("setting.downloaded") }}</span
+                                        >
+                                    </div>
+                                    <div class="text-xs text-base-content/60">
+                                        <span>{{ formatVersionDate(version.builtAt) }}</span>
+                                        <span class="mx-2">·</span>
+                                        <span>{{ version.notes || $t("setting.noDescription") }}</span>
+                                    </div>
+                                </div>
+                                <div class="sm:w-48">
+                                    <div
+                                        v-if="dataPack.isDownloading && dataPack.downloadingVersion === version.version"
+                                        class="w-full flex flex-col gap-1"
+                                    >
+                                        <progress
+                                            class="progress progress-primary w-full"
+                                            :value="Math.round(dataPack.downloadProgress * 100)"
+                                            max="100"
+                                        />
+                                        <div class="text-[11px] text-base-content/60 text-right">
+                                            {{ Math.round(dataPack.downloadProgress * 100) }}%
+                                        </div>
+                                    </div>
+                                    <div v-else-if="isDownloadedVersion(version.version)" class="flex gap-2">
+                                        <button class="btn btn-error btn-sm flex-1" @click="uninstallDataPackVersion(version.version)">
+                                            {{ $t("setting.uninstall") }}
+                                        </button>
+                                        <button
+                                            class="btn btn-primary btn-sm flex-1"
+                                            :disabled="isCurrentDataPackVersion(version.version)"
+                                            @click="useDataPackVersion(version.version)"
+                                        >
+                                            {{ $t("setting.use") }}
+                                        </button>
+                                    </div>
+                                    <button
+                                        v-else
+                                        class="btn btn-primary btn-sm w-full"
+                                        :disabled="dataPack.isDownloading"
+                                        @click="downloadDataPack(version.version)"
+                                    >
+                                        {{ $t("setting.download") }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input ref="dataPackFileInput" type="file" accept=".zip" class="hidden" @change="onImportFileChange" />
+                </div>
+            </article>
+
+            <article>
+                <h2 class="text-sm font-bold m-2">{{ $t("setting.account") }}</h2>
                 <div class="bg-base-100 p-2 rounded-lg">
                     <DOBAccountSetting />
                 </div>
             </article>
 
             <article>
-                <h2 class="text-sm font-bold m-2">剧情文本</h2>
+                <h2 class="text-sm font-bold m-2">{{ $t("setting.storyText") }}</h2>
                 <div class="bg-base-100 p-2 rounded-lg">
                     <div class="flex justify-between items-center p-2 gap-4">
-                        <span class="label-text">主角名称1</span>
+                        <span class="label-text">{{ $t("setting.protagonistName1") }}</span>
                         <input v-model="setting.protagonistName1" type="text" class="input input-bordered input-sm w-64" />
                     </div>
                     <div class="flex justify-between items-center p-2 gap-4">
-                        <span class="label-text">主角性别1</span>
+                        <span class="label-text">{{ $t("setting.protagonistGender1") }}</span>
                         <Select
                             v-model="setting.protagonistGender"
                             class="inline-flex items-center justify-between input input-bordered input-sm w-64"
                         >
-                            <SelectItem value="female">女</SelectItem>
-                            <SelectItem value="male">男</SelectItem>
+                            <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
+                            <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
                         </Select>
                     </div>
                     <div class="flex justify-between items-center p-2 gap-4">
-                        <span class="label-text">主角名称2</span>
+                        <span class="label-text">{{ $t("setting.protagonistName2") }}</span>
                         <input v-model="setting.protagonistName2" type="text" class="input input-bordered input-sm w-64" />
                     </div>
                     <div class="flex justify-between items-center p-2 gap-4">
-                        <span class="label-text">主角性别2</span>
+                        <span class="label-text">{{ $t("setting.protagonistGender2") }}</span>
                         <Select
                             v-model="setting.protagonistGender2"
                             class="inline-flex items-center justify-between input input-bordered input-sm w-64"
                         >
-                            <SelectItem value="female">女</SelectItem>
-                            <SelectItem value="male">男</SelectItem>
+                            <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
+                            <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
                         </Select>
                     </div>
                 </div>
             </article>
 
             <article>
-                <h2 class="text-sm font-bold m-2">
-                    {{ $t("setting.other") }}
-                </h2>
+                <h2 class="text-sm font-bold m-2">{{ $t("setting.other") }}</h2>
                 <div class="bg-base-100 p-2 rounded-lg">
                     <div class="flex justify-between items-center p-2">
                         <span class="label-text">
                             {{ $t("setting.reset") }}
                             <div class="text-xs text-base-content/50">{{ $t("setting.resetTip") }}</div>
                         </span>
-
-                        <div class="btn btn-secondary w-40" @click="openResetConfirmDialog">
-                            {{ $t("setting.confirm") }}
-                        </div>
+                        <div class="btn btn-secondary w-40" @click="openResetConfirmDialog">{{ $t("setting.confirm") }}</div>
                     </div>
                 </div>
             </article>
@@ -420,14 +622,12 @@ async function clearServiceWorkers(): Promise<void> {
         <div class="modal-box font-wt">
             <h3 class="font-bold text-lg">Turn off Safe Mode</h3>
             <p class="py-2 text-sm text-base-content/70">Please answer the question correctly.</p>
-
             <div class="flex flex-col gap-3">
                 <label class="w-full flex flex-col gap-2">
                     <span class="text-sm">{{ currentSafeModeQuestion?.question || "no question" }}</span>
                     <input v-model="safeModeAnswer" type="password" class="input input-bordered" placeholder="enter your answer" />
                 </label>
             </div>
-
             <div class="modal-action">
                 <button class="btn" type="button" @click="cancelDisableSafeMode">Forget it</button>
                 <button class="btn btn-error" type="button" @click="confirmDisableSafeMode">Confirm</button>

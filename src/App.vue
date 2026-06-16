@@ -4,6 +4,7 @@ import { provideClient } from "@urql/vue"
 import { onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
+import { dataPackBootstrapLoading, isDataPackHydrated } from "./data/data-pack-bridge"
 import { env } from "./env"
 import { useMihanNotify } from "./store/mihan"
 import { useScriptRuntimeStore } from "./store/scriptRuntime"
@@ -315,7 +316,7 @@ onBeforeUnmount(() => {
         pinable
         :class="{ 'is-app': env.isApp }"
     >
-        <RouterView v-slot="{ Component, route }">
+        <RouterView v-slot="{ Component, route }" v-if="isDataPackHydrated() || !dataPackBootstrapLoading">
             <transition name="slide-right">
                 <KeepAlive v-if="route.meta.keepAlive">
                     <Suspense>
@@ -338,6 +339,13 @@ onBeforeUnmount(() => {
             <Sidebar />
         </template>
     </ResizeableWindow>
+    <div
+        v-if="dataPackBootstrapLoading && !isDataPackHydrated()"
+        class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-base-100/80 backdrop-blur-sm gap-2"
+    >
+        <span>{{ $t("ai.loading") }}</span>
+        <span class="loading loading-dots" />
+    </div>
     <ScriptRuntimeFloatingBar v-if="isMainWindow" />
 </template>
 

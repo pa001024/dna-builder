@@ -16,7 +16,7 @@ const dungeon = computed(() => abyssDungeonMap.get(dungeonId.value))
         </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">
-            <div class="text-base-content/70">未找到深渊副本</div>
+            <div class="text-base-content/70">{{ $t("abyss-dungeon-detail.notFound") }}</div>
         </div>
     </div>
 </template>

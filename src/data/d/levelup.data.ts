@@ -23,4 +23,4 @@ export const charLevelUpExpCost = [
     40000, 41250, 42500, 50000, 57500, 65000, 72500, 80000, 87500, 95000, 102500, 110000, 117500, 171500,
 ]
 
-export const CashToExpRate = 0.2
+export { CashToExpRate } from "../game-const"
