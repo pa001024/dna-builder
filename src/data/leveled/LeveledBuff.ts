@@ -74,6 +74,7 @@ export class LeveledBuff implements Buff {
             this.mx = buffData.mx
             this.dx = buffData.dx ?? buffData.mx
         }
+        if (buffData.技能) this.技能 = buffData.技能
 
         // 设置等级（如果提供），否则使用默认等级dx
         this.等级 = 等级 !== undefined && 等级 >= 0 ? 等级 : this.dx || this.mx || 1

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from "vue"
+import { computed, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import { dataPackBootstrapLoading } from "@/data/data-pack-bridge"
 import { useDataPackStore } from "@/store/dataPack"
@@ -9,7 +9,7 @@ const router = useRouter()
 const ui = useUIStore()
 const dataPack = useDataPackStore()
 
-const showModal = ref(true)
+const showModal = ref(false)
 const hasChecked = ref(false)
 const isDownloading = ref(false)
 
@@ -104,13 +104,17 @@ async function downloadLatest() {
     }
 }
 
-watchEffect(() => {
-    if (dataPackBootstrapLoading.value || hasChecked.value) {
-        return
-    }
+watch(
+    dataPackBootstrapLoading,
+    loading => {
+        if (loading || hasChecked.value) {
+            return
+        }
 
-    void checkDataPack()
-})
+        void checkDataPack()
+    },
+    { immediate: true }
+)
 </script>
 
 <template>

@@ -11838,6 +11838,7 @@ function patchCWeapon() {
                             filter: "疑星落|星河寥落",
                             inherit: "melee",
                             atk: "all",
+                            视为: "下落攻击",
                         },
                     ],
                 },

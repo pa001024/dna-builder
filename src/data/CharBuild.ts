@@ -938,7 +938,14 @@ export class CharBuild {
             ({ patterns }) => fieldName && patterns.some(pattern => fieldName.includes(pattern))
         )?.prefix
         if (fieldPrefix) return fieldPrefix
-        return weaponAttackTypeMap.find(({ patterns }) => patterns.some(pattern => baseName === pattern))?.prefix
+        const basePrefix = weaponAttackTypeMap.find(({ patterns }) => patterns.some(pattern => baseName === pattern))?.prefix
+        if (basePrefix) return basePrefix
+        const skillWeapon = this.skillWeapon
+        if (skillWeapon?.名称 === baseName) {
+            return weaponAttackTypeMap.find(({ patterns }) => skillWeapon.视为 && patterns.some(pattern => skillWeapon.视为 === pattern))
+                ?.prefix
+        }
+        return undefined
     }
 
     /**
@@ -963,21 +970,24 @@ export class CharBuild {
         weaponPrefix: string,
         baseName: string,
         fieldName: string | undefined,
-        attribute: "增伤" | "独立增伤"
+        attribute: "增伤" | "独立增伤",
+        weapon?: LeveledWeapon | LeveledSkillWeapon
     ) {
         const attackTypePrefix = this.getWeaponAttackTypePrefix(baseName, fieldName)
-        if (!attackTypePrefix) return 0
+        const weaponAttackTypePrefix =
+            attackTypePrefix || (weapon instanceof LeveledSkillWeapon ? this.getWeaponAttackTypePrefix(weapon.视为 || "") : undefined)
+        if (!weaponAttackTypePrefix) return 0
         const prefixScope = this.getAttributePrefixScope(weaponPrefix)
         const getBonus = attribute === "独立增伤" ? this.getTotalBonusMul.bind(this) : this.getTotalBonus.bind(this)
-        let bonus = getBonus(`${weaponPrefix}${attackTypePrefix}${attribute}`, prefixScope)
+        let bonus = getBonus(`${weaponPrefix}${weaponAttackTypePrefix}${attribute}`, prefixScope)
         if (weaponPrefix.includes("近战")) {
-            bonus += getBonus(`${attackTypePrefix}${attribute}`, prefixScope)
+            bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, prefixScope)
         }
         if (weaponPrefix.startsWith("同律")) {
             const lowerPrefix = weaponPrefix.substring(2)
-            bonus += getBonus(`${lowerPrefix}${attackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix))
+            bonus += getBonus(`${lowerPrefix}${weaponAttackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix))
             if (lowerPrefix.includes("近战")) {
-                bonus += getBonus(`${attackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix))
+                bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix))
             }
         }
         return bonus
@@ -1535,7 +1545,7 @@ export class CharBuild {
         const getWeaponAttackTypeBonus = (base: string | undefined, fieldName: string | undefined, attribute: "增伤" | "独立增伤") => {
             const key = base || this.baseName
             const weapon = weaponsMap.get(key) || this.selectedWeapon || this.meleeWeapon
-            return this.getWeaponAttackTypeBonus(weapon.类型, key, fieldName, attribute)
+            return this.getWeaponAttackTypeBonus(weapon.类型, key, fieldName, attribute, weapon)
         }
         const getDamage = (base?: string, fieldName?: string) => {
             const key = base || this.baseName

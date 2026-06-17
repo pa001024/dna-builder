@@ -899,6 +899,35 @@ describe("CharBuild类测试", () => {
             expect(damage.expectedDamage).toBeCloseTo(0, 6)
         })
 
+        it("同律武器的 type=下落攻击 应参与下落增伤判断", () => {
+            const charBuild = new CharBuild({
+                char: new LeveledChar("煜明"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10303),
+                ranged: new LeveledWeapon(20601),
+                baseName: "疑星落",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+                skillMods: [new LeveledMod(54202)],
+            })
+
+            const withType = charBuild.calculateTargetFunction(charBuild.calculateWeaponAttributes(charBuild.skillWeapon), "[疑星落]伤害")
+            charBuild.skillWeapon!.视为 = undefined
+            const withoutType = charBuild.calculateTargetFunction(
+                charBuild.calculateWeaponAttributes(charBuild.skillWeapon),
+                "[疑星落]伤害"
+            )
+
+            expect(charBuild.skillWeapon?.名称).toBe("疑星落")
+            expect(withType).toBeGreaterThan(withoutType)
+        })
+
         it("角色mod的effect暴击词条应对所有武器生效", () => {
             const charBuild = new CharBuild({
                 char: new LeveledChar("黎瑟"),
@@ -1021,7 +1050,7 @@ describe("CharBuild类测试", () => {
             const income = charBuild.calcIncome(buff, true)
 
             expect(Number.isFinite(income)).toBe(true)
-            expect(income).toBeCloseTo(1.6, 10)
+            expect(income).toBeCloseTo(0.6, 10)
         })
 
         it("已装备MOD的精确收益应等于真实移除后的重算结果", () => {
