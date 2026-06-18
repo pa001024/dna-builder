@@ -62,11 +62,7 @@ function normalizeListItem(item: any) {
 
 export const resolvers = {
     Query: {
-        rankingLists: async (_parent, _args, context, info) => {
-            if (!context.user?.roles?.includes("admin")) {
-                throw createGraphQLError("Unauthorized: Admin role required")
-            }
-
+        rankingLists: async (_parent, _args, _context, info) => {
             const result = await db.query.rankingLists.findMany({
                 orderBy: [desc(schema.rankingLists.updateAt), desc(schema.rankingLists.createdAt)],
                 with: getSubSelection(info, "items")
@@ -118,11 +114,7 @@ export const resolvers = {
                 items: (list.items || []).map(normalizeListItem),
             }
         },
-        rankingListItems: async (_parent, args, context, info) => {
-            if (!context.user?.roles?.includes("admin")) {
-                throw createGraphQLError("Unauthorized: Admin role required")
-            }
-
+        rankingListItems: async (_parent, args, _context, info) => {
             const items = await db.query.rankingListItems.findMany({
                 where: eq(schema.rankingListItems.rankingListId, args.rankingListId),
                 orderBy: [asc(schema.rankingListItems.sortOrder), asc(schema.rankingListItems.createdAt)],

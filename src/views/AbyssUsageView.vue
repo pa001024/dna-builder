@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { DNAAPI } from "dna-api"
-import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
 import { utils, writeFile } from "xlsx"
 import { abyssUsageBaseQuery } from "@/api/combined"
@@ -65,7 +64,6 @@ type LevelStatItem = AbyssUsageLevelStat & {
 const setting = useSettingStore()
 const ui = useUIStore()
 const user = useUserStore()
-const { t } = useTranslation()
 
 let api: DNAAPI
 
@@ -161,7 +159,7 @@ const currentLevelRange = computed(() => {
 
 const levelRangeLabel = computed(() => {
     if (currentLevelRange.value.minLevel == null || currentLevelRange.value.maxLevel == null) {
-        return t("abyss-usage.allLevels")
+        return "全部等级"
     }
     return `Lv.${currentLevelRange.value.minLevel} - Lv.${currentLevelRange.value.maxLevel}`
 })
@@ -185,25 +183,25 @@ const slotStatSections = computed<SlotStatSection[]>(() => {
     return [
         {
             key: "support",
-            label: t("abyss-usage.support"),
+            label: "助战",
             items: stats.support || [],
             total: (stats.support || []).reduce((sum, item) => sum + item.submissionCount, 0),
         },
         {
             key: "meleeWeapon",
-            label: t("abyss-usage.meleeWeapon"),
+            label: "近战武器",
             items: stats.meleeWeapon || [],
             total: (stats.meleeWeapon || []).reduce((sum, item) => sum + item.submissionCount, 0),
         },
         {
             key: "rangedWeapon",
-            label: t("abyss-usage.rangedWeapon"),
+            label: "远程武器",
             items: stats.rangedWeapon || [],
             total: (stats.rangedWeapon || []).reduce((sum, item) => sum + item.submissionCount, 0),
         },
         {
             key: "pet",
-            label: t("abyss-usage.pet"),
+            label: "魔灵",
             items: stats.pet || [],
             total: (stats.pet || []).reduce((sum, item) => sum + item.submissionCount, 0),
         },
@@ -212,11 +210,11 @@ const slotStatSections = computed<SlotStatSection[]>(() => {
 
 const groupedRoleRanks = computed<UsageGroup[]>(() => {
     const groups: UsageGroup[] = [
-        { label: t("abyss-usage.percent80Plus"), items: [] },
-        { label: t("abyss-usage.percent60To80"), items: [] },
-        { label: t("abyss-usage.percent40To60"), items: [] },
-        { label: t("abyss-usage.percent20To40"), items: [] },
-        { label: t("abyss-usage.percent20Minus"), items: [] },
+        { label: "80% 以上", items: [] },
+        { label: "60% - 80%", items: [] },
+        { label: "40% - 60%", items: [] },
+        { label: "20% - 40%", items: [] },
+        { label: "20% 以下", items: [] },
     ]
 
     for (const item of roleRanks.value) {
@@ -320,7 +318,7 @@ async function fetchLatestRoleInfo() {
     if (!api) {
         const client = await setting.getDNAAPI()
         if (!client) {
-            ui.showErrorMessage(t("abyss-usage.loginFirst"))
+            ui.showErrorMessage("请先登录")
             return null
         }
         api = client
@@ -332,9 +330,9 @@ async function fetchLatestRoleInfo() {
         if (roleRes.is_success && roleRes.data) {
             return roleRes.data
         }
-        throw new Error(roleRes.msg || t("abyss-usage.loadDefaultRoleFailed"))
+        throw new Error(roleRes.msg || "获取默认角色信息失败")
     } catch (error) {
-        ui.showErrorMessage(t("abyss-usage.loadLatestRoleInfoFailed"), error instanceof Error ? error.message : String(error))
+        ui.showErrorMessage("获取最新角色信息失败", error instanceof Error ? error.message : String(error))
         return null
     } finally {
         await setting.stopHeartbeat()
@@ -349,32 +347,28 @@ async function uploadAbyssUsage() {
     try {
         const role = await fetchLatestRoleInfo()
         if (!role?.roleInfo?.abyssInfo?.bestTimeVo1) {
-            ui.showErrorMessage(t("abyss-usage.noUploadData"))
+            ui.showErrorMessage("没有可上传的深渊数据")
             return
         }
         if (!role.roleInfo?.roleShow?.roleId) {
-            ui.showErrorMessage(t("abyss-usage.missingUid"))
+            ui.showErrorMessage("缺少 UID")
             return
         }
 
         const payload = await buildAbyssUploadPayload(role)
         if (!payload) {
-            throw new Error(t("abyss-usage.buildUploadDataFailed"))
+            throw new Error("无法生成深渊上传数据")
         }
         const result = await submitAbyssUsageMutation({ input: payload }, { requestPolicy: "network-only" })
         if (!result) {
-            throw new Error(t("abyss-usage.emptyUploadResult"))
+            throw new Error("上传结果为空")
         }
         await user.refreshProfile()
         const awardedExp = result.reward?.awardedExp ?? 0
         const awardedPoints = result.reward?.awardedPoints ?? 0
-        ui.showSuccessMessage(
-            awardedExp > 0
-                ? t("abyss-usage.uploadSuccessWithReward", { exp: awardedExp, points: awardedPoints })
-                : t("abyss-usage.uploadSuccess")
-        )
+        ui.showSuccessMessage(awardedExp > 0 ? `深渊数据上传成功，经验+${awardedExp}，积分+${awardedPoints}` : "深渊数据上传成功")
     } catch (error) {
-        ui.showErrorMessage(t("abyss-usage.uploadFailed"), error instanceof Error ? error.message : String(error))
+        ui.showErrorMessage("深渊数据上传失败", error instanceof Error ? error.message : String(error))
     } finally {
         abyssUploading.value = false
     }
@@ -709,36 +703,36 @@ async function exportAbyssSubmissions() {
     try {
         const submissions = await loadAllAbyssSubmissions()
         if (!submissions.length) {
-            ui.showErrorMessage(t("abyss-usage.noExportableSubmissions"))
+            ui.showErrorMessage("没有可导出的深渊提交")
             return
         }
         const workbook = utils.book_new()
         const submissionRows = [
             [
-                t("abyss-usage.submitId"),
-                t("abyss-usage.seasonId"),
-                t("abyss-usage.uidSha256"),
-                t("abyss-usage.mainChar"),
-                t("abyss-usage.mainCharId"),
-                t("abyss-usage.meleeWeapon"),
-                t("abyss-usage.meleeWeaponId"),
-                t("abyss-usage.rangedWeapon"),
-                t("abyss-usage.rangedWeaponId"),
-                t("abyss-usage.support1"),
-                t("abyss-usage.support1Id"),
-                t("abyss-usage.supportWeapon1"),
-                t("abyss-usage.supportWeapon1Id"),
-                t("abyss-usage.support2"),
-                t("abyss-usage.support2Id"),
-                t("abyss-usage.supportWeapon2"),
-                t("abyss-usage.supportWeapon2Id"),
-                t("abyss-usage.pet"),
-                t("abyss-usage.petId"),
-                t("abyss-usage.stars"),
-                t("abyss-usage.createdAt"),
-                t("abyss-usage.updatedAt"),
-                t("abyss-usage.roleParticipation"),
-                t("abyss-usage.weaponParticipation"),
+                "提交ID",
+                "赛季ID",
+                "UID_SHA256",
+                "主角色",
+                "主角色ID",
+                "近战武器",
+                "近战武器ID",
+                "远程武器",
+                "远程武器ID",
+                "助战1",
+                "助战1ID",
+                "助战武器1",
+                "助战武器1ID",
+                "助战2",
+                "助战2ID",
+                "助战武器2",
+                "助战武器2ID",
+                "魔灵",
+                "魔灵ID",
+                "星级",
+                "创建时间",
+                "更新时间",
+                "角色参与",
+                "武器参与",
             ],
             ...submissions.map(item => [
                 item.id,
@@ -768,15 +762,7 @@ async function exportAbyssSubmissions() {
             ]),
         ]
         const roleRows = [
-            [
-                t("abyss-usage.submitId"),
-                t("abyss-usage.seasonId"),
-                t("abyss-usage.mainCharId"),
-                t("abyss-usage.mainChar"),
-                t("abyss-usage.roleType"),
-                t("abyss-usage.level"),
-                t("abyss-usage.createdAt"),
-            ],
+            ["提交ID", "赛季ID", "角色ID", "角色名称", "角色类型", "等级", "创建时间"],
             ...submissions.flatMap(item =>
                 (item.roleParticipants || []).map(participant => [
                     item.id,
@@ -790,15 +776,7 @@ async function exportAbyssSubmissions() {
             ),
         ]
         const weaponRows = [
-            [
-                t("abyss-usage.submitId"),
-                t("abyss-usage.seasonId"),
-                t("abyss-usage.weaponId"),
-                t("abyss-usage.weaponName"),
-                t("abyss-usage.roleType"),
-                t("abyss-usage.skillLevel"),
-                t("abyss-usage.createdAt"),
-            ],
+            ["提交ID", "赛季ID", "武器ID", "武器名称", "角色类型", "技能等级", "创建时间"],
             ...submissions.flatMap(item =>
                 (item.weaponParticipants || []).map(participant => [
                     item.id,
@@ -814,13 +792,13 @@ async function exportAbyssSubmissions() {
         const submissionSheet = utils.aoa_to_sheet(submissionRows)
         const roleSheet = utils.aoa_to_sheet(roleRows)
         const weaponSheet = utils.aoa_to_sheet(weaponRows)
-        utils.book_append_sheet(workbook, submissionSheet, t("abyss-usage.sheetSubmission"))
-        utils.book_append_sheet(workbook, roleSheet, t("abyss-usage.sheetRole"))
-        utils.book_append_sheet(workbook, weaponSheet, t("abyss-usage.sheetWeapon"))
+        utils.book_append_sheet(workbook, submissionSheet, "提交")
+        utils.book_append_sheet(workbook, roleSheet, "角色参与")
+        utils.book_append_sheet(workbook, weaponSheet, "武器参与")
         writeFile(workbook, getAbyssExportFileName())
-        ui.showSuccessMessage(t("abyss-usage.exportSuccess"))
+        ui.showSuccessMessage("深渊提交已导出")
     } catch (error) {
-        ui.showErrorMessage(t("abyss-usage.exportFailed"), error instanceof Error ? error.message : String(error))
+        ui.showErrorMessage("导出深渊提交失败", error instanceof Error ? error.message : String(error))
     } finally {
         exporting.value = false
     }
@@ -844,7 +822,7 @@ async function loadStats() {
         weaponRanks.value = baseRes?.abyssUsageWeaponRank ?? []
         assistantLineupStats.value = []
     } catch (error) {
-        ui.showErrorMessage(t("abyss-usage.loadStatsFailed"), error instanceof Error ? error.message : String(error))
+        ui.showErrorMessage("加载深渊统计失败", error instanceof Error ? error.message : String(error))
     } finally {
         loading.value = false
     }
@@ -862,7 +840,7 @@ onMounted(async () => {
 <template>
     <ScrollArea class="h-full">
         <div class="mx-auto max-w-7xl p-4 space-y-4">
-            <div class="rounded-xl bg-base-100 shadow-md">
+            <div class="rounded-2xl bg-base-100 shadow-md">
                 <div class="p-5 md:p-6 space-y-4">
                     <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                         <div class="space-y-2">
@@ -878,7 +856,7 @@ onMounted(async () => {
                             </div>
                             <div class="space-y-1">
                                 <h1 class="flex items-center gap-2 text-3xl font-black tracking-tight">
-                                    <span>{{ $t("activity-calendar.theater_title") }}</span>
+                                    <span>沉浸式戏剧</span>
                                     <span class="inline-flex items-center gap-1">
                                         <img
                                             v-for="key in seasonDungeonElementKeys"
@@ -908,16 +886,16 @@ onMounted(async () => {
                             >
                                 <span v-if="exporting" class="loading loading-spinner loading-xs"></span>
                                 <Icon v-else icon="ri:file-excel-2-line" />
-                                {{ $t("abyss-usage.export") }}
+                                导出
                             </button>
                             <button class="btn btn-sm btn-primary" :disabled="abyssUploading" @click="uploadAbyssUsage">
                                 <span v-if="abyssUploading" class="loading loading-spinner loading-xs"></span>
                                 <Icon v-else icon="ri:upload-2-line" />
-                                {{ $t("abyss-usage.upload") }}
+                                上传
                             </button>
                             <button class="btn btn-ghost btn-sm" :disabled="loading" @click="loadStats">
                                 <Icon icon="ri:refresh-line" class="size-4" />
-                                <span>{{ $t("abyss-usage.refresh") }}</span>
+                                <span>刷新</span>
                             </button>
                         </div>
                     </div>
@@ -928,13 +906,13 @@ onMounted(async () => {
                 </div>
             </div>
 
-            <div class="rounded-xl bg-base-100 shadow-md">
+            <div class="rounded-2xl bg-base-100 shadow-md">
                 <div class="p-5">
                     <div class="mb-4 flex items-end justify-between gap-3">
                         <div>
-                            <h2 class="text-2xl font-bold">{{ $t("abyss-usage.roleUsage") }}</h2>
+                            <h2 class="text-2xl font-bold">角色使用率</h2>
                             <p class="text-sm opacity-70">
-                                {{ $t("abyss-usage.submissionsFrom", { count: lineupTotal }) }}
+                                本页面全部数据分析自 {{ lineupTotal }} 名玩家。使用率=上场该角色玩家数÷持有该角色玩家数
                             </p>
                         </div>
                     </div>
@@ -958,7 +936,7 @@ onMounted(async () => {
                                     >
                                         <RouterLink
                                             :to="getCharLink(item.charId)"
-                                            class="card-body bg-linear-30 from-indigo-300/50 to-indigo-600/50 rounded-xl relative p-2 overflow-hidden"
+                                            class="card-body bg-linear-30 from-indigo-300/50 to-indigo-600/50 rounded-2xl relative p-2 overflow-hidden"
                                         >
                                             <img
                                                 class="absolute inset-0 h-full object-cover pointer-events-none mask-b-from-60%"
@@ -983,17 +961,17 @@ onMounted(async () => {
             </div>
 
             <div class="grid gap-4 lg:grid-cols-2">
-                <div class="rounded-xl bg-base-100 shadow-md">
+                <div class="rounded-2xl bg-base-100 shadow-md">
                     <div class="p-5">
                         <div class="mb-4">
-                            <h2 class="text-2xl font-bold text-center">{{ $t("abyss-usage.mostUsedLineup") }}</h2>
-                            <p class="mt-2 text-center text-sm opacity-60">{{ $t("abyss-usage.mostUsedLineupDesc") }}</p>
+                            <h2 class="text-2xl font-bold text-center">最常用阵容</h2>
+                            <p class="mt-2 text-center text-sm opacity-60">出战数最高的阵容</p>
                         </div>
                         <div class="space-y-3">
                             <div
                                 v-for="item in lineupStats.slice(0, 6)"
                                 :key="`${item.charId}-${item.meleeId}-${item.rangedId}-${item.support1}-${item.support2}-${item.supportWeapon1}-${item.supportWeapon2}-${item.petId ?? 0}`"
-                                class="rounded-xl bg-base-200 p-3"
+                                class="rounded-2xl bg-base-200 p-3"
                             >
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="flex items-center gap-2 overflow-hidden">
@@ -1030,11 +1008,11 @@ onMounted(async () => {
                     </div>
                 </div>
 
-                <div class="rounded-xl bg-base-100 shadow-md">
+                <div class="rounded-2xl bg-base-100 shadow-md">
                     <div class="p-5">
                         <div class="mb-4">
-                            <h2 class="text-2xl font-bold text-center">{{ $t("abyss-usage.assistant") }}</h2>
-                            <p class="mt-2 text-center text-sm opacity-60">{{ $t("abyss-usage.assistantDesc") }}</p>
+                            <h2 class="text-2xl font-bold text-center">配队助手</h2>
+                            <p class="mt-2 text-center text-sm opacity-60">查询角色常用阵容</p>
                         </div>
                         <div class="mb-3">
                             <div class="flex items-center gap-2">
@@ -1043,13 +1021,13 @@ onMounted(async () => {
                                     :value="selectedAssistantCharId ?? ''"
                                     @change="handleAssistantCharChange"
                                 >
-                                    <option disabled value="">{{ $t("abyss-usage.selectRole") }}</option>
+                                    <option disabled value="">请选择角色</option>
                                     <option v-for="item in lineupCharOptions" :key="item.charId" :value="item.charId">
                                         {{ item.name }}
                                     </option>
                                 </select>
                                 <label class="label cursor-pointer gap-2 px-3 py-2">
-                                    <span class="label-text whitespace-nowrap text-sm">{{ $t("abyss-usage.mainOnly") }}</span>
+                                    <span class="label-text whitespace-nowrap text-sm">仅主控</span>
                                     <input
                                         type="checkbox"
                                         class="toggle toggle-primary toggle-sm"
@@ -1063,7 +1041,7 @@ onMounted(async () => {
                             <div
                                 v-for="item in assistantLineupStats"
                                 :key="`${item.charId}-${item.meleeId}-${item.rangedId}-${item.support1}-${item.support2}-${item.supportWeapon1}-${item.supportWeapon2}-${item.petId ?? 0}`"
-                                class="rounded-xl bg-base-200 p-3"
+                                class="rounded-2xl bg-base-200 p-3"
                             >
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="flex items-center gap-2 overflow-hidden">
@@ -1097,13 +1075,13 @@ onMounted(async () => {
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="py-6 text-center text-sm opacity-60">{{ $t("abyss-usage.noResult") }}</div>
+                        <div v-else class="py-6 text-center text-sm opacity-60">暂无结果</div>
                     </div>
                 </div>
             </div>
 
             <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
-                <div v-for="section in slotStatSections" :key="section.key" class="rounded-xl bg-base-100 shadow-md">
+                <div v-for="section in slotStatSections" :key="section.key" class="rounded-2xl bg-base-100 shadow-md">
                     <div class="p-5">
                         <h2 class="mb-4 text-xl font-bold">{{ section.label }}</h2>
                         <div class="space-y-2">
@@ -1135,15 +1113,13 @@ onMounted(async () => {
                 </div>
             </div>
 
-            <div class="rounded-xl bg-base-100 shadow-md">
+            <div class="rounded-2xl bg-base-100 shadow-md">
                 <div class="p-5">
                     <div class="mb-4 flex items-end justify-between gap-3">
                         <div>
-                            <h2 class="text-xl font-bold">{{ $t("abyss-usage.levelDistribution") }}</h2>
+                            <h2 class="text-xl font-bold">历练等级分布</h2>
                         </div>
-                        <div class="text-sm opacity-60">
-                            {{ levelRangeLabel }} · {{ $t("abyss-usage.submitCount", { count: abyssSubmissionsCount }) }}
-                        </div>
+                        <div class="text-sm opacity-60">{{ levelRangeLabel }} · {{ abyssSubmissionsCount }} 次提交</div>
                     </div>
                     <div v-if="levelStatItems.length" class="space-y-3">
                         <div
@@ -1164,14 +1140,14 @@ onMounted(async () => {
                             <div class="text-right text-sm font-medium opacity-70">{{ item.percent }}</div>
                         </div>
                     </div>
-                    <div v-else class="py-6 text-center text-sm opacity-60">{{ $t("abyss-usage.noResult") }}</div>
+                    <div v-else class="py-6 text-center text-sm opacity-60">暂无结果</div>
                 </div>
             </div>
 
             <div class="grid gap-4 lg:grid-cols-2">
-                <div class="rounded-xl bg-base-100 shadow-md">
+                <div class="rounded-2xl bg-base-100 shadow-md">
                     <div class="p-5">
-                        <h2 class="mb-4 text-xl font-bold">{{ $t("abyss-usage.roleSourceDistribution") }}</h2>
+                        <h2 class="mb-4 text-xl font-bold">角色溯源分布</h2>
                         <div class="space-y-2">
                             <div v-for="item in roleStats" :key="item.charId" class="rounded-xl bg-base-200 p-3">
                                 <div class="flex items-center gap-2">
@@ -1213,9 +1189,9 @@ onMounted(async () => {
                     </div>
                 </div>
 
-                <div class="rounded-xl bg-base-100 shadow-md">
+                <div class="rounded-2xl bg-base-100 shadow-md">
                     <div class="p-5">
-                        <h2 class="mb-4 text-xl font-bold">{{ $t("abyss-usage.weaponForgeDistribution") }}</h2>
+                        <h2 class="mb-4 text-xl font-bold">武器熔铸分布</h2>
                         <div class="space-y-2">
                             <div v-for="item in weaponStats" :key="item.weaponId" class="rounded-xl bg-base-200 p-3">
                                 <div class="flex items-center gap-2">
