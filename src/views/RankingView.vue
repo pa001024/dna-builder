@@ -5,6 +5,7 @@ import { type RankingList, rankingListQuery, rankingListsQuery } from "@/api/gra
 import { normalizeCharSettings } from "@/composables/useCharSettings"
 import { charMap, LeveledChar } from "@/data"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
+import { useInvStore } from "@/store/inv"
 import { formatDateTime } from "@/utils/time"
 
 type RankedItem = {
@@ -24,6 +25,7 @@ type RankedItem = {
 
 const route = useRoute()
 const router = useRouter()
+const inv = useInvStore()
 const rankingOptions = ref<RankingList[]>([])
 const ranking = ref<RankingList | null>(null)
 const loading = ref(false)
@@ -45,7 +47,7 @@ function calcBuildDps(build: RankingList["items"][number]["build"]) {
     try {
         const settings = normalizeCharSettings(JSON.parse(build.charSettings))
         const charName = charMap.get(build.charId)?.名称 || build.charId.toString()
-        const charBuild = createCharBuildFromSettings(charName, settings)
+        const charBuild = createCharBuildFromSettings(charName, settings, inv)
         const result = charBuild.calculate()
         return {
             baseName: settings.baseName,
