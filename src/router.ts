@@ -169,7 +169,24 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "shop-redemption",
                 component: () => import("./admin/ShopRedemptionManagement.vue"),
             },
+            {
+                name: "admin-ranking",
+                path: "ranking",
+                component: () => import("./admin/RankingManagement.vue"),
+            },
         ],
+    },
+    {
+        name: "ranking-list",
+        path: "/ranking",
+        component: () => import("./views/RankingView.vue"),
+        beforeEnter: () => setMinSize(800, 700),
+    },
+    {
+        name: "ranking",
+        path: "/ranking/:id",
+        component: () => import("./views/RankingView.vue"),
+        beforeEnter: () => setMinSize(800, 700),
     },
     // 资料库路由
     {

@@ -766,6 +766,52 @@ export const timelineLikesRelations = relations(timelineLikes, ({ one }) => ({
     user: one(users, { fields: [timelineLikes.userId], references: [users.id] }),
 }))
 
+/** 榜单 */
+export const rankingLists = sqliteTable(
+    "ranking_lists",
+    {
+        id: text("id").$default(id).primaryKey(),
+        name: text("name").notNull(),
+        desc: text("desc"),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
+    },
+    rankingLists => [index("ranking_lists_name_idx").on(rankingLists.name), index("ranking_lists_update_at_idx").on(rankingLists.updateAt)]
+)
+
+/** 榜单条目 */
+export const rankingListItems = sqliteTable(
+    "ranking_list_items",
+    {
+        id: text("id").$default(id).primaryKey(),
+        rankingListId: text("ranking_list_id")
+            .notNull()
+            .references(() => rankingLists.id, { onDelete: "cascade" }),
+        charId: integer("char_id").notNull(),
+        buildId: text("build_id")
+            .notNull()
+            .references(() => builds.id, { onDelete: "cascade" }),
+        sortOrder: integer("sort_order").$default(() => 0),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
+    },
+    rankingListItems => [
+        index("ranking_list_items_ranking_list_id_idx").on(rankingListItems.rankingListId),
+        index("ranking_list_items_char_id_idx").on(rankingListItems.charId),
+        index("ranking_list_items_build_id_idx").on(rankingListItems.buildId),
+        index("ranking_list_items_sort_order_idx").on(rankingListItems.sortOrder),
+    ]
+)
+
+export const rankingListItemsRelations = relations(rankingListItems, ({ one }) => ({
+    rankingList: one(rankingLists, { fields: [rankingListItems.rankingListId], references: [rankingLists.id] }),
+    build: one(builds, { fields: [rankingListItems.buildId], references: [builds.id] }),
+}))
+
+export const rankingListsRelations = relations(rankingLists, ({ many }) => ({
+    items: many(rankingListItems),
+}))
+
 /** DPS数据 */
 export const dps = sqliteTable(
     "dps",

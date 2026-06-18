@@ -527,6 +527,38 @@ export interface BuildInput {
     charSettings: string
 }
 
+export interface RankingListItem {
+    id: string
+    rankingListId: string
+    charId: number
+    buildId: string
+    sortOrder: number
+    createdAt: number
+    updateAt: number
+    build?: Build
+}
+
+export interface RankingList {
+    id: string
+    name: string
+    desc?: string
+    createdAt: number
+    updateAt: number
+    items: RankingListItem[]
+}
+
+export interface RankingListItemInput {
+    charId: number
+    buildId: string
+    sortOrder?: number
+}
+
+export interface RankingListInput {
+    name: string
+    desc?: string
+    items: RankingListItemInput[]
+}
+
 export interface ActivityInput {
     id: number
     postId?: string

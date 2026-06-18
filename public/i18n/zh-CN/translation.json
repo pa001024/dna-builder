@@ -1514,6 +1514,10 @@
     "raid-rank": {
         "title": "排名奖励"
     },
+    "ranking": {
+        "desc": "榜单排行",
+        "title": "榜单"
+    },
     "reputation": {
         "accumulatedExp": "累计经验",
         "entrust": "委托",

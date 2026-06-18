@@ -63,6 +63,11 @@ const menuItems: {
         path: "/admin/shop-redemption",
         icon: "ri:exchange-funds-line",
     },
+    {
+        name: "榜单管理",
+        path: "/admin/ranking",
+        icon: "ri:bar-chart-line",
+    },
 ]
 
 const route = useRoute()

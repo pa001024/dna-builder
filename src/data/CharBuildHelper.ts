@@ -42,7 +42,17 @@ export function createCharBuildFromSettings(
             .filter(mod => mod !== null)
             .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLvFromSnapshot(inv, v[0]))),
         skillLevel: charSettings.charSkillLevel,
-        buffs: charSettings.buffs.map(v => LeveledBuffHelper.fromName(v[0], v[1])),
+        buffs: charSettings.buffs
+            .map(v => {
+                try {
+                    const b = LeveledBuffHelper.fromName(v[0], v[1])
+                    return b
+                } catch (error) {
+                    console.error(error)
+                    return null
+                }
+            })
+            .filter(b => b !== null),
         melee: LeveledWeaponHelper.fromId(
             charSettings.meleeWeapon,
             charSettings.meleeWeaponRefine,

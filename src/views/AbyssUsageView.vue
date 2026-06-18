@@ -768,7 +768,15 @@ async function exportAbyssSubmissions() {
             ]),
         ]
         const roleRows = [
-            [t("abyss-usage.submitId"), t("abyss-usage.seasonId"), t("abyss-usage.mainCharId"), t("abyss-usage.mainChar"), t("abyss-usage.roleType"), t("abyss-usage.level"), t("abyss-usage.createdAt")],
+            [
+                t("abyss-usage.submitId"),
+                t("abyss-usage.seasonId"),
+                t("abyss-usage.mainCharId"),
+                t("abyss-usage.mainChar"),
+                t("abyss-usage.roleType"),
+                t("abyss-usage.level"),
+                t("abyss-usage.createdAt"),
+            ],
             ...submissions.flatMap(item =>
                 (item.roleParticipants || []).map(participant => [
                     item.id,
@@ -782,7 +790,15 @@ async function exportAbyssSubmissions() {
             ),
         ]
         const weaponRows = [
-            [t("abyss-usage.submitId"), t("abyss-usage.seasonId"), t("abyss-usage.weaponId"), t("abyss-usage.weaponName"), t("abyss-usage.roleType"), t("abyss-usage.skillLevel"), t("abyss-usage.createdAt")],
+            [
+                t("abyss-usage.submitId"),
+                t("abyss-usage.seasonId"),
+                t("abyss-usage.weaponId"),
+                t("abyss-usage.weaponName"),
+                t("abyss-usage.roleType"),
+                t("abyss-usage.skillLevel"),
+                t("abyss-usage.createdAt"),
+            ],
             ...submissions.flatMap(item =>
                 (item.weaponParticipants || []).map(participant => [
                     item.id,
@@ -846,7 +862,7 @@ onMounted(async () => {
 <template>
     <ScrollArea class="h-full">
         <div class="mx-auto max-w-7xl p-4 space-y-4">
-            <div class="rounded-2xl bg-base-100 shadow-md">
+            <div class="rounded-xl bg-base-100 shadow-md">
                 <div class="p-5 md:p-6 space-y-4">
                     <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                         <div class="space-y-2">
@@ -912,7 +928,7 @@ onMounted(async () => {
                 </div>
             </div>
 
-            <div class="rounded-2xl bg-base-100 shadow-md">
+            <div class="rounded-xl bg-base-100 shadow-md">
                 <div class="p-5">
                     <div class="mb-4 flex items-end justify-between gap-3">
                         <div>
@@ -942,7 +958,7 @@ onMounted(async () => {
                                     >
                                         <RouterLink
                                             :to="getCharLink(item.charId)"
-                                            class="card-body bg-linear-30 from-indigo-300/50 to-indigo-600/50 rounded-2xl relative p-2 overflow-hidden"
+                                            class="card-body bg-linear-30 from-indigo-300/50 to-indigo-600/50 rounded-xl relative p-2 overflow-hidden"
                                         >
                                             <img
                                                 class="absolute inset-0 h-full object-cover pointer-events-none mask-b-from-60%"
@@ -967,7 +983,7 @@ onMounted(async () => {
             </div>
 
             <div class="grid gap-4 lg:grid-cols-2">
-                <div class="rounded-2xl bg-base-100 shadow-md">
+                <div class="rounded-xl bg-base-100 shadow-md">
                     <div class="p-5">
                         <div class="mb-4">
                             <h2 class="text-2xl font-bold text-center">{{ $t("abyss-usage.mostUsedLineup") }}</h2>
@@ -977,7 +993,7 @@ onMounted(async () => {
                             <div
                                 v-for="item in lineupStats.slice(0, 6)"
                                 :key="`${item.charId}-${item.meleeId}-${item.rangedId}-${item.support1}-${item.support2}-${item.supportWeapon1}-${item.supportWeapon2}-${item.petId ?? 0}`"
-                                class="rounded-2xl bg-base-200 p-3"
+                                class="rounded-xl bg-base-200 p-3"
                             >
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="flex items-center gap-2 overflow-hidden">
@@ -1014,7 +1030,7 @@ onMounted(async () => {
                     </div>
                 </div>
 
-                <div class="rounded-2xl bg-base-100 shadow-md">
+                <div class="rounded-xl bg-base-100 shadow-md">
                     <div class="p-5">
                         <div class="mb-4">
                             <h2 class="text-2xl font-bold text-center">{{ $t("abyss-usage.assistant") }}</h2>
@@ -1047,7 +1063,7 @@ onMounted(async () => {
                             <div
                                 v-for="item in assistantLineupStats"
                                 :key="`${item.charId}-${item.meleeId}-${item.rangedId}-${item.support1}-${item.support2}-${item.supportWeapon1}-${item.supportWeapon2}-${item.petId ?? 0}`"
-                                class="rounded-2xl bg-base-200 p-3"
+                                class="rounded-xl bg-base-200 p-3"
                             >
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="flex items-center gap-2 overflow-hidden">
@@ -1087,7 +1103,7 @@ onMounted(async () => {
             </div>
 
             <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
-                <div v-for="section in slotStatSections" :key="section.key" class="rounded-2xl bg-base-100 shadow-md">
+                <div v-for="section in slotStatSections" :key="section.key" class="rounded-xl bg-base-100 shadow-md">
                     <div class="p-5">
                         <h2 class="mb-4 text-xl font-bold">{{ section.label }}</h2>
                         <div class="space-y-2">
@@ -1119,13 +1135,15 @@ onMounted(async () => {
                 </div>
             </div>
 
-            <div class="rounded-2xl bg-base-100 shadow-md">
+            <div class="rounded-xl bg-base-100 shadow-md">
                 <div class="p-5">
                     <div class="mb-4 flex items-end justify-between gap-3">
                         <div>
                             <h2 class="text-xl font-bold">{{ $t("abyss-usage.levelDistribution") }}</h2>
                         </div>
-                        <div class="text-sm opacity-60">{{ levelRangeLabel }} · {{ $t("abyss-usage.submitCount", { count: abyssSubmissionsCount }) }}</div>
+                        <div class="text-sm opacity-60">
+                            {{ levelRangeLabel }} · {{ $t("abyss-usage.submitCount", { count: abyssSubmissionsCount }) }}
+                        </div>
                     </div>
                     <div v-if="levelStatItems.length" class="space-y-3">
                         <div
@@ -1151,7 +1169,7 @@ onMounted(async () => {
             </div>
 
             <div class="grid gap-4 lg:grid-cols-2">
-                <div class="rounded-2xl bg-base-100 shadow-md">
+                <div class="rounded-xl bg-base-100 shadow-md">
                     <div class="p-5">
                         <h2 class="mb-4 text-xl font-bold">{{ $t("abyss-usage.roleSourceDistribution") }}</h2>
                         <div class="space-y-2">
@@ -1195,7 +1213,7 @@ onMounted(async () => {
                     </div>
                 </div>
 
-                <div class="rounded-2xl bg-base-100 shadow-md">
+                <div class="rounded-xl bg-base-100 shadow-md">
                     <div class="p-5">
                         <h2 class="mb-4 text-xl font-bold">{{ $t("abyss-usage.weaponForgeDistribution") }}</h2>
                         <div class="space-y-2">

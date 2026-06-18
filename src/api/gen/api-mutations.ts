@@ -1013,3 +1013,51 @@ export const submitAbyssUsageMutation = typedMutation<Types.AbyssUsageSubmission
         }
     `
 )
+
+export const createRankingListMutation = typedMutation<Types.RankingList, { input: Types.RankingListInput }>(/* GraphQL */ `
+    mutation ($input: RankingListInput!) {
+        createRankingList(input: $input) {
+            id
+            name
+            desc
+            createdAt
+            updateAt
+            items {
+                id
+                rankingListId
+                charId
+                buildId
+                sortOrder
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const updateRankingListMutation = typedMutation<Types.RankingList, { id: string; input: Types.RankingListInput }>(/* GraphQL */ `
+    mutation ($id: String!, $input: RankingListInput!) {
+        updateRankingList(id: $id, input: $input) {
+            id
+            name
+            desc
+            createdAt
+            updateAt
+            items {
+                id
+                rankingListId
+                charId
+                buildId
+                sortOrder
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const deleteRankingListMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteRankingList(id: $id)
+    }
+`)
