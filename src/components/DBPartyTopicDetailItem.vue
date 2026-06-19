@@ -1007,7 +1007,7 @@ onBeforeUnmount(() => {
                         <div class="min-w-0 flex-1 text-xs">
                             <div class="mb-1 flex items-center gap-2">
                                 <div class="font-medium text-primary min-w-0 truncate" v-if="item.dialogue.npc">
-                                    {{ getSpeakerName(item.dialogue.npc) }}
+                                    {{ $t(getSpeakerName(item.dialogue.npc)) }}
                                 </div>
                                 <button
                                     v-if="item.dialogue.voice"

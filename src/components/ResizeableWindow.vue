@@ -6,6 +6,7 @@ import { onMounted, onUnmounted, ref, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
 import { applyMaterial, getOSVersion } from "../api/app"
 import { env } from "../env"
+import { i18nLanguages } from "../i18n"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
 import { timeStr, useGameTimer } from "../util"
@@ -30,6 +31,8 @@ const setting = useSettingStore()
 const alwaysOnTop = ref(false)
 const maximized = ref(false)
 const isDark = ref(setting.theme === "dark")
+const langDialogOpen = ref(false)
+const langDialogRef = ref<HTMLDialogElement | null>(null)
 
 if (env.isApp) {
     appWindow = getCurrentWindow()
@@ -85,6 +88,27 @@ async function handleClose() {
 watch(alwaysOnTop, async newValue => {
     await appWindow.setAlwaysOnTop(newValue)
 })
+
+function openLangDialog() {
+    if (langDialogOpen.value) {
+        return
+    }
+    langDialogOpen.value = true
+    langDialogRef.value?.showModal()
+}
+
+function closeLangDialog() {
+    if (!langDialogOpen.value) {
+        return
+    }
+    langDialogOpen.value = false
+    langDialogRef.value?.close()
+}
+
+function changeLanguage(lang: string) {
+    setting.setLang(lang)
+    closeLangDialog()
+}
 
 let unlisten: () => void
 
@@ -171,6 +195,9 @@ watchEffect(() => {
                 <!-- fix resize shadow -->
                 <div v-if="env.isApp" class="pointer-events-none flex-none opacity-0 self-start transition-none">
                     <div class="flex items-center space-x-2">
+                        <button class="btn btn-ghost btn-sm btn-square" type="button" :title="$t('setting.lang')">
+                            <Icon bold icon="ri:translate-2" />
+                        </button>
                         <label v-if="darkable" class="btn btn-ghost btn-sm btn-square swap swap-rotate">
                             <!-- this hidden checkbox controls the state -->
                             <input v-model="isDark" type="checkbox" class="theme-controller" value="dark" />
@@ -198,6 +225,9 @@ watchEffect(() => {
                 <!-- fix resize -->
                 <div v-if="env.isApp" class="pointer-events-none fixed right-1 top-1">
                     <div class="flex pointer-events-auto items-center space-x-2">
+                        <button class="btn btn-ghost btn-sm btn-square" type="button" :title="$t('setting.lang')" @click="openLangDialog">
+                            <Icon bold icon="ri:translate-2" />
+                        </button>
                         <label v-if="darkable" class="btn btn-ghost btn-sm btn-square swap swap-rotate">
                             <!-- this hidden checkbox controls the state -->
                             <input v-model="isDark" type="checkbox" class="theme-controller" value="dark" />
@@ -243,6 +273,31 @@ watchEffect(() => {
                     </div>
                 </div>
             </div>
+            <dialog ref="langDialogRef" class="modal" :class="{ 'modal-open': langDialogOpen }" @close="langDialogOpen = false" @click="closeLangDialog">
+                <div class="modal-box bg-base-300" @click.stop>
+                    <div class="flex items-center justify-between pb-4">
+                        <div class="text-lg font-bold">
+                            {{ $t("setting.lang") }}
+                        </div>
+                        <button class="btn btn-ghost btn-sm btn-square" type="button" @click="closeLangDialog">
+                            <Icon bold icon="codicon:chrome-close" />
+                        </button>
+                    </div>
+                    <div class="grid gap-2">
+                        <button
+                            v-for="lang in i18nLanguages"
+                            :key="lang.code"
+                            class="btn btn-ghost justify-between"
+                            :class="{ 'btn-primary': setting.lang === lang.code }"
+                            type="button"
+                            @click="changeLanguage(lang.code)"
+                        >
+                            <span>{{ lang.name }}</span>
+                            <Icon v-if="setting.lang === lang.code" icon="ri:checkbox-circle-fill" />
+                        </button>
+                    </div>
+                </div>
+            </dialog>
             <!-- Body -->
             <div :class="{ 'rounded-tl-box': !!$slots.sidebar }" class="w-full relative bg-base-200/50 flex-1 overflow-hidden shadow-inner">
                 <slot />

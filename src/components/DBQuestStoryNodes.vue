@@ -27,9 +27,11 @@ const props = defineProps<{
     voiceLanguage?: string
     questChainIcon?: string
     questName?: string
+    searchKeyword?: string
 }>()
 
 const settingStore = useSettingStore()
+const normalizedSearchKeyword = computed(() => props.searchKeyword?.trim() || "")
 
 const selectedOptionMap = reactive<Record<string, number>>({})
 const highlightedQuestNodeMap = reactive<Record<string, boolean>>({})
@@ -1033,10 +1035,11 @@ watch(flattenedDialogueChain, () => {
                     :dialogue="item.dialogue"
                     :selected-option="item.selectedOption"
                     :trigger-key="`${questId}-${node.id}-${item.dialogue.id}`"
-                    :speaker-name="item.dialogue.npc ? `${getNPCName(item.dialogue.npc)}:` : undefined"
+                    :speaker-name="item.dialogue.npc ? `${$t(getNPCName(item.dialogue.npc))}:` : undefined"
                     :show-voice-button="!!item.dialogue.voice"
                     :voice-playing="currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id) && isVoicePlaying"
                     :playing="isVoicePlaying && currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id)"
+                    :search-keyword="normalizedSearchKeyword"
                     @select-option="payload => selectOption(getQuestNodeScopeKey(questId, node.id), payload.dialogueId, payload.optionId)"
                     @voice-click="toggleDialogueVoicePlayback(item.dialogue, node.id)"
                 />
