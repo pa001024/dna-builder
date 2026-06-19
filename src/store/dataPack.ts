@@ -39,8 +39,8 @@ export const useDataPackStore = defineStore("dataPack", {
         async refreshStatus(forceRefresh = false) {
             this.status = await getDataPackInstallStatus(forceRefresh)
             this.sourceInfo = await getDataPackSourceInfo()
-            const versions = await getMergedDataPackVersions(this.status.versions)
             const installedVersions = await getInstalledDataPackVersions(this.status.versions)
+            const versions = await getMergedDataPackVersions(this.status.versions, installedVersions)
             this.installedVersions = installedVersions.map(version => version.version)
             this.status.versions = versions
             this.versionFiles = {}

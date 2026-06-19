@@ -716,8 +716,9 @@ export async function ensureDataPackReady(): Promise<boolean> {
  * @returns 安装状态
  */
 export async function getDataPackInstallStatus(forceRefresh = false): Promise<DataPackInstallStatus> {
+    const localVersions = await getInstalledDataPackVersions()
     const remoteVersions = (await fetchRemoteDataPackVersions(forceRefresh)) ?? []
-    const versions = await getMergedDataPackVersions(remoteVersions)
+    const versions = await getMergedDataPackVersions(remoteVersions, localVersions)
     const installed = await readInstalledInfo()
     const manifest =
         installed?.version && installed.version === state.readyVersion && state.manifest
@@ -731,7 +732,7 @@ export async function getDataPackInstallStatus(forceRefresh = false): Promise<Da
         version: installed?.version || null,
         manifest,
         remote: remoteVersions[0] ?? null,
-        versions,
+        versions: versions.length ? versions : localVersions,
     }
 }
 
@@ -756,14 +757,18 @@ export async function getInstalledDataPackVersions(remoteVersions: DataPackVersi
 /**
  * 合并远端版本与本地已安装版本，远端信息优先。
  * @param remoteVersions 远端版本列表
+ * @param installedVersions 本地已安装版本列表
  * @returns 合并后的版本列表
  */
-export async function getMergedDataPackVersions(remoteVersions: DataPackVersionInfo[] = []): Promise<DataPackVersionInfo[]> {
-    const installedVersions = await getInstalledDataPackVersions(remoteVersions)
+export async function getMergedDataPackVersions(
+    remoteVersions: DataPackVersionInfo[] = [],
+    installedVersions: DataPackVersionInfo[] = []
+): Promise<DataPackVersionInfo[]> {
+    const resolvedInstalledVersions = installedVersions.length ? installedVersions : await getInstalledDataPackVersions(remoteVersions)
     const remoteVersionMap = new Map(remoteVersions.map(version => [version.version, version]))
     const mergedVersionMap = new Map<string, DataPackVersionInfo>()
 
-    for (const version of installedVersions) {
+    for (const version of resolvedInstalledVersions) {
         mergedVersionMap.set(version.version, version)
     }
 
@@ -860,7 +865,8 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
     await writePackBytes(remote.version, bytes)
     await writeInstalledInfo(remote)
     await loadLocalVersion(remote.version)
-    const versions = await getMergedDataPackVersions(remoteVersions)
+    const localVersions = await getInstalledDataPackVersions()
+    const versions = await getMergedDataPackVersions(remoteVersions, localVersions)
     if (state.imgsManifest.length) {
         void mountImgsToVirtualPath({
             manifest: state.imgsManifest,
@@ -893,7 +899,8 @@ export async function importDataPackFile(file: File): Promise<DataPackInstallSta
     })
     await loadLocalVersion(manifest.version)
     const remoteVersions = (await fetchRemoteDataPackVersions(true)) ?? []
-    const versions = await getMergedDataPackVersions(remoteVersions)
+    const localVersions = await getInstalledDataPackVersions()
+    const versions = await getMergedDataPackVersions(remoteVersions, localVersions)
     return {
         ready: true,
         version: manifest.version,

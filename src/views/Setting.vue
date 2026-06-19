@@ -2,9 +2,9 @@
 import { t } from "i18next"
 import { computed, onMounted, ref, watch } from "vue"
 import { MATERIALS } from "@/api/app"
-import { clearAllDataPackOpfs } from "@/data/data-pack"
+import { clearAllDataPackOpfs, getInstalledDataPackVersions, getMergedDataPackVersions } from "@/data/data-pack"
+import { deleteImgsCache, imgsDownloadState } from "@/data/imgs-runtime"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
-import { deleteImgsCache, imgsDownloadActive, imgsDownloadCompleted, imgsDownloadPercent, imgsDownloadTotal } from "@/data/imgs-runtime"
 import { env } from "@/env"
 import { i18nLanguages } from "@/i18n"
 import { useDataPackStore } from "@/store/dataPack"
@@ -39,8 +39,51 @@ const CDN_DATA_PACK_BASE_URL = "https://cdn.dna-builder.cn/data-pack"
 const versionDragUrls = ref<Record<string, string>>({})
 const sourceSaveTimer = ref<number | null>(null)
 const isApplyingSourceUpdate = ref(false)
-const imgsDownloadPercentValue = computed(() => Math.round(imgsDownloadPercent.value * 100))
 const isClearingDataPackOpfs = ref(false)
+const formatSize = new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 1 })
+const dataPackLoadingRemoteVersions = ref(false)
+
+const imgsDownloadSummary = computed(() => {
+    const state = imgsDownloadState.value
+    if (!state.active) {
+        return ""
+    }
+
+    const speed = state.speedBps > 0 ? `${formatSize.format(state.speedBps / 1024 / 1024)} MB/s` : "0 MB/s"
+    const size = state.bytesTotal > 0 ? `${formatSize.format(state.bytesTotal / 1024 / 1024)} MB` : "--"
+
+    if (state.stage === "pack-current") {
+        return `包 ${state.version} · ${state.currentPackFiles} 张 · ${size} · ${speed}`
+    }
+
+    return `单图 ${state.completed} / ${state.total} · ${speed}`
+})
+
+const imgsDownloadProgressLabel = computed(() => {
+    const state = imgsDownloadState.value
+    if (!state.active && state.total === 0) {
+        return ""
+    }
+
+    if (state.stage === "pack-current") {
+        return state.completed >= state.total && state.total > 0 ? "图片包下载完成" : `图片包 ${state.version} 下载中`
+    }
+
+    return state.completed >= state.total && state.total > 0 ? "图片下载完成" : "图片下载中"
+})
+
+const imgsDownloadProgressValue = computed(() => {
+    const state = imgsDownloadState.value
+    if (state.stage === "pack-current" && state.bytesTotal > 0) {
+        return Math.round((state.bytesDownloaded / state.bytesTotal) * 100)
+    }
+
+    if (!state.total) {
+        return 0
+    }
+
+    return Math.round((state.completed / state.total) * 100)
+})
 
 const dataPackVersions = computed(() => {
     const versions = dataPack.status?.versions || []
@@ -214,6 +257,41 @@ async function refreshDataPackStatus(forceRefresh = false) {
     dataPackSourceBaseUrl.value = dataPack.sourceInfo?.baseUrl || ""
 }
 
+async function refreshDataPackVersionsInStages(forceRefresh = false) {
+    dataPackLoadingRemoteVersions.value = true
+    try {
+        const localVersions = await getInstalledDataPackVersions()
+        if (localVersions.length) {
+            const currentStatus = dataPack.status || {
+                ready: false,
+                version: null,
+                manifest: null,
+                remote: null,
+                versions: [],
+            }
+            dataPack.status = {
+                ...currentStatus,
+                versions: localVersions,
+            }
+        }
+
+        if (!dataPack.isBootstrapping) {
+            await dataPack.refreshStatus(forceRefresh)
+        }
+
+        const mergedVersions = await getMergedDataPackVersions(dataPack.status?.versions || [], localVersions)
+        if (mergedVersions.length) {
+            dataPack.status = {
+                ...dataPack.status,
+                versions: mergedVersions,
+            } as typeof dataPack.status
+        }
+        dataPackSourceBaseUrl.value = dataPack.sourceInfo?.baseUrl || ""
+    } finally {
+        dataPackLoadingRemoteVersions.value = false
+    }
+}
+
 async function downloadDataPack(version: string) {
     await dataPack.downloadVersion(version)
     await refreshDataPackStatus()
@@ -259,7 +337,7 @@ async function saveSourceKind(kind: "official" | "custom") {
 }
 
 async function refreshDataPackVersions() {
-    await refreshDataPackStatus(true)
+    await refreshDataPackVersionsInStages(true)
 }
 
 function formatVersionDate(date: string | undefined) {
@@ -342,12 +420,7 @@ async function uninstallDataPackVersion(version: string) {
 }
 
 async function clearDataPackStorage() {
-    if (
-        !(await ui.showDialog(
-            t("setting.reset"),
-            "清空后会删除所有数据包和图片缓存，且无法恢复。"
-        ))
-    ) {
+    if (!(await ui.showDialog(t("setting.reset"), "清空后会删除所有数据包和图片缓存，且无法恢复。"))) {
         return
     }
 
@@ -364,7 +437,9 @@ async function clearDataPackStorage() {
     }
 }
 onMounted(() => {
-    dataPack.bootstrap()
+    void dataPack.bootstrap().then(() => {
+        void refreshDataPackVersionsInStages()
+    })
 })
 </script>
 
@@ -497,7 +572,9 @@ onMounted(() => {
                                 @input="dataPackSourceKind === 'custom' && saveSourceBaseUrl()"
                             />
                             <button class="btn btn-sm" @click="importDataPack">{{ $t("achievement.import") }}</button>
-                            <button class="btn btn-sm btn-error" :disabled="isClearingDataPackOpfs" @click="clearDataPackStorage">清空</button>
+                            <button class="btn btn-sm btn-error" :disabled="isClearingDataPackOpfs" @click="clearDataPackStorage">
+                                清空
+                            </button>
                         </div>
                     </div>
 
@@ -508,21 +585,29 @@ onMounted(() => {
                         </button>
                     </div>
 
-                    <div v-if="imgsDownloadActive || imgsDownloadTotal > 0" class="px-2 pb-2">
+                    <div v-if="imgsDownloadState.active || imgsDownloadState.total > 0" class="px-2 pb-2">
                         <div class="rounded-md border border-base-300 bg-base-100/60 px-3 py-3">
                             <div class="flex items-center justify-between gap-2 text-xs text-base-content/70">
-                                <span>图片下载</span>
-                                <span>
-                                    {{ imgsDownloadCompleted }} / {{ imgsDownloadTotal }}
-                                    <span class="mx-1">·</span>
-                                    {{ imgsDownloadPercentValue }}%
-                                </span>
+                                <span>{{ imgsDownloadProgressLabel }}</span>
+                                <span> {{ imgsDownloadProgressValue }}% </span>
                             </div>
-                            <progress
-                                class="progress progress-primary w-full mt-2"
-                                :value="imgsDownloadPercentValue"
-                                max="100"
-                            />
+                            <div v-if="imgsDownloadState.stage === 'pack-current' && imgsDownloadState.packTotal > 1" class="mt-1 text-[11px] text-base-content/55">
+                                包({{ imgsDownloadState.packCompleted }}/{{ imgsDownloadState.packTotal }})
+                                {{ imgsDownloadState.version }} · {{ imgsDownloadState.currentPackFiles }} 张 ·
+                                {{
+                                    imgsDownloadState.bytesTotal > 0
+                                        ? `${formatSize.format(imgsDownloadState.bytesTotal / 1024 / 1024)} MB`
+                                        : "--"
+                                }}
+                                ·
+                                {{
+                                    imgsDownloadState.speedBps > 0
+                                        ? `${formatSize.format(imgsDownloadState.speedBps / 1024 / 1024)} MB/s`
+                                        : "0 MB/s"
+                                }}
+                            </div>
+                            <div v-else class="mt-1 text-[11px] text-base-content/50">{{ imgsDownloadSummary }}</div>
+                            <progress class="progress progress-primary w-full mt-2" :value="imgsDownloadProgressValue" max="100" />
                         </div>
                     </div>
 

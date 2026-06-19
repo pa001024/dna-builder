@@ -1,5 +1,5 @@
 import { unzipSync } from "fflate"
-import { computed, ref } from "vue"
+import { ref } from "vue"
 import { tauriFetch } from "../api/app"
 
 const IMGS_CACHE_DIR = "dna-builder-imgs"
@@ -20,16 +20,71 @@ export type ImgsPackVersionInfo = {
     baseVersion?: string
 }
 
+export type ImgsDownloadStage = "pack-current" | "single"
+
+export type ImgsDownloadState = {
+    active: boolean
+    stage: ImgsDownloadStage | null
+    version: string
+    total: number
+    completed: number
+    packTotal: number
+    packCompleted: number
+    currentPackFiles: number
+    bytesDownloaded: number
+    bytesTotal: number
+    speedBps: number
+}
+
 type ImgsMountOptions = {
     manifest?: ImgsManifestEntry[]
     baseUrl?: string
 }
 
 let mountPromise: Promise<void> | null = null
-export const imgsDownloadCompleted = ref(0)
-export const imgsDownloadTotal = ref(0)
-export const imgsDownloadActive = ref(false)
-export const imgsDownloadPercent = computed(() => (imgsDownloadTotal.value > 0 ? imgsDownloadCompleted.value / imgsDownloadTotal.value : 0))
+export const imgsDownloadState = ref<ImgsDownloadState>({
+    active: false,
+    stage: null,
+    version: "",
+    total: 0,
+    completed: 0,
+    packTotal: 0,
+    packCompleted: 0,
+    currentPackFiles: 0,
+    bytesDownloaded: 0,
+    bytesTotal: 0,
+    speedBps: 0,
+})
+
+/**
+ * 重置图片下载状态。
+ */
+function resetImgsDownloadState(): void {
+    imgsDownloadState.value = {
+        active: false,
+        stage: null,
+        version: "",
+        total: 0,
+        completed: 0,
+        packTotal: 0,
+        packCompleted: 0,
+        currentPackFiles: 0,
+        bytesDownloaded: 0,
+        bytesTotal: 0,
+        speedBps: 0,
+    }
+}
+
+/**
+ * 更新图片下载状态。
+ * @param patch 状态增量
+ */
+function patchImgsDownloadState(patch: Partial<ImgsDownloadState>): void {
+    imgsDownloadState.value = {
+        ...imgsDownloadState.value,
+        ...patch,
+    }
+}
 
 /**
  * 判断当前环境是否支持 OPFS。
@@ -174,8 +229,80 @@ async function loadImgsPack(versionInfo: ImgsPackVersionInfo, baseUrl: string): 
         throw new Error(`下载图片包失败: ${versionInfo.packageFile}`)
     }
 
-    const bytes = new Uint8Array(await response.arrayBuffer())
+    const bytes = await readResponseBytesWithProgress(response, progress => {
+        patchImgsDownloadState({
+            bytesDownloaded: progress.bytesDownloaded,
+            bytesTotal: progress.bytesTotal,
+            speedBps: progress.speedBps,
+        })
+    })
     return unzipSync(bytes)
+}
+
+/**
+ * 从响应流中读取全部字节并汇报进度。
+ * @param response 响应对象
+ * @param onProgress 进度回调
+ * @returns 读取结果
+ */
+async function readResponseBytesWithProgress(
+    response: Response,
+    onProgress?: (progress: { bytesDownloaded: number; bytesTotal: number; speedBps: number }) => void
+): Promise<Uint8Array> {
+    const total = Number(response.headers.get("content-length") || 0)
+    const startedAt = performance.now()
+    let bytesDownloaded = 0
+
+    if (!response.body?.getReader) {
+        const bytes = new Uint8Array(await response.arrayBuffer())
+        onProgress?.({
+            bytesDownloaded: bytes.byteLength,
+            bytesTotal: total || bytes.byteLength,
+            speedBps: bytes.byteLength > 0 ? (bytes.byteLength * 1000) / Math.max(performance.now() - startedAt, 1) : 0,
+        })
+        return bytes
+    }
+
+    const reader = response.body.getReader()
+    const chunks: Uint8Array[] = []
+
+    for (;;) {
+        const { done, value } = await reader.read()
+        if (done) {
+            break
+        }
+        if (value) {
+            chunks.push(value)
+            bytesDownloaded += value.byteLength
+            onProgress?.({
+                bytesDownloaded,
+                bytesTotal: total,
+                speedBps: bytesDownloaded > 0 ? (bytesDownloaded * 1000) / Math.max(performance.now() - startedAt, 1) : 0,
+            })
+        }
+    }
+
+    if (chunks.length === 1) {
+        onProgress?.({
+            bytesDownloaded,
+            bytesTotal: total || bytesDownloaded,
+            speedBps: bytesDownloaded > 0 ? (bytesDownloaded * 1000) / Math.max(performance.now() - startedAt, 1) : 0,
+        })
+        return chunks[0]
+    }
+
+    const bytes = new Uint8Array(bytesDownloaded)
+    let offset = 0
+    for (const chunk of chunks) {
+        bytes.set(chunk, offset)
+        offset += chunk.byteLength
+    }
+    onProgress?.({
+        bytesDownloaded,
+        bytesTotal: total || bytesDownloaded,
+        speedBps: bytesDownloaded > 0 ? (bytesDownloaded * 1000) / Math.max(performance.now() - startedAt, 1) : 0,
+    })
+    return bytes
 }
 
 /**
@@ -246,25 +373,123 @@ async function hydrateCacheFromOpfs(relPath: string): Promise<boolean> {
 }
 
 /**
+ * 收集当前已缓存的图片路径。
+ * @param desiredPaths 目标路径集合
+ * @returns 已缓存路径集合
+ */
+async function collectCachedImgPaths(desiredPaths: Set<string>): Promise<Set<string>> {
+    const cachedPaths = new Set<string>()
+    for (const relPath of desiredPaths) {
+        if (await hydrateCacheFromOpfs(relPath)) {
+            cachedPaths.add(relPath)
+        }
+    }
+
+    return cachedPaths
+}
+
+/**
  * 尝试通过图片包写入资源。
  * @param options 挂载配置
  * @param desiredPaths 目标路径集合
  * @param completedPaths 已完成路径集合
  */
-async function tryMountImgsPacks(options: ImgsMountOptions, desiredPaths: Set<string>, completedPaths: Set<string>): Promise<void> {
+function buildPackPlan(
+    packs: ImgsPackVersionInfo[],
+    desiredPaths: Set<string>
+): { packs: ImgsPackVersionInfo[]; missingPaths: Set<string> } {
+    const selectedPacks: ImgsPackVersionInfo[] = []
+    const coveredPaths = new Set<string>()
+    const sortedPacks = [...packs].sort((a, b) => compareVersion(a.version, b.version))
+
+    for (const pack of sortedPacks) {
+        const packPaths = new Set(pack.files.map(file => normalizeImgPath(file)))
+        let intersects = false
+        for (const path of desiredPaths) {
+            if (packPaths.has(path)) {
+                intersects = true
+                break
+            }
+        }
+
+        if (!intersects) {
+            continue
+        }
+
+        selectedPacks.push(pack)
+        for (const file of pack.files) {
+            const normalizedPath = normalizeImgPath(file)
+            if (desiredPaths.has(normalizedPath)) {
+                coveredPaths.add(normalizedPath)
+            }
+        }
+    }
+
+    const missingPaths = new Set<string>()
+    for (const path of desiredPaths) {
+        if (!coveredPaths.has(path)) {
+            missingPaths.add(path)
+        }
+    }
+
+    return { packs: selectedPacks, missingPaths }
+}
+
+/**
+ * 尝试通过图片包写入资源。
+ * @param options 挂载配置
+ * @param desiredPaths 目标路径集合
+ * @param completedPaths 已完成路径集合
+ * @returns 未命中图片包的路径集合
+ */
+async function tryMountImgsPacks(options: ImgsMountOptions, desiredPaths: Set<string>, completedPaths: Set<string>): Promise<Set<string>> {
     const packs = await fetchRemoteImgsPackVersions(options.baseUrl)
     if (!packs.length) {
-        return
+        return desiredPaths
+    }
+
+    const cachedPaths = await collectCachedImgPaths(desiredPaths)
+    const pendingPaths = new Set<string>()
+    for (const path of desiredPaths) {
+        if (!cachedPaths.has(path)) {
+            pendingPaths.add(path)
+        } else {
+            completedPaths.add(path)
+        }
+    }
+
+    if (!pendingPaths.size) {
+        return pendingPaths
+    }
+
+    const { packs: selectedPacks, missingPaths } = buildPackPlan(packs, pendingPaths)
+    if (!selectedPacks.length) {
+        return missingPaths
     }
 
     const baseUrl = getImgsPackBaseUrl(options.baseUrl)
-    for (const pack of packs) {
+    const packTotal = selectedPacks.length
+    for (const [index, pack] of selectedPacks.entries()) {
+        patchImgsDownloadState({
+            active: true,
+            stage: "pack-current",
+            version: pack.version,
+            total: 0,
+            completed: 0,
+            packTotal,
+            packCompleted: index + 1,
+            currentPackFiles: pack.files.length,
+            bytesDownloaded: 0,
+            bytesTotal: 0,
+            speedBps: 0,
+        })
+
         const entries = await loadImgsPack(pack, baseUrl)
         const packFiles = pack.files.length ? pack.files : Object.keys(entries).filter(name => name !== "manifest.json")
 
         for (const relPath of packFiles) {
             const normalizedPath = normalizeImgPath(relPath)
-            if (!desiredPaths.has(normalizedPath) || completedPaths.has(normalizedPath)) {
+            if (!pendingPaths.has(normalizedPath) || completedPaths.has(normalizedPath)) {
                 continue
             }
 
@@ -275,9 +500,10 @@ async function tryMountImgsPacks(options: ImgsMountOptions, desiredPaths: Set<st
 
             await cacheImg(normalizedPath, bytes, true)
             completedPaths.add(normalizedPath)
-            imgsDownloadCompleted.value += 1
         }
     }
+
+    return missingPaths
 }
 
 /**
@@ -291,30 +517,42 @@ export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Pr
 
     mountPromise = (async () => {
         if (!hasOpfs() || !options.manifest?.length) {
-            imgsDownloadCompleted.value = 0
-            imgsDownloadTotal.value = 0
-            imgsDownloadActive.value = false
+            resetImgsDownloadState()
             return
         }
 
         const baseUrl = getImgsBaseUrl(options.baseUrl)
         const desiredPaths = new Set(options.manifest.map(entry => normalizeImgPath(entry.path)))
         const completedPaths = new Set<string>()
-        imgsDownloadCompleted.value = 0
-        imgsDownloadTotal.value = options.manifest.length
-        imgsDownloadActive.value = true
-        await tryMountImgsPacks(options, desiredPaths, completedPaths)
+        const remainingPaths = await tryMountImgsPacks(options, desiredPaths, completedPaths)
+        if (!remainingPaths.size) {
+            return
+        }
+
+        patchImgsDownloadState({
+            active: true,
+            stage: "single",
+            version: "",
+            total: remainingPaths.size,
+            completed: 0,
+            packTotal: 0,
+            packCompleted: 0,
+            currentPackFiles: 0,
+            bytesDownloaded: 0,
+            bytesTotal: 0,
+            speedBps: 0,
+        })
         await Promise.allSettled(
             options.manifest.map(async entry => {
                 const relPath = normalizeImgPath(entry.path)
-                if (completedPaths.has(relPath)) {
+                if (completedPaths.has(relPath) || !remainingPaths.has(relPath)) {
                     return
                 }
 
                 const hydrated = await hydrateCacheFromOpfs(relPath)
                 if (hydrated) {
                     completedPaths.add(relPath)
-                    imgsDownloadCompleted.value += 1
+                    patchImgsDownloadState({ completed: imgsDownloadState.value.completed + 1 })
                     return
                 }
 
@@ -326,7 +564,7 @@ export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Pr
                 const bytes = new Uint8Array(await response.arrayBuffer())
                 await cacheImg(relPath, bytes, true)
                 completedPaths.add(relPath)
-                imgsDownloadCompleted.value += 1
+                patchImgsDownloadState({ completed: imgsDownloadState.value.completed + 1 })
             })
         )
     })()
@@ -334,7 +572,7 @@ export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Pr
     try {
         await mountPromise
     } finally {
-        imgsDownloadActive.value = false
+        resetImgsDownloadState()
         mountPromise = null
     }
 }
@@ -352,7 +590,5 @@ export async function deleteImgsCache(): Promise<void> {
         await root.removeEntry(IMGS_CACHE_DIR, { recursive: true })
     } catch {}
 
-    imgsDownloadCompleted.value = 0
-    imgsDownloadTotal.value = 0
-    imgsDownloadActive.value = false
+    resetImgsDownloadState()
 }

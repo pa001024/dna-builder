@@ -2,9 +2,9 @@
 
 import fs from "node:fs"
 import path from "node:path"
-import { zipSync } from "fflate"
-import { parse } from "dotenv"
 import OSS from "ali-oss"
+import { parse } from "dotenv"
+import { zipSync } from "fflate"
 
 type ImgsPackVersionEntry = {
     builtAt: string
