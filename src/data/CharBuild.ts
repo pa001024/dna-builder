@@ -144,6 +144,7 @@ export interface CharBuildOptions {
     enemyResistance?: number
     targetFunction?: string
     customVariables?: [string, string][]
+    customBuff?: [string, number][]
     skillLevel?: number
     timeline?: CharBuildTimeline
     timelineDPS?: boolean
@@ -358,6 +359,7 @@ export class CharBuild {
     }
     public targetFunction: string
     public customVariables: [string, string][] = []
+    public customBuff: LeveledBuff[] = []
     public skills!: LeveledSkill[]
     public skillWeapon?: LeveledSkillWeapon
     public timeline?: CharBuildTimeline
@@ -415,9 +417,27 @@ export class CharBuild {
         this.enemyResistance = options.enemyResistance || 0
         this.targetFunction = options.targetFunction || "伤害"
         this.customVariables = options.customVariables || []
+        this.customBuff = this.createCustomBuffs(options.customBuff || [])
         this.timeline = options.timeline
         this.timelineDPS = options.timelineDPS || false
         this.teamWeaponCategories = options.teamWeaponCategories || []
+    }
+
+    /**
+     * 将配置内的自定义 BUFF 转换为当前构筑实例独有的 BUFF 列表。
+     * @param customBuff 自定义 BUFF 条目
+     * @returns 当前构筑可直接使用的 BUFF 实例
+     */
+    private createCustomBuffs(customBuff: [string, number][]) {
+        if (!customBuff.length) return []
+        const buff = {
+            名称: "自定义BUFF",
+            描述: "自行填写",
+        } as Record<string, string | number>
+        customBuff.forEach(([property, value]) => {
+            buff[property] = value
+        })
+        return [new LeveledBuff(buff as never)]
     }
 
     /**
@@ -1174,12 +1194,13 @@ export class CharBuild {
     }
 
     // 计算技能伤害
-    public calculateSkillDamage(attrs: ReturnType<typeof this.calculateAttributes>): DamageResult {
+    public calculateSkillDamage(attrs: ReturnType<typeof this.calculateAttributes>, baseName = this.baseName): DamageResult {
         // 计算各种乘区
         const resistancePenetration = Math.max(0, (1 - this.enemyResistance) * (1 + attrs.属性穿透))
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
-        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (this.selectedSkill?.召唤物 ? attrs.召唤物伤害 : 0)
+        const summonSkill = this.allSkills.find(skill => skill.名称 === baseName)
+        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (summonSkill?.召唤物 ? attrs.召唤物伤害 : 0)
         const independentDamageIncrease = 1 + attrs.独立增伤
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
@@ -1289,7 +1310,7 @@ export class CharBuild {
     public calculateByBasename(baseName: string): [attrs: ReturnType<typeof this.calculateWeaponAttributes>, damage: DamageResult] {
         const weapon = this.getWeaponBySkillName(baseName)
         const attrs = this.calculateWeaponAttributes(weapon)
-        const damage: DamageResult = weapon ? this.calculateWeaponDamage(attrs, weapon) : this.calculateSkillDamage(attrs)
+        const damage: DamageResult = weapon ? this.calculateWeaponDamage(attrs, weapon) : this.calculateSkillDamage(attrs, baseName)
         return [attrs, damage]
     }
 
@@ -1389,6 +1410,7 @@ export class CharBuild {
             const skillAttrs = new Map(this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)]))
             skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
             skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
+            skillAttrs.set("P", skillAttrs.get(this.skills[2].safeName)!)
             const customVariableNames = new Set(this.getValidCustomVariables().map(([key]) => key))
             const getWeaponAttr = (fieldName: string, base?: string) =>
                 weaponAttrs?.get(base || this.baseName)?.[fieldName as keyof WeaponAttr] || 0
@@ -1538,6 +1560,7 @@ export class CharBuild {
         const skillAttrs = new Map(this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)]))
         skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
         skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
+        skillAttrs.set("P", skillAttrs.get(this.skills[2].safeName)!)
         const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
         const getSkillAttr = (fieldName: string, base?: string) =>
             skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
@@ -1570,11 +1593,14 @@ export class CharBuild {
                           weapon,
                           fieldDamageType
                       )
-                    : this.calculateSkillDamage({
-                          ...attrs,
-                          增伤: attrs.增伤 + attackTypeDamageBonus,
-                          独立增伤: (1 + attrs.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
-                      })
+                    : this.calculateSkillDamage(
+                          {
+                              ...attrs,
+                              增伤: attrs.增伤 + attackTypeDamageBonus,
+                              独立增伤: (1 + attrs.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
+                          },
+                          base
+                      )
             damageCache.set(cacheKey, damage)
             return damage
         }
@@ -2005,10 +2031,10 @@ export class CharBuild {
             const damage = build.calculateOneTime(attrs)
             totalDamage += damage
             // 召唤物
-            const summon = this.selectedSkill?.召唤物
+            const summon = build.selectedSkill?.召唤物
             if (summon) {
                 const newAttr = build.calculateWeaponAttributes(build.meleeWeapon)
-                const summonAttrs = this.selectedSkill.getFieldsWithAttr(newAttr)
+                const summonAttrs = build.selectedSkill.getFieldsWithAttr(newAttr)
                 const duration = Math.min(summonAttrs.find(a => a.名称 === "召唤物持续时间")?.值 || 0, i.duration)
                 const delay = summonAttrs.find(a => a.名称 === "召唤物攻击延迟")?.值 || 0
                 const interval = summonAttrs.find(a => a.名称 === "召唤物攻击间隔")?.值 || 0

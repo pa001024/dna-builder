@@ -8,12 +8,10 @@ import { type CharSettings, normalizeCharSettings, useCharSettings } from "@/com
 import type { CharAttr } from "@/data"
 import {
     buffData,
-    buffMap,
     CharBuild,
     charData,
     charMap,
     LeveledBuff,
-    LeveledBuffHelper,
     LeveledChar,
     LeveledCharHelper,
     LeveledMod,
@@ -24,6 +22,7 @@ import {
     monsterMap,
     weaponData,
 } from "@/data"
+import { createBuffFromSettings } from "@/data/CharBuildHelper"
 import { LeveledSkill } from "@/data/leveled/LeveledSkill"
 import { env } from "@/env"
 import { useInvStore } from "@/store/inv"
@@ -99,7 +98,7 @@ const buffOptions = computed(() =>
         .map(buff => {
             const selected = charSettings.value.buffs.find(item => item[0] === buff.名称)
             const level = selected?.[1] ?? 1
-            return new LeveledBuff(buff, level)
+            return createBuffFromSettings(buff.名称, level, charSettings.value.customBuff)
         })
 )
 
@@ -119,7 +118,7 @@ const selectedBuffs = computed(() =>
     charSettings.value.buffs
         .map(item => {
             try {
-                return LeveledBuffHelper.fromName(item[0], item[1])
+                return createBuffFromSettings(item[0], item[1], charSettings.value.customBuff)
             } catch (error) {
                 console.error(error)
                 return null
@@ -205,6 +204,7 @@ const charBuild = computed(() => {
         skillMods: selectedSkillWeaponMods.value,
         skillLevel: charSettings.value.charSkillLevel,
         buffs: selectedBuffs.value,
+        customBuff: charSettings.value.customBuff,
         melee,
         ranged,
         baseName: charSettings.value.baseName,
@@ -1254,33 +1254,6 @@ function applyLoadedSettings(loadedSettings: CharSettings) {
     charSettings.value = normalizeCharSettings(loadedSettings)
     updateCharBuild()
 }
-
-/**
- * 同步自定义 BUFF 到运行时映射，保证属性重算可直接读取。
- * @param customBuff 自定义 BUFF 列表
- * @returns void
- */
-function syncCustomBuff(customBuff: [string, number][]) {
-    const buffObj = {
-        名称: "自定义BUFF",
-        描述: "自行填写",
-    } as Record<string, string | number>
-    customBuff.forEach(([property, value]) => {
-        buffObj[property] = value
-    })
-    buffMap.set("自定义BUFF", buffObj as never)
-}
-
-watch(
-    () => charSettings.value.customBuff,
-    value => {
-        syncCustomBuff(value)
-    },
-    {
-        deep: true,
-        immediate: true,
-    }
-)
 
 watch(
     () => selectedCharName.value,

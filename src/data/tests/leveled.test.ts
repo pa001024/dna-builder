@@ -231,6 +231,14 @@ describe("LeveledBuff类测试", () => {
         expect((助战50攻2级 as any).攻击).toBe(1.0)
     })
 
+    it("Buff克隆后应保留动态倍率", () => {
+        const 助战50攻2级 = new LeveledBuff("助战50攻", 2)
+        const cloned = 助战50攻2级.clone()
+
+        expect(cloned.ratio).toBeCloseTo(助战50攻2级.ratio, 10)
+        expect((cloned as any).攻击).toBeCloseTo((助战50攻2级 as any).攻击, 10)
+    })
+
     // 测试4：设置超出上限的等级（应该被限制在mx）
     it("Buff等级被正确限制在mx", () => {
         const 助战50攻 = new LeveledBuff("助战50攻", 3) // mx=2

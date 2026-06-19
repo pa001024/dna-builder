@@ -1,5 +1,6 @@
 import type { CharSettings } from "../composables/useCharSettings"
 import { CharBuild, CharBuildTimeline } from "./CharBuild"
+import { LeveledBuff } from "./leveled/LeveledBuff"
 import {
     type CharBuildInvSnapshot,
     getBuffLvFromSnapshot,
@@ -45,14 +46,14 @@ export function createCharBuildFromSettings(
         buffs: charSettings.buffs
             .map(v => {
                 try {
-                    const b = LeveledBuffHelper.fromName(v[0], v[1])
-                    return b
+                    return createBuffFromSettings(v[0], v[1], charSettings.customBuff)
                 } catch (error) {
                     console.error(error)
                     return null
                 }
             })
             .filter(b => b !== null),
+        customBuff: charSettings.customBuff,
         melee: LeveledWeaponHelper.fromId(
             charSettings.meleeWeapon,
             charSettings.meleeWeaponRefine,
@@ -80,6 +81,37 @@ export function createCharBuildFromSettings(
             .filter((weapon): weapon is number => typeof weapon === "number")
             .map(weapon => LeveledWeaponHelper.getCategory(weapon)),
     })
+}
+
+/**
+ * 按当前配置构造实例内独立的自定义 BUFF。
+ * @param customBuff 自定义 BUFF 属性列表
+ * @param level 自定义 BUFF 等级
+ * @returns 自定义 BUFF 实例
+ */
+export function createCustomBuff(customBuff: [string, number][], level?: number) {
+    const buffData = {
+        名称: "自定义BUFF",
+        描述: "自行填写",
+    } as Record<string, string | number>
+    customBuff.forEach(([property, value]) => {
+        buffData[property] = value
+    })
+    return new LeveledBuff(buffData as never, level)
+}
+
+/**
+ * 按当前配置构造 BUFF 实例，支持自定义 BUFF 直接从配置内生成。
+ * @param name BUFF 名称
+ * @param level BUFF 等级
+ * @param customBuff 自定义 BUFF 配置
+ * @returns BUFF 实例
+ */
+export function createBuffFromSettings(name: string, level: number, customBuff: [string, number][]) {
+    if (name === "自定义BUFF") {
+        return createCustomBuff(customBuff, level)
+    }
+    return LeveledBuffHelper.fromName(name, level)
 }
 
 ;(CharBuild as typeof CharBuild & { fromCharSetting?: typeof createCharBuildFromSettings }).fromCharSetting = createCharBuildFromSettings

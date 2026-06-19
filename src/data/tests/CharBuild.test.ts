@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
-import { createCharBuildFromSettings } from "../CharBuildHelper"
+import { createBuffFromSettings, createCharBuildFromSettings } from "../CharBuildHelper"
 import { weaponData } from "../index"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
@@ -104,6 +104,84 @@ describe("CharBuild类测试", () => {
         expect(attrs2.增伤).toBe(0.44)
         expect(attrs2.属性穿透).toBe(0)
         expect(attrs2.独立增伤).toBe(0)
+    })
+
+    it("应该为不同构筑生成独立的自定义BUFF实例", () => {
+        const buffA = createBuffFromSettings("自定义BUFF", 1, [["攻击", 0.1]])
+        const buffB = createBuffFromSettings("自定义BUFF", 1, [["攻击", 0.2]])
+
+        expect(buffA).not.toBe(buffB)
+        expect(buffA.攻击).toBe(0.1)
+        expect(buffB.攻击).toBe(0.2)
+
+        const buildA = new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            buffs: [buffA],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "快速出击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "伤害",
+        })
+        const buildB = new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            buffs: [buffB],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "快速出击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "伤害",
+        })
+
+        expect(buildA.buffs[0]).not.toBe(buildB.buffs[0])
+        expect(buildA.buffs[0].攻击).toBe(0.1)
+        expect(buildB.buffs[0].攻击).toBe(0.2)
+    })
+
+    it("选择召唤物技能时不应让namespace访问的其他技能误吃召唤物伤害", () => {
+        const summonBuild = new CharBuild({
+            char: new LeveledChar("丽蓓卡"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 3,
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "缠绵之触",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "纯爱试炼::[爱之毒]伤害",
+        })
+        const summonAttrs = summonBuild.calculateWeaponAttributes()
+        const summonResult = summonBuild.evaluateAST("纯爱试炼::[爱之毒]伤害", summonAttrs)
+
+        const normalBuild = new CharBuild({
+            char: new LeveledChar("丽蓓卡"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 3,
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "纯爱试炼",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "纯爱试炼::[爱之毒]伤害",
+        })
+        const normalAttrs = normalBuild.calculateWeaponAttributes()
+        const normalResult = normalBuild.evaluateAST("纯爱试炼::[爱之毒]伤害", normalAttrs)
+
+        expect(summonResult).toBeCloseTo(normalResult, 6)
     })
 
     // 测试武器独立增伤不应作用于角色

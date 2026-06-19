@@ -15,13 +15,11 @@ import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 import { CharSettings, createDefaultCharSettings, normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
     buffData,
-    buffMap,
     CharBuild,
     CharBuildTimeline,
     charData,
     charMap,
     LeveledBuff,
-    LeveledBuffHelper,
     LeveledChar,
     LeveledCharHelper,
     LeveledModHelper,
@@ -32,6 +30,7 @@ import {
     monsterMap,
     weaponData,
 } from "../data"
+import { createBuffFromSettings } from "../data/CharBuildHelper"
 import { dataPackHydrationKey, isDataPackHydrated } from "../data/data-pack-bridge"
 import type { SkillWeapon, Weapon } from "../data/data-types"
 import { waitForInitialLoad } from "../i18n"
@@ -143,7 +142,7 @@ function reorderGameStyleModes<T>(modes: T[]): (T | null)[] {
 }
 const _buffOptions = reactive(
     buffData.map(buff => ({
-        value: LeveledBuffHelper.fromName(buff.名称),
+        value: createBuffFromSettings(buff.名称, buff.mx || 1, charSettings.value.customBuff),
         label: buff.名称,
         limit: buff.限定,
         description: buff.描述,
@@ -157,7 +156,10 @@ const buffOptions = computed(() => {
             const b = charSettings.value.buffs.find(b => b[0] === v.label)
             const lv = b?.[1] ?? v.value.等级
             return {
-                value: new LeveledBuff(v.value._originalBuffData, lv),
+                value:
+                    v.label === "自定义BUFF"
+                        ? createBuffFromSettings(v.label, lv, charSettings.value.customBuff)
+                        : new LeveledBuff(v.value._originalBuffData, lv),
                 label: v.label,
                 limit: v.limit,
                 description: v.description,
@@ -211,8 +213,7 @@ const selectedBuffs = computed(() => {
     return charSettings.value.buffs
         .map(v => {
             try {
-                const b = LeveledBuffHelper.fromName(v[0], v[1])
-                return b
+                return createBuffFromSettings(v[0], v[1], charSettings.value.customBuff)
             } catch (error) {
                 console.error(error)
                 charSettings.value.buffs = charSettings.value.buffs.filter(b => b[0] !== v[0])
@@ -789,39 +790,6 @@ watch(
         }
     },
     { immediate: true }
-)
-
-/**
- * 将当前角色的自定义 BUFF 配置同步到运行时 buffMap。
- * @param customBuff 自定义 BUFF 配置
- * @returns void
- */
-function syncCustomBuff(customBuff: [string, number][]) {
-    const buffObj = {
-        名称: "自定义BUFF",
-        描述: "自行填写",
-    } as any
-    customBuff.forEach(([property, value]) => {
-        buffObj[property] = value
-    })
-    buffMap.set("自定义BUFF", buffObj)
-
-    const index = _buffOptions.findIndex(buff => buff.label === "自定义BUFF")
-    if (index > -1) {
-        _buffOptions[index].value = LeveledBuffHelper.fromName("自定义BUFF")
-    }
-    charSettings.value.buffs = [...charSettings.value.buffs]
-}
-
-watch(
-    () => charSettings.value.customBuff,
-    customBuff => {
-        syncCustomBuff(customBuff)
-    },
-    {
-        deep: true,
-        immediate: true,
-    }
 )
 
 // 计算属性

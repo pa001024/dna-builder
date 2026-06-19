@@ -64,7 +64,7 @@ const members = {
     未暴击未触发: t("ast-help.members.noCritNoTrigger"),
 }
 
-const namespaces = computed(() => ["E", "Q", "近战", "远程", "同律", ...(props.charBuild?.allSkills.map(v => v.名称) || [])])
+const namespaces = computed(() => ["E", "Q", "P", "近战", "远程", "同律", ...(props.charBuild?.allSkills.map(v => v.名称) || [])])
 
 function parseExpression() {
     if (!inputExpression.value.trim()) {
@@ -147,16 +147,31 @@ const astTreeText = computed(() => {
                 <div class="space-y-2 text-sm text-base-content/80">
                     <p>{{ $t("ast-help.syntaxDesc") }}</p>
                     <ul class="list-disc list-inside space-y-1 ml-2">
-                        <li><strong>{{ $t("ast-help.syntaxItems.number.label") }}:</strong> {{ $t("ast-help.syntaxItems.number.desc") }}</li>
-                        <li><strong>{{ $t("ast-help.syntaxItems.property.label") }}:</strong> {{ $t("ast-help.syntaxItems.property.desc") }}</li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.number.label") }}:</strong> {{ $t("ast-help.syntaxItems.number.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.property.label") }}:</strong> {{ $t("ast-help.syntaxItems.property.desc") }}
+                        </li>
                         <li>
                             <strong>{{ $t("ast-help.syntaxItems.special.label") }}:</strong> {{ $t("ast-help.syntaxItems.special.desc") }}
                         </li>
-                        <li><strong>{{ $t("ast-help.syntaxItems.skill.label") }}:</strong> {{ $t("ast-help.syntaxItems.skill.desc") }}</li>
-                        <li><strong>{{ $t("ast-help.syntaxItems.namespace.label") }}:</strong> {{ $t("ast-help.syntaxItems.namespace.desc") }}</li>
-                        <li><strong>{{ $t("ast-help.syntaxItems.operator.label") }}:</strong> {{ $t("ast-help.syntaxItems.operator.desc") }}</li>
-                        <li><strong>{{ $t("ast-help.syntaxItems.function.label") }}:</strong> {{ $t("ast-help.syntaxItems.function.desc") }}</li>
-                        <li><strong>{{ $t("ast-help.syntaxItems.member.label") }}:</strong> {{ $t("ast-help.syntaxItems.member.desc") }}</li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.skill.label") }}:</strong> {{ $t("ast-help.syntaxItems.skill.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.namespace.label") }}:</strong>
+                            {{ $t("ast-help.syntaxItems.namespace.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.operator.label") }}:</strong> {{ $t("ast-help.syntaxItems.operator.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.function.label") }}:</strong> {{ $t("ast-help.syntaxItems.function.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.member.label") }}:</strong> {{ $t("ast-help.syntaxItems.member.desc") }}
+                        </li>
                     </ul>
                 </div>
             </div>

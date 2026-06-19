@@ -136,6 +136,7 @@ function writeVersions(versions: PackVersionEntry[]): void {
  * 收集 public/imgs 下的资源清单。
  * @returns 图片清单
  */
+
 function collectImgsManifest(): PackImgsEntry[] {
     if (!fs.existsSync(publicImgsRoot)) {
         return []
