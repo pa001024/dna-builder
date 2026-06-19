@@ -226,11 +226,11 @@ async function buildDataPack(targetVersion: string): Promise<PackVersionEntry> {
         version: targetVersion,
         modules: manifestModules,
     }
-    // const imgsManifest = collectImgsManifest()
+    const imgsManifest = collectImgsManifest()
 
     const zipEntries: Record<string, Uint8Array> = {
         "manifest.json": new TextEncoder().encode(JSON.stringify(manifest, null, 2)),
-        // "imgs.json": new TextEncoder().encode(JSON.stringify(imgsManifest, null, 2)),
+        "imgs.json": new TextEncoder().encode(JSON.stringify(imgsManifest, null, 2)),
     }
 
     for (const [moduleKey, entry] of Object.entries(modules)) {

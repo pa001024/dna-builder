@@ -1,6 +1,8 @@
 import { decode } from "@msgpack/msgpack"
 import { unzipSync } from "fflate"
+import { tauriFetch } from "../api/app"
 import { hydrateRegisteredDataPackBindings, markDataPackHydrated, resetRegisteredDataPackBindings } from "./data-pack-bridge"
+import { mountImgsToVirtualPath } from "./imgs-runtime"
 
 export type DataPackModuleRecord = Record<string, unknown>
 
@@ -587,14 +589,7 @@ async function fetchRemoteDataPackVersions(forceRefresh = false): Promise<DataPa
 
     remoteState.promise = (async () => {
         try {
-            const response = await fetch(source.versionsUrl, { cache: "no-store" })
-            if (!response.ok) {
-                remoteState.hasCached = true
-                remoteState.cached = null
-                return null
-            }
-            const payload = (await response.json()) as DataPackVersionInfo[] | { versions?: DataPackVersionInfo[] }
-            const info = Array.isArray(payload) ? payload : (payload.versions ?? [])
+            const info = await fetchDataPackVersions(source.versionsUrl)
             info.sort((a, b) => b.version.localeCompare(a.version, "zh-CN", { numeric: true }))
             remoteState.hasCached = true
             remoteState.cached = info
@@ -609,6 +604,27 @@ async function fetchRemoteDataPackVersions(forceRefresh = false): Promise<DataPa
     })()
 
     return remoteState.promise
+}
+
+/**
+ * 读取数据包版本列表，优先使用浏览器 fetch，失败时回退到 tauriFetch。
+ * @param versionsUrl 版本列表地址
+ * @returns 版本列表
+ */
+async function fetchDataPackVersions(versionsUrl: string): Promise<DataPackVersionInfo[]> {
+    try {
+        const response = await fetch(versionsUrl, { cache: "no-store" })
+        if (response.ok) {
+            return (await response.json()) as DataPackVersionInfo[]
+        }
+    } catch {}
+
+    const fallbackResponse = await tauriFetch(versionsUrl, { cache: "no-store" })
+    if (!fallbackResponse.ok) {
+        return []
+    }
+
+    return (await fallbackResponse.json()) as DataPackVersionInfo[]
 }
 
 /**
@@ -845,6 +861,13 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
     await writeInstalledInfo(remote)
     await loadLocalVersion(remote.version)
     const versions = await getMergedDataPackVersions(remoteVersions)
+    if (state.imgsManifest.length) {
+        void mountImgsToVirtualPath({
+            manifest: state.imgsManifest,
+        }).catch(error => {
+            console.error("下载数据包后预热图片失败", error)
+        })
+    }
     return {
         ready: true,
         version: remote.version,
@@ -898,6 +921,13 @@ export async function deleteDataPack(): Promise<void> {
     } catch {}
 
     resetState()
+}
+
+/**
+ * 清空所有数据包相关 OPFS 数据。
+ */
+export async function clearAllDataPackOpfs(): Promise<void> {
+    await deleteDataPack()
 }
 
 /**

@@ -86,9 +86,13 @@ async function bootstrap() {
         bootstrapDataPack()
             .then(() => {
                 if (env.isApp) {
-                    return mountImgsToVirtualPath({
+                    void mountImgsToVirtualPath({
                         manifest: getLoadedDataPackImgsManifest(),
-                    }).then(() => registerImgsServiceWorker())
+                    })
+                        .then(() => registerImgsServiceWorker())
+                        .catch(error => {
+                            console.error("图片缓存预热失败", error)
+                        })
                 }
 
                 return undefined

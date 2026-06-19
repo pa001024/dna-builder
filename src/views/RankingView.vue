@@ -152,6 +152,7 @@ onMounted(async () => {
                             <div class="min-w-0">
                                 <h1 class="truncate text-2xl font-semibold tracking-tight text-white">榜单 - {{ ranking?.name }}</h1>
                                 <div class="mt-2 flex flex-wrap gap-3 text-xs text-slate-400">
+                                    <span v-if="ranking?.desc">{{ ranking?.desc }}</span>
                                     <span>条目 {{ rankedItems.length }}</span>
                                     <span>更新时间 {{ ranking ? formatDateTime(ranking.updateAt) : "-" }}</span>
                                 </div>

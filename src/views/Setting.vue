@@ -2,7 +2,9 @@
 import { t } from "i18next"
 import { computed, onMounted, ref, watch } from "vue"
 import { MATERIALS } from "@/api/app"
+import { clearAllDataPackOpfs } from "@/data/data-pack"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
+import { deleteImgsCache, imgsDownloadActive, imgsDownloadCompleted, imgsDownloadPercent, imgsDownloadTotal } from "@/data/imgs-runtime"
 import { env } from "@/env"
 import { i18nLanguages } from "@/i18n"
 import { useDataPackStore } from "@/store/dataPack"
@@ -37,6 +39,8 @@ const CDN_DATA_PACK_BASE_URL = "https://cdn.dna-builder.cn/data-pack"
 const versionDragUrls = ref<Record<string, string>>({})
 const sourceSaveTimer = ref<number | null>(null)
 const isApplyingSourceUpdate = ref(false)
+const imgsDownloadPercentValue = computed(() => Math.round(imgsDownloadPercent.value * 100))
+const isClearingDataPackOpfs = ref(false)
 
 const dataPackVersions = computed(() => {
     const versions = dataPack.status?.versions || []
@@ -336,6 +340,29 @@ async function uninstallDataPackVersion(version: string) {
     await dataPack.uninstallVersion(version)
     await refreshDataPackStatus(true)
 }
+
+async function clearDataPackStorage() {
+    if (
+        !(await ui.showDialog(
+            t("setting.reset"),
+            "清空后会删除所有数据包和图片缓存，且无法恢复。"
+        ))
+    ) {
+        return
+    }
+
+    isClearingDataPackOpfs.value = true
+    try {
+        await clearAllDataPackOpfs()
+        await deleteImgsCache()
+        await refreshDataPackStatus(true)
+    } catch (error) {
+        console.error("清空数据包存储失败", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    } finally {
+        isClearingDataPackOpfs.value = false
+    }
+}
 onMounted(() => {
     dataPack.bootstrap()
 })
@@ -470,6 +497,7 @@ onMounted(() => {
                                 @input="dataPackSourceKind === 'custom' && saveSourceBaseUrl()"
                             />
                             <button class="btn btn-sm" @click="importDataPack">{{ $t("achievement.import") }}</button>
+                            <button class="btn btn-sm btn-error" :disabled="isClearingDataPackOpfs" @click="clearDataPackStorage">清空</button>
                         </div>
                     </div>
 
@@ -478,6 +506,24 @@ onMounted(() => {
                         <button class="btn btn-ghost btn-xs" :disabled="dataPack.isBootstrapping" @click="refreshDataPackVersions">
                             {{ $t("setting.refresh") }}
                         </button>
+                    </div>
+
+                    <div v-if="imgsDownloadActive || imgsDownloadTotal > 0" class="px-2 pb-2">
+                        <div class="rounded-md border border-base-300 bg-base-100/60 px-3 py-3">
+                            <div class="flex items-center justify-between gap-2 text-xs text-base-content/70">
+                                <span>图片下载</span>
+                                <span>
+                                    {{ imgsDownloadCompleted }} / {{ imgsDownloadTotal }}
+                                    <span class="mx-1">·</span>
+                                    {{ imgsDownloadPercentValue }}%
+                                </span>
+                            </div>
+                            <progress
+                                class="progress progress-primary w-full mt-2"
+                                :value="imgsDownloadPercentValue"
+                                max="100"
+                            />
+                        </div>
                     </div>
 
                     <div class="px-2 pb-2">

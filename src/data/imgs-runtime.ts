@@ -1,9 +1,23 @@
+import { unzipSync } from "fflate"
+import { computed, ref } from "vue"
+import { tauriFetch } from "../api/app"
+
 const IMGS_CACHE_DIR = "dna-builder-imgs"
 const IMGS_REMOTE_BASE_URL = "https://cdn.dna-builder.cn/imgs"
+const IMGS_PACK_REMOTE_BASE_URL = "https://cdn.dna-builder.cn/imgs-pack"
+const IMGS_PACK_VERSIONS_FILE = "versions.json"
 
 export type ImgsManifestEntry = {
     path: string
     url?: string
+}
+
+export type ImgsPackVersionInfo = {
+    builtAt: string
+    packageFile: string
+    version: string
+    files: string[]
+    baseVersion?: string
 }
 
 type ImgsMountOptions = {
@@ -12,6 +26,10 @@ type ImgsMountOptions = {
 }
 
 let mountPromise: Promise<void> | null = null
+export const imgsDownloadCompleted = ref(0)
+export const imgsDownloadTotal = ref(0)
+export const imgsDownloadActive = ref(false)
+export const imgsDownloadPercent = computed(() => (imgsDownloadTotal.value > 0 ? imgsDownloadCompleted.value / imgsDownloadTotal.value : 0))
 
 /**
  * 判断当前环境是否支持 OPFS。
@@ -28,6 +46,15 @@ function hasOpfs(): boolean {
  */
 function getImgsBaseUrl(baseUrl?: string): string {
     return (baseUrl || IMGS_REMOTE_BASE_URL).replace(/\/$/, "")
+}
+
+/**
+ * 获取图片包资源基址。
+ * @param baseUrl 外部基址
+ * @returns 图片包基址
+ */
+function getImgsPackBaseUrl(baseUrl?: string): string {
+    return (baseUrl || IMGS_PACK_REMOTE_BASE_URL).replace(/\/$/, "")
 }
 
 /**
@@ -58,6 +85,16 @@ async function getImgsDirectory(): Promise<FileSystemDirectoryHandle> {
  */
 function normalizeImgPath(path: string): string {
     return path.replace(/^\/+/, "")
+}
+
+/**
+ * 比较版本号。
+ * @param left 左侧版本
+ * @param right 右侧版本
+ * @returns 比较结果
+ */
+function compareVersion(left: string, right: string): number {
+    return left.localeCompare(right, "zh-CN", { numeric: true })
 }
 
 /**
@@ -100,11 +137,54 @@ function getRemoteImgUrl(path: string, baseUrl?: string): string {
 }
 
 /**
+ * 获取图片包版本列表。
+ * @param baseUrl 外部基址
+ * @returns 图片包版本列表
+ */
+async function fetchRemoteImgsPackVersions(baseUrl?: string): Promise<ImgsPackVersionInfo[]> {
+    try {
+        const versionsUrl = new URL(IMGS_PACK_VERSIONS_FILE, `${getImgsPackBaseUrl(baseUrl)}/`).toString()
+        let response: Response
+        try {
+            response = await fetch(versionsUrl, { cache: "no-store" })
+        } catch {
+            response = await tauriFetch(versionsUrl, { cache: "no-store" })
+        }
+
+        if (!response.ok) {
+            return []
+        }
+
+        const payload = (await response.json()) as ImgsPackVersionInfo[]
+        return Array.isArray(payload) ? payload.sort((a, b) => compareVersion(a.version, b.version)) : []
+    } catch {
+        return []
+    }
+}
+
+/**
+ * 读取图片包并解压。
+ * @param versionInfo 图片包版本信息
+ * @param baseUrl 图片包基址
+ * @returns 解压后的文件映射
+ */
+async function loadImgsPack(versionInfo: ImgsPackVersionInfo, baseUrl: string): Promise<Record<string, Uint8Array>> {
+    const response = await fetch(new URL(versionInfo.packageFile, `${baseUrl}/`).toString(), { cache: "no-store" })
+    if (!response.ok) {
+        throw new Error(`下载图片包失败: ${versionInfo.packageFile}`)
+    }
+
+    const bytes = new Uint8Array(await response.arrayBuffer())
+    return unzipSync(bytes)
+}
+
+/**
  * 写入图片到 OPFS。
  * @param relPath 图片相对路径
  * @param bytes 图片内容
+ * @param overwrite 是否强制覆盖
  */
-async function cacheImg(relPath: string, bytes: Uint8Array): Promise<void> {
+async function cacheImg(relPath: string, bytes: Uint8Array, overwrite = false): Promise<void> {
     const segments = normalizeImgPath(relPath).split("/").filter(Boolean)
     if (!segments.length) {
         return
@@ -121,9 +201,11 @@ async function cacheImg(relPath: string, bytes: Uint8Array): Promise<void> {
         currentDir = await currentDir.getDirectoryHandle(segment, { create: true })
     }
 
-    const cached = await readFile(currentDir, fileName)
-    if (cached) {
-        return
+    if (!overwrite) {
+        const cached = await readFile(currentDir, fileName)
+        if (cached) {
+            return
+        }
     }
 
     await writeFile(currentDir, fileName, bytes)
@@ -164,6 +246,41 @@ async function hydrateCacheFromOpfs(relPath: string): Promise<boolean> {
 }
 
 /**
+ * 尝试通过图片包写入资源。
+ * @param options 挂载配置
+ * @param desiredPaths 目标路径集合
+ * @param completedPaths 已完成路径集合
+ */
+async function tryMountImgsPacks(options: ImgsMountOptions, desiredPaths: Set<string>, completedPaths: Set<string>): Promise<void> {
+    const packs = await fetchRemoteImgsPackVersions(options.baseUrl)
+    if (!packs.length) {
+        return
+    }
+
+    const baseUrl = getImgsPackBaseUrl(options.baseUrl)
+    for (const pack of packs) {
+        const entries = await loadImgsPack(pack, baseUrl)
+        const packFiles = pack.files.length ? pack.files : Object.keys(entries).filter(name => name !== "manifest.json")
+
+        for (const relPath of packFiles) {
+            const normalizedPath = normalizeImgPath(relPath)
+            if (!desiredPaths.has(normalizedPath) || completedPaths.has(normalizedPath)) {
+                continue
+            }
+
+            const bytes = entries[normalizedPath]
+            if (!bytes) {
+                continue
+            }
+
+            await cacheImg(normalizedPath, bytes, true)
+            completedPaths.add(normalizedPath)
+            imgsDownloadCompleted.value += 1
+        }
+    }
+}
+
+/**
  * 将图片清单中的资源下载到 OPFS，并同步到运行时缓存。
  * @param options 挂载配置
  */
@@ -174,15 +291,30 @@ export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Pr
 
     mountPromise = (async () => {
         if (!hasOpfs() || !options.manifest?.length) {
+            imgsDownloadCompleted.value = 0
+            imgsDownloadTotal.value = 0
+            imgsDownloadActive.value = false
             return
         }
 
         const baseUrl = getImgsBaseUrl(options.baseUrl)
+        const desiredPaths = new Set(options.manifest.map(entry => normalizeImgPath(entry.path)))
+        const completedPaths = new Set<string>()
+        imgsDownloadCompleted.value = 0
+        imgsDownloadTotal.value = options.manifest.length
+        imgsDownloadActive.value = true
+        await tryMountImgsPacks(options, desiredPaths, completedPaths)
         await Promise.allSettled(
             options.manifest.map(async entry => {
                 const relPath = normalizeImgPath(entry.path)
+                if (completedPaths.has(relPath)) {
+                    return
+                }
+
                 const hydrated = await hydrateCacheFromOpfs(relPath)
                 if (hydrated) {
+                    completedPaths.add(relPath)
+                    imgsDownloadCompleted.value += 1
                     return
                 }
 
@@ -192,7 +324,9 @@ export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Pr
                 }
 
                 const bytes = new Uint8Array(await response.arrayBuffer())
-                await cacheImg(relPath, bytes)
+                await cacheImg(relPath, bytes, true)
+                completedPaths.add(relPath)
+                imgsDownloadCompleted.value += 1
             })
         )
     })()
@@ -200,6 +334,25 @@ export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Pr
     try {
         await mountPromise
     } finally {
+        imgsDownloadActive.value = false
         mountPromise = null
     }
+}
+
+/**
+ * 删除图片缓存目录。
+ */
+export async function deleteImgsCache(): Promise<void> {
+    if (!hasOpfs()) {
+        return
+    }
+
+    const root = await getRootDirectory()
+    try {
+        await root.removeEntry(IMGS_CACHE_DIR, { recursive: true })
+    } catch {}
+
+    imgsDownloadCompleted.value = 0
+    imgsDownloadTotal.value = 0
+    imgsDownloadActive.value = false
 }
