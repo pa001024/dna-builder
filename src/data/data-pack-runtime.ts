@@ -1,4 +1,10 @@
-import { bootstrapDataPack, loadDataPackExport, loadDataPackModule, syncDataPackModuleBindings } from "./data-pack"
+import {
+    bootstrapDataPack,
+    getLoadedDataPackImgsManifest,
+    loadDataPackExport,
+    loadDataPackModule,
+    syncDataPackModuleBindings,
+} from "./data-pack"
 
 const DATA_PACK_MODULES = [
     "char.data",
@@ -71,7 +77,7 @@ const DATA_PACK_MODULES = [
     "hardboss.data",
 ] as const
 
-export { bootstrapDataPack }
+export { bootstrapDataPack, getLoadedDataPackImgsManifest }
 
 /**
  * 判断模块是否应从数据包读取。

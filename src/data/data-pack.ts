@@ -41,6 +41,7 @@ export interface DataPackSourceInfo {
 const PACK_ROOT_DIR = "dna-builder-data-pack"
 const PACK_BYTES_FILE = "package.zip"
 const MANIFEST_FILE = "manifest.json"
+const IMGS_MANIFEST_FILE = "imgs.json"
 const INSTALL_INFO_FILE = "installed.json"
 const CONFIG_FILE = "config.json"
 const DEV_BASE_URL = "/mock/data-pack"
@@ -53,6 +54,7 @@ type FileSystemDirectoryHandleLike = Awaited<ReturnType<NonNullable<Navigator["s
 type DataPackState = {
     readyVersion: string | null
     manifest: DataPackManifest | null
+    imgsManifest: { path: string; url?: string }[]
     moduleCache: Map<string, DataPackModuleRecord>
 }
 
@@ -76,6 +78,7 @@ type DataPackConfig = {
 const state: DataPackState = {
     readyVersion: null,
     manifest: null,
+    imgsManifest: [],
     moduleCache: new Map(),
 }
 
@@ -411,6 +414,24 @@ function decodePack(bytes: Uint8Array): { manifest: DataPackManifest; modules: M
 }
 
 /**
+ * 读取包内图片清单。
+ * @param bytes 数据包二进制
+ * @returns 图片清单
+ */
+function decodeImgsManifest(bytes: Uint8Array): { path: string; url?: string }[] {
+    const entries = unzipSync(bytes)
+    const manifestBytes = entries[IMGS_MANIFEST_FILE]
+    if (!manifestBytes) {
+        return []
+    }
+
+    const payload = JSON.parse(new TextDecoder().decode(manifestBytes)) as
+        | { files?: { path: string; url?: string }[] }
+        | { path: string; url?: string }[]
+    return Array.isArray(payload) ? payload : (payload.files ?? [])
+}
+
+/**
  * 读取版本信息。
  * @returns 版本信息；不存在时返回 null
  */
@@ -530,6 +551,7 @@ async function writePackBytes(version: string, bytes: Uint8Array): Promise<void>
     await writeFile(versionDir, PACK_BYTES_FILE, bytes)
     const { manifest } = decodePack(bytes)
     await writeFile(versionDir, MANIFEST_FILE, new TextEncoder().encode(JSON.stringify(manifest, null, 2)))
+    await writeFile(versionDir, IMGS_MANIFEST_FILE, new TextEncoder().encode(JSON.stringify(decodeImgsManifest(bytes), null, 2)))
 }
 
 /**
@@ -603,6 +625,7 @@ async function loadLocalVersion(version: string): Promise<boolean> {
     const { manifest, modules } = decodePack(bytes)
     state.readyVersion = version
     state.manifest = manifest
+    state.imgsManifest = decodeImgsManifest(bytes)
     state.moduleCache = modules
     hydrateLoadedDataPackBindings()
     return true
@@ -897,6 +920,14 @@ export async function exportDataPackVersionFile(version: string): Promise<Uint8A
  */
 export function getLoadedDataPackManifest(): DataPackManifest | null {
     return state.manifest
+}
+
+/**
+ * 获取当前已加载的图片清单。
+ * @returns 图片清单
+ */
+export function getLoadedDataPackImgsManifest(): { path: string; url?: string }[] {
+    return state.imgsManifest
 }
 
 /**
