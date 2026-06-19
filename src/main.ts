@@ -1,5 +1,6 @@
 import { createApp, type VNode } from "vue"
 import "./style.css"
+import { registerSW } from "virtual:pwa-register"
 import * as Sentry from "@sentry/vue"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
@@ -16,14 +17,14 @@ import "@globalhive/vuejs-tour/dist/style.css"
 import { createPinia } from "pinia"
 
 /**
- * 注册图片服务工作线程。
+ * 注册 App 端图片服务工作线程。
  */
 async function registerImgsServiceWorker(): Promise<void> {
     if (typeof navigator === "undefined" || !navigator.serviceWorker) {
         return
     }
 
-    await navigator.serviceWorker.register(new URL("/sw.js", window.location.origin).toString(), {
+    await navigator.serviceWorker.register(new URL("/sw-app.js", window.location.origin).toString(), {
         scope: "/",
         updateViaCache: "none",
     })
@@ -84,17 +85,24 @@ async function bootstrap() {
     requestAnimationFrame(() => {
         bootstrapDataPack()
             .then(() => {
-                return mountImgsToVirtualPath({
-                    manifest: getLoadedDataPackImgsManifest(),
-                })
-            })
-            .then(() => {
-                return registerImgsServiceWorker()
+                if (env.isApp) {
+                    return mountImgsToVirtualPath({
+                        manifest: getLoadedDataPackImgsManifest(),
+                    }).then(() => registerImgsServiceWorker())
+                }
+
+                return undefined
             })
             .finally(() => {
                 dataPackBootstrapLoading.value = false
             })
     })
+    // 仅在非应用环境下注册 Service Worker
+    if (!env.isApp) {
+        registerSW({
+            immediate: true,
+        })
+    }
 }
 
 export function renderVueNode(vnode: VNode, container: HTMLElement) {

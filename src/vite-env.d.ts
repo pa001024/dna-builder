@@ -17,6 +17,9 @@ declare module "virtual:pwa-register" {
     export function registerSW(options?: RegisterSWOptions): (onUpdateReady: (registration: ServiceWorkerRegistration) => void) => void
 }
 
+declare const __APP_BUILD__: boolean
+declare const __WEB_BUILD__: boolean
+
 declare module "prismjs" {
     interface PrismGrammar {
         [name: string]: unknown
