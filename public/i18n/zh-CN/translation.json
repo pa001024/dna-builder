@@ -107,6 +107,7 @@
     "总伤": "总计伤害",
     "最大弹药": "最大弹药",
     "abyss-dungeon-detail": {
+        "notFound": "未找到该深渊副本",
         "title": "深渊详情"
     },
     "abyss-dungeon-list": {
@@ -285,6 +286,7 @@
         "title": "后台"
     },
     "ai": {
+        "ai": "AI",
         "commandInputPlaceholder": "发消息或输入/选择指令，支持粘贴或拖拽图片",
         "desc": "使用AI智能体与游戏互动",
         "inputMessage": "输入消息，按 Enter 发送",
@@ -306,7 +308,8 @@
         "startMcp": "启动MCP服务器",
         "startMcpAdminTooltip": "以管理员权限启动 MCP 服务器",
         "stopMcp": "停止",
-        "title": "AI智能体"
+        "title": "AI智能体",
+        "user": "用户"
     },
     "ai-chat": {
         "assistantNotInitialized": "AI助手未初始化，请先配置AI设置",
@@ -789,6 +792,7 @@
         "fish_desc": "钓鱼点详细收益计算",
         "forge": "灾厄武器",
         "forge_desc": "灾厄武器熔炼等级与任务",
+        "hard_boss": "梦魇残声",
         "hardboss": "梦魇残声",
         "hardboss_desc": "查看梦魇残声信息和奖励",
         "impr": "印象",
@@ -816,6 +820,7 @@
         "reputation_desc": "查看区域声名等级与委托信息",
         "resource": "资源",
         "resource_desc": "查看资源信息和图标",
+        "role": "角色",
         "shop": "商店",
         "shop_desc": "查看商店物品信息",
         "solotreasure": "奉香群英试",
@@ -854,6 +859,25 @@
         },
         "title": "皎皎角"
     },
+    "dna-post": {
+        "browse": "浏览",
+        "cancelFollow": "取消关注",
+        "comment": "评论",
+        "commentPublished": "评论已发布",
+        "commentPublishFailed": "发布评论失败",
+        "commentRequired": "请输入评论内容",
+        "commentsTitle": "评论 {{count}}",
+        "favorite": "收藏",
+        "featured": "精选",
+        "follow": "关注",
+        "like": "点赞",
+        "loadMoreCommentsFailed": "加载更多评论失败",
+        "loginFirst": "请先登录",
+        "official": "官方",
+        "postDetailFailed": "获取帖子详情失败",
+        "postDetailTitle": "帖子详情",
+        "userAvatar": "用户头像"
+    },
     "dna-post-detail": {
         "title": "帖子详情"
     },
@@ -881,6 +905,22 @@
     },
     "dna-user": {
         "title": "用户信息"
+    },
+    "dna-user-mine": {
+        "coins": "金币",
+        "comments": "评论",
+        "fans": "粉丝",
+        "favorites": "收藏",
+        "follow": "关注",
+        "gameInfoFailed": "获取游戏信息失败",
+        "gameInfoTab": "游戏信息",
+        "likes": "获赞",
+        "loginFirst": "请先登录",
+        "noPosts": "暂无帖子",
+        "posts": "帖子",
+        "postTab": "帖子",
+        "title": "个人主页",
+        "userInfoFailed": "获取用户信息失败"
     },
     "dna-weapon-detail": {
         "title": "武器详情"
@@ -1224,6 +1264,10 @@
     "map-local": {
         "title": "地图"
     },
+    "misc": {
+        "all_files": "所有文件",
+        "exec_files": "可执行文件"
+    },
     "mod-detail": {
         "title": "魔之楔详情"
     },
@@ -1273,6 +1317,7 @@
     "monster-tag-detail": {
         "bonus": "加成",
         "description": "描述",
+        "meterSuffix": "米",
         "params": "参数",
         "relatedMonsters": "关联怪物",
         "sameTags": "同类词条",
@@ -1332,10 +1377,12 @@
             "stance": "战姿"
         },
         "expressionCalc": {
+            "description": "计算自定义表达式的值",
             "expression": "表达式",
             "expressionPlaceholder": "例如: a + b * c",
             "inputCount": "输入数量:",
-            "result": "结果"
+            "result": "结果",
+            "title": "表达式计算"
         },
         "fullCalc": {
             "description": "基于核心计算节点的完整伤害计算",
@@ -1410,6 +1457,7 @@
     "npc-list": {
         "title": "NPC列表"
     },
+    "other": "其他",
     "partytopic-detail": {
         "title": "光阴集详情"
     },
@@ -1658,6 +1706,7 @@
         "no_output": "暂无输出",
         "no_script_selected": "未选择脚本",
         "no_status": "暂无状态",
+        "no_steps_config_hint": "尚未配置任何步骤，点击下方按钮添加",
         "online": "云端",
         "open_and_run_local_first": "请先打开并运行本地脚本",
         "open_directory": "打开目录",

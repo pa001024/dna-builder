@@ -5443,6 +5443,7 @@
     "坐下": "座る",
     "坐下看剧": "座って劇を見る",
     "abyss-dungeon-detail": {
+        "notFound": "アビスダンジョンが見つかりません",
         "title": "アビスダンジョン詳細"
     },
     "abyss-dungeon-list": {
@@ -5548,11 +5549,13 @@
         "title": "管理画面"
     },
     "ai": {
+        "ai": "AI",
         "commandInputPlaceholder": "メッセージ送信またはコマンドの入力/選択。画像の貼り付けやドラッグ&ドロップにも対応しています。",
         "desc": "AI エージェントを使用してゲームと対話する",
         "inputMessage": "メッセージを入力し、Enterキーを押して送信",
         "mcp_manual_stop_message": "MCP サーバーは手動で終了する必要があります。\n\nタスク マネージャーで 'dna_mcp_server.exe' プロセスを終了してください。\n\n今すぐタスク マネージャーを開きますか？",
-        "title": "AIエージェント"
+        "title": "AIエージェント",
+        "user": "ユーザー"
     },
     "autobuild": {
         "charMods": "キャラクターMOD",
@@ -5799,6 +5802,7 @@
         "fish_desc": "釣り場の詳細収益計算",
         "forge": "災厄武器",
         "forge_desc": "災厄武器の熔錬レベルと任務",
+        "hard_boss": "ナイトメア残響",
         "hardboss": "ナイトメアレムナント",
         "hardboss_desc": "ナイトメアレムナント情報とダイナ報酬を確認",
         "impr": "印象",
@@ -5824,6 +5828,7 @@
         "reputation_desc": "地域名声のレベルと委託情報を確認",
         "resource": "資源",
         "resource_desc": "資源情報とアイコンを確認",
+        "role": "キャラクター",
         "shop": "ショップ",
         "shop_desc": "ショップアイテム情報を表示",
         "solotreasure": "奉香英雄大会",
@@ -5856,6 +5861,25 @@
         "desc": "ゲーム情報/チェックイン/投稿閲覧",
         "title": "皎皎角"
     },
+    "dna-post": {
+        "browse": "閲覧",
+        "cancelFollow": "フォロー解除",
+        "comment": "コメント",
+        "commentPublished": "コメントを投稿しました",
+        "commentPublishFailed": "コメントの投稿に失敗しました",
+        "commentRequired": "コメントを入力してください",
+        "commentsTitle": "コメント {{count}}",
+        "favorite": "お気に入り",
+        "featured": "注目",
+        "follow": "フォロー",
+        "like": "いいね",
+        "loadMoreCommentsFailed": "コメントの追加読み込みに失敗しました",
+        "loginFirst": "先にログインしてください",
+        "official": "公式",
+        "postDetailFailed": "投稿の詳細の取得に失敗しました",
+        "postDetailTitle": "投稿詳細",
+        "userAvatar": "ユーザーアバター"
+    },
     "dna-post-detail": {
         "title": "投稿詳細"
     },
@@ -5883,6 +5907,22 @@
     },
     "dna-user": {
         "title": "ユーザー情報"
+    },
+    "dna-user-mine": {
+        "coins": "コイン",
+        "comments": "コメント",
+        "fans": "フォロワー",
+        "favorites": "お気に入り",
+        "follow": "フォロー",
+        "gameInfoFailed": "ゲーム情報の取得に失敗しました",
+        "gameInfoTab": "ゲーム情報",
+        "likes": "受け取ったいいね",
+        "loginFirst": "先にログインしてください",
+        "noPosts": "投稿はまだありません",
+        "posts": "投稿",
+        "postTab": "投稿",
+        "title": "プロフィール",
+        "userInfoFailed": "ユーザー情報の取得に失敗しました"
     },
     "dna-weapon-detail": {
         "title": "武器詳細"
@@ -6163,6 +6203,10 @@
     "map-local": {
         "title": "マップ"
     },
+    "misc": {
+        "all_files": "すべてのファイル",
+        "exec_files": "実行可能ファイル"
+    },
     "mod-detail": {
         "title": "悪魔の楔の詳細"
     },
@@ -6179,11 +6223,18 @@
         "title": "モンスター一覧"
     },
     "monster-tag-detail": {
+        "meterSuffix": "m",
         "title": "号令者詳細"
     },
     "more": {
         "desc": "その他の機能",
         "title": "もっと"
+    },
+    "node-editor": {
+        "expressionCalc": {
+            "description": "カスタム式の値を計算します",
+            "title": "式計算"
+        }
     },
     "notfound": {
         "back_home": "ホームに戻る",
@@ -6195,6 +6246,7 @@
     "npc-list": {
         "title": "NPC一覧"
     },
+    "other": "その他",
     "partytopic-detail": {
         "title": "追憶録詳細"
     },
@@ -6379,6 +6431,7 @@
         "no_output": "出力はありません",
         "no_script_selected": "スクリプト未選択",
         "no_status": "状態はありません",
+        "no_steps_config_hint": "ステップが未設定です。下のボタンから追加してください。",
         "online": "オンライン",
         "open_and_run_local_first": "先にローカルスクリプトを開いて実行してください",
         "open_directory": "ディレクトリを開く",

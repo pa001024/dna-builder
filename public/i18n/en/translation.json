@@ -5465,6 +5465,7 @@
     "坐下": "Sit",
     "坐下看剧": "Take a Seat for the Show",
     "abyss-dungeon-detail": {
+        "notFound": "Abyss dungeon not found",
         "title": "Abyss Dungeon Detail"
     },
     "abyss-dungeon-list": {
@@ -5570,11 +5571,13 @@
         "title": "Admin"
     },
     "ai": {
+        "ai": "AI",
         "commandInputPlaceholder": "Send a message or enter/select a command. Paste or drag images is supported.",
         "desc": "Interact with games using AI agents",
         "inputMessage": "Enter message, press Enter to send",
         "mcp_manual_stop_message": "The MCP server must be terminated manually.\n\nEnd the 'dna_mcp_server.exe' process in Task Manager.\n\nOpen Task Manager now?",
-        "title": "AI Agent"
+        "title": "AI Agent",
+        "user": "User"
     },
     "autobuild": {
         "charMods": "Character MOD",
@@ -5821,6 +5824,7 @@
         "fish_desc": "Detailed fishing spot yield calculation",
         "forge": "Calamity Weapons",
         "forge_desc": "Calamity weapon smelting levels and quests",
+        "hard_boss": "Nightmare Echo",
         "hardboss": "Nightmare Remnants",
         "hardboss_desc": "View nightmare remnant information and rewards",
         "impr": "Impression",
@@ -5846,6 +5850,7 @@
         "reputation_desc": "View regional reputation levels and commission details",
         "resource": "Resource",
         "resource_desc": "View resource information and icons",
+        "role": "Character",
         "shop": "Shop",
         "shop_desc": "View shop item information",
         "solotreasure": "Incense Proving",
@@ -5878,6 +5883,25 @@
         "desc": "Game Information/Check-in/Browse Posts",
         "title": "Jiaojiaojiao"
     },
+    "dna-post": {
+        "browse": "Views",
+        "cancelFollow": "Unfollow",
+        "comment": "Comments",
+        "commentPublished": "Comment published",
+        "commentPublishFailed": "Failed to publish comment",
+        "commentRequired": "Please enter a comment",
+        "commentsTitle": "{{count}} Comments",
+        "favorite": "Favorites",
+        "featured": "Featured",
+        "follow": "Follow",
+        "like": "Likes",
+        "loadMoreCommentsFailed": "Failed to load more comments",
+        "loginFirst": "Please log in first",
+        "official": "Official",
+        "postDetailFailed": "Failed to load post details",
+        "postDetailTitle": "Post Details",
+        "userAvatar": "User avatar"
+    },
     "dna-post-detail": {
         "title": "Post Details"
     },
@@ -5905,6 +5929,22 @@
     },
     "dna-user": {
         "title": "User Information"
+    },
+    "dna-user-mine": {
+        "coins": "Coins",
+        "comments": "Comments",
+        "fans": "Fans",
+        "favorites": "Favorites",
+        "follow": "Following",
+        "gameInfoFailed": "Failed to load game info",
+        "gameInfoTab": "Game Info",
+        "likes": "Likes",
+        "loginFirst": "Please log in first",
+        "noPosts": "No posts yet",
+        "posts": "Posts",
+        "postTab": "Posts",
+        "title": "Profile",
+        "userInfoFailed": "Failed to load user info"
     },
     "dna-weapon-detail": {
         "title": "Weapon Details"
@@ -6188,6 +6228,10 @@
     "map-local": {
         "title": "Map"
     },
+    "misc": {
+        "all_files": "All files",
+        "exec_files": "Executable files"
+    },
     "mod-detail": {
         "title": "Devil's Wedge details"
     },
@@ -6204,11 +6248,18 @@
         "title": "Monster list"
     },
     "monster-tag-detail": {
+        "meterSuffix": "m",
         "title": "Commander Details"
     },
     "more": {
         "desc": "More features",
         "title": "More"
+    },
+    "node-editor": {
+        "expressionCalc": {
+            "description": "Evaluate a custom expression",
+            "title": "Expression Calc"
+        }
     },
     "notfound": {
         "back_home": "Back to Home",
@@ -6220,6 +6271,7 @@
     "npc-list": {
         "title": "NPC List"
     },
+    "other": "Other",
     "partytopic-detail": {
         "title": "Party Topic Details"
     },
@@ -6404,6 +6456,7 @@
         "no_output": "No output",
         "no_script_selected": "No script selected",
         "no_status": "No status",
+        "no_steps_config_hint": "No steps configured yet. Click the button below to add one.",
         "online": "Online",
         "open_and_run_local_first": "Open and run a local script first",
         "open_directory": "Open directory",

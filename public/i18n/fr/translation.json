@@ -5465,6 +5465,7 @@
     "坐下": "S’asseoir",
     "坐下看剧": "S’asseoir pour regarder la pièce",
     "abyss-dungeon-detail": {
+        "notFound": "Donjon de l’abîme introuvable",
         "title": "Détail du donjon des Abysses"
     },
     "abyss-dungeon-list": {
@@ -5570,11 +5571,13 @@
         "title": "Administration"
     },
     "ai": {
+        "ai": "IA",
         "commandInputPlaceholder": "Envoyez un message ou saisissez/selectionnez une commande. Le collage ou glisser-deposer d'images est pris en charge.",
         "desc": "Interagissez avec les jeux à l'aide d'agents IA",
         "inputMessage": "Entrez un message, appuyez sur Entrée pour envoyer",
         "mcp_manual_stop_message": "Le serveur MCP doit etre arrete manuellement.\n\nTerminez le processus 'dna_mcp_server.exe' dans le Gestionnaire des taches.\n\nOuvrir le Gestionnaire des taches maintenant ?",
-        "title": "Agent IA"
+        "title": "Agent IA",
+        "user": "Utilisateur"
     },
     "autobuild": {
         "charMods": "MOD de personnage",
@@ -5853,6 +5856,7 @@
         "event_desc": "Voir la liste des événements et les détails des événements",
         "fish": "Pêche",
         "fish_desc": "Calcul détaillé du rendement des points de pêche",
+        "hard_boss": "Écho cauchemar",
         "hardboss": "Restes du Cauchemar",
         "hardboss_desc": "Voir les informations sur les restes du Cauchemar et les récompenses",
         "impr": "",
@@ -5878,6 +5882,7 @@
         "reputation_desc": "Voir les niveaux de réputation régionale et les informations de commission",
         "resource": "Ressource",
         "resource_desc": "Voir les informations et icônes de ressource",
+        "role": "Personnage",
         "shop": "Boutique",
         "shop_desc": "Voir les informations sur les articles de la boutique",
         "solotreasure": "Tournoi de l’Encens",
@@ -5910,6 +5915,25 @@
         "desc": "Informations sur le jeu/Check-in/Parcourir les posts",
         "title": "Jiaojiaojiao"
     },
+    "dna-post": {
+        "browse": "Vues",
+        "cancelFollow": "Ne plus suivre",
+        "comment": "Commentaires",
+        "commentPublished": "Commentaire publié",
+        "commentPublishFailed": "Échec de la publication du commentaire",
+        "commentRequired": "Veuillez saisir un commentaire",
+        "commentsTitle": "{{count}} commentaires",
+        "favorite": "Favoris",
+        "featured": "À la une",
+        "follow": "Suivre",
+        "like": "J’aime",
+        "loadMoreCommentsFailed": "Échec du chargement des commentaires supplémentaires",
+        "loginFirst": "Veuillez vous connecter d’abord",
+        "official": "Officiel",
+        "postDetailFailed": "Échec du chargement des détails du post",
+        "postDetailTitle": "Détails du post",
+        "userAvatar": "Avatar de l’utilisateur"
+    },
     "dna-post-detail": {
         "title": "Détails du post"
     },
@@ -5937,6 +5961,22 @@
     },
     "dna-user": {
         "title": "Informations utilisateur"
+    },
+    "dna-user-mine": {
+        "coins": "Pièces",
+        "comments": "Commentaires",
+        "fans": "Abonnés",
+        "favorites": "Favoris",
+        "follow": "Abonnements",
+        "gameInfoFailed": "Échec du chargement des infos du jeu",
+        "gameInfoTab": "Infos du jeu",
+        "likes": "J’aime reçus",
+        "loginFirst": "Veuillez vous connecter d’abord",
+        "noPosts": "Aucun post pour le moment",
+        "posts": "Posts",
+        "postTab": "Posts",
+        "title": "Profil",
+        "userInfoFailed": "Échec du chargement des infos utilisateur"
     },
     "dna-weapon-detail": {
         "title": "Détails de l'arme"
@@ -6217,6 +6257,10 @@
     "map-local": {
         "title": "Carte"
     },
+    "misc": {
+        "all_files": "Tous les fichiers",
+        "exec_files": "Fichiers exécutables"
+    },
     "mod-detail": {
         "title": "Détails du Wedge du Diable"
     },
@@ -6233,11 +6277,18 @@
         "title": "Liste des monstres"
     },
     "monster-tag-detail": {
+        "meterSuffix": "m",
         "title": "Détails du commandant"
     },
     "more": {
         "desc": "Plus de fonctionnalités",
         "title": "Plus"
+    },
+    "node-editor": {
+        "expressionCalc": {
+            "description": "Évalue une expression personnalisée",
+            "title": "Calcul d’expression"
+        }
     },
     "notfound": {
         "back_home": "Retour à l'accueil",
@@ -6249,6 +6300,7 @@
     "npc-list": {
         "title": "Liste des PNJ"
     },
+    "other": "Autre",
     "partytopic-detail": {
         "title": "Détails des Chroniques"
     },
@@ -6432,6 +6484,7 @@
         "no_output": "Aucune sortie",
         "no_script_selected": "Aucun script selectionne",
         "no_status": "Aucun statut",
+        "no_steps_config_hint": "Aucune étape configurée. Cliquez sur le bouton ci-dessous pour en ajouter une.",
         "online": "En ligne",
         "open_and_run_local_first": "Ouvrez et executez d'abord un script local",
         "open_directory": "Ouvrir le dossier",

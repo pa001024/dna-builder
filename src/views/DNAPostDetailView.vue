@@ -178,7 +178,7 @@ async function submitComment() {
 
                         <!-- 帖子元信息 -->
                         <div class="flex flex-wrap gap-2 mb-4 text-sm text-base-content/70">
-                            <span class="text-xs text-base-content/50">
+                            <span class="text-xs text-base-content/50 space-x-1">
                                 <span>{{ $t("dna-post.browse") }}: {{ postRes.postDetail.browseCount }}</span>
                                 <span>{{ $t("dna-post.comment") }}: {{ postRes.postDetail.commentCount }}</span>
                                 <span>{{ $t("dna-post.like") }}: {{ postRes.postDetail.likeCount }}</span>
@@ -188,8 +188,12 @@ async function submitComment() {
 
                         <!-- 帖子标签 -->
                         <div class="flex flex-wrap gap-2">
-                            <span v-if="postRes.postDetail.isElite === 1" class="badge badge-secondary text-xs">{{ $t("dna-post.featured") }}</span>
-                            <span v-if="postRes.postDetail.isOfficial === 1" class="badge badge-info text-xs">{{ $t("dna-post.official") }}</span>
+                            <span v-if="postRes.postDetail.isElite === 1" class="badge badge-secondary text-xs">{{
+                                $t("dna-post.featured")
+                            }}</span>
+                            <span v-if="postRes.postDetail.isOfficial === 1" class="badge badge-info text-xs">{{
+                                $t("dna-post.official")
+                            }}</span>
                             <span v-for="(topic, index) in postRes.postDetail.topics" :key="index" class="badge badge-outline text-xs">
                                 <Icon icon="ri:hashtag" />
                                 {{ topic.topicName }}</span

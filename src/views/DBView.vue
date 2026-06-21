@@ -53,20 +53,6 @@ const databaseItems = [
         color: "from-orange-500/20 to-amber-600/20 text-orange-500",
     },
     {
-        name: "database.ironsurvival",
-        path: "/db/ironsurvival",
-        desc: "database.ironsurvival_desc",
-        icon: "M9.767 6.1c0.94-1.947 1.393-4.104 2.233-6.1 0.837 1.999 1.296 4.15 2.227 6.103 1.181 1.327 2.842-0.17 4.162-0.496-0.316 1.305-1.552 2.614-0.961 3.986 1.184 1.287 3.362 1.327 4.555 2.407-1.187 1.077-3.371 1.123-4.555 2.407-0.584 1.372 0.645 2.677 0.961 3.986-1.32-0.332-2.979-1.832-4.159-0.496-0.934 1.953-1.393 4.104-2.23 6.103-0.84-1.999-1.296-4.156-2.233-6.11-1.174-1.363-2.842 0.192-4.159 0.502 0.313-1.257 1.378-2.443 1.056-3.779-1.019-1.555-3.45-1.46-4.646-2.617 1.211-1.153 3.621-1.059 4.646-2.608 0.313-1.333-0.73-2.531-1.059-3.785 1.324 0.323 2.985 1.838 4.162 0.496zM5.933 11.997c1.476 1.555 3.31 2.991 5.501 3.262 2.626 0.265 4.92-1.451 6.63-3.253-1.527-1.622-3.469-3.131-5.772-3.283-2.531-0.125-4.698 1.543-6.359 3.274z M11.175 9.977c1.667-0.825 3.672 1.181 2.851 2.848-0.514 1.412-2.553 1.853-3.569 0.721-1.132-1.022-0.694-3.052 0.718-3.569z",
-        color: "from-slate-500/20 to-stone-600/20 text-slate-500",
-    },
-    {
-        name: "database.ironsurvival",
-        path: "/db/ironsurvival",
-        desc: "database.ironsurvival_desc",
-        icon: "M9.767 6.1c0.94-1.947 1.393-4.104 2.233-6.1 0.837 1.999 1.296 4.15 2.227 6.103 1.181 1.327 2.842-0.17 4.162-0.496-0.316 1.305-1.552 2.614-0.961 3.986 1.184 1.287 3.362 1.327 4.555 2.407-1.187 1.077-3.371 1.123-4.555 2.407-0.584 1.372 0.645 2.677 0.961 3.986-1.32-0.332-2.979-1.832-4.159-0.496-0.934 1.953-1.393 4.104-2.23 6.103-0.84-1.999-1.296-4.156-2.233-6.11-1.174-1.363-2.842 0.192-4.159 0.502 0.313-1.257 1.378-2.443 1.056-3.779-1.019-1.555-3.45-1.46-4.646-2.617 1.211-1.153 3.621-1.059 4.646-2.608 0.313-1.333-0.73-2.531-1.059-3.785 1.324 0.323 2.985 1.838 4.162 0.496zM5.933 11.997c1.476 1.555 3.31 2.991 5.501 3.262 2.626 0.265 4.92-1.451 6.63-3.253-1.527-1.622-3.469-3.131-5.772-3.283-2.531-0.125-4.698 1.543-6.359 3.274z M11.175 9.977c1.667-0.825 3.672 1.181 2.851 2.848-0.514 1.412-2.553 1.853-3.569 0.721-1.132-1.022-0.694-3.052 0.718-3.569z",
-        color: "from-slate-500/20 to-stone-600/20 text-slate-500",
-    },
-    {
         name: "database.damage",
         path: "/db/damage",
         desc: "database.damage_desc",
@@ -521,7 +507,9 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                                     <div>
                                         <div class="text-sm font-semibold text-base-content">{{ $t("view.featuredEntry") }}</div>
                                     </div>
-                                    <span class="badge badge-ghost badge-sm">{{ featuredItems.length }} {{ $t("view.databaseEntryCount") }}</span>
+                                    <span class="badge badge-ghost badge-sm"
+                                        >{{ featuredItems.length }} {{ $t("view.databaseEntryCount") }}</span
+                                    >
                                 </div>
 
                                 <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
@@ -570,11 +558,15 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                             <div>
                                 <div class="flex items-center gap-3">
                                     <span class="h-3 w-3 rounded-full" :class="section.accentClass" />
-                                    <span class="text-xs font-semibold uppercase tracking-[0.22em] text-base-content/45">{{ section.badge }}</span>
+                                    <span class="text-xs font-semibold uppercase tracking-[0.22em] text-base-content/45">{{
+                                        section.badge
+                                    }}</span>
                                 </div>
                                 <h2 class="mt-3 text-2xl font-bold text-base-content">{{ section.title }}</h2>
                             </div>
-                            <span class="badge badge-ghost badge-lg shrink-0">{{ section.items.length }} {{ $t("view.databaseEntryCount") }}</span>
+                            <span class="badge badge-ghost badge-lg shrink-0"
+                                >{{ section.items.length }} {{ $t("view.databaseEntryCount") }}</span
+                            >
                         </div>
 
                         <div class="mt-5 grid gap-4 md:grid-cols-2">

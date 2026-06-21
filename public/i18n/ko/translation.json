@@ -5465,6 +5465,7 @@
     "坐下": "앉기",
     "坐下看剧": "앉아서 연극 보기",
     "abyss-dungeon-detail": {
+        "notFound": "심연 던전을 찾을 수 없습니다",
         "title": "심연 던전 상세"
     },
     "abyss-dungeon-list": {
@@ -5570,11 +5571,13 @@
         "title": "관리자"
     },
     "ai": {
+        "ai": "AI",
         "commandInputPlaceholder": "메시지를 보내거나 명령을 입력/선택하세요. 이미지 붙여넣기 및 드래그 앤 드롭을 지원합니다.",
         "desc": "AI 에이전트를 사용하여 게임과 상호작용",
         "inputMessage": "메시지를 입력하고 Enter 키를 눌러 보내세요",
         "mcp_manual_stop_message": "MCP 서버는 수동으로 종료해야 합니다.\n\n작업 관리자에서 'dna_mcp_server.exe' 프로세스를 종료하세요.\n\n지금 작업 관리자를 열까요?",
-        "title": "AI 에이전트"
+        "title": "AI 에이전트",
+        "user": "사용자"
     },
     "autobuild": {
         "charMods": "캐릭터 MOD",
@@ -5821,6 +5824,7 @@
         "fish_desc": "낚시터 상세 수익 계산",
         "forge": "재앙 무기",
         "forge_desc": "재앙 무기 융해 레벨과 임무",
+        "hard_boss": "나이트메어 잔향",
         "hardboss": "나이트메어 잔재",
         "hardboss_desc": "나이트메어 잔재 정보 및 보상 확인",
         "impr": "인상",
@@ -5846,6 +5850,7 @@
         "reputation_desc": "지역 명성 레벨 및 위탁 정보를 확인",
         "resource": "자원",
         "resource_desc": "자원 정보와 아이콘 확인",
+        "role": "캐릭터",
         "shop": "상점",
         "shop_desc": "상점 아이템 정보 보기",
         "solotreasure": "봉향 영웅대회",
@@ -5878,6 +5883,25 @@
         "desc": "게임 정보/출석/게시물 브라우징",
         "title": "교교각"
     },
+    "dna-post": {
+        "browse": "조회",
+        "cancelFollow": "팔로우 취소",
+        "comment": "댓글",
+        "commentPublished": "댓글이 게시되었습니다",
+        "commentPublishFailed": "댓글 게시에 실패했습니다",
+        "commentRequired": "댓글을 입력해 주세요",
+        "commentsTitle": "댓글 {{count}}",
+        "favorite": "즐겨찾기",
+        "featured": "추천",
+        "follow": "팔로우",
+        "like": "좋아요",
+        "loadMoreCommentsFailed": "댓글을 더 불러오지 못했습니다",
+        "loginFirst": "먼저 로그인해 주세요",
+        "official": "공식",
+        "postDetailFailed": "게시글 상세를 불러오지 못했습니다",
+        "postDetailTitle": "게시글 상세",
+        "userAvatar": "사용자 아바타"
+    },
     "dna-post-detail": {
         "title": "게시물 상세"
     },
@@ -5905,6 +5929,22 @@
     },
     "dna-user": {
         "title": "사용자 정보"
+    },
+    "dna-user-mine": {
+        "coins": "코인",
+        "comments": "댓글",
+        "fans": "팬",
+        "favorites": "즐겨찾기",
+        "follow": "팔로잉",
+        "gameInfoFailed": "게임 정보를 불러오지 못했습니다",
+        "gameInfoTab": "게임 정보",
+        "likes": "받은 좋아요",
+        "loginFirst": "먼저 로그인해 주세요",
+        "noPosts": "게시글이 없습니다",
+        "posts": "게시글",
+        "postTab": "게시글",
+        "title": "프로필",
+        "userInfoFailed": "사용자 정보를 불러오지 못했습니다"
     },
     "dna-weapon-detail": {
         "title": "무기 상세"
@@ -6185,6 +6225,10 @@
     "map-local": {
         "title": "지도"
     },
+    "misc": {
+        "all_files": "모든 파일",
+        "exec_files": "실행 파일"
+    },
     "mod-detail": {
         "title": "악마의 웨지 세부정보"
     },
@@ -6201,11 +6245,18 @@
         "title": "몬스터 목록"
     },
     "monster-tag-detail": {
+        "meterSuffix": "m",
         "title": "지휘자 상세"
     },
     "more": {
         "desc": "기타 기능",
         "title": "더보기"
+    },
+    "node-editor": {
+        "expressionCalc": {
+            "description": "사용자 지정 수식의 값을 계산합니다",
+            "title": "수식 계산"
+        }
     },
     "notfound": {
         "back_home": "홈으로 돌아가기",
@@ -6217,6 +6268,7 @@
     "npc-list": {
         "title": "NPC 목록"
     },
+    "other": "기타",
     "partytopic-detail": {
         "title": "추억집 상세"
     },
@@ -6401,6 +6453,7 @@
         "no_output": "출력이 없습니다",
         "no_script_selected": "선택된 스크립트가 없습니다",
         "no_status": "상태가 없습니다",
+        "no_steps_config_hint": "설정된 단계가 없습니다. 아래 버튼을 눌러 추가하세요.",
         "online": "온라인",
         "open_and_run_local_first": "먼저 로컬 스크립트를 열고 실행해 주세요",
         "open_directory": "디렉터리 열기",
