@@ -9,7 +9,6 @@ import { env } from "../env"
 import { i18nLanguages } from "../i18n"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
-import { timeStr, useGameTimer } from "../util"
 
 const props = defineProps({
     title: { type: String },
@@ -128,8 +127,6 @@ onMounted(() => {
     ui.previewImageElm = document.getElementById("preview-image") as HTMLElement
 })
 
-const { mihan, moling, zhouben } = useGameTimer()
-
 watchEffect(() => {
     document.title = props.title ? props.title + " - DOB" : "Duet Night Abyss Builder"
 })
@@ -148,49 +145,7 @@ watchEffect(() => {
                         <Icon icon="ri:arrow-left-line" />
                     </button>
                     <span className="max-[370px]:hidden text-sm min-w-20">{{ title }}</span>
-                    <!-- 计时器 -->
-                    <div class="flex ml-4 gap-8 items-center text-xs text-base-content/80">
-                        <div class="inline-block text-center min-w-16 cursor-pointer" @click="ui.mihanVisible = true">
-                            <div class="whitespace-nowrap">
-                                {{ $t("resizeableWindow.mihan") }}
-                            </div>
-                            <div class="font-orbitron">
-                                {{ timeStr(mihan) }}
-                            </div>
-                        </div>
-                        <div class="text-center min-w-16" :class="[env.isApp ? 'hidden sm:inline-block' : 'inline-block']">
-                            <div class="whitespace-nowrap">
-                                {{ $t("resizeableWindow.moling") }}
-                            </div>
-                            <div class="font-orbitron">
-                                {{ timeStr(moling) }}
-                            </div>
-                        </div>
-                        <div class="hidden sm:inline-block text-center min-w-16">
-                            <div class="whitespace-nowrap">
-                                {{ $t("resizeableWindow.zhouben") }}
-                            </div>
-                            <div class="font-orbitron">
-                                {{ timeStr(zhouben) }}
-                            </div>
-                        </div>
-                    </div>
-                    <dialog class="modal" :class="{ 'modal-open': ui.mihanVisible }">
-                        <div class="modal-box bg-base-300 text-md">
-                            <div class="text-lg font-bold flex justify-between items-center pb-2">
-                                {{ $t("resizeableWindow.mihanTitle") }}
-
-                                <form class="flex justify-end gap-2" method="dialog">
-                                    <button class="btn btn-ghost btn-sm btn-square" @click="ui.mihanVisible = false">
-                                        <Icon bold icon="codicon:chrome-close" />
-                                    </button>
-                                </form>
-                            </div>
-                            <DNAMihan />
-                        </div>
-
-                        <div class="modal-backdrop" @click="ui.mihanVisible = false" />
-                    </dialog>
+                    <ResizeableWindowTimers />
                 </div>
                 <!-- fix resize shadow -->
                 <div v-if="env.isApp" class="pointer-events-none flex-none opacity-0 self-start transition-none">
@@ -273,7 +228,13 @@ watchEffect(() => {
                     </div>
                 </div>
             </div>
-            <dialog ref="langDialogRef" class="modal" :class="{ 'modal-open': langDialogOpen }" @close="langDialogOpen = false" @click="closeLangDialog">
+            <dialog
+                ref="langDialogRef"
+                class="modal"
+                :class="{ 'modal-open': langDialogOpen }"
+                @close="langDialogOpen = false"
+                @click="closeLangDialog"
+            >
                 <div class="modal-box bg-base-300" @click.stop>
                     <div class="flex items-center justify-between pb-4">
                         <div class="text-lg font-bold">

@@ -16,7 +16,7 @@
  *            模板字符串 t(`${x}`) 与变量 t(var) 会被跳过并计入 dynamic 计数。
  */
 
-import { readdir, readFile, stat, writeFile } from "node:fs/promises"
+import { readdir, readFile, writeFile } from "node:fs/promises"
 import { extname, join, relative } from "node:path"
 
 const ROOT = process.cwd()
@@ -64,15 +64,6 @@ async function collectFiles(dir: string, acc: string[] = []): Promise<string[]> 
         }
     }
     return acc
-}
-
-/** 把行号/列号转换为基于 0 的偏移，便于切片 */
-function offsetOf(text: string, line: number, col: number): number {
-    let o = 0
-    for (let i = 1; i < line; i++) {
-        o = text.indexOf("\n", o) + 1
-    }
-    return o + (col - 1)
 }
 
 /**
