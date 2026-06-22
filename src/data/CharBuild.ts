@@ -1564,6 +1564,11 @@ export class CharBuild {
         const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
         const getSkillAttr = (fieldName: string, base?: string) =>
             skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
+        const isDamageSkillField = (fieldName: string, base?: string) => {
+            if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) return true
+            const field = getSkillAttr(fieldName, base)
+            return !!field && (field.名称.endsWith("伤害") || field.名称.endsWith("伤害倍率"))
+        }
         const damageCache = new Map<string, DamageResult>()
         const getWeaponAttackTypeBonus = (base: string | undefined, fieldName: string | undefined, attribute: "增伤" | "独立增伤") => {
             const key = base || this.baseName
@@ -1791,9 +1796,9 @@ export class CharBuild {
                 case "property": {
                     const value = evaluateIdentity(node.name, node.namespace)
                     if (!node.namespace && customVariableExpressions.has(node.name)) return value
-                    // 如果是技能字段（evaluateSkill返回值>0），需要乘以默认的伤害系数
+                    // 只有真正的伤害字段才需要乘以默认的伤害系数
                     const skillValue = evaluateSkill(node.name, node.namespace)
-                    if (skillValue) {
+                    if (skillValue && isDamageSkillField(node.name, node.namespace)) {
                         return value * evaluateMember(undefined, node.namespace, node.name)
                     }
                     return value
@@ -1837,6 +1842,9 @@ export class CharBuild {
                     }
 
                     const memberName = node.property
+                    if (objectNode.type === "property" && !isDamageSkillField(objectNode.name, objectNode.namespace)) {
+                        return objectValue
+                    }
                     // 成员访问用于修改伤害计算方式
                     return (
                         objectValue *
