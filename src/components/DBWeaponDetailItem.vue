@@ -338,7 +338,7 @@ watch(
                 </div>
                 <div v-if="leveledWeapon.射速" class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
                     <span class="text-base-content/70">{{ $t("射速") }}</span>
-                    <span class="font-medium text-primary">{{ formatProp("基础弹匣", leveledWeapon.射速) }}</span>
+                    <span class="font-medium text-primary">{{ formatProp("攻击", leveledWeapon.射速) }}</span>
                 </div>
             </div>
         </div>

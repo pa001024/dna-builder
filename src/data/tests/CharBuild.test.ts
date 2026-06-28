@@ -184,6 +184,87 @@ describe("CharBuild类测试", () => {
         expect(summonResult).toBeCloseTo(normalResult, 6)
     })
 
+    it("[降灵]召唤物属性应按比例缩放召唤物伤害", () => {
+        const baseBuild = new CharBuild({
+            char: new LeveledChar("塔比瑟"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 0,
+            buffs: [],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "正义群殴！",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "召唤物伤害",
+        })
+        const reducedBuild = new CharBuild({
+            char: new LeveledChar("塔比瑟"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 0,
+            buffs: [
+                new LeveledBuff({
+                    名称: "[降灵]召唤物属性",
+                    描述: "[降灵]最多叠加层数提高至30.0层，每层[降灵]使自身召唤召唤物时，召唤物属性继承比例提高0.25%。",
+                    召唤物属性继承比例: 0.0025,
+                }),
+            ],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "正义群殴！",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "召唤物伤害",
+        })
+
+        const baseDamage = baseBuild.calculateTargetFunction(undefined, "召唤物伤害")
+        const reducedDamage = reducedBuild.calculateTargetFunction(undefined, "召唤物伤害")
+
+        expect(baseDamage).toBeGreaterThan(0)
+        expect(reducedDamage).toBeGreaterThan(0)
+        expect(reducedDamage).toBeGreaterThan(baseDamage)
+    })
+
+    it("暴虐应提高近战武器攻速", () => {
+        const baseBuild = new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 0,
+            buffs: [],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "普通攻击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "伤害",
+        })
+        const buffedBuild = new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 0,
+            buffs: [new LeveledBuff({ 名称: "暴虐", 描述: "x", 近战攻速: 0.3 })],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "普通攻击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "伤害",
+        })
+
+        const baseAttackSpeed = baseBuild.calculateWeaponAttributes(baseBuild.meleeWeapon).weapon?.攻速
+        const buffedAttackSpeed = buffedBuild.calculateWeaponAttributes(buffedBuild.meleeWeapon).weapon?.攻速
+
+        expect(baseAttackSpeed).toBe(1)
+        expect(buffedAttackSpeed).toBeCloseTo(1.3, 10)
+    })
+
     // 测试武器独立增伤不应作用于角色
     it("武器MOD的独立增伤不应影响角色属性", () => {
         const charBuild = createCharBuild()

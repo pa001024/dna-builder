@@ -2405,13 +2405,13 @@ onMounted(() => {
                                                     }}
                                                 </li>
                                                 <li
-                                                    v-if="baseWeapon && '射速' in baseWeapon && item.key === '攻速'"
+                                                    v-if="baseWeapon && item.key === '攻速'"
                                                     class="flex justify-between gap-8 text-sm text-cyan-200"
                                                 >
                                                     <div class="text-white/75">
                                                         {{ $t("char-build.base_attr_label", { attr: $t(item.key) }) }}
                                                     </div>
-                                                    {{ formatWeaponProp("基础攻击", (baseWeapon as never)["射速"] as number) }}
+                                                    {{ formatWeaponProp("攻击", (baseWeapon as never)["射速"] ?? 1) }}
                                                 </li>
                                                 <li
                                                     v-if="item.key !== '攻击' && charBuild.char.加成 && item.key in charBuild.char.加成"

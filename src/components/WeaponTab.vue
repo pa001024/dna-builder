@@ -77,13 +77,22 @@ interface DynamicAttrSource {
     value: number
 }
 
+interface ModAttrSource {
+    mod: LeveledMod
+    value: number
+}
+
 /**
  * 获取当前武器面板对应的BUFF属性前缀。
  * @returns BUFF属性前缀
  */
 function getBuffWeaponPrefix() {
     if (props.wkey === "skill") {
-        return props.charBuild.skillWeapon?.inherit === "melee" ? "近战" : props.charBuild.skillWeapon?.inherit === "ranged" ? "远程" : "同律"
+        return props.charBuild.skillWeapon?.inherit === "melee"
+            ? "近战"
+            : props.charBuild.skillWeapon?.inherit === "ranged"
+              ? "远程"
+              : "同律"
     }
     return props.wkey === "melee" ? "近战" : "远程"
 }
@@ -150,6 +159,52 @@ const modAttributeBonusSources = computed(() => {
         return modsBySeries
     }
     return []
+})
+
+/**
+ * 获取 MOD 在当前武器面板下的展示值。
+ * 优先展示当前属性键，其次兼容带 scope 前缀的属性键。
+ * @param mod 目标 MOD
+ * @param key 当前武器属性键名
+ * @returns 可展示的属性值
+ */
+function getModSourceValue(mod: LeveledMod, key: string) {
+    const exactValue = mod[key]
+    if (typeof exactValue === "number") {
+        return exactValue
+    }
+
+    const scopedValue = mod[`${getBuffWeaponPrefix()}${key}`]
+    if (typeof scopedValue !== "number") {
+        return undefined
+    }
+
+    return scopedValue
+}
+
+const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
+    const sourceMap: Record<string, ModAttrSource[]> = {}
+    const pushSource = (mod: LeveledMod, key: string) => {
+        const value = getModSourceValue(mod, key)
+        if (value === undefined) return
+
+        sourceMap[key] ||= []
+        sourceMap[key].push({ mod, value })
+    }
+
+    props.charBuild.charMods.forEach(mod => {
+        if (!mod) return
+        Object.keys(weaponAttrs.value).forEach(key => {
+            if (key !== "攻击") pushSource(mod, key)
+        })
+    })
+
+    props.charBuild[`${baseKey.value}Mods`].forEach(mod => {
+        if (!mod) return
+        Object.keys(weaponAttrs.value).forEach(key => pushSource(mod, key))
+    })
+
+    return sourceMap
 })
 </script>
 <template>
@@ -232,9 +287,9 @@ const modAttributeBonusSources = computed(() => {
                                     )
                                 }}
                             </li>
-                            <li v-if="'射速' in baseWeapon && key === '攻速'" class="flex justify-between gap-8 text-sm text-primary">
+                            <li v-if="key === '攻速'" class="flex justify-between gap-8 text-sm text-primary">
                                 <div class="text-base-content/80">{{ $t("char-build.base_attr_label", { attr: $t(key) }) }}</div>
-                                {{ formatWeaponProp("基础攻击", (baseWeapon as LeveledWeapon)["射速"]!) }}
+                                {{ formatWeaponProp("基础攻击", (baseWeapon as LeveledWeapon)["射速"] ?? 1) }}
                             </li>
                             <!-- 角色自带加成 -->
                             <li
@@ -268,20 +323,12 @@ const modAttributeBonusSources = computed(() => {
                                 {{ format100r(charBuild.rangedWeapon.buffProps[key]!) }}
                             </li>
                             <li
-                                v-for="(mod, index) in charBuild.charMods.filter((m): m is LeveledMod => m && m[key] && key !== '攻击')"
-                                :key="index"
+                                v-for="(source, index) in modSourceMap[key] || []"
+                                :key="`${source.mod.id}-${key}-${index}`"
                                 class="flex justify-between gap-8 text-sm text-primary"
                             >
-                                <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
-                                {{ format100r(mod[key]!) }}
-                            </li>
-                            <li
-                                v-for="(mod, index) in charBuild[`${baseKey}Mods`].filter((m): m is LeveledMod => m && m[key])"
-                                :key="index"
-                                class="flex justify-between gap-8 text-sm text-primary"
-                            >
-                                <div class="text-base-content/80">{{ $t(mod.名称) }}</div>
-                                {{ format100r(mod[key]!) }}
+                                <div class="text-base-content/80">{{ $t(source.mod.名称) }}</div>
+                                {{ format100r(source.value) }}
                             </li>
                             <li
                                 v-for="(buff, index) in charBuild.buffs.filter(b => !['攻击', '增伤'].includes(key) && b[key])"

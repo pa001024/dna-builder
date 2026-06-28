@@ -42,6 +42,7 @@ export interface CharAttr {
     技能倍率加数: number
     技能倍率乘数: number
     技能倍率赋值: number
+    召唤物属性继承比例: number
     召唤物攻击速度: number
     召唤物范围: number
     召唤物伤害: number
@@ -550,6 +551,7 @@ export class CharBuild {
         let penetration = this.getTotalBonus("属性穿透")
         let imbalanceDamageBonus = this.getTotalBonus("失衡易伤")
         let skillAdd = this.getTotalBonus("技能倍率加数")
+        let summonAttrInheritRatio = 1 + this.getTotalBonus("召唤物属性继承比例")
         let summonAttackSpeed = this.getTotalBonus("召唤物攻击速度")
         let summonRange = this.getTotalBonus("召唤物范围")
         let summonDamage = this.getTotalBonus("召唤物伤害")
@@ -584,6 +586,7 @@ export class CharBuild {
             penetration += modAttributeBonus * this.getModsBonus(modsBySeries, "属性穿透")
             imbalanceDamageBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "失衡易伤")
             skillAdd += modAttributeBonus * this.getModsBonus(modsBySeries, "技能倍率加数")
+            summonAttrInheritRatio += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物属性继承比例")
             summonAttackSpeed += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物攻击速度")
             summonRange += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物范围")
             summonDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物伤害")
@@ -636,6 +639,7 @@ export class CharBuild {
             失衡易伤: imbalanceDamageBonus,
             技能倍率加数: skillAdd,
             技能倍率乘数: skillMultiplier,
+            召唤物属性继承比例: summonAttrInheritRatio,
             召唤物攻击速度: summonAttackSpeed,
             召唤物范围: summonRange,
             召唤物伤害: summonDamage,
@@ -969,16 +973,6 @@ export class CharBuild {
     }
 
     /**
-     * 判断属性是否是武器攻击类型细分属性。
-     * @param attribute 属性名
-     * @param prefix 武器前缀
-     * @returns 是否为细分属性
-     */
-    private isWeaponAttackTypeAttribute(attribute: string, prefix: string) {
-        return weaponAttackTypeMap.some(({ prefix: attackTypePrefix }) => attribute.startsWith(`${prefix}${attackTypePrefix}`))
-    }
-
-    /**
      * 获取当前武器伤害字段适用的细分加成。
      * @param weaponPrefix 武器前缀
      * @param baseName 技能名称
@@ -1037,19 +1031,17 @@ export class CharBuild {
         }
 
         // 添加MOD加成
-        if (prefix === "角色" || !attribute.startsWith(prefix) || this.isWeaponAttackTypeAttribute(attribute, prefix)) {
-            this.mods.forEach(mod => {
-                if (
-                    ["暴击", "暴伤", "触发", "攻速"].includes(attribute)
-                        ? mod.attrType !== "角色" && mod.attrType !== prefixScope
-                        : prefixScope && mod.attrType !== prefixScope
-                )
-                    return
-                if (typeof mod.addAttr[attribute] === "number") {
-                    bonus += mod.addAttr[attribute]
-                }
-            })
-        }
+        this.mods.forEach(mod => {
+            if (
+                ["暴击", "暴伤", "触发", "攻速"].includes(attribute)
+                    ? mod.attrType !== "角色" && mod.attrType !== prefixScope
+                    : prefixScope && mod.attrType !== prefixScope
+            )
+                return
+            if (typeof mod.addAttr[attribute] === "number") {
+                bonus += mod.addAttr[attribute]
+            }
+        })
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
@@ -1104,14 +1096,12 @@ export class CharBuild {
         }
 
         // 添加MOD加成
-        if (prefix === "角色" || !attribute.startsWith(prefix) || this.isWeaponAttackTypeAttribute(attribute, prefix)) {
-            this.mods.forEach(mod => {
-                if (prefixScope && mod.attrType !== prefixScope) return
-                if (typeof mod.addAttr[attribute] === "number") {
-                    bonus *= 1 + mod.addAttr[attribute]
-                }
-            })
-        }
+        this.mods.forEach(mod => {
+            if (prefixScope && mod.attrType !== prefixScope) return
+            if (typeof mod.addAttr[attribute] === "number") {
+                bonus *= 1 + mod.addAttr[attribute]
+            }
+        })
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
@@ -1564,6 +1554,19 @@ export class CharBuild {
         const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
         const getSkillAttr = (fieldName: string, base?: string) =>
             skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
+        const getSummonAttrs = (base?: string) => {
+            const key = base || this.baseName
+            const summonSkill = this.allSkills.find(skill => skill.名称 === key)
+            if (!summonSkill?.召唤物) return attrs
+            const summonRatio = attrs.召唤物属性继承比例
+            if (summonRatio === 1) return attrs
+            return {
+                ...attrs,
+                攻击: attrs.攻击 * summonRatio,
+                昂扬: attrs.昂扬 * summonRatio,
+                背水: attrs.背水 * summonRatio,
+            }
+        }
         const isDamageSkillField = (fieldName: string, base?: string) => {
             if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) return true
             const field = getSkillAttr(fieldName, base)
@@ -1581,6 +1584,7 @@ export class CharBuild {
             if (damageCache.has(cacheKey)) return damageCache.get(cacheKey)!
             const weapon = weaponsMap.get(key)
             const weaponAttr = getCalculatedWeaponAttr(base)
+            const skillAttrsContext = getSummonAttrs(base)
             const fieldDamageType = fieldName ? getSkillAttr(fieldName, base)?.伤害类型 : undefined
             const attackTypeDamageBonus = getWeaponAttackTypeBonus(base, fieldName, "增伤")
             const attackTypeIndependentDamageBonus = getWeaponAttackTypeBonus(base, fieldName, "独立增伤")
@@ -1600,7 +1604,7 @@ export class CharBuild {
                       )
                     : this.calculateSkillDamage(
                           {
-                              ...attrs,
+                              ...skillAttrsContext,
                               增伤: attrs.增伤 + attackTypeDamageBonus,
                               独立增伤: (1 + attrs.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
                           },
@@ -1709,9 +1713,10 @@ export class CharBuild {
          * @returns 计算结果
          */
         function evaluateSkill(fieldName: string, ns?: string) {
-            if (fieldName === "[攻击]") return (attrs.攻击 + getWeaponAttr("攻击", ns)) * getDef(ns)
-            else if (fieldName === "[防御]") return attrs.防御 * getDef(ns)
-            else if (fieldName === "[生命]") return attrs.生命 * getDef(ns)
+            const currentAttrs = getSummonAttrs(ns)
+            if (fieldName === "[攻击]") return (currentAttrs.攻击 + getWeaponAttr("攻击", ns)) * getDef(ns)
+            else if (fieldName === "[防御]") return currentAttrs.防御 * getDef(ns)
+            else if (fieldName === "[生命]") return currentAttrs.生命 * getDef(ns)
             const field = getSkillAttr(fieldName, ns)
 
             if (!field) return 0
@@ -1725,11 +1730,11 @@ export class CharBuild {
                 let baseValue = 0
                 if (!field.基础) {
                     const patk = getWeaponAttr("攻击", ns) || 0
-                    baseValue = attrs.攻击 + patk
+                    baseValue = currentAttrs.攻击 + patk
                 } else if (field.基础 === "生命") {
-                    baseValue = attrs.生命
+                    baseValue = currentAttrs.生命
                 } else if (field.基础 === "防御") {
-                    baseValue = attrs.防御
+                    baseValue = currentAttrs.防御
                 }
 
                 // 解析并计算表达式
