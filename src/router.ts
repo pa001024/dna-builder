@@ -19,7 +19,7 @@ import TimelineEditor from "./views/TimelineEditor.vue"
 import UserManager from "./views/UserManager.vue"
 
 let setMinSize = async (_w: number, _h: number) => {}
-;(async () => {
+;(() => {
     if (!env.isApp) return
     setMinSize = async (w: number, h: number) => {
         const win = getCurrentWindow()
@@ -101,7 +101,7 @@ const routes: readonly RouteRecordRaw[] = [
         component: () => import("./views/LevelUpCalculatorView.vue"),
         beforeEnter: () => setMinSize(600, 600),
     },
-    { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () => setMinSize(600, 600) },
+    // { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () => setMinSize(600, 600) },
     { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(800, 700) },
     {
         name: "chat",
@@ -169,7 +169,24 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "shop-redemption",
                 component: () => import("./admin/ShopRedemptionManagement.vue"),
             },
+            {
+                name: "admin-ranking",
+                path: "ranking",
+                component: () => import("./admin/RankingManagement.vue"),
+            },
         ],
+    },
+    {
+        name: "ranking-list",
+        path: "/ranking",
+        component: () => import("./views/RankingView.vue"),
+        beforeEnter: () => setMinSize(800, 700),
+    },
+    {
+        name: "ranking",
+        path: "/ranking/:id",
+        component: () => import("./views/RankingView.vue"),
+        beforeEnter: () => setMinSize(800, 700),
     },
     // 资料库路由
     {

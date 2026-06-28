@@ -10,18 +10,16 @@ import { buildQuery, createBuildMutation } from "@/api/graphql"
 import FullTooltip from "@/components/FullTooltip.vue"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
 import { env } from "@/env"
-import { formatProp } from "@/util"
+import { formatBigNumber, formatProp } from "@/util"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 import { CharSettings, createDefaultCharSettings, normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
     buffData,
-    buffMap,
     CharBuild,
     CharBuildTimeline,
     charData,
     charMap,
     LeveledBuff,
-    LeveledBuffHelper,
     LeveledChar,
     LeveledCharHelper,
     LeveledModHelper,
@@ -32,6 +30,8 @@ import {
     monsterMap,
     weaponData,
 } from "../data"
+import { createBuffFromSettings } from "../data/CharBuildHelper"
+import { dataPackHydrationKey, isDataPackHydrated } from "../data/data-pack-bridge"
 import type { SkillWeapon, Weapon } from "../data/data-types"
 import { waitForInitialLoad } from "../i18n"
 import { useInvStore } from "../store/inv"
@@ -48,9 +48,50 @@ const ui = useUIStore()
 const route = useRoute()
 const tourStore = useTourStore()
 const { t } = useTranslation()
+const dataPackTick = computed(() => dataPackHydrationKey.value)
+const isCharBuildReady = computed(() => {
+    dataPackTick.value
+    return isDataPackHydrated() && !!charMap.get(+route.params.charId)
+})
+
+/**
+ * 创建数据包未就绪时使用的空构筑占位对象。
+ * @returns 空构筑对象
+ */
+function createEmptyCharBuild() {
+    return {
+        char: {
+            id: 0,
+            名称: selectedChar.value || "",
+            属性: "",
+            技能: [],
+            加成: {},
+            精通: [],
+            url: "",
+        },
+        meleeWeapon: { url: "", _originalWeaponData: { icon: "" } },
+        rangedWeapon: { url: "", _originalWeaponData: { icon: "" } },
+        skillWeapon: undefined,
+        skillWeaponSkills: [],
+        selectedSkillType: "角色",
+        selectedSkill: undefined,
+        skills: [],
+        charSkills: [],
+        targetFunction: "",
+        isWeaponForgeEffective: () => true,
+        validateAST: () => "",
+        validateCustomVariable: () => "",
+        calculateAttributes: () => ({}),
+        calculate: () => 0,
+        getIdentifierNames: () => [],
+    } as unknown as CharBuild
+}
 
 // 路由
-const selectedChar = computed(() => charMap.get(+route.params.charId)?.名称 || "")
+const selectedChar = computed(() => {
+    dataPackTick.value
+    return charMap.get(+route.params.charId)?.名称 || ""
+})
 const charSettings = useCharSettings(selectedChar)
 const charProjectKey = computed(() => `project.${selectedChar.value}`)
 const charProject = useLocalStorage(charProjectKey, {
@@ -59,25 +100,31 @@ const charProject = useLocalStorage(charProjectKey, {
 })
 
 // 获取实际数据
-const charOptions = charData.map(char => ({
-    value: char.名称,
-    label: char.名称,
-    elm: char.属性,
-    icon: LeveledChar.url(char.icon),
-}))
-const modOptions = modData
-    .map(mod => ({
-        value: mod.id,
-        label: mod.名称,
-        quality: mod.品质,
-        type: mod.类型,
-        limit: mod.属性 || mod.限定,
-        ser: mod.系列,
-        count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
-        bufflv: inv.getBuffLv(mod.id),
-        lv: inv.getModLv(mod.id, mod.品质),
+const charOptions = computed(() => {
+    dataPackTick.value
+    return charData.map(char => ({
+        value: char.名称,
+        label: char.名称,
+        elm: char.属性,
+        icon: LeveledChar.url(char.icon),
     }))
-    .filter(mod => mod.count)
+})
+const modOptions = computed(() => {
+    dataPackTick.value
+    return modData
+        .map(mod => ({
+            value: mod.id,
+            label: mod.名称,
+            quality: mod.品质,
+            type: mod.类型,
+            limit: mod.属性 || mod.限定,
+            ser: mod.系列,
+            count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
+            bufflv: inv.getBuffLv(mod.id),
+            lv: inv.getModLv(mod.id, mod.品质),
+        }))
+        .filter(mod => mod.count)
+})
 
 /**
  * 游戏内魔之楔面板的线性返回顺序。
@@ -95,64 +142,78 @@ function reorderGameStyleModes<T>(modes: T[]): (T | null)[] {
 }
 const _buffOptions = reactive(
     buffData.map(buff => ({
-        value: LeveledBuffHelper.fromName(buff.名称),
+        value: createBuffFromSettings(buff.名称, buff.mx || 1, charSettings.value.customBuff),
         label: buff.名称,
         limit: buff.限定,
         description: buff.描述,
     }))
 )
-const buffOptions = computed(() =>
-    _buffOptions
+const buffOptions = computed(() => {
+    dataPackTick.value
+    return _buffOptions
         .filter(buff => !buff.limit || buff.limit === selectedChar.value || buff.limit === charBuild.value.char.属性)
         .map(v => {
             const b = charSettings.value.buffs.find(b => b[0] === v.label)
             const lv = b?.[1] ?? v.value.等级
             return {
-                value: new LeveledBuff(v.value._originalBuffData, lv),
+                value:
+                    v.label === "自定义BUFF"
+                        ? createBuffFromSettings(v.label, lv, charSettings.value.customBuff)
+                        : new LeveledBuff(v.value._originalBuffData, lv),
                 label: v.label,
                 limit: v.limit,
                 description: v.description,
                 lv,
             }
         })
-)
+})
 // 近战和远程武器选项
-const meleeWeaponOptions = weaponData
-    .filter(weapon => weapon.类型[0] === "近战")
-    .map(weapon => ({
-        value: weapon.名称,
-        label: weapon.名称,
-        type: weapon.类型[1],
-        icon: LeveledWeapon.url(weapon.icon),
-    }))
-const rangedWeaponOptions = weaponData
-    .filter(weapon => weapon.类型[0] === "远程")
-    .map(weapon => ({
-        value: weapon.名称,
-        label: weapon.名称,
-        type: weapon.类型[1],
-        icon: LeveledWeapon.url(weapon.icon),
-    }))
+const meleeWeaponOptions = computed(() => {
+    dataPackTick.value
+    return weaponData
+        .filter(weapon => weapon.类型[0] === "近战")
+        .map(weapon => ({
+            value: weapon.名称,
+            label: weapon.名称,
+            type: weapon.类型[1],
+            icon: LeveledWeapon.url(weapon.icon),
+        }))
+})
+const rangedWeaponOptions = computed(() => {
+    dataPackTick.value
+    return weaponData
+        .filter(weapon => weapon.类型[0] === "远程")
+        .map(weapon => ({
+            value: weapon.名称,
+            label: weapon.名称,
+            type: weapon.类型[1],
+            icon: LeveledWeapon.url(weapon.icon),
+        }))
+})
 
 // 状态变量
-const selectedCharMods = computed(() =>
-    charSettings.value.charMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
-)
-const selectedMeleeMods = computed(() =>
-    charSettings.value.meleeMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
-)
-const selectedRangedMods = computed(() =>
-    charSettings.value.rangedMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
-)
-const selectedSkillWeaponMods = computed(() =>
-    charSettings.value.skillWeaponMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
-)
-const selectedBuffs = computed(() =>
-    charSettings.value.buffs
+const selectedCharMods = computed(() => {
+    dataPackTick.value
+    return charSettings.value.charMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+})
+const selectedMeleeMods = computed(() => {
+    dataPackTick.value
+    return charSettings.value.meleeMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+})
+const selectedRangedMods = computed(() => {
+    dataPackTick.value
+    return charSettings.value.rangedMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+})
+const selectedSkillWeaponMods = computed(() => {
+    dataPackTick.value
+    return charSettings.value.skillWeaponMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+})
+const selectedBuffs = computed(() => {
+    dataPackTick.value
+    return charSettings.value.buffs
         .map(v => {
             try {
-                const b = LeveledBuffHelper.fromName(v[0], v[1])
-                return b
+                return createBuffFromSettings(v[0], v[1], charSettings.value.customBuff)
             } catch (error) {
                 console.error(error)
                 charSettings.value.buffs = charSettings.value.buffs.filter(b => b[0] !== v[0])
@@ -160,21 +221,21 @@ const selectedBuffs = computed(() =>
             }
         })
         .filter(b => b !== null)
-)
+})
 
 const team1Options = computed(() =>
     [{ value: "-", label: "无", elm: "", icon: `/imgs/1.png` }].concat(
-        charOptions.filter(char => char.label !== selectedChar.value && char.label !== charSettings.value.team2)
+        charOptions.value.filter(char => char.label !== selectedChar.value && char.label !== charSettings.value.team2)
     )
 )
 const team2Options = computed(() =>
     [{ value: "-", label: "无", elm: "", icon: `/imgs/1.png` }].concat(
-        charOptions.filter(char => char.label !== selectedChar.value && char.label !== charSettings.value.team1)
+        charOptions.value.filter(char => char.label !== selectedChar.value && char.label !== charSettings.value.team1)
     )
 )
 
 const teamWeaponOptions = computed(() =>
-    [{ value: "-", label: "无", type: "", icon: `/imgs/1.png` }].concat(meleeWeaponOptions.concat(rangedWeaponOptions))
+    [{ value: "-", label: "无", type: "", icon: `/imgs/1.png` }].concat(meleeWeaponOptions.value.concat(rangedWeaponOptions.value))
 )
 const hpPercentOptions = [1, ...Array.from({ length: 20 }, (_, i) => (i + 1) * 5)]
 const resonanceGainOptions = [0, 0.5, 1, 1.5, 2, 2.5, 3]
@@ -190,6 +251,10 @@ const getInlineActions = () => {
 
 // 创建CharBuild实例
 const charBuild = computed(() => {
+    dataPackTick.value
+    if (!isCharBuildReady.value) {
+        return createEmptyCharBuild()
+    }
     try {
         const char = LeveledCharHelper.fromId(selectedChar.value, charSettings.value.charLevel)
         const melee = LeveledWeaponHelper.fromId(
@@ -230,8 +295,7 @@ const charBuild = computed(() => {
         return b
     } catch {
         localStorage.removeItem(`build.${selectedChar.value}`)
-        location.reload()
-        return {} as CharBuild
+        return createEmptyCharBuild()
     }
 })
 
@@ -691,10 +755,13 @@ onMounted(async () => {
 
 // 更新CharBuild实例
 function updateCharBuild() {
+    if (!isCharBuildReady.value) {
+        return
+    }
     if (!monsterMap.has(charSettings.value.enemyId)) {
         charSettings.value.enemyId = 130
     }
-    if (!charSettings.value.baseName) {
+    if (!charSettings.value.baseName && charBuild.value.char.技能[0]) {
         charSettings.value.baseName = charBuild.value.char.技能[0].名称
     }
     pad(charSettings.value.charMods, 8, null)
@@ -715,43 +782,31 @@ function updateCharBuild() {
         return arr
     }
 }
-updateCharBuild()
-
-/**
- * 将当前角色的自定义 BUFF 配置同步到运行时 buffMap。
- * @param customBuff 自定义 BUFF 配置
- * @returns void
- */
-function syncCustomBuff(customBuff: [string, number][]) {
-    const buffObj = {
-        名称: "自定义BUFF",
-        描述: "自行填写",
-    } as any
-    customBuff.forEach(([property, value]) => {
-        buffObj[property] = value
-    })
-    buffMap.set("自定义BUFF", buffObj)
-
-    const index = _buffOptions.findIndex(buff => buff.label === "自定义BUFF")
-    if (index > -1) {
-        _buffOptions[index].value = LeveledBuffHelper.fromName("自定义BUFF")
-    }
-    charSettings.value.buffs = [...charSettings.value.buffs]
-}
-
 watch(
-    () => charSettings.value.customBuff,
-    customBuff => {
-        syncCustomBuff(customBuff)
+    () => isCharBuildReady.value,
+    ready => {
+        if (ready) {
+            updateCharBuild()
+        }
     },
-    {
-        deep: true,
-        immediate: true,
-    }
+    { immediate: true }
 )
 
 // 计算属性
 const attributes = computed(() => charBuild.value.calculateAttributes())
+
+/**
+ * 计算自定义变量表达式的当前结果。
+ * @param variable 自定义变量配置
+ * @returns 格式化后的计算结果
+ */
+function getCustomVariableResult(variable: [string, string]) {
+    if (!variable[0] || !variable[1] || charBuild.value.validateCustomVariable(variable[0], variable[1])) return "-"
+
+    const value = charBuild.value.evaluateAST(variable[1])
+    if (!Number.isFinite(value)) return "0"
+    return `${+value.toFixed(4)}`
+}
 
 //#region Tour
 const tour = ref<typeof VTour>()
@@ -1512,13 +1567,18 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         placeholder="变量名"
                                         @change="updateCharBuild"
                                     />
-                                    <input
-                                        v-model="variable[1]"
-                                        type="text"
-                                        class="input input-sm input-bordered"
-                                        placeholder="表达式"
-                                        @change="updateCharBuild"
-                                    />
+                                    <FullTooltip side="top">
+                                        <template #tooltip>
+                                            <span class="font-mono">{{ getCustomVariableResult(variable) }}</span>
+                                        </template>
+                                        <input
+                                            v-model="variable[1]"
+                                            type="text"
+                                            class="input input-sm input-bordered w-full"
+                                            placeholder="表达式"
+                                            @change="updateCharBuild"
+                                        />
+                                    </FullTooltip>
                                     <button class="btn btn-sm btn-ghost btn-square" @click="removeCustomVariable(index)">
                                         <Icon icon="codicon:chrome-close" />
                                     </button>
@@ -1577,9 +1637,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             </div>
                             <div v-else data-tour="damage-result" class="flex justify-between items-center p-1">
                                 <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
-                                <div class="text-primary font-bold text-md font-orbitron">
-                                    {{ charBuild.calculate() }}
-                                </div>
+                                <DamageShow :value="charBuild.calculate()" />
                             </div>
                         </div>
                     </div>
@@ -1706,8 +1764,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">
                                             {{ $t("生命") }}
                                         </div>
-                                        <div class="text-primary font-bold text-right">
-                                            {{ charBuild.enemy.hp }}
+                                        <div class="text-primary font-bold text-right" :title="`${charBuild.enemy.hp}`">
+                                            {{ formatBigNumber(charBuild.enemy.hp) }}
                                         </div>
                                     </div>
                                     <div class="flex-1">
@@ -1719,11 +1777,14 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">
+                                        <div
+                                            class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap"
+                                            :title="`${charBuild.enemy.es || 0}`"
+                                        >
                                             {{ $t("护盾") }}
                                         </div>
                                         <div class="text-primary font-bold text-right">
-                                            {{ charBuild.enemy.es || 0 }}
+                                            {{ formatBigNumber(charBuild.enemy.es || 0) }}
                                         </div>
                                     </div>
                                 </div>

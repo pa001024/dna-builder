@@ -33,7 +33,7 @@ const book = computed(() => booksData.find(item => item.id === bookId.value))
         </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">
-            <div class="text-base-content/70">未找到读物</div>
+            <div class="text-base-content/70">{{ $t("book-detail.notFound") }}</div>
         </div>
     </div>
 </template>

@@ -231,6 +231,14 @@ describe("LeveledBuff类测试", () => {
         expect((助战50攻2级 as any).攻击).toBe(1.0)
     })
 
+    it("Buff克隆后应保留动态倍率", () => {
+        const 助战50攻2级 = new LeveledBuff("助战50攻", 2)
+        const cloned = 助战50攻2级.clone()
+
+        expect(cloned.ratio).toBeCloseTo(助战50攻2级.ratio, 10)
+        expect((cloned as any).攻击).toBeCloseTo((助战50攻2级 as any).攻击, 10)
+    })
+
     // 测试4：设置超出上限的等级（应该被限制在mx）
     it("Buff等级被正确限制在mx", () => {
         const 助战50攻 = new LeveledBuff("助战50攻", 3) // mx=2
@@ -491,6 +499,31 @@ describe("LeveledWeapon类测试", () => {
 
         expect(simpleProps.背水).toBeCloseTo(0.26, 10)
         expect(simpleProps.攻速).toBeCloseTo(0.3, 10)
+    })
+
+    it("近战武器的基础攻速默认应为1", () => {
+        const 铸铁者 = new LeveledWeapon(10302)
+
+        expect(铸铁者.射速 ?? 1).toBe(1)
+    })
+
+    it("BUFF的近战攻速应进入武器属性汇总", () => {
+        const 暴虐 = new LeveledBuff({
+            名称: "暴虐",
+            描述: "击败敌人后，获得1层攻击速度提高30.0%，持续10.0秒，最多叠加2层。",
+            近战攻速: 0.3,
+        })
+        const weapon = new LeveledWeapon(10302)
+        weapon.buff = 暴虐
+        weapon.updateProperties()
+
+        expect(weapon.getSimpleProperties().近战攻速).toBeCloseTo(0.3, 10)
+    })
+
+    it("MOD effect的近战攻速应可作为武器面板来源读取", () => {
+        const 暴虐mod = new LeveledMod(42311)
+        expect(暴虐mod["近战攻速"]).toBeCloseTo(0.6, 10)
+        expect(暴虐mod.攻速).toBeUndefined()
     })
 
     // 测试11：测试不存在的武器名称

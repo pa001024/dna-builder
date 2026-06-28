@@ -1,10 +1,12 @@
 <script lang="ts" setup>
+import { t } from "i18next"
 import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
 import { useRouter } from "vue-router"
-import { Faction, LeveledMonsterHelper } from "@/data"
+import { LeveledMonsterHelper } from "@/data"
 import type { Monster } from "@/data/d/monster.data"
 import { type ExtractionTreasureMechanism, extractionTreasureMechanismData, type SoloTreasureDropEntry } from "@/data/d/solotreasure.data"
+import { Faction } from "@/data/game-const"
 import { LeveledMonster } from "@/data/leveled/LeveledMonster"
 import { formatBigNumber } from "@/util"
 import { getMonsterType } from "@/utils/monster-utils"
@@ -113,10 +115,10 @@ const monsterAvatarUrl = computed(() => {
  */
 function getFactionName(faction: number | undefined): string {
     if (faction === undefined) {
-        return "其他"
+        return t("other")
     }
 
-    return Faction[faction] || `阵营${faction}`
+    return Faction[faction] || t("monster.faction", { faction })
 }
 
 /**
@@ -188,7 +190,7 @@ function getSoloTreasureRewardText(): string {
     return soloTreasureRewards.value
         .map(reward => {
             if (reward.KillScore !== undefined) {
-                return `积分 ${reward.KillScore}`
+                return t("monster.killScore", { score: reward.KillScore })
             }
 
             // if (reward.DropMechanismId !== undefined) {
@@ -196,7 +198,7 @@ function getSoloTreasureRewardText(): string {
             // }
 
             if (reward.BoxDropRate !== undefined) {
-                return `掉率 ${Math.round(reward.BoxDropRate * 100)}%`
+                return t("monster.dropRate", { rate: Math.round(reward.BoxDropRate * 100) })
             }
 
             return "-"
@@ -261,19 +263,19 @@ function handleClickMonsterCard(): void {
 
         <div class="mt-2 grid grid-cols-2 gap-1.5 text-[11px] sm:grid-cols-4">
             <div class="rounded bg-base-300/90 px-1.5 py-1">
-                <div class="text-[10px] text-base-content/65">生命</div>
+                <div class="text-[10px] text-base-content/65">{{ $t("生命") }}</div>
                 <div class="font-semibold text-error">{{ formatBigNumber(displayMonster.hp) }}</div>
             </div>
             <div class="rounded bg-base-300/90 px-1.5 py-1">
-                <div class="text-[10px] text-base-content/65">防御</div>
+                <div class="text-[10px] text-base-content/65">{{ $t("防御") }}</div>
                 <div class="font-semibold text-success">{{ formatBigNumber(displayMonster.def) }}</div>
             </div>
             <div class="rounded bg-base-300/90 px-1.5 py-1">
-                <div class="text-[10px] text-base-content/65">护盾</div>
+                <div class="text-[10px] text-base-content/65">{{ $t("护盾") }}</div>
                 <div class="font-semibold text-info">{{ formatBigNumber(displayMonster.es || 0) }}</div>
             </div>
             <div class="rounded bg-base-300/90 px-1.5 py-1">
-                <div class="text-[10px] text-base-content/65">有效生命</div>
+                <div class="text-[10px] text-base-content/65">{{ $t("有效生命") }}</div>
                 <div class="font-semibold text-accent">{{ formatBigNumber(effectiveHealth) }}</div>
             </div>
         </div>

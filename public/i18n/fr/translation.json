@@ -2128,7 +2128,7 @@
     "技能范围": "Portée de compétence",
     "技能开启剑气伤害": "Dégâts de l’onde tranchante",
     "技能耐久": "Durée de compétence",
-    "技能伤害": "Dégâts de compétence",
+    "技能伤害": "Dégâts de compétence infligés",
     "技能伤害提高": "Augmentation des Dégâts de compétence",
     "技能伤害提高效果持续时间": "Durée de l’effet d’augmentation des Dégâts de compétence",
     "技能释放伤害": "Dégâts de compétence",
@@ -3464,7 +3464,7 @@
     "取得最高难度“梦魇残声·雪国的野兽”的胜利，未受到生命值伤害且未召唤协战同伴": "Dans [Échos nocturnes : La Bête née du blizzard] en difficulté maximale, remporter le combat sans perdre de PV ni invoquer de Partenaires de combat",
     "取得最高难度“梦魇残声·羽化者”的胜利，且未召唤协战同伴": "Remporter [Échos nocturnes : L’Éclose] en difficulté maximale, sans invoquer de Partenaires de combat",
     "取得最高难度“梦魇残声·羽化者”的胜利，未受到伤害且未召唤协战同伴": "Remporter [Échos nocturnes : L’Éclose] en difficulté maximale, sans perdre de PV ni invoquer de Partenaires de combat",
-    "取消": "Annulation",
+    "取消": "Annuler",
     "全部": "Tout",
     "全部类型": "Tous types",
     "全村的希望Ⅰ": "L’espoir du peuple I",
@@ -4141,6 +4141,7 @@
     "通用鱼饵": "Appât universel",
     "同福饭馆店小二": "Serveur du Restaurant Tongfu",
     "同类相吸": "Appât sélectif",
+    "同律": "Consonance",
     "同律近战": "Arme de Consonance de mêlée",
     "同律远程": "Arme de Consonance à distance",
     "同时持有10只突破至3阶的魔灵": "Posséder 10 Géniemon ayant atteint la phase 3 d’ascension ",
@@ -5128,7 +5129,7 @@
     "增幅激化器": "Catalyseur d’amplification",
     "增加连击点数": "Augmentation des points de Combo",
     "增加要塞维修人力的申请": "Demande de renfort pour l’entretien de la forteresse",
-    "增伤": "Bonus de dégâts",
+    "增伤": "Dégâts infligés",
     "增速": "Accélération",
     "增益": "Bonus",
     "詹姆斯": "James",
@@ -5300,8 +5301,8 @@
     "朱红泪滴": "Larme vermillon",
     "朱辉散射": "Dispersion cramoisie",
     "朱朴": "Zhu Pu",
-    "珠纹扁扁鲨": "Requin perligrane",
-    "珠纹扁扁鲨·异种": "Requin perligrane variant",
+    "珠纹扁扁鲨": "Raie perligrane",
+    "珠纹扁扁鲨·异种": "Raie perligrane variante",
     "诸葛明": "Zhuge Ming",
     "诸葛陶": "Zhuge Tao",
     "诸星耀时": "Quand brillent les étoiles",
@@ -5465,14 +5466,79 @@
     "坐下": "S’asseoir",
     "坐下看剧": "S’asseoir pour regarder la pièce",
     "abyss-dungeon-detail": {
+        "notFound": "Donjon de l’abîme introuvable",
         "title": "Détail du donjon des Abysses"
     },
     "abyss-dungeon-list": {
         "title": "Liste des Abysses"
     },
     "abyss-usage": {
+        "allLevels": "Tous les niveaux",
+        "assistant": "Assistant d’équipe",
+        "assistantDesc": "Consulter les compositions courantes des personnages",
+        "available": "Disponible",
+        "buildUploadDataFailed": "Échec de la génération des données d’envoi de l’Abîme",
+        "createdAt": "Créé le",
         "desc": "Statistiques des compositions et des armes/personnages des Abysses",
-        "title": "Utilisation des Abysses"
+        "emptyUploadResult": "Le résultat de l’envoi est vide",
+        "export": "Exporter",
+        "exportFailed": "Échec de l’exportation des soumissions d’Abîme",
+        "exportSuccess": "Soumissions d’Abîme exportées",
+        "level": "Niveau",
+        "levelDistribution": "Répartition des niveaux",
+        "loadDefaultRoleFailed": "Échec du chargement des informations du personnage par défaut",
+        "loadLatestRoleInfoFailed": "Échec du chargement des dernières informations du personnage",
+        "loadStatsFailed": "Échec du chargement des statistiques de l’Abîme",
+        "loginFirst": "Veuillez d’abord vous connecter",
+        "mainChar": "Personnage principal",
+        "mainCharId": "ID du personnage principal",
+        "mainOnly": "Principal uniquement",
+        "meleeWeapon": "Arme de mêlée",
+        "meleeWeaponId": "ID d’arme de mêlée",
+        "missingUid": "UID manquant",
+        "mostUsedLineup": "Composition la plus utilisée",
+        "mostUsedLineupDesc": "La composition avec le plus grand nombre de sorties",
+        "noExportableSubmissions": "Aucune soumission d’Abîme exportable",
+        "noResult": "Aucun résultat",
+        "noUploadData": "Aucune donnée d’Abîme à envoyer",
+        "pet": "Familier",
+        "petId": "ID du familier",
+        "rangedWeapon": "Arme à distance",
+        "rangedWeaponId": "ID d’arme à distance",
+        "refresh": "Rafraîchir",
+        "roleParticipation": "Participation des personnages",
+        "roleSourceDistribution": "Répartition des sources des personnages",
+        "roleType": "Type de personnage",
+        "roleUsage": "Utilisation des personnages",
+        "seasonId": "ID de saison",
+        "selectRole": "Sélectionner un personnage",
+        "sheetRole": "Participation des personnages",
+        "sheetSubmission": "Soumission",
+        "sheetWeapon": "Participation des armes",
+        "skillLevel": "Niveau de compétence",
+        "stars": "Étoiles",
+        "submissionsFrom": "Cette page est basée sur les données de {{count}} joueurs. Taux d’utilisation = nombre de joueurs ayant utilisé ce personnage ÷ nombre de joueurs qui le possèdent",
+        "submitCount": "{{count}} soumissions",
+        "submitId": "ID de soumission",
+        "support1": "Support 1",
+        "support1Id": "ID du support 1",
+        "support2": "Support 2",
+        "support2Id": "ID du support 2",
+        "supportWeapon1": "Arme de support 1",
+        "supportWeapon1Id": "ID de l’arme de support 1",
+        "supportWeapon2": "Arme de support 2",
+        "supportWeapon2Id": "ID de l’arme de support 2",
+        "title": "Utilisation des Abysses",
+        "uidSha256": "UID SHA256",
+        "updatedAt": "Mis à jour le",
+        "upload": "Envoyer",
+        "uploadFailed": "Échec de l’envoi des données d’Abîme",
+        "uploadSuccess": "Données d’Abîme envoyées",
+        "uploadSuccessWithReward": "Données d’Abîme envoyées, EXP +{{exp}}, points +{{points}}",
+        "weaponForgeDistribution": "Répartition de la forge des armes",
+        "weaponId": "ID de l’arme",
+        "weaponName": "Nom de l’arme",
+        "weaponParticipation": "Participation des armes"
     },
     "accessory": {
         "category": "Catégorie",
@@ -5540,7 +5606,14 @@
         "unnamedAchievement": "Succès sans nom"
     },
     "achievement-detail": {
-        "title": "Détails des succès"
+        "basicInfo": "Informations de base",
+        "category": "Catégorie",
+        "desc": "Description",
+        "name": "Nom",
+        "quality": "Qualité",
+        "reward": "Récompense",
+        "title": "Détails des succès",
+        "version": "Version"
     },
     "achievement-list": {
         "desc": "Suivi de la progression des succès du jeu",
@@ -5553,11 +5626,13 @@
         "end_suffix": "restant",
         "ended_suffix": "il y a",
         "load_error": "Échec du chargement des données d'activité",
+        "local": "Local",
         "moling_completed": "Écho de cette période terminé",
         "moling_desc": "Se rafraîchit tous les 3 jours",
         "moling_refresh": "Rafraîchissement d'Écho",
         "moling_refresh_next": "Prochain rafraîchissement d'Écho",
         "no_activities": "Aucune activité",
+        "remote": "Distant",
         "start": "Début",
         "status_ended": "Terminé",
         "status_ongoing": "En cours",
@@ -5570,23 +5645,218 @@
         "title": "Administration"
     },
     "ai": {
+        "ai": "IA",
         "commandInputPlaceholder": "Envoyez un message ou saisissez/selectionnez une commande. Le collage ou glisser-deposer d'images est pris en charge.",
         "desc": "Interagissez avec les jeux à l'aide d'agents IA",
         "inputMessage": "Entrez un message, appuyez sur Entrée pour envoyer",
+        "loading": "Chargement...",
         "mcp_manual_stop_message": "Le serveur MCP doit etre arrete manuellement.\n\nTerminez le processus 'dna_mcp_server.exe' dans le Gestionnaire des taches.\n\nOuvrir le Gestionnaire des taches maintenant ?",
-        "title": "Agent IA"
+        "mcpAppOnly": "Application de bureau uniquement",
+        "mcpNoResponse": "Le serveur MCP ne répond pas",
+        "mcpNotStarted": "Le serveur MCP n’a pas démarré",
+        "mcpRunning": "Le serveur MCP est en cours d’exécution",
+        "mcpStartedButNoResponse": "Le serveur MCP a démarré mais ne répond pas",
+        "mcpStartFailed": "Échec du démarrage du serveur MCP",
+        "mcpStarting": "Démarrage du serveur MCP...",
+        "mcpStopFailed": "Échec de l’arrêt du serveur MCP",
+        "mcpStopped": "Le serveur MCP est arrêté",
+        "mcpStopping": "Arrêt du serveur MCP...",
+        "mcpTitle": "Serveur MCP",
+        "newConversation": "Nouvelle conversation",
+        "recentConversations": "Conversations récentes",
+        "startMcp": "Démarrer le serveur MCP",
+        "startMcpAdminTooltip": "Démarrer le serveur MCP avec les privilèges administrateur",
+        "stopMcp": "Arrêter",
+        "title": "Agent IA",
+        "user": "Utilisateur"
+    },
+    "ai-chat": {
+        "assistantNotInitialized": "L’assistant IA n’est pas initialisé. Veuillez d’abord configurer les paramètres IA.",
+        "automationContinuePrompt": "Continuez le flux de montage automatisé inachevé de la ronde précédente (tour {{round}}).\nExigences :\n1. Continuez d’appeler les outils nécessaires pour faire avancer le flux.\n2. Une fois terminé, affichez {{doneTag}} sur une ligne séparée.\n3. Si ce n’est pas terminé, affichez {{continueTag}} sur une ligne séparée.",
+        "automationIncompleteWarning": "⚠️ Le flux n’a pas été confirmé comme terminé dans les tours attendus. Vous pouvez envoyer \"continue\" pour reprendre.",
+        "automationPrompt": "Vous êtes maintenant en \"mode d’exécution d’automatisation du montage\".\nVeuillez respecter strictement :\n1. Vous devez appeler des outils pour effectuer de vraies modifications de configuration, pas seulement donner des conseils textuels.\n2. Si vous calculez la meilleure configuration, privilégiez autoBuild et terminez en écrivant la configuration avec apply=true.\n3. Pour les MODs/armes à effet, appelez d’abord queryEffectConfig pour confirmer l’état, puis utilisez setEffectConfig si nécessaire avant autoBuild.\n4. Après avoir terminé toute l’automatisation de cette ronde, affichez {{doneTag}} sur une ligne finale séparée.\n5. Si une autre ronde est nécessaire, affichez {{continueTag}} sur une ligne finale séparée.\n\nDemande de l’utilisateur :\n{{userMessage}}",
+        "automationRoundTag": "[Ronde d’automatisation {{round}}]",
+        "clearChatFailed": "Échec du nettoyage de l’historique de conversation de l’assistant de montage",
+        "error": {
+            "apiKey": "❌ Clé API invalide ou manquante\n\nVeuillez vérifier :\n1. La clé API dans les paramètres est correcte\n2. Vous disposez d’un quota API suffisant\n\nVous pouvez reconfigurer la clé API dans les paramètres.",
+            "generic": "Désolé, une erreur est survenue lors du traitement de la requête.",
+            "network": "❌ Échec de la connexion réseau\n\nVeuillez vérifier :\n1. Que la connexion réseau fonctionne\n2. Que le service API est disponible\n3. Que les paramètres du proxy sont corrects",
+            "rateLimit": "❌ Trop de requêtes\n\nLa limite d’appels API a été atteinte. Veuillez patienter puis réessayer.",
+            "requestFailed": "❌ La requête a échoué\n\n{{message}}",
+            "sdk": "❌ Problème de compatibilité SDK\n\nVeuillez actualiser la page et réessayer. Si le problème persiste, videz le cache du navigateur et redémarrez l’application.",
+            "timeout": "❌ Délai de la requête dépassé\n\nLa réponse a mis trop de temps. Veuillez vérifier votre connexion réseau ou simplifier votre question.",
+            "unknown": "❌ Une erreur inconnue est survenue\n\nVeuillez consulter la console pour plus de détails, ou essayez d’actualiser la page."
+        },
+        "initProxyAgent": "Initialiser l’agent IA en utilisant le proxy du serveur",
+        "initProxyAgentFailed": "Échec de l’initialisation de l’agent IA avec le proxy :",
+        "initUserAgent": "Initialiser l’agent IA avec la clé API configurée par l’utilisateur",
+        "initUserAgentFailed": "Échec de l’initialisation de l’agent IA avec la configuration utilisateur :",
+        "inputPlaceholder": "Posez-moi n’importe quelle question sur le montage...",
+        "loadChatFailed": "Échec du chargement de l’historique de conversation de l’assistant de montage",
+        "noConfigMessage": "Le service IA n’est pas configuré.\n\nVeuillez choisir l’une des options suivantes pour configurer l’IA :\n1. Configurer une clé API dans les paramètres (recommandé)\n2. Contacter un administrateur pour configurer l’IA côté serveur\n\nÉtat actuel :\n- Clé API utilisateur : {{hasUserConfig}}",
+        "reasoning": "Raisonnement",
+        "retry": "Réessayer",
+        "saveChatFailed": "Échec de l’enregistrement de l’historique de conversation de l’assistant de montage",
+        "saveChatFailedFallback": "Échec de l’enregistrement de l’historique de conversation de l’assistant de montage (solution de secours)",
+        "sendMessageFailed": "Échec de l’envoi du message",
+        "tip": "Astuce : vous pouvez demander par exemple « Comment équiper X ? » ou « Quel montage avec Y ? »",
+        "title": "Assistant de montage",
+        "welcome": "Bonjour ! Je suis l’assistant de montage. Je peux vous aider à optimiser les configurations des personnages.\n\nPersonnage actuel : {{charName}} ({{charElm}})\n\nVous pouvez me demander :\n- Comment équiper {{charName}} pour obtenir le plus de dégâts MOD ?\n- Quels MODs sont disponibles pour {{charElm}} ?\n- Comment augmenter les dégâts critiques de {{charName}} ?\n- Quel montage de MOD maximise les dégâts de {{charName}} avec Fushu\n\nPar défaut, je lance le flux complet de montage et j’essaie d’appliquer la configuration directement."
+    },
+    "app": {
+        "initScriptHotkeysFailed": "Échec de l’enregistrement des raccourcis de script au démarrage :",
+        "syncLaunchAtStartupFailed": "Échec de la synchronisation de l’état de lancement au démarrage :",
+        "title": "Application"
+    },
+    "ast-help": {
+        "apply": "Appliquer l’expression",
+        "astPlaceholder": "Affiche l’arborescence AST après la saisie d’une expression",
+        "astTitle": "Arborescence AST",
+        "clear": "Effacer",
+        "examples": {
+            "baseStats": "Statistiques de base",
+            "complex": "Expression complexe",
+            "critDamage": "Dégâts critiques",
+            "expectedDamage": "Dégâts attendus",
+            "functions": "Utilisation des fonctions",
+            "namespace": "Espace de noms",
+            "specialValue": "Valeurs spéciales"
+        },
+        "examplesTitle": "Exemples d’expressions",
+        "functions": {
+            "ceil": "Arrondir au supérieur",
+            "floor": "Arrondir à l’inférieur",
+            "hp": "Calcule le multiplicateur d’effet basé sur les PV (x est le ratio de PV de 0 à 1)",
+            "log": "Logarithme naturel",
+            "max": "Valeur maximale",
+            "min": "Valeur minimale",
+            "or": "OU logique",
+            "power": "Puissance"
+        },
+        "functionsTitle": "Référence des fonctions",
+        "inputLabel": "Saisie de l’expression",
+        "inputPlaceholder": "Saisissez une expression, par exemple : Attaque + Défense",
+        "macrosTitle": "Macros intégrées",
+        "members": {
+            "crit": "Dégâts critiques",
+            "critTrigger": "Critique et déclenché",
+            "n": "Ne pas calculer le multiplicateur d’effet basé sur les PV",
+            "noCrit": "Dégâts non critiques",
+            "noCritNoTrigger": "Non critique et non déclenché",
+            "noTrigger": "Dégâts non déclenchés",
+            "noTriggerCrit": "Critique et non déclenché",
+            "trigger": "Dégâts déclenchés",
+            "triggerNoCrit": "Non critique et déclenché"
+        },
+        "membersTitle": "Référence des types de dégâts",
+        "namespacesTitle": "Référence des espaces de noms",
+        "operators": {
+            "add": "Addition",
+            "div": "Division",
+            "floordiv": "Division entière",
+            "mod": "Modulo",
+            "mul": "Multiplication",
+            "sub": "Soustraction"
+        },
+        "operatorsTitle": "Référence des opérateurs",
+        "parseError": "Erreur d’analyse de l’expression",
+        "syntaxDesc": "Les expressions servent à calculer les dégâts, les valeurs de statistiques, etc. La syntaxe suivante est prise en charge :",
+        "syntaxItems": {
+            "function": {
+                "desc": "min(), max(), floor(), ceil(), or(), log(), power()",
+                "label": "Fonctions"
+            },
+            "member": {
+                "desc": "Utilisez . pour accéder aux types de dégâts, comme .Crit et .NonCrit",
+                "label": "Accès aux membres"
+            },
+            "namespace": {
+                "desc": "Utilisez :: pour accéder à un espace de noms, comme Icarus::Damage",
+                "label": "Espace de noms"
+            },
+            "number": {
+                "desc": "Saisissez directement un nombre, par exemple 100 ou 1.5",
+                "label": "Nombre"
+            },
+            "operator": {
+                "desc": "+, -, *, /, %, //",
+                "label": "Opérateurs"
+            },
+            "property": {
+                "desc": "Noms de statistiques de personnage, comme Attaque, Défense et PV",
+                "label": "Propriété"
+            },
+            "skill": {
+                "desc": "Champs de dégâts de compétence, comme les dégâts de [Illusion]",
+                "label": "Compétence"
+            },
+            "special": {
+                "desc": "Fixé à 100 % et non प्रभावितé par la puissance. Utilisé pour les multiplicateurs de compétence personnalisés, par exemple [Attaque] * 1,2 pour simuler 120 %, ainsi que [Défense] et [PV].",
+                "label": "Valeurs spéciales"
+            }
+        },
+        "syntaxTitle": "Syntaxe de l’expression",
+        "title": "Aide sur l’expression"
     },
     "autobuild": {
         "charMods": "MOD de personnage",
+        "desc": "Construit automatiquement la configuration MOD optimale selon la configuration MOD actuelle",
+        "includeMelee": "Remplacer automatiquement le corps-à-corps",
+        "includeRanged": "Remplacer automatiquement le distance",
+        "includeTypes": "Inclure les types de MOD",
+        "log": "Journal",
         "meleeMods": "MOD de mêlée",
+        "preserveTypes": "Conserver les MOD actuels",
         "rangedMods": "MOD à distance",
-        "skillWeaponMods": "MOD d'arme de compétence"
+        "skillWeaponMods": "MOD d'arme de compétence",
+        "useInv": "Utiliser l’inventaire de l’utilisateur"
     },
     "book-detail": {
-        "title": "Détail du livre"
+        "countSuffix": "Nombre d’entrées : {{count}}",
+        "entryCount": "Nombre d’entrées",
+        "mechanismId": "ID du mécanisme",
+        "notFound": "Livre introuvable",
+        "point": "Point",
+        "region": "Région",
+        "subRegion": "Sous-région",
+        "summary": "Résumé",
+        "title": "Détail du livre",
+        "treasurePoint": "Point de trésor",
+        "treasurePointSuffix": "Point de trésor",
+        "type": {
+            "drop": "Ramassage en exploration",
+            "read": "Obtention directe",
+            "treasureChest": "Coffre au trésor",
+            "unknown": "Type inconnu"
+        }
     },
     "book-list": {
-        "title": "Liste des livres"
+        "allRegions": "Toutes les régions",
+        "enableFullTextSearch": "Activer la recherche dans le texte intégral (pinyin non pris en charge)",
+        "searchPlaceholder": "Rechercher par ID/nom/description/texte du livre...",
+        "searchPlaceholderPinyin": "Rechercher par ID/nom/description du livre (pinyin pris en charge)...",
+        "title": "Liste des livres",
+        "totalCount": "{{count}} livres au total"
+    },
+    "box-drop": {
+        "boxMaximum": "Total maximal",
+        "boxPerDay": "Maximum journalier",
+        "consume": "Coût",
+        "draw": "Tirage",
+        "draw1": "Tirer 1 fois",
+        "draw10": "Tirer 10 fois",
+        "lastResult": "Dernier résultat",
+        "limit": "Limite",
+        "quantity": "Qté",
+        "rewardCount": "{{count}} objets",
+        "rewardIndex": "Groupe de récompenses",
+        "rewardList": "Liste des récompenses",
+        "rewardSet": "Lot de récompenses",
+        "simulation": "Simulation",
+        "simulationCount": "Nombre de simulations",
+        "statistics": "Statistiques",
+        "title": "Tirage",
+        "totalCapacity": "Capacité totale"
     },
     "build-compare": {
         "additional_buff_list": "Liste de BUFF supplémentaires",
@@ -5716,6 +5986,7 @@
         "shield": "Bouclier",
         "shot_damage": "Dégâts de projectiles",
         "simulator": "Simulation",
+        "skill": "Consonance",
         "skill_level": "Niveau de compétence",
         "skill_weapon": "Compétence/Arme",
         "skill_weapon_mod_config": "Configuration MOD d'arme de compétence",
@@ -5754,14 +6025,36 @@
         "title": "Détails du personnage"
     },
     "char-list": {
-        "title": "Liste de personnages"
+        "empty": "Aucun personnage correspondant trouvé",
+        "searchPlaceholder": "Rechercher par nom de personnage, alias, faction (pinyin pris en charge)...",
+        "tabs": {
+            "all": "Tous",
+            "control": "Contrôle",
+            "defense": "Défense",
+            "heal": "Soin",
+            "homologyWeapon": "Arme d’homologie",
+            "maxHp": "PV max",
+            "output": "Dégâts",
+            "sanityRegen": "Régénération de santé mentale",
+            "shield": "Bouclier",
+            "skillDamage": "Dégâts de compétence",
+            "summon": "Invocation",
+            "support": "Soutien",
+            "weaponDamage": "Dégâts d’arme"
+        },
+        "title": "Liste de personnages",
+        "totalSuffix": "personnages",
+        "unreleasedHint": "Le contenu non publié peut changer"
     },
     "chat": {
         "addRoom": "Créer une nouvelle salle",
+        "ai": "IA",
         "autoJoin": "Rejoindre automatiquement",
         "block": "Bloquer",
+        "blockSuccess": "{{name}} bloqué",
         "cancelReply": "Annuler la réponse",
         "chatPlaceholder": "Entrez le contenu du chat",
+        "confirm": "Confirmer",
         "copy": "Copier",
         "deleteRoomConfirm": "Êtes-vous sûr de vouloir supprimer cette salle ?",
         "deleteRoomFailed": "Suppression échouée",
@@ -5770,11 +6063,14 @@
         "edited": "(Modifié)",
         "follow": "Suivre",
         "hello": "Bonjour à tous",
+        "imagePreview": "[Image]",
         "insertImage": "Envoyer une image",
         "joinFailed": "Échec de la jonction",
         "joinFailedTip": "La salle est peut-être pleine",
         "keyboardShortcut": "Raccourci pour rejoindre | Clic droit pour configurer",
         "keyboardShortcutSetting": "Paramètres de raccourcis clavier",
+        "latest": "Messages récents",
+        "messagePreview": "[Message]",
         "micOn": "Activer le microphone",
         "needLogin": "Connexion requise pour la fonction de chat",
         "newRoomBanner": "Personne n'a encore parlé, soyez le premier !",
@@ -5792,17 +6088,51 @@
         "send": "Envoyer",
         "sendTask": "Envoyer UID (Presse-papiers) | Clic droit pour envoyer automatiquement",
         "sound": "Son de notification",
+        "system": "Système",
         "title": "Chat",
         "unblock": "Débloquer",
+        "unblockSuccess": "{{name}} débloqué",
         "unlimited": "Illimité",
+        "user": "Moi",
         "you": "Vous"
+    },
+    "cloudgame": {
+        "closeWindowFailed": "Échec de la fermeture de la fenêtre de cloud gaming",
+        "openWindowFailed": "Échec de l’ouverture de la fenêtre de cloud gaming"
     },
     "common": {
         "delete": "Supprimer"
     },
     "counter": {
+        "action": {
+            "count": "Compter {{amount}}",
+            "reset": "Réinitialiser"
+        },
+        "addTrigger": "Ajouter un déclencheur",
+        "create": "Créer un compteur",
+        "defaultName": "Compteur {{index}}",
+        "defaults": {
+            "dungeonMoling": "Moling de donjon",
+            "endlessDungeonMoling": "Moling de donjon infini",
+            "fishingBonus": "Bonus de pêche"
+        },
+        "deleteCounter": "Supprimer le compteur",
         "desc": "Compteurs",
-        "title": "Compteur"
+        "dragTrigger": "Faire glisser le déclencheur",
+        "expandSettings": "Développer les paramètres du compteur",
+        "hotkeyPlaceholder": "Définir un raccourci",
+        "maxValue": "Valeur max",
+        "moving": "En déplacement",
+        "resetAll": "Tout réinitialiser",
+        "resetCounter": "Réinitialiser le compteur",
+        "resetCron": "Cycle de réinitialisation",
+        "title": "Compteur",
+        "triggers": "Déclencheurs",
+        "unlimited": "Illimité"
+    },
+    "damage": {
+        "desc": "Décompose les formules de dégâts de CharBuild étape par étape et prend en charge les remplacements manuels",
+        "title": "Décomposition des dégâts"
     },
     "damageResult": {
         "critDamage": {
@@ -5853,12 +6183,17 @@
         "event_desc": "Voir la liste des événements et les détails des événements",
         "fish": "Pêche",
         "fish_desc": "Calcul détaillé du rendement des points de pêche",
+        "forge": "Armes de calamité",
+        "forge_desc": "Niveaux et quêtes de fusion des armes de calamité",
+        "hard_boss": "Écho cauchemar",
         "hardboss": "Restes du Cauchemar",
         "hardboss_desc": "Voir les informations sur les restes du Cauchemar et les récompenses",
-        "impr": "",
-        "impr_desc": "",
+        "impr": "Impression",
+        "impr_desc": "Afficher les informations d’augmentation d’Impression pour les quêtes, PNJ et quêtes d’envoi",
         "map": "Carte",
         "map_desc": "Voir les marqueurs de carte",
+        "mapLocal": "Carte des Moling",
+        "mapLocal_desc": "Points d’apparition détaillés des Moling",
         "mod": "Mod",
         "mod_desc": "Voir les informations et attributs du mod",
         "monster": "Monstre",
@@ -5878,6 +6213,7 @@
         "reputation_desc": "Voir les niveaux de réputation régionale et les informations de commission",
         "resource": "Ressource",
         "resource_desc": "Voir les informations et icônes de ressource",
+        "role": "Personnage",
         "shop": "Boutique",
         "shop_desc": "Voir les informations sur les articles de la boutique",
         "solotreasure": "Tournoi de l’Encens",
@@ -5908,7 +6244,36 @@
     },
     "dna-home": {
         "desc": "Informations sur le jeu/Check-in/Parcourir les posts",
+        "lastUpdate": "Dernière mise à jour",
+        "loadMineFailed": "Échec du chargement des informations utilisateur",
+        "refreshCurrentPage": "Actualiser la page actuelle",
+        "tabs": {
+            "announcement": "Annonces",
+            "flowQuery": "Requête de flux",
+            "forum": "Forum",
+            "gameInfo": "Infos du jeu",
+            "signIn": "Connexion"
+        },
         "title": "Jiaojiaojiao"
+    },
+    "dna-post": {
+        "browse": "Vues",
+        "cancelFollow": "Ne plus suivre",
+        "comment": "Commentaires",
+        "commentPublished": "Commentaire publié",
+        "commentPublishFailed": "Échec de la publication du commentaire",
+        "commentRequired": "Veuillez saisir un commentaire",
+        "commentsTitle": "{{count}} commentaires",
+        "favorite": "Favoris",
+        "featured": "À la une",
+        "follow": "Suivre",
+        "like": "J’aime",
+        "loadMoreCommentsFailed": "Échec du chargement des commentaires supplémentaires",
+        "loginFirst": "Veuillez vous connecter d’abord",
+        "official": "Officiel",
+        "postDetailFailed": "Échec du chargement des détails du post",
+        "postDetailTitle": "Détails du post",
+        "userAvatar": "Avatar de l’utilisateur"
     },
     "dna-post-detail": {
         "title": "Détails du post"
@@ -5938,6 +6303,22 @@
     "dna-user": {
         "title": "Informations utilisateur"
     },
+    "dna-user-mine": {
+        "coins": "Pièces",
+        "comments": "Commentaires",
+        "fans": "Abonnés",
+        "favorites": "Favoris",
+        "follow": "Abonnements",
+        "gameInfoFailed": "Échec du chargement des infos du jeu",
+        "gameInfoTab": "Infos du jeu",
+        "likes": "J’aime reçus",
+        "loginFirst": "Veuillez vous connecter d’abord",
+        "noPosts": "Aucun post pour le moment",
+        "posts": "Posts",
+        "postTab": "Posts",
+        "title": "Profil",
+        "userInfoFailed": "Échec du chargement des infos utilisateur"
+    },
     "dna-weapon-detail": {
         "title": "Détails de l'arme"
     },
@@ -5945,18 +6326,66 @@
     "DNA动了Ⅰ": "Mon ADN s’active I",
     "DNA动了Ⅱ": "Mon ADN s’active II",
     "DNA动了Ⅲ": "Mon ADN s’active III",
+    "dps-view": {
+        "buildId": "ID de build",
+        "createdAt": "Créé le",
+        "details": "Détails",
+        "empty": "Aucune donnée DPS pour le moment",
+        "rankList": "Liste DPS des personnages",
+        "rankTitle": "Classement DPS des personnages",
+        "searchPlaceholder": "Rechercher des personnages...",
+        "sortByCreatedAt": "Trier par date de création",
+        "sortByDpsValue": "Trier par DPS",
+        "tierCount": "{{count}} personnages",
+        "tierList": "Tier list",
+        "timelineId": "ID de chronologie"
+    },
     "draft-list": {
         "title": "Liste de dessins"
     },
     "dungeon-detail": {
-        "title": "Copier les détails"
+        "allMonster": "Monstres normaux",
+        "allReward": "Récompenses",
+        "count": "{{count}} types au total",
+        "currentMonsterLevelBase": "Niveau de base des monstres actuel Lv.{{level}} (+{{step}} par vague, max {{max}})",
+        "emptyMonster": "Aucune donnée de monstre",
+        "emptyReward": "Aucune donnée de récompense",
+        "endlessDungeonLevelControlledByWave": "Le niveau du donjon infini est contrôlé par le curseur de vague ci-dessus",
+        "endlessWave": "Vague infinie",
+        "groupMonster": "Monstres groupés",
+        "groupMonsterCount": "Membres du groupe ({{count}} types)",
+        "groupReward": "Groupe de récompenses",
+        "monster": "Monstre",
+        "monsterCount": "Monstre : {{count}} types",
+        "monsterWave": "Vague de monstres",
+        "noWaveData": "Aucune donnée de vague",
+        "pumpkingTitle": "Boîte citrouille",
+        "refreshRange": "Plage de rafraîchissement ({{platform}})",
+        "refreshRangeDisplay": "Affichage de la plage de rafraîchissement",
+        "rewardList": "Liste des récompenses",
+        "specialMonster": "Monstres spéciaux",
+        "specialReward": "Récompenses spéciales",
+        "title": "Copier les détails",
+        "totalWaveReward": "Récompense totale des vagues (vagues 1 à {{count}})",
+        "wave": "Vague"
     },
     "dungeon-list": {
-        "title": "Liste de replicas"
+        "level": "Niveau",
+        "monster": "Monstre",
+        "nightHandbook": "Manuel de la nuit",
+        "reward": "Récompense",
+        "searchPlaceholder": "Rechercher par ID/nom/description/niveau/récompense du donjon (pinyin pris en charge)...",
+        "special": "Spécial",
+        "title": "Liste de replicas",
+        "totalCount": "{{count}} donjons au total",
+        "type": "Type"
     },
     "errorBoundary": {
         "retry": "Réessayer",
         "title": "Erreur de rendu du composant"
+    },
+    "event": {
+        "rule": "Règle"
     },
     "event-detail": {
         "title": "Détails de l'événement"
@@ -5988,6 +6417,7 @@
         "all_files": "Tous les fichiers",
         "beforeGame": "Exécuter avant le lancement",
         "char": "Personnage",
+        "confirmUninstall": "Cela supprimera tous les fichiers et sous-dossiers dans EM et Engine du dossier du jeu. Continuer ?",
         "custom": "Personnalisé",
         "customTypeNameExists": "Le nom du type personnalisé existe déjà",
         "delete": "Supprimer",
@@ -6032,6 +6462,9 @@
         "selectPath": "Sélectionner un chemin",
         "setModFailed": "Échec de la configuration du MOD : {{ error }}",
         "title": "Lanceur de jeu",
+        "uninstall": "Désinstaller",
+        "uninstallFailed": "Échec de la désinstallation : {{ error }}",
+        "uninstallSuccess": "Désinstallation terminée",
         "weapon": "Arme"
     },
     "game-update": {
@@ -6194,6 +6627,18 @@
         "welcome": "Bienvenue sur DNA Builder"
     },
     "Home, Sweet Home": "Home, Sweet Home",
+    "impr": {
+        "all": "Tous",
+        "count": "{{count}} impressions",
+        "region": "Région",
+        "searchPlaceholder": "Rechercher des entrées d’impression",
+        "source": "Source",
+        "sourceDynquest": "Quête d’expédition",
+        "sourceNpc": "PNJ",
+        "sourceQuest": "Quête",
+        "title": "Réputation régionale",
+        "type": "Cinq stats"
+    },
     "interact测试": "interact测试",
     "inventory": {
         "desc": "Personnalisez votre équipement Wedge et arme",
@@ -6209,13 +6654,24 @@
         "btn_unpin_window": "Désépingler la fenêtre"
     },
     "map-detail": {
+        "notFound": "Carte introuvable",
         "title": "Carte"
     },
     "map-list": {
         "title": "Liste des cartes"
     },
+    "map-list-page": {
+        "searchPlaceholder": "Rechercher par ID/nom/description de carte...",
+        "showList": "Afficher la liste des cartes",
+        "title": "Liste des cartes",
+        "totalCount": "{{count}} cartes au total"
+    },
     "map-local": {
         "title": "Carte"
+    },
+    "misc": {
+        "all_files": "Tous les fichiers",
+        "exec_files": "Fichiers exécutables"
     },
     "mod-detail": {
         "title": "Détails du Wedge du Diable"
@@ -6226,18 +6682,175 @@
     "modEditor": {
         "inputCode": "Veuillez entrer le code du personnage ou de l'arme"
     },
+    "monster": {
+        "dropInfo": "Infos de butin",
+        "dropRate": "Taux de butin {{rate}} %",
+        "faction": "Faction {{faction}}",
+        "killScore": "Score {{score}}",
+        "mechanism": "Mécanisme {{id}}"
+    },
     "monster-detail": {
-        "title": "Détails du monstre"
+        "appearingAbyss": "Apparaît dans l’abysse",
+        "appearingDungeon": "Apparaît dans le donjon",
+        "attack": "Attaque",
+        "badgeTitle": "Labyrinthe",
+        "defense": "Défense",
+        "defenseDamageReductionRate": "Taux de réduction des dégâts par la défense",
+        "drop": "Butin",
+        "dropMechanismId": "ID du mécanisme",
+        "dropMonsterTag": "Étiquette de monstre",
+        "dropRate": "Taux de butin du coffre",
+        "effectiveHealth": "PV effectifs",
+        "factionOther": "Autre",
+        "factionPrefix": "Faction",
+        "growthPreview": "Aperçu de progression des niveaux",
+        "hp": "PV",
+        "killScore": "Score d’élimination",
+        "level": "Niveau",
+        "levelDamageReductionRate": "Taux de réduction des dégâts par niveau",
+        "monsterTagInfo": "Infos du chef",
+        "shield": "Bouclier",
+        "showDetail": "Voir les détails",
+        "showEightHp": "PV x8",
+        "stance": "Posture",
+        "title": "Détails du monstre",
+        "value": "Valeur"
     },
     "monster-list": {
         "title": "Liste des monstres"
     },
     "monster-tag-detail": {
+        "bonus": "Bonus",
+        "description": "Description",
+        "meterSuffix": "m",
+        "params": "Paramètres",
+        "relatedMonsters": "Monstres associés",
+        "sameTags": "Étiquettes similaires",
         "title": "Détails du commandant"
     },
     "more": {
         "desc": "Plus de fonctionnalités",
         "title": "Plus"
+    },
+    "node-editor": {
+        "addCalc": {
+            "description": "Calcule la somme des valeurs d’entrée",
+            "result": "Résultat",
+            "title": "Addition",
+            "waiting": "En attente de saisie..."
+        },
+        "astExpression": {
+            "description": "Valider les expressions AST",
+            "expression": "Expression",
+            "expressionPlaceholder": "Dégâts",
+            "missingCore": "Nœud de calcul principal manquant",
+            "result": "Résultat",
+            "title": "Expression AST",
+            "unknownError": "Erreur inconnue",
+            "waiting": "En attente de saisie..."
+        },
+        "attrCalc": {
+            "base": "Statistiques de base",
+            "other": "Autres statistiques",
+            "title": "Calcul des attributs",
+            "waiting": "En attente de saisie..."
+        },
+        "buffInput": {
+            "addBuffSlot": "Ajouter un emplacement de buff",
+            "description": "Rechercher et sélectionner des buffs",
+            "search": "Rechercher (pinyin pris en charge)",
+            "searchPlaceholder": "Saisissez le nom du buff ou son pinyin",
+            "selectBuff": "Sélectionner un buff",
+            "title": "Entrée de buff"
+        },
+        "coreCalc": {
+            "currentAvailable": "Disponible actuellement",
+            "defaultSkill": "Sélectionnez la compétence par défaut :",
+            "errorInfo": "Informations sur l’erreur :",
+            "missingInputs": "Entrées requises manquantes :",
+            "selectSkill": "Veuillez sélectionner une compétence",
+            "waiting": "En attente de saisie"
+        },
+        "enemyInput": {
+            "attack": "Attaque",
+            "attributes": "Attributs de l’ennemi (niveau actuel)",
+            "defense": "Défense",
+            "enemy": "Ennemi",
+            "enemyLevel": "Niveau de l’ennemi",
+            "enemyResistance": "Résistance de l’ennemi",
+            "hp": "PV",
+            "stance": "Posture"
+        },
+        "expressionCalc": {
+            "description": "Évalue une expression personnalisée",
+            "expression": "Expression",
+            "expressionPlaceholder": "par ex. : a + b * c",
+            "inputCount": "Nombre d’entrées :",
+            "result": "Résultat",
+            "title": "Calcul d’expression"
+        },
+        "fullCalc": {
+            "description": "Calcul complet des dégâts basé sur le nœud de calcul principal",
+            "result": "Résultat",
+            "title": "Calcul complet",
+            "waiting": "En attente de saisie..."
+        },
+        "meleeWeaponInput": {
+            "chooseLevel": "Choisir le niveau",
+            "chooseWeapon": "Choisir une arme de mêlée",
+            "description": "Sélection d’arme de mêlée",
+            "refineLevel": "Niveau de raffinement",
+            "title": "Entrée d’arme de mêlée",
+            "weapon": "Arme de mêlée",
+            "weaponLevel": "Niveau de l’arme"
+        },
+        "modInput": {
+            "addModSlot": "Ajouter un emplacement de MOD",
+            "chooseLevel": "Choisir le niveau",
+            "chooseMod": "Choisir un MOD",
+            "element": "Élément du MOD",
+            "type": "Type de MOD"
+        },
+        "multiplyCalc": {
+            "description": "Calcule le produit des valeurs d’entrée",
+            "result": "Résultat",
+            "title": "Multiplication",
+            "waiting": "En attente de saisie..."
+        },
+        "rangedWeaponInput": {
+            "chooseLevel": "Choisir le niveau",
+            "chooseWeapon": "Choisir une arme à distance",
+            "description": "Sélection d’arme à distance",
+            "refineLevel": "Niveau de raffinement",
+            "title": "Entrée d’arme à distance",
+            "weapon": "Arme à distance",
+            "weaponLevel": "Niveau de l’arme"
+        },
+        "skillDmg": {
+            "description": "Calculer les dégâts de compétence",
+            "expectedDamage": "Dégâts attendus",
+            "noHpDamage": "Dégâts sans facteur de PV",
+            "result": "Résultat des dégâts",
+            "waiting": "En attente de saisie..."
+        },
+        "weaponAttr": {
+            "attack": "Attaque",
+            "attackSpeed": "Vitesse d’attaque",
+            "critDamage": "Dégâts critiques",
+            "critRate": "Taux critique",
+            "multiShot": "Tir multiple",
+            "result": "Attributs de l’arme",
+            "triggerRate": "Taux de déclenchement",
+            "waiting": "En attente de saisie..."
+        },
+        "weaponDmg": {
+            "description": "Calculer les dégâts de l’arme",
+            "expectedDamage": "Dégâts attendus",
+            "higherCrit": "Crit plus élevé",
+            "lowerCrit": "Crit plus faible",
+            "result": "Dégâts de l’arme",
+            "waiting": "En attente de saisie..."
+        }
     },
     "notfound": {
         "back_home": "Retour à l'accueil",
@@ -6249,6 +6862,7 @@
     "npc-list": {
         "title": "Liste des PNJ"
     },
+    "other": "Autre",
     "partytopic-detail": {
         "title": "Détails des Chroniques"
     },
@@ -6288,6 +6902,62 @@
     "pet-list": {
         "title": "Liste des Géniemon"
     },
+    "points-mall": {
+        "accountSettings": "Paramètres du compte",
+        "all": "Tout",
+        "availability": "Disponibilité",
+        "balance": "Solde de points",
+        "bubblePreview": "Aperçu de bulle",
+        "confirmRedeem": "Confirmer l’échange",
+        "confirmRedeemDesc": "Dépenser {{cost}} points pour échanger « {{name}} » ?",
+        "currentAppearance": "Apparence actuelle",
+        "default": "Par défaut",
+        "equipAfterRedeem": "Veuillez d’abord échanger cet article",
+        "equipFailed": "Échec de l’application de l’apparence",
+        "equipFailedRetry": "Échec de l’application de l’apparence, veuillez réessayer plus tard",
+        "equipSuccess": "Apparence appliquée",
+        "fetchProductsError": "Échec de la récupération des articles, veuillez réessayer plus tard",
+        "fetchProductsFailed": "Échec de la récupération des articles de la boutique de points",
+        "fetchSummaryError": "Échec de la récupération des informations de points, veuillez réessayer plus tard",
+        "fetchSummaryFailed": "Échec de la récupération du résumé de la boutique de points",
+        "instructionLogin": "Vous devez être connecté pour échanger ou équiper des articles.",
+        "instructionNameEffect": "Les effets de nom modifient l’affichage de votre pseudo dans le chat.",
+        "instructionTitle": "Instructions",
+        "instructionTitleBadge": "Les titres apparaissent à côté de votre pseudo et représentent des succès ou un statut.",
+        "insufficientPoints": "Points insuffisants",
+        "loginFirst": "Veuillez d’abord vous connecter à votre compte DNA Builder",
+        "loginHint": "Une fois connecté, vous pouvez consulter vos points et échanger des apparences.",
+        "nameEffect": "Effet de nom",
+        "noPreview": "Aucun aperçu disponible",
+        "noProducts": "Aucun article échangeable",
+        "notInRedeemWindow": "Cet article n’est actuellement pas dans la période d’échange",
+        "notOwned": "Non possédé",
+        "other": "Autre",
+        "owned": "Possédé",
+        "points": "Points",
+        "pointsHint": "Les points peuvent être utilisés pour échanger des titres, des effets de nom et d’autres apparences.",
+        "preview": "Aperçu",
+        "previewHint": "L’aperçu suit la sélection actuelle",
+        "previewNameCard": "Effet de pseudo affiché après équipement",
+        "previewTitle": "Titre affiché après équipement",
+        "price": "Prix",
+        "productList": "Liste des produits",
+        "redeem": "Échanger",
+        "redeemFailed": "Échec de l’échange",
+        "redeemFailedRetry": "Échec de l’échange, veuillez réessayer plus tard",
+        "redeemSuccess": "Échange réussi",
+        "refresh": "Actualiser",
+        "rewardType": {
+            "nameCard": "Effet de nom",
+            "title": "Titre"
+        },
+        "summaryNotReady": "Impossible de récupérer les informations de points pour le moment, veuillez réessayer plus tard",
+        "title": "Boutique de points",
+        "use": "Utiliser",
+        "used": "Utilisé",
+        "useHint": "Vous pouvez échanger des articles dans la liste des produits et cliquer sur « Utiliser » pour changer d’apparence.",
+        "userFallback": "Utilisateur"
+    },
     "questchain-detail": {
         "title": "Détails de la chaîne de quêtes"
     },
@@ -6296,6 +6966,10 @@
     },
     "raid-rank": {
         "title": "Récompenses de classement"
+    },
+    "ranking": {
+        "desc": "Classement",
+        "title": "Classement"
     },
     "reputation": {
         "accumulatedExp": "EXP cumulée",
@@ -6336,12 +7010,21 @@
     },
     "resource": {
         "background": "Contexte",
+        "book": "Livre",
         "description": "Description",
+        "fish": "Poisson",
         "icon": "Icône",
         "id": "ID",
+        "mapPointCount": "points",
+        "mapPoints": "Points de la carte",
+        "mapPointsJump": "Points de la carte (cliquer pour accéder)",
         "name": "Nom",
+        "optionGroup": "Groupe d’options",
+        "packReward": "Récompense de pack",
         "rarity": "Rareté",
         "searchPlaceholder": "Rechercher par ID ou nom de ressource (pinyin pris en charge)...",
+        "selectReward": "Récompense au choix",
+        "selectRewardTag": "Au choix",
         "source": "Source",
         "title": "Ressources"
     },
@@ -6432,6 +7115,7 @@
         "no_output": "Aucune sortie",
         "no_script_selected": "Aucun script selectionne",
         "no_status": "Aucun statut",
+        "no_steps_config_hint": "Aucune étape configurée. Cliquez sur le bouton ci-dessous pour en ajouter une.",
         "online": "En ligne",
         "open_and_run_local_first": "Ouvrez et executez d'abord un script local",
         "open_directory": "Ouvrir le dossier",
@@ -6527,21 +7211,52 @@
         "appearance": "Apparence",
         "cancel": "Annuler",
         "confirm": "Confirmer",
+        "current": "Actuel",
+        "customSource": "Personnalisé",
         "darkTheme": "Thème sombre",
+        "dataPackManagement": "Gestion des paquets de données",
+        "dataPackSourceAddress": "Adresse source du paquet de données",
         "desc": "Paramètres personnalisés de l'application",
+        "download": "Télécharger",
+        "downloaded": "Téléchargé",
+        "female": "Femme",
+        "initScriptHotkeysAtStartup": "Initialiser les raccourcis de script au démarrage",
         "lang": "Langue",
         "launchAtStartup": "Lancement au démarrage",
         "launchAtStartupTip": "Démarre automatiquement l'application de bureau après votre connexion",
         "lightTheme": "Thème clair",
+        "male": "Homme",
+        "missingDragDataPack": "Aucun paquet de données déplaçable trouvé :",
+        "noAvailableVersions": "Aucune version disponible",
+        "noDescription": "Aucune description",
         "noModelAvailable": "Aucun modèle disponible",
+        "noSafeModeQuestion": "Aucune question n’est disponible pour vérification pour le moment",
+        "officialSource": "Source officielle",
         "other": "Autres paramètres",
+        "prepareDragDataPackFailed": "Échec de la préparation du paquet de données déplaçable",
+        "protagonistGender1": "Genre du protagoniste 1",
+        "protagonistGender2": "Genre du protagoniste 2",
+        "protagonistName1": "Nom du protagoniste 1",
+        "protagonistName2": "Nom du protagoniste 2",
+        "refresh": "Actualiser",
         "reset": "Réinitialiser tous les paramètres",
         "resetConfirm": "Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?",
         "resetTip": "Si une erreur apparaît sur la page, essayez de la réinitialiser.",
+        "safeMode": "Mode sécurisé",
+        "safeModeAnswerWrong": "Mauvaise réponse, le mode sécurisé reste activé",
+        "safeModeHint": "Vous en savez trop",
         "showAIChat": "Afficher l'assistant de montage IA",
+        "storyText": "Texte de l’histoire",
         "theme": "Thème",
         "title": "Paramètres",
         "uiScale": "Mise à l'échelle UI",
+        "uninstall": "Désinstaller",
+        "uninstallDataPack": "Désinstaller le paquet de données",
+        "uninstallDataPackConfirm": "Voulez-vous vraiment désinstaller {{version}} ?",
+        "unknown": "Inconnu",
+        "updateLaunchAtStartupFailed": "Échec de la mise à jour du paramètre de lancement au démarrage",
+        "use": "Utiliser",
+        "versionList": "Liste des versions",
         "windowTrasnparent": "Transparence de la fenêtre",
         "windowTrasnparentTip": "Les fenêtres et les surfaces affichent une translucidité",
         "winMaterial": "Matériau de fenêtre"
@@ -6563,18 +7278,71 @@
     },
     "TalkObject_Test": "TalkObject_Test",
     "timeline": {
+        "addTrack": "Ajouter une piste",
+        "addTrackError": "Erreur lors de l’ajout de la piste :",
+        "addTrackFailed": "Échec de l’ajout de la piste, veuillez réessayer",
+        "addTrackLimitReached": "Limite de pistes atteinte ({{max}}), impossible d’ajouter d’autres pistes !",
+        "addTrackNameTypeError": "Échec de l’ajout de la piste : le nom de la piste doit être une chaîne",
+        "attributeImpact": "Impact des attributs",
+        "brushMode": "Mode pinceau",
+        "buffTooltip": "Le BUFF n’affecte que les compétences sur la même piste ou au-dessus",
+        "buffTrack": "BUFF",
+        "cleanupDragStateError": "Erreur lors du nettoyage de l’état de glisser :",
+        "clear": "Effacer",
+        "clearItemSelectionError": "Erreur lors du nettoyage de la sélection de l’élément :",
+        "clearSelectionError": "Erreur lors du nettoyage de l’état de sélection :",
         "click_to_load": "Cliquer pour charger",
+        "damagePlaceholder": "Dégâts",
+        "deleteItemError": "Erreur lors de la suppression de l’élément :",
+        "deleteItemNotFound": "L’élément à supprimer n’a pas été trouvé lors de la confirmation",
+        "deleteMode": "Mode suppression",
+        "deleteSelectedItemsError": "Erreur lors de la suppression des éléments sélectionnés :",
         "desc": "Personnalisez la logique de combat du personnage (combat d'axe)",
+        "dragAdjustDuration": "Faire glisser pour ajuster la durée",
+        "dragAdjustStartTime": "Faire glisser pour ajuster l’heure de début",
         "export_json": "Exporter JSON",
+        "generateSample": "Générer un exemple",
+        "handleTrackClickError": "Erreur lors du traitement du clic sur la piste :",
+        "healthCurve": "Courbe de PV",
+        "healthLabel": "PV",
+        "horizontalScrollError": "Erreur lors du défilement horizontal :",
         "import_json": "Charger JSON",
+        "importJsonFailed": "Échec de l’importation du JSON",
+        "invalidTrackIndex": "Indice de piste invalide :",
         "load_save": "Charger/Enregistrer",
         "new_scheme": "Nouveau schema",
         "overwrite_confirm_message": "La timeline {{name}} existe deja. Voulez-vous l'ecraser ?",
         "overwrite_confirm_title": "Confirmer l'ecrasement",
+        "removeLastTrackNotAllowed": "Impossible de supprimer la dernière piste !",
+        "removeTrackError": "Erreur lors de la suppression de la piste :",
+        "removeTrackFailed": "Échec de la suppression de la piste, veuillez réessayer",
+        "removeTrackInvalidIndex": "Échec de la suppression de la piste : indice de piste invalide",
         "rename": "Renommer",
+        "renameTrackError": "Erreur lors du renommage de la piste :",
+        "renameTrackFailed": "Échec du renommage de la piste, veuillez réessayer",
+        "renameTrackIndexRangeError": "Échec du renommage de la piste : l’indice de piste est hors limites",
+        "renameTrackIndexTypeError": "Échec du renommage de la piste : l’indice de piste doit être un nombre",
+        "renameTrackNameTypeError": "Échec du renommage de la piste : le nom de la piste doit être une chaîne",
+        "resetView": "Réinitialiser la vue",
         "save": "Enregistrer",
         "save_scheme": "Enregistrer le schema",
-        "title": "Chronologie"
+        "selectMode": "Mode de sélection",
+        "skillNotFound": "Compétence {{base}} introuvable",
+        "skillPrefix": "Compétence",
+        "skillTrack": "Compétence",
+        "stopPropagationError": "Erreur lors de l’arrêt de la propagation de l’événement :",
+        "timeLabel": "Temps",
+        "timelineNameConflictsWithSkill": "Le nom de la chronologie ne peut pas être identique à celui d’une compétence",
+        "timelineNameInvalidChars": "Le nom de la chronologie ne peut pas contenir des symboles comme ()+-*/.",
+        "title": "Chronologie",
+        "trackNameDefault": "Piste {{number}}",
+        "trackNameDuplicate": "Une piste portant le même nom existe déjà !",
+        "trackNameExists": "Le nom de piste « {{name}} » existe déjà, veuillez utiliser un autre nom !",
+        "trackNameRequired": "Le nom de la piste ne peut pas être vide !",
+        "trackNameTooLong": "Le nom de la piste ne peut pas dépasser 30 caractères !",
+        "updateDragPreviewError": "Erreur lors de la mise à jour de la position d’aperçu du glisser :",
+        "zoomIn": "Agrandir",
+        "zoomOut": "Rétrécir"
     },
     "todo": {
         "completeFailed": "Echec du marquage comme termine",
@@ -6679,6 +7447,11 @@
         "desc": "Lire et exporter les fichiers pak",
         "title": "Dépaqueter"
     },
+    "update": {
+        "checkFailed": "Échec de la vérification des mises à jour :",
+        "downloadInstallFailed": "Échec du téléchargement et de l’installation de la mise à jour :",
+        "noUpdateAvailable": "Aucune mise à jour disponible"
+    },
     "updater": {
         "newVersionFound": "Nouvelle version v{{version}} trouvée",
         "newVersionMessage": "\n\n{{body}}\n\nVoulez-vous télécharger et installer automatiquement la mise à jour ?",
@@ -6692,6 +7465,45 @@
         "updateFailed": "Échec de la mise à jour",
         "updating": "Mise à jour en cours..."
     },
+    "view": {
+        "all": "Tout",
+        "allModules": "Tous les modules",
+        "contentAuthorizationDesc": "Sauf indication contraire, le contenu textuel du site est sous licence CC BY-SA 3.0, et les images et autres médias suivent leurs licences d’origine.",
+        "contentAuthorizationDesc2": "Lorsque vous utilisez le contenu de ce site, vous devez fournir une attribution appropriée, inclure un lien vers cette licence et indiquer si vous avez modifié l’œuvre originale ; vous ne devez pas laisser entendre que ce site vous approuve ou approuve votre utilisation.",
+        "contentAuthorizationTitle": "Licence du contenu",
+        "contentCount": "Sections de contenu",
+        "databaseEntryCount": "Entrées de la base de données",
+        "featuredEntry": "Entrée en vedette",
+        "globalSearchEntry": "Entrée de recherche globale",
+        "matchCount": "{{count}} résultats correspondants",
+        "moduleCount": "{{count}} modules sélectionnés",
+        "noResult": "Aucun contenu correspondant trouvé. Essayez des mots-clés comme personnages, cartes, quêtes, donjons ou monstres.",
+        "noResultEntries": "Aucune entrée de base de données correspondante trouvée",
+        "placeholder": "Rechercher dans les modules sélectionnés...",
+        "searchScope": "Portée de recherche actuelle : {{scope}}",
+        "section": {
+            "build": {
+                "badge": "Build",
+                "description": "Concentrez-vous sur la progression des personnages, les combinaisons d’équipement et les matériaux d’amélioration pour trouver rapidement les ressources clés du build.",
+                "title": "Build et progression"
+            },
+            "challenge": {
+                "badge": "Défi",
+                "description": "Pour les contenus ciblés comme les boss, monstres, succès et titres, afin de faciliter les recherches continues autour des objectifs de défi.",
+                "title": "Défi et collection"
+            },
+            "explore": {
+                "badge": "Explorer",
+                "description": "Regroupe les informations de région, donjon, points d’apparition et collecte, en priorité pour les parcours d’exploration, de récolte et de donjons.",
+                "title": "Carte et exploration"
+            },
+            "world": {
+                "badge": "Monde",
+                "description": "Regroupe les PNJ, quêtes dynamiques, sujets, réputation et contenu de codex sur une seule couche pour réduire le coût de recherche lié à l’univers.",
+                "title": "Quêtes et monde"
+            }
+        }
+    },
     "walnut-list": {
         "title": "Liste des noix"
     },
@@ -6699,9 +7511,11 @@
         "title": "Détails de l'arme"
     },
     "weapon-list": {
+        "defaultOrder": "Ordre par défaut",
         "income": "Gain",
         "noResults": "Aucune arme correspondante trouvee",
         "searchPlaceholder": "Rechercher par nom ou type d'arme (prise en charge du pinyin)...",
+        "sortByIncome": "Trier par gain : décroissant",
         "title": "Liste des armes"
     },
     "Wuyou01": "Wuyou01"

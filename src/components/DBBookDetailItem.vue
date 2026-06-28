@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import type { Book, BookResource } from "@/data/d/book.data"
 import { convertRegionMapIdToDBMapId } from "@/data/d/map.data"
@@ -24,6 +25,7 @@ const props = withDefaults(
 )
 
 const settingStore = useSettingStore()
+const { t } = useTranslation()
 const selectedResourceId = ref(0)
 
 /**
@@ -99,15 +101,15 @@ function getBookIcon(icon: string): string {
  */
 function getResourceTypeLabel(type: string): string {
     if (type === "Drop") {
-        return "探索拾取"
+        return t("book-detail.type.drop")
     }
     if (type === "TreasureChest") {
-        return "宝箱获取"
+        return t("book-detail.type.treasureChest")
     }
     if (type === "Read") {
-        return "直接获取"
+        return t("book-detail.type.read")
     }
-    return type || "未知类型"
+    return type || t("book-detail.type.unknown")
 }
 
 /**
@@ -174,12 +176,14 @@ const bookTabItems = computed(() =>
                 <SRouterLink :to="`/db/book/${book.id}`" class="text-lg font-bold link link-primary wrap-break-word">
                     {{ book.name }}
                 </SRouterLink>
-                <div class="text-sm text-base-content/70 mt-1"><CopyID :id="book.id" /> 条目数: {{ book.res.length }}</div>
+                <div class="text-sm text-base-content/70 mt-1">
+                    <CopyID :id="book.id" /> {{ $t("book-detail.countSuffix", { count: book.res.length }) }}
+                </div>
             </div>
         </div>
 
         <div class="card bg-base-100 border border-base-200 rounded p-3">
-            <div class="text-xs text-base-content/70 mb-1">读物简介</div>
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("book-detail.summary") }}</div>
             <div class="text-sm leading-6 whitespace-pre-wrap wrap-break-word">{{ book.desc }}</div>
         </div>
 
@@ -199,24 +203,24 @@ const bookTabItems = computed(() =>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mt-2">
                     <div v-if="selectedResourceLocation && selectedResource.srId" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">子区域</span>
+                        <span class="text-base-content/70">{{ $t("book-detail.subRegion") }}</span>
                         <div class="text-right">
                             <SubRegionLink :sub-region-id="selectedResource.srId" />
                         </div>
                     </div>
 
                     <div v-if="selectedResourceLocation" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">所属地区</span>
+                        <span class="text-base-content/70">{{ $t("book-detail.region") }}</span>
                         <span class="text-right wrap-break-word">{{ selectedResourceLocation.regionName }}</span>
                     </div>
 
                     <div v-if="selectedResource.mId" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">机制 ID</span>
+                        <span class="text-base-content/70">{{ $t("book-detail.mechanismId") }}</span>
                         <span>{{ selectedResource.mId }}</span>
                     </div>
 
                     <div v-if="selectedResource.srId && selectedResource.pos" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">坐标点</span>
+                        <span class="text-base-content/70">{{ $t("book-detail.point") }}</span>
                         <MapPosLink
                             :sub-region-id="selectedResource.srId"
                             :point="selectedResource.pos"
@@ -226,11 +230,11 @@ const bookTabItems = computed(() =>
                     </div>
 
                     <div v-if="selectedResource.srId && selectedResource.treasurePos" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">藏宝点</span>
+                        <span class="text-base-content/70">{{ $t("book-detail.treasurePoint") }}</span>
                         <MapPosLink
                             :sub-region-id="selectedResource.srId"
                             :point="selectedResource.treasurePos"
-                            :point-name="`${getResourceDisplayName(selectedResource)} 藏宝点`"
+                            :point-name="`${getResourceDisplayName(selectedResource)} ${$t('book-detail.treasurePointSuffix')}`"
                             :point-icon="book.icon"
                         />
                     </div>

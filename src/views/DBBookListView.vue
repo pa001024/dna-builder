@@ -145,7 +145,7 @@ useInitialScrollToSelectedItem()
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        :placeholder="showFullTextSearch ? '搜索读物ID/名称/描述/正文...' : '搜索读物ID/名称/描述（支持拼音）...'"
+                        :placeholder="showFullTextSearch ? $t('book-list.searchPlaceholder') : $t('book-list.searchPlaceholderPinyin')"
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
                     />
                 </div>
@@ -153,7 +153,7 @@ useInitialScrollToSelectedItem()
                 <div class="p-2 border-b border-base-200 space-y-2">
                     <label class="flex items-center gap-2 text-xs text-base-content/70 cursor-pointer select-none">
                         <input v-model="showFullTextSearch" type="checkbox" class="checkbox checkbox-xs" />
-                        <span>启用正文检索（不支持拼音）</span>
+                        <span>{{ $t("book-list.enableFullTextSearch") }}</span>
                     </label>
 
                     <div class="flex flex-wrap gap-1">
@@ -162,7 +162,7 @@ useInitialScrollToSelectedItem()
                             :class="selectedRegionId === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedRegionId = 0"
                         >
-                            全部地区
+                            {{ $t("book-list.allRegions") }}
                         </button>
                         <button
                             v-for="region in allRegions"
@@ -208,7 +208,7 @@ useInitialScrollToSelectedItem()
                 </ScrollArea>
 
                 <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredBooks.length }} 本读物
+                    {{ $t("book-list.totalCount", { count: filteredBooks.length }) }}
                 </div>
             </div>
 

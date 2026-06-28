@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { ImprEntry } from "@/data/d/impr"
-import { getImprType, getRegionType } from "@/data/d/quest.data"
+import { getImprType, getRegionType } from "@/utils/quest-utils"
 
 const props = defineProps<{
     entry: ImprEntry

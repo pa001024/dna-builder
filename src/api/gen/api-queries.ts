@@ -918,6 +918,62 @@ export const buildsCountQuery = typedQuery(
     ` as const
 )<number, { search?: string; charId?: number }>()
 
+export const rankingListsQuery = typedQuery(
+    /* GraphQL */ `
+        query {
+            rankingLists {
+                id
+                name
+                desc
+                createdAt
+                updateAt
+            }
+        }
+    ` as const
+)<Types.RankingList[], Record<string, never>>()
+
+export const rankingListQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: String!) {
+            rankingList(id: $id) {
+                id
+                name
+                desc
+                createdAt
+                updateAt
+                items {
+                    id
+                    rankingListId
+                    charId
+                    buildId
+                    sortOrder
+                    createdAt
+                    updateAt
+                    build {
+                        id
+                        title
+                        desc
+                        charId
+                        charSettings
+                        userId
+                        views
+                        likes
+                        isRecommended
+                        isPinned
+                        createdAt
+                        updateAt
+                        user {
+                            id
+                            name
+                            qq
+                        }
+                    }
+                }
+            }
+        }
+    ` as const
+)<Types.RankingList, { id: string }>()
+
 export const recommendedBuildsQuery = typedQuery(
     /* GraphQL */ `
         query ($limit: Int) {

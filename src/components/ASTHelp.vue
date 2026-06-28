@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import { debounce } from "lodash-es"
 import { computed, ref, watch } from "vue"
 import type { CharBuild, LeveledSkill } from "../data"
@@ -20,50 +21,50 @@ const parseError = ref("")
 const skillName = props.skill?.字段[0].名称 || "[幻象]伤害"
 
 const examples = [
-    { label: "基础属性", expr: "攻击 + 防御" },
-    { label: "特殊值", expr: "[攻击]" },
-    { label: "期望伤害", expr: skillName },
-    { label: "暴击伤害", expr: skillName + ".暴击" },
-    { label: "函数使用", expr: "max(攻击, 防御) * 2" },
-    { label: "命名空间", expr: "伊卡洛斯::伤害" },
-    { label: "复杂表达式", expr: "(" + skillName + ") / max(Q::神智消耗, 20)" },
+    { label: t("ast-help.examples.baseStats"), expr: "攻击 + 防御" },
+    { label: t("ast-help.examples.specialValue"), expr: "[攻击]" },
+    { label: t("ast-help.examples.expectedDamage"), expr: skillName },
+    { label: t("ast-help.examples.critDamage"), expr: skillName + ".暴击" },
+    { label: t("ast-help.examples.functions"), expr: "max(攻击, 防御) * 2" },
+    { label: t("ast-help.examples.namespace"), expr: "伊卡洛斯::伤害" },
+    { label: t("ast-help.examples.complex"), expr: "(" + skillName + ") / max(Q::神智消耗, 20)" },
 ]
 
 const internals = CharBuildClass.macros
 
 const operators = {
-    "+": "加法",
-    "-": "减法",
-    "*": "乘法",
-    "/": "除法",
-    "%": "取模",
-    "//": "整除",
+    "+": t("ast-help.operators.add"),
+    "-": t("ast-help.operators.sub"),
+    "*": t("ast-help.operators.mul"),
+    "/": t("ast-help.operators.div"),
+    "%": t("ast-help.operators.mod"),
+    "//": t("ast-help.operators.floordiv"),
 }
 
 const functions = {
-    "min(...)": "最小值",
-    "max(...)": "最大值",
-    "floor(x)": "向下取整",
-    "ceil(x)": "向上取整",
-    "or(...)": "或运算",
-    "log(x)": "自然对数",
-    "power(x, y)": "幂运算",
-    "hp(x)": "计算背水昂扬乘区(x为血量比例0~1)",
+    "min(...)": t("ast-help.functions.min"),
+    "max(...)": t("ast-help.functions.max"),
+    "floor(x)": t("ast-help.functions.floor"),
+    "ceil(x)": t("ast-help.functions.ceil"),
+    "or(...)": t("ast-help.functions.or"),
+    "log(x)": t("ast-help.functions.log"),
+    "power(x, y)": t("ast-help.functions.power"),
+    "hp(x)": t("ast-help.functions.hp"),
 }
 
 const members = {
-    N: "不计算背水昂扬乘区",
-    暴击: "暴击伤害",
-    未暴击: "未暴击伤害",
-    触发: "触发伤害",
-    未触发: "未触发伤害",
-    暴击触发: "暴击且触发",
-    未触发暴击: "暴击且未触发",
-    触发未暴击: "未暴击且触发",
-    未暴击未触发: "未暴击且未触发",
+    N: t("ast-help.members.n"),
+    暴击: t("ast-help.members.crit"),
+    未暴击: t("ast-help.members.noCrit"),
+    触发: t("ast-help.members.trigger"),
+    未触发: t("ast-help.members.noTrigger"),
+    暴击触发: t("ast-help.members.critTrigger"),
+    未触发暴击: t("ast-help.members.noTriggerCrit"),
+    触发未暴击: t("ast-help.members.triggerNoCrit"),
+    未暴击未触发: t("ast-help.members.noCritNoTrigger"),
 }
 
-const namespaces = computed(() => ["E", "Q", "近战", "远程", "同律", ...(props.charBuild?.allSkills.map(v => v.名称) || [])])
+const namespaces = computed(() => ["E", "Q", "P", "近战", "远程", "同律", ...(props.charBuild?.allSkills.map(v => v.名称) || [])])
 
 function parseExpression() {
     if (!inputExpression.value.trim()) {
@@ -77,7 +78,7 @@ function parseExpression() {
         try {
             astTree.value = parseAST(inputExpression.value, CharBuildClass.macros)
         } catch (e: any) {
-            parseError.value = e.message || "表达式解析错误"
+            parseError.value = e.message || t("ast-help.parseError")
             astTree.value = null
         }
         return
@@ -86,7 +87,7 @@ function parseExpression() {
         astTree.value = parseAST(inputExpression.value)
         parseError.value = ""
     } catch (e: any) {
-        parseError.value = e.message || "表达式解析错误"
+        parseError.value = e.message || t("ast-help.parseError")
         astTree.value = null
     }
 }
@@ -142,27 +143,41 @@ const astTreeText = computed(() => {
     <div class="flex gap-4 h-[70vh] overflow-hidden">
         <div class="flex-1 overflow-y-auto space-y-4 pr-2">
             <div class="bg-base-200 rounded-lg p-4">
-                <h4 class="font-semibold mb-2 text-base-content/90">表达式语法</h4>
+                <h4 class="font-semibold mb-2 text-base-content/90">{{ $t("ast-help.syntaxTitle") }}</h4>
                 <div class="space-y-2 text-sm text-base-content/80">
-                    <p>表达式用于计算伤害、属性值等，支持以下语法：</p>
+                    <p>{{ $t("ast-help.syntaxDesc") }}</p>
                     <ul class="list-disc list-inside space-y-1 ml-2">
-                        <li><strong>数字:</strong> 直接输入数字，如 100, 1.5</li>
-                        <li><strong>属性:</strong> 角色属性名，如 攻击、防御、生命</li>
                         <li>
-                            <strong>特殊值:</strong> 倍率固定为100%(不受威力影响) 用于自定义技能倍率，如 [攻击]*1.2
-                            模拟120%倍率、以及[防御]、[生命]等
+                            <strong>{{ $t("ast-help.syntaxItems.number.label") }}:</strong> {{ $t("ast-help.syntaxItems.number.desc") }}
                         </li>
-                        <li><strong>技能:</strong> 技能伤害字段，如 [幻象]伤害</li>
-                        <li><strong>命名空间:</strong> 使用 :: 访问命名空间，如 伊卡洛斯::伤害</li>
-                        <li><strong>运算符:</strong> +, -, *, /, %, //</li>
-                        <li><strong>函数:</strong> min(), max(), floor(), ceil(), or(), log(), power()</li>
-                        <li><strong>成员访问:</strong> 使用 . 访问伤害类型，如 .暴击、.未暴击</li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.property.label") }}:</strong> {{ $t("ast-help.syntaxItems.property.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.special.label") }}:</strong> {{ $t("ast-help.syntaxItems.special.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.skill.label") }}:</strong> {{ $t("ast-help.syntaxItems.skill.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.namespace.label") }}:</strong>
+                            {{ $t("ast-help.syntaxItems.namespace.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.operator.label") }}:</strong> {{ $t("ast-help.syntaxItems.operator.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.function.label") }}:</strong> {{ $t("ast-help.syntaxItems.function.desc") }}
+                        </li>
+                        <li>
+                            <strong>{{ $t("ast-help.syntaxItems.member.label") }}:</strong> {{ $t("ast-help.syntaxItems.member.desc") }}
+                        </li>
                     </ul>
                 </div>
             </div>
 
             <div class="bg-base-200 rounded-lg p-4">
-                <h4 class="font-semibold mb-2 text-base-content/90">运算符说明</h4>
+                <h4 class="font-semibold mb-2 text-base-content/90">{{ $t("ast-help.operatorsTitle") }}</h4>
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <div v-for="(desc, op) in operators" :key="op" class="flex items-center gap-2">
                         <span class="badge badge-sm badge-info">{{ op }}</span>
@@ -172,7 +187,7 @@ const astTreeText = computed(() => {
             </div>
 
             <div class="bg-base-200 rounded-lg p-4">
-                <h4 class="font-semibold mb-2 text-base-content/90">函数说明</h4>
+                <h4 class="font-semibold mb-2 text-base-content/90">{{ $t("ast-help.functionsTitle") }}</h4>
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <div v-for="(desc, fn) in functions" :key="fn" class="flex items-center gap-2">
                         <span class="badge badge-sm badge-secondary select-all!">{{ fn }}</span>
@@ -182,7 +197,7 @@ const astTreeText = computed(() => {
             </div>
 
             <div class="bg-base-200 rounded-lg p-4">
-                <h4 class="font-semibold mb-2 text-base-content/90">伤害类型说明</h4>
+                <h4 class="font-semibold mb-2 text-base-content/90">{{ $t("ast-help.membersTitle") }}</h4>
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <div v-for="(desc, member) in members" :key="member" class="flex items-center gap-2">
                         <span class="badge badge-sm badge-accent select-all!">.{{ member }}</span>
@@ -191,7 +206,7 @@ const astTreeText = computed(() => {
                 </div>
             </div>
             <div class="bg-base-200 rounded-lg p-4">
-                <h4 class="font-semibold mb-2 text-base-content/90">命名空间说明</h4>
+                <h4 class="font-semibold mb-2 text-base-content/90">{{ $t("ast-help.namespacesTitle") }}</h4>
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <div v-for="ns in namespaces" :key="ns" class="flex items-center gap-2">
                         <span class="badge badge-sm badge-accent select-all!">{{ ns }}::</span>
@@ -200,7 +215,7 @@ const astTreeText = computed(() => {
             </div>
 
             <div class="bg-base-200 rounded-lg p-4">
-                <h4 class="font-semibold mb-2 text-base-content/90">示例表达式</h4>
+                <h4 class="font-semibold mb-2 text-base-content/90">{{ $t("ast-help.examplesTitle") }}</h4>
                 <div class="space-y-2">
                     <button
                         v-for="ex in examples"
@@ -214,7 +229,7 @@ const astTreeText = computed(() => {
                 </div>
             </div>
             <div class="bg-base-200 rounded-lg p-4">
-                <h4 class="font-semibold mb-2 text-base-content/90">内置宏</h4>
+                <h4 class="font-semibold mb-2 text-base-content/90">{{ $t("ast-help.macrosTitle") }}</h4>
                 <div class="space-y-2">
                     <button
                         v-for="(expr, label) in internals"
@@ -231,11 +246,11 @@ const astTreeText = computed(() => {
 
         <div class="flex-1 flex flex-col gap-4">
             <div class="flex-1 flex flex-col gap-2">
-                <label class="text-sm font-semibold text-base-content/90">表达式输入</label>
+                <label class="text-sm font-semibold text-base-content/90">{{ $t("ast-help.inputLabel") }}</label>
                 <textarea
                     v-model="inputExpression"
                     class="textarea grow font-mono text-sm w-full"
-                    placeholder="输入表达式，如: 攻击 + 防御"
+                    :placeholder="$t('ast-help.inputPlaceholder')"
                 />
                 <div v-if="parseError" class="text-error text-sm">
                     {{ parseError }}
@@ -243,21 +258,21 @@ const astTreeText = computed(() => {
             </div>
 
             <div class="flex-1 flex flex-col gap-2 overflow-hidden">
-                <label class="text-sm font-semibold text-base-content/90">AST 树结构</label>
+                <label class="text-sm font-semibold text-base-content/90">{{ $t("ast-help.astTitle") }}</label>
                 <div class="flex-1 bg-base-200 rounded-lg p-4 overflow-auto">
                     <pre v-if="astTree" class="text-sm font-mono whitespace-pre-wrap">{{ astTreeText }}</pre>
-                    <div v-else class="text-base-content/40 text-sm">输入表达式后显示AST树结构</div>
+                    <div v-else class="text-base-content/40 text-sm">{{ $t("ast-help.astPlaceholder") }}</div>
                 </div>
             </div>
 
             <div class="flex gap-2">
                 <button class="btn btn-primary flex-1" :disabled="!inputExpression || !!parseError" @click="applyExpression">
                     <Icon icon="radix-icons:check" class="w-4 h-4" />
-                    应用表达式
+                    {{ $t("ast-help.apply") }}
                 </button>
                 <button class="btn btn-ghost" @click="inputExpression = ''">
                     <Icon icon="ri:delete-bin-line" class="w-4 h-4" />
-                    清空
+                    {{ $t("ast-help.clear") }}
                 </button>
             </div>
         </div>

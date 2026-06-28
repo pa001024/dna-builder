@@ -6,7 +6,7 @@ import type { QuestChain } from "@/data/d/questchain.data"
 import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import { useSettingStore } from "@/store/setting"
 import { getQuestTypeDisplay } from "@/utils/quest-utils"
-import { getDropModeText, getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
+import { getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
 interface QuestNextOption {
@@ -23,11 +23,13 @@ interface QuestDetailItem {
     reward: RewardItemType | null
     nextOptions: QuestNextOption[]
     hasBranchNext: boolean
+    searchText: string
 }
 
 const props = defineProps<{
     questChain: QuestChain
     focusQuestId?: number
+    searchKeyword?: string
 }>()
 
 const settingStore = useSettingStore()
@@ -47,6 +49,7 @@ const highlightedQuestMap = reactive<Record<number, boolean>>({})
 
 const questElementMap = new Map<number, HTMLElement>()
 const questHighlightTimerMap = new Map<number, ReturnType<typeof setTimeout>>()
+const normalizedSearchKeyword = computed(() => props.searchKeyword?.trim() || "")
 
 /**
  * 异步加载当前语言的任务剧情数据，并避免过期请求覆盖最新状态。
@@ -211,21 +214,22 @@ function jumpToQuest(questId: number) {
 }
 
 /**
- * 聚焦到指定任务。
- * @param questId 目标任务 ID
+ * 跳转到命中的任务索引。
+ * @param nextIndex 目标索引
  */
-function focusQuest(questId: number) {
-    if (!questId) {
+function jumpToMatchedQuest(nextIndex: number) {
+    if (!matchedQuestIds.value.length) {
         return
     }
 
-    const targetElement = questElementMap.get(questId)
-    if (!targetElement) {
-        return
-    }
+    const total = matchedQuestIds.value.length
+    const normalizedIndex = ((nextIndex % total) + total) % total
+    activeMatchIndex.value = normalizedIndex
 
-    targetElement.scrollIntoView({ behavior: "smooth", block: "center" })
-    triggerQuestHighlight(questId)
+    const questId = matchedQuestIds.value[normalizedIndex]
+    if (questId) {
+        jumpToQuest(questId)
+    }
 }
 
 onBeforeUnmount(() => {
@@ -236,20 +240,6 @@ onBeforeUnmount(() => {
     questHighlightTimerMap.clear()
     questElementMap.clear()
 })
-
-watch(
-    () => props.focusQuestId,
-    questId => {
-        if (!questId) {
-            return
-        }
-
-        void nextTick(() => {
-            focusQuest(questId)
-        })
-    },
-    { immediate: true }
-)
 
 watch(isVoiceSettingsOpen, isOpen => {
     if (isOpen) {
@@ -320,9 +310,33 @@ const questDetails = computed<QuestDetailItem[]>(() => {
             reward,
             nextOptions,
             hasBranchNext,
+            searchText: [
+                formatStoryText(details?.name || ""),
+                formatStoryText(details?.desc || ""),
+                ...(details?.nodes ?? []).flatMap(node => [
+                    formatStoryText(node.name || ""),
+                    ...(node.dialogues ?? []).flatMap(dialogue => [
+                        formatStoryText(dialogue.content || ""),
+                        ...(dialogue.options ?? []).map(option => formatStoryText(option.content || "")),
+                    ]),
+                ]),
+            ]
+                .filter(Boolean)
+                .join(" "),
         }
     })
 })
+
+const matchedQuestIds = computed(() => {
+    const keyword = normalizedSearchKeyword.value
+    if (!keyword) {
+        return []
+    }
+
+    return questDetails.value.filter(quest => quest.searchText.includes(keyword)).map(quest => quest.id)
+})
+
+const activeMatchIndex = ref(0)
 
 /**
  * 获取任务链版本号。
@@ -334,6 +348,28 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
 
 <template>
     <div class="space-y-3">
+        <div
+            v-if="matchedQuestIds.length"
+            class="fixed bottom-6 right-6 z-1200 flex items-center gap-2 rounded-box border border-base-300 bg-base-100/95 p-2 shadow-lg backdrop-blur"
+        >
+            <button
+                type="button"
+                class="btn btn-ghost btn-xs"
+                :disabled="matchedQuestIds.length <= 1"
+                @click="jumpToMatchedQuest(activeMatchIndex - 1)"
+            >
+                <Icon icon="ri:arrow-up-s-line" />
+            </button>
+            <span class="min-w-12 text-center text-xs text-base-content/70">{{ activeMatchIndex + 1 }}/{{ matchedQuestIds.length }}</span>
+            <button
+                type="button"
+                class="btn btn-ghost btn-xs"
+                :disabled="matchedQuestIds.length <= 1"
+                @click="jumpToMatchedQuest(activeMatchIndex + 1)"
+            >
+                <Icon icon="ri:arrow-down-s-line" />
+            </button>
+        </div>
         <div class="flex items-center justify-between p-3">
             <div class="flex items-center gap-3">
                 <div
@@ -408,29 +444,13 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
             <h3 class="font-bold mb-2">奖励信息</h3>
             <div class="space-y-3">
                 <div
-                    v-for="(reward, index) in questChain.reward
+                    v-for="reward in questChain.reward
                         .map(id => getRewardDetails(id))
                         .filter((rewardItem): rewardItem is RewardItemType => !!rewardItem)"
                     :key="reward.id"
                     class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                 >
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium">#{{ index + 1 }} 奖励组 {{ reward.id }}</span>
-
-                        <span
-                            class="text-sm px-1.5 py-0.5 rounded"
-                            :class="
-                                getDropModeText(reward.m || '') === '独立'
-                                    ? 'bg-success text-success-content'
-                                    : 'bg-warning text-warning-content'
-                            "
-                        >
-                            {{ getDropModeText(reward.m || "") }}
-                            <span v-if="reward.totalP"> 总概率 {{ reward.totalP }}</span>
-                        </span>
-                    </div>
-
-                    <RewardItem :reward="reward" />
+                    <RewardItem :reward="reward" header />
                 </div>
             </div>
         </div>
@@ -447,7 +467,7 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
                 >
                     <div class="flex items-center justify-between mb-1">
                         <span class="font-medium"
-                            >任务: {{ formatStoryText(quest.details?.name || "?") }}
+                            >任务: <HighlightText :text="formatStoryText(quest.details?.name || '?')" :keyword="normalizedSearchKeyword" />
                             <CopyID :id="quest.id" />
                             <span v-if="quest.sr" class="text-sm text-base-content/70 ml-2 inline-flex items-center gap-1">
                                 <span>子区域:</span>
@@ -457,7 +477,7 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
                     </div>
 
                     <div v-if="quest.details?.desc" class="text-sm text-base-content/70 mb-2">
-                        {{ formatStoryText(quest.details.desc) }}
+                        <HighlightText :text="formatStoryText(quest.details.desc)" :keyword="normalizedSearchKeyword" />
                     </div>
 
                     <div v-if="shouldShowQuestNextOptions(quest)" class="mb-2 flex flex-wrap items-center gap-1.5 text-xs">
@@ -486,6 +506,7 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
                         :quest-chain-icon="questChain.icon"
                         :quest-name="quest.details?.name || questChain.name"
                         :voice-language="selectedVoiceLocale"
+                        :search-keyword="normalizedSearchKeyword"
                     />
 
                     <div v-if="quest.reward" class="mt-2 pl-2">

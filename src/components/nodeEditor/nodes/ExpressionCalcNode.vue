@@ -32,7 +32,14 @@ const updateInputCount = () => {
 </script>
 
 <template>
-    <BaseNode :id="id" :data="data" :type="type" :selected="selected">
+    <BaseNode
+        :id="id"
+        :data="data"
+        :type="type"
+        :selected="selected"
+        :title="$t('node-editor.expressionCalc.title')"
+        :description="$t('node-editor.expressionCalc.description')"
+    >
         <template #input>
             <!-- 动态输入手柄 -->
             <Handle
@@ -52,11 +59,13 @@ const updateInputCount = () => {
         <div class="space-y-2">
             <!-- 表达式输入 -->
             <div>
-                <label class="block text-xs font-semibold text-base-content/60 mb-1">表达式</label>
+                <label class="block text-xs font-semibold text-base-content/60 mb-1">{{
+                    $t("node-editor.expressionCalc.expression")
+                }}</label>
                 <input
                     v-model="expression"
                     type="text"
-                    placeholder="例如: a + b * c"
+                    :placeholder="$t('node-editor.expressionCalc.expressionPlaceholder')"
                     class="w-full input input-sm text-xs"
                     @input="updateExpression"
                 />
@@ -64,7 +73,7 @@ const updateInputCount = () => {
 
             <!-- 输入数量设置 -->
             <div class="flex items-center gap-2">
-                <label class="text-xs font-semibold text-base-content/60">输入数量:</label>
+                <label class="text-xs font-semibold text-base-content/60">{{ $t("node-editor.expressionCalc.inputCount") }}</label>
                 <Select v-model.number="inputCount" class="input input-sm text-xs w-24" @change="updateInputCount">
                     <SelectItem :value="1">1</SelectItem>
                     <SelectItem :value="2">2</SelectItem>
@@ -76,7 +85,7 @@ const updateInputCount = () => {
 
             <!-- 计算结果预览 -->
             <div>
-                <div class="font-semibold text-xs text-base-content/60 mb-1">结果</div>
+                <div class="font-semibold text-xs text-base-content/60 mb-1">{{ $t("node-editor.expressionCalc.result") }}</div>
                 <div class="flex justify-between items-center mb-1">
                     <span class="font-bold text-lg text-primary font-orbitron">{{ result?.toFixed(2) || "0" }}</span>
                 </div>

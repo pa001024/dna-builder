@@ -7,10 +7,10 @@ import DBImprDetailItem from "@/components/DBImprDetailItem.vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { getImprEntryKey, getLocalizedImprEntriesByLanguage, type ImprEntry } from "@/data/d/impr"
-import { getImprType } from "@/data/d/quest.data"
 import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { useSettingStore } from "@/store/setting"
+import { getImprType } from "@/utils/quest-utils"
 
 interface ImprSnippetSegment {
     text: string

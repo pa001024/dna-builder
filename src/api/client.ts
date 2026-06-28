@@ -204,6 +204,7 @@ const cacheExchange = graphcacheExchange({
     keys: {
         UserDailyExperienceStatus: () => null,
         UserAbyssUsageUploadStatus: () => null,
+        UserShopSummary: () => null,
     },
     resolvers: {
         Query: {

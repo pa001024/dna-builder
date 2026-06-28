@@ -125,6 +125,7 @@ export interface SkillWeapon {
     filter?: string
     inherit?: "melee" | "ranged"
     atk?: "melee" | "ranged" | "all"
+    视为?: string
 }
 
 export interface Weapon {

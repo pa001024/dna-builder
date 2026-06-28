@@ -15468,7 +15468,7 @@ export const partyTopicData_tc: PartyTopic[] = [
             },
             {
                 id: 80130234,
-                content: "耶爾急匆匆地跑開了，看來他下定決心想要把「「劈里啪啦」還給那個突然出現的老店主。",
+                content: "耶爾急匆匆地跑開了，看來他下定決心想要把「劈里啪啦」還給那個突然出現的老店主。",
                 voice: "inv/Yeer/002/C898FE84",
             },
         ],

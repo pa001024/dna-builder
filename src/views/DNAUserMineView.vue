@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DNAAPI, DNAMineBean, DNAPostListBean, DNARoleInfoBean } from "dna-api"
+import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { initEmojiDict } from "@/utils/emoji"
@@ -8,6 +9,7 @@ import { useUIStore } from "../store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()
+const { t } = useTranslation()
 let api: DNAAPI
 const router = useRouter()
 const route = useRoute()
@@ -25,7 +27,7 @@ const isEnd = ref(false)
 onMounted(async () => {
     const p = await setting.getDNAAPI()
     if (!p) {
-        ui.showErrorMessage("请先登录")
+        ui.showErrorMessage(t("dna-user-mine.loginFirst"))
         router.push("/game-accounts")
         return
     }
@@ -44,10 +46,10 @@ async function loadMine() {
             postList.value = res.data.postList
             isEnd.value = res.data.hasNext === 0
         } else {
-            ui.showErrorMessage(res.msg || "获取用户信息失败")
+            ui.showErrorMessage(res.msg || t("dna-user-mine.userInfoFailed"))
         }
     } catch (e) {
-        ui.showErrorMessage("获取用户信息失败", e)
+        ui.showErrorMessage(t("dna-user-mine.userInfoFailed"), e)
     } finally {
         loading.value = false
     }
@@ -62,10 +64,10 @@ async function loadRole() {
         if (res.is_success && res.data) {
             roleInfo.value = res.data.roleInfo
         } else {
-            ui.showErrorMessage(res.msg || "获取游戏信息失败")
+            ui.showErrorMessage(res.msg || t("dna-user-mine.gameInfoFailed"))
         }
     } catch (e) {
-        ui.showErrorMessage("获取游戏信息失败", e)
+        ui.showErrorMessage(t("dna-user-mine.gameInfoFailed"), e)
     } finally {
         loading.value = false
     }
@@ -79,7 +81,7 @@ async function loadRole() {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
-            <h1 class="text-xl font-bold">用户主页</h1>
+            <h1 class="text-xl font-bold">{{ $t("dna-user-mine.title") }}</h1>
             <div class="w-12" />
         </div>
 
@@ -101,38 +103,42 @@ async function loadRole() {
                         <div class="flex gap-4 mt-4 flex-wrap">
                             <div class="flex gap-1 items-baseline">
                                 <span class="text-lg font-bold">{{ mineData.followCount }}</span>
-                                <span class="text-sm text-base-content/70">关注</span>
+                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.follow") }}</span>
                             </div>
                             <div class="flex gap-1 items-baseline">
                                 <span class="text-lg font-bold">{{ mineData.fansCount }}</span>
-                                <span class="text-sm text-base-content/70">粉丝</span>
+                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.fans") }}</span>
                             </div>
                             <div class="flex gap-1 items-baseline">
                                 <span class="text-lg font-bold">{{ mineData.likeCount }}</span>
-                                <span class="text-sm text-base-content/70">获赞</span>
+                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.likes") }}</span>
                             </div>
                             <div class="flex gap-1 items-baseline">
                                 <span class="text-lg font-bold">{{ mineData.collectCount }}</span>
-                                <span class="text-sm text-base-content/70">收藏</span>
+                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.favorites") }}</span>
                             </div>
                             <div class="flex gap-1 items-baseline">
                                 <span class="text-lg font-bold">{{ mineData.commentCount }}</span>
-                                <span class="text-sm text-base-content/70">评论</span>
+                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.comments") }}</span>
                             </div>
                             <div class="flex gap-1 items-baseline">
                                 <span class="text-lg font-bold">{{ mineData.postCount }}</span>
-                                <span class="text-sm text-base-content/70">帖子</span>
+                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.posts") }}</span>
                             </div>
                             <div class="flex gap-1 items-baseline">
                                 <span class="text-lg font-bold">{{ mineData.goldNum }}</span>
-                                <span class="text-sm text-base-content/70">金币</span>
+                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.coins") }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="tabs tabs-border gap-2">
-                    <div class="tab" :class="{ 'tab-active': activeTab === '游戏信息' }" @click="activeTab = '游戏信息'">游戏信息</div>
-                    <div class="tab" :class="{ 'tab-active': activeTab === '帖子' }" @click="activeTab = '帖子'">帖子</div>
+                    <div class="tab" :class="{ 'tab-active': activeTab === '游戏信息' }" @click="activeTab = '游戏信息'">
+                        {{ $t("dna-user-mine.gameInfoTab") }}
+                    </div>
+                    <div class="tab" :class="{ 'tab-active': activeTab === '帖子' }" @click="activeTab = '帖子'">
+                        {{ $t("dna-user-mine.postTab") }}
+                    </div>
                 </div>
                 <!-- 游戏角色信息 -->
                 <div v-if="roleInfo && activeTab === '游戏信息'" class="card bg-base-200">
@@ -145,7 +151,7 @@ async function loadRole() {
                     </div>
                     <div v-else class="flex justify-center items-center py-8">
                         <div class="text-center">
-                            <p class="mb-4">暂无帖子数据</p>
+                            <p class="mb-4">{{ $t("dna-user-mine.noPosts") }}</p>
                         </div>
                     </div>
                 </div>

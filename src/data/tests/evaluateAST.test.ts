@@ -473,6 +473,43 @@ describe("evaluateAST函数测试", () => {
             expect(result).toBeCloseTo(36661.61, 2)
         })
 
+        it("非伤害技能字段不应套用伤害乘区", () => {
+            const lowHpBuild = new CharBuild({
+                char: new LeveledChar("丽蓓卡"),
+                skillLevel: 10,
+                hpPercent: 0.1,
+                resonanceGain: 3,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "纯爱试炼",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[爱之毒]持续时间",
+            })
+            const highHpBuild = new CharBuild({
+                char: new LeveledChar("丽蓓卡"),
+                skillLevel: 10,
+                hpPercent: 0.9,
+                resonanceGain: 3,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "纯爱试炼",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[爱之毒]持续时间",
+            })
+
+            const lowHpAttrs = lowHpBuild.calculateWeaponAttributes()
+            const highHpAttrs = highHpBuild.calculateWeaponAttributes()
+            const lowHpResult = lowHpBuild.evaluateAST("[爱之毒]持续时间", lowHpAttrs)
+            const highHpResult = highHpBuild.evaluateAST("[爱之毒]持续时间", highHpAttrs)
+
+            expect(lowHpResult).toBeCloseTo(highHpResult, 6)
+            expect(lowHpResult).toBeCloseTo(6, 6)
+        })
+
         it("应该支持复杂的自定义目标函数", () => {
             charBuild.mods = [
                 new LeveledMod(41324), // 雷鸣·燎原

@@ -1,3 +1,5 @@
+import type { Faction } from "../game-const"
+
 export interface Monster {
     id: number
     n: string
@@ -11,15 +13,6 @@ export interface Monster {
     icon?: string
     /** 号令者词条标签，来自 GamePlayTags 中的 Mon.Strong.* */
     tags?: string[]
-}
-
-export enum Faction {
-    其他 = 0,
-    秽兽 = 1,
-    海伯利亚帝国 = 2,
-    神弃者同盟 = 3,
-    艾利西安传颂会 = 4,
-    华胥 = 5,
 }
 
 export interface DynamicMonster extends Monster {

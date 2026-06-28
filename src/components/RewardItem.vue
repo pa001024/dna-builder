@@ -2,12 +2,12 @@
 import { t } from "i18next"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
-import { draftMap, LeveledChar, LeveledCharHelper, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "../data"
-import { charMap, modMap, skinMap, walnutMap } from "../data/d"
+import { draftMap, LeveledChar, LeveledCharHelper, LeveledModHelper, LeveledPetHelper, LeveledWeaponHelper, resourceMap } from "../data"
+import { charMap, modMap, petMap, skinMap, walnutMap } from "../data/d"
 import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData } from "../data/d/accessory.data"
 import { headSculptureData } from "../data/d/headsculpture.data"
 import { iconticketData } from "../data/d/iconticket.data"
-import { getRewardTypeText, RewardItem as RewardItemType } from "../utils/reward-utils"
+import { getDropModeText, getRewardTypeText, RewardItem as RewardItemType } from "../utils/reward-utils"
 
 // 递归
 defineOptions({
@@ -20,6 +20,7 @@ const iconticketMap = new Map(iconticketData.map(ticket => [ticket.id, ticket]))
 interface Props {
     reward: RewardItemType | null
     typeFilter?: string[]
+    header?: boolean | string
 }
 
 const props = defineProps<Props>()
@@ -164,6 +165,9 @@ function getRewardLink(item: RewardItemType) {
     if (item.t === "IronTicket") {
         return ""
     }
+    if (item.t === "Pet") {
+        return `/db/pet/${item.id}`
+    }
 
     return ""
 }
@@ -209,6 +213,9 @@ function getRewardIcon(item: RewardItemType) {
     }
     if (item.t === "Draft") {
         return getDraftIcon(item.id)
+    }
+    if (item.t === "Pet") {
+        return LeveledPetHelper.idToUrl(item.id)
     }
     if (item.t === "Resource") {
         const resource = resourceMap.get(item.id)
@@ -288,6 +295,9 @@ function getRewardBackgroundColor(item: RewardItemType) {
     if (item.t === "Mod") {
         return getRarityGradientClass(modMap.get(item.id)?.品质 ?? "金")
     }
+    if (item.t === "Pet") {
+        return getRarityGradientClass(petMap.get(item.id)?.品质 ?? "金")
+    }
     if (item.t === "Weapon") {
         return getRarityGradientClass(5)
     }
@@ -345,6 +355,9 @@ function getRewardDisplayName(item: RewardItemType) {
     }
     if (item.t === "Walnut") {
         return walnutMap.get(item.id)?.名称 || `ID: ${item.id}`
+    }
+    if (item.t === "Pet") {
+        return item.n ? t(item.n) : `ID: ${item.id}`
     }
     if (item.t === "IronTicket") {
         const ticket = iconticketMap.get(item.id)
@@ -413,25 +426,21 @@ function getCharacterFragmentIcon(name?: string): string {
     const char = charMap.get(charName)
     return char?.icon ? LeveledChar.url(char.icon) : ""
 }
-
-// 获取掉落模式文本
-function getDropModeText(mode: string): string {
-    const modeMap: Record<string, string> = {
-        Independent: "独立",
-        Weight: "权重",
-        Fixed: "固定",
-        Gender: "性别",
-        Level: "等级",
-        Once: "一次",
-        Sequence: "序列",
-    }
-
-    return modeMap[mode] || mode
-}
 </script>
 
 <template>
     <div class="space-y-1">
+        <div class="flex items-center gap-2 mb-1" v-if="reward && header">
+            <span class="text-xs font-medium">{{ typeof header === "string" ? header : "奖励组" }} <CopyID :id="reward.id" /></span>
+            <slot></slot>
+            <span
+                class="text-xs px-1.5 py-0.5 rounded"
+                :class="reward.m === 'Independent' ? 'bg-success text-success-content' : 'bg-warning text-warning-content'"
+            >
+                {{ getDropModeText(reward.m || "") }}
+                <span v-if="reward.totalP">总容量 {{ reward.totalP }}</span>
+            </span>
+        </div>
         <!-- 递归奖励显示 -->
         <template v-for="item in getRenderableRewardChildren(reward)" :key="`${item.id}-${item.t}`">
             <template v-if="shouldRenderRewardNode(item)">

@@ -55,45 +55,45 @@ const autoBuild = computed(() => (props.update ? ((lastBuild = buildMods()), emi
 </script>
 <template>
     <div>
-        <div class="text-base-content/60 text-sm">根据当前MOD配置自动构建最优MOD组合</div>
+        <div class="text-base-content/60 text-sm">{{ $t("autobuild.desc") }}</div>
         <!-- 设置 -->
         <div class="flex flex-col gap-4 py-4">
             <div class="flex items-center gap-2 text-sm">
                 <label class="cursor-pointer flex gap-2 items-center">
                     <input v-model="autoBuildSetting.useInv" type="checkbox" class="toggle toggle-secondary" />
-                    使用用户库存
+                    {{ $t("autobuild.useInv") }}
                 </label>
                 <label class="cursor-pointer flex gap-2 items-center">
                     <input v-model="autoBuildSetting.includeMelee" type="checkbox" class="toggle toggle-secondary" />
-                    自动更换近战
+                    {{ $t("autobuild.includeMelee") }}
                 </label>
                 <label class="cursor-pointer flex gap-2 items-center">
                     <input v-model="autoBuildSetting.includeRanged" type="checkbox" class="toggle toggle-secondary" />
-                    自动更换远程
+                    {{ $t("autobuild.includeRanged") }}
                 </label>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div class="flex items-center gap-2 text-sm">
-                    <div class="label">包含MOD类型</div>
+                    <div class="label">{{ $t("autobuild.includeTypes") }}</div>
                     <CheckBoxGroup
                         v-model="autoBuildSetting.includeTypes"
                         :options="[
-                            { label: '角色', value: 'charMods' },
-                            { label: '近战', value: 'meleeMods' },
-                            { label: '远程', value: 'rangedMods' },
-                            { label: '同律', value: 'skillWeaponMods' },
+                            { label: $t('角色'), value: 'charMods' },
+                            { label: $t('近战'), value: 'meleeMods' },
+                            { label: $t('远程'), value: 'rangedMods' },
+                            { label: $t('同律'), value: 'skillWeaponMods' },
                         ]"
                     />
                 </div>
                 <div class="flex items-center gap-2 text-sm">
-                    <div class="label">保留当前MOD</div>
+                    <div class="label">{{ $t("autobuild.preserveTypes") }}</div>
                     <CheckBoxGroup
                         v-model="autoBuildSetting.preserveTypes"
                         :options="[
-                            { label: '角色', value: 'charMods' },
-                            { label: '近战', value: 'meleeMods' },
-                            { label: '远程', value: 'rangedMods' },
-                            { label: '同律', value: 'skillWeaponMods' },
+                            { label: $t('角色'), value: 'charMods' },
+                            { label: $t('近战'), value: 'meleeMods' },
+                            { label: $t('远程'), value: 'rangedMods' },
+                            { label: $t('同律'), value: 'skillWeaponMods' },
                         ]"
                     />
                 </div>
@@ -120,7 +120,7 @@ const autoBuild = computed(() => (props.update ? ((lastBuild = buildMods()), emi
         </div>
         <div class="collapse">
             <input type="checkbox" />
-            <div class="collapse-title font-semibold">日志</div>
+            <div class="collapse-title font-semibold">{{ $t("autobuild.log") }}</div>
             <div class="collapse-content overflow-auto max-h-32">
                 <pre class="text-base-content/60 text-xs font-mona">{{ autoBuild.buildLog }}</pre>
             </div>

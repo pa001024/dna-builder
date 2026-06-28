@@ -14,7 +14,7 @@ import {
     collectResourceQuestSources,
     collectResourceShopSources,
 } from "@/utils/resource-source"
-import { getDropModeText, getRewardDetails, type RewardItem } from "@/utils/reward-utils"
+import { getRewardDetails, type RewardItem } from "@/utils/reward-utils"
 import type { Resource } from "../data/d/resource.data"
 
 interface ResourceSourceGroup {
@@ -172,10 +172,10 @@ function getResourceIconUrl(icon: string): string {
                 </div>
                 <div class="flex flex-wrap gap-3 text-sm opacity-70 p-3 h-12">
                     <span v-if="sourceCounts">
-                        来源 <span class="text-primary">{{ sourceCounts }}</span>
+                        {{ $t("resource.source") }} <span class="text-primary">{{ sourceCounts }}</span>
                     </span>
                     <span v-if="resource.source?.length">
-                        地图点位 <span class="text-primary">{{ resource.source.length }}</span>
+                        {{ $t("resource.mapPoints") }} <span class="text-primary">{{ resource.source.length }}</span>
                     </span>
                 </div>
             </div>
@@ -192,36 +192,21 @@ function getResourceIconUrl(icon: string): string {
         </div>
 
         <div v-if="packReward" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">道具箱</div>
-            <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-base-content/70">
-                <span>奖励组 {{ packReward.id }}</span>
-                <span
-                    class="px-1.5 py-0.5 rounded"
-                    :class="
-                        getDropModeText(packReward.m || '') === '独立'
-                            ? 'bg-success text-success-content'
-                            : 'bg-warning text-warning-content'
-                    "
-                >
-                    {{ getDropModeText(packReward.m || "") }}
-                    <span v-if="typeof packReward.totalP === 'number'"> 总容量 {{ packReward.totalP }}</span>
-                </span>
-                <span v-if="typeof packReward.pp === 'number'">概率: {{ +(packReward.pp * 100).toFixed(2) }}%</span>
-                <span v-if="typeof packReward.times === 'number'">期望: {{ +packReward.times.toFixed(2) }}次</span>
-            </div>
-            <RewardItem :reward="packReward" />
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.packReward") }}</div>
+            <RewardItem :reward="packReward" header />
         </div>
 
         <div v-if="optReward" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">自选箱</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.selectReward") }}</div>
             <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-base-content/70">
-                <span>选项组 {{ optReward.id }}</span> <span class="px-1.5 py-0.5 rounded bg-warning text-warning-content"> 自选 </span>
+                <span>{{ $t("resource.optionGroup") }} {{ optReward.id }}</span>
+                <span class="px-1.5 py-0.5 rounded bg-warning text-warning-content">{{ $t("resource.selectRewardTag") }}</span>
             </div>
             <RewardItem v-if="optRewardRoot" :reward="optRewardRoot" />
         </div>
 
         <div v-if="bookLink && bookTarget" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">所属读物</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.book") }}</div>
             <div class="flex items-center gap-2">
                 <SRouterLink :to="bookLink" class="link link-primary wrap-break-word">
                     {{ bookTarget.name }}
@@ -231,7 +216,7 @@ function getResourceIconUrl(icon: string): string {
         </div>
 
         <div v-if="fishLink && fishTarget" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">所属鱼类</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.fish") }}</div>
             <div class="flex items-center gap-2">
                 <SRouterLink :to="fishLink" class="link link-primary wrap-break-word">
                     {{ fishTarget.name }}
@@ -255,7 +240,7 @@ function getResourceIconUrl(icon: string): string {
         </div>
 
         <div v-if="mapSources.length" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">地图点位 (点击跳转)</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.mapPointsJump") }}</div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
                 <div v-for="source in mapSources" :key="source.srId" class="p-2 bg-base-100 rounded border border-base-200">
                     <div class="flex items-center justify-between gap-2">
@@ -265,7 +250,7 @@ function getResourceIconUrl(icon: string): string {
                             </SRouterLink>
                             <div class="text-xs text-base-content/60 mt-1">{{ source.regionName }}</div>
                         </div>
-                        <span class="text-xs text-base-content/70 shrink-0">{{ source.count }} 个点位</span>
+                        <span class="text-xs text-base-content/70 shrink-0">{{ source.count }} {{ $t("resource.mapPointCount") }}</span>
                     </div>
                 </div>
             </div>

@@ -97,6 +97,7 @@ const frameKey = computed<TitleFrameKey>(() => {
 
 const frame = computed<FrameConfig>(() => titleFrameRenderData[frameKey.value] as unknown as FrameConfig)
 const layers = computed(() => [...frame.value.layers].sort((a, b) => a.zIndex - b.zIndex))
+const hasTitleSlot = computed(() => Boolean(frame.value.width && frame.value.height))
 const currentMs = ref(0)
 const rootRef = ref<HTMLElement | null>(null)
 const stageScale = ref(1)
@@ -273,10 +274,12 @@ function resolveSlotAlignment(layer: FrameLayer) {
 function applySlotLayout(style: CSSProperties, layer: FrameLayer) {
     const padding = getSlotOffsets(layer)
     const alignment = resolveSlotAlignment(layer)
-    const width = layer.imageWidth || frame.value.width
-    const height = layer.imageHeight || frame.value.height
+    const sourceWidth = layer.imageWidth || frame.value.width
+    const sourceHeight = layer.imageHeight || frame.value.height
     const horizontalAlignment = alignment.horizontalAlignment
     const verticalAlignment = alignment.verticalAlignment
+    const width = horizontalAlignment === "HAlign_Fill" ? frame.value.width - padding.left - padding.right : sourceWidth
+    const height = verticalAlignment === "VAlign_Fill" ? frame.value.height - padding.top - padding.bottom : sourceHeight
 
     style.width = `${width}px`
     style.height = `${height}px`
@@ -288,7 +291,7 @@ function applySlotLayout(style: CSSProperties, layer: FrameLayer) {
         style.right = `${padding.right}px`
     } else if (horizontalAlignment === "HAlign_Center") {
         style.left = "50%"
-        style.marginLeft = `${-(width / 2) + padding.left - padding.right}px`
+        style.marginLeft = `${-(width / 2) + (padding.left - padding.right) / 2}px`
     } else {
         style.left = `${padding.left}px`
     }
@@ -299,7 +302,7 @@ function applySlotLayout(style: CSSProperties, layer: FrameLayer) {
         style.bottom = `${padding.bottom}px`
     } else if (verticalAlignment === "VAlign_Center") {
         style.top = "50%"
-        style.marginTop = `${-(height / 2) + padding.top - padding.bottom}px`
+        style.marginTop = `${-(height / 2) + (padding.top - padding.bottom) / 2}px`
     } else {
         style.top = `${padding.top}px`
     }
@@ -400,6 +403,9 @@ function layerBlendStyle(layer: FrameLayer): CSSProperties {
                         draggable="false"
                     />
                 </template>
+                <div v-if="hasTitleSlot" class="title-frame-render__title">
+                    <slot />
+                </div>
             </div>
         </div>
     </div>
@@ -413,11 +419,13 @@ function layerBlendStyle(layer: FrameLayer): CSSProperties {
 
 .title-frame-render__viewport {
     position: absolute;
-    left: 0;
-    top: 0;
+    left: 50%;
+    top: 50%;
     width: v-bind("`${frame.width}px`");
     height: v-bind("`${frame.height}px`");
-    transform-origin: top left;
+    margin-left: v-bind("`${-(frame.width / 2)}px`");
+    margin-top: v-bind("`${-(frame.height / 2)}px`");
+    transform-origin: center center;
 }
 
 .title-frame-render__stage {
@@ -435,7 +443,7 @@ function layerBlendStyle(layer: FrameLayer): CSSProperties {
 
 .title-frame-render__layer {
     position: absolute;
-    object-fit: contain;
+    object-fit: fill;
     user-select: none;
     pointer-events: none;
     transform-origin: center center;
@@ -444,6 +452,34 @@ function layerBlendStyle(layer: FrameLayer): CSSProperties {
 
 .title-frame-render__layer--blend {
     mix-blend-mode: screen;
+}
+
+.title-frame-render__title {
+    position: absolute;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+    color: #ffffff;
+    text-align: center;
+    text-shadow:
+        0 0 4px rgba(0, 0, 0, 0.85),
+        0 1px 1px rgba(0, 0, 0, 0.75);
+    pointer-events: none;
+}
+
+.title-frame-render__title :deep(*) {
+    max-width: 192px;
+    margin: 0 0 -3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 @keyframes title-frame-intro {

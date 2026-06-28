@@ -7013,7 +7013,7 @@ export const charVoiceData: CharVoice[] = [
         charId: 2101,
         name: "角色形象·战斗开始",
         res: "char_Shuimu02_vo_battlestart",
-        text: "\n好像有客人们想要打扰我们的宴会，得要好好招待他们才行。",
+        text: "好像有客人们想要打扰我们的宴会，得要好好招待他们才行。",
     },
     {
         id: 21010004,

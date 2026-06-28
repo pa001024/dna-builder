@@ -12,6 +12,11 @@ export interface StoryTextSegment {
     tone: "normal" | "highlight" | "warning" | "title"
 }
 
+export interface SearchTextSegment {
+    text: string
+    highlighted: boolean
+}
+
 export const DEFAULT_STORY_TEXT_CONFIG: StoryTextConfig = {
     nickname: "维塔",
     nickname2: "墨斯",
@@ -119,4 +124,65 @@ export function buildVisibleStorySegments(segments: StoryTextSegment[], visibleC
     }
 
     return visibleSegments
+}
+
+/**
+ * 将文本按关键词拆分为普通/高亮片段。
+ * @param input 原始文本
+ * @param keyword 搜索关键词
+ * @returns 可渲染的片段
+ */
+export function buildSearchTextSegments(input: string, keyword: string): SearchTextSegment[] {
+    if (!input) {
+        return []
+    }
+
+    const normalizedKeyword = keyword.trim()
+    if (!normalizedKeyword) {
+        return [
+            {
+                text: input,
+                highlighted: false,
+            },
+        ]
+    }
+
+    const segments: SearchTextSegment[] = []
+    let cursor = 0
+
+    while (cursor < input.length) {
+        const matchIndex = input.indexOf(normalizedKeyword, cursor)
+        if (matchIndex === -1) {
+            break
+        }
+
+        if (matchIndex > cursor) {
+            segments.push({
+                text: input.slice(cursor, matchIndex),
+                highlighted: false,
+            })
+        }
+
+        segments.push({
+            text: input.slice(matchIndex, matchIndex + normalizedKeyword.length),
+            highlighted: true,
+        })
+        cursor = matchIndex + normalizedKeyword.length
+    }
+
+    if (cursor < input.length) {
+        segments.push({
+            text: input.slice(cursor),
+            highlighted: false,
+        })
+    }
+
+    return segments.length
+        ? segments
+        : [
+              {
+                  text: input,
+                  highlighted: false,
+              },
+          ]
 }

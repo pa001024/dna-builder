@@ -155,7 +155,7 @@ function handleSelectOption(dialogueId: number, optionId: number) {
                     :dialogue="dialogue"
                     :selected-option="getSelectedOption(getNPCScopeKey(npc.id), dialogue)"
                     :trigger-key="`${npc.id}-${dialogue.id}`"
-                    :speaker-name="`${formatStoryText(npc.name || `NPC ${npc.id}`)}:`"
+                    :speaker-name="`${$t(formatStoryText(npc.name || `NPC ${npc.id}`))}:`"
                     :speaker-avatar="npc.icon ? `/imgs/webp/T_Head_${npc.icon}.webp` : undefined"
                     :show-voice-button="false"
                     :voice-playing="false"

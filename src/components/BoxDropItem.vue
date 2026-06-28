@@ -3,7 +3,7 @@ import { t } from "i18next"
 import { computed, ref, watch } from "vue"
 import type { EventItem } from "@/data/d/event.data"
 import { expandRewardSequenceSource, RewardSequenceSimulator } from "@/utils/reward-sequence"
-import { getDropModeText, getRewardDetails, type RewardItem } from "@/utils/reward-utils"
+import { getRewardDetails, type RewardItem } from "@/utils/reward-utils"
 
 const props = defineProps<{
     boxDrop: NonNullable<EventItem["boxDrop"]>
@@ -252,69 +252,58 @@ watch(
 <template>
     <div class="space-y-3">
         <div class="flex items-center justify-between">
-            <div class="text-sm font-medium">抽奖</div>
+            <div class="text-sm font-medium">{{ t("box-drop.draw") }}</div>
         </div>
 
         <div class="grid grid-cols-2 gap-2 text-sm">
             <div class="rounded bg-base-300 p-2">
-                <div class="text-xs text-base-content/60">总上限</div>
+                <div class="text-xs text-base-content/60">{{ t("box-drop.boxMaximum") }}</div>
                 <div class="font-medium">{{ boxDrop.boxMaximum }}</div>
             </div>
             <div class="rounded bg-base-300 p-2">
-                <div class="text-xs text-base-content/60">每日上限</div>
+                <div class="text-xs text-base-content/60">{{ t("box-drop.boxPerDay") }}</div>
                 <div class="font-medium">{{ boxDrop.boxPerDay }}</div>
             </div>
             <div class="col-span-2 rounded bg-base-300 p-2">
-                <div class="text-xs text-base-content/60">消耗</div>
+                <div class="text-xs text-base-content/60">{{ t("box-drop.consume") }}</div>
                 <ResourceCostItem :name="boxDrop.boxCoinId.toString()" :value="[boxDrop.coinPerBox, boxDrop.boxCoinId, 'Resource']" />
             </div>
         </div>
 
         <div class="space-y-2">
-            <div class="text-xs text-base-content/70">奖励列表</div>
+            <div class="text-xs text-base-content/70">{{ t("box-drop.rewardList") }}</div>
             <div class="space-y-2">
                 <div
-                    v-for="(item, index) in rewardItems"
+                    v-for="item in rewardItems"
                     :key="item.id"
                     class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
                 >
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium">#{{ index + 1 }} 奖励组 {{ item.id }}</span>
-                        <span
-                            class="text-sm px-1.5 py-0.5 rounded"
-                            :class="
-                                getDropModeText(item.reward?.m || '') === '独立'
-                                    ? 'bg-success text-success-content'
-                                    : 'bg-warning text-warning-content'
-                            "
-                        >
-                            {{ getDropModeText(item.reward?.m || "") }}
-                            <span v-if="item.reward?.totalP">总容量 {{ item.reward.totalP }}</span>
-                        </span>
-                    </div>
-                    <div class="text-xs text-base-content/60 mb-1">限量 {{ Number.isFinite(item.count) ? `${item.count} 个` : "∞" }}</div>
                     <div v-if="item.reward" class="pl-2">
-                        <RewardItem :reward="item.reward" />
+                        <RewardItem :reward="item.reward" header>
+                            <div class="text-xs text-base-content/60">
+                                {{ t("box-drop.limit") }} {{ Number.isFinite(item.count) ? `${item.count}${t("box-drop.quantity")}` : "∞" }}
+                            </div>
+                        </RewardItem>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="space-y-2">
-            <div class="text-xs text-base-content/70">模拟</div>
+            <div class="text-xs text-base-content/70">{{ t("box-drop.simulation") }}</div>
             <div class="flex flex-wrap gap-2 justify-center mb-3">
-                <button class="btn btn-primary btn-sm" @click="openOnce">抽1次</button>
-                <button class="btn btn-primary btn-sm" @click="openMany(10)">抽10次</button>
-                <button class="btn btn-error btn-sm" @click="resetSimulation">重置</button>
+                <button class="btn btn-primary btn-sm" @click="openOnce">{{ t("box-drop.draw1") }}</button>
+                <button class="btn btn-primary btn-sm" @click="openMany(10)">{{ t("box-drop.draw10") }}</button>
+                <button class="btn btn-error btn-sm" @click="resetSimulation">{{ t("setting.reset") }}</button>
             </div>
 
             <div class="grid grid-cols-2 gap-2">
                 <div class="rounded bg-base-300 p-2">
-                    <div class="text-xs text-base-content/60">模拟次数</div>
+                    <div class="text-xs text-base-content/60">{{ t("box-drop.simulationCount") }}</div>
                     <div class="text-2xl p-2 font-bold">{{ openCount }}</div>
                 </div>
                 <div class="rounded bg-base-300 p-2">
-                    <div class="text-xs text-base-content/60">最近结果</div>
+                    <div class="text-xs text-base-content/60">{{ t("box-drop.lastResult") }}</div>
                     <div v-if="lastResult.length" class="space-y-1 text-sm font-medium">
                         <ResourceCostItem
                             v-for="item in lastResult"
@@ -328,7 +317,7 @@ watch(
             </div>
 
             <div class="space-y-2">
-                <div class="text-xs text-base-content/70">统计</div>
+                <div class="text-xs text-base-content/70">{{ t("box-drop.statistics") }}</div>
                 <div class="grid grid-cols-2 gap-2">
                     <ResourceCostItem
                         v-for="item in sortedRewardCounts"

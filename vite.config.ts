@@ -1,3 +1,4 @@
+import fs from "node:fs"
 import { resolve } from "node:path"
 import tailwindcss from "@tailwindcss/vite"
 import vue from "@vitejs/plugin-vue"
@@ -8,8 +9,28 @@ import Component from "unplugin-vue-components/vite"
 import { defineConfig } from "vite"
 import { chunkSplitPlugin } from "vite-plugin-chunk-split"
 import { VitePWA } from "vite-plugin-pwa"
+import { dataPackRewritePlugin } from "./src/data/data-pack-rewrite-plugin"
 
 const host = process.env.TAURI_DEV_HOST
+const mockDataPackDir = resolve(__dirname, "mock/data-pack")
+const isAppBuild = process.env.DNA_BUILDER_APP_BUILD === "1"
+
+/**
+ * 从构建产物中剔除 public/imgs 资源。
+ */
+function stripPublicImgsPlugin(): import("vite").Plugin {
+    let outDir = resolve(__dirname, "dist")
+
+    return {
+        name: "dna-builder-strip-public-imgs",
+        configResolved(config) {
+            outDir = resolve(config.root, config.build.outDir)
+        },
+        closeBundle() {
+            fs.rmSync(resolve(outDir, "imgs"), { recursive: true, force: true })
+        },
+    }
+}
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
@@ -18,6 +39,8 @@ export default defineConfig(async () => ({
     },
     define: {
         "import.meta.vitest": "undefined",
+        __APP_BUILD__: JSON.stringify(isAppBuild),
+        __WEB_BUILD__: JSON.stringify(!isAppBuild),
     },
     resolve: {
         alias: {
@@ -28,6 +51,8 @@ export default defineConfig(async () => ({
         },
     },
     plugins: [
+        ...(isAppBuild ? [stripPublicImgsPlugin()] : []),
+        dataPackRewritePlugin(),
         vue(),
         vueJsx(),
         tailwindcss(),
@@ -83,17 +108,6 @@ export default defineConfig(async () => ({
                 maximumFileSizeToCacheInBytes: 12000000,
                 globPatterns: ["**/*.{js,css,html,json}"],
                 runtimeCaching: [
-                    // {
-                    //     urlPattern: /^https:\/\/xn--chq26veyq\.icu\/api\/.+/,
-                    //     handler: "NetworkFirst",
-                    //     options: {
-                    //         cacheName: "api-cache",
-                    //         expiration: {
-                    //             maxEntries: 50,
-                    //             maxAgeSeconds: 60 * 60 * 24, // 1 day
-                    //         },
-                    //     },
-                    // },
                     {
                         urlPattern: /\.json$/,
                         handler: "StaleWhileRevalidate",
@@ -101,7 +115,7 @@ export default defineConfig(async () => ({
                             cacheName: "res-cache",
                             expiration: {
                                 maxEntries: 60,
-                                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
                             },
                         },
                     },
@@ -112,7 +126,7 @@ export default defineConfig(async () => ({
                             cacheName: "image-cache",
                             expiration: {
                                 maxEntries: 60,
-                                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
                             },
                         },
                     },
@@ -159,6 +173,37 @@ export default defineConfig(async () => ({
                 changeOrigin: true,
                 secure: false,
             },
+        },
+        fs: {
+            allow: ["."],
+        },
+        middlewareMode: false,
+        configureServer(server) {
+            server.middlewares.use("/mock/data-pack", (req, res, next) => {
+                const url = req.url || "/"
+                const filePath = url === "/" ? "latest.json" : url.replace(/^\//, "")
+                const absPath = resolve(mockDataPackDir, filePath)
+                if (!absPath.startsWith(mockDataPackDir)) {
+                    res.statusCode = 403
+                    res.end("Forbidden")
+                    return
+                }
+
+                fs.readFile(absPath, (error, buffer) => {
+                    if (error) {
+                        next()
+                        return
+                    }
+
+                    res.statusCode = 200
+                    if (absPath.endsWith(".json")) {
+                        res.setHeader("Content-Type", "application/json; charset=utf-8")
+                    } else if (absPath.endsWith(".zip")) {
+                        res.setHeader("Content-Type", "application/zip")
+                    }
+                    res.end(buffer)
+                })
+            })
         },
         watch: {
             // 3. tell Vite to ignore watching `src-tauri`

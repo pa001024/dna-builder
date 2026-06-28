@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import * as echarts from "echarts"
+import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
 import { soloTreasureDropData } from "@/data/d/solotreasure.data"
+import { Faction } from "@/data/game-const"
 import { format100, formatBigNumber } from "@/util"
-import { abyssDungeonMap, Faction, Monster } from "../data"
+import { abyssDungeonMap, Monster } from "../data"
 import dungeonData from "../data/d/dungeon.data"
 import { LeveledMonster } from "../data/leveled/LeveledMonster"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
@@ -15,6 +17,7 @@ const props = defineProps<{
     monster: Monster
     defaultLevel?: number
 }>()
+const { t } = useTranslation()
 
 const currentLevel = useSearchParam("level", props.defaultLevel || 180)
 const showRougeStats = useSearchParam("rouge", false)
@@ -90,10 +93,10 @@ const soloTreasureDropEntries = computed(() => {
  */
 function getSoloTreasureDropTitle(entry: (typeof soloTreasureDropEntries.value)[number]): string {
     return entry.DropMechanismId !== undefined
-        ? `机制 ${entry.DropMechanismId}`
+        ? t("monster.mechanism", { id: entry.DropMechanismId })
         : entry.KillScore !== undefined
-          ? `击杀积分 ${entry.KillScore}`
-          : "掉落信息"
+          ? t("monster.killScore", { score: entry.KillScore })
+          : t("monster.dropInfo")
 }
 
 /**
@@ -244,7 +247,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
         },
         legend: {
             top: 6,
-            data: ["生命", "护盾", "有效生命", "等级减伤率"],
+            data: [t("monster-detail.hp"), t("monster-detail.shield"), t("monster-detail.effectiveHealth"), t("monster-detail.levelDamageReductionRate")],
         },
         grid: {
             left: 16,
@@ -255,7 +258,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
         },
         xAxis: {
             type: "value",
-            name: "等级",
+            name: t("monster-detail.level"),
             min: 1,
             max: MaxMonsterLevelLimit,
             boundaryGap: [0, 0],
@@ -266,7 +269,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
         yAxis: [
             {
                 type: "value",
-                name: "数值",
+                name: t("monster-detail.value"),
                 scale: true,
                 axisLabel: {
                     formatter: value => formatBigNumber(Number(value)),
@@ -274,7 +277,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
             },
             {
                 type: "value",
-                name: "等级减伤率",
+                name: t("monster-detail.levelDamageReductionRate"),
                 position: "right",
                 min: 0,
                 max: 1,
@@ -307,7 +310,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
         ],
         series: [
             {
-                name: "生命",
+                name: t("monster-detail.hp"),
                 type: "line",
                 smooth: true,
                 showSymbol: false,
@@ -321,7 +324,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
                 data: levelTrendData.value.levels.map((level, index) => [level, levelTrendData.value.hp[index]]),
             },
             {
-                name: "护盾",
+                name: t("monster-detail.shield"),
                 type: "line",
                 smooth: true,
                 showSymbol: false,
@@ -335,7 +338,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
                 data: levelTrendData.value.levels.map((level, index) => [level, levelTrendData.value.shield[index]]),
             },
             {
-                name: "有效生命",
+                name: t("monster-detail.effectiveHealth"),
                 type: "line",
                 smooth: true,
                 showSymbol: false,
@@ -349,7 +352,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
                 data: levelTrendData.value.levels.map((level, index) => [level, levelTrendData.value.effectiveHealth[index]]),
             },
             {
-                name: "等级减伤率",
+                name: t("monster-detail.levelDamageReductionRate"),
                 type: "line",
                 yAxisIndex: 1,
                 smooth: true,
@@ -412,8 +415,8 @@ onUnmounted(() => {
 })
 
 function getFactionName(faction: number | undefined): string {
-    if (faction === undefined) return "其他"
-    return Faction[faction] || `阵营${faction}`
+    if (faction === undefined) return t("monster-detail.factionOther")
+    return Faction[faction] || `${t("monster-detail.factionPrefix")}${faction}`
 }
 </script>
 
@@ -426,16 +429,16 @@ function getFactionName(faction: number | undefined): string {
             <CopyID :id="monster.id" />
             <div class="text-sm text-base-content/70 flex items-center gap-2">
                 <span class="px-1.5 py-0.5 rounded bg-base-200 text-xs">
-                    {{ $t(getFactionName(monster.f)) }}
+                    {{ getFactionName(monster.f) }}
                 </span>
             </div>
             <label class="ml-auto flex items-center gap-1 text-xs">
                 <input v-model="showRougeStats" type="checkbox" class="toggle toggle-sm toggle-primary" />
-                <span>迷津</span>
+                <span>{{ $t("monster-detail.badgeTitle") }}</span>
             </label>
             <label class="flex items-center gap-1 text-xs">
                 <input v-model="useEightHpMultiplier" type="checkbox" class="checkbox checkbox-xs checkbox-primary" />
-                <span>8倍血量</span>
+                <span>{{ $t("monster-detail.showEightHp") }}</span>
             </label>
         </div>
 
@@ -446,49 +449,49 @@ function getFactionName(faction: number | undefined): string {
 
         <div v-if="leveledMonster" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
             <div class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">攻击</div>
+                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.attack") }}</div>
                 <div class="font-bold text-primary">
                     {{ formatBigNumber(leveledMonster.atk) }}
                 </div>
             </div>
             <div class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">防御</div>
+                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.defense") }}</div>
                 <div class="font-bold text-success">
                     {{ formatBigNumber(leveledMonster.def) }}
                 </div>
             </div>
             <div class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">生命</div>
+                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.hp") }}</div>
                 <div class="font-bold text-error">
                     {{ formatBigNumber(leveledMonster.hp) }}
                 </div>
             </div>
             <div v-if="leveledMonster.es !== undefined" class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">护盾</div>
+                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.shield") }}</div>
                 <div class="font-bold text-info">
                     {{ formatBigNumber(leveledMonster.es) }}
                 </div>
             </div>
             <div v-if="leveledMonster.tn !== undefined" class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">战姿</div>
+                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.stance") }}</div>
                 <div class="font-bold text-secondary">
                     {{ formatBigNumber(leveledMonster.tn) }}
                 </div>
             </div>
             <div class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">防御减伤率</div>
+                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.defenseDamageReductionRate") }}</div>
                 <div class="font-bold text-warning">
                     {{ format100(defenseDamageReductionRate, 2) }}
                 </div>
             </div>
             <div class="bg-base-200 rounded p-2 text-center" v-if="levelDamageReductionRate > 0">
-                <div class="text-xs text-base-content/70 mb-1">等级减伤率</div>
+                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.levelDamageReductionRate") }}</div>
                 <div class="font-bold text-warning">
                     {{ format100(levelDamageReductionRate, 2) }}
                 </div>
             </div>
             <div class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">有效生命</div>
+                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.effectiveHealth") }}</div>
                 <div class="font-bold text-accent">
                     {{ formatBigNumber(effectiveHealth) }}
                 </div>
@@ -496,12 +499,12 @@ function getFactionName(faction: number | undefined): string {
         </div>
 
         <div v-if="monsterTagGroups.length">
-            <div class="text-xs text-base-content/70 mb-1">号令者信息</div>
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.monsterTagInfo") }}</div>
             <div v-for="monsterTagGroup in monsterTagGroups" :key="monsterTagGroup.primaryTag.id" class="rounded bg-base-200 p-3 space-y-2">
                 <div class="flex items-center justify-between gap-2">
                     <div class="text-sm font-medium">{{ monsterTagGroup.name }}</div>
                     <SRouterLink :to="`/db/monstertag/${monsterTagGroup.primaryTag.id}`" class="text-xs link link-primary">
-                        查看详情
+                        {{ $t("monster-detail.showDetail") }}
                     </SRouterLink>
                 </div>
                 <div class="text-sm whitespace-pre-line">
@@ -521,28 +524,28 @@ function getFactionName(faction: number | undefined): string {
         </div>
 
         <div v-if="leveledMonster">
-            <div class="text-xs text-base-content/70 mb-1">等级成长预览</div>
+            <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.growthPreview") }}</div>
             <div ref="levelTrendChartRef" class="w-full h-72 rounded bg-base-200/40" />
         </div>
 
         <div v-if="soloTreasureDropEntries.length" class="space-y-3">
-            <h3 class="font-bold mb-2">搜打撤掉落</h3>
+            <h3 class="font-bold mb-2">{{ $t("monster-detail.drop") }}</h3>
             <div v-for="entry in soloTreasureDropEntries" :key="entry.MonsterTag" class="rounded bg-base-200 p-3 space-y-2">
                 <div class="flex items-center justify-between gap-3">
                     <div class="font-medium">{{ getSoloTreasureDropTitle(entry) }}</div>
                     <CopyID :id="entry.MonsterTag" />
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-sm">
-                    <div>怪物标签: {{ entry.MonsterTag }}</div>
-                    <div v-if="entry.DropMechanismId !== undefined">机制 ID: {{ entry.DropMechanismId }}</div>
-                    <div v-if="entry.BoxDropRate !== undefined">宝箱掉落率: {{ entry.BoxDropRate }}</div>
-                    <div v-if="entry.KillScore !== undefined">击杀积分: {{ entry.KillScore }}</div>
+                    <div>{{ $t("monster-detail.dropMonsterTag") }}: {{ entry.MonsterTag }}</div>
+                    <div v-if="entry.DropMechanismId !== undefined">{{ $t("monster-detail.dropMechanismId") }}: {{ entry.DropMechanismId }}</div>
+                    <div v-if="entry.BoxDropRate !== undefined">{{ $t("monster-detail.dropRate") }}: {{ entry.BoxDropRate }}</div>
+                    <div v-if="entry.KillScore !== undefined">{{ $t("monster-detail.killScore") }}: {{ entry.KillScore }}</div>
                 </div>
             </div>
         </div>
 
         <div v-if="dungeons.length > 0">
-            <h3 class="font-bold mb-2">出现副本</h3>
+            <h3 class="font-bold mb-2">{{ $t("monster-detail.appearingDungeon") }}</h3>
 
             <!-- 副本名称Tab筛选 -->
             <div class="mb-3 overflow-x-auto">
@@ -586,7 +589,7 @@ function getFactionName(faction: number | undefined): string {
         </div>
 
         <div v-if="abyssDungeonsFiltered.length > 0">
-            <h3 class="font-bold mb-2">出现深渊</h3>
+            <h3 class="font-bold mb-2">{{ $t("monster-detail.appearingAbyss") }}</h3>
 
             <!-- 深渊列表 -->
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">

@@ -6,7 +6,7 @@ import { charMap, weaponMap } from "@/data/d"
 import type { HardBoss, HardBossDetail } from "@/data/d/hardboss.data"
 import { getHardBossDetail } from "@/data/d/hardboss.data"
 import { type Walnut, walnutMap } from "@/data/d/walnut.data"
-import { getDropModeText, getRewardDetails } from "@/utils/reward-utils"
+import { getRewardDetails } from "@/utils/reward-utils"
 
 interface DynamicRewardEntry {
     DynamicRewardId: number
@@ -602,23 +602,11 @@ function getHardbossIcon(boss: HardBoss): string {
                     </div>
                     <!-- 使用 RewardItem 组件显示奖励 -->
                     <div v-for="reward in [getRewardDetails(dr.RewardView)].filter(v => !!v)" :key="reward.id" class="pl-2">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-medium">奖励组 {{ dr.RewardId }}</span>
+                        <RewardItem :reward="reward" header>
                             <span class="text-xs" :class="getRewardStatusText(dr.StartTime, dr.EndTime).color">
                                 {{ getRewardStatusText(dr.StartTime, dr.EndTime).text }}
                             </span>
-                            <span
-                                class="text-xs px-1.5 py-0.5 rounded"
-                                :class="
-                                    getDropModeText(reward.m || '') === '独立'
-                                        ? 'bg-success text-success-content'
-                                        : 'bg-warning text-warning-content'
-                                "
-                            >
-                                {{ getDropModeText(reward.m || "") }}
-                            </span>
-                        </div>
-                        <RewardItem :reward="reward" />
+                        </RewardItem>
                     </div>
                 </div>
             </div>

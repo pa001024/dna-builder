@@ -47,12 +47,12 @@ function updateWeaponLevel(value: number) {
         <div class="space-y-3">
             <!-- 远程武器选择 -->
             <div>
-                <label class="text-sm text-base-content/60 block mb-1">远程武器</label>
+                <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.rangedWeaponInput.weapon") }}</label>
                 <div class="space-y-2">
                     <Select
                         v-model="selectedWeapon"
                         class="w-full input input-sm"
-                        placeholder="选择远程武器"
+                        :placeholder="$t('node-editor.rangedWeaponInput.chooseWeapon')"
                         @update:model-value="updateWeapon($event)"
                     >
                         <SelectItem v-for="weapon in weaponOptions" :key="weapon.id" :value="weapon.id">
@@ -62,11 +62,11 @@ function updateWeaponLevel(value: number) {
 
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-xs text-base-content/60 block mb-1">精炼等级</label>
+                            <label class="text-xs text-base-content/60 block mb-1">{{ $t("node-editor.rangedWeaponInput.refineLevel") }}</label>
                             <Select
                                 v-model="refineLevel"
                                 class="flex-1 input input-sm"
-                                placeholder="选择等级"
+                                :placeholder="$t('node-editor.rangedWeaponInput.chooseLevel')"
                                 @update:model-value="updateRefineLevel($event)"
                             >
                                 <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">
@@ -75,7 +75,7 @@ function updateWeaponLevel(value: number) {
                             </Select>
                         </div>
                         <div>
-                            <label class="text-xs text-base-content/60 block mb-1">武器等级</label>
+                            <label class="text-xs text-base-content/60 block mb-1">{{ $t("node-editor.rangedWeaponInput.weaponLevel") }}</label>
                             <input
                                 v-model.number="weaponLevel"
                                 type="number"

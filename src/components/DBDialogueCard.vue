@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import type { Dialogue, DialogueOption } from "@/data/d/quest.data"
-import { getImprType, getRegionType } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
+import { getImprType, getRegionType } from "@/utils/quest-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
 const props = defineProps<{
@@ -14,6 +14,7 @@ const props = defineProps<{
     showVoiceButton?: boolean
     voicePlaying?: boolean
     playing?: boolean
+    searchKeyword?: string
 }>()
 
 const emit = defineEmits<{
@@ -22,6 +23,7 @@ const emit = defineEmits<{
 }>()
 
 const settingStore = useSettingStore()
+const normalizedSearchKeyword = computed(() => props.searchKeyword?.trim() || "")
 
 /**
  * 获取当前剧情文本替换配置。
@@ -119,7 +121,13 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                     <Icon :icon="voicePlaying ? 'ri:pause-circle-line' : 'ri:play-circle-line'" />
                 </button>
             </div>
-            <TypewriterText :text="formatStoryText(dialogue.content)" :trigger-key="triggerKey" />
+            <HighlightText
+                v-if="normalizedSearchKeyword"
+                :text="formatStoryText(dialogue.content)"
+                :keyword="normalizedSearchKeyword"
+                class="block w-full"
+            />
+            <TypewriterText v-else :text="formatStoryText(dialogue.content)" :trigger-key="triggerKey" />
             <div v-if="getImpressionEntries(dialogue).length" class="mt-1 flex flex-wrap gap-1.5">
                 <span
                     v-for="impression in getImpressionEntries(dialogue)"
@@ -157,7 +165,13 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                     </span>
 
                     <div class="min-w-0 flex-1 flex items-center gap-1.5 flex-wrap">
-                        <span class="leading-4 text-base-content/90 whitespace-normal">
+                        <HighlightText
+                            v-if="normalizedSearchKeyword"
+                            :text="formatStoryText(option.content)"
+                            :keyword="normalizedSearchKeyword"
+                            class="leading-4 text-base-content/90 whitespace-normal"
+                        />
+                        <span v-else class="leading-4 text-base-content/90 whitespace-normal">
                             {{ formatStoryText(option.content) }}
                         </span>
 

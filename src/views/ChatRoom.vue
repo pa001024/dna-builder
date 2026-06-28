@@ -2,9 +2,11 @@
 import { gql, useQuery, useSubscription } from "@urql/vue"
 import { useLocalStorage, useScroll } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
+import { t } from "i18next"
 import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from "vue"
 import { onBeforeRouteLeave, useRoute } from "vue-router"
 import { editMessageMutation, Msg, msgsQuery, roomQuery, rtcClientsQuery, rtcJoinMutation, sendMessageMutation } from "@/api/graphql"
+import ImagePreview from "@/components/ImagePreview.vue"
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
@@ -22,6 +24,7 @@ const blockedUserIds = useLocalStorage<string[]>("chat_blocked_user_ids", [])
 const variables = computed(() => ({ roomId: roomId.value }))
 const sfx = useSound("/sfx/notice.mp3")
 const NAME_EFFECT_STYLESHEET_ID = "dna-chat-name-effects"
+const messageImagePreview = ref<InstanceType<typeof ImagePreview> | null>(null)
 
 /**
  * @description 将聊天名字特效样式表注入到页面，仅保留一份 link。
@@ -385,12 +388,12 @@ function toggleBlockedUser(msg: Msg) {
 
     if (isUserBlocked(targetUserId)) {
         blockedUserIds.value = blockedUserIds.value.filter(id => id !== targetUserId)
-        ui.showSuccessMessage(`已取消屏蔽 ${targetUserName}`)
+        ui.showSuccessMessage(t("chat.unblockSuccess", { name: targetUserName }))
         return
     }
 
     blockedUserIds.value = [...blockedUserIds.value, targetUserId]
-    ui.showSuccessMessage(`已屏蔽 ${targetUserName}`)
+    ui.showSuccessMessage(t("chat.blockSuccess", { name: targetUserName }))
 }
 
 /**
@@ -496,8 +499,22 @@ function getMessagePreview(content: string) {
     if (text) {
         return text.length > 60 ? `${text.slice(0, 60)}...` : text
     }
-    if (wrapper.querySelector("img")) return "[图片]"
-    return "[消息]"
+    if (wrapper.querySelector("img")) return t("chat.imagePreview")
+    return t("chat.messagePreview")
+}
+
+/**
+ * @description 点击消息正文中的图片时打开图片预览。
+ * @param event 点击事件。
+ */
+function handleMessageImageClick(event: MouseEvent) {
+    const target = event.target as HTMLElement | null
+    const image = target?.closest("img") as HTMLImageElement | null
+    if (!image?.src) return
+
+    event.preventDefault()
+    event.stopPropagation()
+    messageImagePreview.value?.openFromUrls(image.currentSrc || image.src, image.currentSrc || image.src)
 }
 
 /**
@@ -648,6 +665,7 @@ function cancelReply() {
                                         'bg-primary text-base-100 self-end': user.id === item.user!.id,
                                     }"
                                     v-html="sanitizeHTML(item.content)"
+                                    @click="handleMessageImageClick"
                                 ></div>
 
                                 <template #menu>
@@ -704,6 +722,7 @@ function cancelReply() {
                         </div>
                     </div>
                 </div>
+                <ImagePreview ref="messageImagePreview" manual thumb-url="" full-url="" />
 
                 <!-- 在线用户 -->
                 <GQQuery v-slot="{ data: onlines }" :query="rtcClientsQuery" :variables="variables">

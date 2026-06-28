@@ -80,7 +80,7 @@ const imbalance = computed({
         <div class="space-y-3">
             <!-- 敌人选择 -->
             <div>
-                <label class="text-sm text-base-content/60 block mb-1">敌人</label>
+                <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.enemyInput.enemy") }}</label>
                 <Select v-model="enemyId" class="w-full input input-sm" @change="updateEnemy(enemyId)">
                     <SelectItem v-for="option in enemyOptions" :key="option.value" :value="option.value">
                         {{ option.label }} {{ option.type ? `(${option.type})` : "" }}
@@ -90,7 +90,7 @@ const imbalance = computed({
 
             <!-- 敌人等级 -->
             <div>
-                <label class="text-sm text-base-content/60 block mb-1">敌人等级</label>
+                <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.enemyInput.enemyLevel") }}</label>
                 <input
                     v-model.number="enemyLevel"
                     type="number"
@@ -103,7 +103,7 @@ const imbalance = computed({
 
             <!-- 敌人抗性 -->
             <div>
-                <label class="text-sm text-base-content/60 block mb-1">敌人抗性</label>
+                <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.enemyInput.enemyResistance") }}</label>
                 <input
                     v-model.number="enemyResistance"
                     type="number"
@@ -126,12 +126,20 @@ const imbalance = computed({
 
             <!-- 敌人属性显示 -->
             <div class="p-2 bg-base-200 rounded">
-                <div class="text-xs text-base-content/60 mb-2">敌人属性（当前等级）</div>
+                <div class="text-xs text-base-content/60 mb-2">{{ $t("node-editor.enemyInput.attributes") }}</div>
                 <div class="grid grid-cols-2 gap-2 text-sm">
-                    <div><span class="font-medium">血量:</span> {{ formatBigNumber(selectedEnemy.hp) }}</div>
-                    <div><span class="font-medium">防御:</span> {{ selectedEnemy.def }}</div>
-                    <div><span class="font-medium">攻击:</span> {{ selectedEnemy.atk }}</div>
-                    <div><span class="font-medium">战姿:</span> {{ selectedEnemy.tn }}</div>
+                    <div>
+                        <span class="font-medium">{{ $t("node-editor.enemyInput.hp") }}:</span> {{ formatBigNumber(selectedEnemy.hp) }}
+                    </div>
+                    <div>
+                        <span class="font-medium">{{ $t("node-editor.enemyInput.defense") }}:</span> {{ selectedEnemy.def }}
+                    </div>
+                    <div>
+                        <span class="font-medium">{{ $t("node-editor.enemyInput.attack") }}:</span> {{ selectedEnemy.atk }}
+                    </div>
+                    <div>
+                        <span class="font-medium">{{ $t("node-editor.enemyInput.stance") }}:</span> {{ selectedEnemy.tn }}
+                    </div>
                 </div>
             </div>
         </div>

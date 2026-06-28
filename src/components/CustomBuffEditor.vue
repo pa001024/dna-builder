@@ -51,6 +51,12 @@ const properties = [
     "远程触发",
     "远程多重",
     "远程增伤",
+    "普攻增伤",
+    "蓄力增伤",
+    "下落增伤",
+    "普攻独立增伤",
+    "蓄力独立增伤",
+    "下落独立增伤",
 ]
 const props = defineProps<{
     buffs: [string, number][]

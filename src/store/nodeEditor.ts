@@ -138,14 +138,11 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     let lastNodeHistoryNodeId: string | null = null
 
     /**
-     * 深拷贝图状态，优先使用 structuredClone 以提升大型图的复制性能。
-     * @param value 任意可克隆数据。
+     * 深拷贝图状态，统一先转成普通 JSON 数据，避免把 Vue 响应式代理或运行时实例带进历史记录。
+     * @param value 任意可序列化数据。
      * @returns 深拷贝结果。
      */
     function cloneValue<T>(value: T): T {
-        if (typeof structuredClone === "function") {
-            return structuredClone(value)
-        }
         return JSON.parse(JSON.stringify(value)) as T
     }
 
@@ -181,6 +178,22 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     }
 
     /**
+     * 创建适合历史记录的节点快照，只保留可回放的纯数据。
+     * @returns 历史快照节点列表。
+     */
+    function snapshotHistoryNodes(): EditorNode[] {
+        return cloneValue(serializeNodes(Object.values(nodes.value)))
+    }
+
+    /**
+     * 创建适合历史记录的边快照，只保留可回放的纯数据。
+     * @returns 历史快照边列表。
+     */
+    function snapshotHistoryEdges(): EditorEdge[] {
+        return cloneValue(serializeEdges(edges.value))
+    }
+
+    /**
      * 保存当前状态到历史记录
      */
     function saveToHistory(description: string) {
@@ -191,8 +204,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
 
         // 创建历史记录项
         const historyItem: HistoryItem = {
-            nodes: cloneValue(nodes.value),
-            edges: cloneValue(edges.value),
+            nodes: snapshotHistoryNodes(),
+            edges: snapshotHistoryEdges(),
             description,
         }
 

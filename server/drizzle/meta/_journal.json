@@ -176,6 +176,13 @@
             "when": 1776836566245,
             "tag": "0024_serious_newton_destine",
             "breakpoints": true
+        },
+        {
+            "idx": 25,
+            "version": "6",
+            "when": 1781717595671,
+            "tag": "0025_lowly_silvermane",
+            "breakpoints": true
         }
     ]
 }

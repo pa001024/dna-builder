@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useTranslation } from "i18next-vue"
 import { computed, onMounted, onUnmounted, ref } from "vue"
 import { type CounterTrigger, useCounterStore } from "@/store/counter"
 
+const { t } = useTranslation()
 const counterStore = useCounterStore()
 const expandedCounterIds = ref(new Set<string>())
 const draggedTrigger = ref<{ counterId: string; triggerId: string } | null>(null)
@@ -18,7 +20,7 @@ const counters = computed(() => counterStore.counters)
  * 添加新计数器。
  */
 function createCounter() {
-    counterStore.addCounter(`Counter ${counterStore.counters.length + 1}`)
+    counterStore.addCounter(t("counter.defaultName", { index: counterStore.counters.length + 1 }))
 }
 
 /**
@@ -137,8 +139,8 @@ onUnmounted(() => {
     <ScrollArea class="h-full">
         <div class="flex flex-col gap-4 p-4">
             <div class="flex items-center gap-3">
-                <button class="btn btn-primary btn-sm" @click="createCounter">新增计数器</button>
-                <button class="btn btn-ghost btn-sm" @click="counterStore.resetAllCounters">重置全部</button>
+                <button class="btn btn-primary btn-sm" @click="createCounter">{{ $t("counter.create") }}</button>
+                <button class="btn btn-ghost btn-sm" @click="counterStore.resetAllCounters">{{ $t("counter.resetAll") }}</button>
             </div>
 
             <div class="grid gap-4 xl:grid-cols-2">
@@ -163,7 +165,7 @@ onUnmounted(() => {
                                     type="button"
                                     class="inline-flex size-8 items-center justify-center rounded-full text-base-content/60 transition-colors hover:bg-base-200 hover:text-base-content"
                                     :aria-expanded="isCounterPanelOpen(counter.id)"
-                                    aria-label="展开计数器设置"
+                                    :aria-label="$t('counter.expandSettings')"
                                     @click="toggleCounterPanel(counter.id)"
                                 >
                                     <Icon
@@ -174,7 +176,7 @@ onUnmounted(() => {
                                 <button
                                     type="button"
                                     class="inline-flex size-8 items-center justify-center rounded-full text-base-content/60 transition-colors hover:bg-base-200 hover:text-base-content"
-                                    aria-label="重置计数器"
+                                    :aria-label="$t('counter.resetCounter')"
                                     @click="counterStore.resetCounter(counter.id)"
                                 >
                                     <Icon icon="ri:refresh-line" class="h-5 w-5" />
@@ -182,7 +184,7 @@ onUnmounted(() => {
                                 <button
                                     type="button"
                                     class="inline-flex size-8 items-center justify-center rounded-full text-base-content/60 transition-colors hover:bg-base-200 hover:text-error"
-                                    aria-label="删除计数器"
+                                    :aria-label="$t('counter.deleteCounter')"
                                     @click="counterStore.removeCounter(counter.id)"
                                 >
                                     <Icon icon="ri:delete-bin-line" class="h-5 w-5" />
@@ -212,13 +214,13 @@ onUnmounted(() => {
                         <div v-if="isCounterPanelOpen(counter.id)" class="mt-4">
                             <div class="grid gap-4">
                                 <label class="grid gap-2 text-sm">
-                                    <span class="font-medium">设置上限</span>
+                                    <span class="font-medium">{{ $t("counter.maxValue") }}</span>
                                     <input
                                         :value="counter.maxValue ?? ''"
                                         type="number"
                                         min="1"
                                         class="input input-bordered input-sm w-full"
-                                        placeholder="不限制"
+                                        :placeholder="$t('counter.unlimited')"
                                         @change="
                                             counterStore.updateCounter(counter.id, {
                                                 maxValue: ($event.target as HTMLInputElement).value
@@ -229,15 +231,15 @@ onUnmounted(() => {
                                     />
                                 </label>
                                 <label class="grid gap-2 text-sm">
-                                    <span class="font-medium">重置周期</span>
+                                    <span class="font-medium">{{ $t("counter.resetCron") }}</span>
                                     <CronInput v-model="counter.resetCron" />
                                 </label>
                             </div>
                         </div>
 
                         <div class="mt-4 flex items-center justify-between gap-2">
-                            <div class="text-sm font-medium">触发器</div>
-                            <button class="btn btn-ghost btn-xs" @click="counterStore.addTrigger(counter.id)">新增触发器</button>
+                            <div class="text-sm font-medium">{{ $t("counter.triggers") }}</div>
+                            <button class="btn btn-ghost btn-xs" @click="counterStore.addTrigger(counter.id)">{{ $t("counter.addTrigger") }}</button>
                         </div>
 
                         <div class="mt-3 space-y-2">
@@ -251,7 +253,7 @@ onUnmounted(() => {
                                         <button
                                             type="button"
                                             class="inline-flex size-7 items-center justify-center rounded-full text-base-content/50 transition-colors hover:bg-base-300 hover:text-base-content"
-                                            aria-label="拖动触发器"
+                                            :aria-label="$t('counter.dragTrigger')"
                                             @pointerdown="startTriggerMove(counter.id, trigger, $event)"
                                         >
                                             <Icon icon="ri:drag-move-line" class="h-4 w-4" />
@@ -259,7 +261,7 @@ onUnmounted(() => {
                                         <button
                                             type="button"
                                             class="inline-flex size-8 items-center justify-center rounded-full text-base-content/60 transition-colors hover:bg-base-200 hover:text-error"
-                                            aria-label="删除计数器"
+                                            :aria-label="$t('counter.deleteCounter')"
                                             @click="counterStore.removeTrigger(counter.id, trigger.id)"
                                         >
                                             <Icon icon="ri:delete-bin-line" class="h-4 w-4" />
@@ -269,7 +271,7 @@ onUnmounted(() => {
                                         <HotkeyInput
                                             v-model="trigger.hotkey"
                                             size="sm"
-                                            placeholder="设置热键"
+                                            :placeholder="$t('counter.hotkeyPlaceholder')"
                                             @update:modelValue="
                                                 counterStore.updateTrigger(counter.id, trigger.id, { hotkey: trigger.hotkey })
                                             "
@@ -279,14 +281,14 @@ onUnmounted(() => {
                                             class="select select-bordered select-sm"
                                             @change="counterStore.updateTrigger(counter.id, trigger.id, { action: trigger.action })"
                                         >
-                                            <option value="-1">计数 -1</option>
-                                            <option value="+1">计数 +1</option>
-                                            <option value="+2">计数 +2</option>
-                                            <option value="+3">计数 +3</option>
-                                            <option value="+4">计数 +4</option>
-                                            <option value="+5">计数 +5</option>
-                                            <option value="+10">计数 +10</option>
-                                            <option value="reset">重置</option>
+                                            <option value="-1">{{ $t("counter.action.count", { amount: "-1" }) }}</option>
+                                            <option value="+1">{{ $t("counter.action.count", { amount: "+1" }) }}</option>
+                                            <option value="+2">{{ $t("counter.action.count", { amount: "+2" }) }}</option>
+                                            <option value="+3">{{ $t("counter.action.count", { amount: "+3" }) }}</option>
+                                            <option value="+4">{{ $t("counter.action.count", { amount: "+4" }) }}</option>
+                                            <option value="+5">{{ $t("counter.action.count", { amount: "+5" }) }}</option>
+                                            <option value="+10">{{ $t("counter.action.count", { amount: "+10" }) }}</option>
+                                            <option value="reset">{{ $t("counter.action.reset") }}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -301,7 +303,7 @@ onUnmounted(() => {
             class="pointer-events-none fixed z-50 rounded-full border border-primary/40 bg-base-100 px-3 py-1 text-xs shadow-lg"
             :style="{ left: `${dragPreview.x + 12}px`, top: `${dragPreview.y + 12}px` }"
         >
-            正在移动
+            {{ $t("counter.moving") }}
         </div>
     </ScrollArea>
 </template>

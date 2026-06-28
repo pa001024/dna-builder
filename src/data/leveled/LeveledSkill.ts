@@ -129,14 +129,14 @@ export class LeveledSkill {
             if (attrs?.技能倍率赋值 && field.名称.includes("伤害")) {
                 return {
                     ...field,
-                    值: attrs.技能倍率赋值 * attrs.技能倍率乘数 + attrs.技能倍率加数,
+                    值: attrs.技能倍率赋值 * (1 + (attrs.技能倍率乘数 || 0)) + attrs.技能倍率加数,
                 }
             }
             if (field.影响) {
                 let val = field.值
                 let val2 = field.值2 || 0
                 if (field.名称.includes("伤害")) {
-                    val = val * (attrs?.技能倍率乘数 || 1) + (attrs?.技能倍率加数 || 0)
+                    val = val * (1 + (attrs?.技能倍率乘数 || 0)) + (attrs?.技能倍率加数 || 0)
                 }
                 const propSet = new Set(field.影响.split(","))
                 if (propSet.has("技能范围")) {
@@ -182,17 +182,18 @@ export class LeveledSkill {
     getSummonAttrsMap(attrs?: CharAttr & { weapon?: WeaponAttr }) {
         if (this.召唤物) {
             const summon = this.召唤物
-            const atkspd = ((attrs?.weapon?.攻速 || 1) - 1) * (attrs?.召唤物攻击速度 || 0)
+            const atkspd = ((attrs?.weapon?.攻速 ?? 1) - 1) * (attrs?.召唤物攻击速度 ?? 0)
             const df = this.召唤物持续时间
-            const duration = df ? (df.属性影响?.includes("技能耐久") ? df.值 * (attrs?.技能耐久 || 1) : df.值) : 0
+            const duration = df ? (df.属性影响?.includes("技能耐久") ? df.值 * (attrs?.技能耐久 ?? 1) : df.值) : 0
+            const interval = summon.攻击间隔 / (1 + atkspd)
             return {
                 name: summon.名称,
                 delay: summon.攻击延迟,
-                interval: summon.攻击间隔 / (1 + atkspd),
+                interval,
                 attackSpeed: atkspd,
                 duration,
-                attackTimes: Math.floor((duration * (attrs?.技能耐久 || 1) - summon.攻击延迟) / (summon.攻击间隔 / (1 + atkspd))),
-                range: Math.min(2.8, (attrs?.技能范围 || 1) * (1 + (attrs?.召唤物范围 || 0))),
+                attackTimes: Math.floor((duration - summon.攻击延迟) / interval),
+                range: Math.min(2.8, (attrs?.技能范围 ?? 1) * (1 + (attrs?.召唤物范围 ?? 0))),
             }
         }
     }

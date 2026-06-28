@@ -56,7 +56,7 @@ const messageInputRef = ref<HTMLDivElement | null>(null)
 
 // MCP 服务器状态
 const isMCPRunning = ref<boolean>(false)
-const mcpStatus = ref<string>("未启动")
+const mcpStatus = ref<string>(t("ai.mcpNotStarted"))
 const mcpProcess = ref<any>(null)
 
 // 初始化
@@ -76,16 +76,16 @@ async function init() {
 // 启动 MCP 服务器
 async function startMCPServer() {
     if (isMCPRunning.value) {
-        mcpStatus.value = "MCP 服务器已在运行"
+        mcpStatus.value = t("ai.mcpRunning")
         return
     }
 
     try {
-        mcpStatus.value = "正在启动 MCP 服务器..."
+        mcpStatus.value = t("ai.mcpStarting")
 
         // 检查是否为桌面应用环境
         if (!env.isApp) {
-            mcpStatus.value = "MCP 服务器只能在桌面应用环境中启动"
+            mcpStatus.value = t("ai.mcpAppOnly")
             return
         }
 
@@ -94,7 +94,7 @@ async function startMCPServer() {
         const success = await launchExe("dna_mcp_server.exe", "")
 
         if (!success) {
-            mcpStatus.value = "启动失败"
+            mcpStatus.value = t("ai.mcpStartFailed")
             return
         }
 
@@ -105,14 +105,14 @@ async function startMCPServer() {
         await checkMCPServerStatus()
 
         if (isMCPRunning.value) {
-            mcpStatus.value = "运行中 (端口: 3000)"
-            console.log("MCP 服务器已启动")
+            mcpStatus.value = t("ai.mcpRunning")
+            console.log("MCP服务器已启动")
         } else {
-            mcpStatus.value = "已启动但未响应，请检查端口 3000"
+            mcpStatus.value = t("ai.mcpStartedButNoResponse")
         }
     } catch (error: any) {
-        console.error("启动 MCP 服务器失败:", error)
-        mcpStatus.value = `启动失败: ${error.message}`
+        console.error("MCP服务器启动失败:", error)
+        mcpStatus.value = `${t("ai.mcpStartFailed")}: ${error.message}`
         isMCPRunning.value = false
         mcpProcess.value = null
     }
@@ -125,14 +125,14 @@ async function stopMCPServer() {
     }
 
     try {
-        mcpStatus.value = "正在停止 MCP 服务器..."
+        mcpStatus.value = t("ai.mcpStopping")
 
         // 注意：使用 launchExe 启动的进程无法直接停止
         // 这里我们只是更新状态，实际需要用户手动结束进程
         isMCPRunning.value = false
-        mcpStatus.value = "已标记为停止（需要手动结束进程）"
+        mcpStatus.value = t("ai.mcpStopped")
         mcpProcess.value = null
-        console.log("MCP 服务器已标记为停止")
+        console.log("MCP服务器已停止")
 
         // 提示用户如何手动停止
         setTimeout(async () => {
@@ -143,8 +143,8 @@ async function stopMCPServer() {
             }
         }, 1000)
     } catch (error: any) {
-        console.error("停止 MCP 服务器失败:", error)
-        mcpStatus.value = `停止失败: ${error.message}`
+        console.error("MCP服务器停止失败:", error)
+        mcpStatus.value = `${t("ai.mcpStopFailed")}: ${error.message}`
     }
 }
 
@@ -165,14 +165,14 @@ async function checkMCPServerStatus() {
 
         if (response.ok) {
             isMCPRunning.value = true
-            mcpStatus.value = "运行中 (端口: 3000)"
+            mcpStatus.value = t("ai.mcpRunning")
         } else {
             isMCPRunning.value = false
-            mcpStatus.value = "未响应"
+            mcpStatus.value = t("ai.mcpNoResponse")
         }
     } catch {
         isMCPRunning.value = false
-        mcpStatus.value = "未启动"
+        mcpStatus.value = t("ai.mcpNotStarted")
     }
 }
 
@@ -183,7 +183,7 @@ async function loadConversations() {
         // 手动排序
         conversations.value.sort((a, b) => b.updatedAt - a.updatedAt)
     } catch (error) {
-        console.error("加载对话列表失败:", error)
+        console.error("加载消息失败:", error)
     }
 }
 
@@ -194,7 +194,7 @@ function renderMessage(message: Message) {
             const rendered = renderMarkdown(message.content)
             message.renderedContent = rendered
         } catch (error) {
-            console.error("Markdown rendering failed:", error)
+            console.error("Markdown 渲染失败:", error)
             // Fallback to plain text
             message.renderedContent = message.content
         }
@@ -226,7 +226,7 @@ async function createNewConversation() {
     try {
         const now = Date.now()
         const newConv: UConversation = {
-            name: "新对话",
+            name: t("ai.newConversation"),
             createdAt: now,
             updatedAt: now,
         }
@@ -383,7 +383,7 @@ async function generateAIResponse() {
         const errorMessage: UMessage = {
             conversationId: selectedConversationId.value,
             role: "assistant",
-            content: "抱歉，我暂时无法回复，请稍后重试。",
+            content: t("ai-chat.error.generic"),
             createdAt: Date.now(),
         }
         await db.messages.add(errorMessage)
@@ -546,12 +546,12 @@ onMounted(() => {
                 class="p-2 px-4 text-md cursor-pointer btn btn-primary btn-block rounded-lg hover:bg-primary/90 transition-colors duration-200"
                 @click="createNewConversation"
             >
-                新对话
+                {{ $t("ai.newConversation") }}
             </button>
 
             <!-- MCP 服务器控制 -->
             <div v-if="env.isApp && !env.isMSStore" class="mt-4 p-3 bg-base-200 rounded-lg">
-                <div class="text-sm font-medium mb-2">MCP 服务器</div>
+                <div class="text-sm font-medium mb-2">{{ $t("ai.mcpTitle") }}</div>
                 <div class="text-xs opacity-70 mb-2">
                     {{ mcpStatus }}
                 </div>
@@ -563,11 +563,11 @@ onMounted(() => {
                             isMCPRunning ? 'btn-disabled' : 'btn-success',
                             !env.isApp ? 'btn-disabled opacity-50' : '',
                         ]"
-                        title="以管理员权限启动 MCP 服务器"
+                        :title="$t('ai.startMcpAdminTooltip')"
                         @click="startMCPServer"
                     >
                         <Icon icon="ri:play-line" class="mr-1" />
-                        启动
+                        {{ $t("ai.startMcp") }}
                     </button>
                     <button
                         :disabled="!isMCPRunning"
@@ -575,15 +575,15 @@ onMounted(() => {
                         @click="stopMCPServer"
                     >
                         <Icon icon="ri:stop-line" class="mr-1" />
-                        停止
+                        {{ $t("ai.stopMcp") }}
                     </button>
                 </div>
                 <div class="text-xs opacity-50 mt-2">
-                    {{ env.isApp ? "启动MCP服务器" : "仅限桌面应用" }}
+                    {{ env.isApp ? $t("ai.startMcp") : $t("ai.mcpAppOnly") }}
                 </div>
             </div>
 
-            <span class="text-sm opacity-50 px-2">最近对话</span>
+            <span class="text-sm opacity-50 px-2">{{ $t("ai.recentConversations") }}</span>
             <ScrollArea class="flex-1 overflow-hidden">
                 <ul class="flex flex-col gap-2">
                     <li
@@ -622,7 +622,7 @@ onMounted(() => {
                                 msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-300 text-gray-700',
                             ]"
                         >
-                            {{ msg.role === "user" ? "我" : "AI" }}
+                            {{ msg.role === "user" ? $t("ai.user") : $t("ai.ai") }}
                         </div>
                         <!-- 消息内容 -->
                         <div
@@ -649,7 +649,7 @@ onMounted(() => {
                     </div>
                     <!-- 加载状态 -->
                     <div v-if="isLoading" class="flex justify-start gap-3 items-start">
-                        <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-700 flex items-center justify-center">AI</div>
+                        <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-700 flex items-center justify-center">{{ $t("ai.ai") }}</div>
                         <div class="p-3 bg-gray-100 text-gray-800 rounded-lg rounded-tl-none">
                             <div class="flex items-center gap-1">
                                 <span class="animate-pulse">●</span>

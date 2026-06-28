@@ -188,6 +188,9 @@ export class LeveledPetHelper {
         }
         return new LeveledPet(petData, level)
     }
+    static idToUrl(id: number) {
+        return LeveledPet.url(petMap.get(id)?.icon)
+    }
 }
 
 /**

@@ -23,24 +23,24 @@ const weaponDamage = computed<DamageResult | null>(() => {
 <template>
     <BaseNode :id="id" :data="data" :type="type" :selected="selected">
         <div v-if="weaponDamage" class="space-y-1 text-sm">
-            <div class="font-semibold text-xs text-base-content/60 mb-2">武器伤害</div>
+            <div class="font-semibold text-xs text-base-content/60 mb-2">{{ $t("node-editor.weaponDmg.result") }}</div>
             <div class="grid grid-cols-1 gap-1">
-                <div>期望伤害: {{ +(weaponDamage.expectedDamage?.toFixed(4) || 0) }}</div>
-                <div>低级暴击: {{ +(weaponDamage.lowerCritNoTrigger?.toFixed(4) || 0) }}</div>
-                <div>高级暴击: {{ +(weaponDamage.higherCritNoTrigger?.toFixed(4) || 0) }}</div>
+                <div>{{ $t("node-editor.weaponDmg.expectedDamage") }}: {{ +(weaponDamage.expectedDamage?.toFixed(4) || 0) }}</div>
+                <div>{{ $t("node-editor.weaponDmg.lowerCrit") }}: {{ +(weaponDamage.lowerCritNoTrigger?.toFixed(4) || 0) }}</div>
+                <div>{{ $t("node-editor.weaponDmg.higherCrit") }}: {{ +(weaponDamage.higherCritNoTrigger?.toFixed(4) || 0) }}</div>
             </div>
         </div>
-        <div v-else class="text-sm text-base-content/60">等待输入...</div>
+        <div v-else class="text-sm text-base-content/60">{{ $t("node-editor.weaponDmg.waiting") }}</div>
 
         <template #output>
             <Handle id="expectedDamage" type="source" :position="Position.Right" style="top: 25%">
-                <span class="ml-2 whitespace-nowrap text-xs text-base-content/60">期望伤害</span>
+                <span class="ml-2 whitespace-nowrap text-xs text-base-content/60">{{ $t("node-editor.weaponDmg.expectedDamage") }}</span>
             </Handle>
             <Handle id="lowerCritNoTrigger" type="source" :position="Position.Right" style="top: 50%">
-                <span class="ml-2 whitespace-nowrap text-xs text-base-content/60">低级暴击</span>
+                <span class="ml-2 whitespace-nowrap text-xs text-base-content/60">{{ $t("node-editor.weaponDmg.lowerCrit") }}</span>
             </Handle>
             <Handle id="higherCritNoTrigger" type="source" :position="Position.Right" style="top: 75%">
-                <span class="ml-2 whitespace-nowrap text-xs text-base-content/60">高级暴击</span>
+                <span class="ml-2 whitespace-nowrap text-xs text-base-content/60">{{ $t("node-editor.weaponDmg.higherCrit") }}</span>
             </Handle>
         </template>
     </BaseNode>

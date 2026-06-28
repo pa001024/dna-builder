@@ -112,7 +112,7 @@ function selectWeapon(weapon: Weapon) {
                     :class="sortByIncome ? 'btn-secondary' : 'btn-outline'"
                     @click="sortByIncome = !sortByIncome"
                 >
-                    {{ sortByIncome ? "收益排序：高→低" : "默认顺序" }}
+                    {{ sortByIncome ? $t("weapon-list.sortByIncome") : $t("weapon-list.defaultOrder") }}
                 </button>
             </div>
 

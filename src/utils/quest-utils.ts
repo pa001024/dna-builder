@@ -3,6 +3,30 @@ interface QuestTypeDisplay {
     name: string
 }
 
+export type ImprType = "All" | "Any" | "Empathy" | "Chaos" | "Morality" | "Wisdom" | "Benefit"
+
+export function getImprType(type: ImprType): string {
+    const nameMap = {
+        All: "全部",
+        Any: "任意",
+        Empathy: "共情",
+        Chaos: "混沌",
+        Morality: "道德",
+        Wisdom: "才智",
+        Benefit: "功利",
+    }
+    return nameMap[type]
+}
+
+export function getRegionType(id: number): string {
+    if (1011 === id) {
+        return "海伯利亚"
+    } else if (1041 === id) {
+        return "华胥"
+    }
+    return "未知"
+}
+
 const QUEST_TYPE_DISPLAY_MAP: Record<number, QuestTypeDisplay> = {
     1: {
         icon: "T_Gp_MainMission",

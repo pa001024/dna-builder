@@ -85,7 +85,7 @@ const calculateRemainingTimeByScore = (baseRaidPoint: number, targetScore: numbe
 }
 
 // 状态管理
-const selectedSeason = useSearchParam<number>("s", 1002)
+const selectedSeason = useSearchParam<number>("s", 1004)
 const scoreInput = ref("")
 const remainingTime = ref(30)
 const selectedDungeon = useSearchParam<number>("d", 21213)
@@ -481,28 +481,17 @@ function getSeasonName(str: number) {
                         v-if="getTitleFrameId(item.reward)"
                         class="w-48 h-12 max-w-full shrink-0"
                         :title-frame-id="getTitleFrameId(item.reward)"
-                    />
+                    >
+                        <p class="text-sm font-bold text-white">{{ item.reward.child?.[0].n }}</p>
+                    </TitleFrameRender>
                     <img v-else class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
-                    <div class="absolute inset-0 flex items-center justify-center">
+                    <div v-if="!getTitleFrameId(item.reward)" class="absolute inset-0 flex items-center justify-center">
                         <p class="text-sm font-bold text-white">{{ item.reward.child?.[0].n }}</p>
                     </div>
                 </div>
                 <div :key="item.reward.id" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium">奖励组 {{ item.reward.id }}</span>
-                        <span
-                            class="text-xs px-1.5 py-0.5 rounded"
-                            :class="
-                                getDropModeText(item.reward.m || '') === '独立'
-                                    ? 'bg-success text-success-content'
-                                    : 'bg-warning text-warning-content'
-                            "
-                        >
-                            {{ getDropModeText(item.reward.m || "") }}
-                        </span>
-                    </div>
                     <!-- 使用 RewardItem 组件显示奖励 -->
-                    <RewardItem :reward="item.reward" />
+                    <RewardItem :reward="item.reward" header />
                 </div>
             </div>
         </div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
 import type { CharBuildOptions } from "../../../data/CharBuild"
 import { CharBuild } from "../../../data/CharBuild"
@@ -33,6 +34,7 @@ const props = defineProps<{
 
 // 获取store实例
 const store = useNodeEditorStore()
+const { t } = useTranslation()
 
 // 计算属性：检查是否缺少必要输入
 const hasMissingInputs = computed(() => {
@@ -45,12 +47,12 @@ const statusText = computed(() => {
         return props.data.error
     }
     if (hasMissingInputs.value) {
-        return `缺少必要输入：${props.data.missingInputs?.join("、")}`
+        return `${t("node-editor.coreCalc.missingInputs")}${props.data.missingInputs?.join("、")}`
     }
     if (props.data.charBuild) {
-        return "当前可用"
+        return t("node-editor.coreCalc.currentAvailable")
     }
-    return "等待输入"
+    return t("node-editor.coreCalc.waiting")
 })
 
 // 计算属性：获取所有可用技能
@@ -83,7 +85,7 @@ const handleSkillChange = (val: string) => {
 
                 <!-- 缺少输入列表 -->
                 <div v-if="hasMissingInputs" class="mt-2">
-                    <div class="text-xs text-red-600 font-medium mb-1">缺少必要输入：</div>
+                    <div class="text-xs text-red-600 font-medium mb-1">{{ $t("node-editor.coreCalc.missingInputs") }}</div>
                     <div class="text-xs text-red-500">
                         <ul class="list-disc list-inside">
                             <li v-for="input in data.missingInputs" :key="input">{{ input }}</li>
@@ -92,16 +94,16 @@ const handleSkillChange = (val: string) => {
                 </div>
                 <!-- 错误信息 -->
                 <div v-else-if="data.error" class="mt-2">
-                    <div class="text-xs text-red-600 font-medium mb-1">错误信息：</div>
+                    <div class="text-xs text-red-600 font-medium mb-1">{{ $t("node-editor.coreCalc.errorInfo") }}</div>
                     <div class="text-xs text-red-500">{{ data.error }}</div>
                 </div>
                 <!-- 技能选择 -->
                 <div v-else-if="data.charBuild" class="mt-2">
-                    <div class="text-xs text-base-content/60 mb-1">选择默认技能：</div>
+                    <div class="text-xs text-base-content/60 mb-1">{{ $t("node-editor.coreCalc.defaultSkill") }}</div>
                     <Select
                         class="input input-sm w-full"
                         :model-value="data.selectedSkill || ''"
-                        placeholder="请选择技能"
+                        :placeholder="$t('node-editor.coreCalc.selectSkill')"
                         @update:model-value="handleSkillChange"
                     >
                         <SelectItem v-for="skill in availableSkills" :key="skill.名称" :value="skill.名称">

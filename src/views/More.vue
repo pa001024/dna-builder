@@ -62,6 +62,11 @@ const items = [
         icon: "ri:bar-chart-line",
     },
     {
+        name: "ranking",
+        path: "/ranking",
+        icon: "ri:sort-number-asc",
+    },
+    {
         name: "setting",
         path: "/setting",
         icon: "ri:settings-3-line",

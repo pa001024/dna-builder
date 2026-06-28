@@ -8,7 +8,14 @@ defineProps<NodeProps>()
 </script>
 
 <template>
-    <BaseNode :id="id" :data="data" :type="type" :selected="selected" title="完整计算" description="基于核心计算节点的完整伤害计算">
+    <BaseNode
+        :id="id"
+        :data="data"
+        :type="type"
+        :selected="selected"
+        :title="$t('node-editor.fullCalc.title')"
+        :description="$t('node-editor.fullCalc.description')"
+    >
         <!-- 输入手柄 -->
         <Handle
             id="input"
@@ -22,14 +29,14 @@ defineProps<NodeProps>()
         <div class="space-y-2">
             <!-- 计算结果预览 -->
             <div v-if="data.result">
-                <div class="font-semibold text-xs text-base-content/60">结果</div>
+                <div class="font-semibold text-xs text-base-content/60">{{ $t("node-editor.fullCalc.result") }}</div>
                 <div class="flex justify-between items-center mb-1">
                     <span class="font-bold text-lg text-primary font-orbitron">{{ data.result?.value?.toFixed(0) || "0" }}</span>
                 </div>
             </div>
 
             <!-- 提示信息 -->
-            <div v-else class="text-xs text-yellow-500">等待输入...</div>
+            <div v-else class="text-xs text-yellow-500">{{ $t("node-editor.fullCalc.waiting") }}</div>
         </div>
     </BaseNode>
 </template>

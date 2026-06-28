@@ -853,7 +853,7 @@ useInitialScrollToSelectedItem()
             </div>
 
             <ScrollArea v-if="selectedQuestChain" :key="selectedQuestChain.id" class="flex-2">
-                <DBQuestDetailItem :questChain="selectedQuestChain" />
+                <DBQuestDetailItem :quest-chain="selectedQuestChain" :search-keyword="showFullTextSearch ? searchKeyword.trim() : ''" />
             </ScrollArea>
         </div>
     </div>

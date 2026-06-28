@@ -7,6 +7,7 @@ import { resolvers as dpsResolvers, typeDefs as dpsSchema } from "./dps"
 import { resolvers as guideResolvers, typeDefs as guideSchema } from "./guide"
 import { resolvers as messageResolvers, typeDefs as messageSchema } from "./message"
 import { resolvers as missionsIngameResolvers, typeDefs as missionsIngameSchema } from "./missionsIngame"
+import { resolvers as rankingResolvers, typeDefs as rankingSchema } from "./ranking"
 import { resolvers as roomResolvers, typeDefs as roomSchema } from "./room"
 import { resolvers as rtcResolvers, typeDefs as rtcSchema } from "./rtc"
 import { resolvers as scriptResolvers, typeDefs as scriptSchema } from "./script"
@@ -33,6 +34,7 @@ export function schemaWith(ctx: any) {
         buildSchema,
         timelineSchema,
         dpsSchema,
+        rankingSchema,
         scriptSchema,
         scriptCategorySchema,
         shopSchema,
@@ -52,6 +54,7 @@ export function schemaWith(ctx: any) {
         buildResolvers,
         timelineResolvers,
         dpsResolvers,
+        rankingResolvers,
         scriptResolvers,
         scriptCategoryResolvers,
         shopResolvers
