@@ -4141,6 +4141,7 @@
     "通用鱼饵": "Basic Lure",
     "同福饭馆店小二": "Tongfu Eatery Server",
     "同类相吸": "Like Attracts Like",
+    "同律": "Consonance",
     "同律近战": "Melee Consonance Weapon",
     "同律远程": "Ranged Consonance Weapon",
     "同时持有10只突破至3阶的魔灵": "Possess 10 Geniemons that have been ascended to Phase 3",
@@ -5472,8 +5473,72 @@
         "title": "Abyss list"
     },
     "abyss-usage": {
+        "allLevels": "All Levels",
+        "assistant": "Teaming Assistant",
+        "assistantDesc": "Check common lineups for characters",
+        "available": "Available",
+        "buildUploadDataFailed": "Failed to build abyss upload data",
+        "createdAt": "Created At",
         "desc": "Abyss lineup and role/weapon statistics",
-        "title": "Abyss Usage"
+        "emptyUploadResult": "Upload result is empty",
+        "export": "Export",
+        "exportFailed": "Failed to export abyss submissions",
+        "exportSuccess": "Abyss submissions exported",
+        "level": "Level",
+        "levelDistribution": "Level Distribution",
+        "loadDefaultRoleFailed": "Failed to load default role info",
+        "loadLatestRoleInfoFailed": "Failed to load latest role info",
+        "loadStatsFailed": "Failed to load abyss statistics",
+        "loginFirst": "Please log in first",
+        "mainChar": "Main Character",
+        "mainCharId": "Main Character ID",
+        "mainOnly": "Main Only",
+        "meleeWeapon": "Melee Weapon",
+        "meleeWeaponId": "Melee Weapon ID",
+        "missingUid": "Missing UID",
+        "mostUsedLineup": "Most Used Lineup",
+        "mostUsedLineupDesc": "The lineup with the highest number of battles",
+        "noExportableSubmissions": "No exportable abyss submissions",
+        "noResult": "No results",
+        "noUploadData": "No abyss data to upload",
+        "pet": "Pet",
+        "petId": "Pet ID",
+        "rangedWeapon": "Ranged Weapon",
+        "rangedWeaponId": "Ranged Weapon ID",
+        "refresh": "Refresh",
+        "roleParticipation": "Role Participation",
+        "roleSourceDistribution": "Role Source Distribution",
+        "roleType": "Role Type",
+        "roleUsage": "Role Usage",
+        "seasonId": "Season ID",
+        "selectRole": "Select a character",
+        "sheetRole": "Role Participation",
+        "sheetSubmission": "Submission",
+        "sheetWeapon": "Weapon Participation",
+        "skillLevel": "Skill Level",
+        "stars": "Stars",
+        "submissionsFrom": "This page is based on data from {{count}} players. Usage rate = number of players who used this character ÷ number of players who own this character",
+        "submitCount": "{{count}} submissions",
+        "submitId": "Submission ID",
+        "support1": "Support 1",
+        "support1Id": "Support 1 ID",
+        "support2": "Support 2",
+        "support2Id": "Support 2 ID",
+        "supportWeapon1": "Support Weapon 1",
+        "supportWeapon1Id": "Support Weapon 1 ID",
+        "supportWeapon2": "Support Weapon 2",
+        "supportWeapon2Id": "Support Weapon 2 ID",
+        "title": "Abyss Usage",
+        "uidSha256": "UID SHA256",
+        "updatedAt": "Updated At",
+        "upload": "Upload",
+        "uploadFailed": "Failed to upload abyss data",
+        "uploadSuccess": "Abyss data uploaded",
+        "uploadSuccessWithReward": "Abyss data uploaded, EXP +{{exp}}, Points +{{points}}",
+        "weaponForgeDistribution": "Weapon Forge Distribution",
+        "weaponId": "Weapon ID",
+        "weaponName": "Weapon Name",
+        "weaponParticipation": "Weapon Participation"
     },
     "accessory": {
         "category": "Category",
@@ -5541,7 +5606,14 @@
         "unnamedAchievement": "Unnamed Achievement"
     },
     "achievement-detail": {
-        "title": "Achievement Details"
+        "basicInfo": "Basic Info",
+        "category": "Category",
+        "desc": "Description",
+        "name": "Name",
+        "quality": "Quality",
+        "reward": "Reward",
+        "title": "Achievement Details",
+        "version": "Version"
     },
     "achievement-list": {
         "desc": "Track game achievement progress",
@@ -5554,11 +5626,13 @@
         "end_suffix": "remaining",
         "ended_suffix": "ago",
         "load_error": "Failed to load activity data",
+        "local": "Local",
         "moling_completed": "This period's Echo completed",
         "moling_desc": "Refreshes every 3 days",
         "moling_refresh": "Echo Refresh",
         "moling_refresh_next": "Next Echo Refresh",
         "no_activities": "No activities",
+        "remote": "Remote",
         "start": "Start",
         "status_ended": "Ended",
         "status_ongoing": "Ongoing",
@@ -5575,21 +5649,214 @@
         "commandInputPlaceholder": "Send a message or enter/select a command. Paste or drag images is supported.",
         "desc": "Interact with games using AI agents",
         "inputMessage": "Enter message, press Enter to send",
+        "loading": "Loading...",
         "mcp_manual_stop_message": "The MCP server must be terminated manually.\n\nEnd the 'dna_mcp_server.exe' process in Task Manager.\n\nOpen Task Manager now?",
+        "mcpAppOnly": "Desktop app only",
+        "mcpNoResponse": "MCP server not responding",
+        "mcpNotStarted": "MCP server not started",
+        "mcpRunning": "MCP server running",
+        "mcpStartedButNoResponse": "MCP server started but not responding",
+        "mcpStartFailed": "MCP server start failed",
+        "mcpStarting": "Starting MCP server...",
+        "mcpStopFailed": "MCP server stop failed",
+        "mcpStopped": "MCP server stopped",
+        "mcpStopping": "Stopping MCP server...",
+        "mcpTitle": "MCP Server",
+        "newConversation": "New Conversation",
+        "recentConversations": "Recent Conversations",
+        "startMcp": "Start MCP server",
+        "startMcpAdminTooltip": "Start the MCP server with administrator privileges",
+        "stopMcp": "Stop",
         "title": "AI Agent",
         "user": "User"
     },
+    "ai-chat": {
+        "assistantNotInitialized": "AI assistant is not initialized. Please configure AI settings first.",
+        "automationContinuePrompt": "Continue the previous unfinished automation fitting workflow (round {{round}}).\nRequirements:\n1. Keep calling the necessary tools to move the workflow forward.\n2. When finished, output {{doneTag}} on its own line.\n3. If not finished, output {{continueTag}} on its own line.",
+        "automationIncompleteWarning": "⚠️ The workflow was not confirmed complete within the expected rounds. You can send \"continue\" to keep going.",
+        "automationPrompt": "You are now in \"fitting automation execution mode.\"\nPlease strictly follow these rules:\n1. You must call tools to perform real configuration changes, not just give text advice.\n2. If you want to calculate the best fitting setup, prefer autoBuild, and you must write the configuration with apply=true in the end.\n3. When handling effect MODs/weapons, first call queryEffectConfig to confirm the state, and if needed use setEffectConfig before autoBuild.\n4. After finishing all automation this round, output {{doneTag}} on a separate final line.\n5. If another round is needed, output {{continueTag}} on a separate final line.\n\nUser request:\n{{userMessage}}",
+        "automationRoundTag": "[Automation round {{round}}]",
+        "clearChatFailed": "Failed to clear fitting assistant conversation history",
+        "error": {
+            "apiKey": "❌ Invalid or missing API key\n\nPlease check:\n1. Whether the API key in settings is correct\n2. Whether you have enough API quota\n\nYou can reconfigure the API key in settings.",
+            "generic": "Sorry, an error occurred while processing the request.",
+            "network": "❌ Network connection failed\n\nPlease check:\n1. Whether the network connection is normal\n2. Whether the API service is available\n3. Whether the proxy settings are correct",
+            "rateLimit": "❌ Too many requests\n\nAPI call limit has been reached. Please wait a while and try again.",
+            "requestFailed": "❌ Request failed\n\n{{message}}",
+            "sdk": "❌ SDK compatibility issue\n\nPlease refresh the page and try again. If the problem persists, clear the browser cache and restart the app.",
+            "timeout": "❌ Request timed out\n\nThe response took too long. Please check your network connection or try simplifying your question.",
+            "unknown": "❌ An unknown error occurred\n\nPlease check the console for details, or try refreshing the page."
+        },
+        "initProxyAgent": "Initialize AI Agent using the server proxy",
+        "initProxyAgentFailed": "Failed to initialize AI Agent with proxy:",
+        "initUserAgent": "Initialize AI Agent using the user-configured API key",
+        "initUserAgentFailed": "Failed to initialize AI Agent with user settings:",
+        "inputPlaceholder": "Ask me anything about fitting...",
+        "loadChatFailed": "Failed to load fitting assistant conversation history",
+        "noConfigMessage": "AI service is not configured.\n\nPlease choose one of the following to configure AI:\n1. Configure an API key in settings (recommended)\n2. Contact an administrator to configure server-side AI\n\nCurrent status:\n- User API key: {{hasUserConfig}}",
+        "reasoning": "Reasoning",
+        "retry": "Retry",
+        "saveChatFailed": "Failed to save fitting assistant conversation history",
+        "saveChatFailedFallback": "Failed to save fitting assistant conversation history (fallback)",
+        "sendMessageFailed": "Failed to send message",
+        "tip": "Tip: You can ask things like \"How should X be fitted?\" or \"What setup with Y?\"",
+        "title": "Fitting Assistant",
+        "welcome": "Hello! I am the fitting assistant. I can help you optimize character setups.\n\nCurrent character: {{charName}} ({{charElm}})\n\nYou can ask me:\n- How should {{charName}} be fitted for the highest MOD damage?\n- Which MODs are available for {{charElm}}?\n- How can I increase {{charName}}’s critical damage?\n- What MOD setup maximizes {{charName}}’s damage when using Fushu\n\nBy default, I will run the full fitting workflow and try to apply the configuration directly."
+    },
+    "app": {
+        "initScriptHotkeysFailed": "Failed to register script hotkeys on startup:",
+        "syncLaunchAtStartupFailed": "Failed to sync startup launch status:",
+        "title": "App"
+    },
+    "ast-help": {
+        "apply": "Apply expression",
+        "astPlaceholder": "Display the AST tree structure after entering an expression",
+        "astTitle": "AST Tree Structure",
+        "clear": "Clear",
+        "examples": {
+            "baseStats": "Base Stats",
+            "complex": "Complex Expression",
+            "critDamage": "Critical Damage",
+            "expectedDamage": "Expected Damage",
+            "functions": "Function Usage",
+            "namespace": "Namespace",
+            "specialValue": "Special Values"
+        },
+        "examplesTitle": "Example Expressions",
+        "functions": {
+            "ceil": "Round up",
+            "floor": "Round down",
+            "hp": "Compute the HP-based effect multiplier (x is HP ratio 0 to 1)",
+            "log": "Natural logarithm",
+            "max": "Maximum value",
+            "min": "Minimum value",
+            "or": "Logical OR",
+            "power": "Power"
+        },
+        "functionsTitle": "Function Reference",
+        "inputLabel": "Expression Input",
+        "inputPlaceholder": "Enter an expression, e.g.: Attack + Defense",
+        "macrosTitle": "Built-in Macros",
+        "members": {
+            "crit": "Critical Damage",
+            "critTrigger": "Crit and Triggered",
+            "n": "Do not calculate the HP-based effect multiplier",
+            "noCrit": "Non-Critical Damage",
+            "noCritNoTrigger": "Non-Critical and Not Triggered",
+            "noTrigger": "Non-Triggered Damage",
+            "noTriggerCrit": "Crit and Not Triggered",
+            "trigger": "Triggered Damage",
+            "triggerNoCrit": "Not Critical and Triggered"
+        },
+        "membersTitle": "Damage Type Reference",
+        "namespacesTitle": "Namespace Reference",
+        "operators": {
+            "add": "Addition",
+            "div": "Division",
+            "floordiv": "Integer Division",
+            "mod": "Modulo",
+            "mul": "Multiplication",
+            "sub": "Subtraction"
+        },
+        "operatorsTitle": "Operator Reference",
+        "parseError": "Expression parsing error",
+        "syntaxDesc": "Expressions are used to calculate damage, stat values, and more. The following syntax is supported:",
+        "syntaxItems": {
+            "function": {
+                "desc": "min(), max(), floor(), ceil(), or(), log(), power()",
+                "label": "Functions"
+            },
+            "member": {
+                "desc": "Use . to access damage types, such as .Crit and .NonCrit",
+                "label": "Member Access"
+            },
+            "namespace": {
+                "desc": "Use :: to access a namespace, such as Icarus::Damage",
+                "label": "Namespace"
+            },
+            "number": {
+                "desc": "Enter a number directly, such as 100 or 1.5",
+                "label": "Number"
+            },
+            "operator": {
+                "desc": "+, -, *, /, %, //",
+                "label": "Operators"
+            },
+            "property": {
+                "desc": "Character stat names, such as Attack, Defense, and HP",
+                "label": "Property"
+            },
+            "skill": {
+                "desc": "Skill damage fields, such as [Illusion] damage",
+                "label": "Skill"
+            },
+            "special": {
+                "desc": "Fixed at 100% and not affected by power. Used for custom skill multipliers, such as [Attack] * 1.2 to simulate 120%, as well as [Defense] and [HP].",
+                "label": "Special Values"
+            }
+        },
+        "syntaxTitle": "Expression Syntax",
+        "title": "Expression Help"
+    },
     "autobuild": {
         "charMods": "Character MOD",
+        "desc": "Automatically build the optimal MOD setup based on the current MOD configuration",
+        "includeMelee": "Auto-replace melee",
+        "includeRanged": "Auto-replace ranged",
+        "includeTypes": "Include MOD types",
+        "log": "Log",
         "meleeMods": "Melee MOD",
+        "preserveTypes": "Keep current MODs",
         "rangedMods": "Remote MOD",
-        "skillWeaponMods": "Tonglu MOD"
+        "skillWeaponMods": "Tonglu MOD",
+        "useInv": "Use user inventory"
     },
     "book-detail": {
-        "title": "Book Details"
+        "countSuffix": "Entry count: {{count}}",
+        "entryCount": "Entry count",
+        "mechanismId": "Mechanism ID",
+        "notFound": "Book not found",
+        "point": "Point",
+        "region": "Region",
+        "subRegion": "Subregion",
+        "summary": "Summary",
+        "title": "Book Details",
+        "treasurePoint": "Treasure point",
+        "treasurePointSuffix": "Treasure point",
+        "type": {
+            "drop": "Exploration pickup",
+            "read": "Direct acquisition",
+            "treasureChest": "Treasure chest",
+            "unknown": "Unknown type"
+        }
     },
     "book-list": {
-        "title": "Book List"
+        "allRegions": "All regions",
+        "enableFullTextSearch": "Enable full-text search (pinyin not supported)",
+        "searchPlaceholder": "Search book ID/name/description/text...",
+        "searchPlaceholderPinyin": "Search book ID/name/description (pinyin supported)...",
+        "title": "Book List",
+        "totalCount": "{{count}} books total"
+    },
+    "box-drop": {
+        "boxMaximum": "Max total",
+        "boxPerDay": "Daily max",
+        "consume": "Cost",
+        "draw": "Draw",
+        "draw1": "Draw 1",
+        "draw10": "Draw 10",
+        "lastResult": "Latest result",
+        "limit": "Limit",
+        "quantity": "Qty",
+        "rewardCount": "{{count}} items",
+        "rewardIndex": "Reward group",
+        "rewardList": "Reward list",
+        "rewardSet": "Reward set",
+        "simulation": "Simulation",
+        "simulationCount": "Simulation count",
+        "statistics": "Statistics",
+        "title": "Draw",
+        "totalCapacity": "Total capacity"
     },
     "build-compare": {
         "additional_buff_list": "Additional BUFF List",
@@ -5692,6 +5959,7 @@
         "shield": "Shield",
         "shot_damage": "Shot Damage",
         "simulator": "simulation",
+        "skill": "Consonance",
         "skill_level": "Skill Level",
         "skill_weapon": "Skill/Weapon",
         "skill_weapon_mod_config": "Resonance Weapon MOD Configuration",
@@ -5723,14 +5991,36 @@
         "title": "Character Details"
     },
     "char-list": {
-        "title": "Character List"
+        "empty": "No matching characters found",
+        "searchPlaceholder": "Search character name, alias, faction (pinyin supported)...",
+        "tabs": {
+            "all": "All",
+            "control": "Control",
+            "defense": "Defense",
+            "heal": "Heal",
+            "homologyWeapon": "Homology Weapon",
+            "maxHp": "Max HP",
+            "output": "Damage",
+            "sanityRegen": "Sanity Regen",
+            "shield": "Shield",
+            "skillDamage": "Skill Damage",
+            "summon": "Summon",
+            "support": "Support",
+            "weaponDamage": "Weapon Damage"
+        },
+        "title": "Character List",
+        "totalSuffix": "characters",
+        "unreleasedHint": "Unreleased content may change"
     },
     "chat": {
         "addRoom": "Create New Room",
+        "ai": "AI",
         "autoJoin": "Auto Join",
         "block": "Block",
+        "blockSuccess": "Blocked {{name}}",
         "cancelReply": "Cancel Reply",
         "chatPlaceholder": "Enter chat content",
+        "confirm": "Confirm",
         "copy": "Copy",
         "deleteRoomConfirm": "Are you sure you want to delete this room?",
         "deleteRoomFailed": "Deletion Failed",
@@ -5739,11 +6029,14 @@
         "edited": "(Edited)",
         "follow": "Follow",
         "hello": "Hello everyone",
+        "imagePreview": "[Image]",
         "insertImage": "Send Image",
         "joinFailed": "Join Failed",
         "joinFailedTip": "The room may be full",
         "keyboardShortcut": "Keyboard Shortcut to Join | Right-click to set key",
         "keyboardShortcutSetting": "Keyboard Shortcut Settings",
+        "latest": "Latest messages",
+        "messagePreview": "[Message]",
         "micOn": "Turn on Microphone",
         "needLogin": "Login required for chat function",
         "newRoomBanner": "No one has spoken yet, be the first!",
@@ -5761,17 +6054,51 @@
         "send": "Send",
         "sendTask": "Send UID (Clipboard) | Right-click to send automatically",
         "sound": "Notification Sound",
+        "system": "System",
         "title": "Chat",
         "unblock": "Unblock",
+        "unblockSuccess": "Unblocked {{name}}",
         "unlimited": "Unlimited",
+        "user": "Me",
         "you": "You"
+    },
+    "cloudgame": {
+        "closeWindowFailed": "Failed to close cloud gaming window",
+        "openWindowFailed": "Failed to open cloud gaming window"
     },
     "common": {
         "delete": "Delete"
     },
     "counter": {
+        "action": {
+            "count": "Count {{amount}}",
+            "reset": "Reset"
+        },
+        "addTrigger": "Add trigger",
+        "create": "Create counter",
+        "defaultName": "Counter {{index}}",
+        "defaults": {
+            "dungeonMoling": "Dungeon Moling",
+            "endlessDungeonMoling": "Endless Dungeon Moling",
+            "fishingBonus": "Fishing bonus"
+        },
+        "deleteCounter": "Delete counter",
         "desc": "Counters",
-        "title": "Counter"
+        "dragTrigger": "Drag trigger",
+        "expandSettings": "Expand counter settings",
+        "hotkeyPlaceholder": "Set hotkey",
+        "maxValue": "Max value",
+        "moving": "Moving",
+        "resetAll": "Reset all",
+        "resetCounter": "Reset counter",
+        "resetCron": "Reset cycle",
+        "title": "Counter",
+        "triggers": "Triggers",
+        "unlimited": "Unlimited"
+    },
+    "damage": {
+        "desc": "Break down CharBuild damage formulas step by step and support manual overrides",
+        "title": "Damage breakdown"
     },
     "damageResult": {
         "critDamage": {
@@ -5831,6 +6158,8 @@
         "impr_desc": "View impression increase information for quests, NPCs, and dispatch quests",
         "map": "Map",
         "map_desc": "View Map Markers",
+        "mapLocal": "Moling map",
+        "mapLocal_desc": "Detailed Moling spawn points",
         "mod": "Mod",
         "mod_desc": "View mod information and attributes",
         "monster": "Monster",
@@ -5881,6 +6210,16 @@
     },
     "dna-home": {
         "desc": "Game Information/Check-in/Browse Posts",
+        "lastUpdate": "Last updated",
+        "loadMineFailed": "Failed to load user info",
+        "refreshCurrentPage": "Refresh current page",
+        "tabs": {
+            "announcement": "Announcements",
+            "flowQuery": "Flow query",
+            "forum": "Forum",
+            "gameInfo": "Game info",
+            "signIn": "Check-in"
+        },
         "title": "Jiaojiaojiao"
     },
     "dna-post": {
@@ -5953,18 +6292,66 @@
     "DNA动了Ⅰ": "My DNA Is Responding Ⅰ",
     "DNA动了Ⅱ": "My DNA Is Responding Ⅱ",
     "DNA动了Ⅲ": "My DNA Is Responding Ⅲ",
+    "dps-view": {
+        "buildId": "Build ID",
+        "createdAt": "Created at",
+        "details": "Details",
+        "empty": "No DPS data yet",
+        "rankList": "Character DPS list",
+        "rankTitle": "Character DPS ranking",
+        "searchPlaceholder": "Search characters...",
+        "sortByCreatedAt": "Sort by creation time",
+        "sortByDpsValue": "Sort by DPS",
+        "tierCount": "{{count}} characters",
+        "tierList": "Tier list",
+        "timelineId": "Timeline ID"
+    },
     "draft-list": {
         "title": "Drawing list"
     },
     "dungeon-detail": {
-        "title": "Copy details"
+        "allMonster": "Normal monsters",
+        "allReward": "Rewards",
+        "count": "{{count}} types total",
+        "currentMonsterLevelBase": "Current monster level base Lv.{{level}} (+{{step}} per wave, max {{max}})",
+        "emptyMonster": "No monster data",
+        "emptyReward": "No reward data",
+        "endlessDungeonLevelControlledByWave": "Endless dungeon level is controlled by the wave slider above",
+        "endlessWave": "Endless wave",
+        "groupMonster": "Grouped monsters",
+        "groupMonsterCount": "Group members ({{count}} types)",
+        "groupReward": "Reward group",
+        "monster": "Monster",
+        "monsterCount": "Monster: {{count}} types",
+        "monsterWave": "Monster wave",
+        "noWaveData": "No wave data",
+        "pumpkingTitle": "Pumpkin box",
+        "refreshRange": "Refresh range ({{platform}})",
+        "refreshRangeDisplay": "Refresh range display",
+        "rewardList": "Reward list",
+        "specialMonster": "Special monsters",
+        "specialReward": "Special rewards",
+        "title": "Copy details",
+        "totalWaveReward": "Wave reward total (waves 1-{{count}})",
+        "wave": "Wave"
     },
     "dungeon-list": {
-        "title": "Replica list"
+        "level": "Level",
+        "monster": "Monster",
+        "nightHandbook": "Night Handbook",
+        "reward": "Reward",
+        "searchPlaceholder": "Search dungeon ID/name/description/level/reward (pinyin supported)...",
+        "special": "Special",
+        "title": "Replica list",
+        "totalCount": "{{count}} dungeons total",
+        "type": "Type"
     },
     "errorBoundary": {
         "retry": "Retry",
         "title": "Component Rendering Error"
+    },
+    "event": {
+        "rule": "Rule"
     },
     "event-detail": {
         "title": "Event details"
@@ -6205,6 +6592,18 @@
         "welcome": "Welcome to DNA Builder"
     },
     "Home, Sweet Home": "Home, Sweet Home",
+    "impr": {
+        "all": "All",
+        "count": "{{count}} impressions",
+        "region": "Region",
+        "searchPlaceholder": "Search impression entries",
+        "source": "Source",
+        "sourceDynquest": "Dispatch quest",
+        "sourceNpc": "NPC",
+        "sourceQuest": "Quest",
+        "title": "Region reputation",
+        "type": "Five stats"
+    },
     "interact测试": "interact测试",
     "inventory": {
         "desc": "Customize your Wedge and weapon loadout",
@@ -6220,10 +6619,17 @@
         "btn_unpin_window": "Unpin window"
     },
     "map-detail": {
+        "notFound": "Map not found",
         "title": "Map"
     },
     "map-list": {
         "title": "Map List"
+    },
+    "map-list-page": {
+        "searchPlaceholder": "Search map ID/name/description...",
+        "showList": "Show map list",
+        "title": "Map list",
+        "totalCount": "{{count}} maps total"
     },
     "map-local": {
         "title": "Map"
@@ -6241,14 +6647,50 @@
     "modEditor": {
         "inputCode": "Please enter character or weapon code"
     },
+    "monster": {
+        "dropInfo": "Drop info",
+        "dropRate": "Drop rate {{rate}}%",
+        "faction": "Faction {{faction}}",
+        "killScore": "Score {{score}}",
+        "mechanism": "Mechanism {{id}}"
+    },
     "monster-detail": {
-        "title": "Monster details"
+        "appearingAbyss": "Appears in abyss",
+        "appearingDungeon": "Appears in dungeon",
+        "attack": "Attack",
+        "badgeTitle": "Maze",
+        "defense": "Defense",
+        "defenseDamageReductionRate": "Defense damage reduction rate",
+        "drop": "Drop",
+        "dropMechanismId": "Mechanism ID",
+        "dropMonsterTag": "Monster tag",
+        "dropRate": "Treasure drop rate",
+        "effectiveHealth": "Effective health",
+        "factionOther": "Other",
+        "factionPrefix": "Faction",
+        "growthPreview": "Level growth preview",
+        "hp": "HP",
+        "killScore": "Kill score",
+        "level": "Level",
+        "levelDamageReductionRate": "Level damage reduction rate",
+        "monsterTagInfo": "Commander info",
+        "shield": "Shield",
+        "showDetail": "View details",
+        "showEightHp": "8x HP",
+        "stance": "Stance",
+        "title": "Monster details",
+        "value": "Value"
     },
     "monster-list": {
         "title": "Monster list"
     },
     "monster-tag-detail": {
+        "bonus": "Bonus",
+        "description": "Description",
         "meterSuffix": "m",
+        "params": "Parameters",
+        "relatedMonsters": "Related monsters",
+        "sameTags": "Similar tags",
         "title": "Commander Details"
     },
     "more": {
@@ -6256,9 +6698,123 @@
         "title": "More"
     },
     "node-editor": {
+        "addCalc": {
+            "description": "Calculate the sum of input values",
+            "result": "Result",
+            "title": "Addition",
+            "waiting": "Waiting for input..."
+        },
+        "astExpression": {
+            "description": "Validate AST expressions",
+            "expression": "Expression",
+            "expressionPlaceholder": "Damage",
+            "missingCore": "Missing core calculation node",
+            "result": "Result",
+            "title": "AST expression",
+            "unknownError": "Unknown error",
+            "waiting": "Waiting for input..."
+        },
+        "attrCalc": {
+            "base": "Base stats",
+            "other": "Other stats",
+            "title": "Attribute calculation",
+            "waiting": "Waiting for input..."
+        },
+        "buffInput": {
+            "addBuffSlot": "Add buff slot",
+            "description": "Search and select buffs",
+            "search": "Search (pinyin supported)",
+            "searchPlaceholder": "Enter buff name or pinyin",
+            "selectBuff": "Select buff",
+            "title": "Buff input"
+        },
+        "coreCalc": {
+            "currentAvailable": "Currently available",
+            "defaultSkill": "Select default skill:",
+            "errorInfo": "Error info:",
+            "missingInputs": "Missing required inputs:",
+            "selectSkill": "Please select a skill",
+            "waiting": "Waiting for input"
+        },
+        "enemyInput": {
+            "attack": "Attack",
+            "attributes": "Enemy attributes (current level)",
+            "defense": "Defense",
+            "enemy": "Enemy",
+            "enemyLevel": "Enemy level",
+            "enemyResistance": "Enemy resistance",
+            "hp": "HP",
+            "stance": "Stance"
+        },
         "expressionCalc": {
             "description": "Evaluate a custom expression",
+            "expression": "Expression",
+            "expressionPlaceholder": "e.g. a + b * c",
+            "inputCount": "Input count:",
+            "result": "Result",
             "title": "Expression Calc"
+        },
+        "fullCalc": {
+            "description": "Complete damage calculation based on the core calculation node",
+            "result": "Result",
+            "title": "Full calculation",
+            "waiting": "Waiting for input..."
+        },
+        "meleeWeaponInput": {
+            "chooseLevel": "Choose level",
+            "chooseWeapon": "Choose melee weapon",
+            "description": "Melee weapon selection",
+            "refineLevel": "Refinement level",
+            "title": "Melee weapon input",
+            "weapon": "Melee weapon",
+            "weaponLevel": "Weapon level"
+        },
+        "modInput": {
+            "addModSlot": "Add MOD slot",
+            "chooseLevel": "Choose level",
+            "chooseMod": "Choose MOD",
+            "element": "MOD element",
+            "type": "MOD type"
+        },
+        "multiplyCalc": {
+            "description": "Calculate the product of input values",
+            "result": "Result",
+            "title": "Multiplication",
+            "waiting": "Waiting for input..."
+        },
+        "rangedWeaponInput": {
+            "chooseLevel": "Choose level",
+            "chooseWeapon": "Choose ranged weapon",
+            "description": "Ranged weapon selection",
+            "refineLevel": "Refinement level",
+            "title": "Ranged weapon input",
+            "weapon": "Ranged weapon",
+            "weaponLevel": "Weapon level"
+        },
+        "skillDmg": {
+            "description": "Calculate skill damage",
+            "expectedDamage": "Expected damage",
+            "noHpDamage": "Damage without HP factor",
+            "result": "Damage result",
+            "waiting": "Waiting for input..."
+        },
+        "weaponAttr": {
+            "attack": "Attack",
+            "attackSpeed": "Attack speed",
+            "critDamage": "Critical damage",
+            "critRate": "Critical rate",
+            "multiShot": "Multishot",
+            "result": "Weapon attributes",
+            "triggerRate": "Trigger rate",
+            "waiting": "Waiting for input..."
+        },
+        "weaponDmg": {
+            "description": "Calculate weapon damage",
+            "expectedDamage": "Expected damage",
+            "higherCrit": "Higher crit",
+            "lowerCrit": "Lower crit",
+            "result": "Weapon damage",
+            "waiting": "Waiting for input..."
         }
     },
     "notfound": {
@@ -6311,6 +6867,62 @@
     "pet-list": {
         "title": "Geniemon List"
     },
+    "points-mall": {
+        "accountSettings": "Account settings",
+        "all": "All",
+        "availability": "Availability",
+        "balance": "Points balance",
+        "bubblePreview": "Bubble preview",
+        "confirmRedeem": "Confirm redemption",
+        "confirmRedeemDesc": "Spend {{cost}} points to redeem \"{{name}}\"?",
+        "currentAppearance": "Current appearance",
+        "default": "Default",
+        "equipAfterRedeem": "Please redeem this item first",
+        "equipFailed": "Failed to apply appearance",
+        "equipFailedRetry": "Failed to apply appearance, please try again later",
+        "equipSuccess": "Appearance applied",
+        "fetchProductsError": "Failed to fetch products, please try again later",
+        "fetchProductsFailed": "Failed to fetch points mall products",
+        "fetchSummaryError": "Failed to fetch points info, please try again later",
+        "fetchSummaryFailed": "Failed to fetch points mall summary",
+        "instructionLogin": "You must log in to redeem or equip items.",
+        "instructionNameEffect": "Name effects change how your nickname is displayed in chat.",
+        "instructionTitle": "Instructions",
+        "instructionTitleBadge": "Titles appear beside your nickname and represent achievements or status.",
+        "insufficientPoints": "Insufficient points",
+        "loginFirst": "Please log in to your DNA Builder account first",
+        "loginHint": "After logging in, you can view points and redeem appearances.",
+        "nameEffect": "Name effect",
+        "noPreview": "No preview available",
+        "noProducts": "No redeemable items",
+        "notInRedeemWindow": "This item is currently not within the redeem window",
+        "notOwned": "Not owned",
+        "other": "Other",
+        "owned": "Owned",
+        "points": "Points",
+        "pointsHint": "Points can be used to redeem titles, name effects, and other appearances.",
+        "preview": "Preview",
+        "previewHint": "Preview follows the current selection",
+        "previewNameCard": "Nickname effect shown after equip",
+        "previewTitle": "Title shown after equip",
+        "price": "Price",
+        "productList": "Product list",
+        "redeem": "Redeem",
+        "redeemFailed": "Redemption failed",
+        "redeemFailedRetry": "Redemption failed, please try again later",
+        "redeemSuccess": "Redemption successful",
+        "refresh": "Refresh",
+        "rewardType": {
+            "nameCard": "Name effect",
+            "title": "Title"
+        },
+        "summaryNotReady": "Unable to fetch points info right now, please try again later",
+        "title": "Points mall",
+        "use": "Use",
+        "used": "Used",
+        "useHint": "You can redeem items in the product list and click \"Use\" to switch appearances.",
+        "userFallback": "User"
+    },
     "questchain-detail": {
         "title": "Quest Chain Details"
     },
@@ -6319,6 +6931,10 @@
     },
     "raid-rank": {
         "title": "Ranking rewards"
+    },
+    "ranking": {
+        "desc": "Ranking list",
+        "title": "Ranking"
     },
     "reputation": {
         "accumulatedExp": "Accumulated EXP",
@@ -6359,12 +6975,21 @@
     },
     "resource": {
         "background": "Background",
+        "book": "Book",
         "description": "Description",
+        "fish": "Fish",
         "icon": "Icon",
         "id": "ID",
+        "mapPointCount": "points",
+        "mapPoints": "Map points",
+        "mapPointsJump": "Map points (click to jump)",
         "name": "Name",
+        "optionGroup": "Option group",
+        "packReward": "Pack reward",
         "rarity": "Rarity",
         "searchPlaceholder": "Search resource IDs or names (supports pinyin)...",
+        "selectReward": "Selectable reward",
+        "selectRewardTag": "Selectable",
         "source": "Source",
         "title": "Resources"
     },
@@ -6552,21 +7177,52 @@
         "appearance": "Appearance",
         "cancel": "Cancel",
         "confirm": "confirm",
+        "current": "Current",
+        "customSource": "Custom",
         "darkTheme": "Dark Theme",
+        "dataPackManagement": "Data pack management",
+        "dataPackSourceAddress": "Data pack source address",
         "desc": "Custom application settings",
+        "download": "Download",
+        "downloaded": "Downloaded",
+        "female": "Female",
+        "initScriptHotkeysAtStartup": "Initialize script hotkeys at startup",
         "lang": "Language",
         "launchAtStartup": "Launch at startup",
         "launchAtStartupTip": "Start the desktop app automatically after you sign in",
         "lightTheme": "Light Theme",
+        "male": "Male",
+        "missingDragDataPack": "No draggable data pack found:",
+        "noAvailableVersions": "No available versions",
+        "noDescription": "No description",
         "noModelAvailable": "No Model Available",
+        "noSafeModeQuestion": "There is no question available for verification right now",
+        "officialSource": "Official source",
         "other": "Other settings",
+        "prepareDragDataPackFailed": "Failed to prepare draggable data pack",
+        "protagonistGender1": "Protagonist gender 1",
+        "protagonistGender2": "Protagonist gender 2",
+        "protagonistName1": "Protagonist name 1",
+        "protagonistName2": "Protagonist name 2",
+        "refresh": "Refresh",
         "reset": "Reset all settings",
         "resetConfirm": "Are you sure to reset all settings?",
         "resetTip": "If there is an error on the page, try resetting it.",
+        "safeMode": "Safe mode",
+        "safeModeAnswerWrong": "Wrong answer, safe mode remains enabled",
+        "safeModeHint": "You know too much",
         "showAIChat": "Show AI fitting assistant",
+        "storyText": "Story text",
         "theme": "Theme",
         "title": "Settings",
         "uiScale": "UI Scale",
+        "uninstall": "Uninstall",
+        "uninstallDataPack": "Uninstall data pack",
+        "uninstallDataPackConfirm": "Are you sure you want to uninstall {{version}}?",
+        "unknown": "Unknown",
+        "updateLaunchAtStartupFailed": "Failed to update launch-on-startup setting",
+        "use": "Use",
+        "versionList": "Version list",
         "windowTrasnparent": "Window Transparency",
         "windowTrasnparentTip": "Windows and surfaces show translucency",
         "winMaterial": "Window Material"
@@ -6588,18 +7244,71 @@
     },
     "TalkObject_Test": "TalkObject_Test",
     "timeline": {
+        "addTrack": "Add track",
+        "addTrackError": "Error while adding track:",
+        "addTrackFailed": "Failed to add track, please try again",
+        "addTrackLimitReached": "Track limit reached ({{max}}), cannot add more tracks!",
+        "addTrackNameTypeError": "Failed to add track: track name must be a string",
+        "attributeImpact": "Attribute impact",
+        "brushMode": "Brush mode",
+        "buffTooltip": "BUFF only affects skills on the same track or above it",
+        "buffTrack": "BUFF",
+        "cleanupDragStateError": "Error while cleaning up drag state:",
+        "clear": "Clear",
+        "clearItemSelectionError": "Error clearing item selection state:",
+        "clearSelectionError": "Error while clearing selection state:",
         "click_to_load": "Click to load",
+        "damagePlaceholder": "Damage",
+        "deleteItemError": "Error while deleting item:",
+        "deleteItemNotFound": "Item to delete was not found during confirmation",
+        "deleteMode": "Delete mode",
+        "deleteSelectedItemsError": "Error while deleting selected items:",
         "desc": "Customize the character's combat logic (axis fighting)",
+        "dragAdjustDuration": "Drag to adjust duration",
+        "dragAdjustStartTime": "Drag to adjust start time",
         "export_json": "Export JSON",
+        "generateSample": "Generate sample",
+        "handleTrackClickError": "Error while handling track click:",
+        "healthCurve": "HP curve",
+        "healthLabel": "HP",
+        "horizontalScrollError": "Error while scrolling horizontally:",
         "import_json": "Load JSON",
+        "importJsonFailed": "Failed to import JSON",
+        "invalidTrackIndex": "Invalid track index:",
         "load_save": "Load/Save",
         "new_scheme": "New scheme",
         "overwrite_confirm_message": "Timeline {{name}} already exists. Overwrite it?",
         "overwrite_confirm_title": "Confirm overwrite",
+        "removeLastTrackNotAllowed": "Cannot remove the last track!",
+        "removeTrackError": "Error while deleting track:",
+        "removeTrackFailed": "Failed to delete track, please try again",
+        "removeTrackInvalidIndex": "Failed to delete track: invalid track index",
         "rename": "Rename",
+        "renameTrackError": "Error while renaming track:",
+        "renameTrackFailed": "Failed to rename track, please try again",
+        "renameTrackIndexRangeError": "Failed to rename track: track index is out of range",
+        "renameTrackIndexTypeError": "Failed to rename track: track index must be a number",
+        "renameTrackNameTypeError": "Failed to rename track: track name must be a string",
+        "resetView": "Reset view",
         "save": "Save",
         "save_scheme": "Save scheme",
-        "title": "Timeline"
+        "selectMode": "Select mode",
+        "skillNotFound": "Skill {{base}} not found",
+        "skillPrefix": "Skill",
+        "skillTrack": "Skill",
+        "stopPropagationError": "Error stopping event propagation:",
+        "timeLabel": "Time",
+        "timelineNameConflictsWithSkill": "Timeline name cannot be the same as a skill name",
+        "timelineNameInvalidChars": "Timeline name cannot contain symbols such as ()+-*/.",
+        "title": "Timeline",
+        "trackNameDefault": "Track {{number}}",
+        "trackNameDuplicate": "Track with the same name already exists!",
+        "trackNameExists": "Track name \"{{name}}\" already exists, please use another name!",
+        "trackNameRequired": "Track name cannot be empty!",
+        "trackNameTooLong": "Track name cannot exceed 30 characters!",
+        "updateDragPreviewError": "Error while updating drag preview position:",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out"
     },
     "todo": {
         "completeFailed": "Failed to mark as completed",
@@ -6705,6 +7414,11 @@
         "desc": "Read and export pak files",
         "title": "Unpack"
     },
+    "update": {
+        "checkFailed": "Update check failed:",
+        "downloadInstallFailed": "Failed to download and install update:",
+        "noUpdateAvailable": "No updates available"
+    },
     "updater": {
         "newVersionFound": "New version v{{version}} found",
         "newVersionMessage": "\n\n{{body}}\n\nDo you want to automatically download and install the update?",
@@ -6718,6 +7432,45 @@
         "updateFailed": "Update Failed",
         "updating": "Updating..."
     },
+    "view": {
+        "all": "All",
+        "allModules": "All modules",
+        "contentAuthorizationDesc": "Unless otherwise noted, the site's text content is licensed under CC BY-SA 3.0, and images and other media follow their original licenses.",
+        "contentAuthorizationDesc2": "When using this site's content, you must provide appropriate attribution, link to this license, and indicate whether changes were made to the original work; you must not imply endorsement by this site.",
+        "contentAuthorizationTitle": "Content licensing",
+        "contentCount": "Content sections",
+        "databaseEntryCount": "Database entries",
+        "featuredEntry": "Featured entry",
+        "globalSearchEntry": "Global search entry",
+        "matchCount": "{{count}} results matched",
+        "moduleCount": "{{count}} modules selected",
+        "noResult": "No matching content found. Try keywords like characters, maps, quests, dungeons, or monsters.",
+        "noResultEntries": "No matching database entries found",
+        "placeholder": "Search selected modules...",
+        "searchScope": "Current search scope: {{scope}}",
+        "section": {
+            "build": {
+                "badge": "Build",
+                "description": "Focus on character growth, equipment combinations, and upgrade materials to quickly find core build resources.",
+                "title": "Build & Growth"
+            },
+            "challenge": {
+                "badge": "Challenge",
+                "description": "For boss, monster, achievement, and title targets, making it easy to search continuously around challenge goals.",
+                "title": "Challenge & Collection"
+            },
+            "explore": {
+                "badge": "Explore",
+                "description": "Aggregates region, dungeon, respawn point, and gathering info, prioritizing route planning for exploration, gathering, and dungeon runs.",
+                "title": "Maps & Exploration"
+            },
+            "world": {
+                "badge": "World",
+                "description": "Groups NPCs, dynamic quests, topics, reputation, and codex-style content into one layer to reduce worldbuilding search overhead.",
+                "title": "Quests & World"
+            }
+        }
+    },
     "walnut-list": {
         "title": "Walnut List"
     },
@@ -6725,9 +7478,11 @@
         "title": "Weapon details"
     },
     "weapon-list": {
+        "defaultOrder": "Default order",
         "income": "Gain",
         "noResults": "No matching weapons found",
         "searchPlaceholder": "Search weapon names or types (supports pinyin)...",
+        "sortByIncome": "Sort by income: high to low",
         "title": "Weapons list"
     },
     "Wuyou01": "Wuyou01"

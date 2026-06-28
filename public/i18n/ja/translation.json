@@ -4122,6 +4122,7 @@
     "通用鱼饵": "普通のエサ",
     "同福饭馆店小二": "同福飯店の給仕",
     "同类相吸": "ウオエサ",
+    "同律": "コンソナンス",
     "同律近战": "近接同調武器",
     "同律远程": "遠隔同調武器",
     "同时持有10只突破至3阶的魔灵": "同時にランク3まで突破したジェネモン10体所持",
@@ -5450,8 +5451,72 @@
         "title": "アビスリスト"
     },
     "abyss-usage": {
+        "allLevels": "全レベル",
+        "assistant": "編成アシスタント",
+        "assistantDesc": "キャラクターのよく使われる編成を確認",
+        "available": "利用可能",
+        "buildUploadDataFailed": "深淵アップロードデータの生成に失敗しました",
+        "createdAt": "作成時刻",
         "desc": "アビスの編成とキャラ・武器の統計",
-        "title": "アビス使用率"
+        "emptyUploadResult": "アップロード結果が空です",
+        "export": "エクスポート",
+        "exportFailed": "深淵投稿のエクスポートに失敗しました",
+        "exportSuccess": "深淵投稿をエクスポートしました",
+        "level": "レベル",
+        "levelDistribution": "レベル分布",
+        "loadDefaultRoleFailed": "デフォルトキャラクター情報の読み込みに失敗しました",
+        "loadLatestRoleInfoFailed": "最新キャラクター情報の読み込みに失敗しました",
+        "loadStatsFailed": "深淵統計の読み込みに失敗しました",
+        "loginFirst": "先にログインしてください",
+        "mainChar": "メインキャラ",
+        "mainCharId": "メインキャラID",
+        "mainOnly": "メインのみ",
+        "meleeWeapon": "近接武器",
+        "meleeWeaponId": "近接武器ID",
+        "missingUid": "UID がありません",
+        "mostUsedLineup": "最も使用された編成",
+        "mostUsedLineupDesc": "出場数が最も多い編成",
+        "noExportableSubmissions": "エクスポート可能な深淵投稿がありません",
+        "noResult": "結果がありません",
+        "noUploadData": "アップロード可能な深淵データがありません",
+        "pet": "魔霊",
+        "petId": "魔霊ID",
+        "rangedWeapon": "遠隔武器",
+        "rangedWeaponId": "遠隔武器ID",
+        "refresh": "更新",
+        "roleParticipation": "キャラクター参加",
+        "roleSourceDistribution": "キャラクター由来分布",
+        "roleType": "キャラクタータイプ",
+        "roleUsage": "キャラクター使用率",
+        "seasonId": "シーズンID",
+        "selectRole": "キャラクターを選択してください",
+        "sheetRole": "キャラクター参加",
+        "sheetSubmission": "投稿",
+        "sheetWeapon": "武器参加",
+        "skillLevel": "スキルレベル",
+        "stars": "星級",
+        "submissionsFrom": "このページは {{count}} 人のプレイヤーのデータに基づいています。使用率 = 該当キャラを使用したプレイヤー数 ÷ 所持しているプレイヤー数",
+        "submitCount": "{{count}} 回の投稿",
+        "submitId": "投稿ID",
+        "support1": "助戦1",
+        "support1Id": "助戦1ID",
+        "support2": "助戦2",
+        "support2Id": "助戦2ID",
+        "supportWeapon1": "助戦武器1",
+        "supportWeapon1Id": "助戦武器1ID",
+        "supportWeapon2": "助戦武器2",
+        "supportWeapon2Id": "助戦武器2ID",
+        "title": "アビス使用率",
+        "uidSha256": "UID_SHA256",
+        "updatedAt": "更新時刻",
+        "upload": "アップロード",
+        "uploadFailed": "深淵データのアップロードに失敗しました",
+        "uploadSuccess": "深淵データをアップロードしました",
+        "uploadSuccessWithReward": "深淵データをアップロードしました、経験値+{{exp}}、ポイント+{{points}}",
+        "weaponForgeDistribution": "武器熔鋳分布",
+        "weaponId": "武器ID",
+        "weaponName": "武器名",
+        "weaponParticipation": "武器参加"
     },
     "accessory": {
         "category": "カテゴリ",
@@ -5519,7 +5584,14 @@
         "unnamedAchievement": "名前のない実績"
     },
     "achievement-detail": {
-        "title": "実績詳細"
+        "basicInfo": "基本情報",
+        "category": "分類",
+        "desc": "説明",
+        "name": "名前",
+        "quality": "品質",
+        "reward": "報酬",
+        "title": "実績詳細",
+        "version": "バージョン"
     },
     "achievement-list": {
         "desc": "ゲーム実績の進捗を確認",
@@ -5532,11 +5604,13 @@
         "end_suffix": "後",
         "ended_suffix": "前",
         "load_error": "アクティビティデータの読み込みに失敗しました",
+        "local": "ローカル",
         "moling_completed": "今周期のエコー完了",
         "moling_desc": "3日ごとに更新",
         "moling_refresh": "エコー更新",
         "moling_refresh_next": "次回エコー更新",
         "no_activities": "アクティビティがありません",
+        "remote": "リモート",
         "start": "開始",
         "status_ended": "終了済み",
         "status_ongoing": "進行中",
@@ -5553,21 +5627,214 @@
         "commandInputPlaceholder": "メッセージ送信またはコマンドの入力/選択。画像の貼り付けやドラッグ&ドロップにも対応しています。",
         "desc": "AI エージェントを使用してゲームと対話する",
         "inputMessage": "メッセージを入力し、Enterキーを押して送信",
+        "loading": "読み込み中...",
         "mcp_manual_stop_message": "MCP サーバーは手動で終了する必要があります。\n\nタスク マネージャーで 'dna_mcp_server.exe' プロセスを終了してください。\n\n今すぐタスク マネージャーを開きますか？",
+        "mcpAppOnly": "デスクトップアプリのみ",
+        "mcpNoResponse": "MCP サーバーが応答しません",
+        "mcpNotStarted": "MCP サーバーは起動していません",
+        "mcpRunning": "MCP サーバーは実行中です",
+        "mcpStartedButNoResponse": "MCP サーバーは起動しましたが応答がありません",
+        "mcpStartFailed": "MCP サーバーの起動に失敗しました",
+        "mcpStarting": "MCP サーバーを起動しています...",
+        "mcpStopFailed": "MCP サーバーの停止に失敗しました",
+        "mcpStopped": "MCP サーバーは停止しました",
+        "mcpStopping": "MCP サーバーを停止しています...",
+        "mcpTitle": "MCP サーバー",
+        "newConversation": "新しい会話",
+        "recentConversations": "最近の会話",
+        "startMcp": "MCP サーバーを起動",
+        "startMcpAdminTooltip": "管理者権限で MCP サーバーを起動します",
+        "stopMcp": "停止",
         "title": "AIエージェント",
         "user": "ユーザー"
     },
+    "ai-chat": {
+        "assistantNotInitialized": "AIアシスタントが初期化されていません。先にAI設定を行ってください。",
+        "automationContinuePrompt": "前回未完了の自動配装ワークフロー（ラウンド {{round}}）を続行してください。\n要件:\n1. 必要なツールを呼び出し続けて、ワークフローを前進させてください。\n2. 完了したら {{doneTag}} をそれ単独の行で出力してください。\n3. 未完了なら {{continueTag}} をそれ単独の行で出力してください。",
+        "automationIncompleteWarning": "⚠️ 期待されたラウンド内にワークフローの完了が確認されませんでした。続けるには「continue」を送信してください。",
+        "automationPrompt": "あなたは現在「配装自動化実行モード」です。\n次のルールを厳守してください:\n1. テキストで助言するだけでなく、ツールを呼び出して実際に設定を変更してください。\n2. 最適な配装を計算したい場合は autoBuild を優先し、最後に apply=true で設定を書き込んでください。\n3. 効果付き MOD / 武器を扱うときは、まず queryEffectConfig を呼んで状態を確認し、必要なら autoBuild の前に setEffectConfig を使ってください。\n4. 今回の自動化をすべて終えたら、最後に独立した1行で {{doneTag}} を出力してください。\n5. さらに次のラウンドが必要なら、最後に独立した1行で {{continueTag}} を出力してください。\n\nユーザーの要望:\n{{userMessage}}",
+        "automationRoundTag": "【自動化ラウンド {{round}}】",
+        "clearChatFailed": "配装アシスタントの会話履歴を消去できませんでした",
+        "error": {
+            "apiKey": "❌ APIキーが無効か未設定です\n\n確認してください:\n1. 設定のAPIキーが正しいか\n2. APIの利用枠が十分にあるか\n\n設定からAPIキーを再設定できます。",
+            "generic": "申し訳ありません。リクエストの処理中にエラーが発生しました。",
+            "network": "❌ ネットワーク接続に失敗しました\n\n確認してください:\n1. ネットワーク接続が正常か\n2. APIサービスが利用可能か\n3. プロキシ設定が正しいか",
+            "rateLimit": "❌ リクエストが多すぎます\n\nAPI呼び出しの上限に達しました。しばらく待ってからもう一度お試しください。",
+            "requestFailed": "❌ リクエストに失敗しました\n\n{{message}}",
+            "sdk": "❌ SDKの互換性に問題があります\n\nページを更新して再試行してください。問題が続く場合は、ブラウザのキャッシュを削除してアプリを再起動してください。",
+            "timeout": "❌ リクエストがタイムアウトしました\n\n応答に時間がかかりすぎました。ネットワーク接続を確認するか、質問を簡潔にして再試行してください。",
+            "unknown": "❌ 不明なエラーが発生しました\n\n詳細はコンソールを確認するか、ページを更新してみてください。"
+        },
+        "initProxyAgent": "サーバープロキシを使って AI Agent を初期化します",
+        "initProxyAgentFailed": "プロキシを使った AI Agent の初期化に失敗しました:",
+        "initUserAgent": "ユーザー設定の API キーを使って AI Agent を初期化します",
+        "initUserAgentFailed": "ユーザー設定で AI Agent の初期化に失敗しました:",
+        "inputPlaceholder": "質問してください...",
+        "loadChatFailed": "配装アシスタントの会話履歴の読み込みに失敗しました",
+        "noConfigMessage": "AIサービスが設定されていません。\n\nAI を設定するには次のいずれかを選択してください:\n1. 設定で API キーを構成する（推奨）\n2. 管理者にサーバー側の AI 設定を依頼する\n\n現在の状態:\n- ユーザー API キー: {{hasUserConfig}}",
+        "reasoning": "思考過程",
+        "retry": "再試行",
+        "saveChatFailed": "配装アシスタントの会話履歴の保存に失敗しました",
+        "saveChatFailedFallback": "配装アシスタントの会話履歴の保存に失敗しました（フォールバック）",
+        "sendMessageFailed": "メッセージの送信に失敗しました",
+        "tip": "ヒント: 「X はどう配装するべき？」や「Y を使う構成は？」のように質問できます",
+        "title": "配装アシスタント",
+        "welcome": "こんにちは！私は配装アシスタントです。キャラクターの構成最適化をお手伝いします。\n\n現在のキャラクター: {{charName}} ({{charElm}})\n\n次のような質問ができます:\n- {{charName}} を MOD ダメージ最大化でどう配装するべきですか？\n- {{charElm}} の MOD には何がありますか？\n- {{charName}} の会心ダメージをどう上げられますか？\n- 扶疏を使うときに {{charName}} のダメージを最大化する MOD 構成は？\n\n既定では、完全な配装ワークフローを実行し、構成の直接適用を試みます。"
+    },
+    "app": {
+        "initScriptHotkeysFailed": "起動時のスクリプトホットキー登録に失敗しました:",
+        "syncLaunchAtStartupFailed": "起動時の自動起動状態の同期に失敗しました:",
+        "title": "アプリ"
+    },
+    "ast-help": {
+        "apply": "式を適用",
+        "astPlaceholder": "式を入力すると AST ツリー構造を表示します",
+        "astTitle": "AST ツリー構造",
+        "clear": "クリア",
+        "examples": {
+            "baseStats": "基礎ステータス",
+            "complex": "複雑な式",
+            "critDamage": "会心ダメージ",
+            "expectedDamage": "期待ダメージ",
+            "functions": "関数の使い方",
+            "namespace": "名前空間",
+            "specialValue": "特殊値"
+        },
+        "examplesTitle": "式の例",
+        "functions": {
+            "ceil": "切り上げ",
+            "floor": "切り捨て",
+            "hp": "HP 比率に基づく効果倍率を計算します（x は HP 比率 0 から 1）",
+            "log": "自然対数",
+            "max": "最大値",
+            "min": "最小値",
+            "or": "論理 OR",
+            "power": "べき乗"
+        },
+        "functionsTitle": "関数リファレンス",
+        "inputLabel": "式を入力",
+        "inputPlaceholder": "式を入力してください。例: Attack + Defense",
+        "macrosTitle": "内蔵マクロ",
+        "members": {
+            "crit": "会心ダメージ",
+            "critTrigger": "会心と発動",
+            "n": "HP ベースの効果倍率を計算しない",
+            "noCrit": "非会心ダメージ",
+            "noCritNoTrigger": "非会心かつ未発動",
+            "noTrigger": "未発動ダメージ",
+            "noTriggerCrit": "会心かつ未発動",
+            "trigger": "発動ダメージ",
+            "triggerNoCrit": "非会心かつ発動"
+        },
+        "membersTitle": "ダメージタイプ参照",
+        "namespacesTitle": "名前空間参照",
+        "operators": {
+            "add": "加算",
+            "div": "除算",
+            "floordiv": "整数除算",
+            "mod": "剰余",
+            "mul": "乗算",
+            "sub": "減算"
+        },
+        "operatorsTitle": "演算子参照",
+        "parseError": "式の解析エラー",
+        "syntaxDesc": "式はダメージ、ステータス値などを計算するために使います。以下の構文をサポートしています:",
+        "syntaxItems": {
+            "function": {
+                "desc": "min(), max(), floor(), ceil(), or(), log(), power()",
+                "label": "関数"
+            },
+            "member": {
+                "desc": ". を使ってダメージタイプにアクセスします。例: .Crit と .NonCrit",
+                "label": "メンバーアクセス"
+            },
+            "namespace": {
+                "desc": ":: を使って名前空間にアクセスします。例: Icarus::Damage",
+                "label": "名前空間"
+            },
+            "number": {
+                "desc": "100 や 1.5 のように数値を直接入力します",
+                "label": "数値"
+            },
+            "operator": {
+                "desc": "+, -, *, /, %, //",
+                "label": "演算子"
+            },
+            "property": {
+                "desc": "攻撃、防御、HP などのキャラクターステータス名",
+                "label": "プロパティ"
+            },
+            "skill": {
+                "desc": "[幻影]ダメージのようなスキルダメージ項目",
+                "label": "技能"
+            },
+            "special": {
+                "desc": "特殊値",
+                "label": "特殊値"
+            }
+        },
+        "syntaxTitle": "式の構文",
+        "title": "式のヘルプ"
+    },
     "autobuild": {
         "charMods": "キャラクターMOD",
+        "desc": "現在の MOD 構成に基づいて最適な MOD 組み合わせを自動構築します",
+        "includeMelee": "近接を自動で差し替える",
+        "includeRanged": "遠隔を自動で差し替える",
+        "includeTypes": "MOD の種類を含める",
+        "log": "ログ",
         "meleeMods": "近接MOD",
+        "preserveTypes": "現在の MOD を保持",
         "rangedMods": "遠隔MOD",
-        "skillWeaponMods": "同律MOD"
+        "skillWeaponMods": "同律MOD",
+        "useInv": "ユーザー所持品を使用"
     },
     "book-detail": {
-        "title": "読物詳細"
+        "countSuffix": "項目数: {{count}}",
+        "entryCount": "項目数",
+        "mechanismId": "メカニズム ID",
+        "notFound": "読物が見つかりません",
+        "point": "地点",
+        "region": "地域",
+        "subRegion": "サブ地域",
+        "summary": "概要",
+        "title": "読物詳細",
+        "treasurePoint": "宝箱地点",
+        "treasurePointSuffix": "宝箱地点",
+        "type": {
+            "drop": "探索で入手",
+            "read": "直接入手",
+            "treasureChest": "宝箱入手",
+            "unknown": "不明なタイプ"
+        }
     },
     "book-list": {
-        "title": "読物一覧"
+        "allRegions": "すべての地域",
+        "enableFullTextSearch": "本文検索を有効にする（ピンインは非対応）",
+        "searchPlaceholder": "読物ID / 名前 / 説明 / 本文を検索...",
+        "searchPlaceholderPinyin": "読物ID / 名前 / 説明を検索（ピンイン対応）...",
+        "title": "読物一覧",
+        "totalCount": "合計 {{count}} 冊の読物"
+    },
+    "box-drop": {
+        "boxMaximum": "総上限",
+        "boxPerDay": "1日上限",
+        "consume": "消費",
+        "draw": "抽選",
+        "draw1": "1回引く",
+        "draw10": "10回引く",
+        "lastResult": "最新結果",
+        "limit": "制限",
+        "quantity": "個",
+        "rewardCount": "{{count}}個",
+        "rewardIndex": "報酬グループ",
+        "rewardList": "報酬一覧",
+        "rewardSet": "報酬セット",
+        "simulation": "シミュレーション",
+        "simulationCount": "シミュレーション回数",
+        "statistics": "統計",
+        "title": "抽選",
+        "totalCapacity": "総容量"
     },
     "build-compare": {
         "additional_buff_list": "追加BUFFリスト",
@@ -5670,6 +5937,7 @@
         "shield": "シールド",
         "shot_damage": "弾片ダメージ",
         "simulator": "シミュレーション",
+        "skill": "同律",
         "skill_level": "スキルレベル",
         "skill_weapon": "スキル/武器",
         "skill_weapon_mod_config": "同律武器MOD設定",
@@ -5701,14 +5969,36 @@
         "title": "キャラクター詳細"
     },
     "char-list": {
-        "title": "役割リスト"
+        "empty": "一致するキャラクターが見つかりません",
+        "searchPlaceholder": "キャラクター名、別名、陣営を検索（ピンイン対応）...",
+        "tabs": {
+            "all": "すべて",
+            "control": "制御",
+            "defense": "防御",
+            "heal": "回復",
+            "homologyWeapon": "同律武器",
+            "maxHp": "最大HP",
+            "output": "出力",
+            "sanityRegen": "理性回復",
+            "shield": "シールド",
+            "skillDamage": "スキルダメージ",
+            "summon": "召喚物",
+            "support": "支援",
+            "weaponDamage": "武器ダメージ"
+        },
+        "title": "役割リスト",
+        "totalSuffix": "人のキャラクター",
+        "unreleasedHint": "未リリースの内容は変更される場合があります"
     },
     "chat": {
         "addRoom": "新規ルーム作成",
+        "ai": "AI",
         "autoJoin": "自動参加",
         "block": "ブロック",
+        "blockSuccess": "{{name}} をブロックしました",
         "cancelReply": "返信をキャンセル",
         "chatPlaceholder": "チャット内容を入力",
+        "confirm": "確認",
         "copy": "コピー",
         "deleteRoomConfirm": "ルームを削除してもよろしいですか？",
         "deleteRoomFailed": "削除に失敗しました",
@@ -5717,11 +6007,14 @@
         "edited": "(編集済み)",
         "follow": "フォロー",
         "hello": "みなさん、こんにちは",
+        "imagePreview": "[画像]",
         "insertImage": "画像を送信",
         "joinFailed": "参加に失敗しました",
         "joinFailedTip": "ルームが満員の可能性があります",
         "keyboardShortcut": "キーボードショートカットで参加 | 右クリックでキー設定",
         "keyboardShortcutSetting": "キーボードショートカット設定",
+        "latest": "最新メッセージ",
+        "messagePreview": "[メッセージ]",
         "micOn": "マイクをオン",
         "needLogin": "チャット機能はログインが必要です",
         "newRoomBanner": "まだ誰も発言していません、最初になってみませんか！",
@@ -5739,17 +6032,51 @@
         "send": "送信",
         "sendTask": "UIDを送信 (クリップボード) | 右クリックで自動送信",
         "sound": "通知音",
+        "system": "システム",
         "title": "チャット",
         "unblock": "ブロック解除",
+        "unblockSuccess": "{{name}} のブロックを解除しました",
         "unlimited": "無制限",
+        "user": "自分",
         "you": "あなた"
+    },
+    "cloudgame": {
+        "closeWindowFailed": "クラウドゲームウィンドウを閉じられませんでした",
+        "openWindowFailed": "クラウドゲームウィンドウを開けませんでした"
     },
     "common": {
         "delete": "削除"
     },
     "counter": {
+        "action": {
+            "count": "カウント {{amount}}",
+            "reset": "リセット"
+        },
+        "addTrigger": "トリガーを追加",
+        "create": "カウンターを作成",
+        "defaultName": "カウンター {{index}}",
+        "defaults": {
+            "dungeonMoling": "ダンジョン魔霊",
+            "endlessDungeonMoling": "無限ダンジョン魔霊",
+            "fishingBonus": "釣りの追加報酬"
+        },
+        "deleteCounter": "カウンターを削除",
         "desc": "カウンター",
-        "title": "カウンター"
+        "dragTrigger": "トリガーをドラッグ",
+        "expandSettings": "カウンター設定を展開",
+        "hotkeyPlaceholder": "ホットキーを設定",
+        "maxValue": "上限値",
+        "moving": "移動中",
+        "resetAll": "すべてリセット",
+        "resetCounter": "カウンターをリセット",
+        "resetCron": "リセット周期",
+        "title": "カウンター",
+        "triggers": "トリガー",
+        "unlimited": "無制限"
+    },
+    "damage": {
+        "desc": "CharBuild のダメージ式を段階的に分解し、手動上書きをサポートします",
+        "title": "ダメージ分解"
     },
     "damageResult": {
         "critDamage": {
@@ -5809,6 +6136,8 @@
         "impr_desc": "クエスト、NPC、派遣クエストの印象増加情報を確認",
         "map": "マップ",
         "map_desc": "マップのマーカーを表示",
+        "mapLocal": "魔霊マップ",
+        "mapLocal_desc": "魔霊の詳細な出現地点",
         "mod": "モッド",
         "mod_desc": "モッド情報と属性を確認",
         "monster": "モンスター",
@@ -5859,6 +6188,16 @@
     },
     "dna-home": {
         "desc": "ゲーム情報/チェックイン/投稿閲覧",
+        "lastUpdate": "最終更新",
+        "loadMineFailed": "ユーザー情報の取得に失敗しました",
+        "refreshCurrentPage": "現在のページを更新",
+        "tabs": {
+            "announcement": "お知らせ",
+            "flowQuery": "流水検索",
+            "forum": "掲示板",
+            "gameInfo": "ゲーム情報",
+            "signIn": "ログイン"
+        },
         "title": "皎皎角"
     },
     "dna-post": {
@@ -5931,18 +6270,66 @@
     "DNA动了Ⅰ": "骨に刻まれた記憶 Ⅰ",
     "DNA动了Ⅱ": "骨に刻まれた記憶 Ⅱ",
     "DNA动了Ⅲ": "骨に刻まれた記憶 Ⅲ",
+    "dps-view": {
+        "buildId": "構築 ID",
+        "createdAt": "作成日時",
+        "details": "詳細",
+        "empty": "DPS データがまだありません",
+        "rankList": "キャラクター DPS 一覧",
+        "rankTitle": "キャラクター DPS ランキング",
+        "searchPlaceholder": "キャラクターを検索...",
+        "sortByCreatedAt": "作成日時順",
+        "sortByDpsValue": "DPS 順",
+        "tierCount": "{{count}}人のキャラクター",
+        "tierList": "ティアリスト",
+        "timelineId": "タイムライン ID"
+    },
     "draft-list": {
         "title": "図面リスト"
     },
     "dungeon-detail": {
-        "title": "詳細をコピーする"
+        "allMonster": "通常モンスター",
+        "allReward": "報酬",
+        "count": "合計 {{count}} 種",
+        "currentMonsterLevelBase": "現在のモンスター基礎レベル Lv.{{level}}（各ウェーブ +{{step}}、最大 {{max}}）",
+        "emptyMonster": "モンスターデータがありません",
+        "emptyReward": "報酬データがありません",
+        "endlessDungeonLevelControlledByWave": "無限ダンジョンのレベルは上のウェーブスライダーで制御されます",
+        "endlessWave": "無限ウェーブ",
+        "groupMonster": "グループ出現モンスター",
+        "groupMonsterCount": "グループメンバー（{{count}}種）",
+        "groupReward": "報酬グループ",
+        "monster": "モンスター",
+        "monsterCount": "モンスター: {{count}}種",
+        "monsterWave": "モンスターウェーブ",
+        "noWaveData": "ウェーブデータがありません",
+        "pumpkingTitle": "パンプキン बॉックス",
+        "refreshRange": "更新範囲 ({{platform}})",
+        "refreshRangeDisplay": "更新範囲表示",
+        "rewardList": "報酬一覧",
+        "specialMonster": "特殊モンスター",
+        "specialReward": "特殊報酬",
+        "title": "詳細をコピーする",
+        "totalWaveReward": "ウェーブ累計報酬（1～{{count}}ウェーブ）",
+        "wave": "ウェーブ"
     },
     "dungeon-list": {
-        "title": "レプリカリスト"
+        "level": "レベル",
+        "monster": "モンスター",
+        "nightHandbook": "夜航手帳",
+        "reward": "報酬",
+        "searchPlaceholder": "ダンジョンID / 名前 / 説明 / レベル / 報酬を検索（ピンイン対応）...",
+        "special": "特殊",
+        "title": "レプリカリスト",
+        "totalCount": "合計 {{count}} 件のダンジョン",
+        "type": "タイプ"
     },
     "errorBoundary": {
         "retry": "再試行",
         "title": "コンポーネントのレンダリングエラー"
+    },
+    "event": {
+        "rule": "ルール"
     },
     "event-detail": {
         "title": "イベント詳細"
@@ -5974,6 +6361,7 @@
         "all_files": "すべてのファイル",
         "beforeGame": "起動前に実行",
         "char": "キャラクター",
+        "confirmUninstall": "ゲームディレクトリ内の EM と Engine フォルダにあるすべてのファイルとサブディレクトリを削除します。続行しますか？",
         "custom": "カスタム",
         "customTypeNameExists": "カスタムタイプ名が既に存在します",
         "delete": "削除",
@@ -6018,6 +6406,9 @@
         "selectPath": "パスを選択",
         "setModFailed": "MODの設定に失敗しました: {{ error }}",
         "title": "ゲームランチャー",
+        "uninstall": "アンインストール",
+        "uninstallFailed": "アンインストールに失敗しました: {{ error }}",
+        "uninstallSuccess": "アンインストール完了",
         "weapon": "武器"
     },
     "game-update": {
@@ -6180,6 +6571,18 @@
         "welcome": "DNA Builderへようこそ"
     },
     "Home, Sweet Home": "Home, Sweet Home",
+    "impr": {
+        "all": "すべて",
+        "count": "{{count}} 件の印象",
+        "region": "地域",
+        "searchPlaceholder": "印象項目を検索",
+        "source": "ソース",
+        "sourceDynquest": "派遣依頼",
+        "sourceNpc": "NPC",
+        "sourceQuest": "クエスト",
+        "title": "地域声名",
+        "type": "五要素"
+    },
     "interact测试": "interact测试",
     "inventory": {
         "desc": "ウェッジと武器の装備をカスタマイズする",
@@ -6195,10 +6598,17 @@
         "btn_unpin_window": "固定を解除"
     },
     "map-detail": {
+        "notFound": "マップが見つかりません",
         "title": "マップ"
     },
     "map-list": {
         "title": "マップ一覧"
+    },
+    "map-list-page": {
+        "searchPlaceholder": "マップID / 名前 / 説明を検索...",
+        "showList": "マップ一覧を表示",
+        "title": "マップ一覧",
+        "totalCount": "合計 {{count}} 件のマップ"
     },
     "map-local": {
         "title": "マップ"
@@ -6216,14 +6626,50 @@
     "modEditor": {
         "inputCode": "キャラクターまたは武器コードを入力してください"
     },
+    "monster": {
+        "dropInfo": "ドロップ情報",
+        "dropRate": "ドロップ率 {{rate}}%",
+        "faction": "陣営{{faction}}",
+        "killScore": "スコア {{score}}",
+        "mechanism": "メカニズム {{id}}"
+    },
     "monster-detail": {
-        "title": "モンスター詳細"
+        "appearingAbyss": "深淵に出現",
+        "appearingDungeon": "副本に出現",
+        "attack": "攻撃",
+        "badgeTitle": "迷宮",
+        "defense": "防御",
+        "defenseDamageReductionRate": "防御ダメージ軽減率",
+        "drop": "ドロップ",
+        "dropMechanismId": "メカニズム ID",
+        "dropMonsterTag": "モンスタータグ",
+        "dropRate": "宝箱ドロップ率",
+        "effectiveHealth": "実効HP",
+        "factionOther": "その他",
+        "factionPrefix": "陣営",
+        "growthPreview": "レベル成長プレビュー",
+        "hp": "HP",
+        "killScore": "撃破スコア",
+        "level": "レベル",
+        "levelDamageReductionRate": "レベルダメージ軽減率",
+        "monsterTagInfo": "号令者情報",
+        "shield": "シールド",
+        "showDetail": "詳細を見る",
+        "showEightHp": "HP 8倍",
+        "stance": "戦姿",
+        "title": "モンスター詳細",
+        "value": "数値"
     },
     "monster-list": {
         "title": "モンスター一覧"
     },
     "monster-tag-detail": {
+        "bonus": "ボーナス",
+        "description": "説明",
         "meterSuffix": "m",
+        "params": "パラメータ",
+        "relatedMonsters": "関連モンスター",
+        "sameTags": "同類のタグ",
         "title": "号令者詳細"
     },
     "more": {
@@ -6231,9 +6677,123 @@
         "title": "もっと"
     },
     "node-editor": {
+        "addCalc": {
+            "description": "入力値の合計を計算します",
+            "result": "結果",
+            "title": "加算",
+            "waiting": "入力を待っています..."
+        },
+        "astExpression": {
+            "description": "AST 式を検証します",
+            "expression": "式",
+            "expressionPlaceholder": "ダメージ",
+            "missingCore": "コア計算ノードがありません",
+            "result": "結果",
+            "title": "AST 式",
+            "unknownError": "不明なエラー",
+            "waiting": "入力を待っています..."
+        },
+        "attrCalc": {
+            "base": "基礎ステータス",
+            "other": "その他のステータス",
+            "title": "属性計算",
+            "waiting": "入力を待っています..."
+        },
+        "buffInput": {
+            "addBuffSlot": "Buff スロットを追加",
+            "description": "Buff を検索して選択します",
+            "search": "検索（ピンイン対応）",
+            "searchPlaceholder": "Buff 名またはピンインを入力",
+            "selectBuff": "Buff を選択",
+            "title": "Buff 入力"
+        },
+        "coreCalc": {
+            "currentAvailable": "現在利用可能",
+            "defaultSkill": "デフォルトスキルを選択：",
+            "errorInfo": "エラー情報：",
+            "missingInputs": "必要な入力がありません：",
+            "selectSkill": "スキルを選択してください",
+            "waiting": "入力を待っています"
+        },
+        "enemyInput": {
+            "attack": "攻撃",
+            "attributes": "敵の属性（現在のレベル）",
+            "defense": "防御",
+            "enemy": "敵",
+            "enemyLevel": "敵のレベル",
+            "enemyResistance": "敵の耐性",
+            "hp": "HP",
+            "stance": "戦姿"
+        },
         "expressionCalc": {
             "description": "カスタム式の値を計算します",
+            "expression": "式",
+            "expressionPlaceholder": "例: a + b * c",
+            "inputCount": "入力数:",
+            "result": "結果",
             "title": "式計算"
+        },
+        "fullCalc": {
+            "description": "コア計算ノードに基づく完全なダメージ計算",
+            "result": "結果",
+            "title": "完全計算",
+            "waiting": "入力を待っています..."
+        },
+        "meleeWeaponInput": {
+            "chooseLevel": "レベルを選択",
+            "chooseWeapon": "近接武器を選択",
+            "description": "近接武器の選択",
+            "refineLevel": "精錬レベル",
+            "title": "近接武器入力",
+            "weapon": "近接武器",
+            "weaponLevel": "武器レベル"
+        },
+        "modInput": {
+            "addModSlot": "MOD スロットを追加",
+            "chooseLevel": "レベルを選択",
+            "chooseMod": "MOD を選択",
+            "element": "MOD 属性",
+            "type": "MOD タイプ"
+        },
+        "multiplyCalc": {
+            "description": "入力値の積を計算します",
+            "result": "結果",
+            "title": "乗算",
+            "waiting": "入力を待っています..."
+        },
+        "rangedWeaponInput": {
+            "chooseLevel": "レベルを選択",
+            "chooseWeapon": "遠隔武器を選択",
+            "description": "遠隔武器の選択",
+            "refineLevel": "精錬レベル",
+            "title": "遠隔武器入力",
+            "weapon": "遠隔武器",
+            "weaponLevel": "武器レベル"
+        },
+        "skillDmg": {
+            "description": "スキルダメージを計算します",
+            "expectedDamage": "期待ダメージ",
+            "noHpDamage": "HP 因子なしのダメージ",
+            "result": "ダメージ結果",
+            "waiting": "入力を待っています..."
+        },
+        "weaponAttr": {
+            "attack": "攻撃",
+            "attackSpeed": "攻撃速度",
+            "critDamage": "会心ダメージ",
+            "critRate": "会心率",
+            "multiShot": "多重射撃",
+            "result": "武器属性",
+            "triggerRate": "発動率",
+            "waiting": "入力を待っています..."
+        },
+        "weaponDmg": {
+            "description": "武器ダメージを計算します",
+            "expectedDamage": "期待ダメージ",
+            "higherCrit": "高い会心",
+            "lowerCrit": "低い会心",
+            "result": "武器ダメージ",
+            "waiting": "入力を待っています..."
         }
     },
     "notfound": {
@@ -6286,6 +6846,62 @@
     "pet-list": {
         "title": "ジェネモン一覧"
     },
+    "points-mall": {
+        "accountSettings": "アカウント設定",
+        "all": "すべて",
+        "availability": "提供時間",
+        "balance": "ポイント残高",
+        "bubblePreview": "バブルプレビュー",
+        "confirmRedeem": "交換を確認",
+        "confirmRedeemDesc": "「{{name}}」を {{cost}} ポイントで交換しますか？",
+        "currentAppearance": "現在の外見",
+        "default": "デフォルト",
+        "equipAfterRedeem": "先にこの商品を交換してください",
+        "equipFailed": "外見の適用に失敗しました",
+        "equipFailedRetry": "外見の適用に失敗しました。しばらくしてから再試行してください",
+        "equipSuccess": "外見を適用しました",
+        "fetchProductsError": "商品の取得に失敗しました。しばらくしてから再試行してください",
+        "fetchProductsFailed": "ポイントショップ商品の取得に失敗しました",
+        "fetchSummaryError": "ポイント情報の取得に失敗しました。しばらくしてから再試行してください",
+        "fetchSummaryFailed": "ポイントショップの概要取得に失敗しました",
+        "instructionLogin": "交換や装備にはログインが必要です。",
+        "instructionNameEffect": "名前エフェクトはチャットでのニックネーム表示に影響します。",
+        "instructionTitle": "説明",
+        "instructionTitleBadge": "称号はニックネームの横に表示され、実績や地位を示します。",
+        "insufficientPoints": "ポイント不足",
+        "loginFirst": "先に DNA Builder アカウントにログインしてください",
+        "loginHint": "ログイン後、ポイントを確認して外見を交換できます。",
+        "nameEffect": "名前エフェクト",
+        "noPreview": "プレビューはありません",
+        "noProducts": "交換可能な商品はありません",
+        "notInRedeemWindow": "この商品は現在交換可能期間外です",
+        "notOwned": "未所持",
+        "other": "その他",
+        "owned": "所持済み",
+        "points": "ポイント",
+        "pointsHint": "ポイントは称号、名前エフェクトなどの外見と交換できます。",
+        "preview": "プレビュー",
+        "previewHint": "プレビューは現在の選択に従います",
+        "previewNameCard": "装備後にニックネームエフェクトを表示",
+        "previewTitle": "装備後に称号を表示",
+        "price": "価格",
+        "productList": "商品一覧",
+        "redeem": "交換",
+        "redeemFailed": "交換に失敗しました",
+        "redeemFailedRetry": "交換に失敗しました。しばらくしてから再試行してください",
+        "redeemSuccess": "交換成功",
+        "refresh": "更新",
+        "rewardType": {
+            "nameCard": "名前エフェクト",
+            "title": "称号"
+        },
+        "summaryNotReady": "現在ポイント情報を取得できません。しばらくしてから再試行してください",
+        "title": "ポイントショップ",
+        "use": "使用",
+        "used": "使用済み",
+        "useHint": "商品一覧で交換し、「使用」をクリックして外見を切り替えられます。",
+        "userFallback": "ユーザー"
+    },
     "questchain-detail": {
         "title": "クエストチェイン詳細"
     },
@@ -6294,6 +6910,10 @@
     },
     "raid-rank": {
         "title": "ランキング報酬"
+    },
+    "ranking": {
+        "desc": "ランキング一覧",
+        "title": "ランキング"
     },
     "reputation": {
         "accumulatedExp": "累計経験値",
@@ -6334,12 +6954,21 @@
     },
     "resource": {
         "background": "背景",
+        "book": "読物",
         "description": "説明",
+        "fish": "魚",
         "icon": "アイコン",
         "id": "ID",
+        "mapPointCount": "地点",
+        "mapPoints": "マップの地点",
+        "mapPointsJump": "マップの地点（クリックで移動）",
         "name": "名称",
+        "optionGroup": "オプショングループ",
+        "packReward": "パック報酬",
         "rarity": "レアリティ",
         "searchPlaceholder": "資源ID/名称で検索（ピンイン対応）...",
+        "selectReward": "選択式報酬",
+        "selectRewardTag": "選択",
         "source": "入手元",
         "title": "資源"
     },
@@ -6527,21 +7156,52 @@
         "appearance": "外観設定",
         "cancel": "キャンセル",
         "confirm": "確認",
+        "current": "現在",
+        "customSource": "カスタム",
         "darkTheme": "ダークテーマ",
+        "dataPackManagement": "データパック管理",
+        "dataPackSourceAddress": "データパックの取得元アドレス",
         "desc": "カスタムアプリケーション設定",
+        "download": "ダウンロード",
+        "downloaded": "ダウンロード済み",
+        "female": "女性",
+        "initScriptHotkeysAtStartup": "起動時にスクリプトホットキーを初期化",
         "lang": "言語",
         "launchAtStartup": "スタートアップ起動",
         "launchAtStartupTip": "サインイン後にデスクトップアプリを自動で起動します",
         "lightTheme": "ライトテーマ",
+        "male": "男性",
+        "missingDragDataPack": "ドラッグ可能なデータパックが見つかりません:",
+        "noAvailableVersions": "利用可能なバージョンはありません",
+        "noDescription": "説明なし",
         "noModelAvailable": "利用可能なモデルはありません",
+        "noSafeModeQuestion": "現在、確認できる質問はありません",
+        "officialSource": "公式ソース",
         "other": "その他の設定",
+        "prepareDragDataPackFailed": "ドラッグ可能なデータパックの準備に失敗しました",
+        "protagonistGender1": "主人公の性別1",
+        "protagonistGender2": "主人公の性別2",
+        "protagonistName1": "主人公名1",
+        "protagonistName2": "主人公名2",
+        "refresh": "更新",
         "reset": "すべての設定をリセット",
         "resetConfirm": "すべての設定をリセットしてもよろしいですか？",
         "resetTip": "ページにエラーがある場合は、リセットを試してください。",
+        "safeMode": "セーフモード",
+        "safeModeAnswerWrong": "回答が間違っています。セーフモードは有効のままです",
+        "safeModeHint": "あなたは知りすぎています",
         "showAIChat": "AIフィッティングアシスタントを表示",
+        "storyText": "ストーリーテキスト",
         "theme": "テーマ",
         "title": "設定",
         "uiScale": "UIスケール",
+        "uninstall": "アンインストール",
+        "uninstallDataPack": "データパックをアンインストール",
+        "uninstallDataPackConfirm": "{{version}} をアンインストールしますか？",
+        "unknown": "不明",
+        "updateLaunchAtStartupFailed": "起動時実行設定の更新に失敗しました",
+        "use": "使用",
+        "versionList": "バージョン一覧",
         "windowTrasnparent": "透明効果",
         "windowTrasnparentTip": "ウィンドウと表面に半透明を表示",
         "winMaterial": "ウィンドウ素材"
@@ -6563,18 +7223,71 @@
     },
     "TalkObject_Test": "TalkObject_Test",
     "timeline": {
+        "addTrack": "トラックを追加",
+        "addTrackError": "トラック追加中にエラーが発生しました:",
+        "addTrackFailed": "トラックの追加に失敗しました。再試行してください",
+        "addTrackLimitReached": "トラック数が上限 ({{max}}) に達したため、これ以上追加できません！",
+        "addTrackNameTypeError": "トラックの追加に失敗しました: トラック名は文字列である必要があります",
+        "attributeImpact": "属性の影響",
+        "brushMode": "ブラシモード",
+        "buffTooltip": "BUFF は同じトラックまたはその上のスキルにのみ効果があります",
+        "buffTrack": "BUFF",
+        "cleanupDragStateError": "ドラッグ状態のクリーンアップ中にエラーが発生しました:",
+        "clear": "クリア",
+        "clearItemSelectionError": "個別項目の選択状態のクリア中にエラーが発生しました:",
+        "clearSelectionError": "選択状態のクリア中にエラーが発生しました:",
         "click_to_load": "クリックして読み込み",
+        "damagePlaceholder": "ダメージ",
+        "deleteItemError": "項目の削除中にエラーが発生しました:",
+        "deleteItemNotFound": "削除確認時に削除対象の項目が見つかりませんでした",
+        "deleteMode": "削除モード",
+        "deleteSelectedItemsError": "選択項目の削除中にエラーが発生しました:",
         "desc": "キャラクターの戦闘ロジックをカスタマイズする",
+        "dragAdjustDuration": "ドラッグで継続時間を調整",
+        "dragAdjustStartTime": "ドラッグで開始時刻を調整",
         "export_json": "JSONを書き出す",
+        "generateSample": "サンプルを生成",
+        "handleTrackClickError": "トラッククリック処理中にエラーが発生しました:",
+        "healthCurve": "HP 曲線",
+        "healthLabel": "HP",
+        "horizontalScrollError": "水平スクロール中にエラーが発生しました:",
         "import_json": "JSONを読み込む",
+        "importJsonFailed": "JSON のインポートに失敗しました",
+        "invalidTrackIndex": "無効なトラックインデックス:",
         "load_save": "読み込み/保存",
         "new_scheme": "新規プラン",
         "overwrite_confirm_message": "タイムライン {{name}} は既に存在します。上書きしますか？",
         "overwrite_confirm_title": "上書きを確認",
+        "removeLastTrackNotAllowed": "最後のトラックは削除できません！",
+        "removeTrackError": "トラック削除中にエラーが発生しました:",
+        "removeTrackFailed": "トラックの削除に失敗しました。再試行してください",
+        "removeTrackInvalidIndex": "トラックの削除に失敗しました: 無効なトラックインデックス",
         "rename": "名前を変更",
+        "renameTrackError": "トラックの名前変更中にエラーが発生しました:",
+        "renameTrackFailed": "トラックの名前変更に失敗しました。再試行してください",
+        "renameTrackIndexRangeError": "トラックの名前変更に失敗しました: トラックインデックスが範囲外です",
+        "renameTrackIndexTypeError": "トラックの名前変更に失敗しました: トラックインデックスは数値である必要があります",
+        "renameTrackNameTypeError": "トラックの名前変更に失敗しました: トラック名は文字列である必要があります",
+        "resetView": "表示をリセット",
         "save": "保存",
         "save_scheme": "プランを保存",
-        "title": "タイムライン"
+        "selectMode": "選択モード",
+        "skillNotFound": "スキル {{base}} が見つかりません",
+        "skillPrefix": "スキル",
+        "skillTrack": "スキル",
+        "stopPropagationError": "イベントの伝播を停止中にエラーが発生しました:",
+        "timeLabel": "時間",
+        "timelineNameConflictsWithSkill": "タイムライン名はスキル名と同じにできません",
+        "timelineNameInvalidChars": "タイムライン名には ()+-*/. などの記号を含められません",
+        "title": "タイムライン",
+        "trackNameDefault": "トラック {{number}}",
+        "trackNameDuplicate": "同じ名前のトラックが既に存在します！",
+        "trackNameExists": "トラック名「{{name}}」は既に存在します。別の名前を使用してください！",
+        "trackNameRequired": "トラック名は空にできません！",
+        "trackNameTooLong": "トラック名は30文字を超えられません！",
+        "updateDragPreviewError": "ドラッグプレビュー位置の更新中にエラーが発生しました:",
+        "zoomIn": "拡大",
+        "zoomOut": "縮小"
     },
     "todo": {
         "completeFailed": "完了のマークに失敗しました",
@@ -6680,6 +7393,11 @@
         "desc": "pakファイルを読み込み、書き出します",
         "title": "アンパック"
     },
+    "update": {
+        "checkFailed": "更新の確認に失敗しました:",
+        "downloadInstallFailed": "更新のダウンロードとインストールに失敗しました:",
+        "noUpdateAvailable": "利用可能な更新はありません"
+    },
     "updater": {
         "newVersionFound": "新しいバージョン v{{version}}が見つかりました",
         "newVersionMessage": "\n\n{{body}}\n\n更新を自動的にダウンロードしてインストールしますか？",
@@ -6693,6 +7411,45 @@
         "updateFailed": "更新に失敗しました",
         "updating": "更新中..."
     },
+    "view": {
+        "all": "すべて",
+        "allModules": "すべてのモジュール",
+        "contentAuthorizationDesc": "特に記載のない限り、サイトのテキストコンテンツは CC BY-SA 3.0 に従い、画像などのメディアは元のライセンスに従います。",
+        "contentAuthorizationDesc2": "本サイトの内容を利用する際は、適切なクレジットを示し、このライセンスへのリンクを提供し、原作品に変更を加えたかどうかを明示してください。本サイトがあなたやその利用を推奨していると示唆してはいけません。",
+        "contentAuthorizationTitle": "コンテンツ利用許諾",
+        "contentCount": "コンテンツ区分",
+        "databaseEntryCount": "データベース項目",
+        "featuredEntry": "おすすめ項目",
+        "globalSearchEntry": "グローバル検索項目",
+        "matchCount": "{{count}} 件の結果に一致",
+        "moduleCount": "{{count}} 個のモジュールを選択済み",
+        "noResult": "一致する内容が見つかりません。キャラクター、マップ、クエスト、ダンジョン、モンスターなどのキーワードを試してください。",
+        "noResultEntries": "一致するデータベース項目が見つかりません",
+        "placeholder": "選択したモジュールを検索...",
+        "searchScope": "現在の検索範囲: {{scope}}",
+        "section": {
+            "build": {
+                "badge": "ビルド",
+                "description": "キャラクター育成、装備構成、育成素材を中心に、Build 視点で重要な資料をすばやく見つけられます。",
+                "title": "ビルドと育成"
+            },
+            "challenge": {
+                "badge": "チャレンジ",
+                "description": "ボス、モンスター、実績、称号などの対象をまとめ、チャレンジ目標を軸に連続検索しやすくします。",
+                "title": "チャレンジと収集"
+            },
+            "explore": {
+                "badge": "探索",
+                "description": "地域、ダンジョン、リスポーン地点、採集情報をまとめ、探索・採集・ダンジョン周回のルート検索を優先して支援します。",
+                "title": "マップと探索"
+            },
+            "world": {
+                "badge": "世界",
+                "description": "NPC、動的クエスト、話題、評判、図鑑系コンテンツを1つの層にまとめ、世界観検索の手間を減らします。",
+                "title": "クエストと世界"
+            }
+        }
+    },
     "walnut-list": {
         "title": "クルミリスト"
     },
@@ -6700,9 +7457,11 @@
         "title": "武器の詳細"
     },
     "weapon-list": {
+        "defaultOrder": "デフォルト順",
         "income": "收益",
         "noResults": "一致する武器が見つかりません",
         "searchPlaceholder": "武器名または種類を検索（ピンイン対応）...",
+        "sortByIncome": "収益順：高→低",
         "title": "武器リスト"
     },
     "Wuyou01": "Wuyou01"

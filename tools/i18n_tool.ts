@@ -103,11 +103,7 @@ async function importDiff() {
         for (const [key, translations] of Object.entries(diff)) {
             for (const [locale, value] of Object.entries(translations)) {
                 if (value && langFiles.has(locale)) {
-                    const normalizedKey = key.replace(/"/g, "")
-                    const normalizedValue = value.replace(/"/g, "")
-                    if (normalizedKey !== normalizedValue) {
-                        setNestedValue(langFiles.get(locale)!, key, value)
-                    }
+                    setNestedValue(langFiles.get(locale)!, key, value)
                 }
             }
         }

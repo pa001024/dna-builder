@@ -4019,6 +4019,7 @@
     "通用鱼饵": "通用魚竿",
     "同福饭馆店小二": "同福飯館店小二",
     "同类相吸": "同類相吸",
+    "同律": "同律",
     "同律近战": "近戰同律武器",
     "同律远程": "遠程同律武器",
     "同时持有10只突破至3阶的魔灵": "同時持有10隻突破至3階的魔靈",
@@ -5328,8 +5329,72 @@
         "title": "深淵列表"
     },
     "abyss-usage": {
+        "allLevels": "全部等級",
+        "assistant": "配隊助手",
+        "assistantDesc": "查詢角色常用陣容",
+        "available": "可用",
+        "buildUploadDataFailed": "無法生成深淵上傳資料",
+        "createdAt": "建立時間",
         "desc": "深淵陣容與角色武器統計",
-        "title": "深淵使用率"
+        "emptyUploadResult": "上傳結果為空",
+        "export": "匯出",
+        "exportFailed": "匯出深淵提交失敗",
+        "exportSuccess": "深淵提交已匯出",
+        "level": "等級",
+        "levelDistribution": "歷練等級分布",
+        "loadDefaultRoleFailed": "取得預設角色資訊失敗",
+        "loadLatestRoleInfoFailed": "取得最新角色資訊失敗",
+        "loadStatsFailed": "載入深淵統計失敗",
+        "loginFirst": "請先登入",
+        "mainChar": "主角色",
+        "mainCharId": "主角色ID",
+        "mainOnly": "僅主控",
+        "meleeWeapon": "近戰武器",
+        "meleeWeaponId": "近戰武器ID",
+        "missingUid": "缺少 UID",
+        "mostUsedLineup": "最常用陣容",
+        "mostUsedLineupDesc": "出戰數最高的陣容",
+        "noExportableSubmissions": "沒有可匯出的深淵提交",
+        "noResult": "暫無結果",
+        "noUploadData": "沒有可上傳的深淵資料",
+        "pet": "魔靈",
+        "petId": "魔靈ID",
+        "rangedWeapon": "遠程武器",
+        "rangedWeaponId": "遠程武器ID",
+        "refresh": "重新整理",
+        "roleParticipation": "角色參與",
+        "roleSourceDistribution": "角色溯源分布",
+        "roleType": "角色類型",
+        "roleUsage": "角色使用率",
+        "seasonId": "賽季ID",
+        "selectRole": "請選擇角色",
+        "sheetRole": "角色參與",
+        "sheetSubmission": "提交",
+        "sheetWeapon": "武器參與",
+        "skillLevel": "技能等級",
+        "stars": "星級",
+        "submissionsFrom": "本頁面所有資料分析自 {{count}} 名玩家。使用率 = 使用該角色的玩家數 ÷ 擁有該角色的玩家數",
+        "submitCount": "{{count}} 次提交",
+        "submitId": "提交ID",
+        "support1": "助戰1",
+        "support1Id": "助戰1ID",
+        "support2": "助戰2",
+        "support2Id": "助戰2ID",
+        "supportWeapon1": "助戰武器1",
+        "supportWeapon1Id": "助戰武器1ID",
+        "supportWeapon2": "助戰武器2",
+        "supportWeapon2Id": "助戰武器2ID",
+        "title": "深淵使用率",
+        "uidSha256": "UID_SHA256",
+        "updatedAt": "更新時間",
+        "upload": "上傳",
+        "uploadFailed": "深淵資料上傳失敗",
+        "uploadSuccess": "深淵資料已上傳",
+        "uploadSuccessWithReward": "深淵資料上傳成功，經驗+{{exp}}，積分+{{points}}",
+        "weaponForgeDistribution": "武器熔鑄分布",
+        "weaponId": "武器ID",
+        "weaponName": "武器名稱",
+        "weaponParticipation": "武器參與"
     },
     "accessory": {
         "category": "分類",
@@ -5350,10 +5415,13 @@
         "totalCount": "共 {{count}} 個飾品",
         "type": "類型",
         "typeAll": "全部",
+        "typeAvatar": "頭像",
         "typeChar": "角色飾品",
         "typeHair": "髮型",
+        "typeHeadFrame": "頭像框",
         "typeSkin": "武器造型",
         "typeWeapon": "武器飾品",
+        "typeWeaponSkin": "武器皮膚",
         "unlock": "解鎖方式",
         "unlockMethods": {
             "eggShop": "蛋皎的印象商店",
@@ -5394,7 +5462,14 @@
         "unnamedAchievement": "未命名成就"
     },
     "achievement-detail": {
-        "title": "成就詳情"
+        "basicInfo": "基本資訊",
+        "category": "分類",
+        "desc": "描述",
+        "name": "名稱",
+        "quality": "品質",
+        "reward": "獎勵",
+        "title": "成就詳情",
+        "version": "版本"
     },
     "achievement-list": {
         "desc": "遊戲成就解鎖統計",
@@ -5407,11 +5482,13 @@
         "end_suffix": "結束",
         "ended_suffix": "結束",
         "load_error": "加載活動數據失敗",
+        "local": "本地",
         "moling_completed": "本週期魔靈已完成",
         "moling_desc": "每3天刷新一次",
         "moling_refresh": "魔靈刷新",
         "moling_refresh_next": "下一週期魔靈刷新",
         "no_activities": "暫無活動",
+        "remote": "遠端",
         "start": "開始時間",
         "status_ended": "已結束",
         "status_ongoing": "進行中",
@@ -5428,21 +5505,214 @@
         "commandInputPlaceholder": "發送訊息或輸入/選擇指令，支援貼上或拖拽圖片",
         "desc": "使用AI智能體與遊戲互動",
         "inputMessage": "輸入訊息，按 Enter 發送",
+        "loading": "努力載入中...",
         "mcp_manual_stop_message": "MCP 伺服器需要手動結束程序。\n\n請在工作管理員中結束 'dna_mcp_server.exe' 程序。\n\n是否打開工作管理員？",
+        "mcpAppOnly": "僅限桌面應用",
+        "mcpNoResponse": "MCP伺服器無回應",
+        "mcpNotStarted": "MCP伺服器未啟動",
+        "mcpRunning": "MCP伺服器已啟動",
+        "mcpStartedButNoResponse": "MCP伺服器已啟動但無回應",
+        "mcpStartFailed": "MCP伺服器啟動失敗",
+        "mcpStarting": "正在啟動MCP伺服器...",
+        "mcpStopFailed": "MCP伺服器停止失敗",
+        "mcpStopped": "MCP伺服器已停止",
+        "mcpStopping": "正在停止MCP伺服器...",
+        "mcpTitle": "MCP 伺服器",
+        "newConversation": "新對話",
+        "recentConversations": "最近對話",
+        "startMcp": "啟動 MCP 伺服器",
+        "startMcpAdminTooltip": "以管理員權限啟動 MCP 伺服器",
+        "stopMcp": "停止",
         "title": "AI智能體",
         "user": "使用者"
     },
+    "ai-chat": {
+        "assistantNotInitialized": "AI 助手尚未初始化，請先設定 AI。",
+        "automationContinuePrompt": "繼續執行上一輪未完成的自動化配裝流程（第{{round}}輪）。\n要求：\n1. 繼續呼叫必要工具推進流程。\n2. 完成時輸出 {{doneTag}}。\n3. 未完成時輸出 {{continueTag}}。",
+        "automationIncompleteWarning": "⚠️ 未在預期輪次內確認流程完成。你可以繼續送出「繼續」讓我接著跑。",
+        "automationPrompt": "你現在處於「配裝自動化執行模式」。\n請嚴格遵守：\n1. 必須呼叫工具執行真實設定，不要只給文字建議。\n2. 如果要計算最優配裝，優先使用 autoBuild，且最終需要 apply=true 寫入設定。\n3. 涉及帶特效 MOD/武器時，先呼叫 queryEffectConfig 確認狀態，必要時用 setEffectConfig 調整後再 autoBuild。\n4. 本輪完成全部自動化後，在最後單獨一行輸出 {{doneTag}}。\n5. 如果還需要下一輪繼續，在最後單獨一行輸出 {{continueTag}}。\n\n使用者需求：\n{{userMessage}}",
+        "automationRoundTag": "【自動執行第{{round}}輪】",
+        "clearChatFailed": "清除配裝助手歷史對話失敗",
+        "error": {
+            "apiKey": "❌ API 金鑰無效或未設定\n\n請檢查：\n1. 設定中的 API 金鑰是否正確\n2. 是否有足夠的 API 額度\n\n你可以在設定中重新配置 API 金鑰。",
+            "generic": "抱歉，處理請求時出錯。",
+            "network": "❌ 網路連線失敗\n\n請檢查：\n1. 網路連線是否正常\n2. API 服務是否可用\n3. 代理設定是否正確",
+            "rateLimit": "❌ 請求過於頻繁\n\nAPI 呼叫次數已達限制，請等待一段時間後重試。",
+            "requestFailed": "❌ 請求失敗\n\n{{message}}",
+            "sdk": "❌ SDK 相容性問題\n\n請重新整理頁面後重試，如果問題持續，請清除瀏覽器快取並重新啟動應用。",
+            "timeout": "❌ 請求逾時\n\n回應時間過長，請檢查網路連線或嘗試簡化你的問題。",
+            "unknown": "❌ 發生未知錯誤\n\n請查看控制台以取得詳細資訊，或嘗試重新整理頁面。"
+        },
+        "initProxyAgent": "使用伺服器代理初始化 AI Agent",
+        "initProxyAgentFailed": "使用代理初始化 AI Agent 失敗：",
+        "initUserAgent": "使用使用者設定的 API 金鑰初始化 AI Agent",
+        "initUserAgentFailed": "使用使用者設定初始化 AI Agent 失敗：",
+        "inputPlaceholder": "問我任何配裝問題...",
+        "loadChatFailed": "載入配裝助手歷史對話失敗",
+        "noConfigMessage": "AI 服務未設定。\n\n請選擇以下方式之一來設定 AI：\n1. 在設定中配置 API 金鑰（推薦）\n2. 聯繫管理員設定伺服器端 AI\n\n目前狀態：\n- 使用者 API 金鑰：{{hasUserConfig}}",
+        "reasoning": "思考過程",
+        "retry": "重試",
+        "saveChatFailed": "儲存配裝助手歷史對話失敗",
+        "saveChatFailedFallback": "儲存配裝助手歷史對話失敗（後備）",
+        "sendMessageFailed": "傳送訊息失敗",
+        "tip": "提示：可以問「賽琪怎麼配 MOD」、「帶扶疏的配裝」等",
+        "title": "配裝助手",
+        "welcome": "你好！我是配裝助手，可以幫你優化角色配置。\n\n目前角色：{{charName}}（{{charElm}}屬性）\n\n你可以問我：\n- {{charName}}怎麼配 MOD 傷害最高？\n- 帶 {{charElm}} 屬性的 MOD 有哪些？\n- 如何提升 {{charName}} 的暴擊傷害？\n- {{charName}} 在帶扶疏的情況下傷害最大化的 MOD 要怎麼配\n\n預設會自動執行完整配裝流程並嘗試直接套用配置。"
+    },
+    "app": {
+        "initScriptHotkeysFailed": "啟動時註冊腳本熱鍵失敗：",
+        "syncLaunchAtStartupFailed": "同步開機啟動狀態失敗：",
+        "title": "應用"
+    },
+    "ast-help": {
+        "apply": "套用表達式",
+        "astPlaceholder": "輸入表達式後顯示 AST 樹結構",
+        "astTitle": "AST 樹結構",
+        "clear": "清空",
+        "examples": {
+            "baseStats": "基礎屬性",
+            "complex": "複雜表達式",
+            "critDamage": "暴擊傷害",
+            "expectedDamage": "期望傷害",
+            "functions": "函數使用",
+            "namespace": "命名空間",
+            "specialValue": "特殊值"
+        },
+        "examplesTitle": "範例表達式",
+        "functions": {
+            "ceil": "向上取整",
+            "floor": "向下取整",
+            "hp": "計算背水昂揚乘區（x 為血量比例 0~1）",
+            "log": "自然對數",
+            "max": "最大值",
+            "min": "最小值",
+            "or": "或運算",
+            "power": "冪運算"
+        },
+        "functionsTitle": "函數說明",
+        "inputLabel": "表達式輸入",
+        "inputPlaceholder": "輸入表達式，例如：攻擊 + 防禦",
+        "macrosTitle": "內建宏",
+        "members": {
+            "crit": "暴擊傷害",
+            "critTrigger": "暴擊且觸發",
+            "n": "不計算背水昂揚乘區",
+            "noCrit": "未暴擊傷害",
+            "noCritNoTrigger": "未暴擊且未觸發",
+            "noTrigger": "未觸發傷害",
+            "noTriggerCrit": "暴擊且未觸發",
+            "trigger": "觸發傷害",
+            "triggerNoCrit": "未暴擊且觸發"
+        },
+        "membersTitle": "傷害類型說明",
+        "namespacesTitle": "命名空間說明",
+        "operators": {
+            "add": "加法",
+            "div": "除法",
+            "floordiv": "整除",
+            "mod": "取模",
+            "mul": "乘法",
+            "sub": "減法"
+        },
+        "operatorsTitle": "運算子說明",
+        "parseError": "表達式解析錯誤",
+        "syntaxDesc": "表達式用於計算傷害、屬性值等，支援以下語法：",
+        "syntaxItems": {
+            "function": {
+                "desc": "min(), max(), floor(), ceil(), or(), log(), power()",
+                "label": "函數"
+            },
+            "member": {
+                "desc": "使用 . 存取傷害類型，例如 .暴擊、.未暴擊",
+                "label": "成員存取"
+            },
+            "namespace": {
+                "desc": "使用 :: 存取命名空間，例如 伊卡洛斯::傷害",
+                "label": "命名空間"
+            },
+            "number": {
+                "desc": "直接輸入數字，例如 100、1.5",
+                "label": "數字"
+            },
+            "operator": {
+                "desc": "+, -, *, /, %, //",
+                "label": "運算子"
+            },
+            "property": {
+                "desc": "角色屬性名，例如 攻擊、防禦、生命",
+                "label": "屬性"
+            },
+            "skill": {
+                "desc": "技能傷害欄位，例如 [幻象] 傷害",
+                "label": "技能"
+            },
+            "special": {
+                "desc": "倍率固定為100%(不受威力影響)，用於自訂技能倍率，例如 [攻擊]*1.2 模擬120%倍率，以及[防禦]、[生命]等",
+                "label": "特殊值"
+            }
+        },
+        "syntaxTitle": "表達式語法",
+        "title": "表達式幫助"
+    },
     "autobuild": {
         "charMods": "角色MOD",
+        "desc": "根據目前 MOD 配置自動構建最佳 MOD 組合",
+        "includeMelee": "自動更換近戰",
+        "includeRanged": "自動更換遠程",
+        "includeTypes": "包含 MOD 類型",
+        "log": "日誌",
         "meleeMods": "近戰MOD",
+        "preserveTypes": "保留目前 MOD",
         "rangedMods": "遠程MOD",
-        "skillWeaponMods": "同律MOD"
+        "skillWeaponMods": "同律MOD",
+        "useInv": "使用使用者庫存"
     },
     "book-detail": {
-        "title": "讀物詳情"
+        "countSuffix": "條目數: {{count}}",
+        "entryCount": "條目數",
+        "mechanismId": "機制 ID",
+        "notFound": "未找到讀物",
+        "point": "座標點",
+        "region": "所屬地區",
+        "subRegion": "子區域",
+        "summary": "讀物簡介",
+        "title": "讀物詳情",
+        "treasurePoint": "寶藏點",
+        "treasurePointSuffix": "寶藏點",
+        "type": {
+            "drop": "探索拾取",
+            "read": "直接獲取",
+            "treasureChest": "寶箱獲取",
+            "unknown": "未知類型"
+        }
     },
     "book-list": {
-        "title": "讀物列表"
+        "allRegions": "全部地區",
+        "enableFullTextSearch": "啟用正文檢索（不支援拼音）",
+        "searchPlaceholder": "搜尋讀物ID/名稱/描述/正文...",
+        "searchPlaceholderPinyin": "搜尋讀物ID/名稱/描述（支援拼音）...",
+        "title": "讀物列表",
+        "totalCount": "共 {{count}} 本讀物"
+    },
+    "box-drop": {
+        "boxMaximum": "總上限",
+        "boxPerDay": "每日上限",
+        "consume": "消耗",
+        "draw": "抽獎",
+        "draw1": "抽1次",
+        "draw10": "抽10次",
+        "lastResult": "最近結果",
+        "limit": "限量",
+        "quantity": "個",
+        "rewardCount": "{{count}}個",
+        "rewardIndex": "獎勵組",
+        "rewardList": "獎勵列表",
+        "rewardSet": "獎勵組",
+        "simulation": "模擬",
+        "simulationCount": "模擬次數",
+        "statistics": "統計",
+        "title": "抽獎",
+        "totalCapacity": "總容量"
     },
     "build-compare": {
         "additional_buff_list": "額外BUFF列表",
@@ -5545,6 +5815,7 @@
         "shield": "護盾",
         "shot_damage": "彈片傷害",
         "simulator": "模擬",
+        "skill": "同律",
         "skill_level": "技能等級",
         "skill_weapon": "技能/武器",
         "skill_weapon_mod_config": "同律武器MOD配置",
@@ -5576,14 +5847,36 @@
         "title": "角色詳情"
     },
     "char-list": {
-        "title": "角色列表"
+        "empty": "沒有找到符合的角色",
+        "searchPlaceholder": "搜尋角色名稱、別名、陣營（支援拼音）...",
+        "tabs": {
+            "all": "全部",
+            "control": "控制",
+            "defense": "防禦",
+            "heal": "治療",
+            "homologyWeapon": "同律武器",
+            "maxHp": "最大生命",
+            "output": "輸出",
+            "sanityRegen": "神智回復",
+            "shield": "護盾",
+            "skillDamage": "技能傷害",
+            "summon": "召喚物",
+            "support": "輔助",
+            "weaponDamage": "武器傷害"
+        },
+        "title": "角色列表",
+        "totalSuffix": "個角色",
+        "unreleasedHint": "未上線內容可能會發生改變"
     },
     "chat": {
         "addRoom": "創建新房間",
+        "ai": "AI",
         "autoJoin": "自動加入",
         "block": "屏蔽",
+        "blockSuccess": "已封鎖 {{name}}",
         "cancelReply": "取消回覆",
         "chatPlaceholder": "輸入聊天內容",
+        "confirm": "確認",
         "copy": "複製",
         "deleteRoomConfirm": "確認要刪除房間嗎?",
         "deleteRoomFailed": "刪除失敗",
@@ -5592,11 +5885,14 @@
         "edited": "(已編輯)",
         "follow": "關注",
         "hello": "大家好",
+        "imagePreview": "[圖片]",
         "insertImage": "發送圖片",
         "joinFailed": "加入失敗",
         "joinFailedTip": "可能是房間已滿",
         "keyboardShortcut": "快捷鍵加入|右鍵設定鍵位",
         "keyboardShortcutSetting": "快捷鍵設定",
+        "latest": "最近訊息",
+        "messagePreview": "[訊息]",
         "micOn": "開啟麥克風",
         "needLogin": "聊天功能需要登錄",
         "newRoomBanner": "還沒有人發言，快來做第一個吧！",
@@ -5614,17 +5910,51 @@
         "send": "發送",
         "sendTask": "發送UID(剪貼板)|右鍵自動發送",
         "sound": "提示音",
+        "system": "系統",
         "title": "聊天",
         "unblock": "取消封鎖",
+        "unblockSuccess": "已取消封鎖 {{name}}",
         "unlimited": "不限製",
+        "user": "我",
         "you": "你"
+    },
+    "cloudgame": {
+        "closeWindowFailed": "關閉雲遊戲視窗失敗",
+        "openWindowFailed": "開啟雲遊戲視窗失敗"
     },
     "common": {
         "delete": "刪除"
     },
     "counter": {
+        "action": {
+            "count": "計數 {{amount}}",
+            "reset": "重設"
+        },
+        "addTrigger": "新增觸發器",
+        "create": "新增計數器",
+        "defaultName": "計數器 {{index}}",
+        "defaults": {
+            "dungeonMoling": "副本魔靈",
+            "endlessDungeonMoling": "無盡副本魔靈",
+            "fishingBonus": "釣魚額外獎勵"
+        },
+        "deleteCounter": "刪除計數器",
         "desc": "計數器",
-        "title": "計數器"
+        "dragTrigger": "拖動觸發器",
+        "expandSettings": "展開計數器設定",
+        "hotkeyPlaceholder": "設定熱鍵",
+        "maxValue": "設定上限",
+        "moving": "正在移動",
+        "resetAll": "重設全部",
+        "resetCounter": "重設計數器",
+        "resetCron": "重設週期",
+        "title": "計數器",
+        "triggers": "觸發器",
+        "unlimited": "不限制"
+    },
+    "damage": {
+        "desc": "逐步拆解 CharBuild 傷害公式並支援手動覆蓋",
+        "title": "傷害拆解"
     },
     "damageResult": {
         "critDamage": {
@@ -5684,6 +6014,8 @@
         "impr_desc": "查看任務、NPC、派遣委託的印象增加資訊",
         "map": "地圖",
         "map_desc": "查看地圖標點",
+        "mapLocal": "魔靈地圖",
+        "mapLocal_desc": "詳細魔靈刷新點位",
         "mod": "魔之楔",
         "mod_desc": "查看魔之楔信息和屬性",
         "monster": "怪物",
@@ -5734,6 +6066,16 @@
     },
     "dna-home": {
         "desc": "遊戲資訊/簽到/瀏覽帖子",
+        "lastUpdate": "最後更新",
+        "loadMineFailed": "取得使用者資訊失敗",
+        "refreshCurrentPage": "重新整理目前頁面",
+        "tabs": {
+            "announcement": "公告",
+            "flowQuery": "流水查詢",
+            "forum": "論壇",
+            "gameInfo": "遊戲資訊",
+            "signIn": "簽到"
+        },
         "title": "皎皎角"
     },
     "dna-post": {
@@ -5806,18 +6148,66 @@
     "DNA动了Ⅰ": "DNA動了Ⅰ",
     "DNA动了Ⅱ": "DNA動了Ⅱ",
     "DNA动了Ⅲ": "DNA動了Ⅲ",
+    "dps-view": {
+        "buildId": "構建 ID",
+        "createdAt": "建立時間",
+        "details": "詳細資訊",
+        "empty": "暫無 DPS 資料",
+        "rankList": "角色 DPS 列表",
+        "rankTitle": "角色 DPS 排行榜",
+        "searchPlaceholder": "搜尋角色...",
+        "sortByCreatedAt": "按建立時間排序",
+        "sortByDpsValue": "按 DPS 值排序",
+        "tierCount": "{{count}} 個角色",
+        "tierList": "Tier List",
+        "timelineId": "時間線 ID"
+    },
     "draft-list": {
         "title": "圖紙列表"
     },
     "dungeon-detail": {
-        "title": "副本詳情"
+        "allMonster": "普通怪物",
+        "allReward": "獎勵",
+        "count": "共 {{count}} 種",
+        "currentMonsterLevelBase": "目前怪物等級基數 Lv.{{level}}（每波 +{{step}}，最高 {{max}}）",
+        "emptyMonster": "暫無怪物資料",
+        "emptyReward": "暫無獎勵資料",
+        "endlessDungeonLevelControlledByWave": "無盡副本等級由上方波次滑桿控制",
+        "endlessWave": "無盡波次",
+        "groupMonster": "組刷怪",
+        "groupMonsterCount": "組成員（{{count}}種）",
+        "groupReward": "獎勵組",
+        "monster": "怪物",
+        "monsterCount": "怪物: {{count}}種",
+        "monsterWave": "怪物波次",
+        "noWaveData": "暫無波次資料",
+        "pumpkingTitle": "你好箱",
+        "refreshRange": "刷新範圍 ({{platform}})",
+        "refreshRangeDisplay": "刷新範圍顯示",
+        "rewardList": "獎勵列表",
+        "specialMonster": "特殊怪物",
+        "specialReward": "特殊獎勵",
+        "title": "副本詳情",
+        "totalWaveReward": "波數累計獎勵 (1~{{count}}波)",
+        "wave": "波次"
     },
     "dungeon-list": {
-        "title": "副本列表"
+        "level": "等級",
+        "monster": "怪物",
+        "nightHandbook": "夜航手冊",
+        "reward": "獎勵",
+        "searchPlaceholder": "搜尋副本ID/名稱/描述/等級/獎勵（支援拼音）...",
+        "special": "特殊",
+        "title": "副本列表",
+        "totalCount": "共 {{count}} 個副本",
+        "type": "類型"
     },
     "errorBoundary": {
         "retry": "重試",
         "title": "組件渲染出錯"
+    },
+    "event": {
+        "rule": "規則"
     },
     "event-detail": {
         "title": "活動詳情"
@@ -5849,6 +6239,7 @@
         "all_files": "所有檔案",
         "beforeGame": "啟動前執行",
         "char": "角色",
+        "confirmUninstall": "將刪除遊戲目錄下 EM 和 Engine 目錄中的所有檔案與子目錄，是否繼續？",
         "custom": "自定義",
         "customTypeNameExists": "自定義類型名稱已存在",
         "delete": "刪除",
@@ -5893,6 +6284,9 @@
         "selectPath": "選擇路徑",
         "setModFailed": "設定MOD失敗: {{ error }}",
         "title": "遊戲啟動器",
+        "uninstall": "解除安裝",
+        "uninstallFailed": "解除安裝失敗：{{ error }}",
+        "uninstallSuccess": "解除安裝完成",
         "weapon": "武器"
     },
     "game-update": {
@@ -6055,6 +6449,18 @@
         "welcome": "歡迎使用 DNA Builder"
     },
     "Home, Sweet Home": "Home, Sweet Home",
+    "impr": {
+        "all": "全部",
+        "count": "共 {{count}} 條印象",
+        "region": "地區",
+        "searchPlaceholder": "搜尋印象條目",
+        "source": "來源",
+        "sourceDynquest": "派遣委託",
+        "sourceNpc": "NPC",
+        "sourceQuest": "任務",
+        "title": "區域聲名",
+        "type": "五維"
+    },
     "interact测试": "interact测试",
     "inventory": {
         "desc": "自定義你的魔之楔和武器配置",
@@ -6070,10 +6476,17 @@
         "btn_unpin_window": "取消置頂"
     },
     "map-detail": {
+        "notFound": "未找到地圖",
         "title": "地圖"
     },
     "map-list": {
         "title": "地圖列表"
+    },
+    "map-list-page": {
+        "searchPlaceholder": "搜尋地圖ID/名稱/描述...",
+        "showList": "顯示地圖列表",
+        "title": "地圖列表",
+        "totalCount": "共 {{count}} 個地圖"
     },
     "map-local": {
         "title": "地圖"
@@ -6091,14 +6504,50 @@
     "modEditor": {
         "inputCode": "請輸入角色或武器代碼"
     },
+    "monster": {
+        "dropInfo": "掉落資訊",
+        "dropRate": "掉率 {{rate}}%",
+        "faction": "陣營{{faction}}",
+        "killScore": "積分 {{score}}",
+        "mechanism": "機制 {{id}}"
+    },
     "monster-detail": {
-        "title": "怪物詳情"
+        "appearingAbyss": "出現深淵",
+        "appearingDungeon": "出現副本",
+        "attack": "攻擊",
+        "badgeTitle": "迷津",
+        "defense": "防禦",
+        "defenseDamageReductionRate": "防禦減傷率",
+        "drop": "搜打撤掉落",
+        "dropMechanismId": "機制 ID",
+        "dropMonsterTag": "怪物標籤",
+        "dropRate": "寶箱掉落率",
+        "effectiveHealth": "有效生命",
+        "factionOther": "其他",
+        "factionPrefix": "陣營",
+        "growthPreview": "等級成長預覽",
+        "hp": "生命",
+        "killScore": "擊殺積分",
+        "level": "等級",
+        "levelDamageReductionRate": "等級減傷率",
+        "monsterTagInfo": "號令者資訊",
+        "shield": "護盾",
+        "showDetail": "查看詳情",
+        "showEightHp": "8倍血量",
+        "stance": "戰姿",
+        "title": "怪物詳情",
+        "value": "數值"
     },
     "monster-list": {
         "title": "怪物列表"
     },
     "monster-tag-detail": {
+        "bonus": "加成",
+        "description": "描述",
         "meterSuffix": "公尺",
+        "params": "參數",
+        "relatedMonsters": "關聯怪物",
+        "sameTags": "同類詞條",
         "title": "號令者詳情"
     },
     "more": {
@@ -6106,9 +6555,123 @@
         "title": "更多"
     },
     "node-editor": {
+        "addCalc": {
+            "description": "計算輸入值的總和",
+            "result": "結果",
+            "title": "加法計算",
+            "waiting": "等待輸入..."
+        },
+        "astExpression": {
+            "description": "驗證 AST 表達式",
+            "expression": "表達式",
+            "expressionPlaceholder": "傷害",
+            "missingCore": "缺少核心計算節點",
+            "result": "結果",
+            "title": "AST 表達式",
+            "unknownError": "未知錯誤",
+            "waiting": "等待輸入..."
+        },
+        "attrCalc": {
+            "base": "基礎屬性",
+            "other": "其他屬性",
+            "title": "屬性計算",
+            "waiting": "等待輸入..."
+        },
+        "buffInput": {
+            "addBuffSlot": "新增 Buff 槽位",
+            "description": "搜尋與選擇 Buff",
+            "search": "搜尋（支援拼音）",
+            "searchPlaceholder": "輸入 Buff 名稱或拼音",
+            "selectBuff": "選擇 Buff",
+            "title": "Buff 輸入"
+        },
+        "coreCalc": {
+            "currentAvailable": "目前可用",
+            "defaultSkill": "選擇預設技能：",
+            "errorInfo": "錯誤資訊：",
+            "missingInputs": "缺少必要輸入：",
+            "selectSkill": "請選擇技能",
+            "waiting": "等待輸入"
+        },
+        "enemyInput": {
+            "attack": "攻擊",
+            "attributes": "敵人屬性（目前等級）",
+            "defense": "防禦",
+            "enemy": "敵人",
+            "enemyLevel": "敵人等級",
+            "enemyResistance": "敵人抗性",
+            "hp": "生命",
+            "stance": "戰姿"
+        },
         "expressionCalc": {
             "description": "計算自訂運算式的值",
+            "expression": "表達式",
+            "expressionPlaceholder": "例如：a + b * c",
+            "inputCount": "輸入數量：",
+            "result": "結果",
             "title": "運算式計算"
+        },
+        "fullCalc": {
+            "description": "基於核心計算節點的完整傷害計算",
+            "result": "結果",
+            "title": "完整計算",
+            "waiting": "等待輸入..."
+        },
+        "meleeWeaponInput": {
+            "chooseLevel": "選擇等級",
+            "chooseWeapon": "選擇近戰武器",
+            "description": "近戰武器選擇",
+            "refineLevel": "精煉等級",
+            "title": "近戰武器輸入",
+            "weapon": "近戰武器",
+            "weaponLevel": "武器等級"
+        },
+        "modInput": {
+            "addModSlot": "新增 MOD 槽位",
+            "chooseLevel": "選擇等級",
+            "chooseMod": "選擇 MOD",
+            "element": "MOD 元素",
+            "type": "MOD 類型"
+        },
+        "multiplyCalc": {
+            "description": "計算輸入值的乘積",
+            "result": "結果",
+            "title": "乘法計算",
+            "waiting": "等待輸入..."
+        },
+        "rangedWeaponInput": {
+            "chooseLevel": "選擇等級",
+            "chooseWeapon": "選擇遠程武器",
+            "description": "遠程武器選擇",
+            "refineLevel": "精煉等級",
+            "title": "遠程武器輸入",
+            "weapon": "遠程武器",
+            "weaponLevel": "武器等級"
+        },
+        "skillDmg": {
+            "description": "計算技能傷害",
+            "expectedDamage": "期望傷害",
+            "noHpDamage": "無血量因數傷害",
+            "result": "傷害結果",
+            "waiting": "等待輸入..."
+        },
+        "weaponAttr": {
+            "attack": "攻擊",
+            "attackSpeed": "攻擊速度",
+            "critDamage": "暴擊傷害",
+            "critRate": "暴擊率",
+            "multiShot": "多重射擊",
+            "result": "武器屬性",
+            "triggerRate": "觸發率",
+            "waiting": "等待輸入..."
+        },
+        "weaponDmg": {
+            "description": "計算武器傷害",
+            "expectedDamage": "期望傷害",
+            "higherCrit": "高級暴擊",
+            "lowerCrit": "低級暴擊",
+            "result": "武器傷害",
+            "waiting": "等待輸入..."
         }
     },
     "notfound": {
@@ -6161,6 +6724,62 @@
     "pet-list": {
         "title": "魔靈列表"
     },
+    "points-mall": {
+        "accountSettings": "帳號設定",
+        "all": "全部",
+        "availability": "投放時間",
+        "balance": "積分餘額",
+        "bubblePreview": "氣泡預覽",
+        "confirmRedeem": "確認兌換",
+        "confirmRedeemDesc": "確定花費 {{cost}} 積分兌換「{{name}}」嗎？",
+        "currentAppearance": "目前裝扮",
+        "default": "預設",
+        "equipAfterRedeem": "請先兌換該商品",
+        "equipFailed": "套用裝扮失敗",
+        "equipFailedRetry": "套用裝扮失敗，請稍後重試",
+        "equipSuccess": "已套用裝扮",
+        "fetchProductsError": "拉取商品失敗，請稍後重試",
+        "fetchProductsFailed": "拉取積分商城商品失敗",
+        "fetchSummaryError": "拉取積分資訊失敗，請稍後重試",
+        "fetchSummaryFailed": "拉取積分商城摘要失敗",
+        "instructionLogin": "兌換與裝備都需要登入帳號。",
+        "instructionNameEffect": "名字特效會影響聊天中暱稱的顯示特效。",
+        "instructionTitle": "說明",
+        "instructionTitleBadge": "稱號會顯示在暱稱旁邊，用於體現成就或身分。",
+        "insufficientPoints": "積分不足",
+        "loginFirst": "請先登入 DNA Builder 帳號",
+        "loginHint": "登入後可查看積分並兌換裝扮。",
+        "nameEffect": "名字特效",
+        "noPreview": "暫無預覽",
+        "noProducts": "暫無可兌換商品",
+        "notInRedeemWindow": "該商品目前不在可兌換時間範圍內",
+        "notOwned": "未擁有",
+        "other": "其他",
+        "owned": "已擁有",
+        "points": "積分",
+        "pointsHint": "積分可用於兌換稱號、名字特效等裝扮。",
+        "preview": "預覽",
+        "previewHint": "預覽以目前選擇為準",
+        "previewNameCard": "裝備後顯示暱稱特效",
+        "previewTitle": "裝備後顯示稱號",
+        "price": "價格",
+        "productList": "商品列表",
+        "redeem": "兌換",
+        "redeemFailed": "兌換失敗",
+        "redeemFailedRetry": "兌換失敗，請稍後重試",
+        "redeemSuccess": "兌換成功",
+        "refresh": "重新整理",
+        "rewardType": {
+            "nameCard": "名字特效",
+            "title": "稱號"
+        },
+        "summaryNotReady": "目前無法取得積分資訊，請稍後重試",
+        "title": "積分商城",
+        "use": "使用",
+        "used": "已使用",
+        "useHint": "你可以在商品列表中兌換並點擊「使用」來切換裝扮。",
+        "userFallback": "使用者"
+    },
     "questchain-detail": {
         "title": "任務劇情詳情"
     },
@@ -6169,6 +6788,10 @@
     },
     "raid-rank": {
         "title": "排名獎勵"
+    },
+    "ranking": {
+        "desc": "榜單排行",
+        "title": "榜單"
     },
     "reputation": {
         "accumulatedExp": "累計經驗",
@@ -6209,12 +6832,21 @@
     },
     "resource": {
         "background": "背景",
+        "book": "所屬讀物",
         "description": "描述",
+        "fish": "所屬魚類",
         "icon": "圖標",
         "id": "ID",
+        "mapPointCount": "個點位",
+        "mapPoints": "地圖點位",
+        "mapPointsJump": "地圖點位（點擊跳轉）",
         "name": "名稱",
+        "optionGroup": "選項組",
+        "packReward": "道具箱",
         "rarity": "稀有度",
         "searchPlaceholder": "搜尋資源ID/名稱（支援拼音）...",
+        "selectReward": "自選箱",
+        "selectRewardTag": "自選",
         "source": "來源",
         "title": "資源"
     },
@@ -6402,21 +7034,52 @@
         "appearance": "外觀設定",
         "cancel": "取消",
         "confirm": "確認",
+        "current": "目前",
+        "customSource": "自訂",
         "darkTheme": "深色主題",
+        "dataPackManagement": "資料包管理",
+        "dataPackSourceAddress": "資料包來源位址",
         "desc": "自定義應用程序設置",
+        "download": "下載",
+        "downloaded": "已下載",
+        "female": "女",
+        "initScriptHotkeysAtStartup": "啟動時初始化腳本熱鍵",
         "lang": "語言",
         "launchAtStartup": "開機啟動",
         "launchAtStartupTip": "系統登入後自動啟動桌面應用程式",
         "lightTheme": "亮色主題",
+        "male": "男",
+        "missingDragDataPack": "未找到可拖曳的資料包：",
+        "noAvailableVersions": "暫無可用版本",
+        "noDescription": "無說明",
         "noModelAvailable": "暫無可用模型",
+        "noSafeModeQuestion": "目前沒有可校驗的問題",
+        "officialSource": "官方來源",
         "other": "其他設置",
+        "prepareDragDataPackFailed": "準備拖曳資料包失敗",
+        "protagonistGender1": "主角性別1",
+        "protagonistGender2": "主角性別2",
+        "protagonistName1": "主角名稱1",
+        "protagonistName2": "主角名稱2",
+        "refresh": "重新整理",
         "reset": "重置所有設置",
         "resetConfirm": "確認重置所有設置嗎？",
         "resetTip": "如果頁面出錯可以嘗試重置",
+        "safeMode": "安全模式",
+        "safeModeAnswerWrong": "回答錯誤，安全模式仍保持開啟",
+        "safeModeHint": "你知道得太多了",
         "showAIChat": "顯示AI配裝助手",
+        "storyText": "劇情文本",
         "theme": "主題",
         "title": "設定",
         "uiScale": "UI縮放",
+        "uninstall": "解除安裝",
+        "uninstallDataPack": "解除安裝資料包",
+        "uninstallDataPackConfirm": "確定要解除安裝 {{version}} 嗎？",
+        "unknown": "未知",
+        "updateLaunchAtStartupFailed": "更新開機啟動設定失敗",
+        "use": "使用",
+        "versionList": "版本列表",
         "windowTrasnparent": "透明效果",
         "windowTrasnparentTip": "視窗和表面顯示半透明",
         "winMaterial": "視窗材質"
@@ -6438,18 +7101,71 @@
     },
     "TalkObject_Test": "TalkObject_Test",
     "timeline": {
+        "addTrack": "新增軌道",
+        "addTrackError": "新增軌道過程中發生錯誤：",
+        "addTrackFailed": "新增軌道失敗，請重試",
+        "addTrackLimitReached": "軌道數量已達上限（{{max}}），無法新增更多軌道！",
+        "addTrackNameTypeError": "新增軌道失敗：軌道名稱必須是字串類型",
+        "attributeImpact": "屬性影響",
+        "brushMode": "畫筆模式",
+        "buffTooltip": "BUFF只會對同一軌道或其上方的技能生效",
+        "buffTrack": "BUFF",
+        "cleanupDragStateError": "清理拖曳狀態時發生錯誤：",
+        "clear": "清除",
+        "clearItemSelectionError": "清除單個項目選取狀態時出錯：",
+        "clearSelectionError": "清除選取狀態時發生錯誤：",
         "click_to_load": "點擊載入",
+        "damagePlaceholder": "傷害",
+        "deleteItemError": "刪除項目過程中發生錯誤：",
+        "deleteItemNotFound": "刪除確認時未找到要刪除的項目",
+        "deleteMode": "刪除模式",
+        "deleteSelectedItemsError": "刪除選取項目時發生錯誤：",
         "desc": "自訂角色的戰鬥邏輯(打軸)",
+        "dragAdjustDuration": "拖曳調整持續時間",
+        "dragAdjustStartTime": "拖曳調整開始時間",
         "export_json": "匯出 JSON",
+        "generateSample": "產生範例",
+        "handleTrackClickError": "處理軌道點擊時發生錯誤：",
+        "healthCurve": "血量曲線",
+        "healthLabel": "血量",
+        "horizontalScrollError": "水平捲動時發生錯誤：",
         "import_json": "載入 JSON",
+        "importJsonFailed": "匯入 JSON 失敗",
+        "invalidTrackIndex": "無效的軌道索引：",
         "load_save": "載入/保存",
         "new_scheme": "新增方案",
         "overwrite_confirm_message": "時間線 {{name}} 已存在，是否覆蓋？",
         "overwrite_confirm_title": "確認覆蓋",
+        "removeLastTrackNotAllowed": "不能刪除最後一個軌道！",
+        "removeTrackError": "刪除軌道過程中發生錯誤：",
+        "removeTrackFailed": "刪除軌道失敗，請重試",
+        "removeTrackInvalidIndex": "刪除軌道失敗：無效的軌道索引",
         "rename": "重新命名",
+        "renameTrackError": "重新命名軌道過程中發生錯誤：",
+        "renameTrackFailed": "重新命名軌道失敗，請重試",
+        "renameTrackIndexRangeError": "重新命名軌道失敗：軌道索引超出有效範圍",
+        "renameTrackIndexTypeError": "重新命名軌道失敗：軌道索引必須是數字類型",
+        "renameTrackNameTypeError": "重新命名軌道失敗：軌道名稱必須是字串類型",
+        "resetView": "重設視圖",
         "save": "保存",
         "save_scheme": "保存方案",
-        "title": "時間線"
+        "selectMode": "選擇模式",
+        "skillNotFound": "未找到技能 {{base}}",
+        "skillPrefix": "技能",
+        "skillTrack": "技能",
+        "stopPropagationError": "停止事件冒泡時出錯：",
+        "timeLabel": "時間",
+        "timelineNameConflictsWithSkill": "時間線名稱不能與技能名稱相同",
+        "timelineNameInvalidChars": "時間線名稱不能包含 ()+-*/. 等符號",
+        "title": "時間線",
+        "trackNameDefault": "軌道 {{number}}",
+        "trackNameDuplicate": "已存在相同名稱的軌道！",
+        "trackNameExists": "軌道名稱「{{name}}」已存在，請使用其他名稱！",
+        "trackNameRequired": "軌道名稱不能為空！",
+        "trackNameTooLong": "軌道名稱不能超過30個字元！",
+        "updateDragPreviewError": "更新拖曳預覽位置時發生錯誤：",
+        "zoomIn": "放大",
+        "zoomOut": "縮小"
     },
     "todo": {
         "completeFailed": "標記完成失敗",
@@ -6555,6 +7271,11 @@
         "desc": "讀取並匯出 pak 檔案",
         "title": "解包"
     },
+    "update": {
+        "checkFailed": "檢查更新失敗：",
+        "downloadInstallFailed": "下載並安裝更新失敗：",
+        "noUpdateAvailable": "沒有可用的更新"
+    },
     "updater": {
         "newVersionFound": "發現新版本 v{{version}}",
         "newVersionMessage": "\n\n{{body}}\n\n是否自動下載並安裝更新？",
@@ -6568,6 +7289,45 @@
         "updateFailed": "更新失敗",
         "updating": "更新中..."
     },
+    "view": {
+        "all": "全部",
+        "allModules": "全部模組",
+        "contentAuthorizationDesc": "除特別註明的內容外，本站文字內容遵循 CC BY-SA 3.0 協議，圖片等媒體內容則遵循其原有協議。",
+        "contentAuthorizationDesc2": "使用本站內容時，您必須提供適當署名，並提供指向本授權協議的連結，同時標明是否對原始作品作了修改；不得以任何方式暗示本站為您或您的使用背書。",
+        "contentAuthorizationTitle": "內容授權說明",
+        "contentCount": "內容分區",
+        "databaseEntryCount": "資料入口",
+        "featuredEntry": "推薦入口",
+        "globalSearchEntry": "全域檢索入口",
+        "matchCount": "已命中 {{count}} 個結果",
+        "moduleCount": "已選 {{count}} 個模組",
+        "noResult": "沒有找到符合內容，試試角色、地圖、任務、副本或怪物等關鍵字",
+        "noResultEntries": "未找到符合的資料庫條目",
+        "placeholder": "搜尋已選模組...",
+        "searchScope": "目前搜尋範圍：{{scope}}",
+        "section": {
+            "build": {
+                "badge": "Build",
+                "description": "圍繞角色培養、裝備搭配與養成素材，適合從 Build 視角快速定位核心資料。",
+                "title": "構築與養成"
+            },
+            "challenge": {
+                "badge": "挑戰",
+                "description": "面向首領、怪物、成就與稱號等目標型內容，方便圍繞挑戰目標進行連續檢索。",
+                "title": "挑戰與收藏"
+            },
+            "explore": {
+                "badge": "Explore",
+                "description": "聚合區域、副本、刷新點位與採集相關資料，優先服務跑圖、採集和副本路線查詢。",
+                "title": "地圖與探索"
+            },
+            "world": {
+                "badge": "World",
+                "description": "把 NPC、動態任務、話題、聲名與圖鑑類內容整理到同一層，降低世界觀檢索成本。",
+                "title": "任務與世界"
+            }
+        }
+    },
     "walnut-list": {
         "title": "密函列表"
     },
@@ -6575,9 +7335,11 @@
         "title": "武器詳情"
     },
     "weapon-list": {
+        "defaultOrder": "預設順序",
         "income": "收益",
         "noResults": "沒有找到符合的武器",
         "searchPlaceholder": "搜尋武器名稱、類型（支援拼音）...",
+        "sortByIncome": "收益排序：高→低",
         "title": "武器列表"
     },
     "Wuyou01": "Wuyou01"
