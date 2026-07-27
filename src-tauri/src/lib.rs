@@ -1406,11 +1406,30 @@ async fn list_pak_files(
 /// 导出指定 pak 内的文件，并将 Lua 字节码反编译后直接落盘为 `.lua`。
 #[tauri::command]
 async fn export_pak_files(
+    app: tauri::AppHandle,
     pak_files: std::collections::BTreeMap<String, Vec<String>>,
     aes_key: Option<String>,
     target_path: String,
 ) -> Result<Vec<repak_tools::PakExportResult>, String> {
-    repak_tools::export_pak_files(&pak_files, aes_key.as_deref(), Path::new(&target_path))
+    let total: usize = pak_files.values().map(Vec::len).sum();
+    let emit_progress = |current| {
+        let _ = app.emit(
+            "pak_export_progress",
+            serde_json::json!({
+                "current": current,
+                "total": total,
+                "targetPath": target_path,
+            }),
+        );
+    };
+
+    emit_progress(0);
+    repak_tools::export_pak_files(
+        &pak_files,
+        aes_key.as_deref(),
+        Path::new(&target_path),
+        emit_progress,
+    )
 }
 
 /// 使用 unluac 反编译 Lua 字节码文件。

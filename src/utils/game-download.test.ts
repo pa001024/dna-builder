@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from "vitest"
 import { tauriFetch } from "@/api/app"
 import {
+    getHotUpdateVersionList,
     getPreFullPackageInfo,
     normalizeFullPackageInfo,
     normalizeHotUpdatePakFilesInfo,
     normalizeOptionalPatchSigns,
+    resolveGameVersion,
 } from "./game-download"
 
 vi.mock("@/api/app", () => ({
@@ -171,5 +173,31 @@ describe("getPreFullPackageInfo", () => {
         expect(result?.downloadUrl).toBe(
             "https://cdn.example.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/1.6/16001/full_16001/full_16001.hdiff"
         )
+    })
+})
+
+describe("getHotUpdateVersionList", () => {
+    it("热更版本应该继续使用旧 VersionList.json", async () => {
+        vi.mocked(tauriFetch).mockReset().mockResolvedValueOnce({
+            json: async () => ({ versionList: {} }),
+        } as Response)
+
+        await getHotUpdateVersionList("https://cdn.example.com", "PC_OBT_CN_Pub")
+
+        expect(vi.mocked(tauriFetch)).toHaveBeenCalledWith(
+            "https://cdn.example.com/Patches/FinalPatch/CN/Default/WindowsNoEditor/PC_OBT_CN_Pub/VersionList.json"
+        )
+    })
+})
+
+describe("resolveGameVersion", () => {
+    it("应该读取有效的游戏版本文件", () => {
+        expect(resolveGameVersion('{"version":15002}')).toBe(15002)
+    })
+
+    it("应该拒绝无效版本文件", () => {
+        expect(resolveGameVersion('{"version":"15002"}')).toBeNull()
+        expect(resolveGameVersion('{"version":0}')).toBeNull()
+        expect(resolveGameVersion("invalid json")).toBeNull()
     })
 })

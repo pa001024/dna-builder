@@ -14,7 +14,6 @@ import {
     getFileSize,
     listDirectories,
     listFiles,
-    pathExists,
     readTextFile,
     renameFile,
     writeTextFile,
@@ -46,6 +45,7 @@ import {
     normalizeOptionalPatchSigns,
     type OptionalPatchSignsRes,
     pauseDownload,
+    resolveGameVersion,
     resolveLocalVersions,
     toLocalBaseVersionFormat,
     VERSION_URL_PUB,
@@ -211,15 +211,12 @@ function saveChannelGamePath(path: string) {
 }
 
 /**
- * 刷新当前游戏路径是否真实存在。
+ * 根据 CDN 正式版本刷新当前游戏是否正确安装。
  */
 async function refreshGameInstalled() {
-    gameInstalled.value =
-        !!gameStore.path &&
-        (await pathExists(gameStore.path)) &&
-        ((await pathExists(baseVersionPath.value)) || (await pathExists(gameVersionPath.value))) &&
-        !(await pathExists(extractProgressPath.value))
-    gameStore.installed = gameInstalled.value
+    const expectedVersion = fullPackageInfo.value?.latestVersion ?? versionList.value?.subVersion
+    await gameStore.refreshGameInstalled(expectedVersion)
+    gameInstalled.value = gameStore.installed
 }
 
 /**
@@ -946,6 +943,7 @@ async function fetchVersionList() {
         versionList.value = baseVersion
         fullPackageInfo.value = fullPackage
         preFullPackageInfo.value = preFullPackage
+        await refreshGameInstalled()
         calculateTotalSize()
         await checkPreDownloadStatus()
         await checkHotUpdateStatus()
@@ -1130,7 +1128,7 @@ async function checkForUpdates() {
     try {
         if (fullPackageInfo.value) {
             const localContent = await readTextFile(gameVersionPath.value)
-            const localVersion = (JSON.parse(localContent) as { version?: unknown }).version
+            const localVersion = resolveGameVersion(localContent)
             needUpdate.value = String(localVersion) !== fullPackageInfo.value.latestVersion
             updateSize.value = needUpdate.value ? fullPackageInfo.value.size : 0
             await checkPreDownloadStatus()
@@ -1334,6 +1332,11 @@ async function updateBaseVersionFile() {
         const localVersionList = toLocalBaseVersionFormat(versionList.value.gameVersionList.GameVersionList["1"].GameVersionList)
         const content = JSON.stringify(localVersionList, null, 2)
         await writeTextFile(baseVersionPath.value, content)
+        const gameVersion = Number(versionList.value.subVersion)
+        if (!Number.isSafeInteger(gameVersion) || gameVersion <= 0) {
+            throw new Error(`Invalid game version: ${versionList.value.subVersion}`)
+        }
+        await writeTextFile(gameVersionPath.value, JSON.stringify({ version: gameVersion }, null, 2))
         await refreshGameInstalled()
         ui.showSuccessMessage(t("game-update.update_success"))
     } catch (err) {
@@ -1466,6 +1469,11 @@ async function downloadAndApplyFullPackage() {
         overallProgress.value = 1
         downloadSpeed.value = ""
         await applyGamePatch(fullFilePath, extractDir.value)
+        const gameVersion = Number(packageInfo.latestVersion)
+        if (!Number.isSafeInteger(gameVersion) || gameVersion <= 0) {
+            throw new Error(`Invalid game version: ${packageInfo.latestVersion}`)
+        }
+        await writeTextFile(gameVersionPath.value, JSON.stringify({ version: gameVersion }, null, 2))
         await deleteFile(fullFilePath, true)
 
         isExtracting.value = false

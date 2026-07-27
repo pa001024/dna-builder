@@ -23,6 +23,7 @@ const selectedPakPaths = ref<string[]>([])
 const selectedMergedPaths = ref<string[]>([])
 const showSettingsDialog = ref(false)
 const loading = ref(false)
+const exportProgress = ref<number | null>(null)
 const pakPathFilter = ref("")
 const filePathFilter = ref("")
 const debouncedFilePathFilter = ref("")
@@ -240,8 +241,11 @@ async function exportSelectedFiles() {
     }
 
     loading.value = true
+    exportProgress.value = 0
     try {
-        const result = await exportPakFiles(exportMap, aesKey.value.trim() || null, targetPath.value.trim())
+        const result = await exportPakFiles(exportMap, aesKey.value.trim() || null, targetPath.value.trim(), (current, total) => {
+            exportProgress.value = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 0
+        })
         const luaFiles = result.flatMap(item => item.exportedFiles).filter(path => path.toLowerCase().endsWith(".lua"))
         if (luaFiles.length && unluacPath.value.trim() && luaOutputPath.value.trim()) {
             const decompileResult = await decompileLuaBytecodeFiles(
@@ -259,6 +263,7 @@ async function exportSelectedFiles() {
         console.error("导出 pak 文件失败:", error)
         ui.showErrorMessage(error instanceof Error ? error.message : String(error))
     } finally {
+        exportProgress.value = null
         loading.value = false
     }
 }
@@ -308,6 +313,16 @@ onMounted(async () => {
                 </div>
             </section>
         </div>
+    </div>
+
+    <div
+        v-if="exportProgress !== null"
+        class="fixed bottom-4 left-1/2 z-50 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded border border-base-300 bg-base-100 p-3 shadow-lg"
+        role="status"
+        aria-live="polite"
+    >
+        <div class="mb-2 text-center text-sm font-medium tabular-nums">{{ exportProgress }}%</div>
+        <progress class="progress progress-primary block h-2 w-full" :value="exportProgress" max="100" />
     </div>
 
     <dialog class="modal" :class="{ 'modal-open': showSettingsDialog }">

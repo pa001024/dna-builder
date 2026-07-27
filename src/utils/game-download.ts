@@ -349,6 +349,20 @@ export function resolveLocalVersions(localContent: string): Record<string, GameA
 }
 
 /**
+ * 解析 GameVersion.json 中的有效游戏版本号。
+ * @param content GameVersion.json 文本
+ * @returns 正整数版本号，文件无效时返回 null
+ */
+export function resolveGameVersion(content: string): number | null {
+    try {
+        const version = (JSON.parse(content) as { version?: unknown }).version
+        return typeof version === "number" && Number.isSafeInteger(version) && version > 0 ? version : null
+    } catch {
+        return null
+    }
+}
+
+/**
  * 归一化热更 PakFilesInfo，兼容本地缓存和远端清单的字段名差异。
  * @param pakInfo 原始热更文件清单
  * @returns 标准字段名热更文件清单
