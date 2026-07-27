@@ -144,6 +144,7 @@ describe("DynamicBuff", () => {
             技能速度: 1,
             失衡易伤: 1,
             技能倍率加数: 1,
+            召唤物属性继承比例: 1,
             召唤物攻击速度: 1,
             召唤物范围: 1,
             召唤物伤害: 1,
@@ -187,6 +188,7 @@ describe("DynamicBuff", () => {
             技能速度: 1,
             失衡易伤: 1,
             技能倍率加数: 1,
+            召唤物属性继承比例: 1,
             召唤物攻击速度: 1,
             召唤物范围: 1,
             召唤物伤害: 1,
@@ -522,7 +524,7 @@ describe("LeveledWeapon类测试", () => {
 
     it("MOD effect的近战攻速应可作为武器面板来源读取", () => {
         const 暴虐mod = new LeveledMod(42311)
-        expect(暴虐mod["近战攻速"]).toBeCloseTo(0.6, 10)
+        expect(暴虐mod.近战攻速).toBeCloseTo(0.6, 10)
         expect(暴虐mod.攻速).toBeUndefined()
     })
 
