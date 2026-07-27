@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
-import { normalizeHotUpdatePakFilesInfo, normalizeOptionalPatchSigns } from "./game-download"
+import { tauriFetch } from "@/api/app"
+import {
+    getPreFullPackageInfo,
+    normalizeFullPackageInfo,
+    normalizeHotUpdatePakFilesInfo,
+    normalizeOptionalPatchSigns,
+} from "./game-download"
 
 vi.mock("@/api/app", () => ({
     getFileHash: vi.fn(),
@@ -94,5 +100,76 @@ describe("normalizeHotUpdatePakFilesInfo", () => {
             fileSize: 200,
             bExamineIgnore: false,
         })
+    })
+})
+
+describe("normalizeFullPackageInfo", () => {
+    it("应该解析完整包清单并生成下载地址", () => {
+        const result = normalizeFullPackageInfo(
+            {
+                latest_version: "15002",
+                latest_version_number: "1.5",
+                min_supported_version: "15001",
+            },
+            {
+                hdiff_file: {
+                    name: "full_15002.hdiff",
+                    md5: "1481c70e765f8bbbc36d1a1d1ad2e88c",
+                    size: 25469095941,
+                },
+                new_size: 27984206398,
+            },
+            "http://pan01-1-hs.shyxhy.com",
+            "PC_OBT_CN_Pub"
+        )
+
+        expect(result).toEqual({
+            latestVersion: "15002",
+            latestVersionNumber: "1.5",
+            minSupportedVersion: "15001",
+            fileName: "full_15002.hdiff",
+            md5: "1481c70e765f8bbbc36d1a1d1ad2e88c",
+            size: 25469095941,
+            newSize: 27984206398,
+            downloadUrl: "http://pan01-1-hs.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/1.5/15002/full_15002/full_15002.hdiff",
+        })
+    })
+
+    it("清单字段不完整时应该拒绝继续", () => {
+        expect(() => normalizeFullPackageInfo({}, {}, "https://example.com", "PC_OBT_CN_Pub")).toThrow("Invalid full package manifest")
+    })
+})
+
+describe("getPreFullPackageInfo", () => {
+    it("应该使用 PreVersionManifest.json 获取预下载版本", async () => {
+        vi.mocked(tauriFetch)
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    latest_version: "16001",
+                    latest_version_number: "1.6",
+                    min_supported_version: "15002",
+                }),
+            } as Response)
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    hdiff_file: {
+                        name: "full_16001.hdiff",
+                        md5: "abc",
+                        size: 100,
+                    },
+                    new_size: 200,
+                }),
+            } as Response)
+
+        const result = await getPreFullPackageInfo("https://cdn.example.com", "PC_OBT_CN_Pub")
+
+        expect(vi.mocked(tauriFetch).mock.calls[0][0]).toBe(
+            "https://cdn.example.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/PreVersionManifest.json"
+        )
+        expect(result?.downloadUrl).toBe(
+            "https://cdn.example.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/1.6/16001/full_16001/full_16001.hdiff"
+        )
     })
 })

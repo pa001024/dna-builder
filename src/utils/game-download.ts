@@ -22,6 +22,35 @@ export const CDN_LIST = [
 ]
 export const VERSION_URL_PUB = (server: string) => `/Packages/${server}/WindowsNoEditor/`
 
+export interface GameVersionManifest {
+    latestVersion: string
+    latestVersionNumber: string
+    minSupportedVersion: string
+}
+
+export interface FullPackageInfo extends GameVersionManifest {
+    fileName: string
+    md5: string
+    size: number
+    newSize: number
+    downloadUrl: string
+}
+
+interface RawGameVersionManifest {
+    latest_version?: unknown
+    latest_version_number?: unknown
+    min_supported_version?: unknown
+}
+
+interface RawHPatchDiffMd5 {
+    hdiff_file?: {
+        name?: unknown
+        md5?: unknown
+        size?: unknown
+    }
+    new_size?: unknown
+}
+
 export interface GameVersionListRes {
     GameVersionList: GameVersionList
 }
@@ -134,6 +163,111 @@ type RawOptionalPatchSignsRes = Partial<OptionalPatchSignsRes> & {
  * 下载进度回调函数
  */
 export type ProgressCallback = (progress: DownloadProgress) => void
+
+/**
+ * 将新版下载清单转换为前端统一格式。
+ * @param manifest 版本清单
+ * @param patchInfo 完整包清单
+ * @param cdn CDN 地址
+ * @param channel 渠道
+ * @returns 完整包信息
+ * @throws 清单字段缺失或类型错误时抛出异常
+ */
+export function normalizeFullPackageInfo(
+    manifest: RawGameVersionManifest,
+    patchInfo: RawHPatchDiffMd5,
+    cdn: string,
+    channel: string
+): FullPackageInfo {
+    const latestVersion = manifest.latest_version
+    const latestVersionNumber = manifest.latest_version_number
+    const minSupportedVersion = manifest.min_supported_version
+    const fileName = patchInfo.hdiff_file?.name
+    const md5 = patchInfo.hdiff_file?.md5
+    const size = patchInfo.hdiff_file?.size
+    const newSize = patchInfo.new_size
+    if (
+        typeof latestVersion !== "string" ||
+        typeof latestVersionNumber !== "string" ||
+        typeof minSupportedVersion !== "string" ||
+        typeof fileName !== "string" ||
+        typeof md5 !== "string" ||
+        typeof size !== "number" ||
+        typeof newSize !== "number"
+    ) {
+        throw new Error("Invalid full package manifest")
+    }
+
+    const server = channel.match(/(Global)_Pub/)?.[1] || "CN"
+    const packageDir = `${VERSION_URL_PUB(server)}${channel}/${latestVersionNumber}/${latestVersion}/full_${latestVersion}`
+    return {
+        latestVersion,
+        latestVersionNumber,
+        minSupportedVersion,
+        fileName,
+        md5,
+        size,
+        newSize,
+        downloadUrl: `${cdn}${packageDir}/${fileName}`,
+    }
+}
+
+/**
+ * 获取新版完整游戏下载清单；渠道尚未提供清单时返回 null。
+ * @param cdn CDN 地址
+ * @param channel 渠道
+ * @returns 完整包信息或 null
+ */
+async function getFullPackageInfoByManifest(cdn: string, channel: string, manifestName: string) {
+    const server = channel.match(/(Global)_Pub/)?.[1] || "CN"
+    const channelDir = `${VERSION_URL_PUB(server)}${channel}`
+    const manifestResponse = await tauriFetch(`${cdn}${channelDir}/${manifestName}`)
+    if (!manifestResponse.ok) return null
+    const manifest = (await manifestResponse.json()) as RawGameVersionManifest
+    if (typeof manifest.latest_version !== "string" || typeof manifest.latest_version_number !== "string") {
+        throw new Error(`Invalid ${manifestName}`)
+    }
+
+    const packageDir = `${channelDir}/${manifest.latest_version_number}/${manifest.latest_version}/full_${manifest.latest_version}`
+    const patchResponse = await tauriFetch(`${cdn}${packageDir}/HPatchDiffMd5.json`)
+    if (!patchResponse.ok) return null
+    return normalizeFullPackageInfo(manifest, (await patchResponse.json()) as RawHPatchDiffMd5, cdn, channel)
+}
+
+/**
+ * 获取新版正式完整包信息。
+ * @param cdn CDN 地址
+ * @param channel 渠道
+ * @returns 完整包信息或 null
+ */
+export async function getFullPackageInfo(cdn: string, channel: string) {
+    return await getFullPackageInfoByManifest(cdn, channel, "VersionManifest.json")
+}
+
+/**
+ * 获取新版预下载完整包信息。
+ * @param cdn CDN 地址
+ * @param channel 渠道
+ * @returns 预下载完整包信息或 null
+ */
+export async function getPreFullPackageInfo(cdn: string, channel: string) {
+    return await getFullPackageInfoByManifest(cdn, channel, "PreVersionManifest.json")
+}
+
+/**
+ * 下载新版完整游戏包。
+ * @param packageInfo 完整包信息
+ * @param filename 本地目标路径
+ * @param concurrentThreads 并发线程数
+ * @returns 下载结果消息
+ */
+export async function downloadFullPackage(packageInfo: FullPackageInfo, filename: string, concurrentThreads = 10) {
+    return await invoke<string>("download_file", {
+        url: packageInfo.downloadUrl,
+        filename,
+        concurrentThreads,
+    })
+}
 
 /**
  * 判断下载错误是否来自用户暂停。
@@ -451,7 +585,14 @@ export async function downloadHotUpdateAssets(
     }
 }
 
-export async function getBaseVersion(cdn: string, channel: string) {
+/**
+ * 获取旧版分包清单。
+ * @param cdn CDN 地址
+ * @param channel 渠道
+ * @param loadLegacyPreDownload 是否读取旧版预下载清单
+ * @returns 分包版本信息
+ */
+export async function getBaseVersion(cdn: string, channel: string, loadLegacyPreDownload = true) {
     const server = channel.match(/(Global)_Pub/)?.[1] || "CN"
     const versionUrl = VERSION_URL_PUB(server)
     const subVersion = await tauriFetch(`${cdn}${versionUrl}${channel}/PackageBaseVersion.txt`)
@@ -463,6 +604,9 @@ export async function getBaseVersion(cdn: string, channel: string) {
             subVersion: subVersionText,
             gameVersionList: await res.json(),
         } as GameVersionListWithPre
+        if (!loadLegacyPreDownload) {
+            return result
+        }
         const preVersion = await tauriFetch(`${cdn}${versionUrl}${channel}/PreDownloadVersion.json`)
         if (!preVersion.ok) {
             return result

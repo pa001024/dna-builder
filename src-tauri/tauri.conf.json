@@ -41,7 +41,7 @@
                 "language": "zh-CN"
             }
         },
-        "resources": []
+        "resources": ["resources/HPatchz-LICENSE.txt"]
     },
     "plugins": {
         "updater": {

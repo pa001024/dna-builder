@@ -260,6 +260,16 @@ export async function extractGameAssets(zipPath: string, targetDir: string) {
 }
 
 /**
+ * 使用应用内嵌的 hpatchz 应用完整游戏包。
+ * @param diffPath hdiff 文件路径
+ * @param targetDir 游戏安装目录
+ * @returns 成功消息
+ */
+export async function applyGamePatch(diffPath: string, targetDir: string) {
+    return await invoke<string>("apply_game_patch", { diffPath, targetDir })
+}
+
+/**
  * 重命名文件
  * @param oldPath 原文件路径
  * @param newPath 新文件路径

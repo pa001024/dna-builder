@@ -7,6 +7,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import {
+    applyGamePatch,
     cleanupTempDir,
     deleteFile,
     extractGameAssets,
@@ -24,13 +25,17 @@ import {
     compareGameVersions,
     type DownloadProgress,
     downloadAssets,
+    downloadFullPackage,
     downloadHotUpdateAssets,
+    type FullPackageInfo,
     type GameVersionListWithPre,
     getBaseVersion,
     getDownloadProgress,
+    getFullPackageInfo,
     getHotUpdatePakFilesInfo,
     getHotUpdateResDiscreteInfo,
     getHotUpdateVersionList,
+    getPreFullPackageInfo,
     type HotUpdatePakFileInfo,
     type HotUpdatePakFilesInfoRes,
     type HotUpdateVersionListRes,
@@ -51,6 +56,8 @@ const gameStore = useGameStore()
 const ui = useUIStore()
 const setting = useSettingStore()
 const versionList = ref<GameVersionListWithPre | null>(null)
+const fullPackageInfo = ref<FullPackageInfo | null>(null)
+const preFullPackageInfo = ref<FullPackageInfo | null>(null)
 const isLoading = ref(false)
 const isDownloading = ref(false)
 const isExtracting = ref(false)
@@ -74,7 +81,7 @@ const isPauseRequested = ref(false)
 const isRecoveredActiveDownload = ref(false)
 const activeDownloadAction = ref<"game" | "pre" | "hot" | "optional" | "">("")
 const activeOptionalSign = ref("")
-const concurrentThreads = useLocalStorage("download_threads", 1)
+const concurrentThreads = useLocalStorage("download_threads", 8)
 
 const preTotalSize = ref(0)
 const preTotalFiles = ref(0)
@@ -210,7 +217,7 @@ async function refreshGameInstalled() {
     gameInstalled.value =
         !!gameStore.path &&
         (await pathExists(gameStore.path)) &&
-        (await pathExists(baseVersionPath.value)) &&
+        ((await pathExists(baseVersionPath.value)) || (await pathExists(gameVersionPath.value))) &&
         !(await pathExists(extractProgressPath.value))
     gameStore.installed = gameInstalled.value
 }
@@ -266,6 +273,8 @@ watch([selectedChannel, customChannel, selectedCDN], async () => {
     const activeChannel = getActiveChannel()
     if (!activeChannel) {
         versionList.value = null
+        fullPackageInfo.value = null
+        preFullPackageInfo.value = null
         needUpdate.value = false
         updateSize.value = 0
         needPreDownload.value = false
@@ -312,6 +321,10 @@ const tempPreDownloadDir = computed(() => {
     if (!gamePath.value) return ""
     return gamePath.value + "\\DNA Game\\TempPrePath\\"
 })
+const fullPackageDownloadDir = computed(() => {
+    if (!gamePath.value) return ""
+    return `${gamePath.value}\\Diff\\`
+})
 const extractDir = computed(() => {
     if (!gamePath.value) return ""
     return gamePath.value + "\\DNA Game\\"
@@ -319,6 +332,10 @@ const extractDir = computed(() => {
 const baseVersionPath = computed(() => {
     if (!gamePath.value) return ""
     return gamePath.value + "\\DNA Game\\BaseVersion.json"
+})
+const gameVersionPath = computed(() => {
+    if (!gamePath.value) return ""
+    return gamePath.value + "\\DNA Game\\GameVersion.json"
 })
 const extractProgressPath = computed(() => {
     if (!gamePath.value) return ""
@@ -904,6 +921,8 @@ async function fetchVersionList() {
     const activeChannel = getActiveChannel()
     if (!activeChannel) {
         versionList.value = null
+        fullPackageInfo.value = null
+        preFullPackageInfo.value = null
         needUpdate.value = false
         updateSize.value = 0
         needPreDownload.value = false
@@ -916,8 +935,17 @@ async function fetchVersionList() {
         return
     }
     isLoading.value = true
+    fullPackageInfo.value = null
+    preFullPackageInfo.value = null
     try {
-        versionList.value = await getBaseVersion(selectedCDN.value, activeChannel)
+        const [fullPackage, preFullPackage] = await Promise.all([
+            getFullPackageInfo(selectedCDN.value, activeChannel),
+            getPreFullPackageInfo(selectedCDN.value, activeChannel),
+        ])
+        const baseVersion = await getBaseVersion(selectedCDN.value, activeChannel, !fullPackage)
+        versionList.value = baseVersion
+        fullPackageInfo.value = fullPackage
+        preFullPackageInfo.value = preFullPackage
         calculateTotalSize()
         await checkPreDownloadStatus()
         await checkHotUpdateStatus()
@@ -931,6 +959,13 @@ async function fetchVersionList() {
 
 function calculateTotalSize() {
     if (!versionList.value) return
+    if (fullPackageInfo.value) {
+        totalSize.value = fullPackageInfo.value.size
+        totalFiles.value = 1
+        preTotalSize.value = preFullPackageInfo.value?.size ?? 0
+        preTotalFiles.value = preFullPackageInfo.value ? 1 : 0
+        return
+    }
     let size = 0
     let files = 0
     const gameVersionList = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
@@ -958,7 +993,21 @@ function calculateTotalSize() {
 
 async function checkPreDownloadStatus() {
     const activeChannel = getActiveChannel()
-    if (!gamePath.value || !versionList.value || !versionList.value.preVersionList || !activeChannel) {
+    if (!gamePath.value || !activeChannel) {
+        needPreDownload.value = false
+        return
+    }
+    if (fullPackageInfo.value) {
+        if (!preFullPackageInfo.value || preFullPackageInfo.value.latestVersion === fullPackageInfo.value.latestVersion) {
+            needPreDownload.value = false
+            return
+        }
+        const fullFilePath = `${fullPackageDownloadDir.value}${preFullPackageInfo.value.fileName}`
+        const progressFileSize = await getFileSize(`${fullFilePath}.progress`)
+        needPreDownload.value = progressFileSize !== 0 || (await getFileSize(fullFilePath)) !== preFullPackageInfo.value.size
+        return
+    }
+    if (!versionList.value?.preVersionList) {
         needPreDownload.value = false
         return
     }
@@ -1079,6 +1128,16 @@ async function checkForUpdates() {
     }
     if (!gamePath.value) return
     try {
+        if (fullPackageInfo.value) {
+            const localContent = await readTextFile(gameVersionPath.value)
+            const localVersion = (JSON.parse(localContent) as { version?: unknown }).version
+            needUpdate.value = String(localVersion) !== fullPackageInfo.value.latestVersion
+            updateSize.value = needUpdate.value ? fullPackageInfo.value.size : 0
+            await checkPreDownloadStatus()
+            await checkHotUpdateStatus()
+            await syncDownloadProgressAfterRefresh()
+            return
+        }
         const localContent = await readTextFile(baseVersionPath.value)
         const localVersions = resolveLocalVersions(localContent)
         if (!localVersions) {
@@ -1110,6 +1169,26 @@ async function syncDownloadProgressAfterRefresh() {
     if (!gamePath.value) return
     const activeChannel = getActiveChannel()
     if (!activeChannel) return
+    if (needUpdate.value && fullPackageInfo.value) {
+        const fullFilePath = `${fullPackageDownloadDir.value}${fullPackageInfo.value.fileName}`
+        const progress = await getDownloadProgress(fullFilePath)
+        if (progress.hasProgressFile) {
+            await prepareCurrentDownloadFile(
+                fullFilePath,
+                fullPackageInfo.value.fileName,
+                fullPackageInfo.value.size,
+                0,
+                fullPackageInfo.value.size,
+                fullPackageInfo.value.downloadUrl
+            )
+            isDownloading.value = progress.active
+            isPauseRequested.value = progress.active && progress.paused
+            isDownloadPaused.value = progress.paused && !progress.active
+            isRecoveredActiveDownload.value = progress.active
+            activeDownloadAction.value = "game"
+        }
+        return
+    }
     if (needUpdate.value && versionList.value) {
         const files = Object.entries(versionList.value.gameVersionList.GameVersionList["1"].GameVersionList)
         for (const [index, [filename, assets]] of files.entries()) {
@@ -1132,6 +1211,27 @@ async function syncDownloadProgressAfterRefresh() {
             activeDownloadAction.value = "game"
             return
         }
+    }
+
+    if (needPreDownload.value && preFullPackageInfo.value) {
+        const fullFilePath = `${fullPackageDownloadDir.value}${preFullPackageInfo.value.fileName}`
+        const progress = await getDownloadProgress(fullFilePath)
+        if (progress.hasProgressFile) {
+            await prepareCurrentDownloadFile(
+                fullFilePath,
+                preFullPackageInfo.value.fileName,
+                preFullPackageInfo.value.size,
+                0,
+                preFullPackageInfo.value.size,
+                preFullPackageInfo.value.downloadUrl
+            )
+            isDownloading.value = progress.active
+            isPauseRequested.value = progress.active && progress.paused
+            isDownloadPaused.value = progress.paused && !progress.active
+            isRecoveredActiveDownload.value = progress.active
+            activeDownloadAction.value = "pre"
+        }
+        return
     }
 
     if (needPreDownload.value && versionList.value?.preVersionList) {
@@ -1329,6 +1429,73 @@ async function selectGameDir() {
     }
 }
 
+/**
+ * 下载、校验并应用新版完整 hdiff 游戏包。
+ */
+async function downloadAndApplyFullPackage() {
+    const packageInfo = fullPackageInfo.value
+    if (!packageInfo || !gamePath.value) return
+
+    const fullFilePath = `${fullPackageDownloadDir.value}${packageInfo.fileName}`
+    const progressFilePath = `${fullFilePath}.progress`
+    isDownloading.value = true
+    activeDownloadAction.value = "game"
+    activeOptionalSign.value = ""
+    isRecoveredActiveDownload.value = false
+    isDownloadPaused.value = false
+    isPauseRequested.value = false
+    currentDownloaded.value = 0
+    overallProgress.value = 0
+    downloadSpeed.value = ""
+    lastDownloadedBytes = 0
+    lastTimestamp = Date.now()
+
+    try {
+        await prepareCurrentDownloadFile(fullFilePath, packageInfo.fileName, packageInfo.size, 0, packageInfo.size, packageInfo.downloadUrl)
+        const isPackageComplete = await canSkipBeforeHashCheck(fullFilePath, progressFilePath, packageInfo.size)
+        if (!isPackageComplete) {
+            await downloadFullPackage(packageInfo, fullFilePath, concurrentThreads.value)
+        }
+        throwIfPauseRequested()
+
+        isDownloading.value = false
+        isExtracting.value = true
+        currentFile.value = packageInfo.fileName
+        currentFileUrl.value = packageInfo.downloadUrl
+        currentDownloaded.value = packageInfo.size
+        overallProgress.value = 1
+        downloadSpeed.value = ""
+        await applyGamePatch(fullFilePath, extractDir.value)
+        await deleteFile(fullFilePath, true)
+
+        isExtracting.value = false
+        currentFile.value = ""
+        currentFileUrl.value = ""
+        currentDownloadPath.value = ""
+        overallProgress.value = 0
+        await refreshGameInstalled()
+        ui.showSuccessMessage(t("game-update.download_complete", { size: formatSize(packageInfo.size) }))
+        await checkForUpdates()
+        if (needHotUpdate.value && hotUpdatePendingVersions.value.length) {
+            await downloadHotUpdateAllFiles()
+        }
+    } catch (err) {
+        isExtracting.value = false
+        if (isDownloadPausedError(err)) {
+            markDownloadPaused()
+            return
+        }
+        if (isDownloadAlreadyActiveError(err)) {
+            markDownloadAlreadyActive()
+            return
+        }
+        ui.showErrorMessage(t("game-update.download_failed", { error: err instanceof Error ? err.message : String(err) }))
+        console.error("完整包下载或应用失败:", err)
+        isDownloading.value = false
+        downloadSpeed.value = ""
+    }
+}
+
 async function downloadAllFiles() {
     const activeChannel = getActiveChannel()
     if (!activeChannel) {
@@ -1341,6 +1508,10 @@ async function downloadAllFiles() {
     }
     if (!versionList.value) {
         ui.showErrorMessage(t("game-update.version_list_not_loaded"))
+        return
+    }
+    if (fullPackageInfo.value) {
+        await downloadAndApplyFullPackage()
         return
     }
     if (tempPreDownloadDir.value) {
@@ -1452,6 +1623,60 @@ async function downloadAllFiles() {
     }
 }
 
+/**
+ * 下载并校验新版预下载完整包，保留文件供正式版本直接复用。
+ */
+async function preDownloadFullPackage() {
+    const packageInfo = preFullPackageInfo.value
+    if (!packageInfo || !gamePath.value) return
+
+    const fullFilePath = `${fullPackageDownloadDir.value}${packageInfo.fileName}`
+    const progressFilePath = `${fullFilePath}.progress`
+    isDownloading.value = true
+    activeDownloadAction.value = "pre"
+    activeOptionalSign.value = ""
+    isRecoveredActiveDownload.value = false
+    isDownloadPaused.value = false
+    isPauseRequested.value = false
+    currentDownloaded.value = 0
+    overallProgress.value = 0
+    downloadSpeed.value = ""
+    lastDownloadedBytes = 0
+    lastTimestamp = Date.now()
+
+    try {
+        await prepareCurrentDownloadFile(fullFilePath, packageInfo.fileName, packageInfo.size, 0, packageInfo.size, packageInfo.downloadUrl)
+        const isPackageComplete = await canSkipBeforeHashCheck(fullFilePath, progressFilePath, packageInfo.size)
+        if (!isPackageComplete) {
+            await downloadFullPackage(packageInfo, fullFilePath, concurrentThreads.value)
+        }
+        throwIfPauseRequested()
+
+        isDownloading.value = false
+        needPreDownload.value = false
+        currentFile.value = ""
+        currentFileUrl.value = ""
+        currentDownloadPath.value = ""
+        currentDownloaded.value = packageInfo.size
+        overallProgress.value = 0
+        downloadSpeed.value = ""
+        ui.showSuccessMessage(t("game-update.pre_download_complete", { size: formatSize(packageInfo.size) }))
+    } catch (err) {
+        if (isDownloadPausedError(err)) {
+            markDownloadPaused()
+            return
+        }
+        if (isDownloadAlreadyActiveError(err)) {
+            markDownloadAlreadyActive()
+            return
+        }
+        ui.showErrorMessage(t("game-update.download_failed", { error: err instanceof Error ? err.message : String(err) }))
+        console.error("预下载完整包失败:", err)
+        isDownloading.value = false
+        downloadSpeed.value = ""
+    }
+}
+
 async function preDownloadAllFiles() {
     const activeChannel = getActiveChannel()
     if (!activeChannel) {
@@ -1460,6 +1685,10 @@ async function preDownloadAllFiles() {
     }
     if (!gamePath.value) {
         ui.showErrorMessage(t("game-update.select_game_dir_first"))
+        return
+    }
+    if (preFullPackageInfo.value) {
+        await preDownloadFullPackage()
         return
     }
     if (!versionList.value || !versionList.value.preVersion || !versionList.value.preVersionList) {
@@ -1946,7 +2175,7 @@ const launchGame = async () => {
                         </button>
                         <span class="text-base-content/40 text-xs font-bold uppercase tracking-wider">{{ t("game-update.version") }}</span>
                         <div class="flex items-end gap-2">
-                            <span class="text-2xl font-bold font-mono">{{ versionList.subVersion }}</span>
+                            <span class="text-2xl font-bold font-mono">{{ fullPackageInfo?.latestVersion ?? versionList.subVersion }}</span>
                             <span class="text-xs mb-1 px-1.5 py-0.5 rounded bg-base-content/10 opacity-80" v-if="needUpdate">{{
                                 t("game-update.old_version")
                             }}</span>
@@ -1982,7 +2211,7 @@ const launchGame = async () => {
                             <p class="text-xs text-info/80">
                                 {{
                                     t("game-update.pre_download_size", {
-                                        version: versionList.preVersion,
+                                        version: preFullPackageInfo?.latestVersion ?? versionList.preVersion,
                                         size: formatSize(preTotalSize),
                                     })
                                 }}
