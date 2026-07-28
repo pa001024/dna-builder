@@ -2210,13 +2210,6 @@ export const subRegionData: SubRegion[] = [
         ],
     },
     {
-        id: 102201,
-        rid: 1022,
-        name: "UI_SUBREGION_NAME_102201",
-        desc: "UI_SUBREGION_DES_102201",
-        map: "EXChapter01_Jail",
-    },
-    {
         id: 103201,
         rid: 1032,
         name: "佩剑炼金院",
@@ -4365,6 +4358,12 @@ export const subRegionData: SubRegion[] = [
                 name: "集结",
                 icon: "T_Gp_Gathering",
             },
+            {
+                id: 2855,
+                pos: [-18687, 2],
+                name: "黄金旅途·魔灵竞速",
+                icon: "T_Gp_Trans02",
+            },
         ],
     },
     {
@@ -4586,56 +4585,182 @@ export const subRegionData: SubRegion[] = [
         rid: 1070,
         name: "UI_SUBREGION_NAME_107001",
         desc: "UI_SUBREGION_DES_107001",
-        map: "Haiboliya_FTNew",
+        map: "Haiboliya_Thc_Lxzs01",
+        pos: [-3156, -40478],
+        tp: [
+            {
+                id: 1700,
+                pos: [4740, -4868],
+                name: "UI_TELEPORTPOINT_NAME_107001_1",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1701,
+                pos: [7613, -39897],
+                name: "UI_TELEPORTPOINT_NAME_107001_2",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1702,
+                pos: [-21821, -76669],
+                name: "UI_TELEPORTPOINT_NAME_107001_3",
+                icon: "T_Gp_Trans02",
+            },
+        ],
     },
     {
         id: 107101,
         rid: 1071,
         name: "UI_SUBREGION_NAME_107101",
         desc: "UI_SUBREGION_DES_107101",
-        map: "Haiboliya_FTOld",
+        map: "Haiboliya_Thc_Lxzs02",
+        pos: [-41437.333333, -34127.666667],
+        tp: [
+            {
+                id: 1705,
+                pos: [-20624, -30522],
+                name: "UI_TELEPORTPOINT_NAME_107101_3",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1703,
+                pos: [-49721, -51971],
+                name: "UI_TELEPORTPOINT_NAME_107101_1",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1704,
+                pos: [-53967, -19890],
+                name: "UI_TELEPORTPOINT_NAME_107101_2",
+                icon: "T_Gp_Trans02",
+            },
+        ],
     },
     {
         id: 107201,
         rid: 1072,
         name: "UI_SUBREGION_NAME_107201",
         desc: "UI_SUBREGION_DES_107201",
-        map: "Haiboliya_FTLake",
+        map: "Haiboliya_Thc_Lxzx",
+        pos: [-34341.666667, -38723.666667],
+        tp: [
+            {
+                id: 1706,
+                pos: [-76640, -27516],
+                name: "UI_TELEPORTPOINT_NAME_107201_1",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1707,
+                pos: [-33285, -14447],
+                name: "UI_TELEPORTPOINT_NAME_107201_2",
+                icon: "T_Gp_Trans02",
+            },
+            {
+                id: 1708,
+                pos: [6900, -74208],
+                name: "UI_TELEPORTPOINT_NAME_107201_3",
+                icon: "T_Gp_Trans02",
+            },
+        ],
     },
     {
         id: 107301,
         rid: 1073,
         name: "UI_SUBREGION_NAME_107301",
         desc: "UI_SUBREGION_DES_107301",
-        map: "Haiboliya_FTOld_NPark",
+        map: "Haiboliya_Thc_Emyly",
     },
     {
         id: 107401,
         rid: 1074,
         name: "UI_SUBREGION_NAME_107401",
         desc: "UI_SUBREGION_DES_107401",
-        map: "Haiboliya_FTLake_BF_Main",
+        map: "Haiboliya_Thc_Zchj",
     },
     {
         id: 107501,
         rid: 1075,
         name: "UI_SUBREGION_NAME_107501",
         desc: "UI_SUBREGION_DES_107501",
-        map: "Haiboliya_FTNew_Home",
+        map: "Haiboliya_Thc_Zjfj",
     },
     {
         id: 107601,
         rid: 1076,
         name: "UI_SUBREGION_NAME_107601",
         desc: "UI_SUBREGION_DES_107601",
-        map: "Haiboliya_FTNew_Boss",
+        map: "Haiboliya_Thc_Boss",
+    },
+    {
+        id: 107701,
+        rid: 1077,
+        name: "UI_SUBREGION_NAME_107701",
+        desc: "UI_SUBREGION_DES_107701",
+        map: "Haiboliya_Thc_Jhs",
+    },
+    {
+        id: 107801,
+        rid: 1078,
+        name: "UI_SUBREGION_NAME_107801",
+        desc: "UI_SUBREGION_DES_107801",
+        map: "Haiboliya_Thc_Ck",
     },
     {
         id: 108101,
         rid: 1081,
         name: "测试区域",
         desc: "测试区域",
-        map: "Ailixian_LLKXDY",
+        map: "Ailixian_Sailafei",
+    },
+    {
+        id: 108201,
+        rid: 1082,
+        name: "测试区域",
+        desc: "测试区域",
+        map: "Ailixian_Miandao",
+    },
+    {
+        id: 108301,
+        rid: 1083,
+        name: "测试区域",
+        desc: "测试区域",
+        map: "Ailixian_DreamSailafei",
+    },
+    {
+        id: 109001,
+        rid: 1090,
+        name: "",
+        desc: "",
+        map: "Ailixian_Chenmian",
+    },
+    {
+        id: 109101,
+        rid: 1091,
+        name: "",
+        desc: "",
+        map: "Ailixian_Shendianfeixu",
+    },
+    {
+        id: 109201,
+        rid: 1092,
+        name: "",
+        desc: "",
+        map: "Ailixian_Manyue",
+    },
+    {
+        id: 109301,
+        rid: 1093,
+        name: "",
+        desc: "",
+        map: "Ailixian_Anzhixin",
+    },
+    {
+        id: 109401,
+        rid: 1094,
+        name: "",
+        desc: "",
+        map: "Ailixian_LizibeierHJ",
     },
     {
         id: 200101,
@@ -4659,6 +4784,123 @@ export const subRegionData: SubRegion[] = [
         name: "UI_SUBREGION_NAME_300101",
         desc: "UI_SUBREGION_DES_300101",
         map: "Guild",
+        rc: [
+            {
+                id: 9070101,
+                info: [
+                    {
+                        id: 4131,
+                        w: 333,
+                    },
+                    {
+                        id: 4132,
+                        w: 333,
+                    },
+                    {
+                        id: 4133,
+                        w: 167,
+                    },
+                    {
+                        id: 4031,
+                        w: 778,
+                    },
+                    {
+                        id: 4032,
+                        w: 778,
+                    },
+                    {
+                        id: 4033,
+                        w: 389,
+                    },
+                    {
+                        id: 4911,
+                        w: 903,
+                    },
+                    {
+                        id: 4912,
+                        w: 903,
+                    },
+                    {
+                        id: 4913,
+                        w: 903,
+                    },
+                    {
+                        id: 4921,
+                        w: 903,
+                    },
+                    {
+                        id: 4922,
+                        w: 903,
+                    },
+                    {
+                        id: 4923,
+                        w: 903,
+                    },
+                    {
+                        id: 4931,
+                        w: 903,
+                    },
+                    {
+                        id: 4932,
+                        w: 903,
+                    },
+                ],
+                count: 2,
+            },
+            {
+                id: 9070102,
+                info: [
+                    {
+                        id: 4071,
+                        w: 133,
+                    },
+                    {
+                        id: 4072,
+                        w: 133,
+                    },
+                    {
+                        id: 4073,
+                        w: 67,
+                    },
+                    {
+                        id: 4111,
+                        w: 322,
+                    },
+                    {
+                        id: 4112,
+                        w: 322,
+                    },
+                    {
+                        id: 4113,
+                        w: 161,
+                    },
+                    {
+                        id: 4011,
+                        w: 752,
+                    },
+                    {
+                        id: 4012,
+                        w: 752,
+                    },
+                    {
+                        id: 4013,
+                        w: 376,
+                    },
+                    {
+                        id: 4941,
+                        w: 6981,
+                    },
+                ],
+                count: 2,
+            },
+        ],
+    },
+    {
+        id: 300201,
+        rid: 3002,
+        name: "测试公会领地",
+        desc: "测试公会领地",
+        map: "TestGuild",
     },
     {
         id: 999701,

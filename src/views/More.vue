@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import { useLocalStorage } from "@vueuse/core"
 import forge from "node-forge"
-import { onBeforeUnmount, onMounted } from "vue"
-import { useRouter } from "vue-router"
+import { computed, onBeforeUnmount, onMounted } from "vue"
 import { useSettingStore } from "@/store/setting"
 import { sha256 } from "@/utils/sha256"
 import type { IconTypes } from "../components/Icon.vue"
 import { env } from "../env"
 
 const setting = useSettingStore()
-const router = useRouter()
-const items = [
+const scriptUnlocked = useLocalStorage("script-unlocked", false)
+const itemsRaw = [
     {
         name: "char-build",
         path: "/char",
@@ -114,6 +114,19 @@ const items = [
         show: env.isApp && !setting.safeMode,
     },
 ] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[]
+
+const items = computed(
+    () =>
+        [
+            ...itemsRaw,
+            {
+                name: "script-list",
+                path: "/scripts",
+                icon: "ri:code-s-slash-line",
+                show: scriptUnlocked.value,
+            },
+        ] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[]
+)
 // 卡片进入动画延迟
 const getAnimationDelay = (index: number) => {
     return Math.min(index * 50, 500) // 最多延迟500ms
@@ -160,7 +173,7 @@ const handleKeydown = (event: KeyboardEvent) => {
     const signature = buildSignature(history, input)
 
     if (signature === scriptSignature) {
-        router.push("/scripts")
+        scriptUnlocked.value = !scriptUnlocked.value
         hh = []
         return
     }

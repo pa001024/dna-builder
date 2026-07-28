@@ -1,9 +1,10 @@
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
-import { getGameInstall, isGameRunning, launchExe, pathExists } from "../api/app"
+import { getGameInstall, isGameRunning, launchExe, pathExists, readTextFile } from "../api/app"
 import { env } from "../env"
 import { sleep } from "../util"
+import { resolveGameVersion } from "../utils/game-download"
 
 const GAME_RUNNING_POLL_MS = 1000
 const GAME_LIVE_PERSIST_MS = 1000
@@ -132,15 +133,23 @@ export const useGameStore = defineStore("game", {
         gameExeExists: state => state.installed,
     },
     actions: {
-        async refreshGameInstalled() {
-            if (!this.path) {
+        /**
+         * 校验游戏文件与本地版本是否匹配 CDN 期望版本。
+         * @param expectedVersion CDN 正式版本号
+         */
+        async refreshGameInstalled(expectedVersion?: string | number) {
+            if (!this.path || expectedVersion === undefined) {
                 this.installed = false
                 return
             }
             const gameDir = this.path.replace(/EM\.exe$/, "")
+            const gameVersion = await readTextFile(`${gameDir}GameVersion.json`)
+                .then(resolveGameVersion)
+                .catch(() => null)
             this.installed =
                 (await pathExists(this.path)) &&
-                (await pathExists(`${gameDir}BaseVersion.json`)) &&
+                gameVersion !== null &&
+                String(gameVersion) === String(expectedVersion) &&
                 !(await pathExists(`${gameDir}.extracting`))
         },
         async launchGame() {

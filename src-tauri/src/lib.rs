@@ -19,6 +19,14 @@ mod util;
 
 use crate::submodules::{repak_tools, win};
 
+const GAME_LAUNCHER_USER_AGENT: &str =
+    "EMLauncher/++UE4+Release-4.27-CL-0 Windows/10.0.26200.1.256.64bit";
+const HPATCHZ_BYTES: &[u8] = include_bytes!("../resources/hpatchz.exe");
+const DOWNLOAD_CHUNK_SIZE: u64 = 8 * 1024 * 1024;
+const MULTITHREAD_THRESHOLD: u64 = 10 * 1024 * 1024;
+const PROGRESS_MAGIC: &[u8; 2] = b"PA";
+const PROGRESS_HEADER_SIZE: usize = 6;
+
 // 全局HTTP客户端，用于复用连接
 lazy_static! {
     static ref HTTP_CLIENT: Arc<reqwest::Client> = Arc::new(
@@ -70,8 +78,6 @@ struct ChunkProgress {
 struct DownloadProgress {
     /// 文件总大小
     total_size: u64,
-    /// 分块大小
-    chunk_size: u64,
     /// 分块总数
     num_chunks: usize,
     /// 各分块进度
@@ -141,6 +147,63 @@ struct DownloadProgressEmitter {
     filename: String,
     total_size: u64,
     last_emit: std::sync::Mutex<Instant>,
+}
+
+/// 多线程下载期间的内存进度与节流落盘状态。
+struct DownloadProgressStore {
+    file_path: PathBuf,
+    progress: std::sync::Mutex<DownloadProgress>,
+    last_save: std::sync::Mutex<Instant>,
+}
+
+impl DownloadProgressStore {
+    /// 创建内存进度存储。
+    fn new(file_path: &Path, progress: DownloadProgress) -> Self {
+        Self {
+            file_path: file_path.to_path_buf(),
+            progress: std::sync::Mutex::new(progress),
+            last_save: std::sync::Mutex::new(Instant::now()),
+        }
+    }
+
+    /// 更新单个分块进度，并按固定间隔保存快照。
+    fn record(&self, chunk_index: usize, downloaded: u64, completed: bool) -> Result<(), String> {
+        {
+            let mut progress = self.progress.lock().unwrap();
+            let chunk = progress
+                .chunks
+                .get_mut(chunk_index)
+                .ok_or_else(|| "分块索引超出范围".to_string())?;
+            chunk.downloaded = downloaded;
+            chunk.completed = completed;
+        }
+
+        let now = Instant::now();
+        let should_save = {
+            let mut last_save = self.last_save.lock().unwrap();
+            if now.duration_since(*last_save) < Duration::from_millis(500) {
+                false
+            } else {
+                *last_save = now;
+                true
+            }
+        };
+        if should_save {
+            self.persist()?;
+        }
+        Ok(())
+    }
+
+    /// 将当前完整进度快照写入进度文件。
+    fn persist(&self) -> Result<(), String> {
+        let progress_file = {
+            let progress = self.progress.lock().unwrap();
+            encode_progress_file(&progress)?
+        };
+        let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
+        fs::write(get_progress_file_path(&self.file_path), progress_file)
+            .map_err(|e| format!("写入进度文件失败: {}", e))
+    }
 }
 
 impl DownloadProgressEmitter {
@@ -1343,11 +1406,47 @@ async fn list_pak_files(
 /// 导出指定 pak 内的文件，并将 Lua 字节码反编译后直接落盘为 `.lua`。
 #[tauri::command]
 async fn export_pak_files(
+    app: tauri::AppHandle,
     pak_files: std::collections::BTreeMap<String, Vec<String>>,
     aes_key: Option<String>,
     target_path: String,
 ) -> Result<Vec<repak_tools::PakExportResult>, String> {
-    repak_tools::export_pak_files(&pak_files, aes_key.as_deref(), Path::new(&target_path))
+    let total: usize = pak_files.values().map(Vec::len).sum();
+    let target_path_for_progress = target_path.clone();
+    let mut last_percent = 0;
+    let _ = app.emit(
+        "pak_export_progress",
+        serde_json::json!({
+            "current": 0,
+            "total": total,
+            "targetPath": target_path_for_progress,
+        }),
+    );
+    repak_tools::export_pak_files(
+        &pak_files,
+        aes_key.as_deref(),
+        Path::new(&target_path),
+        |current| {
+            let percent = if total > 0 {
+                current.saturating_mul(100).saturating_add(total / 2) / total
+            } else {
+                0
+            };
+            // 百分比未变化时不重复发送事件，避免大量小文件造成 IPC 拥塞。
+            if percent == last_percent && current < total {
+                return;
+            }
+            last_percent = percent;
+            let _ = app.emit(
+                "pak_export_progress",
+                serde_json::json!({
+                    "current": current,
+                    "total": total,
+                    "targetPath": target_path_for_progress,
+                }),
+            );
+        },
+    )
 }
 
 /// 使用 unluac 反编译 Lua 字节码文件。
@@ -1427,91 +1526,154 @@ fn create_progress_file(
     num_chunks: usize,
 ) -> Result<DownloadProgress, String> {
     let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
-    let mut chunks = Vec::with_capacity(num_chunks);
-
-    for i in 0..num_chunks {
-        let start = i as u64 * chunk_size;
-        let end = if i == num_chunks - 1 {
-            total_size - 1
-        } else {
-            start + chunk_size - 1
-        };
-
-        chunks.push(ChunkProgress {
-            index: i,
-            start,
-            end,
-            downloaded: 0,
-            completed: false,
-        });
-    }
-
-    let progress = DownloadProgress {
-        total_size,
-        chunk_size,
-        num_chunks,
-        chunks,
-    };
-
-    // 写入进度文件
+    let progress = build_download_progress(total_size, chunk_size, num_chunks, &[]);
     let progress_path = get_progress_file_path(file_path);
-    let progress_json = serde_json::to_string_pretty(&progress)
-        .map_err(|e| format!("序列化进度文件失败: {}", e))?;
-
-    fs::write(&progress_path, progress_json).map_err(|e| format!("写入进度文件失败: {}", e))?;
+    fs::write(&progress_path, encode_progress_file(&progress)?)
+        .map_err(|e| format!("写入进度文件失败: {}", e))?;
 
     Ok(progress)
 }
 
-/// 读取进度文件
-fn read_progress_file(file_path: &Path) -> Option<DownloadProgress> {
-    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
-    read_progress_file_unlocked(file_path)
+/// 计算保存指定分块数所需的位图字节数。
+fn progress_mask_size(num_chunks: usize) -> usize {
+    num_chunks.div_ceil(8)
 }
 
-/// 读取进度文件（调用方需自行持有锁）
-fn read_progress_file_unlocked(file_path: &Path) -> Option<DownloadProgress> {
-    let progress_path = get_progress_file_path(file_path);
+/// 从位图构造内存中的分块状态。
+fn build_download_progress(
+    total_size: u64,
+    chunk_size: u64,
+    num_chunks: usize,
+    progress_mask: &[u8],
+) -> DownloadProgress {
+    let chunks = (0..num_chunks)
+        .map(|index| {
+            let start = index as u64 * chunk_size;
+            let end = (start + chunk_size - 1).min(total_size.saturating_sub(1));
+            let completed = progress_mask
+                .get(index / 8)
+                .is_some_and(|byte| byte & (1 << (index % 8)) != 0);
+            ChunkProgress {
+                index,
+                start,
+                end,
+                downloaded: if completed {
+                    end.saturating_sub(start) + 1
+                } else {
+                    0
+                },
+                completed,
+            }
+        })
+        .collect();
 
-    if !progress_path.exists() {
-        return None;
+    DownloadProgress {
+        total_size,
+        num_chunks,
+        chunks,
     }
-
-    let content = fs::read_to_string(&progress_path).ok()?;
-    serde_json::from_str(&content).ok()
 }
 
-/// 更新进度文件中的单个分块
-fn update_chunk_progress(
-    file_path: &Path,
-    chunk_index: usize,
-    downloaded: u64,
-    completed: bool,
-) -> Result<(), String> {
-    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
-    let mut progress = match read_progress_file_unlocked(file_path) {
-        Some(progress) => progress,
-        None => {
-            eprintln!("进度文件缺失，跳过本次更新: {}", file_path.display());
-            return Ok(());
-        }
+#[cfg(test)]
+mod download_progress_tests {
+    use super::{
+        build_download_progress, decode_progress_file, encode_progress_file, progress_mask_size,
     };
 
-    if chunk_index >= progress.chunks.len() {
-        return Err("分块索引超出范围".to_string());
+    /// 验证文件头和低位优先位图使用固定紧凑格式。
+    #[test]
+    fn progress_mask_uses_one_bit_per_chunk() {
+        let progress_mask = [0b1000_0001, 0b0000_0011];
+        let progress = build_download_progress(80, 8, 10, &progress_mask);
+        let encoded = encode_progress_file(&progress).unwrap();
+        let (num_chunks, decoded_mask) = decode_progress_file(&encoded).unwrap();
+
+        assert_eq!(progress_mask_size(10), 2);
+        assert_eq!(encoded, [b'P', b'A', 10, 0, 0, 0, 0b1000_0001, 0b0000_0011]);
+        assert_eq!(num_chunks, 10);
+        assert_eq!(decoded_mask, progress_mask);
+        assert_eq!(decoded_mask[1] & 0b1111_1100, 0);
+        assert!(progress.chunks[0].completed);
+        assert!(progress.chunks[7].completed);
+        assert!(progress.chunks[8].completed);
+        assert!(progress.chunks[9].completed);
+        assert!(!progress.chunks[1].completed);
     }
+}
 
-    progress.chunks[chunk_index].downloaded = downloaded;
-    progress.chunks[chunk_index].completed = completed;
+/// 将内存中的完成状态编码为位图。
+fn encode_progress_mask(progress: &DownloadProgress) -> Vec<u8> {
+    let mut progress_mask = vec![0; progress_mask_size(progress.num_chunks)];
+    for chunk in &progress.chunks {
+        if chunk.completed {
+            progress_mask[chunk.index / 8] |= 1 << (chunk.index % 8);
+        }
+    }
+    progress_mask
+}
 
-    // 写入进度文件
-    let progress_path = get_progress_file_path(file_path);
-    let progress_json = serde_json::to_string_pretty(&progress)
-        .map_err(|e| format!("序列化进度文件失败: {}", e))?;
+/// 将固定文件头与完成位图编码为进度文件内容。
+fn encode_progress_file(progress: &DownloadProgress) -> Result<Vec<u8>, String> {
+    let num_chunks =
+        u32::try_from(progress.num_chunks).map_err(|_| "分块数量超过 u32 范围".to_string())?;
+    let progress_mask = encode_progress_mask(progress);
+    let mut content = Vec::with_capacity(PROGRESS_HEADER_SIZE + progress_mask.len());
+    content.extend_from_slice(PROGRESS_MAGIC);
+    content.extend_from_slice(&num_chunks.to_le_bytes());
+    content.extend_from_slice(&progress_mask);
+    Ok(content)
+}
 
-    fs::write(&progress_path, progress_json).map_err(|e| format!("写入进度文件失败: {}", e))?;
+/// 解析并校验进度文件头与正文长度。
+fn decode_progress_file(content: &[u8]) -> Option<(usize, &[u8])> {
+    if content.len() < PROGRESS_HEADER_SIZE || &content[..2] != PROGRESS_MAGIC {
+        return None;
+    }
+    let num_chunks = u32::from_le_bytes(content[2..6].try_into().ok()?) as usize;
+    let progress_mask = &content[PROGRESS_HEADER_SIZE..];
+    if progress_mask.len() != progress_mask_size(num_chunks) {
+        return None;
+    }
+    Some((num_chunks, progress_mask))
+}
 
-    Ok(())
+/// 按给定分块布局读取位图进度文件。
+fn read_progress_file(
+    file_path: &Path,
+    total_size: u64,
+    chunk_size: u64,
+    num_chunks: usize,
+) -> Option<DownloadProgress> {
+    let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
+    let content = fs::read(get_progress_file_path(file_path)).ok()?;
+    let (stored_num_chunks, progress_mask) = decode_progress_file(&content)?;
+    if stored_num_chunks != num_chunks {
+        return None;
+    }
+    Some(build_download_progress(
+        total_size,
+        chunk_size,
+        num_chunks,
+        progress_mask,
+    ))
+}
+
+/// 根据文件头中的分块数推断进度布局，用于页面恢复显示。
+fn read_progress_snapshot(file_path: &Path) -> Option<DownloadProgress> {
+    let total_size = fs::metadata(file_path).ok()?.len();
+    let stored_num_chunks = {
+        let _guard = DOWNLOAD_PROGRESS_LOCK.lock().unwrap();
+        let content = fs::read(get_progress_file_path(file_path)).ok()?;
+        decode_progress_file(&content)?.0
+    };
+    let range_chunks = total_size.div_ceil(DOWNLOAD_CHUNK_SIZE) as usize;
+    if total_size > MULTITHREAD_THRESHOLD && stored_num_chunks == range_chunks {
+        return read_progress_file(file_path, total_size, DOWNLOAD_CHUNK_SIZE, range_chunks);
+    }
+    if stored_num_chunks == 1 {
+        return read_progress_file(file_path, total_size, total_size.max(1), 1);
+    }
+    None
 }
 
 /// 删除进度文件
@@ -1545,7 +1707,8 @@ async fn get_download_progress(filename: String) -> Result<DownloadProgressSnaps
     let download_key = get_download_state_key(&filename)?;
     let active = ACTIVE_DOWNLOADS.lock().unwrap().contains(&download_key);
     let paused = PAUSED_DOWNLOADS.lock().unwrap().contains(&download_key);
-    if let Some(progress) = read_progress_file(&file_path) {
+    let progress_path = get_progress_file_path(&file_path);
+    if let Some(progress) = read_progress_snapshot(&file_path) {
         let downloaded = progress.chunks.iter().map(|chunk| chunk.downloaded).sum();
         let progress_percent = if progress.total_size > 0 {
             (downloaded * 100) / progress.total_size
@@ -1557,6 +1720,21 @@ async fn get_download_progress(filename: String) -> Result<DownloadProgressSnaps
             downloaded,
             total: progress.total_size,
             progress: progress_percent,
+            has_progress_file: true,
+            active,
+            paused,
+        });
+    }
+
+    if progress_path.exists() {
+        let total = fs::metadata(&file_path)
+            .map(|metadata| metadata.len())
+            .unwrap_or(0);
+        return Ok(DownloadProgressSnapshot {
+            filename,
+            downloaded: 0,
+            total,
+            progress: 0,
             has_progress_file: true,
             active,
             paused,
@@ -1622,6 +1800,8 @@ async fn download_chunk(
         // 发送 Range 请求
         let response = client
             .get(url)
+            .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
+            .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip")
             .header("Range", range_header.clone())
             .send()
             .await;
@@ -1629,7 +1809,7 @@ async fn download_chunk(
         match response {
             Ok(resp) => {
                 // 检查响应状态
-                if resp.status().is_success() || resp.status() == 206 {
+                if resp.status() == reqwest::StatusCode::PARTIAL_CONTENT {
                     // 获取响应体流
                     let mut stream = resp.bytes_stream();
                     let mut downloaded = 0u64;
@@ -1656,13 +1836,6 @@ async fn download_chunk(
 
                         downloaded += chunk.len() as u64;
                         let current_chunk_downloaded = resume_offset + downloaded;
-                        update_chunk_progress(
-                            file_path,
-                            chunk_index,
-                            current_chunk_downloaded,
-                            current_chunk_downloaded >= end - start + 1,
-                        )
-                        .map_err(|e| format!("更新进度文件失败: {}", e))?;
 
                         let old_progress = event_progress
                             .fetch_add(chunk.len() as u64, std::sync::atomic::Ordering::Relaxed);
@@ -1733,44 +1906,31 @@ async fn download_file_multithreaded(
     filename: &str,
     concurrent_threads: usize,
 ) -> Result<String, String> {
-    // 配置参数
-    const CHUNK_SIZE: u64 = 5 * 1024 * 1024; // 每个分块 5MB
-
     // 计算分块数量
-    let num_chunks = (total_size + CHUNK_SIZE - 1) / CHUNK_SIZE;
-    let num_chunks = num_chunks as usize;
+    let num_chunks = total_size.div_ceil(DOWNLOAD_CHUNK_SIZE) as usize;
 
     // 检查是否存在进度文件（断点续传）
-    let progress_info = read_progress_file(file_path);
-    let is_resume = progress_info.is_some();
-
+    let progress_info = read_progress_file(file_path, total_size, DOWNLOAD_CHUNK_SIZE, num_chunks);
     let progress_info = if let Some(info) = progress_info {
-        // 验证进度文件是否有效
-        if info.total_size == total_size
-            && info.chunk_size == CHUNK_SIZE
-            && info.num_chunks == num_chunks
-        {
-            info
-        } else {
-            // 进度文件无效，重新创建
-            create_progress_file(file_path, total_size, CHUNK_SIZE, num_chunks)
-                .map_err(|e| format!("创建进度文件失败: {}", e))?
-        }
+        info
     } else {
         // 创建新的进度文件
-        create_progress_file(file_path, total_size, CHUNK_SIZE, num_chunks)
+        create_progress_file(file_path, total_size, DOWNLOAD_CHUNK_SIZE, num_chunks)
             .map_err(|e| format!("创建进度文件失败: {}", e))?
     };
 
-    // 如果不是断点续传，创建文件并预分配空间
-    if !is_resume {
-        let file = File::create(file_path).map_err(|e| format!("创建文件失败: {}", e))?;
-        file.set_len(total_size)
-            .map_err(|e| format!("预分配文件空间失败: {}", e))?;
-    }
+    // 创建目标文件并一次性预分配完整空间，断点文件也同步校正长度。
+    let file = File::options()
+        .create(true)
+        .write(true)
+        .truncate(false)
+        .open(file_path)
+        .map_err(|e| format!("创建文件失败: {}", e))?;
+    file.set_len(total_size)
+        .map_err(|e| format!("预分配文件空间失败: {}", e))?;
 
     // 创建并发控制器
-    let semaphore = Arc::new(tokio::sync::Semaphore::new(concurrent_threads));
+    let semaphore = Arc::new(tokio::sync::Semaphore::new(concurrent_threads.clamp(1, 32)));
     let file_path = file_path.to_path_buf();
     let url = url.to_string();
     let filename = filename.to_string();
@@ -1785,6 +1945,10 @@ async fn download_file_multithreaded(
 
     // 计算已下载的总字节数
     let initial_downloaded: u64 = progress_info.chunks.iter().map(|c| c.downloaded).sum();
+    let progress_store = Arc::new(DownloadProgressStore::new(
+        &file_path,
+        progress_info.clone(),
+    ));
 
     // 更新事件进度
     event_progress.store(initial_downloaded, std::sync::atomic::Ordering::Relaxed);
@@ -1809,6 +1973,7 @@ async fn download_file_multithreaded(
         let filename_clone = filename.clone();
         let event_progress_clone = event_progress.clone();
         let progress_emitter_clone = progress_emitter.clone();
+        let progress_store_clone = progress_store.clone();
         let semaphore_clone = semaphore.clone();
 
         let task = tokio::spawn(async move {
@@ -1832,8 +1997,17 @@ async fn download_file_multithreaded(
             )
             .await?;
 
-            // 确保分块完成状态落盘。
-            update_chunk_progress(&file_path_clone, i, downloaded, true)
+            let expected_size = end - start + 1;
+            if downloaded != expected_size {
+                return Err(format!(
+                    "分块 {} 下载不完整: 预期 {} 字节，实际 {} 字节",
+                    i, expected_size, downloaded
+                ));
+            }
+
+            // 记录分块完成状态，最终由父任务统一强制落盘。
+            progress_store_clone
+                .record(i, downloaded, true)
                 .map_err(|e| format!("更新进度文件失败: {}", e))?;
 
             Ok::<u64, String>(downloaded)
@@ -1859,6 +2033,7 @@ async fn download_file_multithreaded(
             }
         }
     }
+    progress_store.persist()?;
 
     if let Some(error) = first_error {
         return Err(error);
@@ -1885,7 +2060,12 @@ async fn download_file(
     let client = HTTP_CLIENT.clone();
 
     // 发送 HEAD 请求获取文件信息和 Range 支持
-    let head_response = client.head(&url).send().await;
+    let head_response = client
+        .head(&url)
+        .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
+        .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip")
+        .send()
+        .await;
 
     let (total_size, accept_ranges) = match head_response {
         Ok(response) => {
@@ -1909,6 +2089,8 @@ async fn download_file(
                 // HEAD 请求失败，使用 GET 请求
                 let get_response = client
                     .get(&url)
+                    .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
+                    .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip")
                     .send()
                     .await
                     .map_err(|e| format!("Failed to send GET request: {}", e))?;
@@ -1941,6 +2123,8 @@ async fn download_file(
             // HEAD 请求失败，使用 GET 请求
             let get_response = client
                 .get(&url)
+                .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
+                .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip")
                 .send()
                 .await
                 .map_err(|e| format!("Failed to send GET request: {}", e))?;
@@ -1985,10 +2169,7 @@ async fn download_file(
         }
     }
 
-    // 判断是否使用多线程下载（大于 10MB）
-    const MULTITHREAD_THRESHOLD: u64 = 10 * 1024 * 1024; // 10MB
-
-    if total_size > MULTITHREAD_THRESHOLD && accept_ranges == "bytes" && concurrent_threads > 1 {
+    if total_size > MULTITHREAD_THRESHOLD && accept_ranges == "bytes" {
         println!(
             "文件大小: {} bytes ({} MB)，启用多线程下载",
             total_size,
@@ -2009,6 +2190,8 @@ async fn download_file(
     // 单线程下载
     let response = client
         .get(&url)
+        .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
+        .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip")
         .send()
         .await
         .map_err(|e| format!("Failed to send request: {}", e))?;
@@ -2023,6 +2206,8 @@ async fn download_file(
 
     // 创建文件
     let mut file = File::create(&file_path).map_err(|e| format!("Failed to create file: {}", e))?;
+    file.set_len(total_size)
+        .map_err(|e| format!("预分配文件空间失败: {}", e))?;
     let _ = create_progress_file(&file_path, total_size, total_size.max(1), 1)?;
 
     // 获取响应体流
@@ -2045,9 +2230,6 @@ async fn download_file(
 
         // 更新已下载字节数
         downloaded += chunk.len() as u64;
-        update_chunk_progress(&file_path, 0, downloaded, downloaded >= total_size)
-            .map_err(|e| format!("更新进度文件失败: {}", e))?;
-
         progress_emitter.emit(downloaded, downloaded >= total_size)?;
     }
     delete_progress_file(&file_path);
@@ -2100,6 +2282,51 @@ async fn extract_game_assets(
         extracted_files.len(),
         target_directory.to_string_lossy()
     ))
+}
+
+/// 使用内嵌的 hpatchz 将完整 hdiff 包应用到游戏目录。
+#[tauri::command]
+async fn apply_game_patch(diff_path: String, target_dir: String) -> Result<String, String> {
+    tokio::task::spawn_blocking(move || {
+        let diff_path = PathBuf::from(&diff_path);
+        if !diff_path.is_file() {
+            return Err(format!("hdiff 文件不存在: {}", diff_path.display()));
+        }
+
+        let target_dir = PathBuf::from(&target_dir);
+        fs::create_dir_all(&target_dir).map_err(|e| format!("创建游戏目录失败: {}", e))?;
+
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|e| format!("生成临时文件名失败: {}", e))?
+            .as_nanos();
+        let executable_path = std::env::temp_dir().join(format!(
+            "dna-builder-hpatchz-{}-{}.exe",
+            std::process::id(),
+            unique
+        ));
+        fs::write(&executable_path, HPATCHZ_BYTES)
+            .map_err(|e| format!("释放内嵌 hpatchz 失败: {}", e))?;
+
+        let result = std::process::Command::new(&executable_path)
+            .arg("-f")
+            .arg("")
+            .arg(&diff_path)
+            .arg(&target_dir)
+            .output();
+        let _ = fs::remove_file(&executable_path);
+        let output = result.map_err(|e| format!("启动 hpatchz 失败: {}", e))?;
+        if !output.status.success() {
+            let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+            let detail = if stderr.is_empty() { stdout } else { stderr };
+            return Err(format!("hpatchz 执行失败 ({}): {}", output.status, detail));
+        }
+
+        Ok(format!("完整包已应用到 {}", target_dir.display()))
+    })
+    .await
+    .map_err(|e| format!("hpatchz 任务执行失败: {}", e))?
 }
 
 /// 获取文件大小
@@ -3145,6 +3372,7 @@ pub fn run() {
         get_download_progress,
         pause_download,
         extract_game_assets,
+        apply_game_patch,
         get_file_size,
         get_file_hash,
         cleanup_temp_dir,

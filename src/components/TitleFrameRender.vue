@@ -74,6 +74,11 @@ const frameByTitleFrameId: Record<number, TitleFrameKey> = {
     10030: "09_3",
     10031: "09_4",
     10032: "09_5",
+    10044: "12_1",
+    10045: "12_2",
+    10046: "12_3",
+    10047: "12_4",
+    10048: "12_5",
 }
 
 const props = withDefaults(
@@ -364,7 +369,9 @@ function layerBlendStyle(layer: FrameLayer): CSSProperties {
     }
     applySlotLayout(style, layer)
 
-    const animation = props.playing ? (layer.animations.loop ?? layer.animations.normal) : (layer.animations.normal ?? layer.animations.loop)
+    const animation = props.playing
+        ? (layer.animations.loop ?? layer.animations.normal)
+        : (layer.animations.normal ?? layer.animations.loop)
     if (animation?.opacity?.length) {
         style.opacity = String(sampleCurve(animation.opacity, currentMs.value, frame.value.loopMs, 1))
     }

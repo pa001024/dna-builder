@@ -828,6 +828,7 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "夜航篇",
         chapterNumber: "第一章",
         episode: "黑铁·白花",
+        detail: "与贝蕾妮卡分别并坠入大海后，{nickname}被一位白衣神秘人救下，随后被带到海伯利亚北境城市——冰湖城……",
         type: 1,
         main: 1,
         icon: "T_Chapter_Icon01",
@@ -835,6 +836,7 @@ const questChainDataRaw: QuestChain[] = [
         quests: [
             {
                 id: 10020701,
+                sr: 101101,
                 next: {
                     Success: 10020702,
                 },
@@ -902,6 +904,7 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "夜航篇",
         chapterNumber: "第一章",
         episode: "黑铁·白花",
+        detail: "与贝蕾妮卡分别并坠入大海后，{nickname}被一位白衣神秘人救下，随后被带到海伯利亚北境城市——冰湖城……",
         type: 1,
         main: 1,
         icon: "T_Chapter_Icon01",
@@ -967,6 +970,7 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "夜航篇",
         chapterNumber: "第二章",
         episode: "雪国的孩子",
+        detail: "于夜色深处，一只可怖的怪物在冰湖城展开了它的狩猎。为了调查“卡戎狩猎”这一惨案的真相，夜航者小队接下了卫戍部队下级军官——黎瑟的委托……",
         type: 1,
         main: 1,
         icon: "T_Chapter_Icon01",
@@ -1085,6 +1089,7 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "夜航篇",
         chapterNumber: "第二章",
         episode: "雪国的孩子",
+        detail: "于夜色深处，一只可怖的怪物在冰湖城展开了它的狩猎。为了调查“卡戎狩猎”这一惨案的真相，夜航者小队接下了卫戍部队下级军官——黎瑟的委托……",
         type: 1,
         main: 1,
         icon: "T_Chapter_Icon01",
@@ -1156,6 +1161,7 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "夜航篇",
         chapterNumber: "第二章",
         episode: "雪国的孩子",
+        detail: "于夜色深处，一只可怖的怪物在冰湖城展开了它的狩猎。为了调查“卡戎狩猎”这一惨案的真相，夜航者小队接下了卫戍部队下级军官——黎瑟的委托……",
         type: 1,
         main: 1,
         icon: "T_Chapter_Icon01",
@@ -1214,6 +1220,7 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "夜航篇",
         chapterNumber: "第二章",
         episode: "雪国的孩子",
+        detail: "于夜色深处，一只可怖的怪物在冰湖城展开了它的狩猎。为了调查“卡戎狩猎”这一惨案的真相，夜航者小队接下了卫戍部队下级军官——黎瑟的委托……",
         type: 1,
         main: 1,
         icon: "T_Chapter_Icon01",
@@ -1270,6 +1277,7 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "夜航篇",
         chapterNumber: "第二章",
         episode: "雪国的孩子",
+        detail: "于夜色深处，一只可怖的怪物在冰湖城展开了它的狩猎。为了调查“卡戎狩猎”这一惨案的真相，夜航者小队接下了卫戍部队下级军官——黎瑟的委托……",
         type: 1,
         main: 1,
         icon: "T_Chapter_Icon01",
@@ -1364,6 +1372,7 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "夜航篇",
         chapterNumber: "第二章",
         episode: "雪国的孩子",
+        detail: "于夜色深处，一只可怖的怪物在冰湖城展开了它的狩猎。为了调查“卡戎狩猎”这一惨案的真相，夜航者小队接下了卫戍部队下级军官——黎瑟的委托……",
         type: 1,
         main: 1,
         icon: "T_Chapter_Icon01",
@@ -1381,6 +1390,7 @@ const questChainDataRaw: QuestChain[] = [
         chapterName: "夜航篇",
         chapterNumber: "第二章",
         episode: "雪国的孩子",
+        detail: "于夜色深处，一只可怖的怪物在冰湖城展开了它的狩猎。为了调查“卡戎狩猎”这一惨案的真相，夜航者小队接下了卫戍部队下级军官——黎瑟的委托……",
         type: 1,
         main: 1,
         icon: "T_Chapter_Icon01",
@@ -7293,7 +7303,7 @@ const questChainDataRaw: QuestChain[] = [
         name: "黑面包与黄油",
         chapterName: "夜航篇",
         episode: "黑面包与黄油",
-        desc: "出于一些目的，你决定买下这个盒子。",
+        desc: "出于一些目的，你决定买下这个盒子",
         detail: "行商向你们展示了一种奇怪的盒子，看起来年代已久……你们不仅有些怀疑，这么小的盒子里面，真的会有宝贝吗？",
         type: 3,
         reward: [50635],
@@ -7337,7 +7347,7 @@ const questChainDataRaw: QuestChain[] = [
         name: "汽笛鸣泣之时",
         chapterName: "夜航篇",
         episode: "汽笛鸣泣之时",
-        desc: "在车站遇到了一位奇怪的行商，问问他有什么“好东西”。",
+        desc: "在车站遇到了一位奇怪的行商，问问他有什么“好东西”",
         detail: "和同伴们在百花车站闲逛的时候，遇见了一位行商……似乎是因为你们出手阔绰，想要向你们兜售商品。",
         type: 3,
         reward: [50636],
@@ -7471,8 +7481,508 @@ const questChainDataRaw: QuestChain[] = [
         ],
     },
     {
+        id: 200404,
+        name: "你为什么而活",
+        chapterName: "夜航篇",
+        episode: "你为什么而活",
+        desc: "前往螺丝刀行会据点",
+        detail: "前脚刚送走了柯尼，后脚便来了一位奇怪的男人和你们搭话，你们对他有些印象，似乎叫——罗连特？他找你们有什么事？",
+        type: 3,
+        reward: [50638],
+        npc: 700486,
+        quests: [
+            {
+                id: 20040400,
+                sr: 106301,
+                next: {
+                    Success: 20040401,
+                },
+            },
+            {
+                id: 20040401,
+                sr: 106301,
+                next: {
+                    Success: 20040402,
+                },
+            },
+            {
+                id: 20040402,
+                sr: 106301,
+                next: {
+                    Success: 20040403,
+                },
+            },
+            {
+                id: 20040403,
+                sr: 106301,
+                next: {
+                    Success: 20040404,
+                },
+            },
+            {
+                id: 20040404,
+                sr: 106301,
+                next: {
+                    Success: 20040405,
+                },
+            },
+            {
+                id: 20040405,
+                sr: 106301,
+                next: {
+                    Success: 20040406,
+                },
+            },
+            {
+                id: 20040406,
+                sr: 106301,
+                next: {
+                    Success: 20040407,
+                },
+            },
+            {
+                id: 20040407,
+                sr: 106301,
+                next: {
+                    Success: 20040408,
+                },
+            },
+            {
+                id: 20040408,
+                sr: 106301,
+                next: {
+                    easymode: 20040409,
+                    normalmode: 20040410,
+                },
+            },
+            {
+                id: 20040409,
+                sr: 106301,
+                next: {
+                    Success: 20040411,
+                },
+            },
+            {
+                id: 20040411,
+                sr: 106301,
+                next: {
+                    Success: 20040412,
+                },
+            },
+            {
+                id: 20040412,
+                sr: 106301,
+                next: {
+                    Success: 20040413,
+                },
+            },
+            {
+                id: 20040413,
+                sr: 106301,
+                next: {
+                    Success: 20040414,
+                },
+            },
+            {
+                id: 20040414,
+                sr: 106301,
+                next: {
+                    betray: 20040417,
+                    help: 20040415,
+                },
+            },
+            {
+                id: 20040417,
+                sr: 106301,
+            },
+            {
+                id: 20040415,
+                sr: 106301,
+                next: {
+                    Success: 20040418,
+                },
+            },
+            {
+                id: 20040418,
+                sr: 106301,
+                next: {
+                    Success: 20040419,
+                },
+            },
+            {
+                id: 20040419,
+                sr: 106301,
+                next: {
+                    Success: 20040416,
+                },
+            },
+            {
+                id: 20040416,
+                sr: 106301,
+            },
+            {
+                id: 20040410,
+                sr: 106301,
+                next: {
+                    Success: 20040411,
+                },
+            },
+        ],
+    },
+    {
+        id: 200405,
+        name: "禅与火车维修艺术",
+        chapterName: "夜航篇",
+        episode: "禅与火车维修艺术",
+        desc: "回螺丝刀行会复命",
+        detail: "无论以什么样的方式，你圆满完成了罗连特交给你的任务，打消了大部分工人们对于杰克先生的热情，是时候该回到螺丝刀行会获取属于你的奖励了。",
+        type: 3,
+        reward: [50639],
+        quests: [
+            {
+                id: 20040501,
+                sr: 106301,
+                next: {
+                    Success: 20040502,
+                },
+            },
+            {
+                id: 20040502,
+                sr: 106301,
+                next: {
+                    "【分支1】自己想办法": 20040503,
+                    "【分支2】听听克罗格的主意": 20040504,
+                },
+            },
+            {
+                id: 20040503,
+                sr: 106301,
+                next: {
+                    Success: 20040505,
+                },
+            },
+            {
+                id: 20040505,
+                sr: 106001,
+                next: {
+                    Success: 20040513,
+                },
+            },
+            {
+                id: 20040513,
+                sr: 106001,
+                next: {
+                    Success: 20040506,
+                },
+            },
+            {
+                id: 20040506,
+                sr: 106301,
+                next: {
+                    Success: 20040507,
+                },
+            },
+            {
+                id: 20040507,
+                sr: 106301,
+                next: {
+                    Success: 20040508,
+                },
+            },
+            {
+                id: 20040508,
+                sr: 106301,
+                next: {
+                    Success: 20040509,
+                },
+            },
+            {
+                id: 20040509,
+                sr: 106301,
+                next: {
+                    Success: 20040510,
+                },
+            },
+            {
+                id: 20040510,
+                sr: 106301,
+                next: {
+                    Success: 20040511,
+                },
+            },
+            {
+                id: 20040511,
+                sr: 106301,
+                next: {
+                    Success: 20040512,
+                },
+            },
+            {
+                id: 20040512,
+                sr: 106301,
+            },
+            {
+                id: 20040504,
+                sr: 106301,
+                next: {
+                    Success: 20040505,
+                },
+            },
+        ],
+    },
+    {
+        id: 200406,
+        name: "隐于帷幕之下",
+        chapterName: "夜航篇",
+        episode: "隐于帷幕之下",
+        desc: "Description_200406_1",
+        detail: "Content_200406_1",
+        type: 3,
+        reward: [50640],
+        questReward: {
+            "20040602": 506401,
+            "20040605": 506402,
+        },
+        quests: [
+            {
+                id: 20040601,
+                sr: 106001,
+                next: {
+                    Success: 20040602,
+                },
+            },
+            {
+                id: 20040602,
+                sr: 106001,
+                next: {
+                    Success: 20040603,
+                },
+            },
+            {
+                id: 20040603,
+                sr: 106001,
+                next: {
+                    Success: 20040604,
+                },
+            },
+            {
+                id: 20040604,
+                sr: 106001,
+                next: {
+                    Success: 20040605,
+                },
+            },
+            {
+                id: 20040605,
+                sr: 106001,
+                next: {
+                    Success: 20040606,
+                },
+            },
+            {
+                id: 20040606,
+                sr: 106001,
+                next: {
+                    Success: 20040607,
+                },
+            },
+            {
+                id: 20040607,
+                sr: 106001,
+                next: {
+                    Success: 20040612,
+                },
+            },
+            {
+                id: 20040612,
+                sr: 106001,
+                next: {
+                    Success: 20040613,
+                },
+            },
+            {
+                id: 20040613,
+                sr: 106001,
+                next: {
+                    Success: 20040616,
+                },
+            },
+            {
+                id: 20040616,
+                sr: 106001,
+            },
+        ],
+    },
+    {
+        id: 200407,
+        name: "方形罪证",
+        chapterName: "夜航篇",
+        episode: "方形罪证",
+        desc: "Description_200407_1",
+        detail: "Content_200407_1",
+        type: 3,
+        reward: [50641],
+        quests: [
+            {
+                id: 20040700,
+                sr: 106001,
+                next: {
+                    Success: 20040701,
+                },
+            },
+            {
+                id: 20040701,
+                sr: 106001,
+                next: {
+                    Success: 20040702,
+                },
+            },
+            {
+                id: 20040702,
+                sr: 106001,
+                next: {
+                    Success: 20040703,
+                },
+            },
+            {
+                id: 20040703,
+                sr: 106001,
+                next: {
+                    Success: 20040704,
+                },
+            },
+            {
+                id: 20040704,
+                sr: 106001,
+                next: {
+                    Success: 20040705,
+                },
+            },
+            {
+                id: 20040705,
+                sr: 106001,
+            },
+        ],
+    },
+    {
+        id: 200408,
+        name: "法厄同的坠落",
+        chapterName: "夜航篇",
+        episode: "法厄同的坠落",
+        desc: "在陆续帮助汽笛沙龙完成许多委托后，这个明面上拥簇艾森巴恩，实则伺机寻找扳倒他的罪证的组织终于向你揭开了他们的真实面目，在这场精心布置的围剿开幕之前，西顿似乎还有什么话想对你说……",
+        detail: "与西顿对话",
+        type: 3,
+        reward: [50642],
+        npc: 700400,
+        quests: [
+            {
+                id: 20040801,
+                sr: 106001,
+                next: {
+                    Success: 20040802,
+                },
+            },
+            {
+                id: 20040802,
+                sr: 106301,
+                next: {
+                    Success: 20040803,
+                },
+            },
+            {
+                id: 20040803,
+                sr: 106301,
+                next: {
+                    Success: 20040805,
+                },
+            },
+            {
+                id: 20040805,
+                sr: 106301,
+                next: {
+                    Success: 20040806,
+                },
+            },
+            {
+                id: 20040806,
+                sr: 106301,
+                next: {
+                    Success: 20040807,
+                },
+            },
+            {
+                id: 20040807,
+                sr: 106301,
+                next: {
+                    Success: 20040808,
+                },
+            },
+            {
+                id: 20040808,
+                sr: 106301,
+                next: {
+                    Success: 20040809,
+                },
+            },
+            {
+                id: 20040809,
+                sr: 106001,
+                next: {
+                    "分支一：如果上文选择了放过罗连特，让艾森巴恩做好准备": 20040810,
+                    "分支二：如果上文选择了不放过罗连特": 20040811,
+                },
+            },
+            {
+                id: 20040810,
+                sr: 106001,
+                next: {
+                    Success: 20040812,
+                },
+            },
+            {
+                id: 20040812,
+                sr: 106001,
+                next: {
+                    Success: 20040814,
+                },
+            },
+            {
+                id: 20040814,
+                sr: 106001,
+                next: {
+                    Success: 20040816,
+                },
+            },
+            {
+                id: 20040816,
+                sr: 106001,
+                next: {
+                    Success: 20040817,
+                },
+            },
+            {
+                id: 20040817,
+                sr: 106301,
+            },
+            {
+                id: 20040811,
+                sr: 106001,
+                next: {
+                    Success: 20040813,
+                },
+            },
+            {
+                id: 20040813,
+                sr: 106001,
+                next: {
+                    Success: 20040814,
+                },
+            },
+        ],
+    },
+    {
         id: 400101,
-        name: "狩猎委托·其一",
+        name: "尾声",
         chapterName: "世界纪游",
         chapterNumber: "华胥",
         episode: "烟津渡影蔽香尘",
@@ -7490,7 +8000,7 @@ const questChainDataRaw: QuestChain[] = [
     },
     {
         id: 400102,
-        name: "狩猎委托·其二",
+        name: "狩猎委托·其一",
         chapterName: "世界纪游",
         chapterNumber: "华胥",
         episode: "烟津渡影蔽香尘",
@@ -7508,7 +8018,7 @@ const questChainDataRaw: QuestChain[] = [
     },
     {
         id: 400103,
-        name: "狩猎委托·其三",
+        name: "狩猎委托·其二",
         chapterName: "世界纪游",
         chapterNumber: "华胥",
         episode: "烟津渡影蔽香尘",
@@ -7526,7 +8036,7 @@ const questChainDataRaw: QuestChain[] = [
     },
     {
         id: 400104,
-        name: "狩猎委托·其四",
+        name: "狩猎委托·其三",
         chapterName: "世界纪游",
         chapterNumber: "华胥",
         episode: "烟津渡影蔽香尘",
@@ -7544,7 +8054,7 @@ const questChainDataRaw: QuestChain[] = [
     },
     {
         id: 400105,
-        name: "狩猎委托·其五",
+        name: "狩猎委托·其四",
         chapterName: "世界纪游",
         chapterNumber: "华胥",
         episode: "烟津渡影蔽香尘",
@@ -7562,7 +8072,7 @@ const questChainDataRaw: QuestChain[] = [
     },
     {
         id: 400106,
-        name: "狩猎委托·其六",
+        name: "狩猎委托·其五",
         chapterName: "世界纪游",
         chapterNumber: "华胥",
         episode: "烟津渡影蔽香尘",
@@ -7580,7 +8090,7 @@ const questChainDataRaw: QuestChain[] = [
     },
     {
         id: 400107,
-        name: "狩猎委托·其七",
+        name: "狩猎委托·其六",
         chapterName: "世界纪游",
         chapterNumber: "华胥",
         episode: "烟津渡影蔽香尘",
@@ -7598,7 +8108,7 @@ const questChainDataRaw: QuestChain[] = [
     },
     {
         id: 400111,
-        name: "皎皎特别剧场",
+        name: "狩猎委托·其七",
         chapterName: "世界纪游",
         episode: "皎皎特别剧场",
         type: 5,

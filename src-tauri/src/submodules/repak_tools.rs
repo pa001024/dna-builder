@@ -89,9 +89,11 @@ pub fn export_pak_files(
     pak_files: &BTreeMap<String, Vec<String>>,
     aes_key: Option<&str>,
     target_path: &Path,
+    mut on_progress: impl FnMut(usize),
 ) -> Result<Vec<PakExportResult>, String> {
     let key = parse_aes_key(aes_key)?;
     let mut results = Vec::with_capacity(pak_files.len());
+    let mut exported_count = 0;
 
     if !target_path.exists() {
         fs::create_dir_all(target_path)
@@ -130,6 +132,8 @@ pub fn export_pak_files(
                 .map_err(|error| format!("写入输出文件失败: {}: {}", out_path.display(), error))?;
 
             exported_files.push(out_path.to_string_lossy().to_string());
+            exported_count += 1;
+            on_progress(exported_count);
         }
 
         results.push(PakExportResult {

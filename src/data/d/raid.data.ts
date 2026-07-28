@@ -71,6 +71,11 @@ export const RaidBuff = [
         RaidBuffDes: "暗属性角色每持有12%昂扬，全属性穿透提高10%，最多提高50%。",
         RaidBuffParameter: ["12%", "10%", "50%"],
     },
+    {
+        RaidBuffID: 15,
+        RaidBuffDes: "水属性角色技能威力大于100%时，每超过40%，全属性穿透提高5%，最多提高50%。",
+        RaidBuffParameter: ["40%", "5%", "50%"],
+    },
 ].reduce(
     (prev, cur) => {
         prev[cur.RaidBuffID] = cur
@@ -394,6 +399,95 @@ export const RaidDungeon: Record<string | number, RaidDungeonItem> = {
         },
         UnlockDate: 1784408400,
     },
+    "21501": {
+        BaseRaidPoint: 1000,
+        DifficultyLevel: 1,
+        DungeonId: 21501,
+        FomulaId: 1,
+        MinCompleteDamage: 70800000,
+        RaidBuffID: [15],
+        RaidDungeonType: 1,
+        RaidSeason: 1005,
+        UnlockDate: 1787709600,
+    },
+    "21502": {
+        BaseRaidPoint: 10000,
+        DifficultyLevel: 2,
+        DungeonId: 21502,
+        FomulaId: 1,
+        MinCompleteDamage: 309900000,
+        RaidBuffID: [15],
+        RaidDungeonType: 1,
+        RaidSeason: 1005,
+        UnlockDate: 1787709600,
+    },
+    "21503": {
+        BaseRaidPoint: 135000,
+        DifficultyLevel: 3,
+        DungeonId: 21503,
+        FomulaId: 1,
+        MinCompleteDamage: 9223700000,
+        RaidBuffID: [15],
+        RaidDungeonType: 1,
+        RaidSeason: 1005,
+        UnlockDate: 1787709600,
+    },
+    "21511": {
+        BaseRaidPoint: 3500,
+        DifficultyLevel: 1,
+        DungeonId: 21511,
+        FomulaId: 2,
+        MinCompleteDamage: 88400000,
+        RaidBuffID: [15],
+        RaidDungeonType: 2,
+        RaidSeason: 1005,
+        TicketNum: {
+            "217": 3,
+        },
+        UnlockDate: 1787968800,
+    },
+    "21512": {
+        BaseRaidPoint: 40000,
+        DifficultyLevel: 2,
+        DungeonId: 21512,
+        FomulaId: 2,
+        MinCompleteDamage: 859700000,
+        RaidBuffID: [15],
+        RaidDungeonType: 2,
+        RaidSeason: 1005,
+        TicketNum: {
+            "217": 4,
+        },
+        UnlockDate: 1787968800,
+    },
+    "21513": {
+        BaseRaidPoint: 400000,
+        DifficultyLevel: 3,
+        DungeonId: 21513,
+        FomulaId: 2,
+        MinCompleteDamage: 10001800000,
+        RaidBuffID: [15],
+        RaidDungeonType: 2,
+        RaidSeason: 1005,
+        TicketNum: {
+            "217": 5,
+        },
+        UnlockDate: 1788037200,
+    },
+    "21514": {
+        BaseRaidPoint: 1500000,
+        DifficultyLevel: 4,
+        DungeonId: 21514,
+        FomulaId: 2,
+        MinCompleteDamage: 38222900000,
+        RaidBuffID: [15],
+        RaidDungeonType: 2,
+        RaidSeason: 1005,
+        TicketNum: {
+            "217": 5,
+        },
+        UnlockDate: 1788123600,
+    },
 }
 
 export interface RaidSeasonItem {
@@ -460,6 +554,19 @@ export const RaidSeason: Record<string | number, RaidSeasonItem> = {
         RaidPointToRewradMaxTime: 750,
         RaidRankCount: 1000,
         RaidSeason: 1004,
+        RaidTime: 168,
+        Shop: "RaidShopSeason01",
+    },
+    "1005": {
+        EventId: 111005,
+        PreRaidRank: 1,
+        PreRaidTime: 62,
+        RaidPointToRewrad: {
+            "1000": 300315,
+        },
+        RaidPointToRewradMaxTime: 750,
+        RaidRankCount: 1000,
+        RaidSeason: 1005,
         RaidTime: 168,
         Shop: "RaidShopSeason01",
     },
@@ -552,6 +659,13 @@ const PreRaidRankRewardVersions: Record<number, PreRaidRankRewardItem[]> = {
         createPreRaidRankReward(300319, 10031, "A级狩月人·4", 1500, 1, 1),
         createPreRaidRankReward(300320, 10032, "B级狩月人·4", 1000, 1, 1),
     ],
+    1005: [
+        createPreRaidRankReward(300316, 10044, "SSS级狩月人·5", 3000, 2, 2),
+        createPreRaidRankReward(300317, 10045, "SS级狩月人·5", 2500, 2, 2),
+        createPreRaidRankReward(300318, 10046, "S级狩月人·5", 2000, 2, 2),
+        createPreRaidRankReward(300319, 10047, "A级狩月人·5", 1500, 1, 1),
+        createPreRaidRankReward(300320, 10048, "B级狩月人·5", 1000, 1, 1),
+    ],
 }
 
 export interface PreRaidRankItem {
@@ -585,6 +699,13 @@ export const PreRaidRank: Record<string | number, PreRaidRankItem> = {
         RankReward: [300316, 300317, 300318, 300319, 300320],
     },
     "1004": {
+        IsOnline: [false, false, false, false, false],
+        PreRaidRank: 1,
+        RankName: ["SSS", "SS", "S", "A", "B"],
+        RankPercent: [15, 35, 55, 75, 100],
+        RankReward: [300316, 300317, 300318, 300319, 300320],
+    },
+    "1005": {
         IsOnline: [false, false, false, false, false],
         PreRaidRank: 1,
         RankName: ["SSS", "SS", "S", "A", "B"],

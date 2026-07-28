@@ -16,6 +16,11 @@ const FRAME_FILES = {
     "09_3": "WBP_PersonalInfo_Title_09_3.json",
     "09_4": "WBP_PersonalInfo_Title_09_4.json",
     "09_5": "WBP_PersonalInfo_Title_09_5.json",
+    "12_1": "WBP_PersonalInfo_Title_12_1.json",
+    "12_2": "WBP_PersonalInfo_Title_12_2.json",
+    "12_3": "WBP_PersonalInfo_Title_12_3.json",
+    "12_4": "WBP_PersonalInfo_Title_12_4.json",
+    "12_5": "WBP_PersonalInfo_Title_12_5.json",
 }
 
 const RESOURCE_FALLBACK = {
@@ -29,6 +34,11 @@ const RESOURCE_FALLBACK = {
     "09_3": "/imgs/rank/T_PersonalInfo_Title_09_3.webp",
     "09_4": "/imgs/rank/T_PersonalInfo_Title_09_4.webp",
     "09_5": "/imgs/rank/T_PersonalInfo_Title_09_5.webp",
+    "12_1": "/imgs/rank/T_PersonalInfo_Title_12_01.webp",
+    "12_2": "/imgs/rank/T_PersonalInfo_Title_12_02.webp",
+    "12_3": "/imgs/rank/T_PersonalInfo_Title_12_03.webp",
+    "12_4": "/imgs/rank/T_PersonalInfo_Title_12_04.webp",
+    "12_5": "/imgs/rank/T_PersonalInfo_Title_12_05.webp",
 }
 
 const RESOURCE_SRC_MAP = {

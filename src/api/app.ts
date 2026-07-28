@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core"
+import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { DNAAPI } from "dna-api"
 import { env } from "../env"
 
@@ -213,14 +214,29 @@ export async function listPakFiles(pakPaths: string[], aesKey?: string | null): 
  * @param pakFiles pak 文件名和目标文件名列表
  * @param aesKey AES key
  * @param targetPath 目标目录
+ * @param onProgress 导出进度回调
  * @returns 导出结果
  */
 export async function exportPakFiles(
     pakFiles: Record<string, string[]>,
     aesKey: string | null | undefined,
-    targetPath: string
+    targetPath: string,
+    onProgress?: (current: number, total: number) => void
 ): Promise<{ pakPath: string; exportedFiles: string[] }[]> {
-    return await invoke("export_pak_files", { pakFiles, aesKey, targetPath })
+    let unlistenFn: UnlistenFn | undefined
+
+    try {
+        if (onProgress) {
+            unlistenFn = await listen<{ current: number; total: number; targetPath: string }>("pak_export_progress", event => {
+                if (event.payload.targetPath === targetPath) {
+                    onProgress(event.payload.current, event.payload.total)
+                }
+            })
+        }
+        return await invoke("export_pak_files", { pakFiles, aesKey, targetPath })
+    } finally {
+        unlistenFn?.()
+    }
 }
 
 export interface LuaDecompileResult {
@@ -257,6 +273,16 @@ export async function decompileLuaBytecodeFiles(
  */
 export async function extractGameAssets(zipPath: string, targetDir: string) {
     return await invoke<string>("extract_game_assets", { zipPath, targetDir })
+}
+
+/**
+ * 使用应用内嵌的 hpatchz 应用完整游戏包。
+ * @param diffPath hdiff 文件路径
+ * @param targetDir 游戏安装目录
+ * @returns 成功消息
+ */
+export async function applyGamePatch(diffPath: string, targetDir: string) {
+    return await invoke<string>("apply_game_patch", { diffPath, targetDir })
 }
 
 /**

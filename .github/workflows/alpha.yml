@@ -104,7 +104,7 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: dna-builder-alpha-${{ github.sha }}
-                  path: ${{ github.workspace }}/src-tauri/target/release/DNA Builder.exe
+                  path: ${{ github.workspace }}/src-tauri/target/release/dna-builder.exe
 
             - name: Add summary
               if: success() && github.event_name != 'pull_request'
