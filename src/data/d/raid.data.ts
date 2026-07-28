@@ -36,45 +36,38 @@ export interface RaidDungeonItem {
 export interface RaidBuffItem {
     RaidBuffID: number
     RaidBuffDes: string
-    RaidBuffParameter: string[]
+    RaidBuffParameter?: string[]
 }
 
 export const RaidBuff = [
     {
         RaidBuffID: 1,
         RaidBuffDes: "风属性角色技能威力大于100%时，每超过30%，全属性穿透提高5%，最多提高50%。",
-        RaidBuffParameter: ["30%", "5%", "50%"],
     },
     {
         RaidBuffID: 2,
         RaidBuffDes: "风属性角色技能威力大于100%时，每超过30%，全属性穿透提高5%，最多提高50%。",
-        RaidBuffParameter: ["30%", "5%", "50%"],
     },
     {
         RaidBuffID: 3,
         RaidBuffDes: "风属性角色技能威力大于100%时，每超过30%，全属性穿透提高5%，最多提高50%。",
-        RaidBuffParameter: ["30%", "5%", "50%"],
     },
     {
         RaidBuffID: 12,
         RaidBuffDes: "雷属性角色技能威力大于100%时，每超过30%，造成技能伤害时无视目标3.5%防御，最多无视42%防御。",
-        RaidBuffParameter: ["30%", "3.5%", "42%"],
     },
     {
         RaidBuffID: 13,
         RaidBuffDes:
             "光属性角色技能范围大于技能耐久时，每超过10%，造成技能伤害时无视目标7%防御，最多无视42%防御；技能耐久大于技能范围时，每超过20%，全属性穿透提高10%，最多提高50%。",
-        RaidBuffParameter: ["10%", "7%", "42%", "20%", "10%", "50%"],
     },
     {
         RaidBuffID: 14,
         RaidBuffDes: "暗属性角色每持有12%昂扬，全属性穿透提高10%，最多提高50%。",
-        RaidBuffParameter: ["12%", "10%", "50%"],
     },
     {
         RaidBuffID: 15,
         RaidBuffDes: "水属性角色技能威力大于100%时，每超过40%，全属性穿透提高5%，最多提高50%。",
-        RaidBuffParameter: ["40%", "5%", "50%"],
     },
 ].reduce(
     (prev, cur) => {

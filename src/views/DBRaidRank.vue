@@ -85,10 +85,20 @@ const calculateRemainingTimeByScore = (baseRaidPoint: number, targetScore: numbe
 }
 
 // 状态管理
-const selectedSeason = useSearchParam<number>("s", 1005)
+const raidDungeons = Object.values(RaidDungeon)
+const defaultSeason = Object.values(RaidSeason)
+    .filter(season => raidDungeons.some(dungeon => dungeon.RaidSeason === season.RaidSeason))
+    .sort((a, b) => a.RaidSeason - b.RaidSeason)
+    .at(-1)?.RaidSeason ?? 0
+const defaultDungeon = raidDungeons
+    .filter(dungeon => dungeon.RaidSeason === defaultSeason)
+    .sort((a, b) => a.DifficultyLevel - b.DifficultyLevel)
+    .at(-1)?.DungeonId ?? 0
+
+const selectedSeason = useSearchParam<number>("s", defaultSeason)
 const scoreInput = ref("")
 const remainingTime = ref(30)
-const selectedDungeon = useSearchParam<number>("d", 21213)
+const selectedDungeon = useSearchParam<number>("d", defaultDungeon)
 const activeInfoTab = useSearchParam<"score" | "dungeon" | "rank">("t", "rank")
 const seasonTabs = computed(() => Object.values(RaidSeason))
 const dungeonTabs = computed(() => {

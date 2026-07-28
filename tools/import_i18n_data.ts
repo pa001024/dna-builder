@@ -192,12 +192,11 @@ const MAPPINGS: Mapping[] = [
             if (!Array.isArray(value)) {
                 throw new Error("RaidBuff 后处理只支持数组源")
             }
-            const raidBuff = value.find(row => isRecord(row) && row.RaidBuffID === 14)
-            if (!isRecord(raidBuff)) {
-                throw new Error("后处理找不到 RaidBuff[14]")
-            }
-            raidBuff.RaidBuffParameter = ["12%", "10%", "50%"]
-            return value
+            const raidBuff = value.map(v => {
+                const { RaidBuffParameter, ...rest } = v
+                return rest
+            })
+            return raidBuff
         },
     },
     {

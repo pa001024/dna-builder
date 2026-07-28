@@ -151,6 +151,12 @@ describe("模块使用场景测试", () => {
         expect(moduleExports.effectData).toBeDefined()
     })
 
+    it("1.5版本武器应有对应的特效数据", () => {
+        expect(dataModule.effectMap.get("锥心黑曜镰")?.暴伤).toBe(0.06)
+        expect(dataModule.effectMap.get("圣血·手枪")?.暴击).toBe(0.1)
+        expect(dataModule.effectMap.get("最好的一天")?.召唤物伤害).toBe(0.15)
+    })
+
     it("应该能够与其他模块一起使用", () => {
         // 创建完整的构建流程
         const char = new dataModule.LeveledChar("黎瑟")
