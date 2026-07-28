@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLocalStorage } from "@vueuse/core"
 import { computed, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import { dataPackBootstrapLoading } from "@/data/data-pack-bridge"
@@ -12,13 +13,29 @@ const dataPack = useDataPackStore()
 const showModal = ref(false)
 const hasChecked = ref(false)
 const isDownloading = ref(false)
+const lastApply = useLocalStorage("datapack.lastApply", 0)
 
-const latestVersion = computed(() => dataPack.status?.remote?.version || dataPack.status?.versions[0]?.version || "")
+const latestVersionInfo = computed(() => dataPack.status?.remote || dataPack.status?.versions[0] || null)
+const latestVersion = computed(() => latestVersionInfo.value?.version || "")
 const currentVersion = computed(() => dataPack.status?.version || "未激活")
 const versionCount = computed(() => dataPack.status?.versions.length || 0)
 const isReady = computed(() => Boolean(dataPack.status?.ready))
+const hasNewVersion = computed(() => {
+    const latest = latestVersionInfo.value
+    const current = dataPack.status?.version
+    if (!latest || !current || latest.version === current) {
+        return false
+    }
+
+    const latestUpdatedAt = Date.parse(latest.builtAt)
+    return Number.isFinite(latestUpdatedAt) && latestUpdatedAt > lastApply.value
+})
 
 const statusText = computed(() => {
+    if (hasNewVersion.value) {
+        return "发现新数据包版本"
+    }
+
     if (isReady.value) {
         return "数据包已激活"
     }
@@ -31,6 +48,10 @@ const statusText = computed(() => {
 })
 
 const statusHint = computed(() => {
+    if (hasNewVersion.value) {
+        return `当前版本 ${currentVersion.value}，可更新至 ${latestVersion.value}。`
+    }
+
     if (isReady.value) {
         return "当前可直接进入内容页。"
     }
@@ -63,7 +84,7 @@ async function checkDataPack() {
     }
 
     hasChecked.value = true
-    showModal.value = !dataPack.status?.ready
+    showModal.value = !dataPack.status?.ready || hasNewVersion.value
 }
 
 /**
@@ -96,6 +117,7 @@ async function downloadLatest() {
         await router.push({ name: "setting" })
         await dataPack.downloadVersion(version)
         await dataPack.refreshStatus(true)
+        lastApply.value = Date.now()
         showModal.value = false
     } catch (error) {
         ui.showErrorMessage(error instanceof Error ? error.message : String(error))
@@ -103,6 +125,15 @@ async function downloadLatest() {
         isDownloading.value = false
     }
 }
+
+watch(
+    () => dataPack.status?.version,
+    (version, previousVersion) => {
+        if (version && previousVersion && version !== previousVersion) {
+            lastApply.value = Date.now()
+        }
+    }
+)
 
 watch(
     dataPackBootstrapLoading,
