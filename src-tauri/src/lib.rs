@@ -1412,23 +1412,40 @@ async fn export_pak_files(
     target_path: String,
 ) -> Result<Vec<repak_tools::PakExportResult>, String> {
     let total: usize = pak_files.values().map(Vec::len).sum();
-    let emit_progress = |current| {
-        let _ = app.emit(
-            "pak_export_progress",
-            serde_json::json!({
-                "current": current,
-                "total": total,
-                "targetPath": target_path,
-            }),
-        );
-    };
-
-    emit_progress(0);
+    let target_path_for_progress = target_path.clone();
+    let mut last_percent = 0;
+    let _ = app.emit(
+        "pak_export_progress",
+        serde_json::json!({
+            "current": 0,
+            "total": total,
+            "targetPath": target_path_for_progress,
+        }),
+    );
     repak_tools::export_pak_files(
         &pak_files,
         aes_key.as_deref(),
         Path::new(&target_path),
-        emit_progress,
+        |current| {
+            let percent = if total > 0 {
+                current.saturating_mul(100).saturating_add(total / 2) / total
+            } else {
+                0
+            };
+            // 百分比未变化时不重复发送事件，避免大量小文件造成 IPC 拥塞。
+            if percent == last_percent && current < total {
+                return;
+            }
+            last_percent = percent;
+            let _ = app.emit(
+                "pak_export_progress",
+                serde_json::json!({
+                    "current": current,
+                    "total": total,
+                    "targetPath": target_path_for_progress,
+                }),
+            );
+        },
     )
 }
 

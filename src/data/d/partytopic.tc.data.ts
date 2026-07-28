@@ -10172,6 +10172,15 @@ export const partyTopicData_tc: PartyTopic[] = [
         ],
     },
     {
+        id: 210201,
+        charId: 2102,
+        name: "",
+        reward: 7050,
+        consume: {
+            "19006": 2,
+        },
+    },
+    {
         id: 230101,
         charId: 2301,
         name: "超級變變",
@@ -22343,7 +22352,7 @@ export const partyTopicData_tc: PartyTopic[] = [
             {
                 id: 80220113,
                 content:
-                    "刻舟師兄把它抱起來的時候，它沒有叫，也沒有害怕。或者說……它太小了，小到甚至不明白髮生了什麼，只能這麼顫抖著被帶來這裡。",
+                    "刻舟師兄把它抱起來的時候，它沒有叫，也沒有害怕。或者說……它太小了，小到甚至不明白發生了什麼，只能這麼顫抖著被帶來這裡。",
                 voice: "inv/Yuming/001/C8D2984A",
                 npc: 790073,
                 next: 80220114,

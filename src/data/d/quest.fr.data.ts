@@ -64,7 +64,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010104,
-                name: "Quittez la grotte et descendez vers le village.",
+                name: "Quitter la grotte et descendre vers le village",
                 nodes: [
                     {
                         id: "17096430398514460",
@@ -122,7 +122,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010105,
-                name: "Continuez votre chemin vers le village.",
+                name: "Continuer vers le village",
                 nodes: [
                     {
                         id: "170478251651114925",
@@ -172,11 +172,11 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010106,
-                name: "Continuez votre chemin vers le village.",
+                name: "Continuer vers le village",
             },
             {
                 id: 10010107,
-                name: "Évitez les Souillés et rentrez chez vous pour chercher une arme.",
+                name: "Éviter les Souillés et rentrer chez soi pour chercher une arme",
                 nodes: [
                     {
                         id: "quest_168448363277629",
@@ -243,11 +243,11 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010108,
-                name: "Repoussez les Souillés qui approchent.",
+                name: "Repousser les Souillés qui approchent",
             },
             {
                 id: 10010109,
-                name: "Rejoignez le quai pour trouver un bateau.",
+                name: "Rejoindre le quai pour trouver un bateau",
                 nodes: [
                     {
                         id: "quest_1684736085861217",
@@ -284,11 +284,11 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010110,
-                name: "Explorez la plage le long de la côte.",
+                name: "Explorer la plage le long de la côte",
             },
             {
                 id: 10010111,
-                name: "Explorez la plage le long de la côte.",
+                name: "Explorer la plage le long de la côte",
                 nodes: [
                     {
                         id: "171135663694144092",
@@ -349,7 +349,7 @@ export const questData_fr: QuestStory[] = [
         quests: [
             {
                 id: 10010201,
-                name: "Rendez-vous aux ruines situées sur la montagne.",
+                name: "Se rendre aux ruines situées sur la montagne",
                 nodes: [
                     {
                         id: "quest_1684737069161529",
@@ -467,15 +467,15 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010203,
-                name: "Rendez-vous aux ruines situées sur la montagne.",
+                name: "Se rendre aux ruines situées sur la montagne",
             },
             {
                 id: 10010204,
-                name: "Examinez les environs.",
+                name: "Examiner les environs",
             },
             {
                 id: 10010205,
-                name: "Prenez l’ascenseur.",
+                name: "Prendre l’ascenseur",
                 nodes: [
                     {
                         id: "quest_16914040798541069",
@@ -515,11 +515,11 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010206,
-                name: "Ouvrez la porte devant vous.",
+                name: "Ouvrir la porte devant soi",
             },
             {
                 id: 10010207,
-                name: "Explorez les ruines à la recherche du dirigeable.",
+                name: "Explorer les ruines à la recherche du dirigeable",
                 nodes: [
                     {
                         id: "169865654809636140",
@@ -569,11 +569,11 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010208,
-                name: "Explorez les ruines à la recherche du dirigeable.",
+                name: "Explorer les ruines à la recherche du dirigeable",
             },
             {
                 id: 10010209,
-                name: "Explorez les ruines à la recherche du dirigeable.",
+                name: "Explorer les ruines à la recherche du dirigeable",
                 nodes: [
                     {
                         id: "quest_1685429387391115",
@@ -630,15 +630,15 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010210,
-                name: "Explorez les ruines à la recherche du dirigeable.",
+                name: "Explorer les ruines à la recherche du dirigeable",
             },
             {
                 id: 10010212,
-                name: "Explorez les ruines à la recherche du dirigeable.",
+                name: "Explorer les ruines à la recherche du dirigeable",
             },
             {
                 id: 10010213,
-                name: "Repoussez l’assaut des Souillés.",
+                name: "Repousser l’assaut des Souillés",
                 nodes: [
                     {
                         id: "quest_1685957255699600",
@@ -671,11 +671,11 @@ export const questData_fr: QuestStory[] = [
         quests: [
             {
                 id: 10010301,
-                name: "Continuez de chercher le dirigeable.",
+                name: "Continuer à chercher le dirigeable",
             },
             {
                 id: 10010302,
-                name: "Battez les soldats et tentez de vous échapper.",
+                name: "Battre les soldats et tenter de s’échapper",
                 nodes: [
                     {
                         id: "170479445521353718",
@@ -724,7 +724,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010303,
-                name: "Évadez-vous de cet endroit.",
+                name: "S’échapper de cet endroit",
                 nodes: [
                     {
                         id: "1720428418099422115",
@@ -744,15 +744,15 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010304,
-                name: "Échappez à l’encerclement des soldats.",
+                name: "Échapper à l’encerclement des soldats",
             },
             {
                 id: 10010305,
-                name: "Évadez-vous de cet endroit.",
+                name: "S’échapper de cet endroit",
             },
             {
                 id: 10010306,
-                name: "Défendez-vous contre les attaques de Sibylle.",
+                name: "Se défendre contre les attaques de Sibylle",
                 nodes: [
                     {
                         id: "quest_16926743134633260",
@@ -925,7 +925,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010310,
-                name: "Défendez-vous contre les attaques de Sibylle.",
+                name: "Se défendre contre les attaques de Sibylle",
                 nodes: [
                     {
                         id: "17302794084017874",
@@ -994,7 +994,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010311,
-                name: "Explorez les ruines à la recherche du dirigeable.",
+                name: "Explorer les ruines à la recherche du dirigeable",
                 nodes: [
                     {
                         id: "17468608271436328",
@@ -1015,7 +1015,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 10010312,
-                name: "Explorez les ruines à la recherche du dirigeable.",
+                name: "Explorer les ruines à la recherche du dirigeable",
             },
         ],
     },
@@ -1294,7 +1294,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10100401,
                                 content:
-                                    "On dirait que quelqu'un a eu un petit accident... et ça a attiré des Souillés... Ces sales bêtes !",
+                                    "On dirait que quelqu’un a eu un petit accident... et ça a attiré des Souillés... Ces sales bêtes !",
                                 voice: "story/1002/101004/1949090A",
                                 npc: 200002,
                                 next: 10100402,
@@ -1402,7 +1402,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10120601,
-                                content: '<I>Alors c’est ça, une "cité"... Je n’en avais jamais vu avant.</>',
+                                content: "<I>Alors c’est ça, une « cité »... Je n’en avais jamais vu avant.</>",
                                 voice: "story/1002/101206/1955FB1A",
                                 npc: 100001,
                                 next: 10120602,
@@ -1714,7 +1714,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10100901,
-                                content: 'Ce "manoir hanté" dont tu parlais, qu’est-ce que c’est au juste ?',
+                                content: "Ce « manoir hanté » dont tu parlais, qu’est-ce que c’est au juste ?",
                                 voice: "story/1002/101009/19495B12",
                                 npc: 100001,
                                 next: 10100902,
@@ -2084,6 +2084,55 @@ export const questData_fr: QuestStory[] = [
                                 npc: 200006,
                                 next: 10101610,
                             },
+                            {
+                                id: 10101610,
+                                content: "<I>Grrrgl...</>",
+                                voice: "story/1002/101016/1949CF64",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 101016101,
+                                        content: "<I>Pardon...</>",
+                                        next: 10101612,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 101016102,
+                                        content: "<I>Snow, c’est ton ventre qui a grogné ?</>",
+                                        next: 10101611,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 10101612,
+                                content: "... Vous avez faim ? Attendez un peu, je vais vous chercher de quoi manger !",
+                                voice: "story/1002/101016/1949CFB8",
+                                npc: 200006,
+                                next: 10101613,
+                            },
+                            {
+                                id: 10101611,
+                                content:
+                                    "M... même pas ! Le peuple Luno n’est pas aussi fragile que vous, on n’a pas le ventre vide pour si peu !",
+                                voice: "story/1002/101016/1949CF8E",
+                                npc: 200002,
+                                next: 10101612,
+                            },
+                            {
+                                id: 10101613,
+                                content:
+                                    "Franchement... qui aurait cru que ce tenancier si rustre et morose ait à son service une fille aussi serviable et pleine de cœur...",
+                                voice: "story/1002/101016/1949CFE2",
+                                npc: 200002,
+                                next: 10101614,
+                            },
+                            {
+                                id: 10101614,
+                                content: "Grâce à elle, on a enfin trouvé un toit. Allons nous reposer un peu, je suis crevée moi aussi !",
+                                voice: "story/1002/101016/1949D00C",
+                                npc: 200002,
+                            },
                         ],
                     },
                 ],
@@ -2125,7 +2174,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10101704,
                                 content:
-                                    "<I>Heureusement, Sibylle semble avoir besoin de Berry pour une raison que j’ignore. Elle ne devrait pas lui faire de mal.</>",
+                                    '<I>Heureusement, Sibylle semble</> <I spec="H">avoir besoin de</> <I>Berry pour une raison que j’ignore. Elle ne devrait pas lui faire de mal.</>',
                                 voice: "story/1002/101017/1949DED0",
                                 npc: 100001,
                                 next: 10101705,
@@ -2552,7 +2601,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10102413,
                                 content:
-                                    'Le soldat de tout à l’heure... Même après un tel acte de cruauté, la seule sanction qu’il risque, c’est une rétrogradation, sous prétexte d’un "accident".',
+                                    "Le soldat de tout à l’heure... Même après un tel acte de cruauté, la seule sanction qu’il risque, c’est une rétrogradation, sous prétexte d’un « accident ».",
                                 voice: "story/1002/101024/194A52F8",
                                 npc: 200006,
                                 next: 10102414,
@@ -2590,7 +2639,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10102418,
                                 content:
-                                    'Les Sola d’Hyperborea croient que les Charons capables de "magie" sont des sorciers maléfiques, la plus grande menace pour leur tranquillité.',
+                                    "Les Sola d’Hyperborea croient que les Charons capables de « magie » sont des sorciers maléfiques, la plus grande menace pour leur tranquillité.",
                                 voice: "story/1002/101024/194A53CA",
                                 npc: 200006,
                                 next: 10102419,
@@ -2854,7 +2903,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10102801,
-                                content: "Tu... tu veux vraiment m’aider ?! Ouah... merci !",
+                                content: "Tu... tu veux vraiment m’aider ?! Ouah... merci !",
                                 voice: "story/1002/101028/194A92CA",
                                 npc: 2000111,
                                 next: 10102802,
@@ -2862,7 +2911,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10102802,
                                 content:
-                                    "Le voleur est parti vers l’ouest. Mais tu sais, Givrelac est un vrai labyrinthe, qui sait où il peut bien se cacher ? Allons d’abord chercher des indices !",
+                                    "Le voleur est parti vers l’ouest. Mais tu sais, Givrelac est un vrai labyrinthe, qui sait où il peut bien se cacher ? Allons d’abord chercher des indices !",
                                 voice: "story/1002/101028/194A92F4",
                                 npc: 2000111,
                             },
@@ -2917,14 +2966,14 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10117101,
-                                content: "Commençons par chercher vers l’ouest !",
+                                content: "Commençons par chercher vers l’ouest !",
                                 voice: "story/1002/101171/1953BCE2",
                                 npc: 200011,
                                 next: 10117102,
                             },
                             {
                                 id: 10117102,
-                                content: "Le voleur a les cheveux noirs et portait... un haut bleu ? Je crois. ",
+                                content: "Le voleur a les cheveux noirs et portait... un haut bleu ? Je crois. ",
                                 voice: "story/1002/101171/1953BD0C",
                                 npc: 200011,
                             },
@@ -2937,7 +2986,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10117201,
-                                content: "Oh... c’est... Monsieur Badi des taudis ! Je vais lui demander !",
+                                content: "Oh... c’est... Monsieur Badi des taudis ! Je vais lui demander !",
                                 voice: "story/1002/101172/1953CD4A",
                                 npc: 200011,
                             },
@@ -2952,7 +3001,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10117301,
-                                content: "Monsieur Badi ! Vous êtes sorti vous promener ?",
+                                content: "Monsieur Badi ! Vous êtes sorti vous promener ?",
                                 voice: "story/1002/101173/1953DDB1",
                                 npc: 200011,
                                 next: 10117302,
@@ -2960,28 +3009,28 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10117302,
                                 content:
-                                    "Oh ! Mais c’est notre petite Princesse des Déchets ! Aujourd’hui, tu as amené deux acolytes pour t’aider ?",
+                                    "Oh ! Mais c’est notre petite Princesse des Déchets ! Aujourd’hui, tu as amené deux acolytes pour t’aider ?",
                                 voice: "story/1002/101173/1953DDB2",
                                 npc: 200054,
                                 next: 10117303,
                             },
                             {
                                 id: 10117303,
-                                content: "Je ne suis pas une acolyte ! Je suis le Roi Démon !",
+                                content: "Je ne suis pas une acolyte ! Je suis le Roi Démon !",
                                 voice: "story/1002/101173/1953DDDC",
                                 npc: 200002,
                                 next: 10117304,
                             },
                             {
                                 id: 10117304,
-                                content: 'Ah... alors tu es le "Roi Démon des Déchets" ?',
+                                content: "Ah... alors tu es le « Roi Démon des Déchets » ?",
                                 voice: "story/1002/101173/1953DE06",
                                 npc: 200054,
                                 next: 10117305,
                             },
                             {
                                 id: 10117305,
-                                content: 'Non ! C’est le "Roi Démon de la Lumière" !',
+                                content: "Non ! C’est le « Roi Démon de la Lumière » !",
                                 voice: "story/1002/101173/1953DE30",
                                 npc: 200002,
                                 next: 10117306,
@@ -2989,7 +3038,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10117306,
                                 content:
-                                    "Ahahaha... laissons ça de côté pour l’instant. Monsieur Badi, vous n’avez pas vu un Charon aux cheveux noirs et au haut bleu passer par ici ?",
+                                    "Ahahaha... laissons ça de côté pour l’instant. Monsieur Badi, vous n’avez pas vu un Charon aux cheveux noirs et au haut bleu passer par ici ?",
                                 voice: "story/1002/101173/1953DE5A",
                                 npc: 200011,
                                 next: 10117307,
@@ -2997,14 +3046,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10117307,
                                 content:
-                                    "Oui, un jeune homme vient juste de passer. Tout maladroit, sans regarder où il marchait, il est allé droit vers la poubelle dans <H>Brumelac</> ! Attends... il ne serait pas en train de te piquer ton gagne-pain ?",
+                                    "Oui, un jeune homme vient juste de passer. Tout maladroit, sans regarder où il marchait, il est allé droit vers la poubelle dans <H>Brumelac</> ! Attends... il ne serait pas en train de te piquer ton gagne-pain ?",
                                 voice: "story/1002/101173/1953DE84",
                                 npc: 200054,
                                 next: 10117308,
                             },
                             {
                                 id: 10117308,
-                                content: "Euh... en quelque sorte ! Merci, je le poursuis.",
+                                content: "Euh... en quelque sorte ! Merci, je le poursuis.",
                                 voice: "story/1002/101173/1953DEAE",
                                 npc: 200011,
                             },
@@ -3027,7 +3076,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10117501,
                                 content:
-                                    "Allez, filez... comme on dit, « le monde appartient à ceux qui fouillent les poubelles tôt le matin ! »",
+                                    "Allez, filez... comme on dit, « le monde appartient à ceux qui fouillent les poubelles tôt le matin ! »",
                                 voice: "story/1002/101175/1953FE82",
                                 npc: 200054,
                             },
@@ -3040,7 +3089,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10117402,
-                                content: "Il veut dire la grosse poubelle n° 3 ! Suis-moi !",
+                                content: "Il veut dire la grosse poubelle n° 3 ! Suis-moi !",
                                 voice: "story/1002/101174/1953EE44",
                                 npc: 200011,
                             },
@@ -3060,7 +3109,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10117602,
-                                content: "... Pas de souci ! Mon flair de détective me dit qu’il y a un indice dans le coin !",
+                                content: "... Pas de souci ! Mon flair de détective me dit qu’il y a un indice dans le coin !",
                                 voice: "story/1002/101176/19540F14",
                                 npc: 200011,
                             },
@@ -3074,7 +3123,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10117701,
                                 content:
-                                    "Deux caisses empilées... celle du bas est de travers, avec des traces de pas d’adulte un peu partout — <I>hum hum,</> c’est évident !",
+                                    "Deux caisses empilées... celle du bas est de travers, avec des traces de pas d’adulte un peu partout — <I>hum hum,</> c’est évident !",
                                 voice: "story/1002/101177/19541F52",
                                 npc: 200011,
                                 next: 10117702,
@@ -3082,7 +3131,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10117702,
                                 content:
-                                    '<I>Hum,</> d’après le témoignage de Margie, la témoin, elle venait juste de remettre ces caisses à l’horizontale ce matin en faisant ses "courses" à la grosse poubelle n° 3. ',
+                                    "<I>Hum,</> d’après le témoignage de Margie, la témoin, elle venait juste de remettre ces caisses à l’horizontale ce matin en faisant ses « courses » à la grosse poubelle n° 3. ",
                                 voice: "story/1002/101177/19541F7C",
                                 npc: 200011,
                                 next: 10117703,
@@ -3090,14 +3139,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10117703,
                                 content:
-                                    "Donc, déduction de Margie, la Détective Taciturne, le voleur a empilé ces caisses à la hâte pour grimper au mur ! Il doit sûrement être sur le toit ! ",
+                                    "Donc, déduction de Margie, la Détective Taciturne, le voleur a empilé ces caisses à la hâte pour grimper au mur ! Il doit sûrement être sur le toit ! ",
                                 voice: "story/1002/101177/19541FA6",
                                 npc: 200011,
                                 next: 10117704,
                             },
                             {
                                 id: 10117704,
-                                content: "Oh ! Ça tient la route ! Allons voir là-haut !",
+                                content: "Oh ! Ça tient la route ! Allons voir là-haut !",
                                 voice: "story/1002/101177/19541FD0",
                                 npc: 200002,
                             },
@@ -3110,7 +3159,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10117901,
-                                content: "Quoi ? Il y a quelque chose dans la poubelle ?",
+                                content: "Quoi ? Il y a quelque chose dans la poubelle ?",
                                 voice: "story/1002/101179/19544022",
                                 npc: 200011,
                                 next: 10117902,
@@ -3125,14 +3174,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10117903,
                                 content:
-                                    "Ouuuah ! C’est... une demi-bouteille de vin et une broche antique ?! Bon sang, tu serais donc l’{性别:élu|élue} du dieu des poubelles ?!",
+                                    "<I>Ouuuah !</> C’est... une demi-bouteille de vin et une broche antique ?! Bon sang, tu serais donc l’{性别:élu|élue} du dieu des poubelles ?!",
                                 voice: "story/1002/101179/19544076",
                                 npc: 200011,
                                 next: 10117904,
                             },
                             {
                                 id: 10117904,
-                                content: "Mince... pile au mauvais moment... Attends-moi ! ",
+                                content: "Mince... pile au mauvais moment... Attends-moi ! ",
                                 voice: "story/1002/101179/195440A0",
                                 npc: 200011,
                                 next: 10117905,
@@ -3147,7 +3196,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10117906,
                                 content:
-                                    "Voilà, c’est bon ! Je reviendrai les chercher après avoir attrapé le voleur. Ce que tu trouves, c’est pour toi. Une fois le voleur arrêté, je partagerai le vin avec toi !",
+                                    "Voilà, c’est bon ! Je reviendrai les chercher après avoir attrapé le voleur. Ce que tu trouves, c’est pour toi. Une fois le voleur arrêté, je partagerai le vin avec toi !",
                                 voice: "story/1002/101179/195440F4",
                                 npc: 200011,
                                 next: 10117907,
@@ -3175,35 +3224,35 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10117801,
                                 content:
-                                    'Donc "Détective Taciturne", c’est ton titre, Margie ? Pas mal... mais un peu court, ça manque d’impact !',
+                                    "Donc « Détective Taciturne », c’est ton titre, Margie ? Pas mal... mais un peu court, ça manque d’impact !",
                                 voice: "story/1002/101178/19542FBA",
                                 npc: 200002,
                                 next: 10117802,
                             },
                             {
                                 id: 10117802,
-                                content: "Pas faux ! Alors, Roi Démon, une idée ?",
+                                content: "Pas faux ! Alors, Roi Démon, une idée ?",
                                 voice: "story/1002/101178/19542FE4",
                                 npc: 200011,
                                 next: 10117803,
                             },
                             {
                                 id: 10117803,
-                                content: 'Le vieil homme tout à l’heure t’a appelé "Princesse des Déchets"... Pas mal comme titre, non ?',
+                                content: "Le vieil homme tout à l’heure t’a appelé « Princesse des Déchets »... Pas mal comme titre, non ?",
                                 voice: "story/1002/101178/1954300E",
                                 npc: 200002,
                                 next: 10117804,
                             },
                             {
                                 id: 10117804,
-                                content: '"Princesse des Déchets ☆ La Détective Taciturne", ça claque non !',
+                                content: "« Princesse des Déchets ☆ La Détective Taciturne », ça claque non !",
                                 voice: "story/1002/101178/19543038",
                                 npc: 200002,
                                 next: 10117805,
                             },
                             {
                                 id: 10117805,
-                                content: "Ah—! Non, non, stop ! Ne répète plus ce surnom, c’est trop embarrassant !",
+                                content: "<I>Ah—!</> Non, non, stop ! Ne répète plus ce surnom, c’est trop embarrassant !",
                                 voice: "story/1002/101178/19543062",
                                 npc: 200011,
                             },
@@ -3218,21 +3267,21 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10118101,
-                                content: "C’est quoi ce délire ? Tout le monde grimpe partout dans Givrelac. Y a un concours ou quoi ?",
+                                content: "C’est quoi ce délire ? Tout le monde grimpe partout dans Givrelac. Y a un concours ou quoi ?",
                                 voice: "story/1002/101181/195460F2",
                                 npc: 200055,
                                 next: 10118102,
                             },
                             {
                                 id: 10118102,
-                                content: "Euh... à ce qu’il paraît, un vieux Luno avait organisé un défi similaire...",
+                                content: "Euh... à ce qu’il paraît, une ancienne Luno avait organisé un défi similaire...",
                                 voice: "story/1002/101181/1954611C",
                                 npc: 200002,
                                 next: 10118103,
                             },
                             {
                                 id: 10118103,
-                                content: "Alors dépêchez-vous ! L’autre participant est déjà parti depuis un moment.",
+                                content: "Alors dépêchez-vous ! L’autre participant est déjà parti depuis un moment.",
                                 voice: "story/1002/101181/19546146",
                                 npc: 200055,
                             },
@@ -3252,7 +3301,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10118201,
-                                content: "Ah, regardez, c’est lui là-bas sur le toit !",
+                                content: "Ah, regardez, c’est lui là-bas sur le toit !",
                                 voice: "story/1002/101182/1954715A",
                                 npc: 200011,
                             },
@@ -3267,7 +3316,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10118202,
                                 content:
-                                    "Tu... tu devais vraiment me poursuivre jusqu’ici ? Tu as dit que tu allais partager l’argent avec les pauvres de toute façon, alors pourquoi je ne peux pas en avoir une part ?",
+                                    "Tu... tu devais vraiment me poursuivre jusqu’ici ? Tu as dit que tu allais partager l’argent avec les pauvres de toute façon, alors pourquoi je ne peux pas en avoir une part ?",
                                 voice: "story/1002/101182/19547184",
                                 npc: 200053,
                                 next: 10118203,
@@ -3334,14 +3383,14 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10118701,
-                                content: "乖乖站住！不许跑！",
+                                content: "Arrête-toi ! Pas question de fuir !",
                                 voice: "story/1002/101187/1954C362",
                                 npc: 200011,
                                 next: 10118702,
                             },
                             {
                                 id: 10118702,
-                                content: "呼……呼……你们几个腿长的……等等我……",
+                                content: "Huff... huff... vous les grandes jambes... attendez-moi...",
                                 voice: "story/1002/101187/1954C38C",
                                 npc: 200002,
                             },
@@ -3465,7 +3514,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10103205,
                                 content:
-                                    "Hmm... bon, on va faire simple, tu m’as collé quelques coups, je vais te rendre la politesse avec ma pelle. Ensuite, on est quittes, et tu files.",
+                                    "<I>Hmm...</> bon, on va faire simple, tu m’as collé quelques coups, je vais te rendre la politesse avec ma pelle. Ensuite, on est quittes, et tu files.",
                                 voice: "story/1002/101032/194AD498",
                                 npc: 200011,
                                 next: 10103206,
@@ -3644,7 +3693,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10103505,
                                 content:
-                                    "Héhé, merci infiniment ! Tu m’as sauvé la vie, {性别:mon frère d’une autre mère|ma sœur d'un autre père} !",
+                                    "Héhé, merci infiniment ! Tu m’as sauvé la vie, {性别:mon frère d’une autre mère|ma sœur d’un autre père} !",
                                 voice: "story/1002/101034/194AF573",
                                 npc: 200011,
                                 next: 10103506,
@@ -3652,7 +3701,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10103506,
                                 content:
-                                    'Bon, je dois vite redistribuer ces pièces. Moi, d’habitude, je "m’approvisionne" un peu partout à Givrelac. Si tu as besoin de moi, il suffit de donner mon nom dans les taudis, et ils t\'aideront à me trouver.',
+                                    "Bon, je dois vite redistribuer ces pièces. Moi, d’habitude, je « m’approvisionne » un peu partout à Givrelac. Si tu as besoin de moi, il suffit de donner mon nom dans les taudis, et ils t’aideront à me trouver.",
                                 voice: "story/1002/101034/194AF574",
                                 npc: 200011,
                             },
@@ -3696,7 +3745,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10103801,
                                 content:
-                                    "Eh, mais c’est Snow ! Encore en train d’aider les Chasseurs de Phoxène ? Et cette fois, qu’as-tu fait ? T’as arrêté quelques centaines de bandits et déjoué une dizaine de complots infernaux ?",
+                                    "Eh, mais c’est Snow ! Encore en train d’aider les Chasseurs de Phoxène ? Et cette fois, qu’as-tu fait ? T’as arrêté quelques centaines de bandits et déjoué une dizaine de complots infernaux ?",
                                 voice: "story/1002/101038/194B36DA",
                                 npc: 200065,
                                 next: 10103802,
@@ -3740,7 +3789,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10103807,
-                                content: "Merci, ce n'était rien.",
+                                content: "Merci, ce n’était rien.",
                                 voice: "story/1002/101038/194B37D6",
                                 npc: 100001,
                                 next: 10103808,
@@ -3807,7 +3856,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10103815,
                                 content:
-                                    "Hein, donc c’est toi qui as attrapé le voleur ? Je pensais que Snow t’appelait « petit larbin » parce que tu t’étais fait attraper... Mais qui sérieusement se ferait attraper par Snow... Qu’est-ce qui m'a pris ?!",
+                                    "Hein, donc c’est toi qui as attrapé le voleur ? Je pensais que Snow t’appelait « petit larbin » parce que tu t’étais fait attraper... Mais qui sérieusement se ferait attraper par Snow... Qu’est-ce qui m’a pris ?!",
                                 voice: "story/1002/101038/194B397A",
                                 npc: 200065,
                                 next: 10103816,
@@ -4118,7 +4167,7 @@ export const questData_fr: QuestStory[] = [
                                     },
                                     {
                                         id: 101044052,
-                                        content: "<I>Puisque c'est un travail que vous proposez, c'est tout à fait normal.</>",
+                                        content: "<I>Puisque c’est un travail que vous proposez, c’est tout à fait normal.</>",
                                         next: 10104406,
                                         impr: [1011, "Benefit", 3],
                                     },
@@ -4168,7 +4217,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10104504,
-                                content: "C’est plus sûr à l’intérieur, c’est vrai. Mais j’aime bien… l’air ici.",
+                                content: "C’est plus sûr à l’intérieur, c’est vrai. Mais j’aime bien... l’air ici.",
                                 voice: "story/1002/101045/194BAA30",
                                 npc: 200006,
                                 next: 10104505,
@@ -4378,7 +4427,7 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 10020303,
                 name: "Quitter Givrelac et se rendre à la Fosse de Glevum",
-                desc: 'Psyche semble avoir pris sa décision : elle se joint à vous pour cette petite "aventure". Partez avec elle vers la Fosse de Glevum.',
+                desc: "Psyche semble avoir pris sa décision : elle se joint à vous pour cette petite « aventure ». Partez avec elle vers la Fosse de Glevum.",
                 nodes: [
                     {
                         id: "17410725048971568318",
@@ -4509,7 +4558,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10104803,
-                                content: '"Chasseur de Phoxène"... c’est un nom original. Ils chassent vraiment du Phoxène ?',
+                                content: "« Chasseur de Phoxène »... c’est un nom original. Ils chassent vraiment du Phoxène ?",
                                 voice: "story/1002/101048/194BDB3E",
                                 npc: 100001,
                                 next: 10104804,
@@ -4524,7 +4573,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10104805,
-                                content: "Oui, j’ai entendu dire que ce métier est né ici même, à Givrelac. ",
+                                content: "Oui, j’ai entendu dire que ce métier est né ici même, à Givrelac. ",
                                 voice: "story/1002/101048/194BDB92",
                                 npc: 200006,
                                 next: 10104806,
@@ -4578,14 +4627,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10104810,
                                 content:
-                                    "Il y a les grosses missions, comme protéger la ville des griffes des Souillés, et les petites... comme récupérer du pain tout juste sorti du four... des dents d’un chien !",
+                                    "Il y a les grosses missions, comme protéger la ville des griffes des Souillés, et les petites... comme récupérer du pain tout juste sorti du four... des dents d’un chien !",
                                 voice: "story/1002/101048/194BDC64",
                                 npc: 200002,
                                 next: 10104811,
                             },
                             {
                                 id: 10104811,
-                                content: "Récupérer du pain à un chien ?",
+                                content: "Récupérer du pain à un chien ?",
                                 voice: "story/1002/101048/194BDC8E",
                                 npc: 100001,
                                 next: 10104812,
@@ -4654,7 +4703,8 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10130903,
-                                content: "<I>Mieux vaut reculer un peu, et tirer dessus pour déclencher l’explosion.</>",
+                                content:
+                                    '<I>Mieux vaut reculer un peu, et</> <I spec="H">tirer dessus</> <I>pour déclencher l’explosion.</>',
                                 voice: "story/1002/101309/195BD047",
                                 npc: 100001,
                             },
@@ -4771,49 +4821,54 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10120102,
-                                content: "从我大腿上下来，白。你这样我动不了了……你先回冰湖城吧，我不会笑话你的。",
+                                content:
+                                    "Descends de ma jambe, Snow. Je peux pas bouger comme ça... Si tu as trop peur, retourne à Givrelac, je ne me moquerai pas de toi.",
                                 voice: "story/1002/101201/1955A93C",
                                 npc: 100001,
                                 next: 10120103,
                             },
                             {
                                 id: 10120103,
-                                content: "不不不不回去，没没没没有经历过冒冒冒险的人生一定是不不不不不完整的！",
+                                content: "N-n-non ! Une vie sans a-a-aventures ne serait pas c-c-complète... !",
                                 voice: "story/1002/101201/1955A966",
                                 npc: 200002,
                                 next: 10120104,
                             },
                             {
                                 id: 10120104,
-                                content: "好呀，那我就陪着{nickname}和魔王大人一起，把人生变“完整”一点吧。",
+                                content:
+                                    "Alors allons-y ensemble, {nickname}. J’accompagnerai le Roi Démon pour rendre nos vies un peu plus complètes.",
                                 voice: "story/1002/101201/1955A990",
                                 npc: 200006,
                                 next: 10120105,
                             },
                             {
                                 id: 10120105,
-                                content: "刚刚我应该没有拖后腿……所以接下来，我想也不会有问题的！",
+                                content:
+                                    "Je crois que je n’ai pas trop ralenti tout à l’heure... alors je pense que ça ira aussi pour la suite !",
                                 voice: "story/1002/101201/1955A9BA",
                                 npc: 200006,
                                 next: 10120106,
                             },
                             {
                                 id: 10120106,
-                                content: "嗯，我们继续往前走吧。",
+                                content: "Très bien, continuons d’avancer.",
                                 voice: "story/1002/101201/1955A9E4",
                                 npc: 100001,
                                 next: 10120107,
                             },
                             {
                                 id: 10120107,
-                                content: "（只是一些寻常的秽兽，远不如净界岛那一次来得凶险……）",
+                                content:
+                                    "<I>De simples Souillés... rien à voir avec ce que nous avons affronté sur l’Île du Purgatoire...</>",
                                 voice: "story/1002/101201/1955AA0E",
                                 npc: 100001,
                                 next: 10120108,
                             },
                             {
                                 id: 10120108,
-                                content: "（仔细回想贝蕾教过的防身技巧，谨慎地挥出每一次剑——可以做到的。）",
+                                content:
+                                    "<I>Concentre-toi... les techniques de survie que Berry m’a enseignées... une attaque prudente à chaque coup... c’est possible.</>",
                                 voice: "story/1002/101201/1955AA38",
                                 npc: 100001,
                             },
@@ -4935,14 +4990,14 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10122901,
-                                content: "小心！！",
+                                content: "Attention !",
                                 voice: "story/1002/101229/19577472",
                                 npc: 200006,
                                 next: 10122902,
                             },
                             {
                                 id: 10122902,
-                                content: "呼，还好没事……咦，前面有路了！",
+                                content: "Ouf... ça va... Hein ? Le chemin est dégagé !",
                                 voice: "story/1002/101229/1957749C",
                                 npc: 200006,
                             },
@@ -5032,7 +5087,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105401,
                                 content:
-                                    "L’Étranger ?! Qu’est-ce que tu fabriques ? Comment se fait-il que l’Éclat stellaire soit entre tes mains ? C’est mon petit larbin qui l’avait—",
+                                    "L’Étranger ?! Qu’est-ce que tu fabriques ? Comment se fait-il que l’Éclat stellaire soit entre tes mains ? C’est mon petit larbin qui l’avait—",
                                 voice: "story/1002/101054/194C3D5A",
                                 npc: 200002,
                                 next: 10105402,
@@ -5040,7 +5095,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105402,
                                 content:
-                                    "Il était juste là, sans qu’aucun nom ne soit dessus, non ? Allez, chez nous, dans notre boulot, y a pas de « premier arrivé, premier servi ».",
+                                    "Il était juste là, sans qu’aucun nom ne soit dessus, non ? Allez, chez nous, dans notre boulot, y a pas de « premier arrivé, premier servi ».",
                                 voice: "story/1002/101054/194C3D84",
                                 npc: 200021,
                                 next: 10105403,
@@ -5048,7 +5103,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105403,
                                 content:
-                                    "Toi, tu es {性别:nouveau|nouvelle}, non ? Cette leçon, quelqu’un devait bien te la donner, et il se trouve que c’est moi aujourd’hui. On dira que cet Éclat stellaire, c’est ton droit d’entrée.",
+                                    "Toi, tu es {性别:nouveau|nouvelle}, non ? Cette leçon, quelqu’un devait bien te la donner, et il se trouve que c’est moi aujourd’hui. On dira que cet Éclat stellaire, c’est ton droit d’entrée.",
                                 voice: "story/1002/101054/194C3DAE",
                                 npc: 200021,
                                 next: 10105404,
@@ -5091,7 +5146,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10105408,
-                                content: "Ça, c’est l’esprit ! Allez, {nickname}, montre-lui ce que t’as !",
+                                content: "Ça, c’est l’esprit ! Allez, {nickname}, montre-lui ce que t’as !",
                                 voice: "story/1002/101054/194C3E80",
                                 npc: 200002,
                                 next: 10105409,
@@ -5116,7 +5171,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10105410,
-                                content: "On dirait que t’as du tempérament... Petite, tu veux bien raisonner ton {性别:ami|amie} ?",
+                                content: "On dirait que t’as du tempérament... Petite, tu veux bien raisonner ton {性别:ami|amie} ?",
                                 voice: "story/1002/101054/194C3ED4",
                                 npc: 200021,
                                 next: 10105411,
@@ -5145,7 +5200,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10105414,
-                                content: "Quoi ?! Attendez... Même à deux contre un, vous n’êtes pas sûrs de me battre, hein ?",
+                                content: "Quoi ?! Attendez... Même à deux contre un, vous n’êtes pas sûrs de me battre, hein ?",
                                 voice: "story/1002/101054/194C3F53",
                                 npc: 200021,
                                 options: [
@@ -5156,7 +5211,7 @@ export const questData_fr: QuestStory[] = [
                                     },
                                     {
                                         id: 101054142,
-                                        content: "<I>On va voir ça !</>",
+                                        content: "<I>On va voir ça !</>",
                                         next: 10105415,
                                     },
                                 ],
@@ -5171,7 +5226,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105415,
                                 content:
-                                    "Attends un peu ! Je te dis que je suis vraiment fort, aucun Chasseur de Phoxène de Givrelac ne peut me battre. T’as entendu parler de la Commandante Sibylle ? Je peux lui tenir tête.",
+                                    "Attends un peu ! Je te dis que je suis vraiment fort, aucun Chasseur de Phoxène de Givrelac ne peut me battre. T’as entendu parler de la Commandante Sibylle ? Je peux lui tenir tête.",
                                 voice: "story/1002/101054/194C3FA6",
                                 npc: 200021,
                                 options: [
@@ -5182,14 +5237,14 @@ export const questData_fr: QuestStory[] = [
                                     },
                                     {
                                         id: 101054152,
-                                        content: "<I>Quelle coïncidence ! Moi aussi !</>",
+                                        content: "<I>Quelle coïncidence ! Moi aussi !</>",
                                         next: 10105416,
                                     },
                                 ],
                             },
                             {
                                 id: 10105418,
-                                content: "Ah, ce malin aux oreilles de chien essaye encore de nous embobiner !",
+                                content: "Ah, ce malin aux oreilles de chien essaye encore de nous embobiner !",
                                 voice: "story/1002/101054/194C3FD2",
                                 npc: 200002,
                                 next: 10105419,
@@ -5204,7 +5259,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105419,
                                 content:
-                                    "Alors... c’est toi qui décides, hein ? Dites-moi, pourquoi vous êtes-vous donné tout ce mal pour cet Éclat stellaire ?",
+                                    "Alors... c’est toi qui décides, hein ? Dites-moi, pourquoi vous êtes-vous donné tout ce mal pour cet Éclat stellaire ?",
                                 voice: "story/1002/101054/194C3FD3",
                                 npc: 200021,
                                 options: [
@@ -5225,7 +5280,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10105421,
-                                content: "Si tu as un moment, j’aimerais t’expliquer — tu es libre ce soir ?",
+                                content: "Si tu as un moment, j’aimerais t’expliquer — tu es libre ce soir ?",
                                 voice: "story/1002/101054/194C4079",
                                 npc: 200021,
                                 options: [
@@ -5252,14 +5307,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105422,
                                 content:
-                                    "Oh, c’est facile. Avec Snow comme témoin, il ne pourra pas se défiler ! Et puis, Camilla a dit qu’il a un proche terrifiant à la maison, dont il a vraiment peur. ",
+                                    "Oh, c’est facile. Avec Snow comme témoin, il ne pourra pas se défiler ! Et puis, Camilla a dit qu’il a un proche terrifiant à la maison, dont il a vraiment peur. ",
                                 voice: "story/1002/101054/194C4080",
                                 npc: 200002,
                                 next: 10105423,
                             },
                             {
                                 id: 10105426,
-                                content: "Tu comptes faire quoi ?",
+                                content: "Tu comptes faire quoi ?",
                                 voice: "story/1002/101054/194C40A2",
                                 npc: 200061,
                                 next: 10105427,
@@ -5274,7 +5329,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10105427,
-                                content: "Regarde ces sacs. ",
+                                content: "Regarde ces sacs. ",
                                 voice: "story/1002/101054/194C40CC",
                                 npc: 200021,
                                 next: 10105428,
@@ -5305,7 +5360,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105430,
                                 content:
-                                    'Heureusement que ce sont vous, les "Daimons", qui êtes arrivés. Si c’étaient des gens ordinaires... ils auraient fini comme eux.',
+                                    "Heureusement que ce sont vous, les « Daimons », qui êtes arrivés. Si c’étaient des gens ordinaires... ils auraient fini comme eux.",
                                 voice: "story/1002/101054/194C414A",
                                 npc: 200021,
                                 next: 10105431,
@@ -5328,14 +5383,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105433,
                                 content:
-                                    "Euh, pourquoi tu as l’air aussi perdu qu’un petit poussin tout juste sorti de l’œuf ? Je parie que même ce petit champignon blanc à côté de toi est plus informé.",
+                                    "Euh, pourquoi tu as l’air aussi perdu qu’un petit poussin tout juste sorti de l’œuf ? Je parie que même ce petit champignon blanc à côté de toi est plus informé.",
                                 voice: "story/1002/101054/194C41C8",
                                 npc: 200021,
                                 next: 10105434,
                             },
                             {
                                 id: 10105434,
-                                content: "Bien sûr, Snow est super intelligente — attends, tu m’as appelé comment ?! Trop impoli !",
+                                content: "Bien sûr, Snow est super intelligente — attends, tu m’as appelé comment ?! Trop impoli !",
                                 voice: "story/1002/101054/194C41F2",
                                 npc: 200002,
                                 next: 10105435,
@@ -5350,7 +5405,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105436,
                                 content:
-                                    "Hmpf, je ne vais pas me rabaisser à discuter avec un petit personnage comme toi ! Viens ici, mon petit larbin, laisse ton Roi Démon t’éclairer. ",
+                                    "Hmpf, je ne vais pas me rabaisser à discuter avec un petit personnage comme toi ! Viens ici, mon petit larbin, laisse ton Roi Démon t’éclairer. ",
                                 voice: "story/1002/101054/194C4246",
                                 npc: 200002,
                                 next: 10105437,
@@ -5358,7 +5413,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105437,
                                 content:
-                                    'En bref, "l’Éveil" est une étape de croissance que tout Charon traverse, en général à l’âge adulte. Au moment de l’Éveil, le corps émet une lumière très intense, tu dois sûrement t’en souvenir !',
+                                    "En bref, « l’Éveil » est une étape de croissance que tout Charon traverse, en général à l’âge adulte. Au moment de l’Éveil, le corps émet une lumière très intense, tu dois sûrement t’en souvenir !",
                                 voice: "story/1002/101054/194C4270",
                                 npc: 200002,
                                 next: 10105438,
@@ -5366,7 +5421,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105438,
                                 content:
-                                    'Après l’Éveil, certains Charons deviennent beaucoup plus forts, comme toi, et peuvent utiliser une magie spéciale ! Ce sont les "Daimons".',
+                                    "Après l’Éveil, certains Charons deviennent beaucoup plus forts, comme toi, et peuvent utiliser une magie spéciale ! Ce sont les « Daimons ».",
                                 voice: "story/1002/101054/194C429A",
                                 npc: 200002,
                                 next: 10105439,
@@ -5388,7 +5443,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10105441,
-                                content: 'Les "Daimons" sont rares, vous avez donc beaucoup de chance !',
+                                content: "Les « Daimons » sont rares, vous avez donc beaucoup de chance !",
                                 voice: "story/1002/101054/194C4318",
                                 npc: 200002,
                                 next: 10105442,
@@ -5418,7 +5473,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10105445,
-                                content: "Non, ils essayaient juste de survivre. Allez, partez. Je vais m’occuper du reste. ",
+                                content: "Non, ils essayaient juste de survivre. Allez, partez. Je vais m’occuper du reste. ",
                                 voice: "story/1002/101054/194C43C0",
                                 npc: 200021,
                                 next: 10105446,
@@ -5426,7 +5481,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105446,
                                 content:
-                                    "Je vais rentrer un peu plus tard, il se peut que les Asphodèles soit déjà fermé. Venez me trouver chez moi, c’est parmi ces maisons délabrées au sud de la cité, celle avec un petit oiseau sur la porte. ",
+                                    "Je vais rentrer un peu plus tard, il se peut que les Asphodèles soit déjà fermé. Venez me trouver chez moi, c’est parmi ces maisons délabrées au sud de la cité, celle avec un petit oiseau sur la porte. ",
                                 voice: "story/1002/101054/194C43EA",
                                 npc: 200021,
                                 next: 10105447,
@@ -5582,7 +5637,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10105815,
                                 content:
-                                    'On peut parler d’autre chose ? Par exemple... est-ce que vous êtes aussi "aimable" avec tout le monde ? Pas étonnant que votre fichu manoir ne trouve jamais preneur.',
+                                    "On peut parler d’autre chose ? Par exemple... est-ce que vous êtes aussi « aimable » avec tout le monde ? Pas étonnant que votre fichu manoir ne trouve jamais preneur.",
                                 voice: "story/1002/101058/194C811C",
                                 npc: 100001,
                                 next: 10105816,
@@ -5789,7 +5844,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10106019,
-                                content: '<I>Hum hum...</> On dirait que ton "château" reçoit une visite. Je vais voir.',
+                                content: "<I>Hum hum...</> On dirait que ton « château » reçoit une visite. Je vais voir.",
                                 voice: "story/1002/101060/194CA2BE",
                                 npc: 200021,
                             },
@@ -5828,7 +5883,8 @@ export const questData_fr: QuestStory[] = [
                                     },
                                     {
                                         id: 10106106,
-                                        content: '<I>Je m’appelle {nickname}. Tu ne serais pas... le "proche terrifiant", par hasard ?</>',
+                                        content:
+                                            "<I>Je m’appelle {nickname}. Tu ne serais pas... le « proche terrifiant », par hasard ?</>",
                                         next: 10106107,
                                     },
                                 ],
@@ -5970,7 +6026,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10106211,
                                 content:
-                                    "Cette demoiselle qui mettait toujours trop de sucre... c’était une magicienne, elle aussi.\nCar aux yeux de {nickname}, tout ce qui venait d’elle... était précieux. Même les plats trop sucrés pour être avalés.",
+                                    "Cette demoiselle qui mettait toujours trop de sucre... c’était une magicienne, elle aussi.\n Car aux yeux de {nickname}, tout ce qui venait d’elle... était précieux. Même les plats trop sucrés pour être avalés.",
                                 voice: "story/1002/101062/194CC23E",
                                 npc: 200020,
                                 next: 10106212,
@@ -6184,7 +6240,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10106315,
                                 content:
-                                    'J’ai entendu, moi aussi, des rumeurs de "manoir hanté"... mais dit comme ça, c’est encore plus... inquiétant.',
+                                    "J’ai entendu, moi aussi, des rumeurs de « manoir hanté »... mais dit comme ça, c’est encore plus... inquiétant.",
                                 voice: "story/1002/101063/194CD27C",
                                 npc: 100001,
                                 next: 10106316,
@@ -6299,7 +6355,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10106329,
                                 content:
-                                    "Une « identité ». Un permis de circulation qui te permet de circuler librement en Hyperborea, sauf dans la cité intérieure, derrière les grandes tours de garde, réservée aux élites.",
+                                    "Une « identité ». Un permis de circulation qui te permet de circuler librement en Hyperborea, sauf dans la cité intérieure, derrière les grandes tours de garde, réservée aux élites. ",
                                 voice: "story/1002/101063/194CD474",
                                 npc: 200021,
                                 next: 10106330,
@@ -6751,7 +6807,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10107107,
                                 content:
-                                    'Tu ne comprends pas. C’est une "habitude"... Remplir sa vie d’activités régulières, c’est ça l’habitude.',
+                                    "Tu ne comprends pas. C’est une « habitude »... Remplir sa vie d’activités régulières, c’est ça l’habitude.",
                                 voice: "story/1002/101071/194D553E",
                                 npc: 200019,
                                 next: 10107108,
@@ -7316,7 +7372,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10108201,
                                 content:
-                                    'Je dois d’abord ajuster "cette chose". Il est encore tôt, alors profites-en pour t’entraîner sur les Souillés autour. Le Petit Champi est toujours en ville pour surveiller les alentours, ne t’éloigne pas trop.',
+                                    "Je dois d’abord ajuster « cette chose ». Il est encore tôt, alors profites-en pour t’entraîner sur les Souillés autour. Le Petit Champi est toujours en ville pour surveiller les alentours, ne t’éloigne pas trop.",
                                 voice: "story/1002/101082/194E08BA",
                                 npc: 200021,
                                 next: 10108202,
@@ -7471,7 +7527,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10108308,
                                 content:
-                                    'C’est juste du bon sens. Tu ne dirais pas qu’utiliser un parapluie sous la pluie est "sournois", si ?',
+                                    "C’est juste du bon sens. Tu ne dirais pas qu’utiliser un parapluie sous la pluie est « sournois », si ?",
                                 voice: "story/1002/101083/194E1A1E",
                                 npc: 200021,
                                 next: 10108309,
@@ -7627,7 +7683,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10108308,
                                 content:
-                                    'C’est juste du bon sens. Tu ne dirais pas qu’utiliser un parapluie sous la pluie est "sournois", si ?',
+                                    "C’est juste du bon sens. Tu ne dirais pas qu’utiliser un parapluie sous la pluie est « sournois », si ?",
                                 voice: "story/1002/101083/194E1A1E",
                                 npc: 200021,
                                 next: 10108309,
@@ -7690,7 +7746,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10113801,
-                                content: "任务完成",
+                                content: "Quête terminée",
                                 voice: "story/1002/101138/19519F7A",
                             },
                         ],
@@ -7704,7 +7760,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10116801,
-                                content: "我们开始狩猎吧！",
+                                content: "Alors... commençons la chasse.",
                                 voice: "story/1002/101168/19538BAA",
                                 npc: 200021,
                             },
@@ -7746,7 +7802,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10108337,
                                 content:
-                                    "Pas mal, tes compétences au combat s’améliore plus vite que je ne pensais. Si vite, tu deviens déjà {性别:un Chasseur de Phoxène|une Chasseuse de Phoxène} autonome. Ah, les jeunes d’aujourd'hui ont vraiment du talent.",
+                                    "Pas mal, tes compétences au combat s’améliore plus vite que je ne pensais. Si vite, tu deviens déjà {性别:un Chasseur de Phoxène|une Chasseuse de Phoxène} autonome. Ah, les jeunes d’aujourd’hui ont vraiment du talent.",
                                 voice: "story/1002/101083/194E1C17",
                                 npc: 200021,
                                 next: 10108338,
@@ -8600,7 +8656,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10109803,
                                 content:
-                                    "J’aimais les plaques de glace flottantes et les montagnes… mais ce que je préférais, c’était voir les trains passer en grondant.",
+                                    "J’aimais les plaques de glace flottantes et les montagnes... mais ce que je préférais, c’était voir les trains passer en grondant.",
                                 voice: "story/1002/101098/194F0F8E",
                                 npc: 200006,
                                 next: 10109804,
@@ -8777,7 +8833,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10110002,
-                                content: "<I>...  Je ne comprends pas. Je n’ai plus qu’à rentrer et attendre des nouvelles de Psyche.</>",
+                                content: "<I>... Je ne comprends pas. Je n’ai plus qu’à rentrer et attendre des nouvelles de Psyche.</>",
                                 voice: "story/1002/101100/194F3034",
                                 npc: 100001,
                             },
@@ -9083,7 +9139,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10110237,
                                 content:
-                                    '<I>... Et si la cécité de Psyche était un symptôme de la Dégradation ? Se pourrait-il que tous les "pensionnaires" de la Maison d’Hypnos soient des Dégradés ?</>',
+                                    "<I>... Et si la cécité de Psyche était un symptôme de la Dégradation ? Se pourrait-il que tous les « pensionnaires » de la Maison d’Hypnos soient des Dégradés ?</>",
                                 voice: "story/1002/101102/194F5644",
                                 npc: 100001,
                                 next: 10110238,
@@ -9508,7 +9564,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10110237,
                                 content:
-                                    '<I>... Et si la cécité de Psyche était un symptôme de la Dégradation ? Se pourrait-il que tous les "pensionnaires" de la Maison d’Hypnos soient des Dégradés ?</>',
+                                    "<I>... Et si la cécité de Psyche était un symptôme de la Dégradation ? Se pourrait-il que tous les « pensionnaires » de la Maison d’Hypnos soient des Dégradés ?</>",
                                 voice: "story/1002/101102/194F5644",
                                 npc: 100001,
                                 next: 10110238,
@@ -9888,6 +9944,8 @@ export const questData_fr: QuestStory[] = [
                         id: "1723688248145173143",
                         type: "TalkNode",
                         name: "所以，你敲开",
+                        srId: 101101,
+                        pos: [-949, 6039],
                         next: ["17232012426941489991"],
                         dialogues: [
                             {
@@ -9909,6 +9967,8 @@ export const questData_fr: QuestStory[] = [
                         id: "17232012426941489991",
                         type: "TalkNode",
                         name: "都备妥了。",
+                        srId: 101101,
+                        pos: [-949, 6039],
                         dialogues: [
                             {
                                 id: 10110501,
@@ -9993,7 +10053,7 @@ export const questData_fr: QuestStory[] = [
                                 options: [
                                     {
                                         id: 10110512,
-                                        content: "<I>– Révéler les informations obtenues auprès de Kevin.</>",
+                                        content: "<I>Révéler les informations obtenues auprès de Kevin</>",
                                         next: 10110513,
                                     },
                                 ],
@@ -10033,7 +10093,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10110517,
                                 content:
-                                    "Alors, il a trouvé un moyen de capturer certains Dégradés, pour ensuite les exécuter de sa propre main. C'est ta conclusion, hein ?",
+                                    "Alors, il a trouvé un moyen de capturer certains Dégradés, pour ensuite les exécuter de sa propre main. C’est ta conclusion, hein ?",
                                 voice: "story/1002/101105/194F845E",
                                 npc: 200021,
                                 next: 10110518,
@@ -10394,7 +10454,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10114901,
-                                content: "请一定要找到她，拜托了……",
+                                content: "Je vous en supplie... retrouvez-la...",
                                 voice: "story/1002/101149/195253F2",
                                 npc: 200045,
                             },
@@ -10409,14 +10469,14 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10115001,
-                                content: "……赛琪杀了恩里克……为什么……会这样……",
+                                content: "Psyche... a tué Henrik... pourquoi... ?",
                                 voice: "story/1002/101150/1952645A",
                                 npc: 700049,
                                 next: 10115002,
                             },
                             {
                                 id: 10115002,
-                                content: "赛琪永远都在笑着……恩里克先生虽然话不多，但总是像父亲一样照料我们……他们明明都是那么好的人啊……",
+                                content: "Elle souriait toujours... Henrik était comme un père pour nous... Pourquoi...",
                                 voice: "story/1002/101150/19526484",
                                 npc: 700049,
                             },
@@ -10431,7 +10491,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10115101,
-                                content: "恩里克先生一直都太累了。或许对他来说，这样的结局……也不错。",
+                                content: "Henrik était épuisé depuis longtemps... Peut-être que... c’est un repos.",
                                 voice: "story/1002/101151/195274C2",
                                 npc: 200019,
                             },
@@ -10444,7 +10504,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10114801,
-                                content: "先抓紧离开这儿吧。",
+                                content: "Sortons d’ici.",
                                 voice: "story/1002/101148/1952438A",
                                 npc: 100001,
                             },
@@ -10457,28 +10517,28 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10115201,
-                                content: "白，还记得赛琪是往哪个方向跑的吗？",
+                                content: "Snow, tu te souviens de la direction qu’elle a prise ?",
                                 voice: "story/1002/101152/1952852A",
                                 npc: 100001,
                                 next: 10115202,
                             },
                             {
                                 id: 10115202,
-                                content: "当然记得，我的记忆不会出错！她是往城门的方向跑的！",
+                                content: "Bien sûr ! Ma mémoire est infaillible ! Elle est partie vers la porte de la ville !",
                                 voice: "story/1002/101152/19528554",
                                 npc: 200002,
                                 next: 10115203,
                             },
                             {
                                 id: 10115203,
-                                content: "……她出城了？",
+                                content: "... Elle a quitté la ville ?",
                                 voice: "story/1002/101152/1952857E",
                                 npc: 100001,
                                 next: 10115204,
                             },
                             {
                                 id: 10115204,
-                                content: "好，我们也跟上，去城外。",
+                                content: "Très bien. On la suit.",
                                 voice: "story/1002/101152/195285A8",
                                 npc: 100001,
                             },
@@ -11343,7 +11403,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10111704,
-                                content: '... Parce que nous sommes des "Enfants du Démon".',
+                                content: "... Parce que nous sommes des « Enfants du Démon ».",
                                 voice: "story/1002/101117/191BDAA2",
                                 npc: 200006,
                             },
@@ -11357,7 +11417,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10127003,
-                                content: 'Un procès-verbal bâclé, où sont griffonnées les "preuves" de tes crimes.',
+                                content: "Un procès-verbal bâclé, où sont griffonnées les « preuves » de tes crimes.",
                                 voice: "story/1002/101270/195A156E",
                             },
                         ],
@@ -11490,7 +11550,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10111905,
-                                content: '... Mais est-ce qu’on vit vraiment pour "un sens" ?',
+                                content: "... Mais est-ce qu’on vit vraiment pour « un sens » ?",
                                 voice: "story/1002/101119/191BEBB2",
                                 npc: 200006,
                             },
@@ -12046,7 +12106,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10113038,
-                                content: "…………",
+                                content: "...",
                                 voice: "story/1002/101130/19511CB8",
                                 npc: 100001,
                                 next: 10130605,
@@ -12656,7 +12716,7 @@ export const questData_fr: QuestStory[] = [
                                 options: [
                                     {
                                         id: 101259211,
-                                        content: '<I>Qu’est-ce que la "Mer du Silence", au juste ?</>',
+                                        content: "<I>Qu’est-ce que la « Mer du Silence », au juste ?</>",
                                         next: 10125922,
                                     },
                                 ],
@@ -12816,14 +12876,14 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10113205,
-                                content: "... Oui. ",
+                                content: "... Oui. ",
                                 voice: "story/1002/101132/19513DB2",
                                 npc: 100001,
                                 next: 10113206,
                             },
                             {
                                 id: 10113206,
-                                content: "J’ai fait un rêve triste… Enfin, je ne sais même pas si c’en était vraiment un.",
+                                content: "J’ai fait un rêve triste... Enfin, je ne sais même pas si c’en était vraiment un.",
                                 voice: "story/1002/101132/19513DDC",
                                 npc: 100001,
                                 next: 10113207,
@@ -12845,7 +12905,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10113209,
-                                content: "Le temps… la vie… tout est ainsi.",
+                                content: "Le temps... la vie... tout est ainsi.",
                                 voice: "story/1002/101132/19513E5A",
                                 npc: 100012,
                                 next: 10113210,
@@ -12860,7 +12920,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10113211,
-                                content: "Où vas-tu... ?",
+                                content: "Où vas-tu... ?",
                                 voice: "story/1002/101132/19513EAE",
                                 npc: 100001,
                                 next: 10113212,
@@ -13093,14 +13153,14 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10030501,
-                                content: "<I>Mmmh... il y a plein de ballons dans Givrelac... C’est une fête ?</>",
+                                content: "Mmmh... il y a plein de ballons dans Givrelac... C’est une fête ?",
                                 voice: "story/1003/100305/191C3D12",
                                 npc: 100001,
                                 next: 10030502,
                             },
                             {
                                 id: 10030502,
-                                content: "<I>Mais malgré ces décorations, l’air reste pesant, froid...</>",
+                                content: "Mais malgré ces décorations, l’air reste pesant, froid...",
                                 voice: "story/1003/100305/191C3D3C",
                                 npc: 100001,
                                 next: 10030503,
@@ -13108,7 +13168,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10030503,
                                 content:
-                                    "<I>Il vaut mieux que j’aille voir Snow et l’Étranger, pour savoir ce qui s’est passé pendant mon absence.</>",
+                                    "Il vaut mieux que j’aille voir Snow et l’Étranger, pour savoir ce qui s’est passé pendant mon absence.",
                                 voice: "story/1003/100305/191C3D66",
                                 npc: 100001,
                             },
@@ -13162,7 +13222,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10030704,
                                 content:
-                                    'Allons droit au but. Je suis ici pour enquêter sur les récents incidents violents dans la cité extérieure de Givrelac, connus sous le nom de "Traque aux Charons".',
+                                    "Allons droit au but. Je suis ici pour enquêter sur les récents incidents violents dans la cité extérieure de Givrelac, connus sous le nom de « Traque aux Charons ».",
                                 voice: "story/1003/100307/191C5E60",
                                 npc: 100304,
                                 next: 10030705,
@@ -13231,7 +13291,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10030713,
-                                content: "<I>Tch tch tch !</> Allez, viens ici, mon gros toutou !",
+                                content: "Tch tch tch ! Allez, viens ici, mon gros toutou !",
                                 voice: "story/1003/100307/191C6037",
                                 npc: 100001,
                                 next: 10030714,
@@ -13321,7 +13381,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10030725,
                                 content:
-                                    'Quant à moi, j’ai aussi envie de régler cette histoire de "Traque aux Charons" rapidement. Toute la cité extérieure est en état de panique, et ma vieille porte ne supportera pas un verrou de plus.',
+                                    "Quant à moi, j’ai aussi envie de régler cette histoire de « Traque aux Charons » rapidement. Toute la cité extérieure est en état de panique, et ma vieille porte ne supportera pas un verrou de plus.",
                                 voice: "story/1003/100307/191C5F86",
                                 npc: 200021,
                                 next: 10030726,
@@ -13342,7 +13402,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10030728,
-                                content: "<I>Soupir,</> d’accord. Allons-y.",
+                                content: "Soupir, d’accord. Allons-y.",
                                 voice: "story/1003/100307/191C602E",
                                 npc: 100001,
                             },
@@ -13381,7 +13441,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10030803,
                                 content:
-                                    'Donc, la "Traque aux Charons" est une série de meurtres survenus à Givrelac. Vous en avez sans doute déjà entendu parler.',
+                                    "Donc, la « Traque aux Charons » est une série de meurtres survenus à Givrelac. Vous en avez sans doute déjà entendu parler.",
                                 voice: "story/1003/100308/191C6E9E",
                                 npc: 100304,
                                 next: 10030804,
@@ -13397,7 +13457,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10030805,
                                 content:
-                                    'Les crimes ont eu lieu dans le quartier est, là où vivent surtout des Charons. C’est de là que vient le nom de "Traque aux Charons".',
+                                    "Les crimes ont eu lieu dans le quartier est, là où vivent surtout des Charons. C’est de là que vient le nom de « Traque aux Charons ».",
                                 voice: "story/1003/100308/191C6EF2",
                                 npc: 100304,
                                 next: 10030806,
@@ -13523,14 +13583,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10030822,
                                 content:
-                                    'Je comprends parfaitement votre détresse ! Moi aussi, je ne vois presque jamais les miens... Quand la "Traque aux Charons" sera élucidée, je mettrai tout en œuvre pour vous aider à retrouver votre famille !',
+                                    "Je comprends parfaitement votre détresse ! Moi aussi, je ne vois presque jamais les miens... Quand la « Traque aux Charons » sera élucidée, je mettrai tout en œuvre pour vous aider à retrouver votre famille !",
                                 voice: "story/1003/100308/191C71BC",
                                 npc: 100304,
                                 next: 10030823,
                             },
                             {
                                 id: 10030823,
-                                content: "<I>Qu’est-ce qui lui prend, tout à coup ? Je... j’étouffe...</>",
+                                content: "Qu’est-ce qui lui prend, tout à coup ? Je... j’étouffe...",
                                 voice: "story/1003/100308/191C71E6",
                                 npc: 100001,
                                 next: 10030824,
@@ -13614,7 +13674,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10030907,
-                                content: "<I>Ce n’était pas un compliment !</>",
+                                content: "Ce n’était pas un compliment !",
                                 voice: "story/1003/100309/191C7FAE",
                                 npc: 100001,
                             },
@@ -13685,14 +13745,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10031009,
                                 content:
-                                    "<I>Attends... quand je suis arrivé dans cette rue, le vent venait de tomber et la lune apparaissait. D’après sa position, c’était... entre quatre et cinq heures du matin.</>",
+                                    "Attends... quand je suis arrivé dans cette rue, le vent venait de tomber et la lune apparaissait. D’après sa position, c’était... entre quatre et cinq heures du matin.",
                                 voice: "story/1003/100310/191C906A",
                                 npc: 100001,
                                 next: 10031010,
                             },
                             {
                                 id: 10031010,
-                                content: "<I>Je devrais en informer Rhythm.</>",
+                                content: "Je devrais en informer Rhythm.",
                                 voice: "story/1003/100310/191C9094",
                                 npc: 100001,
                             },
@@ -13860,7 +13920,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10031123,
                                 content:
-                                    'Bon, réglons d’abord cette affaire de "Traque aux Charons". Puisqu’il a fallu tout ce mal pour me faire venir ici, autant mener l’enquête sérieusement.',
+                                    "Bon, réglons d’abord cette affaire de « Traque aux Charons ». Puisqu’il a fallu tout ce mal pour me faire venir ici, autant mener l’enquête sérieusement.",
                                 voice: "story/1003/100311/191CA31E",
                                 npc: 100001,
                             },
@@ -13882,7 +13942,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10031120,
-                                content: '"Charon Couronné" ? ... Je crains de ne pas avoir encore mérité cet honneur.',
+                                content: "« Charon Couronné » ? ... Je crains de ne pas avoir encore mérité cet honneur.",
                                 voice: "story/1003/100311/191CA2A0",
                                 npc: 100304,
                                 next: 10031121,
@@ -13912,7 +13972,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10031201,
-                                content: 'Concernant ce "chant de monstre"... pouvez-vous essayer d’en fredonner la mélodie ?',
+                                content: "Concernant ce « chant de monstre »... pouvez-vous essayer d’en fredonner la mélodie ?",
                                 voice: "story/1003/100312/191CAFEA",
                                 npc: 100304,
                                 next: 10031202,
@@ -14034,7 +14094,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10031603,
                                 content:
-                                    'C’est beau, n’est-ce pas ? Chaque fois que je vois ces petites "fleurs" bleues, j’ai l’impression que toute ma fatigue disparaît.',
+                                    "C’est beau, n’est-ce pas ? Chaque fois que je vois ces petites « fleurs » bleues, j’ai l’impression que toute ma fatigue disparaît.",
                                 voice: "story/1003/100316/191CF1DE",
                                 npc: 100304,
                                 next: 10031604,
@@ -14070,7 +14130,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10031211,
-                                content: "<I>Berry adorerait ce côté tout doux...</>",
+                                content: "Berry adorerait ce côté tout doux...",
                                 voice: "story/1003/100312/191CB18E",
                                 npc: 100001,
                                 next: 10031212,
@@ -14093,8 +14153,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10031214,
-                                content:
-                                    "<I>Fête de la Chandelle d’Argent... Les décorations dans la cité, c’est donc pour cette fête ?</>",
+                                content: "Fête de la Chandelle d’Argent... Les décorations dans la cité, c’est donc pour cette fête ?",
                                 voice: "story/1003/100312/191CB20C",
                                 npc: 100001,
                                 next: 10031215,
@@ -14109,7 +14168,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10031216,
-                                content: "<I>Hmm... un rideau de scène. Cela semble effectivement lié à cette autre piste.</>",
+                                content: "Hmm... un rideau de scène. Cela semble effectivement lié à cette autre piste.",
                                 voice: "story/1003/100312/191CB260",
                                 npc: 100001,
                             },
@@ -14161,7 +14220,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10031306,
-                                content: 'Le matin suivant le premier incident de "Traque aux Charons".',
+                                content: "Le matin suivant le premier incident de « Traque aux Charons ».",
                                 voice: "story/1003/100313/191CC124",
                                 npc: 100304,
                                 next: 10031307,
@@ -14199,7 +14258,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10031311,
-                                content: "<I>Le toit... autant aller y jeter un œil.</>",
+                                content: "Le toit... autant aller y jeter un œil.",
                                 voice: "story/1003/100313/191CC1F6",
                                 npc: 100001,
                             },
@@ -14335,7 +14394,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10031703,
-                                content: "<I>C’est quoi, cette description d’odeur !</>",
+                                content: "C’est quoi, cette description d’odeur !",
                                 voice: "story/1003/100317/191D0246",
                                 npc: 100001,
                                 next: 10031704,
@@ -14366,7 +14425,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10031707,
                                 content:
-                                    'L’agresseur en était couvert. Ces petites "fleurs" bleues ont dû couler directement de son corps.',
+                                    "L’agresseur en était couvert. Ces petites « fleurs » bleues ont dû couler directement de son corps.",
                                 voice: "story/1003/100317/191D02EE",
                                 npc: 100304,
                                 next: 10031708,
@@ -14451,7 +14510,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10032104,
-                                content: 'Haha. J’ai pris une mission. À propos de la "Traque aux Charons".',
+                                content: "Haha. J’ai pris une mission. À propos de la « Traque aux Charons ».",
                                 voice: "story/1003/100321/191D4410",
                                 npc: 200021,
                                 next: 10032105,
@@ -14556,7 +14615,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10032205,
                                 content:
-                                    'Hé, du calme ! Rien de tout ça. On a trouvé ce tissu sur une scène de crime liée à la "Traque aux Charons", on vient juste vérifier, c’est tout.',
+                                    "Hé, du calme ! Rien de tout ça. On a trouvé ce tissu sur une scène de crime liée à la « Traque aux Charons », on vient juste vérifier, c’est tout.",
                                 voice: "story/1003/100322/191D54A2",
                                 npc: 200021,
                                 next: 10032206,
@@ -14586,7 +14645,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10032209,
                                 content:
-                                    'Nous assistons les Veilleurs dans l’enquête sur la "Traque aux Charons". Nous avons trouvé ce velours sur les lieux de l’attaque, et nous devons vérifier son origine. Merci de bien vouloir coopérer.',
+                                    "Nous assistons les Veilleurs dans l’enquête sur la « Traque aux Charons ». Nous avons trouvé ce velours sur les lieux de l’attaque, et nous devons vérifier son origine. Merci de bien vouloir coopérer.",
                                 voice: "story/1003/100322/191D5521",
                                 npc: 100001,
                                 next: 10032210,
@@ -15308,7 +15367,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10032712,
                                 content:
-                                    'Tu es plutôt doué pour emprunter des choses. Alors, à part "emprunter" ces deux conteneurs, tu as fait quoi d’autre ?',
+                                    "Tu es plutôt doué pour emprunter des choses. Alors, à part « emprunter » ces deux conteneurs, tu as fait quoi d’autre ?",
                                 voice: "story/1003/100327/191DA7D0",
                                 npc: 200021,
                                 next: 10032713,
@@ -15345,7 +15404,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10032717,
-                                content: '... Tu n’as aucune idée de ce qu’est la "Traque aux Charons" ?',
+                                content: "... Tu n’as aucune idée de ce qu’est la « Traque aux Charons » ?",
                                 voice: "story/1003/100327/191DA8A2",
                                 npc: 100304,
                                 next: 10032718,
@@ -15411,7 +15470,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10032726,
-                                content: 'J-J’ai encore des informations importantes ! Concernant cette "Traque aux Charons" !',
+                                content: "J-J’ai encore des informations importantes ! Concernant cette « Traque aux Charons » !",
                                 voice: "story/1003/100327/191DAA1C",
                                 npc: 100314,
                                 next: 10032727,
@@ -15663,7 +15722,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10032817,
                                 content:
-                                    'Le premier service : si je ne reviens pas, allez au Bureau de la Sécurité, trouvez le Directeur Damian, et annoncez-lui ma... disparition. Dites-lui de poursuivre coûte que coûte l’enquête sur la "Traque aux Charons".',
+                                    "Le premier service : si je ne reviens pas, allez au Bureau de la Sécurité, trouvez le Directeur Damian, et annoncez-lui ma... disparition. Dites-lui de poursuivre coûte que coûte l’enquête sur la « Traque aux Charons ».",
                                 voice: "story/1003/100328/191DB90A",
                                 npc: 100304,
                                 next: 10032818,
@@ -15742,7 +15801,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10032828,
-                                content: 'Hééééé, attendez ! Personne ne veut savoir ce qu’était ce mystérieux "troisième service" ?',
+                                content: "Hééééé, attendez ! Personne ne veut savoir ce qu’était ce mystérieux « troisième service » ?",
                                 voice: "story/1003/100328/191DBAD8",
                                 npc: 200002,
                                 next: 10032829,
@@ -16052,7 +16111,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10031808,
-                                content: "<I>... Tout son possible pour protéger tout le monde ?</>",
+                                content: "... Tout son possible pour protéger tout le monde ?",
                                 voice: "story/1003/100318/191D1380",
                                 npc: 100001,
                                 next: 10031809,
@@ -16074,7 +16133,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10031811,
-                                content: "<I>Assez. Ce n’est pas le moment de penser à ça... Concentre-toi sur les indices.</>",
+                                content: "Assez. Ce n’est pas le moment de penser à ça... Concentre-toi sur les indices.",
                                 voice: "story/1003/100318/191D13FE",
                                 npc: 100001,
                             },
@@ -16149,7 +16208,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10032907,
-                                content: 'C’est aussi une manière, pour nous les "Enfants du Démon", de racheter nos fautes.',
+                                content: "C’est aussi une manière, pour nous les « Enfants du Démon », de racheter nos fautes.",
                                 voice: "story/1003/100329/191DC7CE",
                                 npc: 100304,
                                 next: 10032908,
@@ -16229,7 +16288,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10033004,
-                                content: 'Un monstre... Serait-ce le coupable derrière la "Traque aux Charons" ?',
+                                content: "Un monstre... Serait-ce le coupable derrière la « Traque aux Charons » ?",
                                 voice: "story/1003/100330/191DD7B8",
                                 npc: 100001,
                                 next: 10033005,
@@ -16809,7 +16868,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10033510,
                                 content:
-                                    "Exactement ! J’ai eu une peur bleue ! Si mon petit larbin s’était mis à baver partout, qu’est-ce que j’aurais fait, moi  ?! ",
+                                    "Exactement ! J’ai eu une peur bleue ! Si mon petit larbin s’était mis à baver partout, qu’est-ce que j’aurais fait, moi ?! ",
                                 voice: "story/1003/100335/191E2ABC",
                                 npc: 200002,
                                 options: [
@@ -16837,7 +16896,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10033514,
                                 content:
-                                    "D’accord... mais dis-le si quelque chose cloche. Certaines blessures se réveillent bien plus tard. ",
+                                    "D’accord... mais dis-le si quelque chose cloche. Certaines blessures se réveillent bien plus tard. ",
                                 voice: "story/1003/100335/191E2B64",
                                 npc: 200021,
                                 next: 10033515,
@@ -17198,14 +17257,14 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 10034301,
-                                content: "On est de retour. C’est bien le sceau, n’est-ce pas ?",
+                                content: "On est de retour. C’est bien le sceau, n’est-ce pas ?",
                                 voice: "story/1003/100343/191EAC82",
                                 npc: 200021,
                                 next: 10034302,
                             },
                             {
                                 id: 10034302,
-                                content: "Oui ! Très bien, allons droit au but.",
+                                content: "Oui ! Très bien, allons droit au but.",
                                 voice: "story/1003/100343/191EACAC",
                                 npc: 100361,
                                 next: 10034303,
@@ -17219,7 +17278,7 @@ export const questData_fr: QuestStory[] = [
                                 options: [
                                     {
                                         id: 10034304,
-                                        content: "<I>Ouah... quelle vitesse !</>",
+                                        content: "<I>Ouah... quelle vitesse !</>",
                                         next: 10034305,
                                     },
                                     {
@@ -17239,7 +17298,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10034307,
                                 content:
-                                    "... Oh ! Désolée, c’est une habitude professionnelle. Parlez-moi simplement de la manière qui vous est la plus naturelle. ",
+                                    "... Oh ! Désolée, c’est une habitude professionnelle. Parlez-moi simplement de la manière qui vous est la plus naturelle. ",
                                 voice: "story/1003/100343/191EAD7E",
                                 npc: 100361,
                                 next: 10034308,
@@ -17402,7 +17461,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10034328,
                                 content:
-                                    'Je suis Lynn, major de la XIIIᵉ Légion. J’ai reçu l’ordre de reprendre l’affaire de la "Traque aux Charons".',
+                                    "Je suis Lynn, major de la XIIIᵉ Légion. J’ai reçu l’ordre de reprendre l’affaire de la « Traque aux Charons ».",
                                 voice: "story/1003/100343/191EB0F0",
                                 npc: 200022,
                                 next: 10034329,
@@ -17619,7 +17678,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10034216,
                                 content:
-                                    'Je comprends. Certaines blessures sont trop profondes pour guérir. Ce n’est pas quelque chose que tu peux simplement balayer d’un simple "on oublie ça".',
+                                    "Je comprends. Certaines blessures sont trop profondes pour guérir. Ce n’est pas quelque chose que tu peux simplement balayer d’un simple « on oublie ça ».",
                                 voice: "story/1003/100342/191E9E90",
                                 npc: 200021,
                                 next: 10034217,
@@ -17649,7 +17708,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10034218,
                                 content:
-                                    'Une fois que cette histoire de "Traque aux Charons" sera terminée, et qu’elle t’aura aidé à recueillir des informations sur Berenica, tu pourras rompre les liens avec elle et ne plus jamais la revoir.',
+                                    "Une fois que cette histoire de « Traque aux Charons » sera terminée, et qu’elle t’aura aidé à recueillir des informations sur Berenica, tu pourras rompre les liens avec elle et ne plus jamais la revoir.",
                                 voice: "story/1003/100342/191E9EE4",
                                 npc: 200021,
                                 next: 10034219,
@@ -17695,7 +17754,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10034224,
                                 content:
-                                    "Oh ? Tu l’as trouvé ! Pas mal, pas mal... en récompense, je te propose une couronne de Rosées pourpres.",
+                                    "Oh ? Tu l’as trouvé ! Pas mal, pas mal... en récompense, je te propose une couronne de Rosées pourpres.",
                                 voice: "story/1003/100342/191E9FE0",
                                 npc: 200021,
                                 next: 10034225,
@@ -17703,7 +17762,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10034225,
                                 content:
-                                    "Je ne suis pas un petit enfant qu’on peut contenter avec une seule couronne ! Il m’en faut deux, une pour moi, et une pour {nickname}. Et pour toi, L’Étranger, zéro.",
+                                    "Je ne suis pas un petit enfant qu’on peut contenter avec une seule couronne ! Il m’en faut deux, une pour moi, et une pour {nickname}. Et pour toi, L’Étranger, zéro.",
                                 voice: "story/1003/100342/191EA00A",
                                 npc: 200002,
                                 next: 10034226,
@@ -17717,7 +17776,7 @@ export const questData_fr: QuestStory[] = [
                                 options: [
                                     {
                                         id: 10034227,
-                                        content: "<I>Tu ne vas quand même pas fabriquer des couronnes de fleurs, si ?</>",
+                                        content: "<I>Tu ne vas quand même pas fabriquer des couronnes de fleurs, si ?</>",
                                         next: 10034228,
                                     },
                                     {
@@ -17731,13 +17790,13 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10034228,
                                 content:
-                                    "Bien sûr que non ! Avec la mémoire de poisson rouge du Petit Champi, dans cinq minutes elle aura oublié. Allez, on y va.",
+                                    "Bien sûr que non ! Avec la mémoire de poisson rouge du Petit Champi, dans cinq minutes elle aura oublié. Allez, on y va.",
                                 voice: "story/1003/100342/191EA088",
                                 npc: 200021,
                             },
                             {
                                 id: 10034230,
-                                content: "... ? Qu’est-ce que tu racontes ? Allez, dépêchons-nous.",
+                                content: "... ? Qu’est-ce que tu racontes ? Allez, dépêchons-nous.",
                                 voice: "story/1003/100342/191EA0DC",
                                 npc: 200021,
                             },
@@ -17996,7 +18055,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10033913,
                                 content:
-                                    'C’est pour ça qu’avant d’avoir réglé la "Traque aux Charons", elle ne restera pas dans les vapes bien longtemps. Pour l’instant, on se repose et on attend qu’elle se réveille.',
+                                    "C’est pour ça qu’avant d’avoir réglé la « Traque aux Charons », elle ne restera pas dans les vapes bien longtemps. Pour l’instant, on se repose et on attend qu’elle se réveille.",
                                 voice: "story/1003/100339/191E6CDA",
                                 npc: 200021,
                             },
@@ -18034,7 +18093,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10033917,
-                                content: 'Euh... c’était à propos des... "péchés" des Charons ? Qu’est-ce que c’était déjà...',
+                                content: "Euh... c’était à propos des... « péchés » des Charons ? Qu’est-ce que c’était déjà...",
                                 voice: "story/1003/100339/191E6D82",
                                 npc: 100359,
                                 next: 10033918,
@@ -18057,7 +18116,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10033920,
                                 content:
-                                    'Pff, je bosse aussi, mais tu me vois pas roupiller en classe. On n’a que deux petites années d’école, et toi tu les gaspilles déjà... Bon, revenons aux "péchés" des Charons. Tout commence avec la <H>Nuit du Lac du Deuil</>...',
+                                    "Pff, je bosse aussi, mais tu me vois pas roupiller en classe. On n’a que deux petites années d’école, et toi tu les gaspilles déjà... Bon, revenons aux « péchés » des Charons. Tout commence avec la <H>Nuit du Lac du Deuil</>...",
                                 voice: "story/1003/100339/191E6E00",
                                 npc: 100357,
                                 next: 10033921,
@@ -18065,7 +18124,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10033921,
                                 content:
-                                    'Il y a mille ans, ici même à Givrelac, les "démons" cornus, les Charons, ont fait semblant de fêter avec les Solariens au bord du Lac du Deuil. Mais cette nuit-là, ils ont commis quelque chose d’horrible... presque tous les Solariens présents ont été massacrés.',
+                                    "Il y a mille ans, ici même à Givrelac, les « démons » cornus, les Charons, ont fait semblant de fêter avec les Solariens au bord du Lac du Deuil. Mais cette nuit-là, ils ont commis quelque chose d’horrible... presque tous les Solariens présents ont été massacrés.",
                                 voice: "story/1003/100339/191E6E2A",
                                 npc: 100357,
                                 next: 10038401,
@@ -18081,7 +18140,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10033922,
                                 content:
-                                    'Et c’est à cause de la "Nuit du Lac du Deuil" que chaque descendant Charon doit payer toute sa vie les fautes de ses ancêtres.',
+                                    "Et c’est à cause de la « Nuit du Lac du Deuil » que chaque descendant Charon doit payer toute sa vie les fautes de ses ancêtres.",
                                 voice: "story/1003/100339/191E6E54",
                                 npc: 100357,
                                 next: 10033923,
@@ -18127,7 +18186,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10033928,
                                 content:
-                                    'Je t’avais dit de mettre une lanière ou une chaîne dessus... Mais non, "trop cher, pas rentable"... Laisse tomber, je t’en ferai une moi-même.',
+                                    "Je t’avais dit de mettre une lanière ou une chaîne dessus... Mais non, « trop cher, pas rentable »... Laisse tomber, je t’en ferai une moi-même.",
                                 voice: "story/1003/100339/191E6F50",
                                 npc: 100359,
                             },
@@ -18402,7 +18461,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10033960,
-                                content: 'Le monstre ! Le coupable de la "Traque aux Charons"... vous l’avez attrapé ?',
+                                content: "Le monstre ! Le coupable de la « Traque aux Charons »... vous l’avez attrapé ?",
                                 voice: "story/1003/100339/191E7490",
                                 npc: 100360,
                                 next: 10033961,
@@ -18603,7 +18662,7 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 10030401,
                 name: "Parler à Rhythm",
-                desc: 'Bien que la XIIIᵉ Légion ait proclamé la Traque aux Charons "résolue" et soit repartie vers la capitale couverte d’honneurs, vous le savez — tout comme Rhythm : cette affaire est loin d’être terminée.',
+                desc: "Bien que la XIIIᵉ Légion ait proclamé la Traque aux Charons « résolue » et soit repartie vers la capitale couverte d’honneurs, vous le savez — tout comme Rhythm : cette affaire est loin d’être terminée.",
                 nodes: [
                     {
                         id: "1730710192727847482",
@@ -18854,7 +18913,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10035231,
                                 content:
-                                    'Cette fois encore, c’est la même chose. Si je reste les bras croisés et que je laisse l’affaire de la "Traque aux Charons" se terminer ainsi, je ne me le pardonnerai jamais.',
+                                    "Cette fois encore, c’est la même chose. Si je reste les bras croisés et que je laisse l’affaire de la « Traque aux Charons » se terminer ainsi, je ne me le pardonnerai jamais.",
                                 voice: "story/1003/100352/191F4516",
                                 npc: 100304,
                                 next: 10035232,
@@ -19375,7 +19434,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10035331,
                                 content:
-                                    "Affaire : Bagarre au Théâtre Galea\nDate : 9 octobre, 20 h 30\n\nDépositaire de plainte : Letizia Putsch, directrice de la troupe de la Flûte Enchantée\n\nParties impliquées :\nParsifal Snowfield (comédien principal)\nSusanna Rossi (comédienne principale)\nMathew Bernard (spectateur)\nFeeley Francisco (spectateur)\n...\nRésumé de l’incident : Une altercation aurait éclaté entre des membres de la troupe et des spectateurs du premier rang. Témoignages évoquant des coups portés aux comédiens par les spectateurs. (Certaines pages du rapport officiel ont été arrachées.)\n\nConclusion : Preuves insuffisantes. Aucune suite judiciaire.\n\nRemarques : Les représentations de Né du blizzard sont suspendues jusqu’à nouvel ordre, sans date de reprise annoncée.\nJ’aurais tant voulu voir cette pièce avec Blues, pour effacer le regret de ne pas l’avoir vue autrefois. Mais il semble que ce ne soit pas pour bientôt...",
+                                    "Affaire : Bagarre au Théâtre Galea\nDate : 9 octobre, 20 h 30\n\nDépositaire de plainte : Letizia Putsch, directrice de la troupe de la Flûte Enchantée\n\nParties impliquées :\nParsifal Snowfield (comédien principal)\nSusanna Rossi (comédienne principale)\nMathew Bernard (spectateur)\nFeeley Francisco (spectateur)\n...\nRésumé de l’incident : Une altercation aurait éclaté entre des membres de la troupe et des spectateurs du premier rang. Témoignages évoquant des coups portés aux comédiens par les spectateurs. (Certaines pages du rapport officiel ont été arrachées.)\n\nConclusion : Preuves insuffisantes. Aucune suite judiciaire.\n\nRemarques : Les représentations de <I>Né du blizzard</> sont suspendues jusqu’à nouvel ordre, sans date de reprise annoncée.\nJ’aurais tant voulu voir cette pièce avec Blues, pour effacer le regret de ne pas l’avoir vue autrefois. Mais il semble que ce ne soit pas pour bientôt...",
                                 voice: "story/1003/100353/191F557E",
                                 next: 10035332,
                             },
@@ -19679,7 +19738,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10034412,
-                                content: "<I>Soupir... Génial. Encore une corvée.</>",
+                                content: "<I>Soupir...</> Génial. Encore une corvée.",
                                 voice: "story/1003/100344/191EBEB8",
                                 npc: 200021,
                             },
@@ -19811,7 +19870,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10034517,
                                 content:
-                                    'Le suspect de la "Traque aux Charons" que vous avez laissé filer s’est réfugié dans la cité intérieure. Il a massacré des sujets de Sa Majesté et recouvert les murs de graffitis haineux contre les Solariens... Si ce n’est pas de l’incompétence, ça y ressemble fort !',
+                                    "Le suspect de la « Traque aux Charons » que vous avez laissé filer s’est réfugié dans la cité intérieure. Il a massacré des sujets de Sa Majesté et recouvert les murs de graffitis haineux contre les Solariens... Si ce n’est pas de l’incompétence, ça y ressemble fort !",
                                 voice: "story/1003/100345/191ECFF2",
                                 npc: 100310,
                                 next: 10034518,
@@ -20811,7 +20870,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10035017,
-                                content: 'Cible confirmée éliminée. La "Traque aux Charons" est terminée.',
+                                content: "Cible confirmée éliminée. La « Traque aux Charons » est terminée.",
                                 voice: "story/1003/100350/191F21FA",
                                 npc: 200022,
                                 next: 10035018,
@@ -21048,7 +21107,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10035523,
                                 content:
-                                    'L’esprit n’est qu’un déchet du métabolisme. Il suffit qu’il obéisse, qu’il sache dire "oui". Emmenez-le au terrain d’essai.',
+                                    "L’esprit n’est qu’un déchet du métabolisme. Il suffit qu’il obéisse, qu’il sache dire « oui ». Emmenez-le au terrain d’essai.",
                                 voice: "story/1003/100355/191F74FE",
                                 npc: 100337,
                                 next: 10035524,
@@ -21789,7 +21848,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10036025,
-                                content: 'Si tu ne réponds pas, je prendrai ton silence pour un "oui". Et une promesse, ça se tient.',
+                                content: "Si tu ne réponds pas, je prendrai ton silence pour un « oui ». Et une promesse, ça se tient.",
                                 voice: "story/1003/100360/191FC75A",
                                 npc: 100331,
                                 next: 10036026,
@@ -22326,7 +22385,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10036238,
                                 content:
-                                    'Appelez cela vengeance si vous voulez. Moi j’y vois une mission, protéger les nôtres, un devoir que nous, "démons" devons remplir. Purger la cité intérieure de ses ordures, offrir à vos familles un avenir propre et sûr.',
+                                    "Appelez cela vengeance si vous voulez. Moi j’y vois une mission, protéger les nôtres, un devoir que nous, « démons » devons remplir. Purger la cité intérieure de ses ordures, offrir à vos familles un avenir propre et sûr.",
                                 voice: "story/1003/100362/191FEA4C",
                                 npc: 100326,
                             },
@@ -22592,7 +22651,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10036329,
                                 content:
-                                    'Cible repérée dans une fête. Évaluation préliminaire, il s’agit d’un "Corvin" des Déchus. Les civils ont été évacués. L’opération d’arrestation progresse sans encombre.',
+                                    "Cible repérée dans une fête. Évaluation préliminaire, il s’agit d’un « Corvin » des Déchus. Les civils ont été évacués. L’opération d’arrestation progresse sans encombre.",
                                 voice: "story/1003/100363/191FF93A",
                                 npc: 100310,
                                 next: 10036330,
@@ -22643,7 +22702,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10036503,
                                 content:
-                                    'Officier Fischer et les Chasseurs de Phoxène ? Vous osez protéger ce monstre ? Le meurtrier de la "Traque aux Charons" ?!',
+                                    "Officier Fischer et les Chasseurs de Phoxène ? Vous osez protéger ce monstre ? Le meurtrier de la « Traque aux Charons » ?!",
                                 voice: "story/1003/100365/192015C6",
                                 npc: 100310,
                                 next: 10036504,
@@ -23048,7 +23107,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10036722,
                                 content:
-                                    '<H>Il suffit de lui faire croire que "Blues" vit encore... et que "Blues" lui révèle la vérité.</> Oui...',
+                                    "<H>Il suffit de lui faire croire que « Blues » vit encore... et que « Blues » lui révèle la vérité.</> Oui...",
                                 voice: "story/1003/100367/192039B4",
                                 npc: 100328,
                             },
@@ -23455,7 +23514,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10037505,
                                 content:
-                                    'Vraiment ? Le Petit Larbin disait que c’était trop dangereux et m’interdisait de vous suivre… Et maintenant que j’ai entendu ce qui s’est passé... Ah ! Dire que c’était juste "dangereux" serait un mensonge énorme !',
+                                    "Vraiment ? Le Petit Larbin disait que c’était trop dangereux et m’interdisait de vous suivre... Et maintenant que j’ai entendu ce qui s’est passé... Ah ! Dire que c’était juste « dangereux » serait un mensonge énorme !",
                                 voice: "story/1003/100375/1920BA2A",
                                 npc: 200002,
                                 next: 10037506,
@@ -23498,7 +23557,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10037511,
                                 content:
-                                    'Oui, c’est la médaille des Charons Couronnés. L’officier Lynn me l’a remise... pour récompenser ma "contribution exceptionnelle" lors de cet incident.',
+                                    "Oui, c’est la médaille des Charons Couronnés. L’officier Lynn me l’a remise... pour récompenser ma « contribution exceptionnelle » lors de cet incident.",
                                 voice: "story/1003/100375/1920BB26",
                                 npc: 100304,
                                 next: 10037512,
@@ -23535,7 +23594,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10037516,
                                 content:
-                                    'J’ai cherché ce que tu m’as dit à propos de "n° 0", mais mes contacts m’ont confirmé qu’à peine ce nom est prononcé à la XIIIᵉ Légion, tout le monde se tait. Aucune info n’en sort.',
+                                    "J’ai cherché ce que tu m’as dit à propos de « n° 0 », mais mes contacts m’ont confirmé qu’à peine ce nom est prononcé à la XIIIᵉ Légion, tout le monde se tait. Aucune info n’en sort.",
                                 voice: "story/1003/100375/1920BBF8",
                                 npc: 100304,
                                 next: 10037517,
@@ -23573,7 +23632,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10037521,
                                 content:
-                                    "L’identité de cette prisonnière est top secrète. Tout ce que je sais, c’est qu’elle est actuellement soignée dans la cité intérieure sous haute sécurité. Mais quelqu’un a aperçu son dos, <H>une jeune femme d’une vingtaine d’années</>, vêtue de noir.",
+                                    "L’identité de cette prisonnière est top secrète. Tout ce que je sais, c’est qu’elle est actuellement soignée dans la cité intérieure sous haute sécurité. Mais quelqu’un a aperçu sa silhouette de dos, <H>une jeune femme d’une vingtaine d’années</>, vêtue de noir.",
                                 voice: "story/1003/100375/1920BCCA",
                                 npc: 100304,
                                 next: 10037522,
@@ -23887,7 +23946,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 10037630,
-                                content: "D’accord, je vais jeter un coup d'œil... « ... Ô neige silencieuse, fille des cieux... »",
+                                content: "D’accord, je vais jeter un coup d’œil... « ... Ô neige silencieuse, fille des cieux... »",
                                 voice: "story/1003/100376/1920CEAC",
                                 npc: 100006,
                                 next: 10037631,
@@ -24070,7 +24129,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10040124,
                                 content:
-                                    "Ton optimisme est… rafraîchissant. Alors, où en est votre plan ? De ce que je vois, Snow a déjà… pratiquement finalisé le menu du banquet.",
+                                    "Ton optimisme est... rafraîchissant. Alors, où en est votre plan ? De ce que je vois, Snow a déjà... pratiquement finalisé le menu du banquet.",
                                 voice: "story/1004/100401/192267D8",
                                 npc: 200003,
                             },
@@ -26047,10 +26106,18 @@ export const questData_fr: QuestStory[] = [
                         name: "对话节点",
                         dialogues: [
                             {
+                                id: 10049700,
+                                content: "Déjà terminé ? Pas mal. On arrête les tests pour aujourd’hui. Retournez à vos postes.",
+                                voice: "story/1004/100499/1928AEAD",
+                                npc: 100407,
+                                next: 10049701,
+                            },
+                            {
                                 id: 10049701,
                                 content: "Bien reçu.",
                                 voice: "story/1004/100497/19288B12",
                                 npc: 100418,
+                                next: 10049702,
                             },
                             {
                                 id: 10049702,
@@ -26058,12 +26125,14 @@ export const questData_fr: QuestStory[] = [
                                     "Vous êtes efficaces. Avant que vos poumons ne soient remplis de suie, vous devriez quitter les cheminées et venir travailler ici.",
                                 voice: "story/1004/100497/19288B3C",
                                 npc: 100407,
+                                next: 10049703,
                             },
                             {
                                 id: 10049703,
                                 content: "Non merci. Nous avons encore à faire.",
                                 voice: "story/1004/100497/19288B66",
                                 npc: 100001,
+                                next: 10049704,
                             },
                             {
                                 id: 10049704,
@@ -27083,7 +27152,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10041920,
                                 content:
-                                    "Désolé, désolé, j’étais trop excité... Je pensais qu’il disait ça pour me faire plaisir. Avec son salaire, c’est presque impossible d’économiser autant…",
+                                    "Désolé, désolé, j’étais trop excité... Je pensais qu’il disait ça pour me faire plaisir. Avec son salaire, c’est presque impossible d’économiser autant...",
                                 voice: "story/1004/100419/19238E80",
                                 npc: 100415,
                             },
@@ -27984,16 +28053,16 @@ export const questData_fr: QuestStory[] = [
                         id: "177763795518716773324",
                         type: "TalkNode",
                         name: "对话节点",
-                        srId: 106001,
-                        pos: [-38560, -6600],
+                        srId: 106301,
+                        pos: [-38250, -6680],
                         next: ["177763795518716773319"],
                     },
                     {
                         id: "177763795518716773319",
                         type: "TalkNode",
                         name: "芙罗拉出场",
-                        srId: 106001,
-                        pos: [-38560, -6600],
+                        srId: 106301,
+                        pos: [-38250, -6680],
                         next: ["177763795518716773320"],
                         dialogues: [
                             {
@@ -28226,8 +28295,8 @@ export const questData_fr: QuestStory[] = [
                         id: "177763795518716773320",
                         type: "TalkNode",
                         name: "与芙罗拉交谈",
-                        srId: 106001,
-                        pos: [-38560, -6600],
+                        srId: 106301,
+                        pos: [-38250, -6680],
                         next: ["177763795518716773321"],
                         dialogues: [
                             {
@@ -28343,8 +28412,8 @@ export const questData_fr: QuestStory[] = [
                         id: "177763795518716773321",
                         type: "TalkNode",
                         name: "与希尔妲交谈",
-                        srId: 106001,
-                        pos: [-38560, -6600],
+                        srId: 106301,
+                        pos: [-38250, -6680],
                         dialogues: [
                             {
                                 id: 10042801,
@@ -29265,7 +29334,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10042018,
                                 content:
-                                    "<I>Les patrouilles ne vont pas tarder à revenir… Et si elle dit vrai, ce wagon est déjà rempli de gardes...</>",
+                                    "<I>Les patrouilles ne vont pas tarder à revenir... Et si elle dit vrai, ce wagon est déjà rempli de gardes...</>",
                                 voice: "story/1004/100420/19239E94",
                                 npc: 100001,
                             },
@@ -29620,7 +29689,7 @@ export const questData_fr: QuestStory[] = [
                         type: "TalkNode",
                         name: "（可选）和希尔妲对话",
                         srId: 106001,
-                        pos: [-16340, -90],
+                        pos: [-16500, -90],
                         dialogues: [
                             {
                                 id: 10049962,
@@ -30447,7 +30516,7 @@ export const questData_fr: QuestStory[] = [
                         type: "TalkNode",
                         name: "对话节点",
                         srId: 106001,
-                        pos: [-11980, -930],
+                        pos: [-12230, -880],
                         next: ["17782428113416680851"],
                         dialogues: [
                             {
@@ -32748,7 +32817,7 @@ export const questData_fr: QuestStory[] = [
         quests: [
             {
                 id: 10040401,
-                name: "Suivre la commissaire",
+                name: "Monter à bord et partir",
                 desc: "Flora, qui n’avait jusque-là aucun lien avec l’Empire malgré son statut de princesse impériale, est désormais devenue votre commanditaire. Il faut préparer son évasion.\nPréparez-vous à monter à bord du train et mettez le plan à exécution.",
                 nodes: [
                     {
@@ -34175,7 +34244,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 10046406,
                                 content:
-                                    "C’est la première fois que je t’entends rire comme ça. En fait… c’est la première fois que je t’entends rire tout court.",
+                                    "C’est la première fois que je t’entends rire comme ça. En fait... c’est la première fois que je t’entends rire tout court.",
                                 voice: "story/1004/100464/19266E7C",
                                 npc: 100001,
                             },
@@ -38766,7 +38835,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11010308,
-                                content: "Tu vas où ?",
+                                content: "Tu vas où ?",
                                 voice: "story/1002/110103/1B902AA8",
                                 npc: 110022,
                                 next: 11010309,
@@ -38899,7 +38968,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 11010215,
-                                content: "<I>... Cette voix agaçante s'est enfin tue.</>",
+                                content: "<I>... Cette voix agaçante s’est enfin tue.</>",
                                 voice: "story/1002/110102/1B901B66",
                                 npc: 110022,
                                 next: 11010216,
@@ -39533,7 +39602,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11011017,
                                 content:
-                                    "Vous êtes tous de braves soldats. Votre courage honore l’insigne impérial que vous portez. L'Empire ne laissera pas vos efforts être vains.",
+                                    "Vous êtes tous de braves soldats. Votre courage honore l’insigne impérial que vous portez. L’Empire ne laissera pas vos efforts être vains.",
                                 voice: "story/1002/110110/1B909EFA",
                                 npc: 110010,
                             },
@@ -39798,7 +39867,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11011205,
-                                content: 'Pour ce qui est de "l’art du commandement", personne ne surpasse Fulvis.',
+                                content: "Pour ce qui est de « l’art du commandement », personne ne surpasse Fulvis.",
                                 voice: "story/1002/110112/1B90BDD2",
                                 npc: 110010,
                                 next: 11011206,
@@ -39829,7 +39898,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11017501,
                                 content:
-                                    'La salle des machines est le "cœur" de toute la forteresse. Toute l’énergie qui la maintient en fonctionnement vient du réservoir de Phoxichor.',
+                                    "La salle des machines est le « cœur » de toute la forteresse. Toute l’énergie qui la maintient en fonctionnement vient du réservoir de Phoxichor.",
                                 voice: "story/1002/110175/1B94C6C2",
                                 npc: 110010,
                                 next: 11017502,
@@ -39885,7 +39954,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11018205,
                                 content:
-                                    "À côté de lui, une plaque d’identité repose silencieusement. Tu la reconnais immédiatement : standard pour les nouvelles recrues. Au recto, son nom : Vic Girard. Au verso, un message gravé au couteau : « Monica, la prochaine fois, je te bats au concours de tir. »",
+                                    "À côté de lui, une plaque d’identité repose silencieusement. Tu la reconnais immédiatement : standard pour les nouvelles recrues. Au recto, son nom : Vic Girard. Au verso, un message gravé au couteau : « Monica, la prochaine fois, je te bats au concours de tir. »",
                                 voice: "story/1002/110182/1B953A42",
                             },
                         ],
@@ -40018,7 +40087,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11018205,
                                 content:
-                                    "À côté de lui, une plaque d’identité repose silencieusement. Tu la reconnais immédiatement : standard pour les nouvelles recrues. Au recto, son nom : Vic Girard. Au verso, un message gravé au couteau : « Monica, la prochaine fois, je te bats au concours de tir. »",
+                                    "À côté de lui, une plaque d’identité repose silencieusement. Tu la reconnais immédiatement : standard pour les nouvelles recrues. Au recto, son nom : Vic Girard. Au verso, un message gravé au couteau : « Monica, la prochaine fois, je te bats au concours de tir. »",
                                 voice: "story/1002/110182/1B953A42",
                             },
                         ],
@@ -40223,7 +40292,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11017605,
                                 content:
-                                    "<W>AVERTISSEMENT : Surcharge du réservoir de Phoxichor à 50 %. Arrêtez immédiatement l’utilisation des Roues Phoxynamo, départ non autorisé interdit.</>",
+                                    "<W>AVERTISSEMENT : Surcharge du réservoir de Phoxichor à 50 %. Arrêtez immédiatement l’utilisation des Roues Phoxynamo, départ non autorisé interdit.</>",
                                 voice: "story/1002/110176/1B94D7D2",
                                 next: 11017606,
                             },
@@ -40512,7 +40581,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11011330,
-                                content: "... Hein ?",
+                                content: "<I>... Hein ?</>",
                                 voice: "story/1002/110113/1B90D254",
                                 next: 11011331,
                             },
@@ -40599,7 +40668,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11011504,
-                                content: "Tu tiens le coup ? Si oui, on se bouge pour secourir les autres... Attends, nouveau contact.",
+                                content: "Tu tiens le coup ? Si oui, on se bouge pour secourir les autres... Attends, nouveau contact.",
                                 voice: "story/1002/110115/1B90EEE0",
                                 npc: 110010,
                                 next: 11011505,
@@ -41292,7 +41361,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11011851,
                                 content:
-                                    "Oui. Vous ne m’avez pas humiliée en me fouillant devant tout le monde, et je vous en suis très reconnaissante. Il est rare {性别2:qu’un officier impérial|qu’une officière impériale} respecte la dignité d'une Charon comme moi.",
+                                    "Oui. Vous ne m’avez pas humiliée en me fouillant devant tout le monde, et je vous en suis très reconnaissante. Il est rare {性别2:qu’un officier impérial|qu’une officière impériale} respecte la dignité d’une Charon comme moi.",
                                 voice: "story/1002/110118/1B9127CE",
                                 npc: 110034,
                                 next: 11011852,
@@ -41849,7 +41918,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11012816,
                                 content:
-                                    'À vrai dire... c’est un peu embarrassant. C’est la dernière photo que j’ai prise avec elle. Peu de temps après, sa mère l’a emmenée et elles sont parties. Le nom de famille "Theodore", c’est celui de sa mère.',
+                                    "À vrai dire... c’est un peu embarrassant. C’est la dernière photo que j’ai prise avec elle. Peu de temps après, sa mère l’a emmenée et elles sont parties. Le nom de famille « Theodore », c’est celui de sa mère.",
                                 voice: "story/1002/110128/1B91C620",
                                 npc: 110010,
                                 next: 11012817,
@@ -42109,7 +42178,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11012714,
-                                content: "Tss... fais le malin.",
+                                content: "<I>Tss...</> fais le malin.",
                                 voice: "story/1002/110127/1B91B564",
                                 npc: 110009,
                                 next: 11012715,
@@ -42205,7 +42274,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11012727,
                                 content:
-                                    "On pourrait peut-être attendre un peu pour recueillir plus d'informations auprès de cette fille d’abord...",
+                                    "On pourrait peut-être attendre un peu pour recueillir plus d’informations auprès de cette fille d’abord...",
                                 voice: "story/1002/110127/1B91B786",
                                 npc: 110016,
                                 next: 11012728,
@@ -42387,7 +42456,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11018010,
                                 content:
-                                    "J’aurais pu vous faire confiance si nous n’étions pas entrés dans la salle de commande. Mais maintenant, j’ai l'impression que vous connaissez trop bien cette forteresse.",
+                                    "J’aurais pu vous faire confiance si nous n’étions pas entrés dans la salle de commande. Mais maintenant, j’ai l’impression que vous connaissez trop bien cette forteresse.",
                                 voice: "story/1002/110180/1B951A44",
                                 npc: 110022,
                                 next: 11018011,
@@ -42547,7 +42616,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11017706,
-                                content: "Attention ! Il y a un condenseur devant. Trop près, vous risquez de vous blesser !",
+                                content: "Attention ! Il y a un condenseur devant. Trop près, vous risquez de vous blesser !",
                                 voice: "story/1002/110177/1B94E864",
                                 npc: 110034,
                             },
@@ -42591,7 +42660,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 11017712,
-                                content: "Merci de nous avoir sauvés ! Finalement, tous les soldats impériaux ne sont pas...",
+                                content: "Merci de nous avoir sauvés ! Finalement, tous les soldats impériaux ne sont pas...",
                                 voice: "story/1002/110177/1B94E960",
                                 npc: 110034,
                                 next: 11017713,
@@ -42599,7 +42668,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11017713,
                                 content:
-                                    "Ah, pardon ! Je voulais dire, je pensais autrefois que les soldats impériaux étaient aussi brutaux que les Déchus. Mais maintenant, je sais que je me trompais !",
+                                    "Ah, pardon ! Je voulais dire, je pensais autrefois que les soldats impériaux étaient aussi brutaux que les Déchus. Mais maintenant, je sais que je me trompais !",
                                 voice: "story/1002/110177/1B94E98A",
                                 npc: 110034,
                             },
@@ -42631,7 +42700,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 11011901,
-                                content: "... Quoi ? Les renforts ont du retard ?",
+                                content: "... Quoi ? Les renforts ont du retard ?",
                                 voice: "story/1002/110119/1B913002",
                                 npc: 110010,
                                 next: 11011902,
@@ -42646,7 +42715,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11011903,
                                 content:
-                                    "Tu veux que j’attaque la salle de commande centrale avec ces quelques rescapés ? Fulvis, tu rêves ! Là-dedans, il y a les <H>Messagers</> des <H>Brumaires</> !",
+                                    "Tu veux que j’attaque la salle de commande centrale avec ces quelques rescapés ? Fulvis, tu rêves ! Là-dedans, il y a les <H>Messagers</> des <H>Brumaires</> !",
                                 voice: "story/1002/110119/1B913056",
                                 npc: 110010,
                                 next: 11011904,
@@ -42670,7 +42739,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11011906,
                                 content:
-                                    "Encore cinquante mètres et nous pourrons offrir la victoire à Sa Majesté ! Ce n’est pas compliqué, non ?",
+                                    "Encore cinquante mètres et nous pourrons offrir la victoire à Sa Majesté ! Ce n’est pas compliqué, non ?",
                                 voice: "story/1002/110119/1B9130D4",
                                 npc: 110011,
                                 next: 11011907,
@@ -42684,7 +42753,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11011908,
-                                content: "{nickname2} ? Tout se passe bien de ton côté ?",
+                                content: "{nickname2} ? Tout se passe bien de ton côté ?",
                                 voice: "story/1002/110119/1B913128",
                                 npc: 110010,
                                 next: 11011909,
@@ -42706,7 +42775,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11011911,
-                                content: "Des réfugiés ? J’espère qu’ils ne sont pas des Déchus déguisés.",
+                                content: "Des réfugiés ? J’espère qu’ils ne sont pas des Déchus déguisés.",
                                 voice: "story/1002/110119/1B9131A6",
                                 npc: 110010,
                                 next: 11011912,
@@ -42798,7 +42867,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 11017714,
-                                content: "Là-bas... c’est le Commandant Avar !",
+                                content: "Là-bas... c’est le Commandant Avar !",
                                 voice: "story/1002/110177/1B94E9B4",
                                 npc: 110015,
                                 next: 11017715,
@@ -42815,7 +42884,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 11010527,
-                name: "Redémarrer le champ de bataille simulé",
+                name: "Redémarrer le champ de bataille simulé\n",
                 desc: "Avar prévoit de faire sauter la porte de la salle de commande centrale à l’aide d’une tourelle. Comme l’alimentation de la salle des machines est coupée, vous devez réactiver le champ de bataille simulé via l’énergie d’urgence afin d’acheminer la tourelle jusqu’à la porte.",
                 nodes: [
                     {
@@ -42828,7 +42897,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11017420,
                                 content:
-                                    "Ils appellent ça le « Champ de Bataille Simulé », et ils disent... « Cette fois, le thème est la défense de la cité de Givrelac ».",
+                                    "Ils appellent ça le « Champ de Bataille Simulé », et ils disent... « Cette fois, le thème est la défense de la cité de Givrelac ».",
                                 voice: "story/1002/110174/1B94B978",
                                 npc: 110034,
                                 next: 11017421,
@@ -43380,7 +43449,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11019407,
                                 content:
-                                    'Après avoir appuyé sur "Ouvrir", la porte ne bouge pas d’un pouce. Sabotée ? Tout n’est peut-être pas terminé...',
+                                    "Après avoir appuyé sur « Ouvrir », la porte ne bouge pas d’un pouce. Sabotée ? Tout n’est peut-être pas terminé...",
                                 voice: "story/1002/110194/1B95FF76",
                                 options: [
                                     {
@@ -44094,7 +44163,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11015128,
                                 content:
-                                    'Avant ma naissance, il a rejoint la Légion pour "mériter" maman, risquant sa vie au combat. Plus tard, il nous a quittées, maman et moi, afin de "ne pas gâcher mon avenir".',
+                                    "Avant ma naissance, il a rejoint la Légion pour « mériter » maman, risquant sa vie au combat. Plus tard, il nous a quittées, maman et moi, afin de « ne pas gâcher mon avenir ».",
                                 voice: "story/1002/110151/1B934170",
                                 npc: 110005,
                                 next: 11015129,
@@ -44494,7 +44563,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11014305,
                                 content:
-                                    'Faites attention aux soldats. Ici, il n’y a sans doute plus de "camarades"... seulement des "ennemis".',
+                                    "Faites attention aux soldats. Ici, il n’y a sans doute plus de « camarades »... seulement des « ennemis ».",
                                 voice: "story/1002/110143/1B92BA6A",
                                 npc: 110005,
                             },
@@ -44709,7 +44778,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11014416,
                                 content:
-                                    "Transmettez l’ordre du Commandant Fulvis : verrouillage total de la forteresse, recherche et élimination de Daphne Theodore. Motif : elle a conspiré avec les Déchus, infiltré la Légion comme espionne et compromis le plan d’assaut.",
+                                    "Transmettez l’ordre du Commandant Fulvis : verrouillage total de la forteresse, recherche et élimination de Daphne Theodore. Motif : elle a conspiré avec les Déchus, infiltré la Légion comme espionne et compromis le plan d’assaut.",
                                 voice: "story/1002/110144/1B92CCA0",
                                 npc: 110012,
                                 next: 11014417,
@@ -44791,7 +44860,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11014427,
                                 content:
-                                    "Très bien. Puisque vous ne voulez pas en parler maintenant, je suppose que vous avez vos raisons. Mais puis-je poser une question ?",
+                                    "Très bien. Puisque vous ne voulez pas en parler maintenant, je suppose que vous avez vos raisons. Mais puis-je poser une question ?",
                                 voice: "story/1002/110144/1B92CE6E",
                                 npc: 110005,
                                 next: 11014428,
@@ -45256,7 +45325,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11015806,
-                                content: 'Voilà donc... le "crime" que Fulvis veut me faire porter.',
+                                content: "Voilà donc... le « crime » que Fulvis veut me faire porter.",
                                 voice: "story/1002/110158/1B93B0AC",
                                 npc: 110022,
                                 next: 11015807,
@@ -45395,7 +45464,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11016503,
                                 content:
-                                    "Ce n’est rien, Madame la Geôlière. Je me souviens de tout ce que j’ai dit dans mes rêves. Mais c'est confidentiel, je demande à vous parler en privé.",
+                                    "Ce n’est rien, Madame la Geôlière. Je me souviens de tout ce que j’ai dit dans mes rêves. Mais c’est confidentiel, je demande à vous parler en privé.",
                                 voice: "story/1002/110165/1B942306",
                                 npc: 110022,
                                 next: 11016504,
@@ -45432,7 +45501,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11016602,
                                 content:
-                                    "Je vais être bref, le temps presse. Si nous ne pouvons toujours pas accéder à l'extérieur... je tirerai sur toi avec cette arme. Et toi, tu devras... faire semblant d’être {性别2:mort|morte}.",
+                                    "Je vais être bref, le temps presse. Si nous ne pouvons toujours pas accéder à l’extérieur... je tirerai sur toi avec cette arme. Et toi, tu devras... faire semblant d’être {性别2:mort|morte}.",
                                 voice: "story/1002/110166/1B943344",
                                 npc: 110010,
                                 next: 11016603,
@@ -45485,7 +45554,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11016609,
                                 content:
-                                    'Si je "t’abats" et que je fais mine de rallier son camp... il baissera peut-être sa garde. Tu auras une chance de survivre. C’est ton seul espoir.',
+                                    "Si je « t’abats » et que je fais mine de rallier son camp... il baissera peut-être sa garde. Tu auras une chance de survivre. C’est ton seul espoir.",
                                 voice: "story/1002/110166/1B94346A",
                                 npc: 110010,
                                 next: 11016610,
@@ -45840,7 +45909,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11016904,
-                                content: "Madame la Geôlière, ce n’est pas normal, cela ne suit pas le protocole judiciaire !",
+                                content: "Madame la Geôlière, ce n’est pas normal, cela ne suit pas le protocole judiciaire !",
                                 voice: "story/1002/110169/1B9464D0",
                                 npc: 110041,
                                 next: 11016905,
@@ -45855,7 +45924,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11016906,
-                                content: "Et Falsi ? Tant qu’on retrouve Falsi et l’enregistreur, la vérité... !",
+                                content: "Et Falsi ? Tant qu’on retrouve Falsi et l’enregistreur, la vérité... !",
                                 voice: "story/1002/110169/1B946524",
                                 npc: 110040,
                                 next: 11016907,
@@ -45877,7 +45946,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11016909,
-                                content: "... Madame la Geôlière, vous croyez vraiment à une telle coïncidence ?",
+                                content: "... Madame la Geôlière, vous croyez vraiment à une telle coïncidence ?",
                                 voice: "story/1002/110169/1B9465A2",
                                 npc: 110041,
                                 next: 11016910,
@@ -45892,7 +45961,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11017001,
                                 content:
-                                    "Votre Altesse Prince Vergilius ! Cet endroit n’est pas approprié pour votre rang, je vous en prie, ne vous attardez pas ici !",
+                                    "Votre Altesse Prince Vergilius ! Cet endroit n’est pas approprié pour votre rang, je vous en prie, ne vous attardez pas ici !",
                                 voice: "story/1002/110170/1B9474BA",
                             },
                         ],
@@ -45920,7 +45989,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11017103,
                                 content:
-                                    "Enfin, nous pouvons respirer l’air libre, où veux-tu aller ? Musée, opéra, taverne de l’Avenue du Triomphe, ou simplement te promener le long de la Rivière des Murmures ?",
+                                    "Enfin, nous pouvons respirer l’air libre, où veux-tu aller ? Musée, opéra, taverne de l’Avenue du Triomphe, ou simplement te promener le long de la Rivière des Murmures ?",
                                 voice: "story/1002/110171/1B948576",
                                 npc: 110018,
                                 next: 11017104,
@@ -45943,14 +46012,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11017106,
                                 content:
-                                    "Un millénaire s’est écoulé, et les prisons d’Hyperborea utilisent encore des tortures aussi primitives et inhumaines... Les écrivains flatteurs parlent du « plus grand et prospère des temps », quelle comédie !",
+                                    "Un millénaire s’est écoulé, et les prisons d’Hyperborea utilisent encore des tortures aussi primitives et inhumaines... Les écrivains flatteurs parlent du « plus grand et prospère des temps », quelle comédie !",
                                 voice: "story/1002/110171/1B9485F4",
                                 npc: 110018,
                                 next: 11017107,
                             },
                             {
                                 id: 11017107,
-                                content: "Ne parlons pas de ça... et Daphne ?",
+                                content: "Ne parlons pas de ça... et Daphne ?",
                                 voice: "story/1002/110171/1B94861E",
                                 npc: 110022,
                                 next: 11017108,
@@ -45980,7 +46049,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11017115,
-                                content: "L’adjudante disparue de Fulvis... ? Bien, je m’en occuperai.",
+                                content: "L’adjudante disparue de Fulvis... ? Bien, je m’en occuperai.",
                                 voice: "story/1002/110171/1B94871D",
                                 npc: 110018,
                                 next: 11017109,
@@ -45994,7 +46063,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11017110,
-                                content: "Remercier ? Hmm... que dirais-tu de me servir comme garde du corps pendant six mois ?",
+                                content: "Remercier ? Hmm... que dirais-tu de me servir comme garde du corps pendant six mois ?",
                                 voice: "story/1002/110171/1B94869C",
                                 npc: 110018,
                                 next: 11017111,
@@ -46421,14 +46490,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11019109,
                                 content:
-                                    "Cette dernière œuvre, <I>Né du blizzard</>, est de Cavaradossi. Inspiré d’une légende de sa ville natale, Givrelac... {nickname2}, tu écoutes ?",
+                                    "Cette dernière œuvre, <I>Né du blizzard</>, est de Cavaradossi. Inspiré d’une légende de sa ville natale, Givrelac... {nickname2}, tu écoutes ?",
                                 voice: "story/1002/110191/1B95CE92",
                                 npc: 110018,
                                 next: 11019110,
                             },
                             {
                                 id: 11019110,
-                                content: "Ah ? Oui, tu parlais d’une créature mystérieuse ? À Givrelac ?",
+                                content: "Ah ? Oui, tu parlais d’une créature mystérieuse ? À Givrelac ?",
                                 voice: "story/1002/110191/1B95CEBC",
                                 npc: 110022,
                                 next: 11019111,
@@ -46436,7 +46505,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11019111,
                                 content:
-                                    "... Je vois que tu es toujours {性别2:préoccupé|préoccupée}. J’espérais que cela te changerait un peu les idées. ",
+                                    "... Je vois que tu es toujours {性别2:préoccupé|préoccupée}. J’espérais que cela te changerait un peu les idées. ",
                                 voice: "story/1002/110191/1B95CEE6",
                                 npc: 110018,
                                 next: 11019112,
@@ -46444,7 +46513,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11019112,
                                 content:
-                                    'À propos du rôle de "garde du corps"... je dois savoir ce que cela implique. J’ai quelque chose à faire, je dois savoir si ça gênera.',
+                                    "À propos du rôle de « garde du corps »... je dois savoir ce que cela implique. J’ai quelque chose à faire, je dois savoir si ça gênera.",
                                 voice: "story/1002/110191/1B95CF10",
                                 npc: 110022,
                                 next: 11019113,
@@ -46475,7 +46544,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11019116,
-                                content: "Tu veux que je quitte Dismania pour aller à Rougerive ?",
+                                content: "Tu veux que je quitte Dismania pour aller à Rougerive ?",
                                 voice: "story/1002/110191/1B95CFB8",
                                 npc: 110022,
                                 next: 11017116,
@@ -46499,7 +46568,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11019119,
                                 content:
-                                    "Je comprends. Alors, j’y vais. Ce que je cherche est sur le chemin de toute façon. Dois-je vous prêter serment, Votre Altesse ?",
+                                    "Je comprends. Alors, j’y vais. Ce que je cherche est sur le chemin de toute façon. Dois-je vous prêter serment, Votre Altesse ?",
                                 voice: "story/1002/110191/1B95D036",
                                 npc: 110022,
                                 next: 11017119,
@@ -46576,7 +46645,7 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 12000101,
                 name: "Se rendre aux Asphodèles",
-                desc: 'L’affaire de la Traque aux Charons est close, et la paix est revenue. Il ne reste plus qu’à attendre, vingt jours durant, des nouvelles concernant le "prisonnier d’importance".\nEn attendant, pourquoi ne pas passer aux Asphodèles pour voir si de nouvelles missions vous attendent ?',
+                desc: "L’affaire de la Traque aux Charons est close, et la paix est revenue. Il ne reste plus qu’à attendre, vingt jours durant, des nouvelles concernant le « prisonnier d’importance ».\nEn attendant, pourquoi ne pas passer aux Asphodèles pour voir si de nouvelles missions vous attendent ?",
                 nodes: [
                     {
                         id: "1728635189419913071",
@@ -46712,7 +46781,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12000416,
-                                content: "Bouaaah— !",
+                                content: "<I>Bouaaah— !</>",
                                 voice: "story/1200/120004/1E0AB240",
                                 npc: 200002,
                                 next: 12000417,
@@ -46976,7 +47045,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12000608,
                                 content:
-                                    'Certains parlent de fantômes, d’autres de Déchus... ou même du monstre de la "Traque aux Charons" revenu à la vie. Mais tous ceux qui ont voulu enquêter se sont retrouvés bâillonnés par un ordre de silence !',
+                                    "Certains parlent de fantômes, d’autres de Déchus... ou même du monstre de la « Traque aux Charons » revenu à la vie. Mais tous ceux qui ont voulu enquêter se sont retrouvés bâillonnés par un ordre de silence !",
                                 voice: "story/1200/120006/1E0AD1C0",
                                 npc: 220006,
                             },
@@ -46991,7 +47060,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12004101,
-                                content: "Ouah... Il y a tellement de monde ! Tout ça, c’est pour le spectacle ?",
+                                content: "<I>Ouah...</> Il y a tellement de monde ! Tout ça, c’est pour le spectacle ?",
                                 voice: "story/1200/120007/1E0AE102",
                                 npc: 200002,
                                 next: 12004102,
@@ -47116,7 +47185,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12000712,
-                                content: "Aïe !",
+                                content: "<I>Aïe !</>",
                                 voice: "story/1200/120007/1E0AE2D0",
                                 npc: 200002,
                                 next: 12000713,
@@ -47204,13 +47273,13 @@ export const questData_fr: QuestStory[] = [
                                     {
                                         id: 12000904,
                                         content:
-                                            "Votre règlement dit clairement : l’entrée se fait sur présentation de billets. Je n’ai rien lu sur l’exclusion de certains groupes.",
+                                            "<I>Votre règlement dit clairement : l’entrée se fait sur présentation de billets. Je n’ai rien lu sur l’exclusion de certains groupes.</>",
                                         next: 12000906,
                                         impr: [1011, "Wisdom", 3],
                                     },
                                     {
                                         id: 12000905,
-                                        content: "C’est quoi cette attitude ? Je vais en référer à votre supérieur.",
+                                        content: "<I>C’est quoi cette attitude ? Je vais en référer à votre supérieur.</>",
                                         next: 12000906,
                                         impr: [1011, "Chaos", 3],
                                     },
@@ -47271,7 +47340,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001104,
-                                content: 'Devant ces "preuves", vous restez sans voix.',
+                                content: "Devant ces « preuves », vous restez sans voix.",
                                 voice: "story/1200/120011/1E0B2320",
                                 next: 12001105,
                             },
@@ -47318,7 +47387,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001109,
-                                content: "Hé ! C'était méchant ! Je vais te maudire, vraiment, vraiment méchamment !",
+                                content: "Hé ! C’était méchant ! Je vais te maudire, vraiment, vraiment méchamment !",
                                 voice: "story/1200/120011/1E0B23F2",
                                 npc: 200002,
                                 next: 12001110,
@@ -47550,7 +47619,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001314,
                                 content:
-                                    'Je voyage depuis des années comme commerçante, et je possède quelques commerces. Si tu tiens à m’affubler d’un titre, "Patronne" serait plus approprié.',
+                                    "Je voyage depuis des années comme commerçante, et je possède quelques commerces. Si tu tiens à m’affubler d’un titre, « Patronne » serait plus approprié.",
                                 voice: "story/1200/120013/1E0B4594",
                                 npc: 210004,
                                 next: 12001315,
@@ -47596,7 +47665,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001320,
                                 content:
-                                    "Dans mon pays, les rencontres entre les personnes sont ce qu’on appelle le destin. Ces instants sont rares et précieux, et lorsqu’ils se présentent, il convient de les chérir. Qu’en penses-tu ? ",
+                                    "Dans mon pays, les rencontres entre les personnes sont ce qu’on appelle le destin. Ces instants sont rares et précieux, et lorsqu’ils se présentent, il convient de les chérir. Qu’en penses-tu ? ",
                                 voice: "story/1200/120013/1E0B4690",
                                 npc: 210004,
                                 options: [
@@ -47753,7 +47822,7 @@ export const questData_fr: QuestStory[] = [
                                     },
                                     {
                                         id: 120013352,
-                                        content: "<I>S’ils ont atteint ce qu'ils désiraient... peut-être que cela en valait la peine.</>",
+                                        content: "<I>S’ils ont atteint ce qu’ils désiraient... peut-être que cela en valait la peine.</>",
                                         next: 12001336,
                                     },
                                 ],
@@ -47883,7 +47952,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001348,
                                 content:
-                                    "Désolé pour l’attente, Patronne Zhiliu. Les endroits bondés ne sont pas vraiment mon domaine... un lieu calme se prête bien mieux aux affaires, vous ne trouvez pas ?",
+                                    "Désolé pour l’attente, Patronne Zhiliu. Les endroits bondés ne sont pas vraiment mon domaine... un lieu calme se prête bien mieux aux affaires, vous ne trouvez pas ?",
                                 voice: "story/1200/120013/1E0B4B28",
                                 npc: 220018,
                                 next: 12001349,
@@ -47891,7 +47960,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001349,
                                 content:
-                                    "Oh... un petit avertissement, hein ? Assez avec les excuses. Alors, où est la marchandise que j’ai demandée ?",
+                                    "Oh... un petit avertissement, hein ? Assez avec les excuses. Alors, où est la marchandise que j’ai demandée ?",
                                 voice: "story/1200/120013/1E0B4B52",
                                 npc: 220014,
                                 next: 12001350,
@@ -47906,7 +47975,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001351,
                                 content:
-                                    "Je crois reconnaître ce type... Camilla m’en a parlé. C’est le fameux marchand d’armes du marché noir ici. Ses produits sont toujours douteux, et il cherche toujours à gruger tout le monde !",
+                                    "Je crois reconnaître ce type... Camilla m’en a parlé. C’est le fameux marchand d’armes du marché noir ici. Ses produits sont toujours douteux, et il cherche toujours à gruger tout le monde !",
                                 voice: "story/1200/120013/1E0B4BA6",
                                 npc: 200002,
                                 next: 12001352,
@@ -47914,7 +47983,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001352,
                                 content:
-                                    "Laissez-moi clarifier un point. Je ne veux pas n’importe quel Phoxichor que l’on trouve dans la rue. Je veux le plus pur, pas moins de 95 % de pureté. C’est bien clair ?",
+                                    "Laissez-moi clarifier un point. Je ne veux pas n’importe quel Phoxichor que l’on trouve dans la rue. Je veux le plus pur, pas moins de 95 % de pureté. C’est bien clair ?",
                                 voice: "story/1200/120013/1E0B4BD0",
                                 npc: 220014,
                                 next: 12001353,
@@ -47928,7 +47997,7 @@ export const questData_fr: QuestStory[] = [
                                 options: [
                                     {
                                         id: 12001354,
-                                        content: "<I>Et si ce n’est pas à la hauteur ? Vous offrez un service après-vente ?</>",
+                                        content: "<I>Et si ce n’est pas à la hauteur ? Vous offrez un service après-vente ?</>",
                                         next: 12001357,
                                         impr: [1011, "Wisdom", 3],
                                     },
@@ -47940,7 +48009,7 @@ export const questData_fr: QuestStory[] = [
                                     },
                                     {
                                         id: 12001356,
-                                        content: "<I>Vous nous prenez pour des idiots ?</>",
+                                        content: "<I>Vous nous prenez pour des idiots ?</>",
                                         next: 12001357,
                                         impr: [1011, "Chaos", 3],
                                     },
@@ -47949,7 +48018,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001357,
                                 content:
-                                    "Patron ! On est en supériorité... pourquoi faire semblant ? On la frappe et on prend l’argent direct !",
+                                    "Patron ! On est en supériorité... pourquoi faire semblant ? On la frappe et on prend l’argent direct !",
                                 voice: "story/1200/120013/1E0B4CA2",
                                 npc: 220017,
                                 next: 12001358,
@@ -47957,7 +48026,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001358,
                                 content:
-                                    "<I>Haa... </>Vous vous êtes déjà demandé pourquoi je viens seule, sachant parfaitement que c’était un piège ?",
+                                    "<I>Haa... </>Vous vous êtes déjà demandé pourquoi je viens seule, sachant parfaitement que c’était un piège ?",
                                 voice: "story/1200/120013/1E0B4CCC",
                                 npc: 220014,
                                 next: 12001359,
@@ -47972,21 +48041,21 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001360,
-                                content: "À ton avis, laquelle est la bonne ?",
+                                content: "À ton avis, laquelle est la bonne ?",
                                 voice: "story/1200/120013/1E0B4D20",
                                 npc: 220014,
                                 next: 12001361,
                             },
                             {
                                 id: 12001361,
-                                content: "Q-Que fait-on, patron ? Elle semble... sûre d’elle...",
+                                content: "Q-Que fait-on, patron ? Elle semble... sûre d’elle...",
                                 voice: "story/1200/120013/1E0B4D4A",
                                 npc: 220045,
                                 next: 12001362,
                             },
                             {
                                 id: 12001362,
-                                content: "... Elle bluffe ! Tous à l’attaque !",
+                                content: "... Elle bluffe ! Tous à l’attaque !",
                                 voice: "story/1200/120013/1E0B4D74",
                                 npc: 220018,
                             },
@@ -48023,7 +48092,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12001501,
-                                content: "Arrêtez, Madame ! Arrêtez !",
+                                content: "Arrêtez, Madame ! Arrêtez !",
                                 voice: "story/1200/120015/1E0B6442",
                                 npc: 220017,
                                 next: 12001502,
@@ -48031,14 +48100,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001502,
                                 content:
-                                    "On essayait juste de gagner notre vie... Alors voilà, considérez ce Phoxichor comme un petit cadeau. Une personne aussi généreuse et compréhensive que vous ne nous tiendra pas rigueur, n’est-ce pas ?",
+                                    "On essayait juste de gagner notre vie... Alors voilà, considérez ce Phoxichor comme un petit cadeau. Une personne aussi généreuse et compréhensive que vous ne nous tiendra pas rigueur, n’est-ce pas ?",
                                 voice: "story/1200/120015/1E0B646C",
                                 npc: 220018,
                                 next: 12001503,
                             },
                             {
                                 id: 12001503,
-                                content: 'Oh, donc votre règle du "paiement d’abord" a soudainement disparu, hein ?',
+                                content: "Oh, donc votre règle du « paiement d’abord » a soudainement disparu, <I>hein ?</>",
                                 voice: "story/1200/120015/1E0B6496",
                                 npc: 220014,
                                 next: 12001504,
@@ -48138,7 +48207,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001515,
-                                content: "Petit larbin, regarde ! La fumée réagit à ta présence... Se pourrait-il que... ?",
+                                content: "Petit larbin, regarde ! La fumée réagit à ta présence... Se pourrait-il que... ?",
                                 voice: "story/1200/120015/1E0B668E",
                                 npc: 200002,
                                 next: 12001516,
@@ -48168,7 +48237,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001517,
                                 content:
-                                    "Ouf... je m’étais complètement trompée ! En fait, grande sœur Zhiliu n’attendait pas un amoureux qui l’a plantée... elle venait pour une transaction secrète ! Quelle chance que je n’aie rien dit à voix haute tout à l’heure...",
+                                    "<I>Ouf...</> je m’étais complètement trompée ! En fait, grande sœur Zhiliu n’attendait pas un amoureux qui l’a plantée... elle venait pour une transaction secrète ! Quelle chance que je n’aie rien dit à voix haute tout à l’heure...",
                                 voice: "story/1200/120015/1E0B66E2",
                                 npc: 200002,
                                 next: 12001518,
@@ -48343,7 +48412,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001530,
                                 content:
-                                    'Alors c’est elle, ta fameuse "cliente importante" ? <I>Hum hum !</> Très bien, très bien... vous, discutez entre adultes. La très mature et très fiable Snow va aller s’amuser ailleurs !',
+                                    "Alors c’est elle, ta fameuse « cliente importante » ? <I>Hum hum !</> Très bien, très bien... vous, discutez entre adultes. La très mature et très fiable Snow va aller s’amuser ailleurs !",
                                 voice: "story/1200/120015/1E0B6904",
                                 npc: 200002,
                                 next: 12001531,
@@ -48447,7 +48516,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12001541,
-                                content: "... Hmpf !",
+                                content: "<I>... Hmpf</> !",
                                 voice: "story/1200/120015/1E0B6AD2",
                                 npc: 200002,
                                 next: 12001542,
@@ -48553,7 +48622,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001552,
-                                content: 'Les gravures sur la lame... Ah, je me souviens ! Ce n’est pas ton "arme légendaire" ?',
+                                content: "Les gravures sur la lame... Ah, je me souviens ! Ce n’est pas ton « arme légendaire » ?",
                                 voice: "story/1200/120015/1E0B6CA0",
                                 npc: 200002,
                                 next: 12001553,
@@ -48610,7 +48679,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12001701,
-                                content: "Aïe... aïe... aïe... ça fait mal !",
+                                content: "<I>Aïe... aïe... aïe...</> ça fait mal !",
                                 voice: "story/1200/120017/1E0B8512",
                                 npc: 200002,
                                 next: 12001702,
@@ -48648,7 +48717,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001706,
                                 content:
-                                    "Tu pensais pouvoir te débarrasser de moi et partir à l'aventure {性别:tout seul|toute seule} ? Pas question !",
+                                    "Tu pensais pouvoir te débarrasser de moi et partir à l’aventure {性别:tout seul|toute seule} ? Pas question !",
                                 voice: "story/1200/120017/1E0B85E4",
                                 npc: 200002,
                                 next: 12001707,
@@ -48663,7 +48732,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001708,
-                                content: "Hé... on a déjà foutu le bazar avec les soldats hyperboréens combien de fois, hein ?",
+                                content: "Hé... on a déjà foutu le bazar avec les soldats hyperboréens combien de fois, hein ?",
                                 voice: "story/1200/120017/1E0B8638",
                                 npc: 200002,
                                 next: 12001709,
@@ -48678,7 +48747,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001710,
                                 content:
-                                    "Bref ! Tu es sous ma protection, petit larbin. Tout ce qui te concerne, me concerne aussi, naturellement !",
+                                    "Bref ! Tu es sous ma protection, petit larbin. Tout ce qui te concerne, me concerne aussi, naturellement !",
                                 voice: "story/1200/120017/1E0B868C",
                                 npc: 200002,
                                 options: [
@@ -48696,14 +48765,14 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001711,
-                                content: "Hmpf ! Évidemment ! Qui en douterait ?",
+                                content: "<I>Hmpf</> ! Évidemment ! Qui en douterait ?",
                                 voice: "story/1200/120017/1E0B86B6",
                                 npc: 200002,
                                 next: 12001714,
                             },
                             {
                                 id: 12001712,
-                                content: "N—N—Non, pas du tout ! C’était juste pour tester tes capacités, ne te méprends pas !",
+                                content: "N—N—Non, pas du tout ! C’était juste pour tester tes capacités, ne te méprends pas !",
                                 voice: "story/1200/120017/1E0B86E0",
                                 npc: 200002,
                                 next: 12001713,
@@ -48755,7 +48824,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001719,
-                                content: "Alors, arrête de traîner, petit larbin, et suis-moi ! On y va !",
+                                content: "Alors, arrête de traîner, petit larbin, et suis-moi ! On y va !",
                                 voice: "story/1200/120017/1E0B8806",
                                 npc: 200002,
                             },
@@ -48788,7 +48857,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001722,
-                                content: "Hmm... Hein ?! Un fantôme !?",
+                                content: "<I>Hmm... Hein</> ?! Un fantôme !?",
                                 voice: "story/1200/120017/1E0B8884",
                                 npc: 200002,
                                 next: 12001723,
@@ -48796,14 +48865,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001723,
                                 content:
-                                    "Oh, ce n’était que des déchets... Mais qui a bien pu jeter tout ça par terre ? Quel manque de savoir-vivre ! Faut que la Princesse des Déchets leur donne une bonne leçon !",
+                                    "Oh, ce n’était que des déchets... Mais qui a bien pu jeter tout ça par terre ? Quel manque de savoir-vivre ! Faut que la Princesse des Déchets leur donne une bonne leçon !",
                                 voice: "story/1200/120017/1E0B88AE",
                                 npc: 200002,
                                 next: 12001724,
                             },
                             {
                                 id: 12001724,
-                                content: "Tu vas bien, Snow ? Tu n’es pas trop fatiguée ?",
+                                content: "Tu vas bien, Snow ? Tu n’es pas trop fatiguée ?",
                                 voice: "story/1200/120017/1E0B88D8",
                                 npc: 100001,
                                 next: 12001725,
@@ -48811,7 +48880,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001725,
                                 content:
-                                    "Pour te prendre sur le fait, j’ai dû rester éveillée toute la journée, en guettant à ta porte... super longtemps !",
+                                    "Pour te prendre sur le fait, j’ai dû rester éveillée toute la journée, en guettant à ta porte... super longtemps !",
                                 voice: "story/1200/120017/1E0B8902",
                                 npc: 200002,
                                 next: 12001726,
@@ -48826,7 +48895,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001727,
                                 content:
-                                    "Petit larbin ! Regarde ! Dans cette cabine rouge, il y a quelqu’un ! Ce serait la personne que tu cherches ?",
+                                    "Petit larbin ! Regarde ! Dans cette cabine rouge, il y a quelqu’un ! Ce serait la personne que tu cherches ?",
                                 voice: "story/1200/120017/1E0B8956",
                                 npc: 200002,
                                 next: 12001728,
@@ -48842,14 +48911,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001729,
                                 content:
-                                    "Alors ! La destination officielle de notre aventure est cette cabine rouge ! Que ce soit elle ou pas, on va vite le savoir !",
+                                    "Alors ! La destination officielle de notre aventure est cette cabine rouge ! Que ce soit elle ou pas, on va vite le savoir !",
                                 voice: "story/1200/120017/1E0B89AA",
                                 npc: 200002,
                                 next: 12001730,
                             },
                             {
                                 id: 12001730,
-                                content: "T’es {性别:prêt|prête} ? C’est parti !",
+                                content: "T’es {性别:prêt|prête} ? C’est parti !",
                                 voice: "story/1200/120017/1E0B89D4",
                                 npc: 200002,
                             },
@@ -48880,14 +48949,14 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12001731,
-                                content: "... Qui êtes-vous !?",
+                                content: "... Qui êtes-vous !?",
                                 voice: "story/1200/120017/1E0B89FE",
                                 npc: 220022,
                                 next: 12001732,
                             },
                             {
                                 id: 12001732,
-                                content: "Mademoiselle ! Je peux t’emprunter une pièce ?",
+                                content: "Mademoiselle ! Je peux t’emprunter une pièce ?",
                                 voice: "story/1200/120017/1E0B8A28",
                                 npc: 200002,
                                 next: 12001733,
@@ -48909,14 +48978,14 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001735,
-                                content: "Je suis en mission, ne me dérange pas !",
+                                content: "Je suis en mission, ne me dérange pas !",
                                 voice: "story/1200/120017/1E0B8AA6",
                                 npc: 220022,
                                 next: 12001736,
                             },
                             {
                                 id: 12001736,
-                                content: "... Hmpf. Radine ! Bon, tant pis, j’irai chercher ma pièce ailleurs !",
+                                content: "... <I>Hmpf</>. Radine ! Bon, tant pis, j’irai chercher ma pièce ailleurs !",
                                 voice: "story/1200/120017/1E0B8AD0",
                                 npc: 200002,
                             },
@@ -48960,7 +49029,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001739,
-                                content: "Compris. Autres anomalies ?",
+                                content: "Compris. Autres anomalies ?",
                                 voice: "story/1200/120017/1E0B8B4E",
                                 npc: 220023,
                                 next: 12001740,
@@ -48974,7 +49043,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001741,
-                                content: "Quoi !? Tu as laissé partir cette Lunarien !?",
+                                content: "Quoi !? Tu as laissé partir cette Lunarien !?",
                                 voice: "story/1200/120017/1E0B8BA2",
                                 npc: 220023,
                                 next: 12001742,
@@ -48982,7 +49051,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001742,
                                 content:
-                                    "... Y a-t-il un problème, Commandant ? La cible est {性别:un jeune homme|une jeune femme} Charon d’environ 18 ans. Il est improbable {性别:qu’il|qu’elle} se soit {性别:déguisé|déguisée} en Lunarien...",
+                                    "... Y a-t-il un problème, Commandant ? La cible est {性别:un jeune homme|une jeune femme} Charon d’environ 18 ans. Il est improbable {性别:qu’il|qu’elle} se soit {性别:déguisé|déguisée} en Lunarien...",
                                 voice: "story/1200/120017/1E0B8BCC",
                                 npc: 220022,
                                 next: 12001743,
@@ -48990,7 +49059,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001743,
                                 content:
-                                    "Idiote ! Une personne adulte ne peut pas se transformer en Lunarien, c’est sûr, mais... et si la cible avait une complice ? {性别:Il|Elle} pourrait se cacher à proximité, observant chacun de nos mouvements.",
+                                    "Idiote ! Une personne adulte ne peut pas se transformer en Lunarien, c’est sûr, mais... et si la cible avait une complice ? {性别:Il|Elle} pourrait se cacher à proximité, observant chacun de nos mouvements.",
                                 voice: "story/1200/120017/1E0B8BF6",
                                 npc: 220023,
                                 next: 12001744,
@@ -48998,7 +49067,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001744,
                                 content:
-                                    "À toutes les unités ! Bloquez immédiatement la place et les zones environnantes. Arrêtez tout ce qui bouge ! Ce soir, même un hibou ne doit pas franchir les murailles de Givrelac !",
+                                    "À toutes les unités ! Bloquez immédiatement la place et les zones environnantes. Arrêtez tout ce qui bouge ! Ce soir, même un hibou ne doit pas franchir les murailles de Givrelac !",
                                 voice: "story/1200/120017/1E0B8C20",
                                 npc: 220023,
                             },
@@ -49021,7 +49090,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001745,
                                 content:
-                                    "Alors, petit larbin ? Sans la bravoure et l’ingéniosité du Roi Démon de la Lumière, tu serais tombé dans leur piège !",
+                                    "Alors, petit larbin ? Sans la bravoure et l’ingéniosité du Roi Démon de la Lumière, tu serais tombé dans leur piège !",
                                 voice: "story/1200/120017/1E0B8C4A",
                                 npc: 200002,
                                 options: [
@@ -49039,7 +49108,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001746,
-                                content: "Hum hum ! Continue, j’adore entendre à quel point je suis géniale !",
+                                content: "<I>Hum hum</> ! Continue, j’adore entendre à quel point je suis géniale !",
                                 voice: "story/1200/120017/1E0B8C74",
                                 npc: 200002,
                                 next: 12001748,
@@ -49047,7 +49116,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001747,
                                 content:
-                                    "Quoi !? Où trouverais-tu une alliée aussi efficace, talentueuse... et surtout aussi mignonne que moi !?",
+                                    "Quoi !? Où trouverais-tu une alliée aussi efficace, talentueuse... et surtout aussi mignonne que moi !?",
                                 voice: "story/1200/120017/1E0B8C9E",
                                 npc: 200002,
                                 next: 12001748,
@@ -49074,7 +49143,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001751,
-                                content: "Ils ont capté ! On doit sortir avant qu’ils ne nous encerclent.",
+                                content: "Ils ont capté ! On doit sortir avant qu’ils ne nous encerclent.",
                                 voice: "story/1200/120017/1E0B8D46",
                                 npc: 100001,
                                 next: 12001752,
@@ -49218,7 +49287,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12004401,
-                                content: "Ces machines là-bas ont l’air bizarres... Hum, vaut mieux qu’on les évite !",
+                                content: "Ces machines là-bas ont l’air bizarres... Hum, vaut mieux qu’on les évite !",
                                 voice: "story/1200/120044/1E0D400A",
                                 npc: 200002,
                             },
@@ -49238,7 +49307,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12004502,
-                                content: "Aaah... on s’est fait repérer !",
+                                content: "Aaah... on s’est fait repérer !",
                                 voice: "story/1200/120045/1E0D509C",
                                 npc: 200002,
                             },
@@ -49251,7 +49320,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12004402,
-                                content: "Elles se sont tournées ! Maintenant !",
+                                content: "Elles se sont tournées ! Maintenant !",
                                 voice: "story/1200/120044/1E0D4034",
                                 npc: 200002,
                             },
@@ -49311,21 +49380,21 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001756,
                                 content:
-                                    "Dans le traité militaire de Huaxu, il est dit : « Quand tu encercles ton ennemi, laisse toujours une issue. Crée une fausse route pour mieux le piéger. » À l’instant même, qui sait combien de soldats impériaux se cachent dans les égouts ?",
+                                    "Dans le traité militaire de Huaxu, il est dit : « Quand tu encercles ton ennemi, laisse toujours une issue. Crée une fausse route pour mieux le piéger. » À l’instant même, qui sait combien de soldats impériaux se cachent dans les égouts ?",
                                 voice: "story/1200/120017/1E0B8E18",
                                 npc: 210004,
                                 next: 12001757,
                             },
                             {
                                 id: 12001757,
-                                content: "Allez, monte !",
+                                content: "Allez, monte !",
                                 voice: "story/1200/120017/1E0B8E42",
                                 npc: 210004,
                                 next: 12001758,
                             },
                             {
                                 id: 12001758,
-                                content: "Madame... euh, Patronne Zhiliu ! Que faites-vous ici ?",
+                                content: "Madame... euh, Patronne Zhiliu ! Que faites-vous ici ?",
                                 voice: "story/1200/120017/1E0B8E6C",
                                 npc: 100001,
                                 next: 12001759,
@@ -49339,14 +49408,14 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001760,
-                                content: "Tu comptes rester là à bavarder, ou tu préfères qu’on parte avant qu’ils t’attrapent ?",
+                                content: "Tu comptes rester là à bavarder, ou tu préfères qu’on parte avant qu’ils t’attrapent ?",
                                 voice: "story/1200/120017/1E0B8EC0",
                                 npc: 210004,
                                 next: 12001761,
                             },
                             {
                                 id: 12001761,
-                                content: "... Compris !",
+                                content: "... Compris !",
                                 voice: "story/1200/120017/1E0B8EEA",
                                 npc: 100001,
                             },
@@ -49362,7 +49431,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12001762,
-                                content: "Qui va là ? Halte !",
+                                content: "Qui va là ? Halte !",
                                 voice: "story/1200/120017/1E0B8F14",
                                 npc: 220025,
                                 next: 12001763,
@@ -49370,7 +49439,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001763,
                                 content:
-                                    "Ordres venus d’en haut, ce soir, aucun individu suspect ne doit passer. Merci de votre coopération. ",
+                                    "Ordres venus d’en haut, ce soir, aucun individu suspect ne doit passer. Merci de votre coopération. ",
                                 voice: "story/1200/120017/1E0B8F3E",
                                 npc: 220025,
                                 next: 120017641,
@@ -50208,7 +50277,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12010234,
                                 content:
-                                    'Pourtant, certains étrangers semblent encore ignorer ces règles. Il semblerait que, durant mon absence, quelques "surprises" aient été laissées derrière moi.',
+                                    "Pourtant, certains étrangers semblent encore ignorer ces règles. Il semblerait que, durant mon absence, quelques « surprises » aient été laissées derrière moi.",
                                 voice: "story/1201/120102/1E10FD04",
                                 npc: 210004,
                                 next: 12010235,
@@ -50266,7 +50335,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12010305,
                                 content:
-                                    "Ces derniers temps, le <H>Fléau de Zhuyin</> gagne en intensité. Certains Tisse-Étoiles, mécontents du Décret d’Interdiction, ont contourné Éternel Printemps. Ils ont engagé des gardes venus de l’extérieur, décidés à braver les zones dangereuses.",
+                                    "Ces derniers temps, le <W>Fléau de Zhuyin</> gagne en intensité. Certains Tisse-Étoiles, mécontents du Décret d’Interdiction, ont contourné Éternel Printemps. Ils ont engagé des gardes venus de l’extérieur, décidés à braver les zones dangereuses.",
                                 voice: "story/1201/120103/1E1108AA",
                                 npc: 210032,
                                 next: 12010306,
@@ -50415,7 +50484,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12010453,
                                 content:
-                                    "Hmm... pour faire simple, c’est une catastrophe très très méchante qui empêche tout le monde de faire du commerce tranquillement.",
+                                    "<I>Hmm</>... pour faire simple, c’est une catastrophe très très méchante qui empêche tout le monde de faire du commerce tranquillement.",
                                 voice: "story/1201/120104/1E111F28",
                                 npc: 210003,
                                 next: 12010454,
@@ -52061,7 +52130,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12011201,
-                                content: "Pff— super... Quand tu parles du loup... Petit larbin, tu portes vraiment la poisse !",
+                                content: "<I>Pff</>— super... Quand tu parles du loup... Petit larbin, tu portes vraiment la poisse !",
                                 voice: "story/1201/120112/1E119BAA",
                                 npc: 200002,
                                 next: 12011202,
@@ -52538,7 +52607,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12011704,
-                                content: "Rrrrraaaah— !",
+                                content: "<I>Rrrrraaaah</>— !",
                                 voice: "story/1201/120117/1E11EE30",
                                 npc: 100001,
                                 next: 12011705,
@@ -52807,12 +52876,12 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 12010301,
                 name: "Se rendre au marché noir",
-                desc: 'Comme Zhiliu vous l’a expliqué, ceux qui se rendent pour la première fois au marché noir doivent en sortir par une grotte côtière, un pendentif bien en vue à la ceinture, afin de répondre au "mot de passe".',
+                desc: "Comme Zhiliu vous l’a expliqué, ceux qui se rendent pour la première fois au marché noir doivent en sortir par une grotte côtière, un pendentif bien en vue à la ceinture, afin de répondre au « mot de passe ».",
             },
             {
                 id: 12010302,
                 name: "Parler au marchand du marché noir",
-                desc: 'Comme Zhiliu vous l’a expliqué, ceux qui se rendent pour la première fois au marché noir doivent en sortir par une grotte côtière, un pendentif bien en vue à la ceinture, afin de répondre au "mot de passe".\nUn marchand du marché noir vous attend un peu plus loin. Allez lui parler.',
+                desc: "Comme Zhiliu vous l’a expliqué, ceux qui se rendent pour la première fois au marché noir doivent en sortir par une grotte côtière, un pendentif bien en vue à la ceinture, afin de répondre au « mot de passe ».\nUn marchand du marché noir vous attend un peu plus loin. Allez lui parler.",
                 nodes: [
                     {
                         id: "17627890394154362781",
@@ -53269,7 +53338,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12012508,
-                                content: "Rrrroaaaar— !",
+                                content: "<I>Rrrroaaaar—</> !",
                                 voice: "story/1201/120125/1E127218",
                             },
                         ],
@@ -53294,7 +53363,7 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 12010304,
                 name: "Examiner les blessures de la jeune fille",
-                desc: 'En écoutant leur dispute, vous comprenez que le marchand du marché noir a exploité une faille dans les Neuf Chapitres de Dafeng pour dépouiller une jeune fille des biens de sa famille. À présent, il a même lâché un Bi’an sur elle, sous prétexte de "punition". Sans votre intervention, l’affaire aurait pu tourner bien plus mal.\nAllez maintenant examiner les blessures de la jeune fille.',
+                desc: "En écoutant leur dispute, vous comprenez que le marchand du marché noir a exploité une faille dans les Neuf Chapitres de Dafeng pour dépouiller une jeune fille des biens de sa famille. À présent, il a même lâché un Bi’an sur elle, sous prétexte de « punition ». Sans votre intervention, l’affaire aurait pu tourner bien plus mal.\nAllez maintenant examiner les blessures de la jeune fille.",
                 nodes: [
                     {
                         id: "17627890394154362802",
@@ -53622,7 +53691,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12012719,
                                 content:
-                                    'Là où il y a des humains, il y a domination et soumission. Si certains choisissent d’arracher leurs propres crocs, de jeter l’épée et le bouclier, et de confier leur force à des "règles"aussi vagues qu’intangibles... alors l’existence de gens comme moi n’a rien d’étonnant.',
+                                    "Là où il y a des humains, il y a domination et soumission. Si certains choisissent d’arracher leurs propres crocs, de jeter l’épée et le bouclier, et de confier leur force à des « règles » aussi vagues qu’intangibles... alors l’existence de gens comme moi n’a rien d’étonnant.",
                                 voice: "story/1201/120127/1E1294B6",
                                 npc: 210012,
                                 next: 12012720,
@@ -53991,7 +54060,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12013122,
                                 content:
-                                    "Hm. J’ai lu quelques chroniques de contrées lointaines. Un « duc » serait un titre de noblesse de l’Empire Hyperboréen... mais ces « égouts »...",
+                                    "<I>Hm.</> J’ai lu quelques chroniques de contrées lointaines. Un « duc » serait un titre de noblesse de l’Empire Hyperboréen... mais ces « égouts »...",
                                 voice: "story/1201/120131/1E12D6D4",
                                 npc: 210013,
                                 next: 12013123,
@@ -54177,7 +54246,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12013406,
                                 content:
-                                    "Euh... il doit y avoir un malentendu. Nous venons pour comprendre le fonctionnement de cette arme, pas pour devenir vos apprentis...",
+                                    "<I>Euh...</> il doit y avoir un malentendu. Nous venons pour comprendre le fonctionnement de cette arme, pas pour devenir vos apprentis...",
                                 voice: "story/1201/120134/1E13056C",
                                 npc: 100001,
                                 next: 12013407,
@@ -54584,7 +54653,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12022602,
                                 content:
-                                    "Petit larbin, la prophétie que tu as entendue, elle s’est réalisée. Mais alors… qu’essayait-elle vraiment de nous dire ?",
+                                    "Petit larbin, la prophétie que tu as entendue, elle s’est réalisée. Mais alors... qu’essayait-elle vraiment de nous dire ?",
                                 voice: "story/1201/120226/1E18EA24",
                                 npc: 200002,
                                 next: 12022603,
@@ -54844,7 +54913,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12022914,
                                 content:
-                                    "« Tuer et piller attire la colère du Ciel » — tel est l’antique précepte des Neuf Chapitres de Dafeng !",
+                                    "<W>« Tuer et piller attire la colère du Ciel »</> — tel est l’antique précepte des Neuf Chapitres de Dafeng !",
                                 voice: "story/1201/120229/1E191D54",
                                 npc: 210031,
                                 next: 12022915,
@@ -55091,7 +55160,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12023201,
-                                content: "Pfiou... enfin terminé.",
+                                content: "<I>Pfiou...</> enfin terminé.",
                                 voice: "story/1201/120232/1E194C6A",
                                 npc: 200002,
                                 next: 12023202,
@@ -55130,7 +55199,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12023303,
-                                content: "Hm. Vous avez bien travaillé. Merci.",
+                                content: "<I>Hm.</> Vous avez bien travaillé. Merci.",
                                 voice: "story/1201/120233/1E195D26",
                                 npc: 210004,
                                 next: 12023304,
@@ -55561,7 +55630,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12013422,
-                                content: "Hmph... acceptable. Et pour l’épreuve suivante ?",
+                                content: "<I>Hmph...</> acceptable. Et pour l’épreuve suivante ?",
                                 voice: "story/1201/120134/1E13080C",
                                 npc: 210014,
                             },
@@ -55599,7 +55668,8 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12013454,
-                                content: "Hm... pas mal. Votre compréhension n’est pas mauvaise. Il y a encore matière à vous enseigner.",
+                                content:
+                                    "<I>Hm...</> pas mal. Votre compréhension n’est pas mauvaise. Il y a encore matière à vous enseigner.",
                                 voice: "story/1201/120134/1E130CD1",
                                 npc: 210014,
                                 next: 12013455,
@@ -55900,7 +55970,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12014018,
-                                content: "Mm...",
+                                content: "<I>Mm...</>",
                                 voice: "story/1201/120140/1E1369D4",
                                 npc: 210056,
                                 next: 12014019,
@@ -56156,7 +56226,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12014018,
-                                content: "Mm...",
+                                content: "<I>Mm...</>",
                                 voice: "story/1201/120140/1E1369D4",
                                 npc: 210056,
                                 next: 12014019,
@@ -56361,7 +56431,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12014303,
                                 content:
-                                    "Inutile de paniquer, Snow. C’est l’un des Wishen dont je t’ai parlé. Ceux qui n’ont pas reçu leur invitation ne peuvent pas voir leur véritable forme.",
+                                    "Inutile de paniquer, Snow. C’est l’un des <H>Wishen</> dont je t’ai parlé. Ceux qui n’ont pas reçu leur invitation ne peuvent pas voir leur véritable forme.",
                                 voice: "story/1201/120143/1E139896",
                                 npc: 210013,
                                 next: 12014304,
@@ -56492,7 +56562,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12014205,
-                                content: 'Héhé ! Voilà ce que les romans appellent une "rencontre du destin", rien que ça !',
+                                content: "Héhé ! Voilà ce que les romans appellent une « rencontre du destin », rien que ça !",
                                 voice: "story/1201/120142/1E138882",
                                 npc: 200002,
                             },
@@ -56846,7 +56916,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12015513,
                                 content:
-                                    "Ce n’est que récemment qu’un disciple de ma sœur m’a tirée de ce long sommeil. À l’aide d’un remède nouvellement mis au point, il a purgé la maladie de mon corps… et j’ai pu revenir parmi les vivants.",
+                                    "Ce n’est que récemment qu’un disciple de ma sœur m’a tirée de ce long sommeil. À l’aide d’un remède nouvellement mis au point, il a purgé la maladie de mon corps... et j’ai pu revenir parmi les vivants.",
                                 voice: "story/1201/120155/1E145F1A",
                                 npc: 210013,
                                 next: 12015514,
@@ -58183,7 +58253,7 @@ export const questData_fr: QuestStory[] = [
                         name: "对话节点",
                         srId: 105001,
                         pos: [58542, -25491],
-                        next: ["176543733256461290249", "176543733256461290250", "176543733256461290252"],
+                        next: ["176543733256461290249"],
                         dialogues: [
                             {
                                 id: 12018216,
@@ -58230,38 +58300,6 @@ export const questData_fr: QuestStory[] = [
                                 id: 12018221,
                                 content: "Pierres ternes... avec la force... briller !",
                                 voice: "story/1201/120182/1E161B62",
-                                npc: 210017,
-                            },
-                        ],
-                    },
-                    {
-                        id: "176543733256461290250",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        dialogues: [
-                            {
-                                id: 12018222,
-                                content: "Le passage est bloqué...",
-                                npc: 100001,
-                                next: 12018223,
-                            },
-                            {
-                                id: 12018223,
-                                content: "Observons les alentours. Il doit y avoir un mécanisme dissimulé.",
-                                voice: "story/1201/120182/1E161BB6",
-                                npc: 210013,
-                            },
-                        ],
-                    },
-                    {
-                        id: "176543733256461290252",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        dialogues: [
-                            {
-                                id: 12018224,
-                                content: "Pierres ternes... toutes... briller ensemble !",
-                                voice: "story/1201/120182/1E161BE0",
                                 npc: 210017,
                             },
                         ],
@@ -59132,7 +59170,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12019904,
-                                content: 'Le "Bi’an" dont vous parliez... C’était lui, depuis le début ?',
+                                content: "Le « Bi’an » dont vous parliez... C’était lui, depuis le début ?",
                                 voice: "story/1201/120199/1E172F80",
                                 npc: 100001,
                                 next: 12019905,
@@ -59184,7 +59222,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12019911,
                                 content:
-                                    "Hm... Suis-je vraiment celui qui met ce monde en danger ? Ou bien est-ce ce monde lui-même qui est déjà en train de se disloquer ? Les dérives causées par les Neuf Chapitres... peux-tu vraiment les ignorer ?",
+                                    "<I>Hm...</> Suis-je vraiment celui qui met ce monde en danger ? Ou bien est-ce ce monde lui-même qui est déjà en train de se disloquer ? Les dérives causées par les Neuf Chapitres... peux-tu vraiment les ignorer ?",
                                 voice: "story/1201/120199/1E1730A6",
                                 npc: 210012,
                                 next: 12019912,
@@ -59994,7 +60032,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12019613,
-                                content: "Inculte ! C’est la toute dernière invention de la Secte Jishu ! Contente-toi de regarder !",
+                                content: "Inculte ! C’est la toute dernière invention de la Secte Jishu ! Contente-toi de regarder !\n",
                                 voice: "story/1201/120196/1E16FF13",
                                 npc: 200002,
                             },
@@ -60186,7 +60224,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12020706,
-                                content: "Rooooaaar— !",
+                                content: "<I>Rooooaaar—</> !",
                                 voice: "story/1201/120207/1E17B314",
                                 next: 12020707,
                             },
@@ -60262,7 +60300,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12020901,
-                                content: "Pfiou... C’était vraiment moins une.",
+                                content: "<I>Pfiou...</> C’était vraiment moins une.",
                                 voice: "story/1201/120209/1E17D312",
                                 npc: 210005,
                                 next: 12020902,
@@ -61421,7 +61459,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12030520,
-                                content: 'D’accord ! Mais... c’est quoi, le "Glouton" ?',
+                                content: "D’accord ! Mais... c’est quoi, le « Glouton » ?",
                                 voice: "story/1201/120111/1E1DFD30",
                                 npc: 211001,
                                 next: 12030521,
@@ -61473,7 +61511,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12030527,
-                                content: "Attends… j’ai compris ! Ce sont des patates magiques... bénies par un gentil magicien !",
+                                content: "Attends... j’ai compris ! Ce sont des patates magiques... bénies par un gentil magicien !",
                                 voice: "story/1201/120111/1E1DFE56",
                                 npc: 211001,
                                 next: 12030528,
@@ -62084,7 +62122,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12031310,
                                 content:
-                                    'Euh ! Petite Fina, pardon mais... tu peux pas me donner un autre rôle ? "Princesse", c’est un peu gênant...',
+                                    "Euh ! Petite Fina, pardon mais... tu peux pas me donner un autre rôle ? « Princesse », c’est un peu gênant...",
                                 voice: "story/1201/120112/1E1E7ECC",
                                 npc: 211003,
                                 next: 12031311,
@@ -63418,7 +63456,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12032802,
                                 content:
-                                    'Bon, alors, révisons notre... euh... "témoignage". Dans un instant, je ramène mon ami. Vous, vous ferez semblant d’être des voyageurs qui ont déjà vu la Fée-Papillon, et vous l’emmènerez dans une petite ruelle en lui disant qu’elle apparaîtra là.',
+                                    "Bon, alors, révisons notre... euh... « témoignage ». Dans un instant, je ramène mon ami. Vous, vous ferez semblant d’être des voyageurs qui ont déjà vu la Fée-Papillon, et vous l’emmènerez dans une petite ruelle en lui disant qu’elle apparaîtra là.",
                                 voice: "story/1201/120114/1E1F7394",
                                 npc: 211012,
                                 next: 12032803,
@@ -63433,7 +63471,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12032804,
-                                content: '"Témoignage" ? Tu veux plutôt dire "plan", non ?',
+                                content: "« Témoignage » ? Tu veux plutôt dire « plan », non ?",
                                 voice: "story/1201/120114/1E1F73E8",
                                 npc: 100001,
                                 next: 12032805,
@@ -63447,7 +63485,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12032806,
-                                content: 'Oui, oui ! Je retiens : "témoignage" !',
+                                content: "Oui, oui ! Je retiens : « témoignage » !",
                                 voice: "story/1201/120114/1E1F743C",
                                 npc: 211001,
                                 next: 12032807,
@@ -64230,7 +64268,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12033851,
-                                content: "Ce n’est pas moi… ce sont mes amis qui viennent m’aider !",
+                                content: "Ce n’est pas moi... ce sont mes amis qui viennent m’aider !",
                                 voice: "story/1201/120114/1E201FAE",
                                 npc: 211001,
                                 next: 12033852,
@@ -64635,7 +64673,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12034216,
                                 content:
-                                    'Un "gros monstre" ? Non, trop effrayant ! Je ne connais pas de magie aussi sombre… Mais je peux appeler un grand chevalier pour vous protéger, si vous voulez !',
+                                    "Un « gros monstre » ? Non, trop effrayant ! Je ne connais pas de magie aussi sombre... Mais je peux appeler un grand chevalier pour vous protéger, si vous voulez !",
                                 voice: "story/1201/120114/1E205B90",
                                 npc: 211001,
                                 next: 12034217,
@@ -65037,7 +65075,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12034216,
                                 content:
-                                    'Un "gros monstre" ? Non, trop effrayant ! Je ne connais pas de magie aussi sombre… Mais je peux appeler un grand chevalier pour vous protéger, si vous voulez !',
+                                    "Un « gros monstre » ? Non, trop effrayant ! Je ne connais pas de magie aussi sombre... Mais je peux appeler un grand chevalier pour vous protéger, si vous voulez !",
                                 voice: "story/1201/120114/1E205B90",
                                 npc: 211001,
                                 next: 12034217,
@@ -66135,7 +66173,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12040411,
                                 content:
-                                    "Votre teint révèle une légère transpiration et un esprit quelque peu flottant, mais rien d’inquiétant. Je vais y ajouter un qian de Fushen. Une fois la décoction absorbée, votre esprit devrait s’éclaircir.",
+                                    "Votre teint révèle une légère transpiration et un esprit quelque peu flottant, mais rien d’inquiétant. Je vais y ajouter un peu de Fushen. Une fois la décoction absorbée, votre esprit devrait s’éclaircir.",
                                 voice: "story/1204/120404/1E2453EE",
                                 npc: 240003,
                                 next: 12040412,
@@ -70968,7 +71006,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12043719,
-                                content: "<I>Hmpf.<I> Je réglerai le compte de ce bon à rien plus tard. Parlons plutôt de l’essentiel.",
+                                content: "<I>Hmpf.</> Je réglerai le compte de ce bon à rien plus tard. Parlons plutôt de l’essentiel.",
                                 voice: "story/1204/120437/1E2672A6",
                                 npc: 240026,
                                 next: 12043720,
@@ -71912,7 +71950,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12044114,
-                                content: "Oui. Il y est entré avant l’aube… et il n’en est pas ressorti.",
+                                content: "Oui. Il y est entré avant l’aube... et il n’en est pas ressorti.",
                                 voice: "story/1204/120441/1E26B374",
                                 npc: 240033,
                                 next: 12044115,
@@ -72243,7 +72281,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12044322,
-                                content: "Grande sœur Yi… et vous aussi... merci. Vraiment.",
+                                content: "Grande sœur Yi... et vous aussi... merci. Vraiment.",
                                 voice: "story/1204/120443/1E26D594",
                                 npc: 240034,
                                 next: 12044323,
@@ -73781,7 +73819,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12045008,
-                                content: "... Petit larbin ? Hé ! Réponds-moi ! … Ça va ?!",
+                                content: "... Petit larbin ? Hé ! Réponds-moi ! ... Ça va ?!",
                                 voice: "story/1204/120450/1E274620",
                                 npc: 200002,
                             },
@@ -74190,7 +74228,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12045207,
                                 content:
-                                    "De nouvelles lunes en saisons, de saisons en années… j’ai enduré jusqu’au jour du tribut. Ma résolution ne souffre aucun doute.",
+                                    "De nouvelles lunes en saisons, de saisons en années... j’ai enduré jusqu’au jour du tribut. Ma résolution ne souffre aucun doute.",
                                 voice: "story/1204/120452/1E2766C6",
                                 npc: 240025,
                                 next: 12045208,
@@ -75116,7 +75154,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12045639,
                                 content:
-                                    "La Secte Jishu a été réprimée, et nombre de nos techniques ont été frappées d’interdit. Pourtant, on continuait d’avoir besoin des méchapoupées du Pavillon des Artisans pour produire et bâtir… mais toujours sous d’innombrables restrictions et un lourd préjugé.",
+                                    "La Secte Jishu a été réprimée, et nombre de nos techniques ont été frappées d’interdit. Pourtant, on continuait d’avoir besoin des méchapoupées du Pavillon des Artisans pour produire et bâtir... mais toujours sous d’innombrables restrictions et un lourd préjugé.",
                                 voice: "story/1204/120456/1E27ADA6",
                                 npc: 240026,
                                 next: 12045640,
@@ -79778,7 +79816,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12048503,
                                 content:
-                                    "<I>Pfiou...<I> qui aurait cru qu’en une seule journée il se passerait autant de choses... Même dans mes rêves, je n’aurais jamais imaginé voir un tel spectacle.",
+                                    "<I>Pfiou...</> qui aurait cru qu’en une seule journée il se passerait autant de choses... Même dans mes rêves, je n’aurais jamais imaginé voir un tel spectacle.",
                                 voice: "story/1204/120485/1E298386",
                                 npc: 240026,
                                 next: 12048504,
@@ -81926,7 +81964,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12060827,
                                 content:
-                                    "Ils sont composés des jeunes prodiges de la Secte Xuanheng. Leur formation est digne d’une finale.",
+                                    "Ils sont composés des jeunes prodiges de la Secte Xuanheng. Leur formation est digne d’une finale.\n",
                                 voice: "story/1206/120608/1E316849",
                                 npc: 250012,
                                 next: 12060821,
@@ -82018,7 +82056,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12060909,
                                 content:
-                                    "Dommage que ça ne se conserve pas... Si je pouvais en rapporter à Hyperborea, pour que les autres puissent goûter…",
+                                    "Dommage que ça ne se conserve pas... Si je pouvais en rapporter à Hyperborea, pour que les autres puissent goûter...",
                                 voice: "story/1206/120609/1E3176E2",
                                 npc: 250006,
                                 next: 12060910,
@@ -84610,7 +84648,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12063011,
-                                content: "Pendant ce temps, à l’arène…",
+                                content: "Pendant ce temps, à l’arène...",
                                 voice: "story/1206/120630/1E32CFBE",
                             },
                         ],
@@ -86966,7 +87004,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12063011,
-                                content: "Pendant ce temps, à l’arène…",
+                                content: "Pendant ce temps, à l’arène...",
                                 voice: "story/1206/120630/1E32CFBE",
                             },
                         ],
@@ -87317,7 +87355,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 12063011,
-                                content: "Pendant ce temps, à l’arène…",
+                                content: "Pendant ce temps, à l’arène...",
                                 voice: "story/1206/120630/1E32CFBE",
                             },
                         ],
@@ -88329,7 +88367,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20010102,
-                name: "Découvrez qui vous a interpellé.",
+                name: "Découvrir qui vous a interpellé",
                 desc: "Vous entendez quelqu’un vous appeler. Allez voir de qui il s’agit.",
                 nodes: [
                     {
@@ -88380,7 +88418,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 20000506,
                                 content:
-                                    'La "petite fille" au marteau devant toi a les mêmes traits et la même voix que Snow, mais son regard et son expérience racontent une tout autre histoire. Décidément, les <H>Lunariens</> sont un peuple bien mystérieux...',
+                                    "La « petite fille » au marteau devant toi a les mêmes traits et la même voix que Snow, mais son regard et son expérience racontent une tout autre histoire. Décidément, les <H>Lunariens</> sont un peuple bien mystérieux...",
                                 voice: "story/2001/200005/3211B52E",
                             },
                         ],
@@ -88735,7 +88773,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 20000506,
                                 content:
-                                    'La "petite fille" au marteau devant toi a les mêmes traits et la même voix que Snow, mais son regard et son expérience racontent une tout autre histoire. Décidément, les <H>Lunariens</> sont un peuple bien mystérieux...',
+                                    "La « petite fille » au marteau devant toi a les mêmes traits et la même voix que Snow, mais son regard et son expérience racontent une tout autre histoire. Décidément, les <H>Lunariens</> sont un peuple bien mystérieux...",
                                 voice: "story/2001/200005/3211B52E",
                             },
                         ],
@@ -88744,7 +88782,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20010103,
-                name: "Ramenez Luno, la forgeronne, au Sanctuaire.",
+                name: "Ramener Luno, la forgeronne, au Sanctuaire",
                 desc: "Celle qui vous a interpellé se présente comme une forgeronne de la race des Luno.\nSelon Snow, il s’agirait d’une ancienne, bien que tous les Luno aient la même apparence juvénile, quel que soit leur âge.\nEn échange de ses talents, Luno, la forgeronne souhaite vous accompagner dans votre voyage.\nRamenez-la au Sanctuaire.",
             },
             {
@@ -88754,7 +88792,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20010105,
-                name: "Fabriquez une fiole de Sel volatil avec Luno, la forgeronne.",
+                name: "Fabriquer une fiole de Sel volatil avec Luno, la forgeronne",
                 desc: "Luno, la forgeronne ne cache pas sa fierté quant à ses talents.\nVoyez donc de quoi elle est capable.",
                 nodes: [
                     {
@@ -89373,7 +89411,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 20000921,
                                 content:
-                                    "Pourtant, elles continuent à absorber l’eau de toutes leurs forces et, même pour un temps si court, s’épanouissent pleinement, comme si elles avaient encore leurs racines, comme si elles n’avaient jamais été coupées. ",
+                                    "Pourtant, elles continuent à absorber l’eau de toutes leurs forces et, même pour un temps si court, s’épanouissent pleinement, comme si elles avaient encore leurs racines, comme si elles n’avaient jamais été coupées. ",
                                 voice: "story/2001/200009/3211F91A",
                                 npc: 200027,
                                 next: 20000922,
@@ -89462,7 +89500,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 20000928,
-                                content: "Parfait, c’est une promesse. ",
+                                content: "Parfait, c’est une promesse. ",
                                 voice: "story/2001/200009/3211FA40",
                                 npc: 100001,
                                 next: 20000929,
@@ -89553,7 +89591,7 @@ export const questData_fr: QuestStory[] = [
                                     },
                                     {
                                         id: 200048042,
-                                        content: '<I>Donc, la "chose terrible", c’est juste qu’on a vu... un cochon géant ?</>',
+                                        content: "<I>Donc, la « chose terrible », c’est juste qu’on a vu... un cochon géant ?</>",
                                         next: 20004806,
                                     },
                                 ],
@@ -89587,7 +89625,7 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 20010302,
                 name: "Se rendre à la rive du Lac du Deuil et chercher le cochon géant",
-                desc: 'On raconte qu’un cochon géant rôde aux abords de Givrelac. Difficile d’y croire... mais s’il est vraiment "géant", jusqu’à quel point ? Rien ne vaut vos propres yeux : allez vérifier par vous-même.',
+                desc: "On raconte qu’un cochon géant rôde aux abords de Givrelac. Difficile d’y croire... mais s’il est vraiment « géant », jusqu’à quel point ? Rien ne vaut vos propres yeux : allez vérifier par vous-même.",
                 nodes: [
                     {
                         id: "1745491798277276829",
@@ -89800,7 +89838,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 20005403,
                                 content:
-                                    'Alors... c’est ça, le "cochon géant" plus grand que moi, la tête grosse comme une forteresse ? Tu t’es fait rouler, Snow.',
+                                    "Alors... c’est ça, le « cochon géant » plus grand que moi, la tête grosse comme une forteresse ? Tu t’es fait rouler, Snow.",
                                 voice: "story/2001/200054/3214D86E",
                                 npc: 100001,
                                 next: 20005404,
@@ -89852,7 +89890,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 20005410,
                                 content:
-                                    'Oui, ce sont eux... Ils se font appeler "Chasseurs de Géniemon". Ça sonne beau, mais en vrai, ils ne font que des bêtises. Ils attrapent tous les Géniemon des alentours et ne leur laissent aucune liberté.',
+                                    "Oui, ce sont eux... Ils se font appeler « Chasseurs de Géniemon ». Ça sonne beau, mais en vrai, ils ne font que des bêtises. Ils attrapent tous les Géniemon des alentours et ne leur laissent aucune liberté.",
                                 voice: "story/2001/200054/3214D994",
                                 npc: 200074,
                             },
@@ -90274,7 +90312,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 20005710,
                                 content:
-                                    "Comment faire entrer Truffle à Givrelac ? C’est simple, en trois étapes :\n1) Aller aux Asphodèles.\n2) Demander de l’aide à Camilla.",
+                                    "Comment faire entrer Truffle à Givrelac ? C’est simple, en trois étapes :\n 1) Aller aux Asphodèles.\n 2) Demander de l’aide à Camilla.",
                                 voice: "story/2001/200057/32150ACC",
                             },
                         ],
@@ -90372,7 +90410,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 20005716,
                                 content:
-                                    "Merci, Madame Camilla ! J’étais un peu nerveuse... j’ai même appelé le Domaine Vivar... « Vavir » par erreur... Désolée. ",
+                                    "Merci, Madame Camilla ! J’étais un peu nerveuse... j’ai même appelé le Domaine Vivar... « Vavir » par erreur... Désolée. ",
                                 voice: "story/2001/200057/32150BC8",
                                 npc: 200074,
                                 next: 20005717,
@@ -90531,7 +90569,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 20005903,
-                                content: "<I>Groin…</>",
+                                content: "<I>Groin...</>",
                                 voice: "story/2001/200059/32152A76",
                                 npc: 200086,
                                 next: 20005904,
@@ -91539,7 +91577,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 20007010,
                                 content:
-                                    "Quand Filbert et moi cherchons de la nourriture, on traverse parfois, par des montagnes non gardées pour atteindre l’Hyperborea. Au début, j'avais un peu peur, après tout, l’Église et l’Empire ont toujours été en guerre...",
+                                    "Quand Filbert et moi cherchons de la nourriture, on traverse parfois, par des montagnes non gardées pour atteindre l’Hyperborea. Au début, j’avais un peu peur, après tout, l’Église et l’Empire ont toujours été en guerre...",
                                 voice: "story/2001/200070/3215E014",
                                 npc: 200074,
                                 next: 20007011,
@@ -91869,7 +91907,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020102,
-                name: "Essayez de retrouver la dame mentionnée par Sally.",
+                name: "Retrouver la dame mentionnée par Sally",
                 desc: "Sally paraît tourmentée à propos d’une certaine dame dont elle s’inquiète.\nSi vous croisez cette femme, peut-être pourrez-vous lui venir en aide.",
             },
             {
@@ -92040,7 +92078,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51002405,
                                 content:
-                                    'Tu l’auras peut-être deviné, mais Monsieur Dickinson était le grand amour de Dame Hilin il y a quarante ans. À l’époque, elle n’était pas encore "dame", on l’appelait Mademoiselle Hilin, une jeune fille vive et passionnée.',
+                                    "Tu l’auras peut-être deviné, mais Monsieur Dickinson était le grand amour de Dame Hilin il y a quarante ans. À l’époque, elle n’était pas encore « dame », on l’appelait Mademoiselle Hilin, une jeune fille vive et passionnée.",
                                 npc: 700020,
                                 next: 51002406,
                             },
@@ -92465,12 +92503,12 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020302,
-                name: "Aidez Elsa à retrouver sa fille Annie.",
+                name: "Aider Elsa à retrouver sa fille Annie",
                 desc: "La fille unique de Madame Elsa, Annie, a disparu.\nEn parcourant Givrelac, gardez l’œil ouvert : quelqu’un pourrait bien ressembler à Annie.",
             },
             {
                 id: 20020303,
-                name: "Cherchez des indices sur le passé d’Alice.",
+                name: "Chercher des indices sur le passé d’Alice",
                 desc: "Essayez de fouiller à l’extérieur de la ville, le docteur n’a sans doute pas encore quitté les environs. Avec un peu de chance, vous la retrouverez.",
             },
             {
@@ -92497,7 +92535,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020306,
-                name: "Informez la jeune fille amnésique de vos découvertes.",
+                name: "Informer la jeune fille amnésique de vos découvertes",
                 desc: "Annie a tragiquement perdu la vie, tandis qu’Alice, la jeune fille qui avait revêtu ses vêtements, a survécu.\nBien qu’elle ait échappé à la mort dans les montagnes enneigées, la fièvre prolongée a effacé sa mémoire.\nÀ présent que la vérité est révélée, il ne reste plus qu’à la transmettre à celle qui doit l’entendre.",
                 nodes: [
                     {
@@ -92528,7 +92566,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51000891,
                                 content:
-                                    'La jeune fille aurait retrouvé un foyer chaleureux. Elsa aurait retrouvé sa "fille". <H>Ce serait le dénouement idéal... mais toutes deux ont droit à la vérité.</>',
+                                    "La jeune fille aurait retrouvé un foyer chaleureux. Elsa aurait retrouvé sa « fille ». <H>Ce serait le dénouement idéal... mais toutes deux ont droit à la vérité.</>",
                                 next: 51000892,
                             },
                             {
@@ -92646,8 +92684,8 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020309,
-                name: "Informez Elsa de ce qui est arrivé à Annie.",
-                desc: 'Nous avons choisi de cacher la mort d’Annie. Maintenant... conduisez "Annie" auprès de Madame Elsa pour les réunir.',
+                name: "Informer Elsa de ce qui est arrivé à Annie",
+                desc: "Nous avons choisi de cacher la mort d’Annie. Maintenant... conduisez « Annie » auprès de Madame Elsa pour les réunir.",
                 nodes: [
                     {
                         id: "1728635513781755655",
@@ -92706,7 +92744,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020310,
-                name: "Informez Elsa de ce qui est arrivé à Annie.",
+                name: "Informer Elsa de ce qui est arrivé à Annie",
                 desc: "Alice a retrouvé la mémoire.\nIl est temps d’annoncer à Madame Elsa la mort d’Annie...",
                 nodes: [
                     {
@@ -92790,7 +92828,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020312,
-                name: "Cette personne au grand cœur semble vouloir vous parler.",
+                name: "Cette personne au grand cœur semble vouloir vous parler",
                 desc: "Depuis que vous avez quitté cette femme éplorée, vous sentez un regard peser sur vous. Il semblerait qu’elle ait encore quelque chose à dire.",
                 nodes: [
                     {
@@ -92848,7 +92886,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020313,
-                name: "Allez interroger d’autres personnes.",
+                name: "Interroger d’autres personnes",
                 desc: "Continuez de demander autour de vous — quelqu’un possède peut-être un indice.",
                 nodes: [
                     {
@@ -92876,7 +92914,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020314,
-                name: "Demandez autour de vous où se trouve le médecin.",
+                name: "Se renseigner sur la localisation du médecin",
                 desc: "Il semble que d’autres habitants soient au courant. Interrogez-les au sujet du médecin disparu.",
                 nodes: [
                     {
@@ -92917,12 +92955,12 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020319,
-                name: "Informez Elsa de ce qui est arrivé à Annie.",
+                name: "Informer Elsa de ce qui est arrivé à Annie",
                 desc: "Alice a retrouvé la mémoire.\nIl est temps d’annoncer à Madame Elsa la mort d’Annie...",
             },
             {
                 id: 20020320,
-                name: "Informez Elsa de ce qui est arrivé à Annie.",
+                name: "Informer Elsa de ce qui est arrivé à Annie",
                 desc: "Alice a retrouvé la mémoire.\nIl est temps d’annoncer à Madame Elsa la mort d’Annie...",
             },
         ],
@@ -92987,12 +93025,12 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020403,
-                name: "Accomplissez une mission de Chasseur de Phoxène\n(vous pouvez en accepter une via la page Missions)",
+                name: "Accomplir une mission de Chasseur de Phoxène\n(via l’interface des missions)",
                 desc: "Vous avez accepté l’invitation de Wells.\nPréparez-vous et partez avec lui pour cette mission.",
             },
             {
                 id: 20020404,
-                name: "Aidez Wells à résoudre son problème.",
+                name: "Aider Wells à résoudre son problème",
                 desc: "Wells semble en difficulté...\nTrouvez un moyen de le protéger de la colère de son beau-père.",
             },
             {
@@ -93259,7 +93297,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20020503,
-                name: "Cherchez les affaires laissées par Brunetto.",
+                name: "Chercher les affaires laissées par Brunetto",
                 desc: "Vous voilà de retour sur l’îÎle du Purgatoire. Le temps semble s’y être figé : le village repose encore dans l’état où les Souillés l’ont laissé. La maison de Brunetto se trouvait tout à l’est. Rendez-vous sur place — peut-être y reste-t-il quelque chose.",
                 nodes: [
                     {
@@ -93696,7 +93734,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51003101,
                                 content:
-                                    "Camila a dit que Monsieur Buck ne boit jamais... Alors ? Quelqu’un a mis de l’alcool dans son lait ?",
+                                    "Camilla a dit que Monsieur Buck ne boit jamais... Alors ? Quelqu’un a mis de l’alcool dans son lait ?",
                                 npc: 100001,
                                 next: 51003102,
                             },
@@ -94637,7 +94675,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51004944,
                                 content:
-                                    'Tu remarques que certains papiers portent le mot "Ordonnance"... Peut-être que cette femme est liée à <H>un indice que Margie t’a donné</> ?',
+                                    "Tu remarques que certains papiers portent le mot « Ordonnance »... Peut-être que cette femme est liée à <H>un indice que Margie t’a donné</> ?",
                                 options: [
                                     {
                                         id: 510049011,
@@ -94706,7 +94744,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51004908,
-                                content: "Ah... ouuh...",
+                                content: "Ah... O-Oh, je... euh...",
                                 npc: 700010,
                                 next: 51004909,
                             },
@@ -95309,7 +95347,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20021007,
-                name: "Frappez à une porte dans les égouts pour accéder au marché noir",
+                name: "Frapper à une porte dans les égouts pour accéder au marché noir",
                 desc: "Des rumeurs évoquent l’existence d’un marché noir secret dans les Égouts de Givrelac, où se dérouleraient d’obscures transactions.\nEn tant que Chasseur de Phoxène vigilant et aguerri, il est de votre devoir d’aller y voir de plus près.",
                 nodes: [
                     {
@@ -95495,7 +95533,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51003815,
-                                content: 'Allez, rentre avec nous. Tout le monde est tellement "inquiet" de ton absence.',
+                                content: "Allez, rentre avec nous. Tout le monde est tellement « inquiet » de ton absence.",
                                 npc: 700088,
                                 next: 51003816,
                             },
@@ -95867,7 +95905,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51008052,
                                 content:
-                                    'Le Phoxène ensanglanté pèse lourd dans ta main. Bien plus qu’une pierre. On croirait qu’il palpite, prêt à engloutir le prochain "Larry" qui s’en approchera.',
+                                    "Le Phoxène ensanglanté pèse lourd dans ta main. Bien plus qu’une pierre. On croirait qu’il palpite, prêt à engloutir le prochain « Larry » qui s’en approchera.",
                             },
                         ],
                     },
@@ -96066,7 +96104,7 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 20021207,
                 name: "Revenir voir Larry",
-                desc: 'Ce sac de Phoxène a clairement une provenance douteuse. Peu importe dans quelle poche il finit, il ne deviendra jamais un bien "propre"... alors pourquoi ne serait-il pas dans la vôtre ? Retournez voir Larry.',
+                desc: "Ce sac de Phoxène a clairement une provenance douteuse. Peu importe dans quelle poche il finit, il ne deviendra jamais un bien « propre »... alors pourquoi ne serait-il pas dans la vôtre ? Retournez voir Larry.",
                 nodes: [
                     {
                         id: "174237914185913281519",
@@ -96207,7 +96245,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51008052,
                                 content:
-                                    'Le Phoxène ensanglanté pèse lourd dans ta main. Bien plus qu’une pierre. On croirait qu’il palpite, prêt à engloutir le prochain "Larry" qui s’en approchera.',
+                                    "Le Phoxène ensanglanté pèse lourd dans ta main. Bien plus qu’une pierre. On croirait qu’il palpite, prêt à engloutir le prochain « Larry » qui s’en approchera.",
                             },
                         ],
                     },
@@ -96319,7 +96357,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51005111,
                                 content:
-                                    'Tu te penches pour observer de plus près les "trouvailles" de Margie. Sur les petites étagères s’entassent divers objets, la plupart utilisés, mais soigneusement nettoyés.',
+                                    "Tu te penches pour observer de plus près les « trouvailles » de Margie. Sur les petites étagères s’entassent divers objets, la plupart utilisés, mais soigneusement nettoyés.",
                                 options: [
                                     {
                                         id: 510051111,
@@ -96625,7 +96663,7 @@ export const questData_fr: QuestStory[] = [
                                     {
                                         id: 510052083,
                                         content:
-                                            '<I>Tout le monde ne suit pas les "lois de la ville". Combien transgressent en secret ?</>',
+                                            "<I>Tout le monde ne suit pas les « lois de la ville ». Combien transgressent en secret ?</>",
                                         next: 51005209,
                                         impr: [1011, "Wisdom", 3],
                                     },
@@ -96857,7 +96895,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20021503,
-                name: "Allez goûter le poisson de Marcus",
+                name: "Goûter le poisson de Marcus",
                 desc: "Vous avez des doutes... mais après tout, vous avez pêché ces poissons vous-même. Autant goûter — à contrecœur — la cuisine de Marcus.",
                 nodes: [
                     {
@@ -98071,7 +98109,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51006905,
                                 content:
-                                    'Ah, d’accord... Monsieur "accent bizarre", après que je t’ai poliment donné le prix du billet, tu comptes faire quoi ? Fouiller tes poches vides et me donner des ordres ?',
+                                    "Ah, d’accord... Monsieur « accent bizarre », après que je t’ai poliment donné le prix du billet, tu comptes faire quoi ? Fouiller tes poches vides et me donner des ordres ?",
                                 npc: 700147,
                                 next: 51006906,
                             },
@@ -98128,14 +98166,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51007103,
                                 content:
-                                    'Surveille ton langage. Je ne suis pas {性别:un "fauché"|une "fauchée"}. Tu connais la Maison d’Hypnos ? Eh bien, c’est moi qui loue une de ses propriétés.',
+                                    "Surveille ton langage. Je ne suis pas {性别:un « fauché »|une « fauchée »}. Tu connais la Maison d’Hypnos ? Eh bien, c’est moi qui loue une de ses propriétés.",
                                 npc: 100001,
                                 next: 51007104,
                             },
                             {
                                 id: 51007104,
                                 content:
-                                    'Quoi ? Tout le monde sait que ce vieux grincheux déteste les étrangers. Tu devrais faire quelques recherches avant d’essayer d’impressionner des gens avec ton mensonge. Allez, enferme-toi dans ton "manoir" et épargne-nous tes délires.',
+                                    "Quoi ? Tout le monde sait que ce vieux grincheux déteste les étrangers. Tu devrais faire quelques recherches avant d’essayer d’impressionner des gens avec ton mensonge. Allez, enferme-toi dans ton « manoir » et épargne-nous tes délires.",
                                 npc: 700147,
                                 next: 51007105,
                             },
@@ -98166,7 +98204,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51007109,
-                                content: 'Pourquoi "camelote" ? Moi, j’y vois un travail minutieux, plein de sincérité et de sentiment.',
+                                content: "Pourquoi « camelote » ? Moi, j’y vois un travail minutieux, plein de sincérité et de sentiment.",
                                 npc: 100001,
                                 next: 51007110,
                             },
@@ -98286,7 +98324,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51007126,
                                 content:
-                                    '... D’accord. Oui. C’est moi. Ces "saletés", c’est bien les miennes... Mais qu’est-ce que tu veux, au juste ? Te moquer de moi ?',
+                                    "... D’accord. Oui. C’est moi. Ces « saletés », c’est bien les miennes... Mais qu’est-ce que tu veux, au juste ? Te moquer de moi ?",
                                 next: 51007127,
                             },
                             {
@@ -99820,7 +99858,7 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 20022202,
                 name: "Parler avec Dutton dans les Égouts de Givrelac",
-                desc: 'Un projet "récréatif" installé dans les Égouts de Givrelac... voilà qui inspire peu confiance. Mais l’homme nommé Dutton semble étonnamment sûr de lui.\nPuisque c’est gratuit, autant aller voir quelle folie il a imaginée.',
+                desc: "Un projet « récréatif » installé dans les Égouts de Givrelac... voilà qui inspire peu confiance. Mais l’homme nommé Dutton semble étonnamment sûr de lui.\nPuisque c’est gratuit, autant aller voir quelle folie il a imaginée.",
                 nodes: [
                     {
                         id: "17393485560544292",
@@ -100373,7 +100411,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51007552,
-                                content: "Mais… on dirait que les Charons peuvent aussi plaisanter...",
+                                content: "Mais... on dirait que les Charons peuvent aussi plaisanter...",
                                 npc: 700011,
                                 next: 51007553,
                             },
@@ -100452,7 +100490,8 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51007569,
-                                content: 'Il y a quelques années, j’ai rencontré un Charon très gentil. Il m’a dit qu’il était une "fée".',
+                                content:
+                                    "Il y a quelques années, j’ai rencontré un Charon très gentil. Il m’a dit qu’il était une « fée ».",
                                 npc: 700011,
                                 next: 51007570,
                             },
@@ -100692,7 +100731,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51007625,
                                 content:
-                                    'Une fois, ici même, j’ai vu un rat énorme, impressionnant, comme le "Guerrier Rat" des légendes !',
+                                    "Une fois, ici même, j’ai vu un rat énorme, impressionnant, comme le « Guerrier Rat » des légendes !",
                                 npc: 700204,
                                 next: 51007626,
                             },
@@ -101531,7 +101570,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51007741,
                                 content:
-                                    '... On l’appelle la "Dégradation". Une maladie qui n’affecte que les Charons. Il n’existe encore aucun traitement... et beaucoup des nôtres en souffrent chaque jour.',
+                                    "... On l’appelle la « Dégradation ». Une maladie qui n’affecte que les Charons. Il n’existe encore aucun traitement... et beaucoup des nôtres en souffrent chaque jour.",
                                 npc: 100001,
                                 next: 51007742,
                             },
@@ -101900,7 +101939,7 @@ export const questData_fr: QuestStory[] = [
                                     },
                                     {
                                         id: 510091112,
-                                        content: "Quelle arme magnifique... je peux l’essayer ?",
+                                        content: "Rassure-toi, cette fois c’est un service spécial, gratuit.",
                                         next: 51009113,
                                         impr: [1011, "Empathy", 3],
                                     },
@@ -101908,7 +101947,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51009112,
-                                content: "Rassure-toi, cette fois c’est un service spécial, gratuit.",
+                                content: "Quelle arme magnifique... je peux l’essayer ?",
                                 npc: 230002,
                                 next: 51009114,
                             },
@@ -102122,7 +102161,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51009203,
-                                content: 'Mais si je dois absolument le nommer... appelez-moi "artiste".',
+                                content: "Mais si je dois absolument le nommer... appelez-moi « artiste ».",
                                 npc: 230003,
                                 next: 51009204,
                             },
@@ -102705,7 +102744,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51009439,
-                                content: 'Tout ce que je te demande, c’est de le trouver... et de lui adresser un petit "avertissement".',
+                                content: "Tout ce que je te demande, c’est de le trouver... et de lui adresser un petit « avertissement ».",
                                 npc: 700300,
                                 options: [
                                     {
@@ -103923,7 +103962,7 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 20023108,
                 name: "Reconduire Donat chez lui",
-                desc: 'Donat finit par vous confier son "crime" — qui semble lié à une affaire remontant à seize ans.',
+                desc: "Donat finit par vous confier son « crime » — qui semble lié à une affaire remontant à seize ans.",
                 nodes: [
                     {
                         id: "17448590098465492157",
@@ -104319,7 +104358,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51009719,
-                                content: 'Dis... est-ce que tu crois qu’Oncle Donat est une "mauvaise" personne ?',
+                                content: "Dis... est-ce que tu crois qu’Oncle Donat est une « mauvaise » personne ?",
                                 npc: 700303,
                                 options: [
                                     {
@@ -105456,7 +105495,7 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 20023302,
                 name: "Se rendre au lieu indiqué dans la lettre",
-                desc: 'Si votre intuition est juste, Giselle est l’instigatrice de toute cette mise en scène — y compris de "l’enlèvement" de l’élève de Violetta. Rendez-vous au lieu convenu et découvrez ce qu’elle prépare.',
+                desc: "Si votre intuition est juste, Giselle est l’instigatrice de toute cette mise en scène — y compris de « l’enlèvement » de l’élève de Violetta. Rendez-vous au lieu convenu et découvrez ce qu’elle prépare.",
                 nodes: [
                     {
                         id: "17457393991729683022",
@@ -106208,7 +106247,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51009959,
                                 content:
-                                    'Et pourtant... quand sa fille est "morte", cet homme cruel a ignoré toute procédure judiciaire pour exécuter lui-même l’auteur de l’enlèvement — quitte à offrir à ses ennemis l’arme pour le destituer.',
+                                    "Et pourtant... quand sa fille est « morte », cet homme cruel a ignoré toute procédure judiciaire pour exécuter lui-même l’auteur de l’enlèvement — quitte à offrir à ses ennemis l’arme pour le destituer.",
                                 npc: 700300,
                                 next: 51009960,
                             },
@@ -106292,7 +106331,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51009972,
                                 content:
-                                    'Ce n’était pas prévu. Je ne pensais pas que quelqu’un d’aussi proche de toi viendrait m’engager pour la "kidnapper". J’ai simplement... profité de l’occasion.',
+                                    "Ce n’était pas prévu. Je ne pensais pas que quelqu’un d’aussi proche de toi viendrait m’engager pour la « kidnapper ». J’ai simplement... profité de l’occasion.",
                                 npc: 700302,
                                 next: 51009973,
                             },
@@ -106312,7 +106351,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51009975,
                                 content:
-                                    'Eh bien. Avec tout ce vacarme autour de "l’enlèvement" de la demoiselle Magnus, je vais devoir disparaître quelque temps de toute façon.',
+                                    "Eh bien. Avec tout ce vacarme autour de « l’enlèvement » de la demoiselle Magnus, je vais devoir disparaître quelque temps de toute façon.",
                                 npc: 700302,
                                 next: 51009976,
                             },
@@ -106537,7 +106576,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51010009,
                                 content:
-                                    'Ne te méprends pas, je viendrai. Mais disons que pour une "demi-fugitive", mieux vaut ne pas trop se faire remarquer.',
+                                    "Ne te méprends pas, je viendrai. Mais disons que pour une « demi-fugitive », mieux vaut ne pas trop se faire remarquer.",
                                 npc: 700302,
                                 next: 51010010,
                             },
@@ -106700,7 +106739,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51010031,
                                 content:
-                                    'Espérons simplement que les gens arrêteront de me donner du fil à retordre... Je ne veux plus jamais avoir à "kidnapper" mes propres clients.',
+                                    "Espérons simplement que les gens arrêteront de me donner du fil à retordre... Je ne veux plus jamais avoir à « kidnapper » mes propres clients.",
                                 npc: 700302,
                                 next: 51010032,
                             },
@@ -107126,7 +107165,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51010094,
                                 content:
-                                    'Disons que, puisque je suis actuellement suspectée d’avoir "kidnappé"la fille d’un comte, mon activité est suspendue.',
+                                    "Disons que, puisque je suis actuellement suspectée d’avoir « kidnappé » la fille d’un comte, mon activité est suspendue.",
                                 npc: 700302,
                                 next: 51010095,
                             },
@@ -107585,23 +107624,23 @@ export const questData_fr: QuestStory[] = [
         quests: [
             {
                 id: 20023601,
-                name: "Terminez le Mandat scellé de Truffle et Filbert pour obtenir leurs Fragments de pensée.",
-                desc: "Terminer le Mandat scellé de Truffle et Filbert pour obtenir leurs Fragments de pensée.",
+                name: "Terminer le Mandat scellé : Truffle et Filbert",
+                desc: "Terminez le Mandat scellé de Truffle et Filbert pour obtenir leurs Fragments de pensée.",
             },
             {
                 id: 20023602,
-                name: "Dans l’onglet Arsenal, utilisez les Fragments de pensée de Truffle et Filbert pour compléter la Réminiscence et débloquer le personnage.",
-                desc: "Dans l’onglet Arsenal, utiliser les Fragments de pensée de Truffle et Filbert pour compléter la Réminiscence et débloquer le personnage.",
+                name: "Compléter la Réminiscence pour obtenir Truffle et Filbert",
+                desc: "Dans l’onglet Arsenal, utilisez les Fragments de pensée de Truffle et Filbert pour compléter la Réminiscence et débloquer le personnage.",
             },
             {
                 id: 20023603,
-                name: "Terminez le Mandat scellé de Truffle et Filbert pour obtenir leurs Fragments de pensée.",
-                desc: "Terminer le Mandat scellé de Truffle et Filbert pour obtenir leurs Fragments de pensée.",
+                name: "Terminer le Mandat scellé : Truffle et Filbert",
+                desc: "Terminez le Mandat scellé de Truffle et Filbert pour obtenir leurs Fragments de pensée.",
             },
             {
                 id: 20023604,
-                name: "Dans l’onglet Arsenal, utilisez les Fragments de pensée de Truffle et Filbert pour compléter la Réminiscence et débloquer le personnage.",
-                desc: "Dans l’onglet Arsenal, utiliser les Fragments de pensée de Truffle et Filbert pour compléter la Réminiscence et débloquer le personnage.",
+                name: "Compléter la Réminiscence pour obtenir Truffle et Filbert",
+                desc: "Dans l’onglet Arsenal, utilisez les Fragments de pensée de Truffle et Filbert pour compléter la Réminiscence et débloquer le personnage.",
             },
         ],
     },
@@ -108340,7 +108379,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51100050,
                                 content:
-                                    'Et surtout ! J’ai entendu une "voix" me parler. Or, qui peut avoir des Bi’an chargés de faire respecter la loi à ses côtés ? Forcément le Seigneur Dragon d’Argent : Taihao ! J’ai entendu un message divin !',
+                                    "Et surtout ! J’ai entendu une « voix » me parler. Or, qui peut avoir des Bi’an chargés de faire respecter la loi à ses côtés ? Forcément le Seigneur Dragon d’Argent : Taihao ! J’ai entendu un message divin !",
                                 npc: 700319,
                                 next: 51100051,
                             },
@@ -109779,7 +109818,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51101082,
                                 content:
-                                    'On croirait qu’ils sont loin, isolés les uns des autres... mais si l’on trace des lignes entre eux, alors naît une nouvelle "constellation". Et les pas des Tisse-Étoiles... sont ces lignes.',
+                                    "On croirait qu’ils sont loin, isolés les uns des autres... mais si l’on trace des lignes entre eux, alors naît une nouvelle « constellation ». Et les pas des Tisse-Étoiles... sont ces lignes.",
                                 npc: 700321,
                                 next: 51101083,
                             },
@@ -109793,14 +109832,14 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51101084,
                                 content:
-                                    'Et peut-être qu’un jour, les hommes reviendront à ce néant. Mais les "lignes" tissées par les Tisse-Étoiles, elles, ne se briseront pas pour autant.',
+                                    "Et peut-être qu’un jour, les hommes reviendront à ce néant. Mais les « lignes » tissées par les Tisse-Étoiles, elles, ne se briseront pas pour autant.",
                                 npc: 700321,
                                 next: 51101085,
                             },
                             {
                                 id: 51101085,
                                 content:
-                                    'Les marchandises, la civilisation, le savoir... tout cela circulera le long de ces lignes, jusqu’aux coins les plus reculés du continent, jusqu’à ceux qui en ont besoin. Et les "étoiles" de notre monde... brilleront de plus en plus.',
+                                    "Les marchandises, la civilisation, le savoir... tout cela circulera le long de ces lignes, jusqu’aux coins les plus reculés du continent, jusqu’à ceux qui en ont besoin. Et les « étoiles » de notre monde... brilleront de plus en plus.",
                                 npc: 700321,
                                 next: 51101086,
                             },
@@ -109863,7 +109902,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51102003,
-                                content: "Pardonnez mon audace… mais auriez-vous déjà entendu parler de l’Oracle de Xuantian ?",
+                                content: "Pardonnez mon audace... mais auriez-vous déjà entendu parler de l’Oracle de Xuantian ?",
                                 npc: 700322,
                                 next: 51102004,
                             },
@@ -110014,7 +110053,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20030301,
-                name: 'Chercher le "trésor" près de l’épave',
+                name: "Chercher le « trésor » près de l’épave",
                 desc: "Un homme étrange vous arrête au marché noir. Il semble connaître l’origine de cette voix qui résonne dans votre esprit. Autant écouter ce qu’il a à dire.",
                 nodes: [
                     {
@@ -110101,7 +110140,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51102034,
-                                content: "Cet endroit me file la chair de poule… Tu es {性别:sûr|sûre} qu’il y a un trésor, ici ?",
+                                content: "Cet endroit me file la chair de poule... Tu es {性别:sûr|sûre} qu’il y a un trésor, ici ?",
                                 npc: 700363,
                                 next: 51102035,
                             },
@@ -110311,7 +110350,7 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 20030304,
                 name: "Empêcher Ren Wu de récupérer son butin illicite",
-                desc: 'Ren Wu surgit soudain et s’empare de votre "prise". Quelque chose ne tourne pas rond... Il doit exister un moyen de récupérer ce qui vous revient.',
+                desc: "Ren Wu surgit soudain et s’empare de votre « prise ». Quelque chose ne tourne pas rond... Il doit exister un moyen de récupérer ce qui vous revient.",
                 nodes: [
                     {
                         id: "17505717775592936921",
@@ -113503,7 +113542,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 51125082,
-                                content: "Maudit soit… je n’ai plus de forces !",
+                                content: "Maudit soit... je n’ai plus de forces !",
                                 npc: 700379,
                                 next: 51125083,
                             },
@@ -114024,7 +114063,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51151007,
                                 content:
-                                    'Certains ont voulu vérifier par eux-mêmes... même les plus courageux ont été "reconduits" dehors sans comprendre comment.',
+                                    "Certains ont voulu vérifier par eux-mêmes... même les plus courageux ont été « reconduits » dehors sans comprendre comment.",
                                 npc: 700371,
                                 next: 51151008,
                             },
@@ -114315,7 +114354,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51151007,
                                 content:
-                                    'Certains ont voulu vérifier par eux-mêmes... même les plus courageux ont été "reconduits" dehors sans comprendre comment.',
+                                    "Certains ont voulu vérifier par eux-mêmes... même les plus courageux ont été « reconduits » dehors sans comprendre comment.",
                                 npc: 700371,
                                 next: 51151008,
                             },
@@ -114490,7 +114529,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51151088,
                                 content:
-                                    "Franchement… c’est juste un Géniemon qui maîtrise un peu la magie du vent. Allez, avouez : pourquoi occuper l’entrepôt de quelqu’un d’autre et faire croire que l’endroit est hanté ?",
+                                    "Franchement... c’est juste un Géniemon qui maîtrise un peu la magie du vent. Allez, avouez : pourquoi occuper l’entrepôt de quelqu’un d’autre et faire croire que l’endroit est hanté ?",
                                 npc: 200002,
                                 next: 51151089,
                             },
@@ -114531,7 +114570,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51151128,
-                                content: "Il semble… un peu effrayé ?",
+                                content: "Il semble... un peu effrayé ?",
                                 next: 51151094,
                             },
                             {
@@ -114543,7 +114582,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51151095,
                                 content:
-                                    "Serait-ce… des êtres encore plus puissants que notre divinité ? Hasheng aurait-il manqué de discernement ?",
+                                    "Serait-ce... des êtres encore plus puissants que notre divinité ? Hasheng aurait-il manqué de discernement ?",
                                 npc: 700376,
                                 next: 51151096,
                             },
@@ -114864,7 +114903,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51140044,
-                                content: "S’agit-il d’un mal du corps… ou du cœur ? Si je peux vous aider, je le ferai sans réserve.",
+                                content: "S’agit-il d’un mal du corps... ou du cœur ? Si je peux vous aider, je le ferai sans réserve.",
                                 npc: 701075,
                             },
                             {
@@ -115144,7 +115183,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51140062,
                                 content:
-                                    'Ce patient refusait toute médication. Ma sœur imagina alors un stratagème : sous prétexte de soigner également son épouse, elle lui faisait emporter deux décoctions — l’une pour "elle", l’autre qu’il devait goûter lui-même.',
+                                    "Ce patient refusait toute médication. Ma sœur imagina alors un stratagème : sous prétexte de soigner également son épouse, elle lui faisait emporter deux décoctions — l’une pour « elle », l’autre qu’il devait goûter lui-même.",
                                 npc: 701075,
                             },
                             {
@@ -115154,7 +115193,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51140064,
-                                content: '... Je comprends maintenant. "L’épouse" de Weisheng... nous l’avons déjà trouvée. Elle est—',
+                                content: "... Je comprends maintenant. « L’épouse » de Weisheng... nous l’avons déjà trouvée. Elle est—",
                                 npc: 100001,
                                 options: [
                                     {
@@ -116025,8 +116064,8 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20031103,
-                name: "前往浮星埠买梨",
-                desc: "你记得浮星埠附近有不少摊贩，去那里帮杨父买梨吧。",
+                name: "Acheter des poires au Quai-aux-Étoiles",
+                desc: "Vous vous souvenez qu’il y a de nombreux marchands près du Quai-aux-Étoiles. Allez-y acheter des poires pour le père de Yang.",
                 nodes: [
                     {
                         id: "17682007471603872",
@@ -116073,7 +116112,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 51118000,
-                                content: "Hnn... pourquoi il n’est toujours pas là...",
+                                content: "<I>Hnn...</> pourquoi il n’est toujours pas là...",
                                 npc: 701024,
                                 next: 51118001,
                             },
@@ -116097,7 +116136,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51118004,
-                                content: "Mmmh...",
+                                content: "<I>Mmmh...</>",
                                 npc: 701024,
                                 options: [
                                     {
@@ -116228,7 +116267,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51118014,
-                                content: "Haaah... vous commencez vous aussi à piquer du nez.",
+                                content: "<I>Haaah...</> vous commencez vous aussi à piquer du nez.",
                             },
                         ],
                     },
@@ -116487,8 +116526,8 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20031204,
-                name: "在附近等待",
-                desc: "你决定帮助青青与她的哥哥相见，在附近找个不起眼的地方等待他出现吧。",
+                name: "Attendre à proximité",
+                desc: "Vous avez décidé d’aider Qingqing à retrouver son frère. Trouvez un endroit discret à proximité et attendez son arrivée.",
                 nodes: [
                     {
                         id: "17679445583002180037",
@@ -117387,7 +117426,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51154021,
                                 content:
-                                    'Très bien... très bien. Puisque tu as su m’arracher un rire... je consens à ne pas te faire payer ce "faux Bi’an".',
+                                    "Très bien... très bien. Puisque tu as su m’arracher un rire... je consens à ne pas te faire payer ce « faux Bi’an ».",
                                 npc: 701096,
                                 next: 51154022,
                             },
@@ -118014,7 +118053,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51164904,
                                 content:
-                                    "Une rencontre de hasard… et pourtant, vous m’avez gardé en mémoire. Voilà qui me touche. Laisse-moi t’offrir quelque chose... en guise de remerciement.",
+                                    "Une rencontre de hasard... et pourtant, vous m’avez gardé en mémoire. Voilà qui me touche. Laisse-moi t’offrir quelque chose... en guise de remerciement.",
                                 npc: 700385,
                                 options: [
                                     {
@@ -118618,7 +118657,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51165307,
                                 content:
-                                    'Oui ! Qing Shang était un enfant si gentil... Dès qu’il avait un moment, il aidait au village : porter de l’eau, couper du bois... Mais ce vieil homme prétendait que ces tâches "vulgaires" corrompaient son art. Alors il l’a puni... en le forçant à s’agenouiller toute une nuit sous la pluie.',
+                                    "Oui ! Qing Shang était un enfant si gentil... Dès qu’il avait un moment, il aidait au village : porter de l’eau, couper du bois... Mais ce vieil homme prétendait que ces tâches « vulgaires » corrompaient son art. Alors il l’a puni... en le forçant à s’agenouiller toute une nuit sous la pluie.",
                                 npc: 240038,
                             },
                             {
@@ -120005,7 +120044,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51175219,
-                                content: "<I>Si je m’attarde ici… je risque de manquer le moment d’entrer dans la faille…</>",
+                                content: "<I>Si je m’attarde ici... je risque de manquer le moment d’entrer dans la faille...</>",
                                 npc: 700390,
                                 options: [
                                     {
@@ -120187,7 +120226,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51175219,
-                                content: "<I>Si je m’attarde ici… je risque de manquer le moment d’entrer dans la faille…</>",
+                                content: "<I>Si je m’attarde ici... je risque de manquer le moment d’entrer dans la faille...</>",
                                 npc: 700390,
                                 options: [
                                     {
@@ -120630,7 +120669,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 51175407,
-                                content: "<I>Kof... kof...</> Je n’arrive presque plus à mobiliser la puissance des Neuf Chapitres…",
+                                content: "<I>Kof... kof...</> Je n’arrive presque plus à mobiliser la puissance des Neuf Chapitres...",
                                 npc: 700390,
                             },
                         ],
@@ -120841,7 +120880,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51175438,
                                 content:
-                                    "Seule ma sœur est la guérisseuse dont ce monde a besoin. Quant à moi... aux Zhuyou... de la Maison Fu… tout cela doit disparaître avec les Neuf Chapitres de Dafeng... et être enfoui dans l’oubli.",
+                                    "Seule ma sœur est la guérisseuse dont ce monde a besoin. Quant à moi... aux Zhuyou... de la Maison Fu... tout cela doit disparaître avec les Neuf Chapitres de Dafeng... et être enfoui dans l’oubli.",
                                 npc: 700390,
                                 next: 51175439,
                             },
@@ -122681,7 +122720,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20040201,
-                name: "Acheter cette boîte pour certaines raisons.",
+                name: "Acheter cette boîte pour certaines raisons",
                 desc: "Le marchand ambulant vous présente une étrange boîte qui paraît très ancienne... Vous avez du mal à croire qu’un objet aussi petit puisse réellement contenir un trésor.",
                 nodes: [
                     {
@@ -123085,7 +123124,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20040202,
-                name: "Ouvrir la boîte pour voir ce qu’elle contient.",
+                name: "Ouvrir la boîte pour voir ce qu’elle contient",
                 desc: "Vous avez dépensé une somme considérable pour acheter la boîte du marchand. Snow l’examine sous toutes les coutures, refusant de croire qu’une simple boîte puisse valoir un tel prix. Alors qu’elle s’apprête à employer quelques méthodes particulières pour percer son secret, un passant l’interrompt.",
                 nodes: [
                     {
@@ -123262,7 +123301,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20040203,
-                name: "Demander au passant combien il est prêt à offrir pour la boîte.",
+                name: "Demander au passant combien il est prêt à offrir pour la boîte",
                 desc: "Le passant, nommé Toran, se présente comme un membre « connaisseur » du Salon du Sifflet et propose de vous racheter la boîte. En entendant son offre, vous comprenez aussitôt que vous avez été dupés. Furieuse, Snow entraîne immédiatement l’Étranger à la poursuite du marchand ambulant.",
                 nodes: [
                     {
@@ -123680,7 +123719,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20040204,
-                name: "Raconter à Snow et à l’Étranger tout ce qui s’est passé.",
+                name: "Raconter à Snow et à l’Étranger tout ce qui s’est passé",
                 desc: "Snow et l’Étranger ne parviennent pas à rattraper le marchand ambulant. Vous leur racontez alors ce que Toran vous a appris, et décidez d’enquêter plus en profondeur sur le Salon du Sifflet. Par hasard, un noble surprend votre conversation.",
                 nodes: [
                     {
@@ -123905,7 +123944,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20040205,
-                name: "Se rendre au salon réservé aux nobles, où se trouve le Salon du Sifflet.",
+                name: "Se rendre au salon réservé aux nobles, où se trouve le Salon du Sifflet",
                 desc: "Comme prévu, vous vous rendez au Salon du Sifflet afin d’enquêter davantage sur « l’immense popularité d’Eisenbahn ». Toran vous y attend depuis un bon moment.",
                 nodes: [
                     {
@@ -124105,7 +124144,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20040206,
-                name: "Entrer dans le salon des nobles.",
+                name: "Entrer dans le salon des nobles",
                 desc: "Vous entrez dans le Salon du Sifflet. Son président, Seaton, vous accueille chaleureusement et vous invite à participer au concours de photographie récemment organisé par le salon, qui servira également d’épreuve pour les nouveaux membres.",
                 nodes: [
                     {
@@ -124301,7 +124340,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20040207,
-                name: "Demander à Toran le déroulement du concours photo.",
+                name: "Demander à Toran le déroulement du concours photo",
                 desc: "Vous interrogez Toran, le responsable du concours, au sujet de l’organisation et du déroulement de l’événement.",
                 nodes: [
                     {
@@ -124395,7 +124434,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20040208,
-                name: "Prendre des photos dans la gare.",
+                name: "Prendre des photos dans la gare",
                 desc: "Vous accompagnez Toran dans la gare pour prendre des photos. Celui-ci vous apprend plusieurs astuces de photographie. Au début, tout se passe parfaitement : vous parvenez à capturer Eisenbahn dans les lieux indiqués, ce qui enthousiasme Toran au plus haut point.",
                 nodes: [
                     {
@@ -124535,7 +124574,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51200654,
                                 content:
-                                    "Ainsi, le centre de l’image devient immédiatement clair, et l’intention du cliché saute aux yeux. Par exemple, sur celle que je viens de prendre, on voit—",
+                                    "Ainsi, le centre de l’image attire immédiatement le regard, et l’intention du cliché saute aux yeux. Par exemple, sur celle que je viens de prendre, on voit—",
                                 npc: 700398,
                                 next: 51200655,
                             },
@@ -124678,7 +124717,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51200675,
                                 content:
-                                    "Oui, voilà. Ce soldat a dû agir de sa propre initiative ! Quel affront à la réputation du chef de gare Eisenbahn ! S’il m’avait eu, moi, à ses côtés, les choses ne se seraient jamais passées ainsi. Je vais… je vais écrire une dizaine de lettres de plainte ! Je vais le signaler pour négligence dans l’exercice de ses fonctions !",
+                                    "Oui, voilà. Ce soldat a dû agir de sa propre initiative ! Quel affront à la réputation du chef de gare Eisenbahn ! S’il m’avait eu, moi, à ses côtés, les choses ne se seraient jamais passées ainsi. Je vais... je vais écrire une dizaine de lettres de plainte ! Je vais le signaler pour négligence dans l’exercice de ses fonctions !",
                                 npc: 700398,
                                 next: 51200676,
                             },
@@ -124752,7 +124791,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 20040209,
-                name: "Attendre les résultats du concours.",
+                name: "Attendre les résultats du concours",
                 desc: "Les résultats du concours photo demanderont encore un peu de temps, mais l’attente ne devrait pas être longue. Tout est désormais entre les mains de Toran.",
                 nodes: [
                     {
@@ -125055,7 +125094,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 51200807,
-                                content: "On ne se dispute pas !\n Comme si j’allais me disputer avec lui !",
+                                content: "On ne se dispute pas !\n  Comme si j’allais me disputer avec lui !",
                                 npc: 700409,
                                 next: 51200808,
                             },
@@ -126392,6 +126431,11371 @@ export const questData_fr: QuestStory[] = [
                                 content:
                                     "On dirait bien que ce bon vieux Handy nous a laissé un fameux cadeau d’adieu. Maintenant, il ne nous reste plus qu’à voir comment nous allons nous en servir.",
                                 npc: 700409,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 200404,
+        quests: [
+            {
+                id: 20040400,
+                name: "",
+                nodes: [
+                    {
+                        id: "17799526697681733",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-16579, 13157],
+                        next: ["17807363385121523745"],
+                        dialogues: [
+                            {
+                                id: 51206801,
+                                content:
+                                    "Je suis ravi d’avoir enfin l’occasion de discuter avec vous en privé. À vrai dire, on croise rarement des gens comme vous dans cette gare... des personnes à la fois bienveillantes et intelligentes.",
+                                npc: 700486,
+                                next: 51206802,
+                            },
+                            {
+                                id: 51206802,
+                                content:
+                                    "Avant de vous présenter à notre patron, permettez-moi de me présenter officiellement. Je m’appelle Lorent — mais ça, vous le saviez déjà. Quant à mon rôle au sein de l’Union du Tournevis... disons que je suis le numéro deux.",
+                                npc: 700486,
+                                next: 51206803,
+                            },
+                            {
+                                id: 51206803,
+                                content: "Le numéro deux ? Ça sonne super classe ! Un peu comme moi, aux Asphodèles !",
+                                npc: 700449,
+                                next: 51206804,
+                            },
+                            {
+                                id: 51206804,
+                                content: "On n’a pas le temps pour les bavardages. Si vous avez quelque chose à dire, allez droit au but.",
+                                npc: 100001,
+                                next: 51206805,
+                            },
+                            {
+                                id: 51206805,
+                                content:
+                                    "Très bien. Je vois que vous préférez les discussions franches. Alors je vais faire court : notre union traverse quelques difficultés... et nous avons justement besoin de quelqu’un d’à la fois compétent et doté d’un bon fond.",
+                                npc: 700486,
+                                options: [
+                                    {
+                                        id: 51206806,
+                                        content: "<I>Pourquoi est-ce que je vous aiderais ?</>",
+                                        next: 51206809,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 51206807,
+                                        content: "<I>Qu’est-ce que j’y gagne ?</>",
+                                        next: 51206809,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 51206808,
+                                        content: "<I>Ce n’est pas parce que j’ai aidé Coney que je vais vous aider aussi.</>",
+                                        next: 51206809,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51206809,
+                                content:
+                                    "Héhé... J’aime les gens directs dans votre genre. Vous comprenez vite les choses. C’est précisément pour ça que je voulais commencer par une véritable présentation.",
+                                npc: 700486,
+                                next: 51206810,
+                            },
+                            {
+                                id: 51206810,
+                                content:
+                                    "Vous ne nous connaissez pas, n’est-ce pas ? Tout ce que vous savez de l’Union du Tournevis vient de ce que ce gamin de Coney vous a raconté. Ce n’est qu’une partie de l’histoire.",
+                                npc: 700486,
+                                next: 51206811,
+                            },
+                            {
+                                id: 51206811,
+                                content:
+                                    "Tu parles trop, je comprends plus rien... En gros, votre organisation est super puissante, c’est ça ?",
+                                npc: 700449,
+                                next: 51206812,
+                            },
+                            {
+                                id: 51206812,
+                                content:
+                                    "Au contraire. Nous sommes une alliance composée d’innombrables « Coney ». Des miséreux qui rampent sous les apparences brillantes de cette gare.",
+                                npc: 700486,
+                                next: 51206813,
+                            },
+                            {
+                                id: 51206813,
+                                content:
+                                    "Alors nous nous serrons les coudes. Quand l’un de nous rencontre un problème au travail, les autres lui viennent en aide. Exactement comme pour Coney. Chaque jour, nous aidons ces ouvriers qui se tuent à la tâche.",
+                                npc: 700486,
+                                next: 51206814,
+                            },
+                            {
+                                id: 51206814,
+                                content:
+                                    "Coney ne nous avait pas raconté tout ça... mais il a dit que les frais pour soigner sa blessure venaient d’un prêt de l’union...",
+                                npc: 700449,
+                                next: 51206815,
+                            },
+                            {
+                                id: 51206815,
+                                content:
+                                    "Exactement. En somme, nous sommes une organisation d’entraide pour les travailleurs de la Gare des Cent-Fleurs. Tous ceux qui tiennent un tournevis sont nos frères et sœurs... du moins, dans l’idéal.",
+                                npc: 700486,
+                                next: 51206816,
+                            },
+                            {
+                                id: 51206816,
+                                content:
+                                    "L’argent que Coney nous doit... provient des cotisations versées pièce par pièce par d’autres ouvriers tout aussi misérables que lui. Vous avez sauvé Coney... mais qu’en est-il des autres ?",
+                                npc: 700486,
+                                next: 51206817,
+                            },
+                            {
+                                id: 51206817,
+                                content: "Très bien... Qu’est-ce que vous voulez exactement de moi... ?",
+                                npc: 100001,
+                                next: 51206818,
+                            },
+                            {
+                                id: 51206818,
+                                content: "Allons d’abord au siège actuel de l’union. Nous discuterons du reste là-bas.",
+                                npc: 700486,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17807363385121523745",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-16579, 13157],
+                        dialogues: [
+                            {
+                                id: 51206901,
+                                content: "Petit larbin, à ton avis... qu’est-ce que cette Union du Tournevis nous veut exactement ?",
+                                npc: 700449,
+                                next: 51206902,
+                            },
+                            {
+                                id: 51206902,
+                                content: "Aucune idée. Espérons juste que ça ne nous retardera pas trop longtemps.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040401,
+                name: "Se rendre au repaire de l’Union du Tournevis",
+                desc: "Vous venez à peine de dire au revoir à Coney qu’un homme étrange vient vous adresser la parole. Son visage vous dit vaguement quelque chose... Il s’appelle, semble-t-il, Lorent ? Que peut-il bien vous vouloir ?",
+                nodes: [
+                    {
+                        id: "17803000081561484645",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-17680, 12339],
+                        dialogues: [
+                            {
+                                id: 51207001,
+                                content: "Nous y voilà. C’est ici—",
+                                npc: 700428,
+                                next: 51207002,
+                            },
+                            {
+                                id: 51207002,
+                                content:
+                                    "Va te faire foutre ! Même un chien te prêterait pas un sou ! La dernière fois déjà, t’as cramé tout l’argent que je t’avais prêté ! Puis t’es revenu en redemander, et t’as encore tout perdu ! Et t’oses encore te pointer ici ?",
+                                next: 51207003,
+                            },
+                            {
+                                id: 51207003,
+                                content:
+                                    "Je t’en supplie, Kroger ! Tu dois me croire ! Avant, je faisais juste des essais ! Mais maintenant, j’ai trouvé une méthode infaillible ! Si tu me prêtes de l’argent, je te rembourserai, c’est promis !",
+                                next: 51207004,
+                            },
+                            {
+                                id: 51207004,
+                                content:
+                                    "Tu y crois toi-même, à tes conneries ? Va donc raconter ça à ta femme qui s’est barrée avec les gosses. On verra si elles te croient, elles.",
+                                npc: 700429,
+                                next: 51207005,
+                            },
+                            {
+                                id: 51207005,
+                                content:
+                                    "Non ! Cette fois, c’est différent ! Cette fois, je peux vraiment gagner ! Kroger, je suis le seul comptable de l’union ! J’ai enfin compris les règles de ce « jeu » ! Cette fois... je vais gagner !",
+                                next: 51207006,
+                            },
+                            {
+                                id: 51207006,
+                                content: "Dégage, Rowan. Même si tu t’explosais le crâne ici même, je ne te filerais pas un sou.",
+                                npc: 700429,
+                                next: 51207007,
+                            },
+                            {
+                                id: 51207007,
+                                content:
+                                    "Tu... Très bien ! Tu veux pas prêter ? Alors ne prête pas ! Si toi tu refuses, quelqu’un d’autre acceptera ! Et j’en ai rien à foutre de ton argent !",
+                                npc: 700430,
+                                next: 51207008,
+                            },
+                            {
+                                id: 51207008,
+                                content:
+                                    "Haha ! Parfait ! Va donc jouer jusqu’à y laisser ta peau ! J’ai hâte de retrouver ton cadavre gelé dans une benne de Givrelac !",
+                                npc: 700429,
+                                next: 51207009,
+                            },
+                            {
+                                id: 51207009,
+                                content:
+                                    "Un brouhaha étouffé résonna derrière la porte. Quelques instants plus tard, un homme en surgit tête baissée, vous bouscula au passage et disparut précipitamment.",
+                                next: 51207010,
+                            },
+                            {
+                                id: 51207010,
+                                content: "Désolé pour l’attente. Entrons.",
+                                npc: 700428,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040402,
+                name: "Entrer dans le repaire de l’Union du Tournevis",
+                desc: "À vrai dire, cet homme nommé Lorent vous a laissé une impression plutôt favorable. Après tout, il a pris la parole lorsque Coney essuyait des remarques acerbes. Mais plus que lui, c’est surtout cette fameuse Union du Tournevis, dont Coney parlait sans cesse, qui retient votre attention. Puisqu’ils vous ont envoyé une invitation, aller jeter un œil ne devrait pas faire de mal.",
+                nodes: [
+                    {
+                        id: "17803003214772966199",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-18248, 11633],
+                        dialogues: [
+                            {
+                                id: 51207101,
+                                content: "T’es revenu ? Bordel, Rowan va finir par me rendre dingue... C’est qui, eux ?",
+                                npc: 700429,
+                                next: 51207102,
+                            },
+                            {
+                                id: 51207102,
+                                content:
+                                    "Tu devrais vraiment apprendre à te calmer, Kroger. À ce rythme, ça ne m’étonnerait pas de te voir mourir d’alcool ou d’une crise de nerfs avant même de voir Rowan crever.",
+                                npc: 700428,
+                                next: 51207103,
+                            },
+                            {
+                                id: 51207103,
+                                content:
+                                    "Va te faire foutre ! Tu prends sa défense maintenant ? Tu crois vraiment que j’aurais dû lui prêter de l’argent ? Lorent, tu comprends pas ! Ce type est devenu fou ! Ce n’est plus du tout le Rowan d’avant ! C’est un cinglé, tu comprends ? Un vrai cinglé !",
+                                npc: 700429,
+                                next: 51207104,
+                            },
+                            {
+                                id: 51207104,
+                                content:
+                                    "Peut-être. Mais il l’a dit lui-même : si nous refusons de lui prêter de l’argent... il trouvera quelqu’un d’autre.",
+                                npc: 700428,
+                                next: 51207105,
+                            },
+                            {
+                                id: 51207105,
+                                content: "Haha ! Qui ça ? À part nous, qui serait assez idiot pour lui filer du fric ici ?",
+                                npc: 700429,
+                                next: 51207106,
+                            },
+                            {
+                                id: 51207106,
+                                content: "Du calme. Laisse-moi d’abord te présenter notre petit renfort.",
+                                npc: 700428,
+                                next: 51207107,
+                            },
+                            {
+                                id: 51207107,
+                                content: "Renfort ? Il parle de qui ? Nous ?",
+                                npc: 700449,
+                                next: 51207108,
+                            },
+                            {
+                                id: 51207108,
+                                content:
+                                    "Plus précisément... de ton « petit larbin », Luno. Après tout, ce n’est pas une affaire pour les enfants.",
+                                npc: 700428,
+                                next: 51207109,
+                            },
+                            {
+                                id: 51207109,
+                                content:
+                                    "Quoi ?! Espèce d’insolent ! Tu oses mépriser le Roi Démon de la Lumière ?! Sais-tu seulement qui je suis—",
+                                npc: 700449,
+                                next: 51207110,
+                            },
+                            {
+                                id: 51207110,
+                                content: "Snow... doucement...",
+                                npc: 100001,
+                                next: 51207111,
+                            },
+                            {
+                                id: 51207111,
+                                content:
+                                    "Alors... {性别:un Chasseur de Phoxène venu|une Chasseuse de Phoxène venue} faire quelques extras ? Je peux vous appeler ainsi ?",
+                                npc: 700428,
+                                next: 51207112,
+                            },
+                            {
+                                id: 51207112,
+                                content:
+                                    "Appelez-moi simplement {nickname}. Je ne suis pas {性别:venu|venue} ici pour assister à vos disputes. Alors dites-moi clairement ce que vous attendez de moi.",
+                                npc: 100001,
+                                next: 51207113,
+                            },
+                            {
+                                id: 51207113,
+                                content:
+                                    "Très bien, {nickname}. Imaginez un instant que vous soyez un simple ouvrier. Rien de spécial. Vous travaillez dans cette gare depuis... un an, peut-être deux.",
+                                npc: 700428,
+                                next: 51207114,
+                            },
+                            {
+                                id: 51207114,
+                                content:
+                                    "La vie y est misérable, mais suffisante pour survivre. Pourtant, vous rêvez chaque nuit de quitter cet endroit. Car rester ici trop longtemps, c’est finir rongé par la maladie... jusqu’à devenir inutile.",
+                                npc: 700428,
+                                next: 51207115,
+                            },
+                            {
+                                id: 51207115,
+                                content: "C’est quoi ton cirque, au juste ?",
+                                npc: 700429,
+                                next: 51207116,
+                            },
+                            {
+                                id: 51207116,
+                                content: "Patience~",
+                                npc: 700428,
+                                next: 51207117,
+                            },
+                            {
+                                id: 51207117,
+                                content:
+                                    "{nickname}, dans cette existence sans lumière... surgit soudain un homme du nom de Monsieur Jack. Il apporte avec lui un tout nouveau « jeu ». Un jeu simple à comprendre... et capable de rapporter gros.",
+                                npc: 700428,
+                                next: 51207118,
+                            },
+                            {
+                                id: 51207118,
+                                content:
+                                    "Une seule victoire peut vous rapporter davantage qu’un mois entier passé à nettoyer des vitres ou ramoner des cheminées. Alors, {nickname}... participeriez-vous à ce jeu ?",
+                                npc: 700428,
+                                options: [
+                                    {
+                                        id: 51207119,
+                                        content: "<I>Et qu’est-ce qu’on perd en cas d’échec ?</>",
+                                        next: 51207120,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 51207121,
+                                        content: "<I>Évidemment. Tant qu’on n’a rien à perdre.</>",
+                                        next: 51207122,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 51207123,
+                                        content: "<I>Je ne participerais jamais à quelque chose d’aussi louche.</>",
+                                        next: 51207124,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 51207125,
+                                        content: "<I>Et ensuite ? On finit à genoux ici à supplier pour un prêt ?</>",
+                                        next: 51207126,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51207120,
+                                content:
+                                    "Héhé... Voilà pourquoi je disais que vous êtes quelqu’un d’intelligent. Vous savez qu’il n’existe aucun repas gratuit.",
+                                npc: 700428,
+                                next: 51207127,
+                            },
+                            {
+                                id: 51207122,
+                                content: "Oh, mais il y a toujours quelque chose à perdre. Sinon, je serais moi-même allé jouer.",
+                                npc: 700428,
+                                next: 51207127,
+                            },
+                            {
+                                id: 51207124,
+                                content:
+                                    "Oh ? Intéressant. Est-ce votre sens inné de la justice... ou l’instinct d’un Chasseur de Phoxène ?",
+                                npc: 700428,
+                                next: 51207127,
+                            },
+                            {
+                                id: 51207126,
+                                content: "Pff... Vous avez de l’humour.",
+                                npc: 700428,
+                                next: 51207127,
+                            },
+                            {
+                                id: 51207127,
+                                content:
+                                    "Quelle que soit votre réponse, vous avez fini entraîné dans le jeu de Monsieur Jack. Au début... la chance vous sourit. Vous perdez parfois, vous gagnez parfois... mais dans l’ensemble, vous gagnez davantage que vous ne perdez.",
+                                npc: 700428,
+                                next: 51207128,
+                            },
+                            {
+                                id: 51207128,
+                                content:
+                                    "Alors vous prenez confiance. Vous commencez à croire que cette chance ne vous abandonnera jamais. Vous jouez de plus en plus souvent... et misez toujours davantage. Jusqu’au jour où—",
+                                npc: 700428,
+                                next: 51207129,
+                            },
+                            {
+                                id: 51207129,
+                                content: "Jusqu’à ce qu’il te reste plus que ton cul à vendre !",
+                                npc: 700429,
+                                next: 51207130,
+                            },
+                            {
+                                id: 51207130,
+                                content: "Kroger, inutile d’être aussi vulgaire. Mais... l’idée est là. Vous perdez tout.",
+                                npc: 700428,
+                                next: 51207131,
+                            },
+                            {
+                                id: 51207131,
+                                content:
+                                    "Bah alors on arrête de jouer, c’est tout ! Moi, je retournerais juste aux Asphodèles demander de l’argent à Camilla~",
+                                npc: 700449,
+                                next: 51207132,
+                            },
+                            {
+                                id: 51207132,
+                                content: "Vraiment ? Et vous, {nickname} ? Pensez-vous pouvoir partir aussi facilement ?",
+                                npc: 700428,
+                                next: 51207133,
+                            },
+                            {
+                                id: 51207133,
+                                content:
+                                    "Dans la situation que vous décrivez... si j’avais déjà perdu énormément, au point d’être devenu insensible aux chiffres... et que la somme perdue représentait des mois, voire une année entière de travail...",
+                                npc: 100001,
+                                next: 51207134,
+                            },
+                            {
+                                id: 51207134,
+                                content:
+                                    "... alors après avoir goûté une seule fois à cette sensation d’obtenir quelque chose sans effort, je voudrais forcément récupérer tout ce que j’ai perdu... avec les intérêts. Une fois qu’on y a goûté, la tentation devient immense.",
+                                npc: 100001,
+                                next: 51207135,
+                            },
+                            {
+                                id: 51207135,
+                                content:
+                                    "Je ne pense pas être capable d’y résister. C’est justement pour ça que je ne participerais jamais à ce jeu dès le départ.",
+                                npc: 100001,
+                                next: 51207136,
+                            },
+                            {
+                                id: 51207136,
+                                content: "Mais ceux qui s’y retrouvent piégés... continueront probablement jusqu’à renverser la situation.",
+                                npc: 100001,
+                                next: 51207137,
+                            },
+                            {
+                                id: 51207137,
+                                content:
+                                    "Exactement ! Et cet argent pour « se refaire », d’où vient-il ? Monsieur Jack a une réponse toute trouvée :",
+                                npc: 700428,
+                                next: 51207138,
+                            },
+                            {
+                                id: 51207138,
+                                content:
+                                    "« Empruntez-moi de l’argent ! » Le grand Monsieur Jack vous avance les fonds nécessaires pour tenter votre chance à nouveau. Et si vous gagnez, aucun intérêt à rembourser ! Vous repartez même avec du bénéfice. Alors ? Tentant, non ?",
+                                npc: 700428,
+                                next: 51207139,
+                            },
+                            {
+                                id: 51207139,
+                                content: "Tu parles toujours des bons côtés, jamais du reste... Et quand on perd, hein ?",
+                                npc: 700449,
+                                next: 51207140,
+                            },
+                            {
+                                id: 51207140,
+                                content:
+                                    "Ce n’est pas qu’il cache les mauvais côtés... C’est qu’à ce moment-là, je ne serais déjà plus capable d’en voir les conséquences.",
+                                npc: 100001,
+                                next: 51207141,
+                            },
+                            {
+                                id: 51207141,
+                                content:
+                                    "Voilà ce que je déteste chez toi ! Tu compliques toujours des trucs simples ! En gros, ce foutu Jack fait du prêt d’argent, c’est ça ? Et cet imbécile de Rowan veut aller emprunter chez lui ?",
+                                npc: 700429,
+                                next: 51207142,
+                            },
+                            {
+                                id: 51207142,
+                                content:
+                                    "Pas seulement Rowan. Tous ceux à qui nous refusons désormais de prêter de l’argent envisagent d’aller voir Monsieur Jack.",
+                                npc: 700428,
+                                next: 51207143,
+                            },
+                            {
+                                id: 51207143,
+                                content:
+                                    "Et ce n’est pas tout. Beaucoup commencent aussi à considérer l’Union du Tournevis comme une union inutile. Incapable de garantir leur survie... et incapable de leur permettre d’accéder à une vie meilleure.",
+                                npc: 700428,
+                                next: 51207144,
+                            },
+                            {
+                                id: 51207144,
+                                content: "Une vie meilleure ?! Mon cul !",
+                                npc: 700429,
+                                next: 51207145,
+                            },
+                            {
+                                id: 51207145,
+                                content:
+                                    "L’homme abattit violemment son poing contre une caisse voisine. Du sang coula aussitôt entre ses doigts, mais il n’y prêta même pas attention.",
+                                next: 51207146,
+                            },
+                            {
+                                id: 51207146,
+                                content:
+                                    "Très bien ! Très bien ! On essaie de sauver la peau de ces idiots... et voilà qu’ils nous reprochent de ne pas les laisser se détruire ?",
+                                npc: 700429,
+                                next: 51207147,
+                            },
+                            {
+                                id: 51207147,
+                                content:
+                                    "Toi, tu crois faire le bien. Eux ne le voient pas ainsi. Si nous refusons de leur prêter de l’argent, ils continueront quand même à jouer. Ils iront simplement s’endetter ailleurs.",
+                                npc: 700428,
+                                next: 51207148,
+                            },
+                            {
+                                id: 51207148,
+                                content: "Alors qu’est-ce qu’on est censés faire, bordel ? Les laisser nous salir ?!",
+                                npc: 700429,
+                                next: 51207149,
+                            },
+                            {
+                                id: 51207149,
+                                content:
+                                    "Tu vois ? Tu t’énerves encore. Je te l’ai dit pourtant... je nous ai ramené notre {性别:petit sauveur|petite sauveuse}. Pas vrai ?",
+                                npc: 700428,
+                                options: [
+                                    {
+                                        id: 51207150,
+                                        content: "<I>Je comprends ce que vous voulez dire. Qu’est-ce que vous attendez de moi ?</>",
+                                        next: 51207151,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51207152,
+                                        content: "<I>Je comprends ce que vous voulez dire. Qu’est-ce que j’y gagne ?</>",
+                                        next: 51207153,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 51207157,
+                                        content: "<I>Je comprends ce que vous voulez dire. Mais pourquoi moi ?</>",
+                                        next: 51207158,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51207151,
+                                content:
+                                    "Je m’en doutais. Quand je vous ai vu sauver Coney, j’ai tout de suite su que vous feriez ce choix. Allez-y... notre {性别:petit sauveur|petite sauveuse}. Tout se joue maintenant : il faut faire tomber Monsieur Jack.",
+                                npc: 700428,
+                                next: 51207162,
+                            },
+                            {
+                                id: 51207153,
+                                content:
+                                    "Je ne m’étais pas trompé sur votre compte. Vous êtes quelqu’un de bien. Depuis le moment où vous avez aidé Coney, je vous observais.",
+                                npc: 700428,
+                                next: 51207154,
+                            },
+                            {
+                                id: 51207158,
+                                content:
+                                    "La réputation désastreuse des conditions de travail de la Gare des Cent-Fleurs s’est déjà répandue dans tout Givrelac. Les nouvelles recrues se font rares... et vous êtes sans doute le visage le plus récent à être arrivé ici.",
+                                npc: 700428,
+                                next: 51207159,
+                            },
+                            {
+                                id: 51207162,
+                                content: "Bon... Très bien. Quel est votre plan ?",
+                                npc: 100001,
+                                next: 51207163,
+                            },
+                            {
+                                id: 51207154,
+                                content:
+                                    "Si cette affaire se règle correctement, je peux vous faire entrer dans l’Union du Tournevis. Vous y serez traité comme {性别:un invité|une invitée} de marque... avec tous les ouvriers de la gare derrière vous.",
+                                npc: 700428,
+                                next: 51207155,
+                            },
+                            {
+                                id: 51207159,
+                                content:
+                                    "Monsieur Jack ne vous connaît pas. Ses hommes non plus. Vous êtes {性别:un parfait inconnu|une parfaite inconnue} à leurs yeux, ce qui vous permettra de circuler librement sans éveiller les soupçons.",
+                                npc: 700428,
+                                next: 51207160,
+                            },
+                            {
+                                id: 51207163,
+                                content:
+                                    "D’un regard, Lorent fit signe à Kroger d’emmener Snow plus loin. Une fois seuls dans la pièce, il poussa un long soupir avant de vous exposer son plan en détail. Ce n’est qu’une fois la discussion terminée qu’il vous laissa repartir.",
+                            },
+                            {
+                                id: 51207155,
+                                content:
+                                    "Ça ne m’intéresse pas. Je ne compte pas rester ici bien longtemps. Si tout se passe bien, effacez simplement la dette de Coney.",
+                                npc: 100001,
+                                next: 51207156,
+                            },
+                            {
+                                id: 51207160,
+                                content:
+                                    "Et surtout... vous êtes quelqu’un de bien. Vous avez aidé Coney. Alors je me dis que vous ne pourrez pas rester les bras croisés en voyant ces pauvres ouvriers continuer à se faire manipuler... perdre leur argent, leur vie... et peut-être davantage encore.",
+                                npc: 700428,
+                                next: 51207161,
+                            },
+                            {
+                                id: 51207156,
+                                content:
+                                    "Hm... Très bien. Alors allez-y... notre {性别:petit sauveur|petite sauveuse}. Tout repose sur vous désormais.",
+                                npc: 700428,
+                                next: 51207162,
+                            },
+                            {
+                                id: 51207161,
+                                content: "Alors... allez-y, notre {性别:petit sauveur|petite sauveuse}. Tout se joue maintenant.",
+                                npc: 700428,
+                                next: 51207162,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040403,
+                name: "Sortir chercher Snow",
+                desc: "Après avoir accepté la requête de l’Union du Tournevis, vous discutez seul à seul avec Lorent dans la pièce afin d’établir un plan. Cela a pris un peu de temps ; Snow doit sûrement commencer à s’impatienter. Sortez vite la retrouver.",
+                nodes: [
+                    {
+                        id: "17804712788094162",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-18345, 12347],
+                        dialogues: [
+                            {
+                                id: 51207201,
+                                content: "1901, 1902, 1903, 1904...",
+                                npc: 700449,
+                                next: 51207202,
+                            },
+                            {
+                                id: 51207202,
+                                content: "Snow ? Qu’est-ce que tu fais ?",
+                                npc: 100001,
+                                next: 51207203,
+                            },
+                            {
+                                id: 51207203,
+                                content:
+                                    "Ouah ! Petit larbin ! Enfin ! J’ai cru que ce type avec son sourire bizarre allait te vendre quelque part ! J’allais entrer te sauver dès que j’aurais atteint 2000 !",
+                                npc: 700449,
+                                next: 51207204,
+                            },
+                            {
+                                id: 51207204,
+                                content: "Euh... On a juste discuté un peu plus longtemps.",
+                                npc: 100001,
+                                next: 51207205,
+                            },
+                            {
+                                id: 51207205,
+                                content: "Alors ? De quoi vous avez parlé ? Il veut encore nous envoyer faire ses courses ?",
+                                npc: 700449,
+                                next: 51207206,
+                            },
+                            {
+                                id: 51207206,
+                                content: "Il a dit...",
+                                npc: 100001,
+                                next: 51207207,
+                            },
+                            {
+                                id: 51207207,
+                                content:
+                                    "Puisque votre temps est compté, allons droit au but. Monsieur Jack — autrement dit l’homme qui tient ce soi-disant parc de loisirs pour ouvriers — a placé de nombreux guetteurs dans les usines. On pourrait aussi les appeler des hameçons.",
+                                npc: 700428,
+                                next: 51207208,
+                            },
+                            {
+                                id: 51207208,
+                                content:
+                                    "Grâce à eux, il attire les jeunes ouvriers fauchés, lassés de leur vie monotone... exactement le genre de personne que vous allez devoir incarner.",
+                                npc: 700428,
+                                next: 51207209,
+                            },
+                            {
+                                id: 51207209,
+                                content:
+                                    "J’ai besoin que vous mordiez à l’hameçon. Faites simplement quelque chose qui attirera leur attention. Ce ne sera pas difficile : vous êtes un nouveau visage. Ils vous repéreront très vite.",
+                                npc: 700428,
+                                next: 51207210,
+                            },
+                            {
+                                id: 51207210,
+                                content:
+                                    "Hm... En y réfléchissant, c’est plutôt vous qui serez notre hameçon. Celui qui nous permettra d’attraper les poissons de Monsieur Jack.",
+                                npc: 700428,
+                                next: 51207211,
+                            },
+                            {
+                                id: 51207211,
+                                content: "Snow, allons là où les ouvriers sont les plus nombreux.",
+                                npc: 100001,
+                                next: 51207212,
+                            },
+                            {
+                                id: 51207212,
+                                content: "Bien ! Quand le Roi Démon et son petit larbin passent à l’action, rien ne peut leur résister !",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040404,
+                name: "Se rendre dans la zone des usines",
+                desc: "Votre premier objectif est de trouver les appâts de Monsieur Jack dans l’usine. Ils sont très faciles à reconnaître : il suffit de laisser paraître le moindre intérêt, et ils se jetteront sur vous comme des poissons affamés. Pour faire simple, c’est vous qui servez d’appât pour l’Union du Tournevis.",
+                nodes: [
+                    {
+                        id: "17805606375361516373",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-10710, 7990],
+                        next: ["17803044888741910"],
+                        dialogues: [
+                            {
+                                id: 51207301,
+                                content:
+                                    "Tous les gens ici ont l’air déprimés... On dirait qu’on est au bon endroit. Petit larbin, on fait quoi maintenant ?",
+                                npc: 700449,
+                                next: 51207302,
+                            },
+                            {
+                                id: 51207302,
+                                content: "Par ici.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17803044888741910",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-13878, 5174],
+                        dialogues: [
+                            {
+                                id: 51207401,
+                                content: "Bonjour... Vous êtes en pause ?",
+                                npc: 100001,
+                                next: 51207402,
+                            },
+                            {
+                                id: 51207402,
+                                content:
+                                    "Une ouvrière souleva péniblement ses paupières lourdes et vous dévisagea un instant sans répondre.",
+                                next: 51207403,
+                            },
+                            {
+                                id: 51207403,
+                                content: "Encore des {性别:idiots qu’on a arnaqués|idiotes qu’on a arnaquées} pour les faire entrer ici...",
+                                npc: 700431,
+                                next: 51207404,
+                            },
+                            {
+                                id: 51207404,
+                                content:
+                                    "Allons, ne dites pas ça. Ce sont des {性别:nouveaux|nouvelles}, après tout. Bonjour, bienvenue à la Gare des Cent-Fleurs... même si vous réaliserez vite que ce n’était pas le meilleur choix de votre vie.",
+                                npc: 700432,
+                                next: 51207405,
+                            },
+                            {
+                                id: 51207405,
+                                content: "Comment vous avez su que j’étais {性别:nouveau|nouvelle} ?",
+                                npc: 100001,
+                                next: 51207406,
+                            },
+                            {
+                                id: 51207406,
+                                content:
+                                    "Y a que les nouveaux idiots pour aller saluer les gens avec autant d’enthousiasme. Bientôt, le boulot vous écrasera comme nous tous. Même rester debout ici à attendre du travail suffit à vous faire accuser de paresser.",
+                                npc: 700431,
+                                next: 51207407,
+                            },
+                            {
+                                id: 51207407,
+                                content:
+                                    "Elle est toujours comme ça, ne faites pas attention. Vous avez besoin de quelque chose ? Personne ne vous accompagne ? Ou bien...",
+                                npc: 700432,
+                                next: 51207408,
+                            },
+                            {
+                                id: 51207408,
+                                content:
+                                    "Vous avez même une Luno avec vous ? Vous allez nettoyer les vitres du secteur des enfants travailleurs ?",
+                                npc: 700432,
+                                next: 51207409,
+                            },
+                            {
+                                id: 51207409,
+                                content: "Euh... Oui ! J’ai commencé à travailler ici en même temps {性别:que lui|qu’elle} !",
+                                npc: 700449,
+                                next: 51207410,
+                            },
+                            {
+                                id: 51207410,
+                                content: "{性别:Un grand idiot|Une grande idiote} et une petite idiote. Beau duo.",
+                                npc: 700431,
+                                options: [
+                                    {
+                                        id: 51207411,
+                                        content: "<I>Aller dans son sens</>",
+                                        next: 51207412,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 51207413,
+                                        content: "<I>Changer de sujet</>",
+                                        next: 51207414,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51207415,
+                                        content: "<I>Vous n’avez pas l’air bien maligne non plus.</>",
+                                        next: 51207416,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51207412,
+                                content:
+                                    "Ouais. Faut vraiment être idiot pour venir s’entasser ici alors qu’on sait déjà à quel point les conditions sont horribles.",
+                                npc: 100001,
+                                next: 51207419,
+                            },
+                            {
+                                id: 51207414,
+                                content: "Mais qu’est-ce qu’on était censés faire d’autre ?",
+                                npc: 100001,
+                                next: 51207419,
+                            },
+                            {
+                                id: 51207416,
+                                content: "Sinon, pourquoi être arrivé ici avant nous ?",
+                                npc: 100001,
+                                next: 51207417,
+                            },
+                            {
+                                id: 51207419,
+                                content: "Qu... Quoi ?",
+                                npc: 700432,
+                                next: 51207420,
+                            },
+                            {
+                                id: 51207417,
+                                content: "J’avais pas le choix ! J’ai besoin d’argent pour vivre, vous comprenez ça ?",
+                                npc: 700431,
+                                next: 51207418,
+                            },
+                            {
+                                id: 51207420,
+                                content: "Nous n’avons simplement plus aucun endroit où aller.",
+                                npc: 100001,
+                                next: 51207421,
+                            },
+                            {
+                                id: 51207418,
+                                content: "Moi aussi, j’ai besoin d’argent. Pour quelque chose de plus important que simplement survivre.",
+                                npc: 100001,
+                                next: 51207419,
+                            },
+                            {
+                                id: 51207421,
+                                content: "Plus aucun endroit où aller ? Petit larbin, tu... Oh ! {nickname}, de quoi tu parles ?",
+                                npc: 700449,
+                                next: 51207422,
+                            },
+                            {
+                                id: 51207422,
+                                content:
+                                    "Ma sœur et moi avons grandi ensemble depuis l’enfance. Puis un jour, un salaud est venu dans notre village... et l’a enlevée.",
+                                npc: 100001,
+                                next: 51207423,
+                            },
+                            {
+                                id: 51207423,
+                                content:
+                                    "Depuis, nous avons erré jusqu’à Givrelac pour la retrouver et payer sa rançon. Mais nous avons déjà dépensé tout ce que nous avions. À part travailler pour survivre, il ne nous reste plus rien.",
+                                npc: 100001,
+                                next: 51207424,
+                            },
+                            {
+                                id: 51207424,
+                                content: "Petit larbin, tu... Oh !",
+                                npc: 700449,
+                                next: 51207425,
+                            },
+                            {
+                                id: 51207425,
+                                content:
+                                    "Oui oui ! {性别:Il|Elle} dit vrai ! Ça fait longtemps qu’on n’a pas mangé à notre faim ! Sans la patronne des Asphodèles qui nous a donné un peu à manger, on serait morts de faim depuis longtemps !",
+                                npc: 700449,
+                                next: 51207426,
+                            },
+                            {
+                                id: 51207426,
+                                content: "...",
+                                npc: 700431,
+                                next: 51207427,
+                            },
+                            {
+                                id: 51207427,
+                                content: "... Je vois... C’est vrai que votre histoire fait un peu peine à entendre.",
+                                npc: 700432,
+                                next: 51207428,
+                            },
+                            {
+                                id: 51207428,
+                                content:
+                                    "Nous avons désespérément besoin d’argent. Pas seulement pour manger... mais aussi pour payer la rançon de ma sœur...",
+                                npc: 100001,
+                                next: 51207429,
+                            },
+                            {
+                                id: 51207429,
+                                content:
+                                    "Aaah... Si seulement il existait un endroit où on pouvait gagner énormément d’argent d’un seul coup...",
+                                npc: 700449,
+                                next: 51207430,
+                            },
+                            {
+                                id: 51207430,
+                                content:
+                                    "Un endroit comme ça... ça existe. Mais dans votre situation, au lieu d’économiser sagement pour la rançon, vous devriez plutôt engager des gens pour aller récupérer votre sœur de force.",
+                                npc: 700432,
+                                next: 51207431,
+                            },
+                            {
+                                id: 51207431,
+                                content:
+                                    "Vous avez bien des contacts avec la patronne des Asphodèles, non ? Y a pas un groupe chez eux qui s’appelle les Chasseurs de Phoxène ? Ils ont l’air plutôt forts.",
+                                npc: 700431,
+                                next: 51207432,
+                            },
+                            {
+                                id: 51207432,
+                                content:
+                                    "Si ce n’était que de simples ravisseurs, ça irait. Mais celui qui a kidnappé ma sœur est un véritable monstre. Un type monstrueusement fort... et incroyablement dangereux.",
+                                npc: 100001,
+                                next: 51207433,
+                            },
+                            {
+                                id: 51207433,
+                                content:
+                                    "Vous avez l’air plus mal en point que je le pensais... Je retire ce que j’ai dit plus tôt. Désolée.",
+                                npc: 700431,
+                                next: 51207434,
+                            },
+                            {
+                                id: 51207434,
+                                content:
+                                    "Mais quoi qu’il arrive, ce boulot vous empêchera tout juste de mourir de faim. Alors oubliez les histoires de rançon.",
+                                npc: 700431,
+                                next: 51207438,
+                            },
+                            {
+                                id: 51207435,
+                                content:
+                                    "Tiens donc, de quoi vous parlez tous ? Vous deux, le contremaître vous cherche. Il veut vous voir là-bas pour déplacer des caisses.",
+                                npc: 700448,
+                                next: 51207436,
+                            },
+                            {
+                                id: 51207436,
+                                content: "Enfin ! Bon, on y va alors. Si vous comptez vraiment travailler ici, on se recroisera sûrement.",
+                                npc: 700432,
+                                next: 51207437,
+                            },
+                            {
+                                id: 51207437,
+                                content: "À plus !",
+                                npc: 700431,
+                                next: 51207439,
+                            },
+                            {
+                                id: 51207501,
+                                content:
+                                    "Oh ? Vous êtes {性别:nouveaux|nouvelles} ? Il me semble vous avoir entendu parler d’un moyen de gagner de l’argent...",
+                                npc: 700448,
+                                next: 51207502,
+                            },
+                            {
+                                id: 51207502,
+                                content: "Oui ! On a besoin d’argent ! Plein, plein d’argent !",
+                                npc: 700449,
+                                next: 51207503,
+                            },
+                            {
+                                id: 51207503,
+                                content:
+                                    "Vraiment... Eh bien, je connais peut-être un endroit dans ce genre-là. Avec une petite mise de départ, il est possible d’y gagner énormément.",
+                                npc: 700448,
+                                next: 51207504,
+                            },
+                            {
+                                id: 51207504,
+                                content: "Vraiment ? Où ça ? On peut y aller ?",
+                                npc: 100001,
+                                next: 51207505,
+                            },
+                            {
+                                id: 51207505,
+                                content: "Toi, oui... aucun problème. Je peux t’y emmener quand tu veux. Mais elle...",
+                                npc: 700448,
+                                next: 51207506,
+                            },
+                            {
+                                id: 51207506,
+                                content: "Hein ? Qu’est-ce qu’il y a avec moi ?",
+                                npc: 700449,
+                                next: 51207507,
+                            },
+                            {
+                                id: 51207507,
+                                content:
+                                    "... Bah, ce n’est qu’une enfant après tout. Ça tombe bien, je dois justement y aller maintenant. Vous venez avec moi ?",
+                                npc: 700448,
+                                next: 51207508,
+                            },
+                            {
+                                id: 51207508,
+                                content: "Je ne connais pas très bien le coin. Ça ne pose pas de problème ?",
+                                npc: 100001,
+                                next: 51207509,
+                            },
+                            {
+                                id: 51207509,
+                                content: "Aucun souci ! Venez avec moi, c’est tout.",
+                                npc: 700448,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040405,
+                name: "Se rendre sur le lieu du « jeu »",
+                desc: "Comme prévu, vous ne tardez pas à entrer en contact avec un homme affable, qui vous conduit jusqu’au fameux lieu du « jeu ». Pourtant... ce genre de « jeu » ferait mieux d’être évité.",
+                nodes: [
+                    {
+                        id: "17803047516302753",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-33804, 5173],
+                        dialogues: [
+                            {
+                                id: 51207601,
+                                content:
+                                    "Pourquoi tout le monde passe son temps à dire que je suis une enfant aujourd’hui ? Les enfants n’ont pas le droit de jouer, peut-être ?",
+                                npc: 700449,
+                                next: 51207602,
+                            },
+                            {
+                                id: 51207602,
+                                content: "Peut-être que... ce n’est pas un jeu ordinaire ?",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040406,
+                name: "Se rendre sur le lieu du « jeu »",
+                desc: "Comme prévu, vous ne tardez pas à entrer en contact avec un homme affable, qui vous conduit jusqu’au fameux lieu du « jeu ». Pourtant... ce genre de « jeu » ferait mieux d’être évité.",
+                nodes: [
+                    {
+                        id: "17803048919444526",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-33804, 5173],
+                        dialogues: [
+                            {
+                                id: 51207701,
+                                content:
+                                    "Dans la petite pièce étouffante, plusieurs tables bricolées à la hâte avaient été installées. Une foule surexcitée se pressait autour des tables. Le vacarme engloutissait instantanément quiconque entrait ici ; il fallait presque hurler pour entendre les gens autour de soi.",
+                                next: 51207702,
+                            },
+                            {
+                                id: 51207702,
+                                content: "Le jeu de Monsieur Jack ! Tu connais les règles ?!",
+                                npc: 700433,
+                                next: 51207703,
+                            },
+                            {
+                                id: 51207703,
+                                content:
+                                    "Installe-toi quand tu veux. Le croupier distribue des cartes à tous les joueurs. Chaque carte possède une valeur différente : les cartes numérotées de 2 à 10 valent leur chiffre, les figures — J, Q et K — valent toutes 10, et l’As peut compter comme 1 ou 11.",
+                                npc: 700433,
+                                next: 51207704,
+                            },
+                            {
+                                id: 51207704,
+                                content:
+                                    "Le meilleur score possible, c’est 21. Si tes cartes totalisent exactement 21, c’est le jackpot. Sinon, celui qui a le total le plus élevé gagne. Mais si tu dépasses 21... c’est terminé. Tu perds tout.",
+                                npc: 700433,
+                                next: 51207705,
+                            },
+                            {
+                                id: 51207705,
+                                content: "Je crois avoir compris... Alors je peux essayer une partie ?",
+                                npc: 700434,
+                                next: 51207706,
+                            },
+                            {
+                                id: 51207706,
+                                content: "Petit larbin ? Qu’est-ce que tu regardes comme ça ? T’as l’air complètement absorbé.",
+                                npc: 700449,
+                                next: 51207707,
+                            },
+                            {
+                                id: 51207707,
+                                content: "Rien... J’écoutais juste cette femme expliquer les règles du jeu de Monsieur Jack.",
+                                npc: 100001,
+                                next: 51207708,
+                            },
+                            {
+                                id: 51207708,
+                                content: "Oh ? Le jeu de Monsieur Jack t’intéresse ? Tu veux essayer une partie ?",
+                                npc: 700448,
+                                next: 51207709,
+                            },
+                            {
+                                id: 51207709,
+                                content: "Ça ne m’intéresse pas.",
+                                npc: 100001,
+                                next: 51207710,
+                            },
+                            {
+                                id: 51207710,
+                                content:
+                                    "Oh là, ne me dis pas que tu trouves les règles trop compliquées. Ce n’est pas grave, on a aussi des jeux plus simples—",
+                                npc: 700448,
+                                next: 51207711,
+                            },
+                            {
+                                id: 51207711,
+                                content: "... Je ne peux pas y jouer non plus.",
+                                npc: 100001,
+                                next: 51207712,
+                            },
+                            {
+                                id: 51207712,
+                                content:
+                                    "Comment ça ? Celui-là ne t’intéresse pas, les autres non plus... Alors qu’est-ce que tu viens faire ici au juste ?",
+                                npc: 700448,
+                                next: 51207713,
+                            },
+                            {
+                                id: 51207713,
+                                content:
+                                    "Euh... Ne le prenez pas mal ! Ce n’est pas qu’on ne veut pas jouer, c’est juste que... euh... on n’a pas d’argent.",
+                                npc: 700449,
+                                next: 51207714,
+                            },
+                            {
+                                id: 51207714,
+                                content: "Pas d’argent ?",
+                                npc: 700448,
+                                next: 51207715,
+                            },
+                            {
+                                id: 51207715,
+                                content:
+                                    "Oui oui ! On vient juste d’arriver à la gare pour travailler, alors comme on n’a pas encore reçu notre paie... on n’a pas un sou sur nous !",
+                                npc: 700449,
+                                next: 51207716,
+                            },
+                            {
+                                id: 51207716,
+                                content: "Exactement. Alors, il n’existe pas des jeux auxquels on peut jouer sans argent ?",
+                                npc: 100001,
+                                next: 51207717,
+                            },
+                            {
+                                id: 51207717,
+                                content: "Jouer sans argent ? Et puis quoi encore !",
+                                npc: 700448,
+                                next: 51207718,
+                            },
+                            {
+                                id: 51207718,
+                                content:
+                                    "Je vous ai amenés ici parce que je pensais que vous étiez sérieux, et maintenant vous me sortez ça ? Vous vous moquez de moi ou quoi ?",
+                                npc: 700448,
+                                next: 51207719,
+                            },
+                            {
+                                id: 51207719,
+                                content:
+                                    "On était {性别:sérieux|sérieuse} en disant qu’on voulait gagner de l’argent. Mais ne pas en avoir, ce n’est pas vraiment quelque chose qu’on avait prévu non plus.",
+                                npc: 100001,
+                                next: 51207720,
+                            },
+                            {
+                                id: 51207720,
+                                content:
+                                    "Sinon... vous pourriez peut-être m’en prêter un peu ? Je jouerai, puis je vous rembourserai une fois que j’aurai gagné.",
+                                npc: 100001,
+                                next: 51207721,
+                            },
+                            {
+                                id: 51207721,
+                                content: "Emprunter— Emprunter de l’argent ?! {nickname}, tu n’avais pas dit que—",
+                                npc: 700449,
+                                next: 51207722,
+                            },
+                            {
+                                id: 51207722,
+                                content:
+                                    "Emprunter de l’argent... Ce n’est pas impossible. Enfin, ce ne sera pas moi qui te prêterai quoi que ce soit. Mais tu peux emprunter directement à Monsieur Jack.",
+                                npc: 700448,
+                                next: 51207723,
+                            },
+                            {
+                                id: 51207723,
+                                content: "Très bien. Alors emmenez-moi voir Monsieur Jack pour que je lui emprunte quelques pièces.",
+                                npc: 100001,
+                                next: 51207724,
+                            },
+                            {
+                                id: 51207724,
+                                content:
+                                    "Votre réponse immédiate fit briller les yeux du rabatteur. Incapable de cacher son excitation, il échangea un regard avec le croupier de la table voisine avant de se préparer à vous emmener. Mais à cet instant, une voix surgit soudainement derrière vous.",
+                                next: 51207725,
+                            },
+                            {
+                                id: 51207725,
+                                content:
+                                    "Attends une seconde ! {nickname} ?! T’es pas {性别:le voisin|la voisine} du neveu de la cousine éloignée de mon oncle ? Qu’est-ce que tu fais ici tout d’un coup ?",
+                                next: 51207726,
+                            },
+                            {
+                                id: 51207726,
+                                content: "<I>... Cette voix me dit quelque chose.</>",
+                                npc: 100001,
+                                next: 51207727,
+                            },
+                            {
+                                id: 51207727,
+                                content:
+                                    "{nickname} ! Ça fait une éternité ! Quand on était petits, on grimpait encore aux arbres ensemble pour attraper des insectes, tu te souviens ?",
+                                npc: 700430,
+                                next: 51207728,
+                            },
+                            {
+                                id: 51207728,
+                                content: "...",
+                                npc: 100001,
+                                next: 51207729,
+                            },
+                            {
+                                id: 51207729,
+                                content:
+                                    "Rowan ? Qu’est-ce que tu fais encore ici aujourd’hui ? Arrête un peu tes bêtises, je vais l’emmener acheter un « Fonds Renaissance ».",
+                                npc: 700448,
+                                next: 51207730,
+                            },
+                            {
+                                id: 51207730,
+                                content:
+                                    "Patron, on se connaît depuis qu’on est gosses. Ça fait des années qu’on ne s’est pas vus. Les histoires d’emprunt peuvent attendre. {性别:Il|Elle} et moi aimerions d’abord discuter un peu.",
+                                npc: 700430,
+                                next: 51207731,
+                            },
+                            {
+                                id: 51207731,
+                                content: "Les retrouvailles pourront attendre...",
+                                npc: 700448,
+                                next: 51207732,
+                            },
+                            {
+                                id: 51207732,
+                                content: "À plus, patron ! On a énormément de choses à se raconter ! On revient plus tard !",
+                                npc: 700430,
+                                next: 51207733,
+                            },
+                            {
+                                id: 51207733,
+                                content:
+                                    "Rowan vous attrapa par le bras pendant que vous entraîniez Snow derrière vous, et tous les trois quittèrent précipitamment la pièce.",
+                                next: 51207734,
+                            },
+                            {
+                                id: 51207734,
+                                content:
+                                    "Une fois que vous aurez mordu à l’hameçon, ils vous emmèneront forcément dans leur salle de jeux. Et si tout se passe comme prévu, vous y croiserez Rowan.",
+                                npc: 700428,
+                                next: 51207735,
+                            },
+                            {
+                                id: 51207735,
+                                content: "Rowan ?",
+                                npc: 100001,
+                                next: 51207736,
+                            },
+                            {
+                                id: 51207736,
+                                content:
+                                    "Vous l’avez déjà vu. C’est l’homme qui venait nous supplier de lui prêter de l’argent tout à l’heure. Vous devrez trouver un moyen de sympathiser avec lui. Lui parler, le saluer... ou même lui offrir une partie. Peu importe. L’important, c’est qu’il se familiarise avec vous.",
+                                npc: 700428,
+                                next: 51207737,
+                            },
+                            {
+                                id: 51207737,
+                                content: "Pourquoi lui ?",
+                                npc: 100001,
+                                next: 51207738,
+                            },
+                            {
+                                id: 51207738,
+                                content: "Parce qu’il faut que ce soit lui.",
+                                npc: 700428,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040407,
+                name: "Parler à Rowan",
+                desc: "Vous restez ferme dans votre refus de participer au « jeu » et dissipez les soupçons du guide en prétendant vouloir emprunter de l’argent. Mais au moment de conclure l’affaire, Rowan surgit soudain et vous entraîne ailleurs avec une excuse maladroite.",
+                nodes: [
+                    {
+                        id: "178047184382310203",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-35202, 2902],
+                        dialogues: [
+                            {
+                                id: 51207801,
+                                content: "Hah... Hah... Pour une petite Luno, t’es sacrément rapide quand tu te mets à courir !",
+                                npc: 700430,
+                                next: 51207802,
+                            },
+                            {
+                                id: 51207802,
+                                content:
+                                    "C’est pas moi qui courais vite ! {nickname} m’a traînée tout du long, j’avais presque les pieds qui quittaient le sol !",
+                                npc: 700449,
+                                next: 51207803,
+                            },
+                            {
+                                id: 51207803,
+                                content: "{nickname}, c’est ton nom ? Pas banal.",
+                                npc: 700430,
+                                options: [
+                                    {
+                                        id: 51207804,
+                                        content: "<I>Enchanté. C’est notre première rencontre.</>",
+                                        next: 51207805,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 51207806,
+                                        content:
+                                            "<I>Alors comme ça, je suis vraiment {性别:le voisin|la voisine} du neveu de la cousine éloignée de ton oncle ?</>",
+                                        next: 51207807,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51207805,
+                                content:
+                                    "Enchanté enchanté ! Moi, c’est Rowan. J’ai juste improvisé une excuse pour te sortir de là, mais je n’ai aucune mauvaise intention. Je voulais simplement éviter que tu tombes dans leur piège.",
+                                npc: 700430,
+                                next: 51207808,
+                            },
+                            {
+                                id: 51207807,
+                                content:
+                                    "Haha, bien sûr que non. J’ai raconté n’importe quoi. Moi, c’est Rowan. Mais je te jure que je ne te veux aucun mal. Je voulais juste éviter que tu tombes dans leur piège.",
+                                npc: 700430,
+                                next: 51207808,
+                            },
+                            {
+                                id: 51207808,
+                                content: "Un piège ?",
+                                npc: 100001,
+                                next: 51207809,
+                            },
+                            {
+                                id: 51207809,
+                                content:
+                                    "Tu voulais emprunter de l’argent, pas vrai ? Surtout, ne va jamais emprunter auprès de ces types. J’ai déjà essayé plus tôt aujourd’hui. Leur soi-disant « Fonds Renaissance »... c’est juste un prêt usurier !",
+                                npc: 700430,
+                                next: 51207810,
+                            },
+                            {
+                                id: 51207810,
+                                content:
+                                    "Un prêt usurier ? C’est le genre de truc où on emprunte un peu... mais où on rembourse énormément, c’est ça ? Camilla m’en avait déjà parlé.",
+                                npc: 700449,
+                                next: 51207811,
+                            },
+                            {
+                                id: 51207811,
+                                content:
+                                    "Exactement ! Ils présentent ça comme quelque chose de flexible : remboursement quotidien, hebdomadaire ou mensuel, intérêts soi-disant faibles... Ça suffit pour arnaquer quelques idiots sans cervelle, mais moi ? Ils croyaient vraiment pouvoir me piéger ?",
+                                npc: 700430,
+                                next: 51207812,
+                            },
+                            {
+                                id: 51207812,
+                                content:
+                                    "Leur taux journalier de 0,3 % paraît faible au premier regard... mais une fois annualisé, ça monte à 109,5 % ! En clair, si tu leur empruntes 10 000 pièces, tu as l’impression de ne rembourser que 30 par jour... alors qu’au bout d’un an, tu leur auras rendu 20 950 au total.",
+                                npc: 700430,
+                                next: 51207813,
+                            },
+                            {
+                                id: 51207813,
+                                content:
+                                    "Et encore, ça, c’est sans intérêts composés. Je n’ai pas lu toutes les petites lignes, mais je suis prêt à parier qu’il y a plein d’autres pièges cachés là-dedans.",
+                                npc: 700430,
+                                next: 51207814,
+                            },
+                            {
+                                id: 51207814,
+                                content: "Ouaaah... T’es super fort en calcul, toi. Après tous ces chiffres, j’ai complètement décroché.",
+                                npc: 700449,
+                                next: 51207815,
+                            },
+                            {
+                                id: 51207815,
+                                content:
+                                    "Évidemment ! J’étais le comptable des usines de la Gare des Cent-Fleurs ! Enfin... plus maintenant. Avant.",
+                                npc: 700430,
+                                next: 51207816,
+                            },
+                            {
+                                id: 51207816,
+                                content: "« Avant »... Qu’est-ce que ça veut dire ?",
+                                npc: 100001,
+                                next: 51207817,
+                            },
+                            {
+                                id: 51207817,
+                                content:
+                                    "J’ai démissionné ! À quoi bon bosser comme un malade pour gagner trois misérables pièces ? Le jeu de Monsieur Jack est bien plus amusant. Tu tires quelques cartes et tu gagnes une fortune !",
+                                npc: 700430,
+                                next: 51207818,
+                            },
+                            {
+                                id: 51207818,
+                                content:
+                                    "Pourtant, vous êtes doué en calcul. Vous devriez comprendre les probabilités et les pièges de ce genre de jeu mieux que les autres. Alors pourquoi être tombé dedans vous aussi ?",
+                                npc: 100001,
+                                next: 51207819,
+                            },
+                            {
+                                id: 51207819,
+                                content:
+                                    "Tu comprends pas ! Justement parce que je suis bon en calcul, j’étais convaincu que je pouvais les battre ! Avant, je n’avais simplement pas encore trouvé la bonne méthode... Mais cette fois, j’ai compris !",
+                                npc: 700430,
+                                next: 51207820,
+                            },
+                            {
+                                id: 51207820,
+                                content:
+                                    "Cela dit... tu gardes la tête étonnamment froide. Les gens aussi lucides ne viennent généralement pas jouer ici.",
+                                npc: 700430,
+                                next: 51207821,
+                            },
+                            {
+                                id: 51207821,
+                                content: "C’est parce qu’on doit—",
+                                npc: 700449,
+                                next: 51207822,
+                            },
+                            {
+                                id: 51207822,
+                                content:
+                                    "Nous avons besoin d’argent. Ma sœur a été kidnappée, et il faut une énorme rançon pour la récupérer.",
+                                npc: 100001,
+                                next: 51207823,
+                            },
+                            {
+                                id: 51207823,
+                                content:
+                                    "Je vois... Alors tu devrais encore plus me remercier. Je viens probablement de te sauver ta rançon.",
+                                npc: 700430,
+                                next: 51207824,
+                            },
+                            {
+                                id: 51207824,
+                                content: "Mais ça ne suffit toujours pas. Je n’ai pas encore assez d’argent pour la récupérer.",
+                                npc: 100001,
+                                next: 51207825,
+                            },
+                            {
+                                id: 51207825,
+                                content: "Pfff... T’es vraiment mal tombé, toi aussi.",
+                                npc: 700430,
+                                next: 51207826,
+                            },
+                            {
+                                id: 51207826,
+                                content: "Bouhouhou... {nickname} a une vie tellement misérable... Bouhouhou...",
+                                npc: 700449,
+                                next: 51207827,
+                            },
+                            {
+                                id: 51207827,
+                                content:
+                                    "Hé, hé, ne pleure pas ! Bon... allez, aujourd’hui je me sens généreux. Ça vous dirait de bosser avec moi ? Je vais vous aider à gagner de l’argent.",
+                                npc: 700430,
+                                next: 51207828,
+                            },
+                            {
+                                id: 51207828,
+                                content: "Comment ça ?",
+                                npc: 100001,
+                                next: 51207829,
+                            },
+                            {
+                                id: 51207829,
+                                content: "Approche un peu, je vais tout t’expliquer.",
+                                npc: 700430,
+                                next: 51207830,
+                            },
+                            {
+                                id: 51207830,
+                                content:
+                                    "C’est notre comptable. L’un des rares travailleurs ici à avoir fait des études et à avoir un peu de jugeote.",
+                                npc: 700428,
+                                next: 51207831,
+                            },
+                            {
+                                id: 51207831,
+                                content:
+                                    "Avant, il venait d’une petite famille noble, mais leur situation s’est effondrée. Il a donc fini ici à faire des calculs et de la comptabilité. Mais il a quitté son poste il y a un mois.",
+                                npc: 700428,
+                                next: 51207832,
+                            },
+                            {
+                                id: 51207832,
+                                content:
+                                    "À cause de ce jeu. Le jeu de Monsieur Jack, je crois ? Je n’y ai jamais joué moi-même, mais d’après ce que racontent les ouvriers, il s’agit d’un simple jeu de calculs. Rowan a quitté son travail uniquement pour l’étudier.",
+                                npc: 700428,
+                                next: 51207833,
+                            },
+                            {
+                                id: 51207833,
+                                content:
+                                    "Il prétend avoir mis au point une méthode permettant d’atteindre 70 à 80 % de chances de victoire. Mais il faut être deux : l’un surveille les tables et les cartes distribuées, pendant que l’autre ne s’assoit pour jouer qu’au moment où les probabilités deviennent favorables.",
+                                npc: 700428,
+                                next: 51207834,
+                            },
+                            {
+                                id: 51207834,
+                                content:
+                                    "Avec cette méthode, il a essayé de convaincre beaucoup de gens de coopérer avec lui. Mais personne ne l’a cru. Il a donc fini par jouer seul... avec des résultats assez peu convaincants.",
+                                npc: 700428,
+                                next: 51207835,
+                            },
+                            {
+                                id: 51207835,
+                                content:
+                                    "La raison pour laquelle je vous ai demandé de le trouver, c’est qu’il cherchera forcément à vous proposer de travailler avec lui. Quelle que soit sa méthode miracle... contentez-vous de jouer le jeu.",
+                                npc: 700428,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040408,
+                name: "Retourner sur le lieu du « jeu »",
+                desc: "Cet ancien comptable d’usine, fort de son talent naturel pour les chiffres, vous propose de l’aider à tricher. Il précise que vous n’aurez pas à participer réellement au « jeu » : vous serez simplement ses assistants, chargés de repérer les tables où la situation lui est favorable. Cela faisait déjà partie du plan ; autant accepter.",
+                nodes: [
+                    {
+                        id: "17799541764754544",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-33894, 5999],
+                        dialogues: [
+                            {
+                                id: 51207901,
+                                content:
+                                    "Tu as bien compris ce que je viens de dire ? Ce que tu dois faire est très simple. Après tout, cette salle de jeux est loin d’être réglementaire : ils n’utilisent qu’un seul paquet de cartes et ils n’ont même pas de mélangeur automatique.",
+                                npc: 700430,
+                                options: [
+                                    {
+                                        id: 51207902,
+                                        content: "<I>J’ai compris.</> (Mode simplifié : progression automatique sans analyse manuelle)",
+                                        next: 51207903,
+                                    },
+                                    {
+                                        id: 51207904,
+                                        content: "<I>Vous pouvez répéter ?</>",
+                                        next: 51207905,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51207903,
+                                content: "Parfait. J’avais peur que tu retiennes pas tout ça.",
+                                npc: 700430,
+                                next: 51207913,
+                            },
+                            {
+                                id: 51207905,
+                                content: "Bon, d’accord, je vais le réexpliquer. Essaie de suivre cette fois.",
+                                npc: 700430,
+                                next: 51207906,
+                            },
+                            {
+                                id: 51207913,
+                                content: "Moi aussi je peux surveiller les cartes ! J’ai une super mémoire, je me tromperai jamais !",
+                                npc: 700449,
+                                next: 51207914,
+                            },
+                            {
+                                id: 51207906,
+                                content: "Tu n’as même pas besoin de jouer. Tu dois juste observer discrètement les tables.",
+                                npc: 700430,
+                                next: 51207907,
+                            },
+                            {
+                                id: 51207914,
+                                content:
+                                    "Parfait. Cela dit, vu ta taille... tu serais peut-être plus utile en regardant discrètement les cartes du croupier par-dessous la table ?",
+                                npc: 700430,
+                                next: 51207915,
+                            },
+                            {
+                                id: 51207907,
+                                content:
+                                    "Le jeu de Monsieur Jack repose entièrement sur la proportion de « grosses cartes » restantes dans le paquet. Les grosses cartes, ce sont toutes celles valant 10 points ou plus. Plus il en reste, plus ça nous avantage, parce que le croupier est obligé de tirer jusqu’à atteindre 17.",
+                                npc: 700430,
+                                next: 51207908,
+                            },
+                            {
+                                id: 51207915,
+                                content: "Hein ?! Qu’est-ce que ça veut dire, ça ?!",
+                                npc: 700449,
+                                next: 51207916,
+                            },
+                            {
+                                id: 51207908,
+                                content:
+                                    "Et plus il reste de grosses cartes dans le paquet, plus le croupier risque de dépasser 21 en tirant. Autrement dit... de faire sauter sa main.",
+                                npc: 700430,
+                                next: 51207909,
+                            },
+                            {
+                                id: 51207916,
+                                content: "Snow, allons-y.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51207909,
+                                content:
+                                    "Si tu obtiens un As — donc 11 points — accompagné d’une carte valant 10, tu décroches un « Super Jack ». Et là, les gains sont multipliés par 1,5 ! Bref, plus il reste de grosses cartes, plus nos chances de gagner augmentent.",
+                                npc: 700430,
+                                next: 51207910,
+                            },
+                            {
+                                id: 51207910,
+                                content:
+                                    "Chaque paquet contient toujours le même nombre de cartes. Donc quand beaucoup de petites cartes sont déjà sorties, ça veut dire qu’il reste davantage de grosses cartes dans le paquet. Ce qu’on doit faire, c’est surveiller quelles cartes ont été jouées à chaque table et repérer celles où beaucoup de petites cartes sont déjà passées.",
+                                npc: 700430,
+                                next: 51207911,
+                            },
+                            {
+                                id: 51207911,
+                                content:
+                                    "Une fois que tu as trouvé une bonne table, utilise notre signal : tu lèves le bras comme si tu t’étirais. Dès que je vois ça, j’arrive, je m’assois, je gagne, je repars. Simple et efficace !",
+                                npc: 700430,
+                                next: 51207912,
+                            },
+                            {
+                                id: 51207912,
+                                content: "Facile, non ? Essaie juste d’avoir l’air naturel. Il ne faut surtout pas qu’on vous remarque.",
+                                npc: 700430,
+                                next: 51207913,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040409,
+                name: "Commencer le « jeu »",
+                desc: "Après avoir révisé les règles une nouvelle fois, vous décidez d’aider Rowan à participer au « jeu ».",
+                nodes: [
+                    {
+                        id: "17804736159833025171",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34708, 4774],
+                        dialogues: [
+                            {
+                                id: 51208001,
+                                content:
+                                    "Vous observez cette table pendant un moment. Les grosses cartes et les petites semblent sortir en proportions équilibrées ; cette table ne paraît pas particulièrement intéressante.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804736247503025416",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34434, 4410],
+                        dialogues: [
+                            {
+                                id: 51208101,
+                                content:
+                                    "Vous observez cette table pendant un moment. Beaucoup de grosses cartes ont déjà été jouées ; la situation ne semble pas idéale.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804736231173025369",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34309, 5006],
+                        next: ["17804736159833025171", "17804736247503025416", "17804738120483026884"],
+                        dialogues: [
+                            {
+                                id: 51208201,
+                                content:
+                                    "Vous observez cette table pendant un moment. Beaucoup de petites cartes sont déjà sorties ; c’est le moment idéal pour faire signe à votre partenaire.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738120483026884",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        next: ["17804736159833025171", "17804738675223028184", "17804738675223028183"],
+                        dialogues: [
+                            {
+                                id: 51208403,
+                                content: "4 visible pour le croupier, Valet caché... il tire un 9. Dépassement. Le joueur gagne.",
+                                npc: 700435,
+                                next: 51208404,
+                            },
+                            {
+                                id: 51208404,
+                                content: "Qu’est-ce qui se passe aujourd’hui ?! Rowan ! Tu nous paies un verre après ça !",
+                                npc: 700436,
+                                next: 51208405,
+                            },
+                            {
+                                id: 51208405,
+                                content: "Plus tard ! Plus tard, promis !",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738675223028184",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34309, 5006],
+                        dialogues: [
+                            {
+                                id: 51208101,
+                                content:
+                                    "Vous observez cette table pendant un moment. Beaucoup de grosses cartes ont déjà été jouées ; la situation ne semble pas idéale.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738675223028183",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34434, 4410],
+                        next: ["17804736159833025171", "17804738675223028184", "17804738675223028186"],
+                        dialogues: [
+                            {
+                                id: 51208301,
+                                content:
+                                    "Vous observez cette table pendant un moment. Beaucoup de petites cartes sont déjà sorties ; c’est le moment idéal pour faire signe à votre partenaire.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738675223028186",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        next: ["17804738706543028309", "17804738675223028184", "17804738706543028310"],
+                        dialogues: [
+                            {
+                                id: 51208303,
+                                content:
+                                    "As visible pour le croupier, 8 caché. Le joueur obtient As + Roi = 21. Super Jack ! Le joueur gagne !",
+                                npc: 700435,
+                                next: 51208304,
+                            },
+                            {
+                                id: 51208304,
+                                content: "Hé Rowan, tu plaisantes ou quoi ?! Ta chance est complètement folle aujourd’hui !",
+                                npc: 700436,
+                                next: 51208305,
+                            },
+                            {
+                                id: 51208305,
+                                content: "C’est juste un coup de chance. N’importe qui pourrait faire pareil.",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738706543028309",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34434, 4410],
+                        dialogues: [
+                            {
+                                id: 51208001,
+                                content:
+                                    "Vous observez cette table pendant un moment. Les grosses cartes et les petites semblent sortir en proportions équilibrées ; cette table ne paraît pas particulièrement intéressante.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738706543028310",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34708, 4774],
+                        next: ["17804738706543028309", "17804738675223028184", "17804738706543028313"],
+                        dialogues: [
+                            {
+                                id: 51208401,
+                                content:
+                                    "Vous observez cette table pendant un moment. Beaucoup de petites cartes sont déjà sorties ; c’est le moment idéal pour faire signe à votre partenaire.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738706543028313",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        next: ["17804740047553030191"],
+                        dialogues: [
+                            {
+                                id: 51208203,
+                                content:
+                                    "Rowan remarqua immédiatement votre signal et se fraya un chemin jusqu’à la table avant de commencer son numéro.",
+                                next: 51208204,
+                            },
+                            {
+                                id: 51208204,
+                                content: "Le croupier tire : 9 visible, 5 caché... il retire un Q. Dépassement. Le joueur gagne !",
+                                npc: 700435,
+                                next: 51208205,
+                            },
+                            {
+                                id: 51208205,
+                                content: "Eh ben, Rowan ! T’as une sacrée chance aujourd’hui !",
+                                npc: 700436,
+                                next: 51208206,
+                            },
+                            {
+                                id: 51208206,
+                                content: "Évidemment ! Regardez bien : je ne partirai pas avant d’avoir vidé leurs poches !",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804740047553030191",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        dialogues: [
+                            {
+                                id: 51208501,
+                                content:
+                                    "Vous continuez à circuler entre les tables, mais aucune ne semble particulièrement favorable. Vous échangez un regard avant de quitter discrètement la salle ensemble.",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040410,
+                name: "Commencer le « jeu »",
+                desc: "Après avoir révisé les règles une nouvelle fois, vous décidez d’aider Rowan à participer au « jeu ».",
+                nodes: [
+                    {
+                        id: "17804741378814538648",
+                        type: "TalkNode",
+                        name: "调查第一张桌子",
+                        srId: 106301,
+                        pos: [-34708, 4774],
+                        next: ["17804742700314540828"],
+                        dialogues: [
+                            {
+                                id: 51208601,
+                                content:
+                                    "Vous vous approchez silencieusement de cette table et commencez à observer les cartes distribuées...",
+                                next: 51208602,
+                            },
+                            {
+                                id: 51208602,
+                                content:
+                                    "7 visible pour le croupier, Dame cachée. Le joueur reste sur 2 + Valet + 6 = 18. Le joueur gagne !",
+                                npc: 700437,
+                                next: 51208603,
+                            },
+                            {
+                                id: 51208603,
+                                content: "Héhé~ Encore une !",
+                                npc: 700438,
+                                next: 51208604,
+                            },
+                            {
+                                id: 51208604,
+                                content:
+                                    "5 visible pour le croupier, 6 caché... il tire un 9 et monte à 20. Le joueur reste sur 3 + Roi + 4 = 17. Le joueur perd !",
+                                npc: 700437,
+                                next: 51208605,
+                            },
+                            {
+                                id: 51208605,
+                                content: "Merde ! J’aurais dû tirer une autre carte !",
+                                npc: 700438,
+                                next: 51208606,
+                            },
+                            {
+                                id: 51208606,
+                                content:
+                                    "9 visible pour le croupier, 10 caché : 19. Le joueur reste sur 8 + As compté comme 11 : 19. Égalité !",
+                                npc: 700437,
+                                next: 51208607,
+                            },
+                            {
+                                id: 51208607,
+                                content: "<I>Tss...</> Ça s’est joué à rien !",
+                                npc: 700438,
+                                next: 51208608,
+                            },
+                            {
+                                id: 51208608,
+                                content: "Petit larbin, on appelle Rowan ?",
+                                npc: 700449,
+                                options: [
+                                    {
+                                        id: 51208609,
+                                        content: "<I>Appeler Rowan</>",
+                                        next: 51208610,
+                                    },
+                                    {
+                                        id: 51208612,
+                                        content: "<I>Ne pas l’appeler</>",
+                                        next: 51208613,
+                                    },
+                                    {
+                                        id: 51208614,
+                                        content: "<I>Se remémorer les cartes sorties</>",
+                                        next: 51208615,
+                                    },
+                                    {
+                                        id: 51208616,
+                                        content: "<I>Se souvenir des explications de Rowan</>",
+                                        next: 51208617,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51208610,
+                                content:
+                                    "Mmh... Je ne suis pas sûre que ce soit une bonne idée. J’ai l’impression qu’il reste encore beaucoup de petites cartes. On devrait peut-être continuer à observer un peu.",
+                                npc: 700449,
+                                next: 51208611,
+                            },
+                            {
+                                id: 51208611,
+                                content: "D’accord.",
+                                npc: 100001,
+                                next: 51208612,
+                            },
+                            {
+                                id: 51208613,
+                                content: "Ce n’est pas idéal. Continuons à regarder.",
+                                npc: 100001,
+                                next: 51208614,
+                            },
+                            {
+                                id: 51208615,
+                                content:
+                                    "<I>Beaucoup de grosses cartes — 10, Valet, Dame, Roi et As — sont déjà sorties sur cette table... Ce n’est probablement pas un bon choix.</>",
+                                npc: 100001,
+                                next: 51208616,
+                            },
+                            {
+                                id: 51208617,
+                                content:
+                                    "Chaque paquet contient toujours le même nombre de cartes. Donc quand beaucoup de petites cartes sont déjà sorties, ça veut dire qu’il reste davantage de grosses cartes dans le paquet. Ce qu’on doit faire, c’est surveiller quelles cartes ont été jouées à chaque table et repérer celles où beaucoup de petites cartes sont déjà passées.",
+                                npc: 700430,
+                                next: 51208618,
+                            },
+                            {
+                                id: 51208618,
+                                content: "D’accord~",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804741607864539000",
+                        type: "TalkNode",
+                        name: "调查第二张桌子",
+                        srId: 106301,
+                        pos: [-34434, 4410],
+                        next: ["17804742700314540828"],
+                        dialogues: [
+                            {
+                                id: 51208701,
+                                content:
+                                    "Vous vous approchez silencieusement de cette table et commencez à observer les cartes distribuées...",
+                                next: 51208702,
+                            },
+                            {
+                                id: 51208702,
+                                content:
+                                    "8 visible pour le croupier, 7 caché... il tire un 2 et monte à 17. Le joueur reste sur 9 + 7 + 2 = 18. Le joueur gagne !",
+                                npc: 700437,
+                                next: 51208703,
+                            },
+                            {
+                                id: 51208703,
+                                content: "Avec l’argent que j’ai gagné aujourd’hui, je vais enfin pouvoir me faire plaisir !",
+                                npc: 700439,
+                                next: 51208704,
+                            },
+                            {
+                                id: 51208704,
+                                content:
+                                    "2 visible pour le croupier, 6 caché... il tire un 9 et monte à 17. Le joueur reste sur 6 + 5 + 4 = 15. Le joueur perd !",
+                                npc: 700437,
+                                next: 51208705,
+                            },
+                            {
+                                id: 51208705,
+                                content: "J’aurais dû demander une autre carte !",
+                                npc: 700439,
+                                next: 51208706,
+                            },
+                            {
+                                id: 51208706,
+                                content:
+                                    "4 visible pour le croupier, 2 caché... il tire un 9 puis un 7 et monte à 22. Dépassement. Le joueur reste sur 3 + 5 + 9 = 17. Le joueur gagne !",
+                                npc: 700437,
+                                next: 51208707,
+                            },
+                            {
+                                id: 51208707,
+                                content: "Youpi ! J’arrête là ! J’ai récupéré tout mon argent !",
+                                npc: 700439,
+                                next: 51208708,
+                            },
+                            {
+                                id: 51208708,
+                                content: "Petit larbin, on appelle Rowan ?",
+                                npc: 700449,
+                                options: [
+                                    {
+                                        id: 51208709,
+                                        content: "<I>Appeler Rowan</>",
+                                        next: 51208710,
+                                    },
+                                    {
+                                        id: 51208711,
+                                        content: "<I>Ne pas l’appeler</>",
+                                        next: 51208712,
+                                    },
+                                    {
+                                        id: 51208714,
+                                        content: "<I>Se remémorer les cartes sorties</>",
+                                        next: 51208715,
+                                    },
+                                    {
+                                        id: 51208716,
+                                        content: "<I>Se souvenir des explications de Rowan</>",
+                                        next: 51208717,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51208710,
+                                content:
+                                    "Très peu de grosses cartes sont sorties pendant ces manches. La situation est excellente. Va vite chercher Rowan.",
+                                npc: 100001,
+                                next: 51208711,
+                            },
+                            {
+                                id: 51208712,
+                                content:
+                                    "Hein ? On ne l’appelle pas ? Pourtant, aucune grosse carte n’est sortie pendant ces manches. Ça veut dire qu’il en reste plein dans le paquet, non ?",
+                                npc: 700449,
+                                next: 51208713,
+                            },
+                            {
+                                id: 51208713,
+                                content: "... Maintenant que tu le dis, c’est vrai. Je vais le faire venir.",
+                                npc: 100001,
+                                next: 51208714,
+                            },
+                            {
+                                id: 51208715,
+                                content:
+                                    "<I>Aucune grosse carte n’est encore sortie sur cette table... Ça semble être un excellent choix.</>",
+                                npc: 100001,
+                                next: 51208716,
+                            },
+                            {
+                                id: 51208717,
+                                content:
+                                    "Chaque paquet contient toujours le même nombre de cartes. Donc quand beaucoup de petites cartes sont déjà sorties, ça veut dire qu’il reste davantage de grosses cartes dans le paquet. Ce qu’on doit faire, c’est surveiller quelles cartes ont été jouées à chaque table et repérer celles où beaucoup de petites cartes sont déjà passées.",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804742700314540828",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        dialogues: [
+                            {
+                                id: 51208801,
+                                content:
+                                    "Vous passez d’une table à l’autre et raflez rapidement une belle somme. Mais lorsque les croupiers commencent à mélanger les cartes, plus aucune table ne semble favorable. Vous échangez un regard complice avant de quitter la salle ensemble.",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040411,
+                name: "Quitter le lieu du « jeu »",
+                desc: "La stratégie de Rowan se révèle très efficace, et vous engrangez rapidement de beaux gains. Mais dans un endroit pareil, gagner trop souvent attire l’attention. Vous n’avez d’autre choix que de vous faire discrets quelque temps.",
+                nodes: [
+                    {
+                        id: "17804757854444544079",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-27560, 4836],
+                        dialogues: [
+                            {
+                                id: 51208901,
+                                content:
+                                    "Sacré coup de chance ! Je pensais pas que ça marcherait aussi facilement. À part quelques manches catastrophiques, tout le reste était super stable ! Du bénéfice net !",
+                                npc: 700430,
+                                next: 51208902,
+                            },
+                            {
+                                id: 51208902,
+                                content:
+                                    "Le problème, c’est qu’il n’y a plus vraiment de bonne occasion de retourner jouer pour le moment. Enfin... peu importe ! De toute façon, on pourra revenir quand on voudra. Allons d’abord boire un coup, puis on reviendra tenter notre chance plus tard ! Vous attendez ici une minute, d’accord ?",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040412,
+                name: "Quitter le lieu du « jeu »",
+                desc: "La stratégie de Rowan se révèle très efficace, et vous engrangez rapidement de beaux gains. Mais dans un endroit pareil, gagner trop souvent attire l’attention. Vous n’avez d’autre choix que de vous faire discrets quelque temps.",
+                nodes: [
+                    {
+                        id: "17804765855464545597",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-27560, 4836],
+                        dialogues: [
+                            {
+                                id: 51209001,
+                                content:
+                                    "Rowan vous laissa avec Snow pendant quelques instants. Lorsqu’il revint, il tenait trois gobelets fumants dans les mains, l’air particulièrement enthousiaste.",
+                                next: 51209002,
+                            },
+                            {
+                                id: 51209002,
+                                content:
+                                    "Tenez ! Ça, c’est un vrai bon truc que j’ai acheté avec l’argent gagné ici il y a quelque temps. Les riches de la cité intérieure en boivent tout le temps, mais dans les quartiers extérieurs, c’est quasiment introuvable.",
+                                npc: 700430,
+                                next: 51209003,
+                            },
+                            {
+                                id: 51209003,
+                                content:
+                                    "Je n’avais jamais osé le boire... ni même le revendre. Une occasion pareille, ça ne se gâche pas. Mais aujourd’hui, on a gagné de l’argent, alors il fallait bien partager un verre avec notre {性别:grand héros|grande héroïne}, non ?",
+                                npc: 700430,
+                                next: 51209004,
+                            },
+                            {
+                                id: 51209004,
+                                content:
+                                    "Ah, et je ne t’ai pas oubliée non plus, petite Luno. Tiens, un chocolat chaud. Même les gosses du secteur des plafonds n’ont pas l’occasion d’en boire !",
+                                npc: 700430,
+                                next: 51209005,
+                            },
+                            {
+                                id: 51209005,
+                                content: "Je t’ai déjà dit plein de fois que je ne suis pas une enfant !",
+                                npc: 700449,
+                                next: 51209006,
+                            },
+                            {
+                                id: 51209006,
+                                content: "... Bon, d’accord. Je vais te pardonner cette fois. Mais uniquement grâce au chocolat chaud.",
+                                npc: 700449,
+                                options: [
+                                    {
+                                        id: 51209007,
+                                        content: "<I>Prendre le gobelet et boire une gorgée</>",
+                                        next: 51209008,
+                                    },
+                                    {
+                                        id: 51209009,
+                                        content: "<I>Prendre le gobelet sans boire</>",
+                                        next: 51209010,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51209008,
+                                content:
+                                    "Vous portez le gobelet à vos lèvres et prenez une petite gorgée. C’est du vin chaud. Impossible de dire s’il est bon ou non, mais la chaleur qui se répand dans votre corps est étrangement réconfortante.",
+                                next: 51209011,
+                            },
+                            {
+                                id: 51209010,
+                                content:
+                                    "Vous gardez simplement le gobelet entre vos mains sans y toucher. Rowan ne semble pas s’en formaliser ; il savoure tranquillement sa boisson de son côté, laissant parfois échapper de petits bruits satisfaits, complètement absorbé par le moment.",
+                                next: 51209011,
+                            },
+                            {
+                                id: 51209011,
+                                content: "Dis-moi... à ton avis, pourquoi les gens vivent-ils ?",
+                                npc: 700430,
+                                options: [
+                                    {
+                                        id: 51209012,
+                                        content: "<I>Pour devenir riche.</>",
+                                        next: 51209013,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 51209014,
+                                        content: "<I>Pour sauver le monde.</>",
+                                        next: 51209015,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 51209016,
+                                        content: "<I>Pour protéger ceux qui comptent pour eux.</>",
+                                        next: 51209017,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51209018,
+                                        content: "<I>On vit au jour le jour.</>",
+                                        next: 51209019,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51209013,
+                                content: "La richesse... Ouais... devenir riche... gagner une fortune dans cette salle de jeux...",
+                                npc: 700430,
+                                next: 51209020,
+                            },
+                            {
+                                id: 51209015,
+                                content: "Hahaha ! Quelle réponse solennelle ! C’en est presque drôle tellement c’est sérieux.",
+                                npc: 700430,
+                                next: 51209020,
+                            },
+                            {
+                                id: 51209017,
+                                content: "Mm... Oui. Ta sœur. La petite Luno qui t’accompagne. Ma femme... mes enfants...",
+                                npc: 700430,
+                                next: 51209020,
+                            },
+                            {
+                                id: 51209019,
+                                content:
+                                    "Exactement ! Voilà ce que je voulais entendre ! Alors trinquons au simple fait d’être encore en vie aujourd’hui !",
+                                npc: 700430,
+                                next: 51209020,
+                            },
+                            {
+                                id: 51209020,
+                                content: "À vrai dire... je ne viens même pas d’ici, à l’origine.",
+                                npc: 700430,
+                                next: 51209021,
+                            },
+                            {
+                                id: 51209021,
+                                content:
+                                    "Avant, j’étais l’un des nobles de la cité intérieure. Ce genre de vin, je pouvais en boire autant que je voulais. Je prenais le train quand ça me chantait, et si j’avais envie d’aller à la capitale impériale, j’y allais.",
+                                npc: 700430,
+                                next: 51209022,
+                            },
+                            {
+                                id: 51209022,
+                                content:
+                                    "À cette époque, je n’avais besoin de penser à rien. Il suffisait que j’ouvre les yeux le matin pour que des domestiques viennent m’habiller, me tendent de quoi me rincer la bouche, arrangent ma tenue... Quand je sortais, je montais en voiture en marchant sur les épaules des serviteurs, et quelqu’un déroulait même des coussins sous mes pieds à l’arrivée.",
+                                npc: 700430,
+                                next: 51209023,
+                            },
+                            {
+                                id: 51209023,
+                                content:
+                                    "Tu crois sûrement que je raconte n’importe quoi, hein ? Un simple comptable de gare qui prétend avoir été un grand seigneur... Haha !",
+                                npc: 700430,
+                                next: 51209024,
+                            },
+                            {
+                                id: 51209024,
+                                content: "Je ne pense pas que tu mens...",
+                                npc: 700449,
+                                next: 51209025,
+                            },
+                            {
+                                id: 51209025,
+                                content: "Oh ? Toi, petite Luno, tu es plus intéressante que tu en as l’air.",
+                                npc: 700430,
+                                next: 51209026,
+                            },
+                            {
+                                id: 51209026,
+                                content: "Les gens qui mentent ne prennent pas cet air triste en parlant du passé.",
+                                npc: 700449,
+                                next: 51209027,
+                            },
+                            {
+                                id: 51209027,
+                                content: "Héhé... ce serait tellement plus simple si tout ça n’était qu’un mensonge...",
+                                npc: 700430,
+                                next: 51209028,
+                            },
+                            {
+                                id: 51209028,
+                                content: "Comment avez-vous fini ici ?",
+                                npc: 100001,
+                                next: 51209029,
+                            },
+                            {
+                                id: 51209029,
+                                content:
+                                    "Il y a beaucoup de raisons. Mais la plus importante, c’est que mon père — le seul de la famille capable de gagner de l’argent — a fait faillite. Il a perdu toute sa fortune, puis il s’est laissé complètement abattre. Il est tombé gravement malade à force de rage et de désespoir... puis il est mort.",
+                                npc: 700430,
+                                next: 51209030,
+                            },
+                            {
+                                id: 51209030,
+                                content:
+                                    "Et après ça, tout s’est déroulé exactement comme dans les romans : la demeure a disparu, les bijoux aussi... absolument tout. Il ne restait plus que les créanciers et les membres de la famille venus nous dévorer vivants.",
+                                npc: 700430,
+                                next: 51209031,
+                            },
+                            {
+                                id: 51209031,
+                                content:
+                                    "J’ai emmené ma femme et mes enfants dans la cité extérieure. Mais comment auraient-ils pu s’habituer à une vie pareille ? Il fallait bien que je les nourrisse. Et pour ça... il fallait de l’argent. Beaucoup d’argent.",
+                                npc: 700430,
+                                next: 51209032,
+                            },
+                            {
+                                id: 51209032,
+                                content: "Avec mon salaire, j’avais déjà du mal à survivre seul. Alors leur offrir une vie confortable...",
+                                npc: 700430,
+                                next: 51209033,
+                            },
+                            {
+                                id: 51209033,
+                                content: "Donc vous jouez à ce « jeu » pour faire vivre votre famille ?",
+                                npc: 700449,
+                                next: 51209034,
+                            },
+                            {
+                                id: 51209034,
+                                content:
+                                    "Non. Elles sont parties depuis longtemps. Aucune idée d’où elles sont allées. Peut-être qu’elles sont rentrées à Dismania. Je ne leur en veux pas... c’est juste moi qui étais incapable de les protéger.",
+                                npc: 700430,
+                                next: 51209035,
+                            },
+                            {
+                                id: 51209035,
+                                content: "Alors pourquoi continuer à jouer maintenant que votre famille est partie ?",
+                                npc: 100001,
+                                next: 51209036,
+                            },
+                            {
+                                id: 51209036,
+                                content:
+                                    "... Bonne question. Pourquoi, au juste ? J’en sais rien. J’imagine que je veux juste devenir riche. Très riche. Plus riche encore que mon père mort d’épuisement. Relever la tête... retourner dans la cité intérieure... redevenir quelqu’un.",
+                                npc: 700430,
+                                next: 51209037,
+                            },
+                            {
+                                id: 51209037,
+                                content: "Mais... ce jeu est mauvais pour vous.",
+                                npc: 100001,
+                                next: 51209038,
+                            },
+                            {
+                                id: 51209038,
+                                content: "Héhé... Haha... Toi aussi, tu le sais ? Alors pourquoi t’es encore là à jouer avec moi ?",
+                                npc: 700430,
+                                next: 51209039,
+                            },
+                            {
+                                id: 51209039,
+                                content: "On n’a pas le choix ! Il nous faut de l’argent pour payer la rançon !",
+                                npc: 700449,
+                                next: 51209040,
+                            },
+                            {
+                                id: 51209040,
+                                content: "Et moi non plus, je n’ai pas le choix~",
+                                npc: 700430,
+                                next: 51209041,
+                            },
+                            {
+                                id: 51209041,
+                                content: "...",
+                                npc: 100001,
+                                next: 51209042,
+                            },
+                            {
+                                id: 51209042,
+                                content:
+                                    "Au fond, perdre n’est pas vraiment ce qu’il y a de plus effrayant, pas vrai ? Le plus terrible, c’est de sombrer après une défaite... de perdre jusqu’à la volonté de se relever et de tenter un dernier coup pour renverser la situation. Tu ne crois pas ?",
+                                npc: 700430,
+                                next: 51209043,
+                            },
+                            {
+                                id: 51209043,
+                                content: "Faire semblant de coopérer ? Et si je finis par le faire perdre ?",
+                                npc: 100001,
+                                next: 51209044,
+                            },
+                            {
+                                id: 51209044,
+                                content:
+                                    "C’est précisément ce que je veux. Il doit perdre. Perdre complètement. Être détruit au point de ne plus jamais pouvoir revenir jouer.",
+                                npc: 700428,
+                                next: 51209045,
+                            },
+                            {
+                                id: 51209045,
+                                content: "Vous voulez que je le pousse volontairement à la ruine ?",
+                                npc: 100001,
+                                next: 51209046,
+                            },
+                            {
+                                id: 51209046,
+                                content:
+                                    "Pas exactement. Dans ce jeu, personne ne gagne vraiment... à part Jack lui-même. Tout ce que vous aurez à faire, c’est pousser légèrement Rowan sur une route qui le mène déjà à sa perte.",
+                                npc: 700428,
+                                next: 51209047,
+                            },
+                            {
+                                id: 51209047,
+                                content: "Et s’il perd... qu’est-ce qui lui arrivera ?",
+                                npc: 100001,
+                                next: 51209048,
+                            },
+                            {
+                                id: 51209048,
+                                content:
+                                    "Aucune idée. Il n’a pas emprunté auprès de l’Union du Tournevis, mais auprès de Monsieur Jack. Alors ils l’emmèneront probablement travailler jusqu’à l’épuisement pour rembourser sa dette.",
+                                npc: 700428,
+                                next: 51209049,
+                            },
+                            {
+                                id: 51209049,
+                                content:
+                                    "L’Union du Tournevis n’a-t-elle pas été fondée pour que les ouvriers s’entraident ? Il n’existe vraiment aucune autre solution ?",
+                                npc: 100001,
+                                next: 51209050,
+                            },
+                            {
+                                id: 51209050,
+                                content:
+                                    "Vous ne comprenez pas. Beaucoup de ces types sont alcooliques, irresponsables, incapables de résister au moindre vice. Peu importe ce qu’on leur dit, ils ne changeront jamais. C’est dans leur nature.",
+                                npc: 700428,
+                                next: 51209051,
+                            },
+                            {
+                                id: 51209051,
+                                content:
+                                    "Nous ne pouvons aider que ceux qui ont encore une valeur. Les autres ne font que gaspiller les maigres ressources de l’union. Nous survivons dans les fissures de ce monde ; parfois, sacrifier quelqu’un est nécessaire pour réveiller les autres.",
+                                npc: 700428,
+                                next: 51209052,
+                            },
+                            {
+                                id: 51209052,
+                                content:
+                                    "Il suffit d’un pauvre type persuadé qu’il va gagner... puis de le pousser du sommet au fond du gouffre. Le faire tomber assez violemment pour que tout le monde comprenne ce qui les attend.",
+                                npc: 700428,
+                                next: 51209053,
+                            },
+                            {
+                                id: 51209053,
+                                content:
+                                    "Regardez Rowan. Même lui, un homme obsédé par les chiffres, a fini détruit. Alors les autres ? Ce ne sont que des ouvriers ordinaires. Pourquoi croiraient-ils pouvoir changer leur destin grâce à ce jeu ?",
+                                npc: 700428,
+                                next: 51209054,
+                            },
+                            {
+                                id: 51209054,
+                                content:
+                                    "Sacrifier un Rowan pour sauver tous ceux qui s’apprêtaient à tomber dans les abysses... c’est une affaire rentable, vous ne trouvez pas ?",
+                                npc: 700428,
+                                next: 51209055,
+                            },
+                            {
+                                id: 51209055,
+                                content:
+                                    "Hé ? Ça va ? T’as l’air complètement perdu dans tes pensées. Mes paroles t’ont à ce point bouleversé ?",
+                                npc: 700430,
+                                next: 51209056,
+                            },
+                            {
+                                id: 51209056,
+                                content: "Non... c’est juste que...",
+                                npc: 100001,
+                                next: 51209057,
+                            },
+                            {
+                                id: 51209057,
+                                content: "Haha ! Je plaisante !",
+                                npc: 700430,
+                                next: 51209058,
+                            },
+                            {
+                                id: 51209058,
+                                content:
+                                    "Bon, maintenant il faut frapper un grand coup, récupérer l’argent et filer avant que Monsieur Jack et ses hommes remarquent ce qu’on fait.",
+                                npc: 700430,
+                                next: 51209059,
+                            },
+                            {
+                                id: 51209059,
+                                content:
+                                    "Une fois qu’on aura empoché le pactole, on fait soixante-dix trente, ça te va ? Toi, tu prends l’argent pour sauver ta sœur... et moi, je reprends enfin ma vie en main.",
+                                npc: 700430,
+                                next: 51209060,
+                            },
+                            {
+                                id: 51209060,
+                                content:
+                                    "Pourquoi tu fais encore cette tête ? Tu trouves que ça ne fait pas assez ? Bon... allez, je peux te laisser trente-cinq pour cent, mais pas davantage ! Après tout, c’est ma méthode.",
+                                npc: 700430,
+                                next: 51209061,
+                            },
+                            {
+                                id: 51209061,
+                                content: "Ce n’est pas une question d’argent.",
+                                npc: 100001,
+                                next: 51209062,
+                            },
+                            {
+                                id: 51209062,
+                                content:
+                                    "Pas le temps de déprimer maintenant. On doit agir avant qu’ils comprennent ce qui se passe. Allez, dépêchons-nous !",
+                                npc: 700430,
+                                next: 51209063,
+                            },
+                            {
+                                id: 51209063,
+                                content: "Cette fois... on mise tout !",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040413,
+                name: "Retourner une nouvelle fois sur le lieu du « jeu »",
+                desc: "Après avoir discuté à cœur ouvert avec Rowan, vous en apprenez davantage sur son passé. Grisé par la victoire, il veut tenter le tout pour le tout et miser tout son argent. Ce serait le moment idéal pour le trahir... La requête de Lorent vous revient en mémoire : tout se déroule exactement comme il l’avait prévu. Faire perdre Rowan, puis partir. Pourtant, votre esprit revient sans cesse à ce verre qu’il vous a servi, à ce regard nostalgique lorsqu’il évoquait le passé. Que faire ? Quel choix allez-vous faire ?",
+                nodes: [
+                    {
+                        id: "17804768563516053869",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-33804, 5173],
+                        dialogues: [
+                            {
+                                id: 51209101,
+                                content: "Petit larbin... ça va ? Depuis tout à l’heure, tu as une drôle de tête.",
+                                npc: 700449,
+                                next: 51209102,
+                            },
+                            {
+                                id: 51209102,
+                                content: "... Ça va.",
+                                npc: 100001,
+                                next: 51209103,
+                            },
+                            {
+                                id: 51209103,
+                                content:
+                                    "Héhé, tant mieux. Tu ne trouves pas que Rowan est plutôt gentil, au fond ? Avant de partir, il m’a même discrètement donné un paquet de bonbons.",
+                                npc: 700449,
+                                next: 51209104,
+                            },
+                            {
+                                id: 51209104,
+                                content:
+                                    "Il m’a dit que sa fille adorait cette marque. J’en ai goûté un, c’était plutôt bon. Tu en veux un aussi ?",
+                                npc: 700449,
+                                next: 51209105,
+                            },
+                            {
+                                id: 51209105,
+                                content: "Non, ça ira.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040414,
+                name: "Retourner une nouvelle fois sur le lieu du « jeu »",
+                desc: "Après avoir discuté à cœur ouvert avec Rowan, vous en apprenez davantage sur son passé. Grisé par la victoire, il veut tenter le tout pour le tout et miser tout son argent. Ce serait le moment idéal pour le trahir... La requête de Lorent vous revient en mémoire : tout se déroule exactement comme il l’avait prévu. Faire perdre Rowan, puis partir. Pourtant, votre esprit revient sans cesse à ce verre qu’il vous a servi, à ce regard nostalgique lorsqu’il évoquait le passé. Que faire ? Quel choix allez-vous faire ?",
+                nodes: [
+                    {
+                        id: "17804769256626055012",
+                        type: "TalkNode",
+                        name: "交互第一张桌子",
+                        srId: 106301,
+                        pos: [-34434, 4410],
+                        next: ["17804769411196055212"],
+                        dialogues: [
+                            {
+                                id: 51209201,
+                                content:
+                                    "Vous observez attentivement les cartes sur la table et faites rapidement le calcul dans votre tête — cette table n’est clairement pas favorable.",
+                                next: 51209202,
+                            },
+                            {
+                                id: 51209202,
+                                content: "Qu’est-ce qu’il y a ? Cette table ne convient pas ?",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804769411196055212",
+                        type: "TalkNode",
+                        name: "交互第二张桌子",
+                        srId: 106301,
+                        pos: [-34708, 4774],
+                        next: ["17799594576023798"],
+                        dialogues: [
+                            {
+                                id: 51209301,
+                                content: "{nickname} ! {nickname} ! Regarde celle-là !",
+                                npc: 700449,
+                                next: 51209302,
+                            },
+                            {
+                                id: 51209302,
+                                content:
+                                    "Vous fixez les cartes sur la table tout en faisant rapidement vos calculs mentaux. Les probabilités sont excellentes ici ; les chances de victoire sont très élevées.",
+                                next: 51209303,
+                            },
+                            {
+                                id: 51209303,
+                                content: "C’est celle-là, pas vrai ? Petit larbin, on va devenir riches, hein ? Hein ?!",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17799594576023798",
+                        type: "TalkNode",
+                        name: "和白对话",
+                        srId: 106301,
+                        pos: [-33799, 4412],
+                        dialogues: [
+                            {
+                                id: 51209401,
+                                content: "Petit larbin, alors ? Tu as fini de regarder ?",
+                                npc: 700449,
+                                next: 51209402,
+                            },
+                            {
+                                id: 51209402,
+                                content: "<I>Je dois faire un choix.</>",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 51209403,
+                                        content: "<I>Aider Rowan à gagner</>",
+                                        next: 51209405,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51209404,
+                                        content: "<I>Faire perdre Rowan</>",
+                                        next: 51209405,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51209405,
+                                content: "Rowan aperçoit votre signal et s’approche aussitôt de la table.",
+                                next: 51209406,
+                            },
+                            {
+                                id: 51209406,
+                                content: "C’est le moment... ma vie va enfin repartir de zéro.",
+                                npc: 700430,
+                                next: 51209407,
+                            },
+                            {
+                                id: 51209407,
+                                content: "Vous fermez lentement les yeux, attendant le dénouement de cette partie.",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040415,
+                name: "Aider Rowan",
+                desc: "Vous savez parfaitement qu’aider Rowan n’est pas forcément le bon choix. Ce n’est pas parce que vous l’aidez cette fois qu’il renoncera au « jeu ». Et pourtant... il est des moments où trahir quelqu’un n’est tout simplement pas une réponse que l’on peut choisir.",
+                nodes: [
+                    {
+                        id: "17804772972276058267",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        dialogues: [
+                            {
+                                id: 51209601,
+                                content: "Hé ! Aujourd’hui, la chance est avec moi ! Je mise tout !",
+                                npc: 700430,
+                                next: 51209602,
+                            },
+                            {
+                                id: 51209602,
+                                content: "Rowan, t’es devenu fou ?! Tu comptes même plus vivre demain ? Et si tu perds ?!",
+                                npc: 700440,
+                                next: 51209603,
+                            },
+                            {
+                                id: 51209603,
+                                content: "Quitte à jouer, autant tout miser ! J’en ai assez de vivre en rampant !",
+                                npc: 700430,
+                                next: 51209604,
+                            },
+                            {
+                                id: 51209604,
+                                content:
+                                    "Le croupier jette un regard indifférent à Rowan avant de commencer à distribuer les cartes avec froideur.",
+                                next: 51209605,
+                            },
+                            {
+                                id: 51209605,
+                                content: "Je reste.",
+                                npc: 700430,
+                                next: 51209606,
+                            },
+                            {
+                                id: 51209606,
+                                content: "Rowan, t’as quoi comme cartes ? Tu t’arrêtes déjà avec deux cartes ? Allez, montre-nous !",
+                                npc: 700440,
+                                next: 51209607,
+                            },
+                            {
+                                id: 51209607,
+                                content: "Les bonnes mains, ça se garde caché~ Tiens, je vais quand même t’en montrer une.",
+                                npc: 700430,
+                                next: 51209608,
+                            },
+                            {
+                                id: 51209608,
+                                content: "Un Roi ? Grosse carte, ça ! Et l’autre ?",
+                                npc: 700440,
+                                next: 51209609,
+                            },
+                            {
+                                id: 51209609,
+                                content: "Chut, chut. Regardons d’abord le croupier.",
+                                npc: 700430,
+                                next: 51209610,
+                            },
+                            {
+                                id: 51209610,
+                                content: "Carte.",
+                                npc: 700435,
+                                next: 51209611,
+                            },
+                            {
+                                id: 51209611,
+                                content:
+                                    "Le croupier reçoit un 9. Son visage se ferme aussitôt, puis il retourne sa carte cachée : un Valet.",
+                                next: 51209612,
+                            },
+                            {
+                                id: 51209612,
+                                content: "4 visible, Valet caché, puis un 9... Vous avez sauté, non ?",
+                                npc: 700430,
+                                next: 51209613,
+                            },
+                            {
+                                id: 51209613,
+                                content: "Assez parlé. Montrez vos cartes.",
+                                npc: 700435,
+                                next: 51209614,
+                            },
+                            {
+                                id: 51209614,
+                                content: "Rowan pose lentement ses deux cartes sur la table, l’une après l’autre.",
+                                next: 51209615,
+                            },
+                            {
+                                id: 51209615,
+                                content: "Roi + As. Super Jack.",
+                                npc: 700430,
+                                next: 51209616,
+                            },
+                            {
+                                id: 51209616,
+                                content: "Impossible ! Comment tu peux... Comment tu peux gagner ?!",
+                                npc: 700440,
+                                next: 51209617,
+                            },
+                            {
+                                id: 51209617,
+                                content: "Petit larbin, regarde ! Rowan a gagné ! C’est un Super Jack !",
+                                npc: 700449,
+                                next: 51209618,
+                            },
+                            {
+                                id: 51209618,
+                                content: "... Oui.",
+                                npc: 100001,
+                                next: 51209619,
+                            },
+                            {
+                                id: 51209619,
+                                content: "Alors ? Paiement à 3 contre 2. Il va falloir payer, non ?",
+                                npc: 700430,
+                                next: 51209620,
+                            },
+                            {
+                                id: 51209620,
+                                content: "Monsieur Rowan, vous avez vraiment beaucoup de chance. Mais...",
+                                npc: 700441,
+                                next: 51209621,
+                            },
+                            {
+                                id: 51209621,
+                                content:
+                                    "Nous avons de bonnes raisons de soupçonner que vous avez eu recours à des méthodes frauduleuses pour obtenir cette victoire. Veuillez nous suivre.",
+                                npc: 700441,
+                                next: 51209622,
+                            },
+                            {
+                                id: 51209622,
+                                content: "Hein ? Qu’est-ce que ça veut dire ? J’ai gagné ! Vous êtes mauvais perdants ou quoi ?",
+                                npc: 700430,
+                                next: 51209623,
+                            },
+                            {
+                                id: 51209623,
+                                content: "Monsieur Rowan, veuillez nous suivre. Nous discuterons ensuite.",
+                                npc: 700441,
+                                next: 51209624,
+                            },
+                            {
+                                id: 51209624,
+                                content: "Et merde. Je bouge pas. Tu vas faire quoi ?",
+                                npc: 700430,
+                                next: 51209625,
+                            },
+                            {
+                                id: 51209625,
+                                content: "Navré, mais aujourd’hui, vous allez venir avec nous.",
+                                npc: 700441,
+                                next: 51209626,
+                            },
+                            {
+                                id: 51209626,
+                                content: "Ça va pas ! Ils veulent emmener Rowan de force ! Petit larbin, vite, on doit l’aider !",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040416,
+                name: "Quitter les lieux",
+                desc: "Après avoir repoussé les hommes de Monsieur Jack, vous dévoilez la vérité aux joueurs : leur espoir de changer de vie grâce au « jeu » n’était qu’un mensonge, un masque hypocrite destiné à leur soutirer l’argent gagné à la sueur de leur front.",
+                nodes: [
+                    {
+                        id: "17804782483216063600",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-35202, 2902],
+                        dialogues: [
+                            {
+                                id: 51209801,
+                                content: "Tout ça pour rien... Tout ça pour rien !",
+                                npc: 700430,
+                                next: 51209802,
+                            },
+                            {
+                                id: 51209802,
+                                content:
+                                    "Moi, j’ai pas servi à rien ! C’est vous qui avez joué, c’est {nickname} qui les a fait fuir, et moi, j’ai tout regardé !",
+                                npc: 700449,
+                                next: 51209803,
+                            },
+                            {
+                                id: 51209803,
+                                content:
+                                    "Tu... Ah ! Laisse tomber ! Quoi qu’il en soit, avec le bazar que tu as mis, la salle de jeux de Monsieur Jack risque de ne pas rouvrir avant un moment. On n’a pas réussi à lui soutirer l’argent, mais au moins, on ne s’en sort pas trop mal...",
+                                npc: 700430,
+                                next: 51209804,
+                            },
+                            {
+                                id: 51209804,
+                                content:
+                                    "Tu pouvais pas me dire plus tôt que tu savais te battre comme ça ? Pourquoi je t’ai emmené jouer aux cartes, moi ? J’aurais dû t’emmener faire des combats clandestins !",
+                                npc: 700430,
+                                next: 51209805,
+                            },
+                            {
+                                id: 51209805,
+                                content:
+                                    "Bref... Plus la peine d’en parler. Je ne peux pas laisser tout ça n’avoir servi à rien. Avant que Monsieur Jack vienne réclamer ce que je lui dois, je dois quitter cet endroit au plus vite.",
+                                npc: 700430,
+                                next: 51209806,
+                            },
+                            {
+                                id: 51209806,
+                                content:
+                                    "Mais... je ne vous ai pas oubliés. On a quand même gagné un peu d’argent. Tenez, voilà votre part. Soixante-dix trente : soixante-dix pour moi, trente pour vous.",
+                                npc: 700430,
+                                next: 51209807,
+                            },
+                            {
+                                id: 51209807,
+                                content: "Ouah ! On a vraiment notre part !",
+                                npc: 700449,
+                                next: 51209808,
+                            },
+                            {
+                                id: 51209808,
+                                content:
+                                    "Pas le temps de bavarder. Ils vont bientôt nous tomber dessus. Le mieux, c’est que chacun file de son côté.",
+                                npc: 700430,
+                                next: 51209809,
+                            },
+                            {
+                                id: 51209809,
+                                content: "D’accord.",
+                                npc: 100001,
+                                next: 51209810,
+                            },
+                            {
+                                id: 51209810,
+                                content:
+                                    "Bon, cette fois, j’y vais vraiment. Adieu ! Ah, et toi... j’espère que tu retrouveras vite ta sœur !",
+                                npc: 700430,
+                                next: 51209811,
+                            },
+                            {
+                                id: 51209811,
+                                content: "Rowan détale à toute vitesse, vous laissant seul avec Snow.",
+                                next: 51209812,
+                            },
+                            {
+                                id: 51209812,
+                                content:
+                                    "Petit larbin... Tu crois qu’il continuera à jouer à ce genre de jeux ? Si oui, est-ce qu’on ne lui a pas fait plus de mal que de bien en l’aidant ?",
+                                npc: 700449,
+                                next: 51209813,
+                            },
+                            {
+                                id: 51209813,
+                                content:
+                                    "Je ne sais pas... Mais au début, il m’a aidé. Je n’avais pas le cœur à le regarder tout perdre dans un état aussi misérable.",
+                                npc: 100001,
+                                next: 51209814,
+                            },
+                            {
+                                id: 51209814,
+                                content:
+                                    "Il t’a aidé ? Tu parles du moment où il nous a tirés de là quand on voulait emprunter de l’argent ?",
+                                npc: 700449,
+                                next: 51209815,
+                            },
+                            {
+                                id: 51209815,
+                                content: "Entre autres... Et puis il y a eu le vin, et ton chocolat chaud.",
+                                npc: 100001,
+                                next: 51209816,
+                            },
+                            {
+                                id: 51209816,
+                                content: "C’est vrai ! Les humains sont vraiment compliqués...",
+                                npc: 700449,
+                                next: 51209817,
+                            },
+                            {
+                                id: 51209817,
+                                content:
+                                    "C’est encore un peu trop compliqué pour ta petite tête, Snow. N’y pensons plus. La mission est terminée, il est temps de retourner faire notre rapport à l’Union du Tournevis.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040417,
+                name: "Trahir Rowan",
+                desc: "Ceux qui participent à ce genre de « jeu » ne méritent pas d’être sauvés. C’était votre plan depuis le début, n’est-ce pas ?",
+                nodes: [
+                    {
+                        id: "17804788252186065263",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        dialogues: [
+                            {
+                                id: 51209501,
+                                content: "Hé ! Aujourd’hui, la chance est avec moi ! Je mise tout !",
+                                npc: 700430,
+                                next: 51209502,
+                            },
+                            {
+                                id: 51209502,
+                                content: "Rowan, t’es devenu fou ?! Tu comptes même plus vivre demain ? Et si tu perds ?!",
+                                npc: 700440,
+                                next: 51209503,
+                            },
+                            {
+                                id: 51209503,
+                                content: "Quitte à jouer, autant tout miser ! J’en ai assez de vivre en rampant !",
+                                npc: 700430,
+                                next: 51209504,
+                            },
+                            {
+                                id: 51209504,
+                                content:
+                                    "Le croupier jette un regard indifférent à Rowan avant de commencer à distribuer les cartes avec froideur.",
+                                next: 51209505,
+                            },
+                            {
+                                id: 51209505,
+                                content: "Tu vois ça ? Une excellente main !",
+                                npc: 700430,
+                                next: 51209506,
+                            },
+                            {
+                                id: 51209506,
+                                content:
+                                    "Pas mal du tout, Rowan... Tu vas vraiment gagner, cette fois ? 8 et 9, ça fait 17. Le croupier montre un 5, voyons s’il tire.",
+                                npc: 700440,
+                                next: 51209507,
+                            },
+                            {
+                                id: 51209507,
+                                content: "Carte.",
+                                npc: 700435,
+                                next: 51209508,
+                            },
+                            {
+                                id: 51209508,
+                                content: "Wow... il a tiré un 3. Impossible de savoir ce qu’il cache encore.",
+                                npc: 700440,
+                                next: 51209509,
+                            },
+                            {
+                                id: 51209509,
+                                content: "Pourquoi il sort autant de petites cartes... ? Ce n’est pas normal...",
+                                npc: 700430,
+                                next: 51209510,
+                            },
+                            {
+                                id: 51209510,
+                                content: "Hein ? Rowan ? Tu reprends une carte ? Le croupier vient encore de tirer un 2 !",
+                                npc: 700440,
+                                next: 51209511,
+                            },
+                            {
+                                id: 51209511,
+                                content: "Non... ce n’est pas possible... ça ne devrait pas se passer comme ça !",
+                                npc: 700430,
+                                next: 51209512,
+                            },
+                            {
+                                id: 51209512,
+                                content:
+                                    "Mais qu’est-ce que tu racontes, Rowan ? Vu toutes les petites cartes sorties, tu devrais reprendre !",
+                                npc: 700440,
+                                next: 51209513,
+                            },
+                            {
+                                id: 51209513,
+                                content: "Les petites cartes ne devraient pas être aussi nombreuses... non... c’est impossible...",
+                                npc: 700430,
+                                next: 51209514,
+                            },
+                            {
+                                id: 51209514,
+                                content: "Le croupier reste ! Rowan, tu tires ou pas ?!",
+                                npc: 700440,
+                                next: 51209515,
+                            },
+                            {
+                                id: 51209515,
+                                content:
+                                    "Il s’est arrêté... alors ça veut dire qu’il a au moins 17... Qu’est-ce que je fais...? Qu’est-ce que je...",
+                                npc: 700430,
+                                next: 51209516,
+                            },
+                            {
+                                id: 51209516,
+                                content: "Rowan ! Tire une carte ! Sinon t’as perdu !",
+                                npc: 700440,
+                                next: 51209517,
+                            },
+                            {
+                                id: 51209517,
+                                content: "Je... Je... Carte !",
+                                npc: 700430,
+                                next: 51209518,
+                            },
+                            {
+                                id: 51209518,
+                                content:
+                                    "Il hurle presque ces mots. Pendant un bref instant, toute la salle se fige sous le choc. Sans dire un mot, le croupier lui tend une nouvelle carte.",
+                                next: 51209519,
+                            },
+                            {
+                                id: 51209519,
+                                content: "... Un 7.",
+                                npc: 700440,
+                                next: 51209520,
+                            },
+                            {
+                                id: 51209520,
+                                content: "J’ai sauté.",
+                                npc: 700430,
+                                next: 51209521,
+                            },
+                            {
+                                id: 51209521,
+                                content: "<I>Tss...</> La carte cachée du croupier était un 7. Il n’avait même que 17.",
+                                npc: 700440,
+                                next: 51209522,
+                            },
+                            {
+                                id: 51209522,
+                                content:
+                                    "Petit larbin... qu’est-ce qu’il s’est passé... ? Rowan a perdu ? Pourquoi il y avait autant de petites cartes sur cette table ?",
+                                npc: 700449,
+                                next: 51209523,
+                            },
+                            {
+                                id: 51209523,
+                                content: "...",
+                                npc: 100001,
+                                next: 51209524,
+                            },
+                            {
+                                id: 51209524,
+                                content: "Impossible... pourquoi...? Pourquoi tu...",
+                                npc: 700430,
+                                next: 51209525,
+                            },
+                            {
+                                id: 51209525,
+                                content:
+                                    "Monsieur Rowan. Il semblerait que votre tapis n’ait pas produit le miracle espéré. Nous devrions maintenant discuter sérieusement de votre dette envers Monsieur Jack, vous ne croyez pas ?",
+                                npc: 700441,
+                                next: 51209526,
+                            },
+                            {
+                                id: 51209526,
+                                content: "Ma dette... ? Non... Je vais gagner ! Si je gagne, je pourrai rembourser !",
+                                npc: 700430,
+                                next: 51209527,
+                            },
+                            {
+                                id: 51209527,
+                                content: "Pfft~ Rowan, t’as déjà tout misé. Avec quel argent tu comptes rejouer maintenant ? T’es finiii~",
+                                npc: 700440,
+                                next: 51209528,
+                            },
+                            {
+                                id: 51209528,
+                                content: "Monsieur Rowan, veuillez nous suivre.",
+                                npc: 700441,
+                                next: 51209529,
+                            },
+                            {
+                                id: 51209529,
+                                content:
+                                    "Voilà ce qui arrive quand on joue avec ce genre de choses ! Vous avez tous vu ? Rowan est l’exemple parfait du parfait idiot : il emprunte à Monsieur Jack, puis se fait traîner dehors après avoir tout perdu ! Et vous savez tous très bien ce qui attend les gens comme lui après ça !",
+                                npc: 700440,
+                                next: 51209530,
+                            },
+                            {
+                                id: 51209530,
+                                content:
+                                    "C’est comme ça qu’ils nous traitent ! Allez-y, allez tous emprunter à Monsieur Jack ! Finissez comme cet idiot, hahaha !",
+                                npc: 700440,
+                                next: 51209531,
+                            },
+                            {
+                                id: 51209531,
+                                content:
+                                    "Vous observez ce « joueur » qui se donne des airs vertueux. Pourtant, vous avez l’étrange impression de l’avoir déjà vu quelque part... Peut-être aux côtés de Lorent.",
+                                next: 51209532,
+                            },
+                            {
+                                id: 51209532,
+                                content:
+                                    "Toute cette mise en scène soigneusement préparée vous semble soudain terriblement vide de sens. Vous prenez Snow par la main et quittez les lieux. Il est temps de retourner auprès de l’Union du Tournevis pour faire votre rapport.",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040418,
+                name: "Vaincre les hommes de Jack",
+                desc: "Les responsables des lieux semblent avoir percé votre manège... ou peut-être pas. Peut-être refusent-ils simplement que quelqu’un tire réellement profit de ces « jeux ». Quoi qu’il en soit, vous avez choisi d’aider Rowan jusqu’au bout.",
+            },
+            {
+                id: 20040419,
+                name: "Vaincre les hommes de Jack",
+                desc: "Les responsables des lieux semblent avoir percé votre manège... ou peut-être pas. Peut-être refusent-ils simplement que quelqu’un tire réellement profit de ces « jeux ». Quoi qu’il en soit, vous avez choisi d’aider Rowan jusqu’au bout.",
+                nodes: [
+                    {
+                        id: "17804776884446062778",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        dialogues: [
+                            {
+                                id: 51209701,
+                                content: "Ça va ?",
+                                npc: 100001,
+                                next: 51209702,
+                            },
+                            {
+                                id: 51209702,
+                                content: "Ça va... Ça va... Ce fichu Jack... Il n’a jamais eu l’intention de nous donner notre argent !",
+                                npc: 700430,
+                                next: 51209703,
+                            },
+                            {
+                                id: 51209703,
+                                content:
+                                    "Vous avez tous vu, non ? Ce soi-disant Monsieur Jack ne vous laissera jamais vraiment gagner. Votre seule voie ici, c’est de jouer, de lui verser sa part, d’emprunter auprès de lui... puis de tout perdre.",
+                                npc: 100001,
+                                next: 51209704,
+                            },
+                            {
+                                id: 51209704,
+                                content:
+                                    "Et si vous sortez de son plan, si vous gagnez comme monsieur Rowan ici, il enverra ses hommes vous « inviter à discuter ».",
+                                npc: 100001,
+                                next: 51209705,
+                            },
+                            {
+                                id: 51209705,
+                                content:
+                                    "L’argent que vous espérez gagner grâce au jeu de Monsieur Jack, vous ne l’obtiendrez jamais. Chaque jour passé ici vous fera seulement perdre davantage. Vous voulez vraiment jeter les économies de toute une vie dans cet endroit ?",
+                                npc: 100001,
+                                next: 51209706,
+                            },
+                            {
+                                id: 51209706,
+                                content:
+                                    "La foule se met à murmurer. Quelques ouvriers, trop effrayés pour rester, quittent discrètement les lieux. Vous remarquez le « joueur » qui encourageait Rowan tout à l’heure ; il vous fixe désormais avec une expression troublée.",
+                                next: 51209707,
+                            },
+                            {
+                                id: 51209707,
+                                content: "Vous lui adressez un sourire.",
+                                next: 51209708,
+                            },
+                            {
+                                id: 51209708,
+                                content: "Tu souris à qui comme ça ? Allez, viens. T’as fait fuir tout le monde, autant partir nous aussi.",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 200405,
+        quests: [
+            {
+                id: 20040501,
+                name: "Retourner faire votre rapport à l’Union du Tournevis",
+                desc: "Quelle que soit la méthode employée, vous avez brillamment accompli la mission confiée par Lorent et refroidi l’enthousiasme de la plupart des ouvriers envers Monsieur Jack. Il est temps de retourner à l’Union du Tournevis pour récupérer votre récompense.",
+                nodes: [
+                    {
+                        id: "17796899057061462681",
+                        type: "TalkNode",
+                        name: "克罗格对话",
+                        srId: 106301,
+                        pos: [-17948, 12385],
+                        next: ["17796912649381470138"],
+                        dialogues: [
+                            {
+                                id: 51209901,
+                                content:
+                                    "Vous retournez à l’Union du Tournevis avec Snow. En approchant de l’entrée, vous apercevez une silhouette à la fois familière et étrange, debout dehors, une cigarette entre les lèvres. En vous voyant arriver, l’homme l’écrase et lève les yeux vers vous.",
+                                next: 51209902,
+                            },
+                            {
+                                id: 51209902,
+                                content:
+                                    "Vous voilà. Comme quoi, faut pas se fier aux apparences. J’ai entendu dire que t’avais retourné la salle de jeux de ce petit fumier de Jack. Maintenant, les ouvriers sont sagement retournés bosser.",
+                                npc: 700429,
+                                next: 51209903,
+                            },
+                            {
+                                id: 51209903,
+                                content: "Ce n’était rien. Pourquoi vous n’entrez pas ?",
+                                npc: 100001,
+                                next: 51209904,
+                            },
+                            {
+                                id: 51209904,
+                                content: "Le patron est revenu. Lorent est en train de discuter avec lui.",
+                                npc: 700429,
+                                next: 51209905,
+                            },
+                            {
+                                id: 51209905,
+                                content:
+                                    "Quoi ? Le patron ? Mais les chefs de l’Union du Tournevis, c’était pas toi et Lorent ? Pourquoi il y a encore un patron qui apparaît maintenant ?",
+                                npc: 700449,
+                                next: 51209906,
+                            },
+                            {
+                                id: 51209906,
+                                content:
+                                    "Qui t’a raconté ça ? Écoute pas les ragots. Enfin, cela dit, les rumeurs que vous avez entendues viennent sûrement de Maggie elle-même. Personne veut vraiment de ce poste.",
+                                npc: 700429,
+                                next: 51209907,
+                            },
+                            {
+                                id: 51209907,
+                                content: "Maggie ?",
+                                npc: 100001,
+                                next: 51209908,
+                            },
+                            {
+                                id: 51209908,
+                                content: "On en parlera à l’intérieur. Tout le monde est là, justement.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17796912649381470138",
+                        type: "TalkNode",
+                        name: "触发玛吉罗连特对话",
+                        srId: 106301,
+                        pos: [-15540, 9140],
+                        dialogues: [
+                            {
+                                id: 51210001,
+                                content:
+                                    "Tout ça est déjà en train de se régler petit à petit. Alors évite de nous créer d’autres problèmes dans un moment pareil. Le livre de comptes, c'est réglé ?",
+                                npc: 700428,
+                                next: 51210002,
+                            },
+                            {
+                                id: 51210002,
+                                content: "Le livre de comptes ? Quel livre de comptes ? Aucune idée.",
+                                npc: 700442,
+                                next: 51210003,
+                            },
+                            {
+                                id: 51210003,
+                                content: "Fais pas l’idiote, Maggie. Tu sais très bien que c’est important pour nous !",
+                                npc: 700428,
+                                next: 51210004,
+                            },
+                            {
+                                id: 51210004,
+                                content:
+                                    "<I>Tss...</> Oui, oui, je sais. J’ai déjà demandé aux gamins qui bossent à la gare de récolter des informations. Mais ça prend du temps. Tu sais bien qu’Eisenbahn nous surveille de très près.",
+                                npc: 700442,
+                                next: 51210005,
+                            },
+                            {
+                                id: 51210005,
+                                content: "Très bien, Maggie. Pour cette affaire... Attends...",
+                                npc: 700428,
+                                next: 51210006,
+                            },
+                            {
+                                id: 51210006,
+                                content: "Regardez qui est de retour. Notre {性别:petit sauveur|petite sauveuse}~",
+                                npc: 700428,
+                                options: [
+                                    {
+                                        id: 51210007,
+                                        content: "<I>Bonjour.</>",
+                                        next: 51210009,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 51210008,
+                                        content: "<I>Acclamez-moi ! Votre {性别:grand sauveur|grande sauveuse} est de retour !</>",
+                                        next: 51210009,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210009,
+                                content: "{性别:Sauveur|Sauveuse} ? Qu’est-ce que cette personne a fait ?",
+                                npc: 700442,
+                                next: 51210010,
+                            },
+                            {
+                                id: 51210010,
+                                content:
+                                    "{性别:Il|Elle} a foutu le casino de Monsieur Jack sens dessus dessous ! Lorent te l’a pas dit ? Rien que d’imaginer les vermines que ce type avait planquées dans les usines se faire écraser une par une... ah, ça fait du bien !",
+                                npc: 700429,
+                                next: 51210011,
+                            },
+                            {
+                                id: 51210011,
+                                content:
+                                    "Ce n’est pas forcément une bonne chose. Pendant quelque temps, nous devrons encore recruter pour combler les postes laissés vacants.",
+                                npc: 700428,
+                                next: 51210012,
+                            },
+                            {
+                                id: 51210012,
+                                content:
+                                    "Et puis quoi encore ! Ils bossaient même plus, ces parasites. Ils passaient leurs journées à pousser les autres à aller jouer !",
+                                npc: 700429,
+                                next: 51210013,
+                            },
+                            {
+                                id: 51210013,
+                                content:
+                                    "Oh, oh ! Alors c’est toi qui as fait tout ça ? Salut ! Moi, c’est Maggie, la patronne de l’Union du Tournevis. Ravie de te rencontrer.",
+                                npc: 700442,
+                                next: 51210014,
+                            },
+                            {
+                                id: 51210014,
+                                content: "Et moi aussi ! Moi aussi, je suis une sauveuse qui a aidé à détruire le casino !",
+                                npc: 700449,
+                                next: 51210015,
+                            },
+                            {
+                                id: 51210015,
+                                content:
+                                    "T’as même ramené une Luno avec toi ? Elle sert à quoi ? Comme celle qu’on a à la gare, qui se met à parler des trains dès qu’elle croise quelqu’un... sauf qu’elle, elle parle de toi ?",
+                                npc: 700442,
+                                next: 51210016,
+                            },
+                            {
+                                id: 51210016,
+                                content:
+                                    "Mais qu’est-ce que tu racontes ?! Je suis le Rédempteur Immaculé ☆ Roi Démon de la Lumière, la plus fidèle compagne de mon petit larbin, Chasseuse de Phoxène d’élite des Asphodèles — Snow !",
+                                npc: 700449,
+                                next: 51210017,
+                            },
+                            {
+                                id: 51210017,
+                                content:
+                                    "Je vois~ C’est cette personne qui fait tout le boulot, mais toi tu balances des grands titres et tu l’appelles « petit larbin ». T’es comme moi, en fait : une mascotte.",
+                                npc: 700442,
+                                next: 51210018,
+                            },
+                            {
+                                id: 51210018,
+                                content: "Une mascotte ? Qu’est-ce que ça veut dire ? Je suis—",
+                                npc: 700449,
+                                next: 51210019,
+                            },
+                            {
+                                id: 51210019,
+                                content: "Snow, on va peut-être mettre les présentations héroïques en pause...",
+                                npc: 100001,
+                                next: 51210020,
+                            },
+                            {
+                                id: 51210020,
+                                content:
+                                    "Veuillez nous excuser. Comme vous pouvez le voir, le patron de l’Union du Tournevis est effectivement une enfant.",
+                                npc: 700428,
+                                next: 51210021,
+                            },
+                            {
+                                id: 51210021,
+                                content:
+                                    "Notre intention première n’était pas de choisir une mascotte pour nous diriger. Simplement, à part une enfant, aucun adulte n’était prêt à devenir patron et à défier ouvertement Eisenbahn.",
+                                npc: 700428,
+                                next: 51210022,
+                            },
+                            {
+                                id: 51210022,
+                                content:
+                                    "Exactement ! Ils m’ont dit : « C’est comme quand tu commandais les gamins du secteur des plafonds, sauf qu’au lieu de gérer des enfants, tu gères tous les ouvriers de la gare. C’est super impressionnant ! »",
+                                npc: 700442,
+                                next: 51210023,
+                            },
+                            {
+                                id: 51210023,
+                                content:
+                                    "Et puis tu acceptes vraiment, tu te colles ce boulet sur le dos... et tu découvres que le boulet est rempli de crottes de rat !",
+                                npc: 700442,
+                                next: 51210024,
+                            },
+                            {
+                                id: 51210024,
+                                content:
+                                    "Kroger, je t’avais déjà dit d’arrêter de parler comme ça devant elle. Regarde dans quel état elle est maintenant !",
+                                npc: 700428,
+                                next: 51210025,
+                            },
+                            {
+                                id: 51210025,
+                                content: "Quoi ?! Pourquoi ce serait ma faute ? Elle apprend aussi des trucs dehors !",
+                                npc: 700429,
+                                next: 51210073,
+                            },
+                            {
+                                id: 51210027,
+                                content:
+                                    "Vous avez déjà une certaine idée de ce qu’est l’Union du Tournevis, n’est-ce pas ? Vous savez donc que nous sommes un groupe d’ouvriers de la gare qui s’entraident. Mais nous restons des ouvriers, et notre survie dépend encore des décisions de ceux d’en haut.",
+                                npc: 700428,
+                                next: 51210028,
+                            },
+                            {
+                                id: 51210028,
+                                content:
+                                    "Notre sort est étroitement lié à leurs humeurs. Si les dirigeants sont de bonne humeur, nous aurons peut-être un morceau de pain en plus au dîner. S’ils sont contrariés, nous pourrions jeûner deux jours.",
+                                npc: 700428,
+                                next: 51210029,
+                            },
+                            {
+                                id: 51210029,
+                                content: "Et savez-vous qui dirige réellement la Gare des Cent-Fleurs ?",
+                                npc: 700428,
+                                next: 51210030,
+                            },
+                            {
+                                id: 51210030,
+                                content:
+                                    "Eisenbahn est le ciel ! Le ciel de la Gare des Cent-Fleurs ! Eisenbahn est la mer ! La mer de la Gare des Cent-Fleurs !",
+                                npc: 700442,
+                                next: 51210031,
+                            },
+                            {
+                                id: 51210031,
+                                content: "Hé, hé, hé ! Cette chanson, c’est pas moi qui lui ai apprise ! Je saurais même pas la chanter !",
+                                npc: 700429,
+                                next: 51210032,
+                            },
+                            {
+                                id: 51210032,
+                                content: "Je l’ai entendue au Salon du Sifflet, chantée par ces fichus nobles.",
+                                npc: 700442,
+                                next: 51210073,
+                            },
+                            {
+                                id: 51210034,
+                                content: "La sous-estime pas. Elle a un surnom qui claque : Maggie la Folle !",
+                                npc: 700429,
+                                next: 51210035,
+                            },
+                            {
+                                id: 51210035,
+                                content:
+                                    "Pas Maggie la Folle ! Maggie l’Invincible ! À l’époque, j’avais deux clés à molette en main. J’ai traversé le secteur des plafonds jusqu’aux usines souterraines en frappant tout ce qui bougeait. Bam, bam ! Trois jours et trois nuits ! Il y avait du sang partout !",
+                                npc: 700442,
+                                next: 51210036,
+                            },
+                            {
+                                id: 51210036,
+                                content:
+                                    "Je frappais, je levais ma clé, je frappais, je levais ma clé, je frappais encore ! Et j’ai pas cligné des yeux une seule fois !",
+                                npc: 700442,
+                                next: 51210037,
+                            },
+                            {
+                                id: 51210037,
+                                content: "Ça, elle l’a appris auprès des types bourrés. Rien à voir avec moi non plus.",
+                                npc: 700429,
+                                next: 51210038,
+                            },
+                            {
+                                id: 51210038,
+                                content:
+                                    "De toute évidence, tu fais partie de ces types-là. Et quand t’es bourré, t’es encore plus dangereux...",
+                                npc: 700428,
+                                next: 51210039,
+                            },
+                            {
+                                id: 51210039,
+                                content:
+                                    "Passons. En résumé, Maggie est une sorte de cheffe très respectée parmi les enfants travailleurs du secteur des plafonds. Si nous l’avons recrutée, c’est aussi pour unir les ouvriers adultes et les enfants travailleurs.",
+                                npc: 700428,
+                                next: 51210073,
+                            },
+                            {
+                                id: 51210040,
+                                content: "Je crois comprendre votre situation. Mais je me pose quand même une question...",
+                                npc: 100001,
+                                next: 51210041,
+                            },
+                            {
+                                id: 51210041,
+                                content:
+                                    "Dans votre état, sur quoi vous appuyez-vous pour résister à vos supérieurs... à Eisenbahn ? Autrement dit, qu’est-ce qui vous donne le courage de lui tenir tête ?",
+                                npc: 100001,
+                                next: 51210042,
+                            },
+                            {
+                                id: 51210042,
+                                content: "Bonne question ! En plein dans le mille ! Lorent, sors-lui ton grand discours prétentieux !",
+                                npc: 700442,
+                                next: 51210043,
+                            },
+                            {
+                                id: 51210043,
+                                content: "... Savez-vous pourquoi l’Union du Tournevis porte ce nom ?",
+                                npc: 700428,
+                                next: 51210044,
+                            },
+                            {
+                                id: 51210044,
+                                content:
+                                    "Ça, je sais ! Coney nous l’a dit ! C’est un grand ingénieur formé à l’Académie d’Alchimie qui l’a choisi, pas vrai ? Il avait même amélioré le Moteur Phoxichor !",
+                                npc: 700449,
+                                next: 51210045,
+                            },
+                            {
+                                id: 51210045,
+                                content:
+                                    "Coney vous a donc fait un exposé très détaillé. Alors vous savez sûrement aussi que ce grand ingénieur est mort peu après avoir fondé l’union. Mais son savoir-faire a été transmis aux ouvriers de l’époque, jusqu’à aujourd’hui.",
+                                npc: 700428,
+                                next: 51210046,
+                            },
+                            {
+                                id: 51210046,
+                                content:
+                                    "Oh~ J’ai compris~ Vous avez donc entre les mains une technologie du Moteur Phoxichor qu’Eisenbahn ne connaît pas !",
+                                npc: 700449,
+                                next: 51210047,
+                            },
+                            {
+                                id: 51210047,
+                                content:
+                                    "Exactement. Nous dépendons du salaire qu’Eisenbahn nous verse, mais Eisenbahn dépend aussi de notre savoir-faire lié au Moteur Phoxichor.",
+                                npc: 700428,
+                                next: 51210048,
+                            },
+                            {
+                                id: 51210048,
+                                content:
+                                    "C’est pour cela que notre relation reste bloquée dans cette impasse. Il peut nous exploiter autant qu’il le souhaite, mais il ne peut pas réellement nous pousser trop loin ni nous chasser. Et nous pouvons résister autant que possible, sans jamais vraiment nous libérer de son contrôle.",
+                                npc: 700428,
+                                next: 51210049,
+                            },
+                            {
+                                id: 51210049,
+                                content:
+                                    "<I>Tss...</> Pitoyable ! Moi, je dis qu’il faut prendre nos clés à molette et écraser tous les gardes d’Eisenbahn !",
+                                npc: 700442,
+                                next: 51210050,
+                            },
+                            {
+                                id: 51210050,
+                                content: "Là-dessus, je suis d’accord.",
+                                npc: 700429,
+                                next: 51210051,
+                            },
+                            {
+                                id: 51210051,
+                                content: "À ce sujet, justement... j’ai quelque chose à vous demander.",
+                                npc: 700428,
+                                next: 51210052,
+                            },
+                            {
+                                id: 51210052,
+                                content: "À moi ? Encore moi ?",
+                                npc: 100001,
+                                next: 51210053,
+                            },
+                            {
+                                id: 51210053,
+                                content:
+                                    "Oui. Je suis sincèrement désolé, mais oui, encore vous. L’un des nôtres a disparu : l’ingénieur qui détient actuellement les techniques de l’Union du Tournevis. Nous l’appelons le Maître Zen d’une Nuit.",
+                                npc: 700428,
+                                next: 51210054,
+                            },
+                            {
+                                id: 51210054,
+                                content: "Maître Zen d’une Nuit... Pourquoi il a un nom aussi bizarre ?",
+                                npc: 700449,
+                                next: 51210055,
+                            },
+                            {
+                                id: 51210055,
+                                content:
+                                    "Parce que c’est un abruti. Peu importe la question qu’on lui pose, il répond jamais sur le moment. Il rentre chez lui, attend toute une nuit, puis revient avec la solution. Il prétend devoir atteindre l’illumination en une nuit pour voir la voie.",
+                                npc: 700429,
+                                next: 51210056,
+                            },
+                            {
+                                id: 51210056,
+                                content:
+                                    "Il appelle ça « Zen et art de la réparation ferroviaire ». Moi, je pense surtout qu’il cherche une excuse pour aller boire !",
+                                npc: 700442,
+                                next: 51210057,
+                            },
+                            {
+                                id: 51210057,
+                                content:
+                                    "Au passage, son histoire de zen, il l’a sûrement entendue un jour en ville, pendant qu’il picolait avec des Tisse-Étoiles venus de Huaxu. Après ça, il a récupéré le terme pour se donner un style. N’importe quoi !",
+                                npc: 700429,
+                                next: 51210058,
+                            },
+                            {
+                                id: 51210058,
+                                content:
+                                    "Bien. Quoi qu’il en soit, il a disparu. Nous avons besoin de quelqu’un pour le retrouver. La dernière piste mène à un contremaître de la gare, alors...",
+                                npc: 700428,
+                                options: [
+                                    {
+                                        id: 51210059,
+                                        content: "<I>J’ai compris. Encore une course à faire, c’est ça ?</>",
+                                        next: 51210060,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51210063,
+                                        content: "<I>Vous voulez encore me faire travailler gratuitement ?</>",
+                                        next: 51210064,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210060,
+                                content:
+                                    "C’est ça... Hum. Comme je le disais, la dernière piste liée à la disparition du Maître Zen d’une Nuit mène à un contremaître de la gare.",
+                                npc: 700428,
+                                next: 51210061,
+                            },
+                            {
+                                id: 51210064,
+                                content:
+                                    "Exactement ! Moi aussi, je trouve ça pas très correct de te faire travailler gratuitement tout le temps, surtout que tu n’es même pas ouvrier de notre union. J’ai donc décidé de te céder mon poste de patronne de l’Union du Tournevis !",
+                                npc: 700442,
+                                next: 51210065,
+                            },
+                            {
+                                id: 51210061,
+                                content:
+                                    "Officiellement, c’est un contremaître. En réalité, c’est l’un des chiens d’Eisenbahn. S’en prendre à eux revient presque à défier directement Eisenbahn, surtout quand ils savent exactement qui fait partie de l’union.",
+                                npc: 700428,
+                                next: 51210062,
+                            },
+                            {
+                                id: 51210065,
+                                content:
+                                    "Elle fait mine de retirer une couronne invisible de sa tête et s’apprête à la poser sur la vôtre, mais quelqu’un l’arrête aussitôt.",
+                                next: 51210066,
+                            },
+                            {
+                                id: 51210062,
+                                content:
+                                    "Dans ces conditions, le meilleur choix est de confier l’enquête à un nouveau visage. Plus précisément, à quelqu’un d’extérieur qui quittera bientôt la gare.",
+                                npc: 700428,
+                                next: 51210067,
+                            },
+                            {
+                                id: 51210066,
+                                content: "Petite folle, qu’est-ce que tu fabriques encore ?!",
+                                npc: 700429,
+                                next: 51210067,
+                            },
+                            {
+                                id: 51210067,
+                                content: "Très bien. Puisque vous insistez tous comme ça, je vais y aller.",
+                                npc: 100001,
+                                next: 51210068,
+                            },
+                            {
+                                id: 51210068,
+                                content:
+                                    "Vous savez, j’ai toujours eu beaucoup d’estime pour vous. Vous possédez quelque chose que les gens d’ici n’ont plus : la bonté.",
+                                npc: 700428,
+                                next: 51210069,
+                            },
+                            {
+                                id: 51210069,
+                                content:
+                                    "Arrête un peu ! Les gens qui parlent comme ça cachent toujours quelque chose. « Tu es quelqu’un de bien, tu as bon cœur »... En vrai, c’est juste une façon de pousser les autres à travailler pour eux !",
+                                npc: 700449,
+                                next: 51210070,
+                            },
+                            {
+                                id: 51210070,
+                                content: "Exactement ! Lorent, la Luno a totalement raison. T’es vraiment un sale type !",
+                                npc: 700442,
+                                next: 51210071,
+                            },
+                            {
+                                id: 51210071,
+                                content:
+                                    "Oui, oui. Vous demander de nous aider sans que l’union ne fasse rien en retour serait effectivement injuste. Cette fois...",
+                                npc: 700428,
+                                next: 51210072,
+                            },
+                            {
+                                id: 51210072,
+                                content: "Kroger vous accompagnera.",
+                                npc: 700428,
+                            },
+                            {
+                                id: 51210026,
+                                content: "<I>Qu’est-ce que vous entendez par « défier ouvertement Eisenbahn » ?</>",
+                                next: 51210027,
+                            },
+                            {
+                                id: 51210033,
+                                content: "<I>Pourquoi avoir choisi... elle ?</>",
+                                next: 51210034,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040502,
+                name: "Se rendre à l’usine",
+                desc: "À peine la récompense de votre précédente mission est-elle en vue qu’une nouvelle mission vous tombe dessus. Vous rencontrez pour la première fois le véritable patron de l’Union du Tournevis et découvrez avec surprise qu’il ne s’agit que d’une enfant. À l’issue de la discussion, votre bonté vous vaut d’être chargé de retrouver le Maître Zen d’une Nuit de l’Union. Puisque vous avez accepté, autant les aider une dernière fois.",
+                nodes: [
+                    {
+                        id: "17796930161731480984",
+                        type: "TalkNode",
+                        name: "触发工厂对话",
+                        srId: 106301,
+                        pos: [-18580, 12750],
+                        dialogues: [
+                            {
+                                id: 51210101,
+                                content:
+                                    "Encore de retour ici... J’ai l’impression qu’on a déjà fait des allers-retours des dizaines de fois en à peine quelques heures...",
+                                npc: 700449,
+                                next: 51210102,
+                            },
+                            {
+                                id: 51210102,
+                                content:
+                                    "Et alors ? Moi, ça fait des années que je passe ma vie à faire des allers-retours ici ! C’est pas amusant, justement ? Y a toujours de nouvelles têtes.",
+                                npc: 700429,
+                                next: 51210103,
+                            },
+                            {
+                                id: 51210103,
+                                content: "Moi, j’ai surtout l’impression que tout le monde a le même air épuisé...",
+                                npc: 700449,
+                                next: 51210104,
+                            },
+                            {
+                                id: 51210104,
+                                content: "Bon, assez bavardé. C’est qui, ce contremaître que Lorent nous a demandé de trouver ?",
+                                npc: 100001,
+                                next: 51210105,
+                            },
+                            {
+                                id: 51210105,
+                                content:
+                                    "Tu regardes autour de toi : celui qui affiche ce sourire arrogant qu’on a envie de lui faire ravaler et qui marche la tête haute comme s’il possédait l’endroit... c’est forcément un contremaître.",
+                                npc: 700429,
+                                next: 51210106,
+                            },
+                            {
+                                id: 51210106,
+                                content: "C’est vrai que c’est... facile à repérer.",
+                                npc: 100001,
+                                next: 51210107,
+                            },
+                            {
+                                id: 51210107,
+                                content: "Passe deux jours à bosser ici et toi aussi tu sauras plus sourire.",
+                                npc: 700429,
+                                next: 51210108,
+                            },
+                            {
+                                id: 51210108,
+                                content:
+                                    "Comment on va lui soutirer des infos sur le Maître Zen d’une Nuit ? On fait comme avant ? On invente une histoire triste ? Je suis prête !",
+                                npc: 700449,
+                                next: 51210109,
+                            },
+                            {
+                                id: 51210109,
+                                content:
+                                    "Une histoire triste ? Pour un contremaître ? Haha, bonne blague. Les contremaîtres sont les derniers à marcher à ce genre de trucs. Des ouvriers misérables, ils en voient toute la journée. Vos petites combines serviront à rien.",
+                                npc: 700429,
+                                next: 51210110,
+                            },
+                            {
+                                id: 51210110,
+                                content: "Cela dit... je peux peut-être vous proposer une méthode. Bon, le risque est un peu élevé...",
+                                npc: 700429,
+                                next: 51210111,
+                            },
+                            {
+                                id: 51210111,
+                                content: "<I>Comment retrouver le Maître Zen d’une Nuit ?</>",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 51210112,
+                                        content: "<I>On improvise.</>",
+                                        next: 51210113,
+                                    },
+                                    {
+                                        id: 51210118,
+                                        content: "<I>Écoutons plutôt son idée.</>",
+                                        next: 51210119,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210113,
+                                content:
+                                    "Puisque tous ces contremaîtres bossent pour Eisenbahn, jouons le rôle des plus grands admirateurs d’Eisenbahn.",
+                                npc: 100001,
+                                next: 51210114,
+                            },
+                            {
+                                id: 51210119,
+                                content: "Dis toujours. Les risques, ça nous fait pas peur.",
+                                npc: 100001,
+                                next: 51210120,
+                            },
+                            {
+                                id: 51210114,
+                                content:
+                                    "Admirateurs ? D’Eisenbahn ? Comment t’arrives à mettre ces deux mots dans la même phrase avec autant de naturel ? Ah... non, c’est horrible. Rien que de les entendre ensemble, ça me file des frissons...",
+                                npc: 700429,
+                                next: 51210115,
+                            },
+                            {
+                                id: 51210120,
+                                content:
+                                    "Pas mal. Puisque t’as du cran, je vais pas me dégonfler non plus. On va simplement lui casser la figure jusqu’à ce qu’il parle. Tu vois l’endroit là-bas ?",
+                                npc: 700429,
+                                next: 51210121,
+                            },
+                            {
+                                id: 51210115,
+                                content: "Tu connais le nom de ce contremaître ?",
+                                npc: 100001,
+                                next: 51210116,
+                            },
+                            {
+                                id: 51210121,
+                                content: "Où ça ? Où ça ?",
+                                npc: 700449,
+                                next: 51210122,
+                            },
+                            {
+                                id: 51210116,
+                                content: "Lui ? Olaf.",
+                                npc: 700429,
+                                next: 51210117,
+                            },
+                            {
+                                id: 51210122,
+                                content:
+                                    "Là-bas. Tout à l’heure, je vais pousser un grand cri comme signal, puis faire semblant d’être complètement bourré. Je vais commencer à te cogner dessus pendant que toi, tu cries au secours et tu cours jusque-là pour attirer le contremaître.",
+                                npc: 700429,
+                                next: 51210123,
+                            },
+                            {
+                                id: 51210117,
+                                content: "Olaf... Très bien. Snow, en route !",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51210123,
+                                content: "Me... cogner dessus ?",
+                                npc: 100001,
+                                next: 51210124,
+                            },
+                            {
+                                id: 51210124,
+                                content:
+                                    "Oui. T’inquiète, je vais pas vraiment te frapper. Juste un peu de comédie. L’important, c’est de faire assez de bruit pour attirer le contremaître. Une fois qu’il sera là-bas, on lui tombera dessus tous les deux.",
+                                npc: 700429,
+                                next: 51210125,
+                            },
+                            {
+                                id: 51210125,
+                                content: "Lui... tomber dessus ?",
+                                npc: 700449,
+                                next: 51210126,
+                            },
+                            {
+                                id: 51210126,
+                                content:
+                                    "Oui. Pourquoi vous répétez toujours tout en même temps, vous deux ? Bref, voilà le plan. Quand vous êtes prêts, dites-le-moi.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040503,
+                name: "Tromper le contremaître",
+                desc: "Votre groupe retrouve sans difficulté le contremaître qui est la dernière personne à connaître la destination du Maître Zen d’une Nuit. Lorsqu’il s’agit de lui faire révéler cette information, vous refusez la proposition de Kroger et choisissez une autre approche.",
+                nodes: [
+                    {
+                        id: "17796949056624387885",
+                        type: "TalkNode",
+                        name: "对话奥拉夫",
+                        srId: 106301,
+                        pos: [-13600, 10240],
+                        dialogues: [
+                            {
+                                id: 51210601,
+                                content: "Excusez-moi !",
+                                npc: 100001,
+                                next: 51210602,
+                            },
+                            {
+                                id: 51210602,
+                                content: "Hm ? T’es qui, toi ? Je t’ai jamais vu. T’as pas une tête d’ouvrier d’ici.",
+                                npc: 700443,
+                                next: 51210603,
+                            },
+                            {
+                                id: 51210603,
+                                content:
+                                    "Peut-être, mais moi je vous connais ! Vous êtes Olaf, le plus brillant contremaître sous les ordres du grand Eisenbahn !",
+                                npc: 100001,
+                                next: 51210604,
+                            },
+                            {
+                                id: 51210604,
+                                content:
+                                    "Vous connaissez mon nom ? Nom d’un chien... Attendez, ça veut dire que je suis enfin apparu dans le <H>Salon du Sifflet</> ? Quelle liste ? Employé modèle de l’année ? Bras droit d’Eisenbahn ?",
+                                npc: 700443,
+                                next: 51210605,
+                            },
+                            {
+                                id: 51210605,
+                                content:
+                                    "Hum hum... Enfin, ce serait pas impossible que je sois dans les deux, vu la qualité exceptionnelle de mon travail. Je me disais aussi qu’Eisenbahn me confiait de plus en plus de tâches importantes récemment...",
+                                npc: 700443,
+                                next: 51210606,
+                            },
+                            {
+                                id: 51210606,
+                                content:
+                                    "Exactement ! En ce moment, vous êtes la nouvelle vedette du Salon du Sifflet. Beaucoup pensent même que vous pourriez devenir le prochain bras droit du chef de gare Eisenbahn !",
+                                npc: 100001,
+                                next: 51210607,
+                            },
+                            {
+                                id: 51210607,
+                                content:
+                                    "Exactement ! C’est pour ça qu’on est venus vous interviewer ! Le Salon du Sifflet ne peut pas laisser passer la moindre information liée au chef de gare Eisenbahn !",
+                                npc: 700449,
+                                next: 51210608,
+                            },
+                            {
+                                id: 51210608,
+                                content:
+                                    "Oh là là, vous me flattez. Je n’oserais jamais rêver du poste d’adjoint... mais employé modèle de l’année, pourquoi pas. Puisque vous faites partie du Salon du Sifflet, cela signifie donc que vous êtes...",
+                                npc: 700443,
+                                next: 51210609,
+                            },
+                            {
+                                id: 51210609,
+                                content:
+                                    "Ah, oui oui. Et si vous coopérez bien avec cette interview, nous glisserons quelques bons mots à votre sujet auprès des hautes sphères du Salon.",
+                                npc: 100001,
+                                next: 51210610,
+                            },
+                            {
+                                id: 51210610,
+                                content: "Oui, bien sûr ! Posez toutes les questions que vous voulez !",
+                                npc: 700443,
+                                options: [
+                                    {
+                                        id: 51210611,
+                                        content:
+                                            "<I>Vous disiez que le chef de gare Eisenbahn vous avait confié des tâches importantes ?</>",
+                                        next: 51210612,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210612,
+                                content:
+                                    "Oh, rien d’aussi extraordinaire ! Quelques ouvriers des usines ont récemment commencé à voler des trucs à droite à gauche. Et justement, il y a quelques jours, on a attrapé un petit voleur qui s’était introduit dans l’infirmerie.",
+                                npc: 700443,
+                                next: 51210613,
+                            },
+                            {
+                                id: 51210613,
+                                content:
+                                    "Le chef de gare m’a chargé de le garder enfermé là-bas, sans le laisser sortir. Et surtout, il ne faut pas que l’Union du Tournevis apprenne quoi que ce soit.",
+                                npc: 700443,
+                                options: [
+                                    {
+                                        id: 51210614,
+                                        content: "<I>Il s’est introduit dans l’infirmerie ? Pour voler ?</>",
+                                        next: 51210615,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210615,
+                                content:
+                                    "Oui. Cet ouvrier s’appelle Hugh. D’habitude, il cause jamais de problèmes. Peut-être qu’il était ivre ce soir-là ? Il a fouillé l’infirmerie pendant un bon moment avant de se faire attraper par les gardes en patrouille.",
+                                npc: 700443,
+                                next: 51210616,
+                            },
+                            {
+                                id: 51210616,
+                                content:
+                                    "Mais le médecin de garde a confirmé qu’il ne manquait rien. Sinon, l’affaire aurait été bien plus grave qu’une simple détention.",
+                                npc: 700443,
+                                options: [
+                                    {
+                                        id: 51210617,
+                                        content: "<I>Pourquoi cacher ça à l’Union du Tournevis ?</>",
+                                        next: 51210618,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210618,
+                                content:
+                                    "Vous du Salon du Sifflet, vous êtes pas déjà au courant ? Les gens de l’Union du Tournevis adorent créer des problèmes au chef de gare. Alors cette fois qu’on en tient enfin un, le chef de gare compte bien leur rendre la monnaie de leur pièce.",
+                                npc: 700443,
+                                next: 51210619,
+                            },
+                            {
+                                id: 51210619,
+                                content:
+                                    "Cela dit... vous savez bien qu’une personne importante est récemment arrivée à la gare. Le chef de gare est très occupé pour le moment. Mais une fois qu’il aura du temps, il utilisera sûrement ce type pour leur causer des ennuis.",
+                                npc: 700443,
+                                options: [
+                                    {
+                                        id: 51210620,
+                                        content: "<I>Je n’ai plus de questions.</>",
+                                        next: 51210621,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210621,
+                                content:
+                                    "On dirait qu’Eisenbahn vous fait vraiment confiance. Confier une tâche aussi importante à quelqu’un comme vous... Je vais devoir vous faire remonter de quelques places dans mon classement des meilleurs hommes d’Eisenbahn.",
+                                npc: 100001,
+                                next: 51210622,
+                            },
+                            {
+                                id: 51210622,
+                                content:
+                                    "V-Vraiment ?! Merci beaucoup ! Je... Je travaillerai encore plus dur ! Je compte sur vous pour continuer à parler de moi en bien !",
+                                npc: 700443,
+                                next: 51210623,
+                            },
+                            {
+                                id: 51210623,
+                                content: "Merci pour votre temps. Mon interview est terminée. À une prochaine !",
+                                npc: 100001,
+                                next: 51210624,
+                            },
+                            {
+                                id: 51210624,
+                                content: "Oui ! Merci à vous ! À la prochaine !",
+                                npc: 700443,
+                                next: 51210625,
+                            },
+                            {
+                                id: 51210625,
+                                content:
+                                    "Il vous adresse un salut impérial d’une précision irréprochable, comme un simple soldat face à l’inspection de son commandant de Légion.",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040504,
+                name: "Rosser le contremaître",
+                desc: "Votre groupe retrouve sans difficulté le contremaître qui est la dernière personne à connaître la destination du Maître Zen d’une Nuit. Lorsqu’il s’agit de lui faire révéler cette information, vous décidez de suivre la proposition de Kroger.",
+                nodes: [
+                    {
+                        id: "17796966937604396312",
+                        type: "TalkNode",
+                        name: "战斗1开车",
+                        srId: 106301,
+                        pos: [-12590, 10510],
+                        dialogues: [
+                            {
+                                id: 51210201,
+                                content: "Petit larbin, pourquoi t’as accepté un plan aussi absurde ?!",
+                                npc: 700449,
+                                next: 51210202,
+                            },
+                            {
+                                id: 51210202,
+                                content:
+                                    "AAAAAAAH ! Quel boulot pourri ! J’en peux plus ! Je vais aller boire ! Hé toi ! Espèce de contremaître qui m’exploite !",
+                                npc: 700429,
+                                next: 51210203,
+                            },
+                            {
+                                id: 51210203,
+                                content: "Au secours ! Il attaque vraiment !",
+                                npc: 700449,
+                                next: 51210301,
+                            },
+                            {
+                                id: 51210301,
+                                content: "Hé, je croyais que c’était moi qui devais te frapper ! Pourquoi tu ripostes ?!",
+                                npc: 700429,
+                                next: 51210302,
+                            },
+                            {
+                                id: 51210302,
+                                content: "Le résultat est le même. J’ai pas envie d’être {性别:le seul|la seule} à prendre.",
+                                npc: 100001,
+                                next: 51210303,
+                            },
+                            {
+                                id: 51210303,
+                                content: "Putain ! Arrête de frapper, il arrive ! Va là-bas, vite !",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797832081655957882",
+                        type: "TalkNode",
+                        name: "触发工头警觉",
+                        srId: 106301,
+                        pos: [-12590, 10510],
+                        next: ["17797835188985962708"],
+                        dialogues: [
+                            {
+                                id: 51210401,
+                                content: "Qu’est-ce qui se passe ici ? Encore un ivrogne qui fait n’importe quoi ?",
+                                next: 51210402,
+                            },
+                            {
+                                id: 51210402,
+                                content: "C’est maintenant ! Frappez-le !",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797835188985962708",
+                        type: "TalkNode",
+                        name: "触发揍人结尾对话",
+                        srId: 106301,
+                        pos: [-12270, 10270],
+                        dialogues: [
+                            {
+                                id: 51210501,
+                                content: "Petit larbin, pas mal !",
+                                npc: 700449,
+                                next: 51210502,
+                            },
+                            {
+                                id: 51210502,
+                                content: "Toi, t’as complètement ignoré le plan.",
+                                npc: 700429,
+                                next: 51210503,
+                            },
+                            {
+                                id: 51210503,
+                                content: "Je me suis {性别:retenu|retenue}. Sinon, tu aurais fini comme lui...",
+                                npc: 100001,
+                                next: 51210504,
+                            },
+                            {
+                                id: 51210504,
+                                content: "Aïe... ma tête... mon dos... Vous êtes complètement fous ou quoi ?!",
+                                next: 51210505,
+                            },
+                            {
+                                id: 51210505,
+                                content:
+                                    "Hein ? T’es pas... le contremaître ? Pourquoi t’as deux frères jumeaux ? Et pourquoi ils flottent dans les airs ?",
+                                npc: 700429,
+                                next: 51210506,
+                            },
+                            {
+                                id: 51210506,
+                                content:
+                                    "Kroger ! Boire pendant les heures de travail ?! Cette fois, même si Lorent vient supplier pour toi, ça te sauvera pas ! Tu vas voir ce qui t’attend !",
+                                next: 51210507,
+                            },
+                            {
+                                id: 51210507,
+                                content: "Refais-moi cette phrase correctement.",
+                                npc: 700429,
+                                next: 51210508,
+                            },
+                            {
+                                id: 51210508,
+                                content: "Kroger reprend son rôle d’ivrogne déchaîné et se remet à rouer le contremaître de coups.",
+                                next: 51210509,
+                            },
+                            {
+                                id: 51210509,
+                                content: "Arrête ! Arrête ! Pourquoi tu cognes toujours quelqu’un dès que t’as bu ?!",
+                                next: 51210510,
+                            },
+                            {
+                                id: 51210510,
+                                content:
+                                    "Mmh... Contremaître, ton frère jumeau parle pour toi ? Hein ? Pourquoi y en a trois maintenant ? Moi, je...",
+                                npc: 700429,
+                                next: 51210511,
+                            },
+                            {
+                                id: 51210511,
+                                content: "Kroger vous lance discrètement un regard avant de s’écrouler « ivre mort » devant vous.",
+                                next: 51210512,
+                            },
+                            {
+                                id: 51210512,
+                                content:
+                                    "Sale parasite ! Poivrot ! Espèce de déchet irrécupérable ! Et toi, t’es qui ? Je t’ai vu me frapper aussi ! Crois pas que j’ai pas remarqué ! T’es ouvrier ici ? Je vais me souvenir de toi !",
+                                next: 51210513,
+                            },
+                            {
+                                id: 51210513,
+                                content: "Fais donc.",
+                                npc: 100001,
+                                next: 51210514,
+                            },
+                            {
+                                id: 51210514,
+                                content: "C’est quoi cette attitude ?! Je vous ferai payer ça !",
+                                next: 51210515,
+                            },
+                            {
+                                id: 51210515,
+                                content: "Où est le Maître Zen d’une Nuit ?",
+                                npc: 100001,
+                                next: 51210516,
+                            },
+                            {
+                                id: 51210516,
+                                content: "Le Maître Zen d’une Nuit ? De quoi tu parles ? C’est qui, ça ?",
+                                next: 51210517,
+                            },
+                            {
+                                id: 51210517,
+                                content: "Oh non, petit larbin... Ils nous ont jamais dit comment il s’appelait vraiment...",
+                                npc: 700449,
+                                next: 51210518,
+                            },
+                            {
+                                id: 51210518,
+                                content: "Hugh ! Encore un verre ! Un dernier ! Hugh ! Où tu vas ?!",
+                                npc: 700429,
+                                next: 51210519,
+                            },
+                            {
+                                id: 51210519,
+                                content: "... Hugh ? Où est-il ?",
+                                npc: 100001,
+                                next: 51210520,
+                            },
+                            {
+                                id: 51210520,
+                                content: "Vous êtes ensemble...? Toi et ce Hugh... ce voleur ?",
+                                next: 51210521,
+                            },
+                            {
+                                id: 51210521,
+                                content: "Un voleur ? Tu veux dire que Hugh est un voleur ?",
+                                npc: 700449,
+                                next: 51210522,
+                            },
+                            {
+                                id: 51210522,
+                                content:
+                                    "Attendez... Vous me tabassez sans raison et maintenant vous faites comme si vous saviez rien ?! Je me suis fait frapper pour rien ?!",
+                                next: 51210523,
+                            },
+                            {
+                                id: 51210523,
+                                content: "Assez parlé. Où est Hugh ? Si tu réponds pas, je recommence.",
+                                npc: 100001,
+                                next: 51210524,
+                            },
+                            {
+                                id: 51210524,
+                                content:
+                                    "Je vais parler ! Me frappez pas ! Ce type, Hugh... il y a quelque temps, il s’est introduit dans l’infirmerie au beau milieu de la nuit pour voler quelque chose. Les gardes l’ont pris sur le fait.",
+                                next: 51210525,
+                            },
+                            {
+                                id: 51210525,
+                                content:
+                                    "Après vérification, rien n’avait disparu. Sinon, il serait pas simplement enfermé. Mais le chef de gare a ordonné qu’on le garde là-bas jusqu’à ce que quelqu’un vienne le réclamer.",
+                                next: 51210526,
+                            },
+                            {
+                                id: 51210526,
+                                content: "Hein ? On dirait presque que ça ne dérange personne qu’il soit libéré ou pas...",
+                                npc: 700449,
+                                next: 51210527,
+                            },
+                            {
+                                id: 51210527,
+                                content:
+                                    "Ça, c’est les affaires du chef de gare, pas les miennes. J’ai répondu à vos questions. Vous pouvez me laisser partir maintenant ?",
+                                next: 51210528,
+                            },
+                            {
+                                id: 51210528,
+                                content: "Dégage.",
+                                npc: 100001,
+                                next: 51210529,
+                            },
+                            {
+                                id: 51210529,
+                                content:
+                                    "Le contremaître s’enfuit en trébuchant, tandis que Kroger se relève aussitôt du sol, comme si de rien n’était.",
+                                next: 51210530,
+                            },
+                            {
+                                id: 51210530,
+                                content: "Héhé...",
+                                npc: 700429,
+                                next: 51210531,
+                            },
+                            {
+                                id: 51210531,
+                                content: "On dirait que tu t’es bien amusé à jouer la comédie.",
+                                npc: 100001,
+                                next: 51210532,
+                            },
+                            {
+                                id: 51210532,
+                                content: "Héhé... Pas mal, ouais... Bon, allons-y.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040505,
+                name: "Se rendre à l’infirmerie",
+                desc: "Grâce aux informations obtenues auprès du contremaître Olaf, vous découvrez enfin où se trouve Hugh, le Maître Zen d’une Nuit. Pour une raison inconnue, Eisenbahn l’a pris pour un voleur et l’a enfermé à l’infirmerie. Il est temps d’aller le secourir.",
+                nodes: [
+                    {
+                        id: "17796997348224400654",
+                        type: "TalkNode",
+                        name: "前往医务室开车",
+                        srId: 106001,
+                        pos: [-30780, 6480],
+                        dialogues: [
+                            {
+                                id: 51210701,
+                                content:
+                                    "Avant, Lorent disait que t’avais quelque chose de spécial. J’y croyais pas vraiment... mais maintenant, je commence à le croire.",
+                                npc: 700429,
+                                next: 51210702,
+                            },
+                            {
+                                id: 51210702,
+                                content: "Quelque chose de spécial ? La bonté ?",
+                                npc: 100001,
+                                next: 51210703,
+                            },
+                            {
+                                id: 51210703,
+                                content:
+                                    "La bonté, mon cul. J’en sais rien, moi, je suis analphabète. Impossible de mettre le doigt dessus. Mais t’as clairement quelque chose. Et c’est pas juste de la gentillesse.",
+                                npc: 700429,
+                                next: 51210704,
+                            },
+                            {
+                                id: 51210704,
+                                content:
+                                    "Moi je sais, moi je sais ! {nickname} a une agilité incroyable, et moi j’ai un cerveau exceptionnel ! Ensemble, nous sommes invincibles !",
+                                npc: 700449,
+                                next: 51210705,
+                            },
+                            {
+                                id: 51210705,
+                                content:
+                                    "Hm. J’saurais pas dire quoi exactement... mais ce que {性别:ce type|cette fille} a, ça n’a certainement rien à voir avec toi, la Luno.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797044901284418825",
+                        type: "TalkNode",
+                        name: "对话克罗格嘲笑休",
+                        srId: 106001,
+                        pos: [-34100, 5970],
+                        dialogues: [
+                            {
+                                id: 51210801,
+                                content:
+                                    "Après que Kroger eut forcé sans effort la porte de l’infirmerie, vous rencontrez enfin le fameux Maître Zen d’une Nuit — version ligotée des pieds et des mains, avec du ruban adhésif sur la bouche.",
+                                next: 51210802,
+                            },
+                            {
+                                id: 51210802,
+                                content: "HAHAHAHA ! Alors toi aussi, ça t’arrive !",
+                                npc: 700429,
+                                next: 51210803,
+                            },
+                            {
+                                id: 51210803,
+                                content: "Mmph ! Mmmmh !",
+                                npc: 700444,
+                                next: 51210804,
+                            },
+                            {
+                                id: 51210804,
+                                content: "Hein ? Quoi ? J’entends rien du tout ! Hahaha !",
+                                npc: 700429,
+                                next: 51210805,
+                            },
+                            {
+                                id: 51210805,
+                                content:
+                                    "Il a quand même l’air assez pitoyable... Petit larbin, on devrait peut-être commencer par le détacher.",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040506,
+                name: "Aider Hugh à retrouver ses souvenirs",
+                desc: "Après une discussion peu amicale, vous finissez par comprendre pourquoi Hugh a été arrêté et la situation délicate dans laquelle il se trouve. Mais l’usine souterraine ne peut se permettre de perdre un ingénieur, même aussi incompétent soit-il. Vous décidez donc de l’aider à retrouver ce livre si important.",
+                nodes: [
+                    {
+                        id: "17833911874975002",
+                        type: "TalkNode",
+                        name: "前往喝酒点开车",
+                        srId: 106301,
+                        pos: [-10700, 7590],
+                        dialogues: [
+                            {
+                                id: 51211001,
+                                content: "Snow... c’est vraiment un jour exceptionnel.",
+                                npc: 100001,
+                                next: 51211002,
+                            },
+                            {
+                                id: 51211002,
+                                content: "Hein ? Quoi ? Qu’est-ce qui est exceptionnel ?",
+                                npc: 700449,
+                                next: 51211003,
+                            },
+                            {
+                                id: 51211003,
+                                content: "Tu as réussi à dire deux choses intelligentes dans la même journée. C’est historique.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797634539585883653",
+                        type: "TalkNode",
+                        name: "对话克罗格休喝酒",
+                        srId: 106301,
+                        pos: [-13050, 5840],
+                        next: ["17821909127516479"],
+                        dialogues: [
+                            {
+                                id: 51211101,
+                                content:
+                                    "Kroger revient avec plusieurs bouteilles d’alcool bas de gamme dont l’odeur agressive vous prend immédiatement au nez. Elles sont désormais soigneusement alignées sur la table.",
+                                next: 51211102,
+                            },
+                            {
+                                id: 51211102,
+                                content:
+                                    "Trois bouteilles de Rouille et une bouteille d’alcool distillé. C’est ce que tu bois d’habitude, non ? Dis-moi si ça suffit pas, j’irai en chercher d’autres.",
+                                npc: 700429,
+                                next: 51211103,
+                            },
+                            {
+                                id: 51211103,
+                                content: "Ça devrait aller... Enfin, sauf si toi aussi tu bois. Dans ce cas, ce sera clairement pas assez.",
+                                npc: 700444,
+                                next: 51211104,
+                            },
+                            {
+                                id: 51211104,
+                                content:
+                                    "Si je bois, qui va gérer les choses sérieuses ? Arrête de râler et bois. De toute façon, à part boire, t’es plus bon à grand-chose.",
+                                npc: 700429,
+                                next: 51211105,
+                            },
+                            {
+                                id: 51211105,
+                                content:
+                                    "Moi ? Je suis quand même le Maître Zen d’une Nuit de l’union ! Toi, t’es juste un type qui sait boire et cogner les autres ! D’ailleurs, si on en est là, c’est parce que tu m’as tabassé la dernière fois que t’étais ivre !",
+                                npc: 700444,
+                                next: 51211106,
+                            },
+                            {
+                                id: 51211106,
+                                content:
+                                    "Tout le monde à l’union sait que je frappe les gens quand je suis bourré ! C’est toi qui t’es cru malin à me provoquer alors que t’es incapable de te défendre ! Maintenant ferme-la et bois avant que je te cogne pour de vrai !",
+                                npc: 700429,
+                                next: 51211107,
+                            },
+                            {
+                                id: 51211107,
+                                content:
+                                    "Brute épaisse ! Chien enragé ! Psychopathe ! J’ai pas envie de perdre mon temps avec un sauvage comme toi !",
+                                npc: 700444,
+                                next: 51211108,
+                            },
+                            {
+                                id: 51211108,
+                                content: "Pourquoi ces deux-là commencent à se disputer dès qu’ils ouvrent la bouche... ?",
+                                npc: 700449,
+                                next: 51211109,
+                            },
+                            {
+                                id: 51211109,
+                                content: "Et si... on se concentrait d’abord sur ce qu’on est venus faire ?",
+                                npc: 100001,
+                                next: 51211110,
+                            },
+                            {
+                                id: 51211110,
+                                content:
+                                    "Hugh lance un regard noir à Kroger avant d’attraper immédiatement une bouteille pour boire à grandes gorgées.",
+                                next: 51211111,
+                            },
+                            {
+                                id: 51211111,
+                                content:
+                                    "Les nobles de la ville disent souvent qu’il faut accompagner l’alcool avec quelque chose, non ? Nous, on n’a rien à manger... alors autant accompagner ça avec une bonne discussion.",
+                                npc: 700429,
+                                next: 51211112,
+                            },
+                            {
+                                id: 51211112,
+                                content: "Tu veux dire qu’on va discuter ? D’accord ! On parle de quoi ? Petit larbin, trouve un sujet !",
+                                npc: 700449,
+                                next: 51211146,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17821909127516479",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-13050, 5690],
+                        dialogues: [
+                            {
+                                id: 51211142,
+                                content:
+                                    "Hugh... tu te souviens de la dernière fois où toi et Kroger avez trop bu, et qu’il t’a passé à tabac ?",
+                                npc: 700449,
+                                next: 51211143,
+                            },
+                            {
+                                id: 51211143,
+                                content:
+                                    "<I>Hic ?</> Trop... trop bu ? C’est toi qui bois trop ! Kro... Kroger... <I>Hic !</> Ce chien enragé ! Il était pas là y a deux secondes ? Il est où ?! J’aurais dû... <I>Hic !</> J’aurais dû lui casser la gueule tout à l’heure !",
+                                npc: 700444,
+                                next: 51211144,
+                            },
+                            {
+                                id: 51211144,
+                                content: "Aucune idée. Tu veux peut-être aller le chercher dans les usines ?",
+                                npc: 700449,
+                                next: 51211145,
+                            },
+                            {
+                                id: 51211145,
+                                content:
+                                    "Ouais... <I>Hic !</> Le retrouver... Il m’a frappé comme ça... Je vais me... me venger... me venge— <I>Hic !</>",
+                                npc: 700444,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040507,
+                name: "Suivre les pas de Hugh",
+                desc: "Sous les piques incessantes de Kroger, Hugh ne tarde pas à se rendre ivre. Il ne vous reste plus qu’à suivre chacun de ses pas et à vérifier s’il n’a pas laissé tomber son livre aux endroits où il s’arrête.",
+                nodes: [
+                    {
+                        id: "17797755431235894134",
+                        type: "TalkNode",
+                        name: "跟踪开车A",
+                        srId: 106301,
+                        pos: [-13050, 5690],
+                        dialogues: [
+                            {
+                                id: 51211201,
+                                content: "Ouah... Vu comme il titube dans tous les sens, t’es sûr qu’il va vraiment bien ?",
+                                npc: 700449,
+                                next: 51211202,
+                            },
+                            {
+                                id: 51211202,
+                                content:
+                                    "Il est toujours comme ça quand il est bourré. T’inquiète pas. Et puis cette idée, c’était la tienne, non ?",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797756150125894750",
+                        type: "TalkNode",
+                        name: "触发查看对话A",
+                        srId: 106301,
+                        pos: [-13050, 5690],
+                        dialogues: [
+                            {
+                                id: 51211301,
+                                content:
+                                    "Vous vous arrêtez ici avec le Maître Zen d’une Nuit. Serait-ce l’endroit où il a perdu son manuel ?",
+                                next: 51211302,
+                            },
+                            {
+                                id: 51211302,
+                                content: "Y a rien du tout...",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040508,
+                name: "Observer les agissements de Hugh",
+                desc: "Suivre un ivrogne à la trace est une idée parfaitement absurde, mais à ce stade, autant tenter le tout pour le tout.",
+                nodes: [
+                    {
+                        id: "17797759998105901047",
+                        type: "TalkNode",
+                        name: "跟踪开车B",
+                        srId: 106301,
+                        pos: [-14610, 4670],
+                        dialogues: [
+                            {
+                                id: 51211401,
+                                content:
+                                    "Eh ? C’est pas le Maître Zen d’une Nuit ? Comment il a pu se mettre dans un état pareil à cette heure-ci ?",
+                                npc: 700445,
+                                next: 51211402,
+                            },
+                            {
+                                id: 51211402,
+                                content:
+                                    "Haha~ Le Maître Zen de la Gueule de Bois fait encore des siennes. Laissez-le et retournez bosser.",
+                                npc: 700446,
+                                next: 51211403,
+                            },
+                            {
+                                id: 51211403,
+                                content: "On dirait que le Maître Zen d’une Nuit est plutôt connu dans le coin.",
+                                npc: 100001,
+                                next: 51211404,
+                            },
+                            {
+                                id: 51211404,
+                                content:
+                                    "Toute l’usine dépend de lui pour réparer les machines, régler les problèmes et assumer les responsabilités, alors forcément, il a un peu de réputation. S’il pouvait juste arrêter de se bourrer la gueule à longueur de journée...",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797759998105901048",
+                        type: "TalkNode",
+                        name: "触发查看对话B",
+                        srId: 106301,
+                        pos: [-14610, 4670],
+                        dialogues: [
+                            {
+                                id: 51211501,
+                                content:
+                                    "Vous vous arrêtez ici avec le Maître Zen d’une Nuit. Serait-ce l’endroit où il a perdu son manuel ?",
+                                next: 51211502,
+                            },
+                            {
+                                id: 51211502,
+                                content: "Y a que des déchets ici !",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040509,
+                name: "Continuer à suivre Hugh",
+                desc: "Est-ce vraiment la bonne solution... ?",
+                nodes: [
+                    {
+                        id: "17797767859345911260",
+                        type: "TalkNode",
+                        name: "终点对话",
+                        srId: 106301,
+                        pos: [-14153, 2559],
+                        dialogues: [
+                            {
+                                id: 51211601,
+                                content: "Le Maître Zen d’une Nuit finit par s’écrouler au sol, complètement inconscient.",
+                                next: 51211602,
+                            },
+                            {
+                                id: 51211602,
+                                content: "Hé ! Abruti ! Debout !",
+                                npc: 700429,
+                                next: 51211603,
+                            },
+                            {
+                                id: 51211603,
+                                content: "Euh... Peut-être qu’il faudrait éviter de le réveiller à coups de pied... ?",
+                                npc: 700449,
+                                next: 51211604,
+                            },
+                            {
+                                id: 51211604,
+                                content: "Merde ! On l’a suivi pendant des heures pour rien ! Quelle perte de temps !",
+                                npc: 700429,
+                                next: 51211605,
+                            },
+                            {
+                                id: 51211605,
+                                content: "Excusez-moi...",
+                                npc: 700447,
+                                next: 51211606,
+                            },
+                            {
+                                id: 51211606,
+                                content: "Hein ? T’es qui, bordel ?",
+                                npc: 700429,
+                                next: 51211607,
+                            },
+                            {
+                                id: 51211607,
+                                content: "Chef Kroger... Je... je venais pas pour vous. Je cherchais le Maître Zen d’une Nuit, il...",
+                                npc: 700447,
+                                next: 51211608,
+                            },
+                            {
+                                id: 51211608,
+                                content: "Y a plus de Maître Zen d’une Nuit ici. Juste un alcoolique fini complètement torché !",
+                                npc: 700429,
+                                next: 51211609,
+                            },
+                            {
+                                id: 51211609,
+                                content:
+                                    "Hein ? Il est dans un état pareil ? Pourtant, ces derniers jours, même bourré, il arrivait encore à jeter un œil aux machines...",
+                                npc: 700447,
+                                next: 51211610,
+                            },
+                            {
+                                id: 51211610,
+                                content: "Ces derniers jours ?",
+                                npc: 100001,
+                                next: 51211611,
+                            },
+                            {
+                                id: 51211611,
+                                content:
+                                    "Ben oui. On l’a plus vu à l’usine depuis quelques jours, alors quand nos machines avaient un problème, on savait plus vers qui se tourner.",
+                                npc: 700447,
+                                next: 51211612,
+                            },
+                            {
+                                id: 51211612,
+                                content: "Quel genre de problème ? Ça empêche de travailler ?",
+                                npc: 700429,
+                                next: 51211613,
+                            },
+                            {
+                                id: 51211613,
+                                content:
+                                    "Pas vraiment une grosse panne, mais faudrait quand même quelqu’un pour vérifier. Vu l’état dans lequel il est, vous pourriez peut-être venir voir à sa place ?",
+                                npc: 700447,
+                                next: 51211614,
+                            },
+                            {
+                                id: 51211614,
+                                content: "Nous ?! Mais on connaît rien à la mécanique !",
+                                npc: 700449,
+                                next: 51211615,
+                            },
+                            {
+                                id: 51211615,
+                                content:
+                                    "Bof. Allez jeter un œil. Au pire, vous revenez. Moi, je vais chercher un seau d’eau glacée pour réveiller cet idiot.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040510,
+                name: "Examiner la machine défectueuse mentionnée par l’ouvrier",
+                desc: "Après l’avoir suivi pendant un long moment sans le moindre résultat, un ouvrier vient interrompre cette mascarade. Kroger vous suggère d’aller voir ce qui se passe, même si vous doutez sincèrement de pouvoir être utile.",
+                nodes: [
+                    {
+                        id: "17797774274955922936",
+                        type: "TalkNode",
+                        name: "对话工厂工人",
+                        srId: 106301,
+                        pos: [-14644, 287],
+                        next: ["17797780721365928144"],
+                        dialogues: [
+                            {
+                                id: 51211701,
+                                content: "Laissez faire le Roi Démon ! Voyons quel terrible problème vous tourmente depuis si longtemps !",
+                                npc: 700449,
+                                next: 51211702,
+                            },
+                            {
+                                id: 51211702,
+                                content:
+                                    "C’est ça — le thermorégulateur. Le Maître Zen d’une Nuit l’avait déjà réglé une fois, mais depuis quelques jours, il recommence à déconner.",
+                                npc: 700447,
+                                next: 51211703,
+                            },
+                            {
+                                id: 51211703,
+                                content:
+                                    "C’est pas une machine très importante. On s’en sert surtout pour vérifier la température des entrepôts avant d’y stocker le Phoxichor pur. Si la température est trop basse, le liquide risque de se solidifier.",
+                                npc: 700447,
+                                next: 51211704,
+                            },
+                            {
+                                id: 51211704,
+                                content: "Posez-le ici. Je vais regarder.",
+                                npc: 100001,
+                                next: 51211711,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797780721365928144",
+                        type: "TalkNode",
+                        name: "触发检修后对话",
+                        srId: 106301,
+                        pos: [-14644, 287],
+                        dialogues: [
+                            {
+                                id: 51211801,
+                                content: "Voilà... Hein ? Pourquoi ça bouge dans tous les sens ?",
+                                npc: 700449,
+                                next: 51211802,
+                            },
+                            {
+                                id: 51211802,
+                                content:
+                                    "Ah, désolé. Il y a un problème là-dessous. Je l’ai signalé il y a quelques jours, mais personne n’a encore réagi. Quand le Maître Zen d’une Nuit est venu, il avait aussi dit que ça bougeait. Moi, je pensais juste qu’il avait la tête qui tournait à cause de l’alcool.",
+                                npc: 700447,
+                                next: 51211803,
+                            },
+                            {
+                                id: 51211803,
+                                content:
+                                    "Mais ce jour-là, il avait glissé un objet sous la table et ça avait arrêté de bouger. Vous avez quelque chose à mettre dessous ? Sinon je peux aller chercher une brique.",
+                                npc: 700447,
+                                next: 51211804,
+                            },
+                            {
+                                id: 51211804,
+                                content: "J’ai rien sur moi. Merci.",
+                                npc: 100001,
+                                next: 51211805,
+                            },
+                            {
+                                id: 51211805,
+                                content: "L’ouvrier repart en courant avant de revenir aussitôt avec une brique qu’il glisse dessous.",
+                                next: 51211806,
+                            },
+                            {
+                                id: 51211806,
+                                content: "Cette fois, ça devrait aller ! Allez, ouvre-le vite !",
+                                npc: 700449,
+                                next: 51211807,
+                            },
+                            {
+                                id: 51211807,
+                                content: "On dirait que quelque chose est coincé à l’intérieur...",
+                                npc: 100001,
+                                next: 51211808,
+                            },
+                            {
+                                id: 51211808,
+                                content:
+                                    "Laisse-moi voir aussi ! Hmm hmm ! C’est un petit caillou ! Aucune idée de comment il est entré là-dedans ! Mes mains sont plus petites, je vais le retirer !",
+                                npc: 700449,
+                                next: 51211809,
+                            },
+                            {
+                                id: 51211809,
+                                content:
+                                    "Snow retire le petit caillou coincé dans l’appareil. L’aiguille tremble joyeusement avant de revenir lentement à la bonne température.",
+                                next: 51211810,
+                            },
+                            {
+                                id: 51211810,
+                                content: "Ça a l’air de fonctionner maintenant.",
+                                npc: 100001,
+                                next: 51211811,
+                            },
+                            {
+                                id: 51211811,
+                                content: "Un miracle ! Un véritable médecin des machines ! Sans vous, j’aurais jamais su quoi faire !",
+                                npc: 700447,
+                                next: 51211812,
+                            },
+                            {
+                                id: 51211812,
+                                content: "Héhé~ Un jeu d’enfant !",
+                                npc: 700449,
+                                next: 51211813,
+                            },
+                            {
+                                id: 51211813,
+                                content:
+                                    "Bon, je dois aller prévenir le contremaître que l’appareil fonctionne à nouveau. Comme ça, la prochaine livraison de Phoxichor pur pourra arriver à temps.",
+                                npc: 700447,
+                                next: 51211814,
+                            },
+                            {
+                                id: 51211814,
+                                content:
+                                    "Pas de quoi~ Pour un Roi Démon, ce genre de mission est d’une facilité déconcertante~ Petit larbin, allons vite retrouver Kroger et Hugh~",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040511,
+                name: "Retourner voir Kroger",
+                desc: "Snow et vous résolvez facilement le problème qui préoccupait l’ouvrier. Vous découvrez même qu’il était si simple que Snow aurait pu s’en charger seule. Une question vous vient alors à l’esprit : si les ouvriers ne rencontrent que ce genre de pannes élémentaires, à quoi sert réellement le Maître Zen d’une Nuit ? Peut-être que seul Kroger détient la réponse.",
+                nodes: [
+                    {
+                        id: "17797787957135933080",
+                        type: "TalkNode",
+                        name: "对话克罗格",
+                        srId: 106301,
+                        pos: [-14195, 2328],
+                        dialogues: [
+                            {
+                                id: 51211901,
+                                content:
+                                    "Quand vous revenez, Hugh est trempé de la tête aux pieds, assis par terre avec un air absent, tandis que Kroger fume à côté de lui.",
+                                next: 51211902,
+                            },
+                            {
+                                id: 51211902,
+                                content: "Vous voilà. Cet abruti est toujours pas revenu à lui. Alors ? Vous avez réussi à aider ?",
+                                npc: 700429,
+                                next: 51211903,
+                            },
+                            {
+                                id: 51211903,
+                                content: "Mission ultra facile ! Petit larbin et moi avons réglé ça en deux secondes !",
+                                npc: 700449,
+                                next: 51211904,
+                            },
+                            {
+                                id: 51211904,
+                                content:
+                                    "C’était tellement simple qu’un professionnel n’était même pas nécessaire. Ils auraient pu résoudre ça eux-mêmes en regardant un peu.",
+                                npc: 100001,
+                                next: 51211905,
+                            },
+                            {
+                                id: 51211905,
+                                content: "Hah. Je m’en doutais.",
+                                npc: 700429,
+                                next: 51211906,
+                            },
+                            {
+                                id: 51211906,
+                                content: "Vous trouvez pas ça étrange ?",
+                                npc: 100001,
+                                next: 51211907,
+                            },
+                            {
+                                id: 51211907,
+                                content: "Petit larbin, de quoi tu parles ? Qu’est-ce qui est étrange ?",
+                                npc: 700449,
+                                next: 51211908,
+                            },
+                            {
+                                id: 51211908,
+                                content:
+                                    "Le seul mécanicien de l’usine passe ses journées à régler des problèmes de ce niveau-là... et grâce à un simple manuel, il est devenu un soi-disant maître. Alors pourquoi ne pas simplement rendre ce manuel public et permettre à tout le monde de devenir un maître ?",
+                                npc: 100001,
+                                next: 51211909,
+                            },
+                            {
+                                id: 51211909,
+                                content: "Plus j’y pense... plus cette histoire me paraît bizarre.",
+                                npc: 100001,
+                                next: 51211910,
+                            },
+                            {
+                                id: 51211910,
+                                content: "À ton avis, pourquoi c’est justement cet idiot qui est resté ?",
+                                npc: 700429,
+                                next: 51211911,
+                            },
+                            {
+                                id: 51211911,
+                                content: "Vous arrêtez pas de parler par énigmes, je comprends rien du tout...",
+                                npc: 700449,
+                                next: 51211912,
+                            },
+                            {
+                                id: 51211912,
+                                content:
+                                    "Le maître de Hugh était le meilleur mécanicien de toute l’usine. Même les plans des trains, il pouvait les modifier. Alors pour transmettre son savoir, on lui a demandé de former d’autres ouvriers.",
+                                npc: 700429,
+                                next: 51211913,
+                            },
+                            {
+                                id: 51211913,
+                                content:
+                                    "Au début, tout se passait bien. Les ouvriers apprenaient vite, et les plus doués maîtrisaient rapidement plein de techniques de réparation. Le travail devenait plus efficace.",
+                                npc: 700429,
+                                next: 51211914,
+                            },
+                            {
+                                id: 51211914,
+                                content:
+                                    "Et quand les gens progressent, ils commencent aussi à penser qu’ils méritent un meilleur salaire. Alors ils sont allés réclamer une augmentation collective, en menaçant de partir si on refusait.",
+                                npc: 700429,
+                                next: 51211915,
+                            },
+                            {
+                                id: 51211915,
+                                content:
+                                    "Et tu sais ce qui s’est passé ? La Gare des Cent-Fleurs s’en fichait complètement. Ils voulaient juste des ouvriers obéissants. Les dirigeants leur ont dit qu’ils coûtaient trop cher et les ont virés. Au final... Hugh a été le seul à rester.",
+                                npc: 700429,
+                                next: 51211916,
+                            },
+                            {
+                                id: 51211916,
+                                content: "Donc Hugh n’était pas le plus compétent...",
+                                npc: 100001,
+                                next: 51211917,
+                            },
+                            {
+                                id: 51211917,
+                                content: "Juste le moins cher.",
+                                npc: 700429,
+                                next: 51211918,
+                            },
+                            {
+                                id: 51211918,
+                                content:
+                                    "Pourquoi faut-il que je me réveille juste au moment où vous balancez des vérités aussi cruelles... ? Donnez-moi de l’alcool...",
+                                npc: 700444,
+                                next: 51211919,
+                            },
+                            {
+                                id: 51211919,
+                                content: "De l’alcool, mon cul ! On t’a suivi pendant des heures sans retrouver ton fichu manuel !",
+                                npc: 700429,
+                                next: 51211920,
+                            },
+                            {
+                                id: 51211920,
+                                content:
+                                    "C’est pas un fichu manuel... Comment tu peux dire ça ? Ce livre est un trésor ! Je n’atteindrai jamais le niveau de son auteur !",
+                                npc: 700444,
+                                next: 51211921,
+                            },
+                            {
+                                id: 51211921,
+                                content:
+                                    "Tu m’énerves quand tu parles comme ça. Bon, on fait quoi maintenant ? Après toutes ces années, t’es toujours incapable d’apprendre ce bouquin par cœur ?",
+                                npc: 700429,
+                                next: 51211922,
+                            },
+                            {
+                                id: 51211922,
+                                content: "Par cœur... ? Je... j’y ai jamais pensé...",
+                                npc: 700444,
+                                next: 51211923,
+                            },
+                            {
+                                id: 51211923,
+                                content: "... Putain, mais quel abruti...",
+                                npc: 700429,
+                                next: 51211924,
+                            },
+                            {
+                                id: 51211924,
+                                content: "Pas — de — bagarre ! Pas — de — bagarre !",
+                                npc: 700449,
+                                next: 51211925,
+                            },
+                            {
+                                id: 51211925,
+                                content: "Maître ! Vous avez enfin dégrisé !",
+                                npc: 700447,
+                                next: 51211926,
+                            },
+                            {
+                                id: 51211926,
+                                content:
+                                    "Hein ? C’est pas l’ouvrier qui nous a demandé de l’aide tout à l’heure ? Qu’est-ce qu’il y a ? L’appareil est encore en panne ?",
+                                npc: 700449,
+                                next: 51211927,
+                            },
+                            {
+                                id: 51211927,
+                                content: "Non, non ! Je suis venu rendre quelque chose au Maître Zen d’une Nuit !",
+                                npc: 700447,
+                                next: 51211928,
+                            },
+                            {
+                                id: 51211928,
+                                content: "Rendre quoi ?",
+                                npc: 700429,
+                                next: 51211929,
+                            },
+                            {
+                                id: 51211929,
+                                content: "Ce livre-là.",
+                                npc: 700447,
+                                next: 51211930,
+                            },
+                            {
+                                id: 51211930,
+                                content: "L’ouvrier sort calmement un livre de sa veste avant de le tendre à Hugh.",
+                                next: 51211931,
+                            },
+                            {
+                                id: 51211931,
+                                content:
+                                    "Ce jour-là, vous étiez complètement ivre. Vous avez pris ce livre pour le glisser dessous en guise de cale, puis vous êtes reparti sans même vous retourner.",
+                                npc: 700447,
+                                next: 51211932,
+                            },
+                            {
+                                id: 51211932,
+                                content:
+                                    "Nous, on sait pas lire, alors on savait pas ce que c’était. On pensait que si vous l’aviez juste utilisé comme cale, ça devait pas être très important. Mais un collègue m’a dit tout à l’heure que puisque ça appartenait au Maître, il fallait quand même le rendre.",
+                                npc: 700447,
+                                next: 51211933,
+                            },
+                            {
+                                id: 51211933,
+                                content:
+                                    "Alors je vous le rapporte. Vous nous aidez tellement tous les jours... Vous devez avoir énormément de pression. Sinon, vous boiriez sûrement pas autant.",
+                                npc: 700447,
+                                next: 51211934,
+                            },
+                            {
+                                id: 51211934,
+                                content: "Lui ? Stressé ?",
+                                npc: 700429,
+                                next: 51211935,
+                            },
+                            {
+                                id: 51211935,
+                                content:
+                                    "Bouhouhou... Si, énormément... Merci... Ce livre est tellement important pour moi... C’est pratiquement... pratiquement toute ma vie...",
+                                npc: 700444,
+                                next: 51211936,
+                            },
+                            {
+                                id: 51211936,
+                                content:
+                                    "Hein ? Maître, pourquoi vous pleurez ? Si j’avais su que c’était si précieux, je l’aurais rapporté plus tôt !",
+                                npc: 700447,
+                                next: 51211937,
+                            },
+                            {
+                                id: 51211937,
+                                content:
+                                    "Non... c’est bon... Tant qu’il est revenu... Kroger ! Le manuel est retrouvé ! Je peux rentrer à l’union maintenant !",
+                                npc: 700444,
+                                next: 51211938,
+                            },
+                            {
+                                id: 51211938,
+                                content: "Merde... Tout ce bordel pour ça...",
+                                npc: 700429,
+                                next: 51211939,
+                            },
+                            {
+                                id: 51211939,
+                                content: "Peu importe, l’essentiel, c’est qu’on l’ait retrouvé !",
+                                npc: 700449,
+                                next: 51211940,
+                            },
+                            {
+                                id: 51211940,
+                                content:
+                                    "Je vais ramener cet abruti à l’union pour faire mon rapport au patron. Vous devriez retourner à vos affaires.",
+                                npc: 700429,
+                                next: 51211941,
+                            },
+                            {
+                                id: 51211941,
+                                content: "Très bien. Je retourne travailler alors. Kroger, transmettez mes salutations à monsieur Lorent.",
+                                npc: 700447,
+                                next: 51211942,
+                            },
+                            {
+                                id: 51211942,
+                                content: "Ouais, je lui dirai. Quant à vous deux...",
+                                npc: 700429,
+                                next: 51211943,
+                            },
+                            {
+                                id: 51211943,
+                                content: "Nous... ?",
+                                next: 51211944,
+                            },
+                            {
+                                id: 51211944,
+                                content: "Vous venez aussi.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040512,
+                name: "Retourner à l’Union du Tournevis",
+                desc: "L’affaire est finalement réglée. Ces événements vous ont également permis de mieux comprendre la situation des ouvriers des usines souterraines placées sous l’autorité d’Eisenbahn. Maintenant que Hugh et le manuel de réparation dont il dépend tant ont été retrouvés, la mission peut être considérée comme un succès complet. Cette fois, vous allez enfin pouvoir récupérer votre récompense, n’est-ce pas ?",
+                nodes: [
+                    {
+                        id: "17797807357515940604",
+                        type: "TalkNode",
+                        name: "触发门口对话",
+                        srId: 106301,
+                        pos: [-17836, 12365],
+                        next: ["17797813277975941798"],
+                        dialogues: [
+                            {
+                                id: 51212001,
+                                content: "Lorent, dis la vérité ! T’es qu’un lâche !",
+                                next: 51212002,
+                            },
+                            {
+                                id: 51212002,
+                                content:
+                                    "Maggie, on ne résout pas tout avec ses poings. Et puis, tu crois vraiment qu’on peut rivaliser avec lui ?",
+                                next: 51212003,
+                            },
+                            {
+                                id: 51212003,
+                                content: "Y a que les incapables qui disent ça !",
+                                next: 51212004,
+                            },
+                            {
+                                id: 51212004,
+                                content:
+                                    "Cette union, y a vraiment personne qui travaille ? Pourquoi vous passez votre temps à vous engueuler... ?",
+                                npc: 700449,
+                                next: 51212005,
+                            },
+                            {
+                                id: 51212005,
+                                content:
+                                    "... Peut-être que Snow et moi devrions éviter d’entrer. Après tout, notre mission est terminée...",
+                                npc: 100001,
+                                next: 51212006,
+                            },
+                            {
+                                id: 51212006,
+                                content:
+                                    "Arrêtez vos manières. On se connaît assez maintenant, non ? L’Union du Tournevis est toujours comme ça. Venez.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797813277975941798",
+                        type: "TalkNode",
+                        name: "玩家被推进屋内",
+                        srId: 106301,
+                        pos: [-17836, 12365],
+                        next: ["17797820469805943781"],
+                        dialogues: [
+                            {
+                                id: 51212007,
+                                content: "Avant même que vous puissiez réagir, Kroger vous pousse à l’intérieur.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797820469805943781",
+                        type: "TalkNode",
+                        name: "触发完成对话",
+                        srId: 106301,
+                        pos: [-17836, 12365],
+                        dialogues: [
+                            {
+                                id: 51212008,
+                                content: "Tant que tu ne te seras pas calmée, je ne dirai pas un mot de plus.",
+                                npc: 700428,
+                                next: 51212009,
+                            },
+                            {
+                                id: 51212009,
+                                content: "Toi... !",
+                                npc: 700442,
+                                next: 51212010,
+                            },
+                            {
+                                id: 51212010,
+                                content: "On tombe mal ?",
+                                npc: 700429,
+                                next: 51212011,
+                            },
+                            {
+                                id: 51212011,
+                                content: "Non. Vous arrivez au moment parfait !",
+                                npc: 700428,
+                                next: 51212012,
+                            },
+                            {
+                                id: 51212012,
+                                content: "Haha... Salut, Lorent...",
+                                npc: 700444,
+                                next: 51212013,
+                            },
+                            {
+                                id: 51212013,
+                                content:
+                                    "Hugh, te voilà revenu. Pourquoi t’es trempé et tu sens encore l’alcool ? Où est-ce que vous l’avez retrouvé ? Dans une cave ? Flottant dans un tonneau ?",
+                                npc: 700428,
+                                next: 51212014,
+                            },
+                            {
+                                id: 51212014,
+                                content:
+                                    "Pire que ça. À l’infirmerie. Les hommes d’Eisenbahn l’avaient ligoté parce qu’ils l’accusaient de vol.",
+                                npc: 700429,
+                                next: 51212015,
+                            },
+                            {
+                                id: 51212015,
+                                content:
+                                    "Tu vois ?! Qu’est-ce que je disais ?! Eisenbahn cherche clairement à nous provoquer ! D’abord ils nous volent notre livre de comptes, ensuite ils kidnappent Hugh, et après quoi ?",
+                                npc: 700442,
+                                next: 51212016,
+                            },
+                            {
+                                id: 51212016,
+                                content:
+                                    "Lorent, tu fais que reculer encore et encore ! Petit à petit, ses chiens infiltrent notre territoire ! Et quand il nous aura retiré notre dernière parcelle d’influence, il sera trop tard !",
+                                npc: 700442,
+                                next: 51212017,
+                            },
+                            {
+                                id: 51212017,
+                                content: "C’est pas ça ! J’y suis allé de moi-même, c’est pour ça qu’ils m’ont attrapé !",
+                                npc: 700444,
+                                next: 51212018,
+                            },
+                            {
+                                id: 51212018,
+                                content: "De toi-même ?! T’es devenu fou ?! L’alcool t’a définitivement grillé le cerveau ?",
+                                npc: 700442,
+                                next: 51212019,
+                            },
+                            {
+                                id: 51212019,
+                                content: "Non... Cette histoire... est compliquée à expliquer...",
+                                npc: 700444,
+                                next: 51212020,
+                            },
+                            {
+                                id: 51212020,
+                                content:
+                                    "On parlera de ça plus tard. J’ai aussi ramené nos {性别:sauveurs|sauveuses}. Sans {性别:eux|elles}, on n’aurait jamais retrouvé Hugh. On devrait plutôt réfléchir à comment fêter ça.",
+                                npc: 700429,
+                                next: 51212021,
+                            },
+                            {
+                                id: 51212021,
+                                content: "Exactement ! Après tout ce qu’on a fait pour vous, vous pourriez quand même nous gâter un peu !",
+                                npc: 700449,
+                                next: 51212022,
+                            },
+                            {
+                                id: 51212022,
+                                content:
+                                    "Merci infiniment. Sans vous, la situation déjà chaotique de l’Union du Tournevis serait devenue totalement ingérable. Après tous les problèmes que vous avez résolus ici, j’imagine que vous avez désormais une bonne idée de notre situation.",
+                                npc: 700428,
+                                next: 51212023,
+                            },
+                            {
+                                id: 51212023,
+                                content:
+                                    "Pour la célébration... pourquoi pas. Vous voulez rester manger avec nous ce soir ? Par contre, pas d’alcool. Sinon Kroger va encore devenir incontrôlable.",
+                                npc: 700428,
+                                next: 51212024,
+                            },
+                            {
+                                id: 51212024,
+                                content: "Nous avons encore des choses très importantes à faire. Nous ne pouvons pas rester dîner.",
+                                npc: 100001,
+                                next: 51212025,
+                            },
+                            {
+                                id: 51212025,
+                                content:
+                                    "Ah... oui... c’est vrai. Vous avez toujours dit que vous aviez d’autres affaires à régler et que vous ne pouviez pas rester longtemps à la gare.",
+                                npc: 700428,
+                                next: 51212026,
+                            },
+                            {
+                                id: 51212026,
+                                content:
+                                    "C’est presque un miracle d’avoir accompli autant de choses en si peu de temps. Si tous les ouvriers des gares travaillaient avec une telle efficacité, nous aurions déjà dépassé la capitale impériale pour devenir la première gare d’Hyperborea.",
+                                npc: 700428,
+                                next: 51212027,
+                            },
+                            {
+                                id: 51212027,
+                                content:
+                                    "Mais puisque vous ne souhaitez pas rester davantage, je ne vais pas essayer de vous retenir. Voici votre récompense, et...",
+                                npc: 700428,
+                                next: 51212028,
+                            },
+                            {
+                                id: 51212028,
+                                content: "Tiens. Prends ça.",
+                                npc: 700442,
+                                next: 51212029,
+                            },
+                            {
+                                id: 51212029,
+                                content:
+                                    "Maggie s’approche brusquement, sort un tournevis de sa poche et le pose solennellement dans votre main.",
+                                next: 51212030,
+                            },
+                            {
+                                id: 51212030,
+                                content:
+                                    "C’est le symbole le plus important de l’Union du Tournevis. Avec ça sur toi, n’importe quel membre de l’union dans cette gare obéira à tes demandes sans discuter.",
+                                npc: 700442,
+                                next: 51212031,
+                            },
+                            {
+                                id: 51212031,
+                                content: "Tss. Même moi j’en ai pas un !",
+                                npc: 700429,
+                                next: 51212032,
+                            },
+                            {
+                                id: 51212032,
+                                content:
+                                    "Chez nous, ce qui compte, c’est la loyauté ! Vous nous avez aidés énormément, et on n’a pas grand-chose à vous offrir. Alors on vous donne toute notre loyauté !",
+                                npc: 700442,
+                                next: 51212033,
+                            },
+                            {
+                                id: 51212033,
+                                content:
+                                    "Si un jour vous avez des problèmes, revenez simplement à la gare avec ce tournevis. Tous les membres de l’Union du Tournevis répondront présents. Il suffira d’un mot de votre part pour qu’on verse sang et sueur à vos côtés ! Alors ? Ça, c’est de la loyauté ou pas ?!",
+                                npc: 700442,
+                                next: 51212034,
+                            },
+                            {
+                                id: 51212034,
+                                content: "Merci. J’en prendrai soin.",
+                                npc: 100001,
+                                next: 51212035,
+                            },
+                            {
+                                id: 51212035,
+                                content: "Dans ce cas... permettez-nous de ne pas vous raccompagner davantage.",
+                                npc: 700428,
+                                next: 51212036,
+                            },
+                            {
+                                id: 51212036,
+                                content: "À la prochaine~ Revenez boire un verre avec moi un de ces jours~",
+                                npc: 700444,
+                                next: 51212037,
+                            },
+                            {
+                                id: 51212037,
+                                content: "Pour te regarder finir ivre mort et retourner en prison à l’infirmerie ? Hahaha !",
+                                npc: 700429,
+                                next: 51212038,
+                            },
+                            {
+                                id: 51212038,
+                                content:
+                                    "Tu... Kroger... Finalement, j’ai même pas besoin d’alcool pour avoir du courage. Je vais te refaire le portrait tout de suite !",
+                                npc: 700444,
+                                next: 51212039,
+                            },
+                            {
+                                id: 51212039,
+                                content: "Viens essayer avec tes bras de crevette !",
+                                npc: 700429,
+                                next: 51212040,
+                            },
+                            {
+                                id: 51212040,
+                                content:
+                                    "Derrière vous résonnent les voix des quatre membres de l’union qui se chamaillent encore. Le vacarme ressemble à une étrange symphonie faite de tournevis, de clés à molette et de bouteilles qui s’entrechoquent. C’est sur ce rythme chaotique que Snow et vous quittez finalement les lieux.",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040513,
+                name: "Secourir Hugh",
+                desc: "En suivant les indices, vous retrouvez l’infirmerie où Hugh est retenu. À l’intérieur, vous découvrez enfin le Maître Zen d’une Nuit, ligoté et bâillonné.",
+                nodes: [
+                    {
+                        id: "17811719221036155011",
+                        type: "TalkNode",
+                        name: "触发和二人对话",
+                        srId: 106001,
+                        pos: [-30780, 6480],
+                        dialogues: [
+                            {
+                                id: 51210901,
+                                content: "Haaah ! Enfin... enfin je peux parler !",
+                                npc: 700444,
+                                next: 51210902,
+                            },
+                            {
+                                id: 51210902,
+                                content:
+                                    "Le Maître Zen d’une Nuit ? Tu devrais plutôt t’appeler le Maître Zen de la Gueule de Bois ! Hahaha ! Alors ? Cette fois, t’as fini par te planter ?",
+                                npc: 700429,
+                                next: 51210903,
+                            },
+                            {
+                                id: 51210903,
+                                content: "Allez, raconte un peu. Combien de verres t’as descendus pour finir attaché dans une infirmerie ?",
+                                npc: 700429,
+                                next: 51210904,
+                            },
+                            {
+                                id: 51210904,
+                                content: "J’étais pas ivre... Comment j’aurais pu être ivre...",
+                                npc: 700444,
+                                next: 51210905,
+                            },
+                            {
+                                id: 51210905,
+                                content:
+                                    "Tu racontes n’importe quoi. Si t’étais pas bourré, t’aurais jamais fini ici. Enfin, si t’as pas envie d’en parler, tant pis. Viens juste avec moi à l’union. On réglera ça là-bas.",
+                                npc: 700429,
+                                next: 51210906,
+                            },
+                            {
+                                id: 51210906,
+                                content: "Non ! Hors de question ! Je peux pas retourner à l’union !",
+                                npc: 700444,
+                                next: 51210907,
+                            },
+                            {
+                                id: 51210907,
+                                content: "Hein ?",
+                                npc: 700429,
+                                next: 51210908,
+                            },
+                            {
+                                id: 51210908,
+                                content: "N’importe où sauf là-bas ! Mais pas à l’union !",
+                                npc: 700444,
+                                next: 51210909,
+                            },
+                            {
+                                id: 51210909,
+                                content:
+                                    "T’as le cerveau qui a pourri ici ou quoi ?! T’es quand même le Maître Zen d’une Nuit ! Tout le monde compte sur toi pour réparer les tas de ferraille caractériels de cette gare ! Si tu rentres pas, tu comptes aller où exactement ?",
+                                npc: 700429,
+                                next: 51210910,
+                            },
+                            {
+                                id: 51210910,
+                                content: "Je peux pas... Je... je...",
+                                npc: 700444,
+                                next: 51210911,
+                            },
+                            {
+                                id: 51210911,
+                                content: "Accouche, merde !",
+                                npc: 700429,
+                                next: 51210912,
+                            },
+                            {
+                                id: 51210912,
+                                content: "Snow, n’écoute pas cette expression vulgaire.",
+                                npc: 100001,
+                                next: 51210913,
+                            },
+                            {
+                                id: 51210913,
+                                content: "Trop tard, je l’ai entendue...",
+                                npc: 700449,
+                                next: 51210914,
+                            },
+                            {
+                                id: 51210914,
+                                content:
+                                    "Je... Je... Je suis pas un vrai Maître Zen d’une Nuit ! Tout ça, c’est du pipeau ! Des conneries ! Je sais rien faire ! Si je suis devenu le Maître Zen d’une Nuit, c’est uniquement grâce à ce livre... ce <I>Manuel de réparation</> !",
+                                npc: 700444,
+                                next: 51210915,
+                            },
+                            {
+                                id: 51210915,
+                                content: "Quoi ?!",
+                                next: 51210916,
+                            },
+                            {
+                                id: 51210916,
+                                content: "Tu n’es pas l’héritier des techniques du fondateur de l’Union du Tournevis ?",
+                                npc: 100001,
+                                next: 51210917,
+                            },
+                            {
+                                id: 51210917,
+                                content:
+                                    "L’héritier de ses techniques... ? Pas du tout ! Avant, y avait bien un vieux maître qui m’enseignait des choses, mais... j’ai jamais vraiment étudié sérieusement. Parce qu’un jour, j’ai trouvé un livre. Et dedans, y avait les solutions à presque tous les problèmes de réparation courants.",
+                                npc: 700444,
+                                next: 51210918,
+                            },
+                            {
+                                id: 51210918,
+                                content:
+                                    "Alors je me suis dit : « À quoi bon mémoriser toutes ces formules compliquées et ces calculs interminables ? » J’avais juste à ouvrir le livre, chercher le problème... et la solution apparaissait.",
+                                npc: 700444,
+                                next: 51210919,
+                            },
+                            {
+                                id: 51210919,
+                                content:
+                                    "Donc quand tout le monde disait que tu atteignais l’illumination en une nuit... en fait, tu rentrais juste chez toi pour consulter ton manuel ?",
+                                npc: 700449,
+                                next: 51210920,
+                            },
+                            {
+                                id: 51210920,
+                                content:
+                                    "Exactement ! À l’époque, on était plusieurs apprentis. Le vieux maître n’attendait pas grand-chose de moi. Mais... les autres sont tous partis. Et au final, le seul qui est resté, c’était moi... le pire de tous.",
+                                npc: 700444,
+                                next: 51210921,
+                            },
+                            {
+                                id: 51210921,
+                                content:
+                                    "Je pouvais pas avouer la vérité, alors j’ai inventé cette histoire ridicule de « Maître Zen d’une Nuit ». Je prétendais que chaque problème nécessitait une nuit entière de réflexion... alors qu’en réalité, je rentrais simplement vérifier dans le livre.",
+                                npc: 700444,
+                                next: 51210922,
+                            },
+                            {
+                                id: 51210922,
+                                content: "Je comprends mieux maintenant...",
+                                npc: 700449,
+                                next: 51210923,
+                            },
+                            {
+                                id: 51210923,
+                                content:
+                                    "Franchement, je m’en fiche que tu répares les machines avec un livre ou avec ton cerveau. Tant que ça marche, ça me va. Alors maintenant, tu rentres avec moi. Fin de l’histoire.",
+                                npc: 700429,
+                                next: 51210924,
+                            },
+                            {
+                                id: 51210924,
+                                content: "Non ! Impossible ! Je peux pas rentrer !",
+                                npc: 700444,
+                                next: 51210925,
+                            },
+                            {
+                                id: 51210925,
+                                content: "Mais POURQUOI au juste ?!",
+                                npc: 700429,
+                                next: 51210926,
+                            },
+                            {
+                                id: 51210926,
+                                content: "Attends une seconde, Kroger. Calme-toi.",
+                                npc: 100001,
+                                next: 51210927,
+                            },
+                            {
+                                id: 51210927,
+                                content: "Quoi ?",
+                                npc: 700429,
+                                next: 51210928,
+                            },
+                            {
+                                id: 51210928,
+                                content:
+                                    "Maître Zen d’une Nuit... ou plutôt monsieur Hugh. Ce que vous êtes venu voler dans l’infirmerie cette fois... ce ne serait pas justement ce fameux <I>Manuel de réparation</> ?",
+                                npc: 100001,
+                                next: 51210929,
+                            },
+                            {
+                                id: 51210929,
+                                content: "Haha... Hahaha... T’as vu juste...",
+                                npc: 700444,
+                                next: 51210931,
+                            },
+                            {
+                                id: 51210931,
+                                content: "On a fouillé partout ! Impossible de trouver ce fameux manuel !",
+                                npc: 700449,
+                                next: 51210932,
+                            },
+                            {
+                                id: 51210932,
+                                content:
+                                    "Quand je suis venu ici la première fois, j’ai déjà retourné toute l’infirmerie. Ce sale médecin hypocrite l’a forcément caché quelque part !",
+                                npc: 700444,
+                                next: 51210933,
+                            },
+                            {
+                                id: 51210933,
+                                content: "Et qu’est-ce qui te fait croire que c’est lui qui l’a pris ?",
+                                npc: 700429,
+                                next: 51210934,
+                            },
+                            {
+                                id: 51210934,
+                                content:
+                                    "Quand je me suis réveillé, j’étais déjà dans l’infirmerie. Ce type m’a demandé avec un grand sourire si je me sentais bien. J’ai pas osé répondre et je suis parti en vitesse. Mais une fois rentré chez moi... le livre avait disparu.",
+                                npc: 700444,
+                                next: 51210935,
+                            },
+                            {
+                                id: 51210935,
+                                content:
+                                    "Y avait que moi et les rats qui connaissaient la cachette. Et les rats lisent pas de manuels. Donc j’ai forcément emporté le livre avec moi pendant que j’étais bourré.",
+                                npc: 700444,
+                                next: 51210936,
+                            },
+                            {
+                                id: 51210936,
+                                content: "Et si quelqu’un te l’avait pris avant même que tu arrives jusqu’à l’infirmerie ?",
+                                npc: 100001,
+                                next: 51210937,
+                            },
+                            {
+                                id: 51210937,
+                                content:
+                                    "Oui ! Si le médecin avait trouvé un objet aussi important sur toi, il l’aurait sûrement remis à Eisenbahn !",
+                                npc: 700449,
+                                next: 51210938,
+                            },
+                            {
+                                id: 51210938,
+                                content:
+                                    "Et si Eisenbahn l’avait eu en sa possession, il ne t’aurait jamais simplement enfermé ici. Il t’aurait forcément interrogé sur l’origine du livre et tout le reste !",
+                                npc: 700449,
+                                next: 51210939,
+                            },
+                            {
+                                id: 51210939,
+                                content: "... Pas faux. Snow, pour une fois, tu viens de dire quelque chose d’intelligent.",
+                                npc: 100001,
+                                next: 51210940,
+                            },
+                            {
+                                id: 51210940,
+                                content: "Comment ça « pour une fois » ?! Je suis TOUJOURS intelligente !",
+                                npc: 700449,
+                                next: 51210941,
+                            },
+                            {
+                                id: 51210941,
+                                content:
+                                    "Ils ont raison. Sérieusement, tu comptes arrêter quand, cette habitude de foutre le chaos chaque fois que t’es bourré ?",
+                                npc: 700429,
+                                next: 51210942,
+                            },
+                            {
+                                id: 51210942,
+                                content:
+                                    "Et toi, t’as le culot de me dire ça ?! J’allais justement parler de toi ! Quand t’es ivre, tu passes ton temps à frapper les gens ! Et puis ce soir-là, moi... moi j’étais justement sorti pour te chercher...",
+                                npc: 700444,
+                                next: 51210943,
+                            },
+                            {
+                                id: 51210943,
+                                content: "Me chercher ? Pourquoi ?",
+                                npc: 700429,
+                                next: 51210944,
+                            },
+                            {
+                                id: 51210944,
+                                content:
+                                    "La dernière fois, tu m’avais laissé couvert de bleus... alors je voulais profiter d’être ivre pour...",
+                                npc: 700444,
+                                next: 51210945,
+                            },
+                            {
+                                id: 51210945,
+                                content: "Quoi ? Te venger pendant que t’étais bourré ?",
+                                npc: 700429,
+                                next: 51210946,
+                            },
+                            {
+                                id: 51210946,
+                                content:
+                                    "Peu importe ! T’es aussi responsable dans cette histoire ! Si t’étais venu boire avec moi ce soir-là, rien de tout ça serait arrivé !",
+                                npc: 700444,
+                                next: 51210947,
+                            },
+                            {
+                                id: 51210947,
+                                content:
+                                    "Putain, toi, t’as vraiment besoin qu’on te remette les idées en place, tu sais ça ? J’ai envie de—",
+                                npc: 700429,
+                                next: 51210948,
+                            },
+                            {
+                                id: 51210948,
+                                content: "Ça suffit...",
+                                npc: 100001,
+                                next: 51210949,
+                            },
+                            {
+                                id: 51210949,
+                                content:
+                                    "Hmm hmm~ En général, quand l’ambiance devient aussi explosive, Camilla plante directement un couteau dans la table pour empêcher les clients de se battre.",
+                                npc: 700449,
+                                next: 51210950,
+                            },
+                            {
+                                id: 51210950,
+                                content:
+                                    "La violence ne résoudra rien. Revenons au sujet principal. Si le médecin ne l’a pas caché... alors peut-être que le manuel a été perdu ailleurs ?",
+                                npc: 100001,
+                                next: 51210951,
+                            },
+                            {
+                                id: 51210951,
+                                content: "Aucune idée... Je me rappelle même plus où je suis allé ce soir-là. J’ai tout oublié...",
+                                npc: 700444,
+                                next: 51210952,
+                            },
+                            {
+                                id: 51210952,
+                                content: "J’ai une idée !",
+                                npc: 700449,
+                                next: 51210953,
+                            },
+                            {
+                                id: 51210953,
+                                content: "T’as intérêt à en avoir une bonne. Sinon je te cogne aussi.",
+                                npc: 700429,
+                                next: 51210954,
+                            },
+                            {
+                                id: 51210954,
+                                content:
+                                    "Tu peux même pas battre petit larbin~ Le Roi Démon est magnanime et ne règlera pas ses comptes aujourd’hui. Puisque monsieur Hugh a perdu son livre en étant ivre, pourquoi ne pas reconstituer ce qu’il a fait cette nuit-là ?",
+                                npc: 700449,
+                                next: 51210955,
+                            },
+                            {
+                                id: 51210955,
+                                content: "... Ça pourrait effectivement fonctionner.",
+                                npc: 100001,
+                                next: 51210956,
+                            },
+                            {
+                                id: 51210956,
+                                content:
+                                    "Mais je peux pas garantir que je me souviendrai de quoi que ce soit. Vous savez bien que j’ai une mémoire catastrophique.",
+                                npc: 700444,
+                                next: 51210957,
+                            },
+                            {
+                                id: 51210957,
+                                content: "On fera avec ce dont tu te rappelles ! On a pas d’autre piste de toute façon !",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 200406,
+        quests: [
+            {
+                id: 20040601,
+                name: "Se rendre devant le salon des nobles et parler à Snow",
+                desc: "Snow fulmine devant le salon des nobles. Quelque chose a visiblement dû se passer. Allez lui parler devant l’entrée du salon pour découvrir la raison de sa colère.",
+                nodes: [
+                    {
+                        id: "17804122730321542",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-31420, -5500],
+                        dialogues: [
+                            {
+                                id: 51213001,
+                                content: "{nickname} ! Ah, te voilà.",
+                                npc: 700450,
+                                next: 51213002,
+                            },
+                            {
+                                id: 51213002,
+                                content: "On dirait que le président du Salon du Sifflet est revenu. Il te cherche justement...",
+                                npc: 700450,
+                                options: [
+                                    {
+                                        id: 51213003,
+                                        content: "<I>Pourquoi Snow fait cette tête ?</>",
+                                        next: 51213004,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213004,
+                                content:
+                                    "Haha, à vrai dire, ça te concerne aussi. Tu sais, la photo que tu avais prise ? Celle qui a remporté le concours de photographie. Le président n’était pas là à ce moment-là, mais maintenant qu’il est revenu, il a envoyé des gens te chercher.",
+                                npc: 700457,
+                                next: 51213005,
+                            },
+                            {
+                                id: 51213005,
+                                content:
+                                    "Dès qu’elle a entendu que le président du salon voulait te voir, Snow s’est emballée. Elle disait qu’elle allait récupérer à ta place la récompense du grand gagnant du concours photo, puis elle s’est précipitée vers le salon des nobles, toute excitée.",
+                                npc: 700457,
+                                next: 51213006,
+                            },
+                            {
+                                id: 51213006,
+                                content:
+                                    "Et dès qu’on est entrés, on s’est fait rembarrer et jeter dehors comme des malpropres ! Hmpf ! Il m’a vraiment traitée comme une simple servante Luno qu’on appelle et qu’on renvoie quand ça l’arrange ! En plus, il parlait super mal !",
+                                npc: 700450,
+                                next: 51213007,
+                            },
+                            {
+                                id: 51213007,
+                                content:
+                                    "Et toi, qu’est-ce qui te fait rire ?! On s’est fait expulser tous les deux, je te signale ! T’es fier de ça peut-être ?",
+                                npc: 700450,
+                                next: 51213008,
+                            },
+                            {
+                                id: 51213008,
+                                content: "Le président n’a même pas ouvert les yeux pour regarder Snow avant de nous congédier.",
+                                npc: 700457,
+                                next: 51213009,
+                            },
+                            {
+                                id: 51213009,
+                                content:
+                                    "Le noble Luno, le Roi Démon, a été profondément blessé ! En tant que mes petits larbins, vous devriez prendre ma défense, non ? Ce type n’arrêtait pas de me poser des questions compliquées... J’avais tellement peur de dire une bêtise et de vous attirer des ennuis...",
+                                npc: 700450,
+                                next: 51213010,
+                            },
+                            {
+                                id: 51213010,
+                                content:
+                                    "Bouhouhou... Alors c’est aussi difficile que ça, d’avoir affaire à ce genre de gens ? Je comprends enfin ce que petit larbin endure tous les jours !",
+                                npc: 700450,
+                                options: [
+                                    {
+                                        id: 51213011,
+                                        content: "<I>Ceux qui endurent les plus grandes épreuves deviennent les plus grands des Luno !</>",
+                                        next: 51213012,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                    {
+                                        id: 51213017,
+                                        content: "<I>Tu as bien travaillé, Snow.</>",
+                                        next: 51213018,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213012,
+                                content: "Hein... ? Ça veut dire quoi, « les plus grands des Luno » ?",
+                                npc: 700450,
+                                next: 51213013,
+                            },
+                            {
+                                id: 51213018,
+                                content:
+                                    "Tu as fait beaucoup d’efforts ces derniers temps, Snow. Sa Majesté le Roi Démon a été exemplaire. Un véritable modèle pour nous autres petits larbins !",
+                                npc: 100001,
+                                next: 51213019,
+                            },
+                            {
+                                id: 51213013,
+                                content: "Que tu deviendras un Roi Démon encore plus grand, plus fort et plus incroyable.",
+                                npc: 100001,
+                                next: 51213014,
+                            },
+                            {
+                                id: 51213019,
+                                content:
+                                    "Évidemment ! Même en tant que servante, Snow est la cheffe des serviteurs ! Le grand Roi Démon des larbins !",
+                                npc: 700450,
+                                next: 51213020,
+                            },
+                            {
+                                id: 51213014,
+                                content:
+                                    "Attends... Donc souffrir fait grandir ?! Tu me mens encore ! Les Lunariens ne grandissent jamais !",
+                                npc: 700450,
+                                next: 51213015,
+                            },
+                            {
+                                id: 51213020,
+                                content:
+                                    "Bon, bon, Snow, calme-toi un peu. {nickname}, va d’abord au Salon du Sifflet. Ce monsieur Seaton attend depuis un moment. Snow et moi allons continuer à nous renseigner dans les environs. On se retrouve après.",
+                                npc: 700457,
+                                next: 51213021,
+                            },
+                            {
+                                id: 51213015,
+                                content:
+                                    "La puissance peut prendre bien des formes. Être forte mentalement, c’est aussi une forme de puissance. Le jour venu, davantage de Lunariens, ainsi que Charons et Solariens, te suivront sincèrement. Tout le monde se rassemblera autour de toi en criant : « Vive Sa Majesté le Roi Démon ! »...",
+                                npc: 100001,
+                                next: 51213016,
+                            },
+                            {
+                                id: 51213021,
+                                content: "D’accord.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51213016,
+                                content:
+                                    "... Petit larbin, tu dis vrai ? Hm... héhé... ça a l’air plutôt bien, en fait. Bon, alors je veux bien continuer à être ton maître encore un peu ! Je vais devenir encore plus puissante !",
+                                npc: 700450,
+                                next: 51213020,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040602,
+                name: "Entrer dans le salon des nobles et parler à Seaton",
+                desc: "Au milieu de ses plaintes et de ses explications, Snow vous apprend que Seaton vous attend au Salon du Sifflet depuis un bon moment. Rendez-vous sur place pour le retrouver.",
+                nodes: [
+                    {
+                        id: "17804128269361506229",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32190, -6990],
+                        dialogues: [
+                            {
+                                id: 51213023,
+                                content:
+                                    "Merci d’avoir patienté. Veuillez m’excuser, les négociations avec l’imprimerie ont pris plus de temps que prévu.",
+                                npc: 700460,
+                                next: 51213024,
+                            },
+                            {
+                                id: 51213024,
+                                content:
+                                    "Aujourd’hui, c’est normalement moi qui aurais dû vous accueillir et vous annoncer cette excellente nouvelle... Mais j’imagine que vous êtes déjà au courant ? Votre photo a remporté la première place du concours.",
+                                npc: 700460,
+                                next: 51213025,
+                            },
+                            {
+                                id: 51213025,
+                                content:
+                                    "À vrai dire, nous pensions initialement que, tant que vous montriez votre sincérité et votre enthousiasme en tant qu’admirateur du Chef de gare Eisenbahn, peu importait réellement la qualité de votre cliché : vous auriez été admis.",
+                                npc: 700460,
+                                next: 51213026,
+                            },
+                            {
+                                id: 51213026,
+                                content:
+                                    "Mais qui aurait cru... Vous n’êtes pas seulement {性别:un homme|une femme} d’une élégance et d’une noblesse exemplaires, {性别:porté|portée} par une passion ardente et une volonté inébranlable ; vous possédez également un talent extraordinaire. Une seule photographie, et vous êtes {性别:parvenu|parvenue} à capturer à la fois une histoire et un véritable sentiment de mouvement... Remarquable.",
+                                npc: 700460,
+                                next: 51213027,
+                            },
+                            {
+                                id: 51213027,
+                                content:
+                                    "Moi, Seaton Brutus, président du Salon du Sifflet, vous invite officiellement à rejoindre notre cercle, à devenir l’un des partisans du Chef de gare Eisenbahn ainsi qu’un membre œuvrant pour l’entraide au sein de la Gare des Cent-Fleurs.",
+                                npc: 700460,
+                                next: 51213028,
+                            },
+                            {
+                                id: 51213028,
+                                content: "Puis-je connaître... votre réponse ?",
+                                npc: 700460,
+                                next: 51213029,
+                            },
+                            {
+                                id: 51213029,
+                                content:
+                                    "<I>C’est complètement exagéré... J’ai vraiment pas réfléchi autant en prenant cette photo. Donc c’est ça, le fameux « les gens raffinés trouveront eux-mêmes une signification à ton œuvre » ?</>",
+                                npc: 100001,
+                                next: 51213030,
+                            },
+                            {
+                                id: 51213030,
+                                content: "Hum... C’est un honneur.",
+                                npc: 100001,
+                                next: 51213031,
+                            },
+                            {
+                                id: 51213031,
+                                content:
+                                    "Dans ce cas, bienvenue parmi les membres du Salon du Sifflet. Œuvrons ensemble pour nos idéaux communs.",
+                                npc: 700460,
+                                next: 51213032,
+                            },
+                            {
+                                id: 51213032,
+                                content:
+                                    "À propos, les deux serviteurs qui vous accompagnent d’ordinaire ne sont pas venus aujourd’hui. Nous avions préparé trois modestes présents ; puisqu’ils sont absents, je vous serais reconnaissant de bien vouloir récupérer leur part pour eux.",
+                                npc: 700460,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040603,
+                name: "Parler de nouveau à Seaton",
+                desc: "Seaton couvre votre photographie d’éloges presque excessifs et vous remet lui-même la récompense réservée au grand gagnant du concours. Mais il semble avoir une autre faveur à vous demander. Parlez-lui de nouveau afin de découvrir ce qu’il attend de vous.",
+                nodes: [
+                    {
+                        id: "17804129519603010143",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32190, -6990],
+                        dialogues: [
+                            {
+                                id: 51213034,
+                                content: "Merci beaucoup.",
+                                npc: 100001,
+                                next: 51213035,
+                            },
+                            {
+                                id: 51213035,
+                                content: "Nul besoin de me remercier. Il s’agit simplement de la récompense que vous méritez.",
+                                npc: 700460,
+                                next: 51213036,
+                            },
+                            {
+                                id: 51213036,
+                                content:
+                                    "À présent... j’aurais également une faveur à vous demander. Accepteriez-vous de prendre un peu de votre temps pour aller vérifier l’avancement des préparatifs de la célébration ?",
+                                npc: 700460,
+                                next: 51213037,
+                            },
+                            {
+                                id: 51213037,
+                                content:
+                                    "Oh, pardon. Vous venez tout juste d’intégrer le salon, vous ignorez probablement encore les détails de cette fête. Je vais vous expliquer brièvement : rien de bien compliqué, il s’agit simplement d’une célébration organisée en l’honneur du chef de gare Eisenbahn.",
+                                npc: 700460,
+                                next: 51213038,
+                            },
+                            {
+                                id: 51213038,
+                                content:
+                                    "La Gare des Cent-Fleurs est particulièrement animée ces derniers temps, n’est-ce pas ? Vous avez sûrement déjà entendu dire que nous approchons du dixième anniversaire de la prise de fonction du chef de gare Eisenbahn.",
+                                npc: 700460,
+                                next: 51213039,
+                            },
+                            {
+                                id: 51213039,
+                                content:
+                                    "Ce n’est pas seulement l’anniversaire de la renaissance de la Gare des Cent-Fleurs ; c’est aussi celui du chef de gare Eisenbahn lui-même. Le Salon du Sifflet organise donc une grande célébration afin d’inviter tous les habitants de la gare à y participer.",
+                                npc: 700460,
+                                next: 51213040,
+                            },
+                            {
+                                id: 51213040,
+                                content: "Et c’est précisément lié à la tâche que j’aimerais vous confier.",
+                                npc: 700460,
+                                options: [
+                                    {
+                                        id: 51213041,
+                                        content: "<I>Pourquoi moi ?</>",
+                                        next: 51213042,
+                                    },
+                                    {
+                                        id: 51213045,
+                                        content: "<I>D’accord, je vais aller voir.</>",
+                                        next: 51213046,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213042,
+                                content:
+                                    "Les autres membres sont déjà occupés avec les activités préparatoires de la célébration. Quant à moi, je dois encore m’entretenir avec les responsables de l’imprimerie... Je suis donc légèrement pris moi aussi.",
+                                npc: 700460,
+                                next: 51213043,
+                            },
+                            {
+                                id: 51213046,
+                                content:
+                                    "Je vous remercie. Veuillez me pardonner : vous venez à peine d’intégrer le salon et je vous envoie déjà courir partout.",
+                                npc: 700460,
+                                options: [
+                                    {
+                                        id: 51213048,
+                                        content: "<I>Quelles sortes d’activités ?</>",
+                                        next: 51213049,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213043,
+                                content:
+                                    "La photographie qui a remporté le grand prix sera utilisée comme illustration principale pour les affiches promotionnelles de la célébration. Toute la Gare des Cent-Fleurs pourra admirer votre œuvre.",
+                                npc: 700460,
+                                options: [
+                                    {
+                                        id: 51213048,
+                                        content: "<I>Quelles sortes d’activités ?</>",
+                                        next: 51213049,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213049,
+                                content:
+                                    "Principalement des quiz de connaissances, une loterie thématique et une pièce de théâtre à thème. Les deux premières activités ont déjà commencé depuis quelque temps ; la dernière est probablement encore en répétition.",
+                                npc: 700460,
+                                next: 51213050,
+                            },
+                            {
+                                id: 51213050,
+                                content:
+                                    "Nombre de nos membres ont vu des centaines d’opéras et rêvent eux-mêmes de monter sur scène. Mais une fois devant le public, ils deviennent incapables d’aligner trois mots correctement. J’ai même dû engager des acteurs professionnels pour les entraîner.",
+                                npc: 700460,
+                                next: 51213051,
+                            },
+                            {
+                                id: 51213051,
+                                content:
+                                    "Le quiz et la loterie sont organisés par la même personne ; vous la trouverez dans le hall principal de la gare. Quant aux répétitions de la pièce, elles doivent avoir lieu près de la passerelle.",
+                                npc: 700460,
+                                next: 51213052,
+                            },
+                            {
+                                id: 51213052,
+                                content:
+                                    "Et pour le temps qu’il nous reste... pourquoi ne pas apprendre à mieux nous connaître ? En tant que président du Salon du Sifflet, je dois apprendre à connaître chacun de mes membres.",
+                                npc: 700460,
+                                next: 51213053,
+                            },
+                            {
+                                id: 51213053,
+                                content: "Ne soyez pas {性别:nerveux|nerveuse}. Nous allons simplement discuter un peu.",
+                                npc: 700460,
+                                next: 51213054,
+                            },
+                            {
+                                id: 51213054,
+                                content:
+                                    "Le président vous entraîne alors dans une longue conversation couvrant toutes sortes de sujets et d’idéaux... De la gestion de Givrelac à l’ascension du chef de gare Eisenbahn, il semble capable de parler de tout.",
+                                next: 51213055,
+                            },
+                            {
+                                id: 51213055,
+                                content:
+                                    "Cependant, chaque fois que vous essayez d’obtenir des informations plus précises ou plus personnelles concernant Eisenbahn, Seaton détourne systématiquement la conversation, affichant une légère impatience difficile à dissimuler.",
+                                next: 51213056,
+                            },
+                            {
+                                id: 51213056,
+                                content:
+                                    "Il ne cesse de réajuster son col, de se toucher le nez ou de faire tourner son stylo entre ses doigts. Ses gestes nerveux et incessants donnent l’impression qu’il peine à rester concentré, son expression demeurant constamment vague et détachée.",
+                                next: 51213057,
+                            },
+                            {
+                                id: 51213057,
+                                content:
+                                    "Finalement, après un temps impossible à évaluer, Seaton prend congé. Vous réalisez alors que cet homme ne semble pas vouer un respect si profond à Eisenbahn... Du moins, son admiration et son enthousiasme sont loin d’égaler ceux de votre précédent guide, le photographe Toran.",
+                                next: 51213058,
+                            },
+                            {
+                                id: 51213058,
+                                content:
+                                    "<I>Il vient de me parler pendant une éternité... Avec tout ce temps perdu, il aurait déjà pu aller inspecter les préparatifs lui-même.</>",
+                                npc: 100001,
+                                next: 51213059,
+                            },
+                            {
+                                id: 51213059,
+                                content: "Il est presque l’heure de mon rendez-vous avec le responsable... Je vous laisse donc la suite.",
+                                npc: 700460,
+                                next: 51213060,
+                            },
+                            {
+                                id: 51213060,
+                                content:
+                                    "Au fait, prenez ceci. Vous êtes encore un nouveau visage ; il est normal que certains ne vous reconnaissent pas. Avec ça, personne ne vous empêchera de passer.",
+                                npc: 700460,
+                                next: 51213061,
+                            },
+                            {
+                                id: 51213061,
+                                content: "Bon courage, jeune recrue. J’attends de bonnes nouvelles de votre part.",
+                                npc: 700460,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040604,
+                name: "Quitter le salon des nobles et faire le point avec vos compagnons",
+                desc: "Derrière cette généreuse récompense se cache une nouvelle requête. Seaton souhaite que vous le représentiez en allant inspecter les préparatifs du dixième anniversaire de la prise de fonction du chef de gare Eisenbahn. Quittez le salon des nobles et discutez de cette nouvelle mission avec vos compagnons.",
+                nodes: [
+                    {
+                        id: "17804137225865014740",
+                        type: "TalkNode",
+                        name: "开车",
+                        srId: 106001,
+                        pos: [-31420, -5500],
+                        dialogues: [
+                            {
+                                id: 51213063,
+                                content:
+                                    "<I>Je me demande comment s’en sortent Snow et l’Étranger... Allons d’abord échanger nos informations.</>",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804136867165013967",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-31420, -5500],
+                        dialogues: [
+                            {
+                                id: 51213065,
+                                content:
+                                    "Te voilà enfin. Ouf... Snow et moi avons profité de ce temps pour nous renseigner un peu. La gare est particulièrement animée ces derniers jours. Ils organisent des activités... assez étranges.",
+                                npc: 700457,
+                                next: 51213066,
+                            },
+                            {
+                                id: 51213066,
+                                content: "Oui, oui ! Ils ont même essayé de me refiler un tract !",
+                                npc: 700450,
+                                next: 51213067,
+                            },
+                            {
+                                id: 51213067,
+                                content: "Vous expliquez à Snow et à l’Étranger la requête de Seaton.",
+                                next: 51213068,
+                            },
+                            {
+                                id: 51213068,
+                                content:
+                                    "Le quiz et la loterie thématique ? Oui, on les a vus aussi. Beaucoup de gens se dirigent vers le hall principal.",
+                                npc: 700457,
+                                next: 51213069,
+                            },
+                            {
+                                id: 51213069,
+                                content:
+                                    "Il y avait même des familles entières qui se dépêchaient d’y aller. Apparemment, les participants peuvent recevoir des conserves gratuites.",
+                                npc: 700457,
+                                next: 51213070,
+                            },
+                            {
+                                id: 51213070,
+                                content: "Gratuites ?! Alors allons-en chercher aussi !",
+                                npc: 700450,
+                                next: 51213071,
+                            },
+                            {
+                                id: 51213071,
+                                content:
+                                    "Hé, notre objectif est d’inspecter les préparatifs de la célébration. Ne perds pas de vue l’essentiel !",
+                                npc: 700457,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040605,
+                name: "Se rendre dans le hall de la gare et parler à l’organisateur",
+                desc: "Pendant votre entretien avec Seaton, Snow et l’Étranger ont eux aussi recueilli quelques informations sur la célébration. Il paraît que de délicieux Délices Yum seront distribués aux participants. Suivez ces informations pour retrouver l’organisateur et tentez de remporter quelques Délices Yum.",
+                nodes: [
+                    {
+                        id: "17804154220376519690",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-12980, -3070],
+                        dialogues: [
+                            {
+                                id: 51213073,
+                                content: "Vous venez participer au quiz sur le chef de gare Eisenbahn ou à la loterie ?",
+                                npc: 700454,
+                                options: [
+                                    {
+                                        id: 51213074,
+                                        content: "<I>Ni l’un ni l’autre.</>",
+                                        next: 51213075,
+                                    },
+                                    {
+                                        id: 51213076,
+                                        content: "<I>On participe aux deux !</>",
+                                        next: 51213077,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213075,
+                                content:
+                                    "Alors qu’est-ce que vous faites ici ? Vous seriez pas des ennemis du chef de gare Eisenbahn venus saboter l’événement, par hasard ? Je vous préviens : tenez-vous tranquilles ces temps-ci. On a pas le temps de se battre avec vous, on est occupés avec la célébration.",
+                                npc: 700454,
+                                next: 51213078,
+                            },
+                            {
+                                id: 51213077,
+                                content:
+                                    "Dans ce cas, veuillez faire la queue derrière. Avec un peu de chance, ce sera votre tour dans deux ou trois heures.",
+                                npc: 700454,
+                                next: 51213078,
+                            },
+                            {
+                                id: 51213078,
+                                content:
+                                    "Bon... En réalité, votre président m’a demandé de venir vérifier l’avancement des préparatifs. Voici son insigne.",
+                                npc: 100001,
+                                next: 51213079,
+                            },
+                            {
+                                id: 51213079,
+                                content:
+                                    "Oh ! C’est le président qui vous envoie ? Je vous ai jamais vu avant. Vous êtes {性别:nouveau|nouvelle} ?",
+                                npc: 700454,
+                                next: 51213080,
+                            },
+                            {
+                                id: 51213080,
+                                content: "Oui. J’ai officiellement rejoint le salon aujourd’hui.",
+                                npc: 100001,
+                                next: 51213081,
+                            },
+                            {
+                                id: 51213081,
+                                content:
+                                    "Je vois... Alors le président vous accorde beaucoup d’importance. Un nouveau membre ordinaire n’aurait jamais accès à une tâche aussi centrale.",
+                                npc: 700454,
+                                next: 51213082,
+                            },
+                            {
+                                id: 51213082,
+                                content: "<I>Centrale... ? C’est juste une activité préparatoire pour une fête, non ?</>",
+                                npc: 100001,
+                                next: 51213083,
+                            },
+                            {
+                                id: 51213083,
+                                content:
+                                    "Le président vous fait confiance, alors moi aussi. Concernant les activités : tout se déroule parfaitement. Les messages que nous voulions transmettre à travers le quiz se propagent déjà.",
+                                npc: 700454,
+                                next: 51213084,
+                            },
+                            {
+                                id: 51213084,
+                                content:
+                                    "Comme prévu, ça attire énormément de curieux. Et ce sont précisément eux qui diffusent les informations le plus rapidement. Tout se passe exactement comme le président l’avait prévu.",
+                                npc: 700454,
+                                next: 51213085,
+                            },
+                            {
+                                id: 51213085,
+                                content:
+                                    "Très bientôt, toute la Gare des Cent-Fleurs parlera sûrement du « chef de gare Eisenbahn travaillant sans relâche jusque tard dans la nuit pour accueillir des marchands étrangers »... Et cela grâce à votre photographie, qui nous est utile dans bien des domaines.",
+                                npc: 700454,
+                                next: 51213086,
+                            },
+                            {
+                                id: 51213086,
+                                content: "Même ça, vous êtes déjà au courant ? Les informations circulent vite ici.",
+                                npc: 100001,
+                                next: 51213087,
+                            },
+                            {
+                                id: 51213087,
+                                content:
+                                    "Évidemment. Je connaissais pas votre visage, mais dès que vous avez parlé du nouveau membre {性别:favorisé|favorisée} par le président, j’ai compris.",
+                                npc: 700454,
+                                next: 51213088,
+                            },
+                            {
+                                id: 51213088,
+                                content:
+                                    "Votre photo était vraiment exceptionnelle ! Continuez comme ça. Prenez-en d’autres dès que vous en avez l’occasion !",
+                                npc: 700454,
+                                next: 51213089,
+                            },
+                            {
+                                id: 51213089,
+                                content: "Euh... les con-conserves...",
+                                npc: 100402,
+                                next: 51213090,
+                            },
+                            {
+                                id: 51213090,
+                                content:
+                                    "Ah, vous voulez ça aussi ? Très bien, très bien. Tenez, prenez cette caisse entière. Et n’oubliez pas de dire du bien de moi au président. Dites-lui que je travaille sérieusement ; après le succès de la célébration, j’aimerais bien recevoir une plus grosse part !",
+                                npc: 700454,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040606,
+                name: "Discuter des prochaines étapes avec Snow et l’Étranger",
+                desc: "L’organisateur vous réserve une récompense bien plus généreuse que prévu. Décidément, avoir de bonnes relations ouvre bien des portes. Discutez avec Snow et l’Étranger afin de décider de la suite.",
+                nodes: [
+                    {
+                        id: "17804164294298024034",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-31420, -5500],
+                        dialogues: [
+                            {
+                                id: 51213092,
+                                content: "Comment il a fini par te donner autant ?! C’est carrément une caisse entière !",
+                                npc: 700457,
+                                next: 51213093,
+                            },
+                            {
+                                id: 51213093,
+                                content:
+                                    "C’est donc ça, le pouvoir des relations ?! Le fameux privilège des gens bien entourés ?! Petit larbin n’a quasiment rien fait, il a juste discuté un peu avec lui, et hop, il lui a donné toutes les conserves ! Ouaah... Petit larbin, t’es vraiment {性别:impressionnant|impressionnante} !",
+                                npc: 700450,
+                                next: 51213094,
+                            },
+                            {
+                                id: 51213094,
+                                content:
+                                    "Une fois rentrés, je vais demander à Camilla d’essayer toutes les recettes possibles ! Je vais me régaler~",
+                                npc: 700450,
+                                next: 51213095,
+                            },
+                            {
+                                id: 51213095,
+                                content: "Tu vas en manger deux bouchées avant d’en avoir marre et réclamer autre chose.",
+                                npc: 700457,
+                                next: 51213096,
+                            },
+                            {
+                                id: 51213096,
+                                content:
+                                    "Avec Snow qui faisait l’idiote, j’avais presque oublié... Il y avait pas une autre activité ? Quelque chose à propos d’une répétition de théâtre...",
+                                npc: 700457,
+                                next: 51213097,
+                            },
+                            {
+                                id: 51213097,
+                                content: "Seaton a dit que ça se déroulait près de la passerelle.",
+                                npc: 100001,
+                                next: 51213098,
+                            },
+                            {
+                                id: 51213098,
+                                content:
+                                    "Alors allons vite chercher. Si on arrive trop tard et qu’ils terminent leur répétition, on risque de manquer quelque chose.",
+                                npc: 700457,
+                                next: 51213099,
+                            },
+                            {
+                                id: 51213099,
+                                content:
+                                    "J’ai entendu votre conversation avec l’employé tout à l’heure. Je pense qu’il vaut mieux les prendre par surprise avant qu’ils aient le temps de cacher leurs failles.",
+                                npc: 700457,
+                                next: 51213100,
+                            },
+                            {
+                                id: 51213100,
+                                content:
+                                    "Écoutons attentivement les alentours. Si une répétition est en cours, il y aura forcément du bruit. Un espace fermé avec de la musique... ça doit être là-bas.",
+                                npc: 700457,
+                                next: 51213101,
+                            },
+                            {
+                                id: 51213101,
+                                content:
+                                    "Cela dit, les pièces sont plutôt bien insonorisées ici. Depuis l’extérieur, on entend mal ce qui se passe à l’intérieur. Faites attention à ne pas vous tromper de salle.",
+                                npc: 700457,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040607,
+                name: "Rechercher le lieu exact des répétitions sur la passerelle",
+                desc: "Seaton ne vous a donné aucune indication précise concernant l’emplacement de l’activité théâtrale. Il va sans doute falloir partir à sa recherche près de la passerelle.",
+                nodes: [
+                    {
+                        id: "17809025659893170",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        next: ["17809026938035217", "17809026938035216"],
+                        dialogues: [
+                            {
+                                id: 51213106,
+                                content:
+                                    "Et alors ?! J’aime la nourriture des roturiers, et alors ?! Si tu trouves ça sale quand je mange ce genre de choses, alors ne m’embrasse pas !",
+                                npc: 700455,
+                                next: 51213107,
+                            },
+                            {
+                                id: 51213107,
+                                content:
+                                    "Je t’interdis pas d’en manger ! Mais tu pourrais au moins te brosser les dents après ? Franchement, c’est vra—",
+                                npc: 700456,
+                                next: 51213108,
+                            },
+                            {
+                                id: 51213108,
+                                content: "... Qui êtes-vous ?",
+                                npc: 700455,
+                                next: 51213109,
+                            },
+                            {
+                                id: 51213109,
+                                content: "Veuillez nous excuser pour l’interruption.",
+                                npc: 700457,
+                                next: 51213110,
+                            },
+                            {
+                                id: 51213110,
+                                content:
+                                    "L’Étranger plaque aussitôt une main sur la bouche de Snow avant de l’éloigner du couple en pleine dispute.",
+                                next: 51213111,
+                            },
+                            {
+                                id: 51213111,
+                                content:
+                                    "Se disputer pour un truc pareil... Enfin bon, après avoir mangé, il faut quand même se brosser les dents, tu sais ? Si un jour tu veux séduire une fille...",
+                                npc: 700450,
+                                next: 51213112,
+                            },
+                            {
+                                id: 51213112,
+                                content: "Stop, stop, stop ! Inutile de parler de choses qui n’arriveront probablement jamais.",
+                                npc: 700457,
+                                next: 51213113,
+                            },
+                            {
+                                id: 51213113,
+                                content:
+                                    "Continuons à chercher. Au moins, ça nous fait déjà une mauvaise piste en moins. Clairement, ce n’était pas ici.",
+                                npc: 700457,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809025659893171",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        dialogues: [
+                            {
+                                id: 51213103,
+                                content: "Ouaah, il y a du bruit devant ! Vite, allons voir—",
+                                npc: 700450,
+                                next: 51213104,
+                            },
+                            {
+                                id: 51213104,
+                                content: "Attends, Snow. Ça, c’est clairement pas—",
+                                npc: 700457,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809026938035217",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        next: ["17809027454876886"],
+                        dialogues: [
+                            {
+                                id: 51213119,
+                                content: "Bonjour~ Snow arrive~ L’Étranger et {nickname} sont là aussi~",
+                                npc: 700450,
+                                next: 51213121,
+                            },
+                            {
+                                id: 51213121,
+                                content:
+                                    "Alors la musique venait de ça... Ce n’est pas ici non plus. Bon, allons-y— et Snow, ne touche pas à ça.",
+                                npc: 700457,
+                                next: 51213122,
+                            },
+                            {
+                                id: 51213122,
+                                content:
+                                    "Mais elle est posée par terre ! Ça veut sûrement dire que personne n’en veut, non ? Camilla disait justement qu’elle voulait remplacer sa radio... Si on la ramène, elle sera sûrement super contente ! Elle me félicitera même peut-être !",
+                                npc: 700450,
+                                next: 51213123,
+                            },
+                            {
+                                id: 51213123,
+                                content:
+                                    "Je doute fortement que les Asphodèles soient trop pauvres pour remplacer une radio. Camilla a simplement l’habitude d’économiser. Et puis offrir des objets dont les gens ne veulent plus, c’est pas vraiment une bonne idée, Snow.",
+                                npc: 700457,
+                                next: 51213124,
+                            },
+                            {
+                                id: 51213124,
+                                content:
+                                    "Sans compter que ça pourrait être un piège. Une radio cachée derrière un panneau d’affichage, c’est déjà suffisamment suspect.",
+                                npc: 700457,
+                                next: 51213125,
+                            },
+                            {
+                                id: 51213125,
+                                content:
+                                    "D’accord... Mais c’est tellement joli et raffiné... Je pourrais m’en acheter une aussi, un jour ?",
+                                npc: 700450,
+                                next: 51213126,
+                            },
+                            {
+                                id: 51213126,
+                                content:
+                                    "Ça, il faudra demander à {nickname}. Moi, j’ai pas mon mot à dire. Alors, {nickname} ? Tu vas en acheter une à Snow ?",
+                                npc: 700457,
+                                options: [
+                                    {
+                                        id: 51213127,
+                                        content: "<I>Puisque Snow l’aime autant, on lui en achètera une plus tard.</>",
+                                        next: 51213128,
+                                    },
+                                    {
+                                        id: 51213129,
+                                        content: "<I>Et pourquoi ce ne serait pas à Snow de m’en acheter une ?</>",
+                                        next: 51213130,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213128,
+                                content: "Petit larbin... Je savais bien que c’était toi {性别:le plus gentil|la plus gentille} avec moi.",
+                                npc: 700450,
+                                next: 51213133,
+                            },
+                            {
+                                id: 51213130,
+                                content:
+                                    "M-Mais... Je n’ai pas d’argent... Et puis tu as encore tous ces chèques sur toi ! Avec autant d’argent, il en reste forcément plein.",
+                                npc: 700450,
+                                next: 51213131,
+                            },
+                            {
+                                id: 51213133,
+                                content: "Bon... Ce n’était pas cette salle non plus. Continuons à chercher.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51213131,
+                                content:
+                                    "Mais tu es mon supérieur et je suis {性别:ton subordonné|ta subordonnée}. Je suis ton petit larbin. Depuis quand un Roi Démon demande-t-il des cadeaux à ses serviteurs ? Ce devrait plutôt être toi qui me récompenses, non ?",
+                                npc: 100001,
+                                next: 51213132,
+                            },
+                            {
+                                id: 51213132,
+                                content:
+                                    "Uuuh... C’est pas faux, en fait. Alors je vais travailler dur et gagner plein d’argent pour pouvoir m’occuper de mon petit larbin !",
+                                npc: 700450,
+                                next: 51213133,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809026938035216",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        dialogues: [
+                            {
+                                id: 51213115,
+                                content: "Il y a quelqu’un ? Excusez-nous, nous cherchons la troupe qui répète dans les environs...",
+                                npc: 700457,
+                                next: 51213117,
+                            },
+                            {
+                                id: 51213117,
+                                content:
+                                    "Étrange... On entend pourtant clairement de la musique par ici. J’ai parlé trop doucement, peut-être ?",
+                                npc: 700457,
+                                next: 51213118,
+                            },
+                            {
+                                id: 51213118,
+                                content: "Alors allons voir directement !",
+                                npc: 700450,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809027454876886",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        next: ["1782198002031986"],
+                        dialogues: [
+                            {
+                                id: 51213135,
+                                content:
+                                    "Cette fois, je pense que c’est la bonne. {nickname}, passe devant et va jeter un œil. Snow et moi, en tant que tes petits larbins, te soutiendrons jusqu’au bout.",
+                                npc: 700457,
+                                next: 51213136,
+                            },
+                            {
+                                id: 51213136,
+                                content:
+                                    "Exactement ! C’est la première fois que tu as des petits larbins, pas vrai ? Tu stresses ? Je peux te transmettre un peu de mon immense expérience, si tu veux.",
+                                npc: 700450,
+                                next: 51213137,
+                            },
+                            {
+                                id: 51213137,
+                                content: "D’abord, il faut lever la tête, bomber le torse et regarder les gens de haut avec le menton—",
+                                npc: 700450,
+                                next: 51213138,
+                            },
+                            {
+                                id: 51213138,
+                                content:
+                                    "Donc c’est vraiment comme ça que tu te vois au quotidien ? Désolé, désolé, mais nous sommes beaucoup trop grands pour apercevoir ton menton. On voit surtout tes cornes.",
+                                npc: 700457,
+                                next: 51213139,
+                            },
+                            {
+                                id: 51213139,
+                                content:
+                                    "... Quelle impolitesse ! {nickname} a des choses importantes à faire. Je vais laisser passer ça pour aujourd’hui !",
+                                npc: 700450,
+                                next: 51213140,
+                            },
+                            {
+                                id: 51213140,
+                                content:
+                                    "C’est rare de te voir devenir sérieuse... Bon, vas-y, {nickname}. Puisqu’on joue la comédie, fais attention à ne pas te trahir.",
+                                npc: 700457,
+                                next: 51213142,
+                            },
+                            {
+                                id: 51213142,
+                                content:
+                                    "Regardez donc... Un ennemi vient de pénétrer au cœur de la tempête ardente. Les chants triomphants résonnent depuis des horizons lointains ; le puissant sifflement des locomotives nous appelle—",
+                                npc: 700458,
+                                next: 51213143,
+                            },
+                            {
+                                id: 51213143,
+                                content: "À une représentation tonitruante !",
+                                npc: 700458,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1782198002031986",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        dialogues: [
+                            {
+                                id: 51213145,
+                                content: "Oh ? Tu te débrouilles plutôt bien. Mais même comme ça, je peux pas te laisser passer.",
+                                npc: 700458,
+                                next: 51213146,
+                            },
+                            {
+                                id: 51213146,
+                                content:
+                                    "Franchement, je me demande toujours où vous, les fans, trouvez toutes ces informations... Tiens, une dédicace rien que pour toi. Maintenant, file vite. Aujourd’hui, la troupe n’est vraiment pas ouverte aux visiteurs. Nous avons quelque chose de très important à préparer.",
+                                npc: 700458,
+                                next: 51213147,
+                            },
+                            {
+                                id: 51213147,
+                                content: "...",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 51213148,
+                                        content: "<I>Lui tendre votre propre signature</>",
+                                        next: 51213149,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                    {
+                                        id: 51213153,
+                                        content: "<I>Lui tendre papier et stylo. Après tout, autant en profiter.</>",
+                                        next: 51213154,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 51213159,
+                                        content: "<I>Refuser poliment l’autographe et expliquer la situation</>",
+                                        next: 51213160,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213149,
+                                content:
+                                    "... Pourquoi tu me donnes ça ? T’es pas une célébrité... Attends, {nickname}... T-Tu ne serais pas {性别:ce célèbre Chasseur|cette célèbre Chasseuse} de Phoxène ?!",
+                                npc: 700458,
+                                next: 51213150,
+                            },
+                            {
+                                id: 51213154,
+                                content: "Voilà, c’est signé. Maintenant, arrêtez de revenir me déranger !",
+                                npc: 700458,
+                                next: 51213155,
+                            },
+                            {
+                                id: 51213160,
+                                content:
+                                    "Ah... Donc vous n’êtes pas l’{性别:un de mes admirateurs|une de mes admiratrices}. Veuillez me pardonner. Beaucoup de gens viennent me chercher récemment, alors je pensais que c’était encore le cas.",
+                                npc: 700458,
+                                next: 51213161,
+                            },
+                            {
+                                id: 51213150,
+                                content:
+                                    "« Qui aurait cru qu’un jour l’étoile qui brillait dans mon cœur tomberait jusqu’à ma fenêtre ! » — Mince, mince... Je ne suis absolument pas préparée ! Ma robe n’est pas en désordre, au moins ? Quelle honte...",
+                                npc: 700458,
+                                next: 51213151,
+                            },
+                            {
+                                id: 51213155,
+                                content: "Merci... Euh, qu’est-ce qui est écrit exactement ?",
+                                npc: 100001,
+                                next: 51213156,
+                            },
+                            {
+                                id: 51213161,
+                                content:
+                                    "Enchantée. Je suis Arcia Hall, comédienne de la troupe de la Flûte Enchantée. Le Salon du Sifflet nous a engagés comme conseillers pour cette pièce.",
+                                npc: 700458,
+                                next: 51213162,
+                            },
+                            {
+                                id: 51213151,
+                                content:
+                                    "J’ai toujours rêvé de devenir Chasseuse de Phoxène moi aussi ! Malheureusement, je n’ai absolument aucun talent pour le combat... Je suis même incapable de battre un simple rottin. Je conserverai précieusement votre signature !",
+                                npc: 700458,
+                                next: 51213152,
+                            },
+                            {
+                                id: 51213156,
+                                content:
+                                    "Arcia ! Arcia Hall ! Vous ne me connaissez même pas, alors pourquoi vous venez me bloquer ici ?! ... Attendez, ne me dites pas que vous n’étiez pas venu pour moi ?",
+                                npc: 700458,
+                                next: 51213157,
+                            },
+                            {
+                                id: 51213162,
+                                content:
+                                    "Que puis-je faire pour vous ? Hmm... Si vous cherchez quelqu’un, vous pouvez patienter dans les environs. La répétition devrait bientôt se terminer.",
+                                npc: 700458,
+                                next: 51213163,
+                            },
+                            {
+                                id: 51213152,
+                                content:
+                                    "Quelle incroyable coïncidence ! Je n’aurais jamais imaginé que vous viendriez assister aux répétitions.",
+                                npc: 700458,
+                                next: 51213161,
+                            },
+                            {
+                                id: 51213157,
+                                content: "Je suis ici pour le travail.",
+                                npc: 100001,
+                                next: 51213158,
+                            },
+                            {
+                                id: 51213163,
+                                content: "Je pourrais assister à la répétition ?",
+                                npc: 100001,
+                                next: 51213164,
+                            },
+                            {
+                                id: 51213158,
+                                content:
+                                    "Mince... Veuillez me pardonner pour mon impolitesse de tout à l’heure. Ces derniers temps, des gens viennent constamment me chercher ici et perturbent les répétitions. Je pensais que vous étiez encore l’un d’eux.",
+                                npc: 700458,
+                                next: 51213161,
+                            },
+                            {
+                                id: 51213164,
+                                content:
+                                    "Impossible. Le président du Salon du Sifflet nous a ordonné de garder la pièce secrète jusqu’à la représentation officielle. Je dois respecter ses consignes ; sinon, je risque de ne jamais être payée, et ce ne serait pas rentable du tout.",
+                                npc: 700458,
+                                next: 51213165,
+                            },
+                            {
+                                id: 51213165,
+                                content:
+                                    "Je fais moi aussi partie du Salon du Sifflet. Le président est occupé, alors il m’a envoyé vérifier l’avancement des répétitions à sa place.",
+                                npc: 100001,
+                                next: 51213166,
+                            },
+                            {
+                                id: 51213166,
+                                content:
+                                    "Même si vous dites cela... Désolée, je ne peux quand même pas vous laisser entrer. La dernière personne venue inspecter les répétitions n’était pas vous ; je ne peux pas confirmer votre identité.",
+                                npc: 700458,
+                                options: [
+                                    {
+                                        id: 51213167,
+                                        content: "<I>Présenter l’insigne de Seaton</>",
+                                        next: 51213168,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213168,
+                                content:
+                                    "Oh ! Alors c’est vous ! Je ne pensais pas que {性别:le|la} responsable serait aussi jeune. Dans ce cas, veuillez me suivre.",
+                                npc: 700458,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040612,
+                name: "Parler aux jeunes hommes en pleine dispute",
+                desc: "Grâce aux indications d’Arcia, vous arrivez enfin sur le lieu des répétitions. Pourtant, l’ambiance y est loin d’être paisible. Allez parler aux jeunes gens en pleine dispute pour découvrir la raison de leur querelle.",
+                nodes: [
+                    {
+                        id: "17804846466864534020",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-26070, 17150],
+                        dialogues: [
+                            {
+                                id: 51213170,
+                                content:
+                                    "Puisque mademoiselle Arcia elle-même a dit qu’il n’y avait aucun problème, je comprends vraiment pas pourquoi tu continues à bloquer tout le monde ! Tu peux arrêter de faire l’imbécile maintenant ? D’habitude, on te voit jamais jouer les chevaliers servants !",
+                                npc: 700462,
+                                next: 51213171,
+                            },
+                            {
+                                id: 51213171,
+                                content:
+                                    "Je m’inquiète bien sûr pour mademoiselle Arcia... mais ce qui m’inquiète encore plus, c’est la sécurité. Est-ce qu’on est vraiment obligés d’utiliser de vraies armes pour les accessoires de scène ?",
+                                npc: 700461,
+                                next: 51213172,
+                            },
+                            {
+                                id: 51213172,
+                                content:
+                                    "Je peux payer davantage les menuisiers pour qu’ils fabriquent des copies réalistes... Alors arrête un peu de t’obséder avec ces armes, d’accord ?",
+                                npc: 700461,
+                                next: 51213173,
+                            },
+                            {
+                                id: 51213173,
+                                content:
+                                    "Le président l’a dit lui-même : plus c’est réaliste, mieux c’est ! Les armes, c’est pas un problème. Avec suffisamment d’argent, on peut toujours s’en procurer. Alors pourquoi tu paniques maintenant à propos d’un simple accessoire de théâtre ?!",
+                                npc: 700462,
+                                next: 51213174,
+                            },
+                            {
+                                id: 51213174,
+                                content:
+                                    "Mais il n’y aura pas des sièges vides devant la scène ! Le chef de gare Eisenbahn sera réellement présent ! Tu comptes vraiment obéir aux ordres du président et aller jusque-là... ? Franchement, on devrait peut-être abandonner. À ce rythme-là, on risque tous d’y passer !",
+                                npc: 700461,
+                                next: 51213175,
+                            },
+                            {
+                                id: 51213175,
+                                content:
+                                    "Maintenant que nous sommes allés aussi loin, tu veux abandonner ? Tu crois vraiment qu’on peut encore s’échapper ? Arrête d’être naïf. Le président Seaton est peut-être moins brutal qu’Eisenbahn, mais il nous surveille certainement lui aussi.",
+                                npc: 700462,
+                                next: 51213176,
+                            },
+                            {
+                                id: 51213176,
+                                content:
+                                    "Vous allez arrêter de vous disputer tous les deux ? Ça fait toute la journée que ça dure. Encore cette histoire d’utiliser de vraies armes ? Ça suffit. Le président Seaton a envoyé quelqu’un inspecter vos répétitions.",
+                                npc: 700458,
+                                next: 51213177,
+                            },
+                            {
+                                id: 51213177,
+                                content:
+                                    "Aucune dispute ! Aucune dispute ! Nous étions simplement en train de nous mettre dans l’ambiance. Nous sommes prêts pour l’inspection !",
+                                npc: 700462,
+                                next: 51213178,
+                            },
+                            {
+                                id: 51213178,
+                                content:
+                                    "Ah— Eisenbahn, notre héros ! Il marche aux côtés de la générosité ; il resplendit avec la justice ! Je sais que vous n’avez jamais accepté mes idéaux... mais moi, je vous ai déjà compris.",
+                                npc: 700462,
+                                next: 51213179,
+                            },
+                            {
+                                id: 51213179,
+                                content:
+                                    "La tempête finira par disparaître, et cette longue nuit prendra fin elle aussi. Les trains deviendront comme des fils d’or tissés par le soleil, reliant Givrelac à Dismania.",
+                                npc: 700462,
+                                next: 51213180,
+                            },
+                            {
+                                id: 51213180,
+                                content:
+                                    "Alors je la maudis. Je maudis cette tempête qui ralentit toute chose. Je vais insuffler toute ma haine dans ces trois balles... et ouvrir le feu sur cette bête invisible qui rugit dans l’ombre.",
+                                npc: 700462,
+                                next: 51213181,
+                            },
+                            {
+                                id: 51213181,
+                                content: "Et finalement... devenir le soleil qui la dissipera—",
+                                npc: 700462,
+                                next: 51213182,
+                            },
+                            {
+                                id: 51213182,
+                                content:
+                                    "<I>... Mais qu’est-ce qu’il raconte ? Il est déjà complètement entré dans son rôle ? Cet endroit est rempli de fanatiques de théâtre...</>",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040613,
+                name: "Vaincre le comédien absorbé par sa représentation",
+                desc: "Le jeune homme, emporté par sa colère, vous prend pour son adversaire sur scène et décide de mettre vos compétences à l’épreuve.",
+                nodes: [
+                    {
+                        id: "1782197711479674",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25860, 17150],
+                        dialogues: [
+                            {
+                                id: 51213184,
+                                content:
+                                    "Hm. Tu te débrouilles bien. Franchement, je pense que tu serais {性别:un meilleur|une meilleure} partenaire de scène que Kieran pour jouer cette pièce avec moi.",
+                                npc: 700462,
+                                next: 51213185,
+                            },
+                            {
+                                id: 51213185,
+                                content:
+                                    "Tu recommences encore... Veuillez nous excuser. Les passionnés de théâtre comme nous ont tendance à improviser des scènes n’importe quand dès qu’ils sont trop pris dans l’ambiance. Le personnage qu’il joue représente l’ancien chef de gare de la Gare des Cent-Fleurs. Il vous a simplement pris pour le chef de gare dans sa scène.",
+                                npc: 700461,
+                                next: 51213186,
+                            },
+                            {
+                                id: 51213186,
+                                content:
+                                    "Arcia, tu peux faire les présentations ? Tu as dit que cette personne avait été envoyée par le président Seaton pour inspecter nos progrès, c’est bien ça ?",
+                                npc: 700461,
+                                next: 51213187,
+                            },
+                            {
+                                id: 51213187,
+                                content:
+                                    "Vous êtes arrivé rapidement. Veuillez nous pardonner pour ce spectacle. Je m’appelle Kieran, et ce tempérament explosif là-bas, c’est Levi. Puisque vous faites partie du Salon, inutile de nous présenter plus longtemps, j’imagine.",
+                                npc: 700461,
+                                next: 51213188,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040616,
+                name: "Retourner au salon des nobles et parler à Seaton",
+                desc: "Au nom de Seaton, vous avez inspecté le quiz, la loterie thématique et les répétitions de la pièce. Quelque chose d’inhabituel semble se tramer... Retournez au Salon du Sifflet et faites part à Seaton de tout ce que vous avez vu et appris.",
+                nodes: [
+                    {
+                        id: "17804852955039055191",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32190, -6990],
+                        dialogues: [
+                            {
+                                id: 51213224,
+                                content: "Vous êtes déjà revenu ? Je pensais devoir encore vous attendre un moment, jeune recrue.",
+                                npc: 700460,
+                                next: 51213225,
+                            },
+                            {
+                                id: 51213225,
+                                content: "Vous racontez à Seaton tout ce que vous avez découvert durant votre enquête.",
+                                next: 51213226,
+                            },
+                            {
+                                id: 51213226,
+                                content: "Hmm... Tout le monde est prêt, donc. Parfait... Moi aussi, je suis prêt.",
+                                npc: 700460,
+                                next: 51213227,
+                            },
+                            {
+                                id: 51213227,
+                                content:
+                                    "Le Salon du Sifflet accorde vraiment énormément d’importance à cette célébration, pas vrai ? On dirait que tout le monde y met toutes ses forces.",
+                                npc: 100001,
+                                next: 51213228,
+                            },
+                            {
+                                id: 51213228,
+                                content:
+                                    "Parce qu’une telle célébration est ce que tout le monde attendait. Les occasions d’exprimer notre profond respect envers le chef de gare Eisenbahn sont bien trop rares ; il faut donc en profiter pleinement.",
+                                npc: 700460,
+                                next: 51213229,
+                            },
+                            {
+                                id: 51213229,
+                                content: "Merci, jeune recrue. Chaque membre du Salon du Sifflet vous est reconnaissant pour vos efforts.",
+                                npc: 700460,
+                                next: 51213230,
+                            },
+                            {
+                                id: 51213230,
+                                content:
+                                    "Seaton se détourne ensuite et quitte le salon. Juste avant de franchir la porte, il semble murmurer quelque chose... mais vous êtes trop loin pour distinguer clairement ses paroles.",
+                                next: 51213231,
+                            },
+                            {
+                                id: 51213231,
+                                content: "Qu’est-ce qu’il vient de dire ?",
+                                npc: 100001,
+                                next: 51213232,
+                            },
+                            {
+                                id: 51213232,
+                                content: "Il a dit... hum...",
+                                npc: 700450,
+                                next: 51213233,
+                            },
+                            {
+                                id: 51213233,
+                                content: "Qu’est-ce qu’il y a ? Tu bafouilles, c’est pas ton genre.",
+                                npc: 100001,
+                                next: 51213234,
+                            },
+                            {
+                                id: 51213234,
+                                content:
+                                    "Ouais, j’ai entendu aussi. Je vais le dire à sa place ; le petit champi a dû avoir un sacré choc. Seaton a dit...",
+                                npc: 700457,
+                                next: 51213235,
+                            },
+                            {
+                                id: 51213235,
+                                content:
+                                    "« Pour un soldat, son arme représente sa vie. Voilà la preuve de ma loyauté envers le chef de gare. »",
+                                npc: 700457,
+                                next: 51213236,
+                            },
+                            {
+                                id: 51213236,
+                                content: "« Et la récompense que j’attends en retour... c’est le cœur du chef de gare. »",
+                                npc: 700457,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 200407,
+        quests: [
+            {
+                id: 20040700,
+                name: "",
+                nodes: [
+                    {
+                        id: "178062924055212129936",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 51214001,
+                                content: "Ah, te voilà ! Vite, viens avec moi au salon.",
+                                npc: 700398,
+                                next: 51214002,
+                            },
+                            {
+                                id: 51214002,
+                                content:
+                                    "Peu importe ce qu’il se passe, mon ami, il faut quand même garder un minimum de tenue, non ? Saisir directement le poignet de {性别:mon maître|ma maîtresse}, ça n’a rien d’un comportement de gentleman. Relâche-{性别:le|la} immédiatement, ou je risque de devenir désagréable.",
+                                npc: 100401,
+                                next: 51214003,
+                            },
+                            {
+                                id: 51214003,
+                                content:
+                                    "Ah ! Désolé... J’étais trop pressé, j’ai oublié de vous expliquer. Le concours photo... enfin, plutôt cette photo-là... il y a eu un petit problème. Ça prend pas mal d’ampleur en ce moment.",
+                                npc: 700398,
+                                next: 51214004,
+                            },
+                            {
+                                id: 51214004,
+                                content: "Le président espère que tu viendras en personne. Il souhaite discuter franchement avec toi.",
+                                npc: 700398,
+                                next: 51214005,
+                            },
+                            {
+                                id: 51214005,
+                                content: "J’arrive dans un instant.",
+                                npc: 100001,
+                                next: 51214006,
+                            },
+                            {
+                                id: 51214006,
+                                content: "Très bien... Je vais d’abord prévenir le président.",
+                                npc: 700398,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040701,
+                name: "Se rendre au salon des nobles et parler à Seaton",
+                desc: "Toran vous demande en urgence de vous rendre au salon : il semble qu’un problème soit survenu avec la photo. Allez au salon des nobles où se trouve le Salon du Sifflet, parlez à Seaton et renseignez-vous sur cette « urgence » mentionnée par Toran.",
+                nodes: [
+                    {
+                        id: "17798655834755419",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32191, -7000],
+                        dialogues: [
+                            {
+                                id: 51214008,
+                                content:
+                                    "Cette photo, c’est eux-mêmes qui l’ont choisie. Alors quel genre de problème ça pourrait bien poser ?",
+                                npc: 100401,
+                                next: 51214009,
+                            },
+                            {
+                                id: 51214009,
+                                content:
+                                    "Comme je le pensais... il y a quelque chose de louche là-dessous. Ce serait pas une polémique montée de toutes pièces par eux-mêmes, par hasard ? On ira se renseigner tout à l’heure.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17798656139715749",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32191, -7000],
+                        dialogues: [
+                            {
+                                id: 51214011,
+                                content: "Le président ne va quand même pas essayer de te retirer ton titre de grand gagnant, hein ?!",
+                                npc: 100402,
+                                next: 51214012,
+                            },
+                            {
+                                id: 51214012,
+                                content:
+                                    "Hors de question ! On a déjà récupéré la récompense, donc pas question de la rendre ! Petit larbin, montre un peu de caractère ! Ce qui t’appartient, personne n’a le droit de te le voler ! Je te protégerai !",
+                                npc: 100402,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17798656987026906",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32191, -7000],
+                        next: ["17798655834755419", "17798656139715749", "17798692068108019"],
+                        dialogues: [
+                            {
+                                id: 51214014,
+                                content:
+                                    "Vous voilà. Cette fois encore, j’aurais besoin de vous demander un service. Commencez donc par regarder cette affiche.",
+                                npc: 700400,
+                                next: 51214016,
+                            },
+                            {
+                                id: 51214016,
+                                content: "C’est quoi, ça ? Une affiche promotionnelle ? Voyons voir ce qui est écrit...",
+                                npc: 100001,
+                                next: 51214017,
+                            },
+                            {
+                                id: 51214017,
+                                content:
+                                    "« Les sombres trafics d’Eisenbahn ! Soupçonné de contrebande et d’enrichissement personnel ! Indigne de son poste de chef de gare ! »",
+                                npc: 100001,
+                                next: 51214018,
+                            },
+                            {
+                                id: 51214018,
+                                content: "Attendez... Pourquoi est-ce ma photo sur cette affiche ?",
+                                npc: 100001,
+                                next: 51214019,
+                            },
+                            {
+                                id: 51214019,
+                                content:
+                                    "En effet. Avec le recul, cette photographie posait certains problèmes. Le Phoxichor est une ressource militaire ; il y a normalement toujours des soldats lors de son transport. Que certains y voient une opération de contrebande... ce n’est malheureusement pas si étonnant.",
+                                npc: 700400,
+                                next: 51214020,
+                            },
+                            {
+                                id: 51214020,
+                                content:
+                                    "Cette photo provoque énormément de discussions dans toute la gare. J’aimerais donc que vous représentiez le Salon du Sifflet — et moi-même — afin de régler le problème avec tous ces individus qui répandent des absurdités.",
+                                npc: 700400,
+                                next: 51214021,
+                            },
+                            {
+                                id: 51214021,
+                                content:
+                                    "Le dixième anniversaire approche à grands pas. Cela devait être une journée de fête pour tout le monde. Notre intention était simplement d’organiser une grande célébration afin d’honorer le chef de gare Eisenbahn... certainement pas de le couvrir de honte.",
+                                npc: 700400,
+                                next: 51214022,
+                            },
+                            {
+                                id: 51214022,
+                                content:
+                                    "Donc, si je comprends bien : vous avez choisi ma photo pour votre campagne de promotion, puis vous avez découvert qu’elle pouvait être interprétée comme une preuve des trafics d’Eisenbahn. Et maintenant que tout explose, c’est à moi de gérer les conséquences ?",
+                                npc: 100001,
+                                next: 51214023,
+                            },
+                            {
+                                id: 51214023,
+                                content:
+                                    "Non, voyons. Tout le Salon du Sifflet reconnaît l’excellence de cette photographie. Si elle a remporté le concours, c’est parce qu’elle le méritait, et cette décision a été prise collectivement.",
+                                npc: 700400,
+                                next: 51214024,
+                            },
+                            {
+                                id: 51214024,
+                                content:
+                                    "C’est peut-être justement la puissance de sa composition qui nous a fait négliger certains détails de l’image. Cette erreur nous appartient ; nous n’avons aucune raison de vous en tenir responsable.",
+                                npc: 700400,
+                                next: 51214025,
+                            },
+                            {
+                                id: 51214025,
+                                content: "Vous avez déjà très bien résolu les précédents incidents. Nous avons tous confiance en vous.",
+                                npc: 700400,
+                                next: 51214026,
+                            },
+                            {
+                                id: 51214026,
+                                content: "... Qu’est-ce que vous attendez exactement de moi ?",
+                                npc: 100001,
+                                next: 51214027,
+                            },
+                            {
+                                id: 51214027,
+                                content:
+                                    "J’aimerais que vous vous occupiez des personnes qui propagent ces rumeurs. Dans un moment aussi crucial, nous ne pouvons pas nous permettre le moindre incident. Si le chef de gare Eisenbahn venait à remarquer cette agitation... cela poserait problème.",
+                                npc: 700400,
+                                next: 51214028,
+                            },
+                            {
+                                id: 51214028,
+                                content:
+                                    "Et si cela devait indisposer le chef de gare Eisenbahn... ce serait une faute impardonnable de notre part.",
+                                npc: 700400,
+                                next: 51214029,
+                            },
+                            {
+                                id: 51214029,
+                                content:
+                                    "J’aimerais également que vous profitiez de l’occasion pour recueillir l’opinion des habitants de la gare à ce sujet. Ensuite, rassemblez toutes ces informations et faites-m’en un rapport détaillé.",
+                                npc: 700400,
+                                options: [
+                                    {
+                                        id: 51214030,
+                                        content: "<I>D’accord. Et qu’est-ce que j’y gagne ?</>",
+                                        next: 51214031,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214031,
+                                content: "Vous obtiendrez certaines réponses que vous cherchez. Votre déplacement ne sera pas inutile.",
+                                npc: 700400,
+                                next: 51214032,
+                            },
+                            {
+                                id: 51214032,
+                                content: "Vous savez ce que je cherche ?",
+                                npc: 100001,
+                                next: 51214033,
+                            },
+                            {
+                                id: 51214033,
+                                content:
+                                    "Bien sûr... Les membres les plus importants du Salon du Sifflet se sont tous réunis pour cette même raison.",
+                                npc: 700400,
+                                next: 51214034,
+                            },
+                            {
+                                id: 51214034,
+                                content: "Allez-y, jeune recrue. J’ai confiance en vos capacités.",
+                                npc: 700400,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17798692068108019",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32191, -7000],
+                        dialogues: [
+                            {
+                                id: 51214036,
+                                content: "Alors ? Qu’est-ce qu’il t’a raconté, ce type ?",
+                                npc: 100401,
+                                next: 51214037,
+                            },
+                            {
+                                id: 51214037,
+                                content:
+                                    "Il passe ses journées à te donner du travail ! Le Salon du Sifflet compte des dizaines de membres, non ? Ou alors leur président est complètement seul avec une bande d’incapables bons à rien ?",
+                                npc: 100402,
+                                next: 51214038,
+                            },
+                            {
+                                id: 51214038,
+                                content:
+                                    "Petit larbin, tu devrais arrêter de toujours céder à ses demandes ! Camilla me l’a appris : quand quelque chose ne te plaît pas, il faut savoir dire « non » !",
+                                npc: 100402,
+                                next: 51214039,
+                            },
+                            {
+                                id: 51214039,
+                                content: "Vous racontez alors à Snow et à l’Étranger la requête de Seaton.",
+                                next: 51214040,
+                            },
+                            {
+                                id: 51214040,
+                                content:
+                                    "... Qu’est-ce qu’il voulait dire avec ses dernières phrases ? Les organisateurs des activités avaient déjà eu des réactions similaires quand nous leur avons parlé.",
+                                npc: 100401,
+                                next: 51214041,
+                            },
+                            {
+                                id: 51214041,
+                                content: "Comme s’ils partaient du principe que tu étais déjà censé être au courant...",
+                                npc: 100401,
+                                next: 51214042,
+                            },
+                            {
+                                id: 51214042,
+                                content:
+                                    "Quoi « comme s’ils » ?! C’est clairement une provocation ! Rah, c’est exactement le genre de promesses en l’air qu’on utilise pour manipuler les gens ! Petit larbin, ne sois pas trop triste, sinon tu vas finir par te faire « Étrangeriser » !",
+                                npc: 100402,
+                                next: 51214043,
+                            },
+                            {
+                                id: 51214043,
+                                content: "... « Étrangeriser » ?",
+                                npc: 100001,
+                                next: 51214044,
+                            },
+                            {
+                                id: 51214044,
+                                content:
+                                    "Oui ! Se faire complètement embobiner par l’Étranger ! Il te baratine avec de belles paroles, te vole ta glace, puis réussit à te convaincre que c’était parfaitement normal. Et des semaines plus tard, Camilla t’explique enfin que tu t’es fait arnaquer !",
+                                npc: 100402,
+                                next: 51214045,
+                            },
+                            {
+                                id: 51214045,
+                                content: "Hé ! Je te l’ai rendue après ! Je t’ai pris une glace, puis je t’en ai rendu trois.",
+                                npc: 100401,
+                                next: 51214046,
+                            },
+                            {
+                                id: 51214046,
+                                content:
+                                    "Hmpf ! Cette glace et les trois autres appartenaient déjà au Roi Démon à la base ! J’ai quand même perdu une glace dans l’histoire !",
+                                npc: 100402,
+                                next: 51214047,
+                            },
+                            {
+                                id: 51214047,
+                                content:
+                                    "Allons d’abord du côté de la zone des voyageurs. Il y a plus de passage là-bas, et les avis des gens seront probablement plus représentatifs.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040702,
+                name: "Se rendre dans la zone des voyageurs et discuter avec les citoyens",
+                desc: "Dans la zone des voyageurs, discutez avec les citoyens afin de connaître leur avis sur l’affaire de la photo.",
+                nodes: [
+                    {
+                        id: "177988305818611715021",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-31103, -806],
+                        next: ["17800415443431483869", "17800437873877392044"],
+                        dialogues: [
+                            {
+                                id: 51214062,
+                                content: "<I>Qu’est-ce qu’il s’est passé ?</>",
+                                npc: 100001,
+                                next: 51214063,
+                            },
+                            {
+                                id: 51214063,
+                                content:
+                                    "Vous n’avez pas reçu ce tract ? Celui avec « Célébration du dixième anniversaire » écrit en grosses lettres dessus.",
+                                npc: 700465,
+                                next: 51214064,
+                            },
+                            {
+                                id: 51214064,
+                                content:
+                                    "Ha ! Quelle ironie... Eisenbahn a passé des années à bâtir sa réputation, et finalement ce sont ses propres partisans qui l’ont fait tomber. Bien fait pour lui.",
+                                npc: 700465,
+                                options: [
+                                    {
+                                        id: 51214065,
+                                        content: "<I>Pourquoi le détestez-vous autant ?</>",
+                                        next: 51214066,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214066,
+                                content:
+                                    "Il n’existe pas un seul ouvrier qui ne le déteste pas ! Ce démon ! Cette ordure dont le sang est rempli de poison !",
+                                npc: 700465,
+                                next: 51214067,
+                            },
+                            {
+                                id: 51214067,
+                                content:
+                                    "Eisenbahn refuse de soigner les ouvriers. Il gaspille notre sueur et notre sang... mais quand nous avons besoin d’aide, il nous laisse mourir.",
+                                npc: 700465,
+                                next: 51214068,
+                            },
+                            {
+                                id: 51214068,
+                                content:
+                                    "Ma fille... ma fille a eu le bras transpercé ici même par une barre métallique. La blessure s’est infectée... et elle est morte dans d’atroces souffrances.",
+                                npc: 700465,
+                                next: 51214069,
+                            },
+                            {
+                                id: 51214069,
+                                content:
+                                    "« Même si on la soigne, elle ne fera que gaspiller des rations », voilà ce qu’ils disaient. Pour eux, les ouvriers de la Gare des Cent-Fleurs ne valent pas plus que des boulons rouillés. Une fois usés, il suffit de les jeter.",
+                                npc: 700465,
+                                next: 51214070,
+                            },
+                            {
+                                id: 51214070,
+                                content:
+                                    "Mais ma fille était humaine ! Une vraie personne ! C’était Vivian, la meilleure jeune ouvrière de la gare pendant tant d’années... Elle était encore si jeune...",
+                                npc: 700465,
+                                next: 51214071,
+                            },
+                            {
+                                id: 51214071,
+                                content: "L’ouvrière se couvre lentement le visage de ses mains avant de s’effondrer en sanglots.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "177988304017511714591",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-29953, -666],
+                        next: ["17800415155751483369", "17800437873877392044"],
+                        dialogues: [
+                            {
+                                id: 51214051,
+                                content: "<I>Qu’est-ce qu’il s’est passé ?</>",
+                                npc: 100001,
+                                next: 51214052,
+                            },
+                            {
+                                id: 51214052,
+                                content:
+                                    "Comment ça, vous êtes pas au courant ? Eisenbahn faisait de la contrebande de Phoxichor. La photo le montre clairement... Vous allez quand même pas me faire croire qu’il passait là par hasard ?",
+                                npc: 700464,
+                                next: 51214053,
+                            },
+                            {
+                                id: 51214053,
+                                content:
+                                    "Moi aussi, avant, je rêvais de rejoindre le Salon du Sifflet. Je pensais qu’Eisenbahn agissait toujours pour le bien de la gare. Même s’il était parfois brutal, je croyais qu’il faisait simplement ce qu’il fallait.",
+                                npc: 700464,
+                                next: 51214054,
+                            },
+                            {
+                                id: 51214054,
+                                content:
+                                    "J’aurais dû comprendre depuis longtemps, dès le moment où il a commencé à retenir les salaires des ouvriers, que ce type était pourri jusqu’à la moelle.",
+                                npc: 700464,
+                                next: 51214055,
+                            },
+                            {
+                                id: 51214055,
+                                content:
+                                    "Mais malgré tout... j’ai vu de mes propres yeux la Gare des Cent-Fleurs passer d’un trou perdu ignoré de tous à ce qu’on appelle aujourd’hui « les rouages qui font tourner l’Empire ». Eisenbahn... lui...",
+                                npc: 700464,
+                                next: 51214056,
+                            },
+                            {
+                                id: 51214056,
+                                content:
+                                    "Ha... Je comprends vraiment pas pourquoi le Salon du Sifflet a choisi une photo pareille pour leur campagne.",
+                                npc: 700464,
+                                options: [
+                                    {
+                                        id: 51214057,
+                                        content: "<I>L’avertir de ne plus répandre ce genre de propos</>",
+                                        next: 51214058,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214058,
+                                content: "...",
+                                npc: 700464,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800415443431483869",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-30569, -734],
+                        next: ["17800415443431483869"],
+                        dialogues: [
+                            {
+                                id: 51214060,
+                                content:
+                                    "Je vous l’avais dit depuis le début : Eisenbahn est un véritable démon. Mais évidemment, tant que la lame ne vous transperce pas vous-même, personne ne comprend la douleur...",
+                                npc: 700465,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800415155751483369",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-30569, -734],
+                        next: ["17800415155751483369"],
+                        dialogues: [
+                            {
+                                id: 51214049,
+                                content: "Le chef de gare Eisenbahn... non, Eisenbahn tout court... vous me décevez énormément...",
+                                npc: 700464,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800437873877392044",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-30569, -734],
+                        dialogues: [
+                            {
+                                id: 51214073,
+                                content:
+                                    "Ha... La prospérité de la Gare des Cent-Fleurs s’est construite sur les ossements des malchanceux. Il faut jeter de la chair et du sang dans le moteur pour que les roues continuent d’avancer.",
+                                npc: 100401,
+                                next: 51214074,
+                            },
+                            {
+                                id: 51214074,
+                                content:
+                                    "Cette dame pleurait tellement... Bouhouhou... Rien que grimper aussi haut me donne le vertige, alors sa petite fille...",
+                                npc: 100402,
+                                next: 51214075,
+                            },
+                            {
+                                id: 51214075,
+                                content:
+                                    "Allons voir du côté de la zone de fret maintenant. Les marchands auront peut-être entendu d’autres choses.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040703,
+                name: "Se rendre dans la zone de fret et parler au marchand",
+                desc: "Dans la zone de fret, discutez avec le marchand afin de connaître son avis sur l’affaire de la photo.",
+                nodes: [
+                    {
+                        id: "17800414090495400",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25183, 7668],
+                        next: ["17800414500575682", "17800444776118868860"],
+                        dialogues: [
+                            {
+                                id: 51214079,
+                                content: "<I>Discuter de quoi exactement ?</>",
+                                npc: 100001,
+                                next: 51214080,
+                            },
+                            {
+                                id: 51214080,
+                                content: "De certaines questions liées aux journaux, aux informations... et aux prix.",
+                                npc: 700466,
+                                next: 51214081,
+                            },
+                            {
+                                id: 51214081,
+                                content:
+                                    "À votre tenue... Oh, veuillez me pardonner mon manque de courtoisie. Permettez-moi de me présenter : je dirige le journal <I>Courrier du Nord</> ainsi que plusieurs maisons d’édition et relais postaux.",
+                                npc: 700466,
+                                next: 51214082,
+                            },
+                            {
+                                id: 51214082,
+                                content:
+                                    "Le <I>Courrier du Nord</> n’a peut-être pas beaucoup d’influence ici, à Givrelac... mais à Dismania, c’est l’un des journaux les plus réputés. Même Sa Majesté l’Empereur lit chaque matin un exemplaire du <I>Courrier du Nord</>.",
+                                npc: 700466,
+                                next: 51214083,
+                            },
+                            {
+                                id: 51214083,
+                                content:
+                                    "Pour ma part, je souhaite simplement discuter de certaines affaires avec le chef de gare. C’est un homme respectable ; j’imagine qu’il préférerait éviter que ces informations ne se répandent jusqu’à Dismania. J’espère donc qu’il saura proposer un prix satisfaisant.",
+                                npc: 700466,
+                                next: 51214084,
+                            },
+                            {
+                                id: 51214084,
+                                content:
+                                    "Belle manière de présenter les choses... mais ça ressemble surtout à du chantage, non ? Les gardes d’Eisenbahn ne plaisantent pas. Tu n’as pas peur qu’après avoir franchi cette ligne, il t’empêche simplement de rentrer à la capitale impériale ?",
+                                npc: 100401,
+                                next: 51214085,
+                            },
+                            {
+                                id: 51214085,
+                                content:
+                                    "Ce serait là une solution bien maladroite. Ce genre de problème ne disparaît pas simplement en me faisant tuer.",
+                                npc: 700466,
+                                next: 51214086,
+                            },
+                            {
+                                id: 51214086,
+                                content:
+                                    "Et puis, en tant que commerçant avisé — ou journaliste expérimenté — il faut savoir faire confiance à mon jugement... Hé hé. Je lui présenterai un prix parfaitement raisonnable. Un prix qu’il ne pourra pas refuser.",
+                                npc: 700466,
+                                options: [
+                                    {
+                                        id: 51214087,
+                                        content: "<I>L’avertir de ne rien ébruiter</>",
+                                        next: 51214088,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214088,
+                                content:
+                                    "Hé hé... Bien entendu. Puisque vous vous montrez aussi menaçant, je vais naturellement respecter votre volonté. Mais j’ai bien peur que vous ne puissiez pas faire taire tous ceux qui pensent comme moi.",
+                                npc: 700466,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800414500575682",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25183, 7668],
+                        next: ["17800414500575682"],
+                        dialogues: [
+                            {
+                                id: 51214077,
+                                content:
+                                    "Ce genre de rumeur est facile à étouffer. Il suffit de faire taire les ouvriers... Je devrais discuter avec Eisenbahn.",
+                                npc: 700466,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800444776118868860",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25183, 7668],
+                        dialogues: [
+                            {
+                                id: 51214090,
+                                content:
+                                    "Les rumeurs se répandent encore plus vite que je ne l’imaginais... Quelqu’un serait-il en train d’attiser le feu ?",
+                                npc: 100401,
+                                next: 51214091,
+                            },
+                            {
+                                id: 51214091,
+                                content:
+                                    "Ou alors... peut-être que cette évolution est exactement ce que voulait le Salon du Sifflet depuis le début. Peut-être qu’ils cherchaient volontairement à provoquer ce genre de rumeurs.",
+                                npc: 100401,
+                                next: 51214092,
+                            },
+                            {
+                                id: 51214092,
+                                content: "Continuons l’enquête. Allons voir du côté du hall principal de la gare.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040704,
+                name: "Se rendre dans le hall de la gare et discuter avec les manifestants",
+                desc: "Dans le hall de la gare, discutez avec les manifestants afin de comprendre les répercussions de l’affaire de la photo.",
+                nodes: [
+                    {
+                        id: "17800431095975915144",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-12266, -226],
+                        next: ["17800431095985915145", "178004491486313298663"],
+                        dialogues: [
+                            {
+                                id: 51214096,
+                                content:
+                                    "J’imagine que vous avez vu la nouvelle vous aussi : Eisenbahn se donne des airs de grand chef de gare en public, mais dans l’ombre, ce n’est qu’un misérable.",
+                                npc: 700467,
+                                next: 51214097,
+                            },
+                            {
+                                id: 51214097,
+                                content:
+                                    "Il profite de sa position pour faire des affaires avec les gens. Il doit forcément s’en mettre plein les poches. Et nos gars des forges, alors ? Ils mangent mal et s’habillent à peine correctement !",
+                                npc: 700467,
+                                next: 51214098,
+                            },
+                            {
+                                id: 51214098,
+                                content:
+                                    "On pensait tous qu’Eisenbahn avait ses raisons, que la situation finirait par s’améliorer... mais maintenant, c’est clair : ça n’arrivera jamais !",
+                                npc: 700467,
+                                next: 51214099,
+                            },
+                            {
+                                id: 51214099,
+                                content:
+                                    "C’est précisément pour ça qu’il faut profiter de cette occasion ! Nous devons unir nos forces et faire entendre notre propre voix ! Son règne comme chef de gare doit s’arrêter aujourd’hui !",
+                                npc: 700467,
+                                next: 51214100,
+                            },
+                            {
+                                id: 51214100,
+                                content:
+                                    "Bon... rassembler des soutiens demande forcément quelques moyens financiers. Personnellement, je suis prêt à consacrer toute ma fortune à sa chute. Alors si vous partagez mes convictions, n’hésitez pas à contribuer un peu vous aussi.",
+                                npc: 700467,
+                                next: 51214101,
+                            },
+                            {
+                                id: 51214101,
+                                content:
+                                    "Une fois tout ça terminé, je pourrai même vous recommander pour devenir conducteur ou chef de la sécurité !",
+                                npc: 700467,
+                                next: 51214102,
+                            },
+                            {
+                                id: 51214102,
+                                content:
+                                    "<I>Ce type profite clairement du chaos pour soutirer de l’argent aux gens... Autant le faire taire avant qu’il n’aille plus loin.</>",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 51214103,
+                                        content: "<I>L’avertir d’arrêter de provoquer des troubles</>",
+                                        next: 51214104,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 51214106,
+                                        content: "<I>Parler calmement pour comprendre ses motivations</>",
+                                        next: 51214107,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51214110,
+                                        content: "<I>Donner un coup de poing pour le faire taire</>",
+                                        next: 51214111,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214104,
+                                content:
+                                    "Peu importe ce qu’a fait Eisenbahn, profiter de la situation pour récolter de l’argent avec de grands discours... vous essayez surtout de vous enrichir dans le chaos, non ?",
+                                npc: 100001,
+                                next: 51214105,
+                            },
+                            {
+                                id: 51214107,
+                                content:
+                                    "Quel genre d’injustice avez-vous subi ? Et qu’espérez-vous obtenir ? Les conflits n’ont pas forcément besoin d’être réglés de manière aussi extrême.",
+                                npc: 100001,
+                                next: 51214108,
+                            },
+                            {
+                                id: 51214111,
+                                content:
+                                    "H-Hé ! Qu’est-ce que vous faites ?! Me frappez pas ! Je vous préviens : plus vous essayerez de nous faire taire, plus nous résisterons ! Nous ne nous inclinerons jamais !",
+                                npc: 700467,
+                            },
+                            {
+                                id: 51214105,
+                                content: "Vous trois, vous jouez à quoi exactement ? Aux justiciers ?",
+                                npc: 700467,
+                            },
+                            {
+                                id: 51214108,
+                                content:
+                                    "Je... je... Moi, je suis juste quelqu’un qui ne supporte plus Eisenbahn ! Et puis ses crimes sont connus de tout le monde !",
+                                npc: 700467,
+                                next: 51214109,
+                            },
+                            {
+                                id: 51214109,
+                                content:
+                                    "Vous dites que je vais trop loin ? Moi, je pense surtout que vous essayez de le défendre ! Aujourd’hui, vous allez prendre les mêmes coups qu’Eisenbahn !",
+                                npc: 700467,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800431095985915145",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-12493, -20],
+                        next: ["17800431095985915145"],
+                        dialogues: [
+                            {
+                                id: 51214094,
+                                content: "Eisenbahn est vraiment ignoble !",
+                                npc: 700467,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178004491486313298663",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-12493, -20],
+                        next: ["178004463604210345927"],
+                        dialogues: [
+                            {
+                                id: 51214113,
+                                content: "Aaaah ! Arrêtez, j’ai compris ! Pardon, pardon... Je recommencerai plus à escroquer les gens...",
+                                npc: 700467,
+                                next: 51214114,
+                            },
+                            {
+                                id: 51214114,
+                                content:
+                                    "Pourquoi prétendre défendre les opprimés alors que vous profitez simplement des rumeurs autour du chef de gare Eisenbahn pour arnaquer les gens ?",
+                                npc: 100001,
+                                next: 51214115,
+                            },
+                            {
+                                id: 51214115,
+                                content:
+                                    "<I>Tss.</> Quand un mur s’effondre, tout le monde vient lui donner un dernier coup. C’est aussi simple que ça. Il y a trois jours encore, j’étais l’un de ses plus fervents partisans. Je récupérais même quelques pièces auprès des membres du Salon du Sifflet grâce à mes discours.",
+                                npc: 700467,
+                                next: 51214116,
+                            },
+                            {
+                                id: 51214116,
+                                content:
+                                    "Je dis simplement ce que les gens veulent entendre. Je suis juste un orateur ordinaire qui gagne sa vie grâce au soutien et aux dons du public... On peut pas vraiment appeler ça une arnaque—",
+                                npc: 700467,
+                                next: 51214117,
+                            },
+                            {
+                                id: 51214117,
+                                content: "Hmm ? Qu’est-ce que vous venez de dire ?",
+                                npc: 100401,
+                                next: 51214118,
+                            },
+                            {
+                                id: 51214118,
+                                content:
+                                    "Le protestataire jette un regard au poing de l’Étranger avant de baisser aussitôt la tête, devenu soudainement docile.",
+                                next: 51214119,
+                            },
+                            {
+                                id: 51214119,
+                                content: "P-Pardon... Je suis juste un sale escroc.",
+                                npc: 700467,
+                                next: 51214120,
+                            },
+                            {
+                                id: 51214120,
+                                content: "Qu’est-ce que vous savez exactement ? Pourquoi tout le monde parle-t-il de contrebande ?",
+                                npc: 100001,
+                                next: 51214121,
+                            },
+                            {
+                                id: 51214121,
+                                content:
+                                    "Parce que tout le monde le dit ! Moi, j’en sais rien au fond. Certains disent qu’il faisait passer du Phoxichor en douce, d’autres parlent de trafic de Géniemon... chacun raconte sa version.",
+                                npc: 700467,
+                                next: 51214122,
+                            },
+                            {
+                                id: 51214122,
+                                content: "Et vous avez entendu ça de qui exactement ?",
+                                npc: 100001,
+                                next: 51214123,
+                            },
+                            {
+                                id: 51214123,
+                                content:
+                                    "Euh... d’un homme qui avait l’air super déçu, d’un marchand aussi... Ah oui, et d’une femme complètement folle qui répétait sans arrêt qu’Eisenbahn devait payer pour ses crimes.",
+                                npc: 700467,
+                                next: 51214124,
+                            },
+                            {
+                                id: 51214124,
+                                content:
+                                    "Je me souviens pourtant leur avoir demandé d’arrêter de répandre ces rumeurs. Si les avertissements polis ne suffisent pas, alors notre président n’hésitera pas à utiliser certains moyens plus... particuliers pour protéger la réputation du chef de gare Eisenbahn.",
+                                npc: 100001,
+                                next: 51214125,
+                            },
+                            {
+                                id: 51214125,
+                                content:
+                                    "Ahah, ça ne marchera jamais. Si les avertissements suffisaient à arrêter les gens, le monde serait déjà en paix. Il faut savoir attiser les émotions comme moi je le fais... Mais de toute façon, maintenant, il est déjà trop tard.",
+                                npc: 700467,
+                                next: 51214126,
+                            },
+                            {
+                                id: 51214126,
+                                content:
+                                    "Pour être honnête, au départ, je ne croyais même pas vraiment à cette histoire. Mais à partir du moment où vous êtes venus me voir... j’ai commencé à croire que c’était vrai.",
+                                npc: 700467,
+                                next: 51214127,
+                            },
+                            {
+                                id: 51214127,
+                                content:
+                                    "Votre présence ici prouve que vous êtes nerveux. Que vous avez peur, pas vrai ? Sinon, vous auriez simplement laissé courir les rumeurs.",
+                                npc: 700467,
+                                next: 51214128,
+                            },
+                            {
+                                id: 51214128,
+                                content:
+                                    "Et je doute fortement d’être le seul à penser ça... Enfin, inutile de trop vous inquiéter. La Gare des Cent-Fleurs est petite, les gens circulent vite, et les rumeurs s’y répandent à une vitesse folle. À l’heure qu’il est, toute la gare est probablement déjà au courant.",
+                                npc: 700467,
+                                next: 51214129,
+                            },
+                            {
+                                id: 51214129,
+                                content:
+                                    "<I>Je suis {性别:étranger|étrangère} à cette gare, alors je ne réalisais pas à quel point les informations circulaient vite ici... Mais Seaton, en tant que président du Salon du Sifflet, pouvait-il vraiment ne pas avoir anticipé cela ?</>",
+                                npc: 100001,
+                                next: 51214130,
+                            },
+                            {
+                                id: 51214130,
+                                content:
+                                    "Ouais, j’ai entendu aussi. Je vais le dire à sa place ; le petit champi a dû avoir un sacré choc. Seaton a dit...",
+                                npc: 100401,
+                                next: 51214131,
+                            },
+                            {
+                                id: 51214131,
+                                content:
+                                    "« Pour un soldat, son arme représente sa vie. Voilà la preuve de ma loyauté envers le chef de gare. »",
+                                npc: 100401,
+                                next: 51214132,
+                            },
+                            {
+                                id: 51214132,
+                                content: "« Et la récompense que j’attends en retour... c’est le cœur du chef de gare. »",
+                                npc: 100401,
+                                next: 51214133,
+                            },
+                            {
+                                id: 51214133,
+                                content:
+                                    "<I>... Et si tout était inversé ? Et si le véritable objectif de Seaton n’avait jamais été d’empêcher la propagation de cette histoire, mais plutôt...</>",
+                                npc: 100001,
+                                next: 51214134,
+                            },
+                            {
+                                id: 51214134,
+                                content:
+                                    "... Quand on veut qu’une information se répande partout, le moyen le plus efficace consiste parfois à essayer de l’étouffer.",
+                                npc: 100001,
+                                next: 51214135,
+                            },
+                            {
+                                id: 51214135,
+                                content:
+                                    "Exactement, exactement ! Enfin bref, c’est comme ça que ça fonctionne. Mais ne culpabilisez pas trop non plus... Même si ma soi-disant lutte était bidon, ça ne veut pas dire qu’Eisenbahn est innocent pour autant, pas vrai ?",
+                                npc: 700467,
+                                next: 51214136,
+                            },
+                            {
+                                id: 51214136,
+                                content:
+                                    "Vous avez du talent pour parler, vous savez ! Vous avez le potentiel d’un vrai orateur. Si vous voulez, je peux même vous apprendre quelques techniques. Et si vous devenez {性别:mon|ma} disciple aujourd’hui, je vous offrirai exceptionnellement les frais d’inscription—",
+                                npc: 700467,
+                                next: 51214137,
+                            },
+                            {
+                                id: 51214137,
+                                content:
+                                    "Ce que vous faites n’a rien d’un discours. C’est juste de l’escroquerie pure et simple. Alors abandonnez immédiatement cette idée ; {nickname} n’est pas assez {性别:naïf|naïve} pour tomber là-dedans. Et au fait... qu’est-ce que vous vouliez dire par « il est déjà trop tard » ?",
+                                npc: 100401,
+                                next: 51214138,
+                            },
+                            {
+                                id: 51214138,
+                                content:
+                                    "Quoi ?! Vous êtes vraiment de la concurrence ou quoi ?! ... Enfin bref : quelqu’un a fabriqué des affiches à partir de cette photo. Elles sont déjà placardées dans toute la gare. Vous les avez pas vues ?",
+                                npc: 700467,
+                                next: 51214139,
+                            },
+                            {
+                                id: 51214139,
+                                content:
+                                    "À ce stade, même si Eisenbahn lui-même venait parler, plus personne ne l’écouterait. Et honnêtement ? Les gens feront davantage confiance à leurs propres yeux qu’à ses paroles. Je ne sais pas qui vous êtes exactement, mais abandonnez.",
+                                npc: 700467,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178004463604210345927",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-12493, -20],
+                        dialogues: [
+                            {
+                                id: 51214141,
+                                content: "Pourquoi l’avoir laissé partir ? On aurait pas dû le ramener à Seaton comme preuve ?",
+                                npc: 100402,
+                                next: 51214142,
+                            },
+                            {
+                                id: 51214142,
+                                content:
+                                    "Si tout le monde pense réellement comme ce manifestant... alors ça veut dire qu’il y a déjà énormément de gens dans la gare qui considèrent qu’Eisenbahn a commis quelque chose de terrible.",
+                                npc: 100402,
+                                next: 51214143,
+                            },
+                            {
+                                id: 51214143,
+                                content:
+                                    "Mais c’est complètement l’inverse de ce que Seaton voulait obtenir, non ?! Il voulait que tout le monde continue à soutenir Eisenbahn !",
+                                npc: 100402,
+                                next: 51214144,
+                            },
+                            {
+                                id: 51214144,
+                                content:
+                                    "Hmm... Il nous a demandé d’effacer l’impact de cette photo, mais au final, ça n’a fait qu’attiser encore davantage les flammes.",
+                                npc: 100401,
+                                next: 51214145,
+                            },
+                            {
+                                id: 51214145,
+                                content: "Et si... c’était justement ce qu’il cherchait depuis le début ?",
+                                npc: 100001,
+                                next: 51214146,
+                            },
+                            {
+                                id: 51214146,
+                                content:
+                                    "Quand on y réfléchit, même si tout part de cette photo d’Eisenbahn que nous avons prise, c’est quand même le Salon du Sifflet qui nous a confié cette mission... et qui a choisi cette photo comme grande gagnante.",
+                                npc: 100401,
+                                next: 51214147,
+                            },
+                            {
+                                id: 51214147,
+                                content:
+                                    "Et dès que cette image a commencé à provoquer des réactions, ils nous ont immédiatement envoyés pour « calmer » la situation. Peu importe comment on regarde ça... c’est louche.",
+                                npc: 100401,
+                                next: 51214148,
+                            },
+                            {
+                                id: 51214148,
+                                content:
+                                    "Et pourtant, ce type disait tout à l’heure que ça ne ferait qu’aggraver les choses et répandre encore plus vite les rumeurs...",
+                                npc: 100401,
+                                next: 51214149,
+                            },
+                            {
+                                id: 51214149,
+                                content:
+                                    "Donc selon toi... tout cela aurait été orchestré par Seaton depuis le début ? Le Salon du Sifflet chercherait volontairement à créer des problèmes à Eisenbahn ?",
+                                npc: 100001,
+                                next: 51214150,
+                            },
+                            {
+                                id: 51214150,
+                                content:
+                                    "Oui... Entre cette histoire de répétition théâtrale et les paroles qu’il a prononcées plus tôt, il semble évident qu’il ne porte pas Eisenbahn dans son cœur. Il pourrait même nourrir une haine assez profonde envers lui.",
+                                npc: 100001,
+                                next: 51214151,
+                            },
+                            {
+                                id: 51214151,
+                                content: "Oui. J’ai bien peur que nous ayons tous été utilisés comme pièces dans son plan.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040705,
+                name: "Retourner au salon des nobles et parler à Seaton",
+                desc: "L’opinion publique tourne clairement au désavantage d’Eisenbahn, et vous commencez à soupçonner que c’est précisément le résultat recherché par Seaton. Retournez au salon et parlez de nouveau à Seaton afin de confirmer ses véritables intentions.",
+                nodes: [
+                    {
+                        id: "17798719698297318137",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32191, -7000],
+                        dialogues: [
+                            {
+                                id: 51214153,
+                                content:
+                                    "Ah, vous voilà de retour, jeune recrue. Asseyez-vous donc et prenez une tasse de thé. Nous pouvons parler tranquillement... Alors, quelle est la situation ?",
+                                npc: 700400,
+                                next: 51214154,
+                            },
+                            {
+                                id: 51214154,
+                                content:
+                                    "Vous racontez à Seaton comment les rumeurs se sont propagées de plus en plus vite, ainsi que l’effet inverse provoqué par vos tentatives pour les calmer.",
+                                next: 51214155,
+                            },
+                            {
+                                id: 51214155,
+                                content:
+                                    "Voilà des méthodes bien douces pour tenter de faire taire les gens... Vous n’avez jamais envisagé d’utiliser des moyens plus radicaux ? Des méthodes qui les empêcheraient définitivement de parler ?",
+                                npc: 700400,
+                                options: [
+                                    {
+                                        id: 51214156,
+                                        content: "<I>... Je ne pense pas qu’il soit nécessaire d’aller jusque-là.</>",
+                                        next: 51214157,
+                                    },
+                                    {
+                                        id: 51214158,
+                                        content: "<I>Vous ne semblez pas vraiment surpris par ce résultat.</>",
+                                        next: 51214159,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214157,
+                                content: "Haha... Détendez-vous donc. Je plaisantais.",
+                                npc: 700400,
+                                next: 51214160,
+                            },
+                            {
+                                id: 51214159,
+                                content:
+                                    "Parce que j’ai tout préparé avec soin. Peu importe les nouvelles que vous me rapportiez, rien n’aurait pu me surprendre.",
+                                npc: 700400,
+                                next: 51214160,
+                            },
+                            {
+                                id: 51214160,
+                                content: "Vraiment ?",
+                                npc: 100001,
+                                next: 51214161,
+                            },
+                            {
+                                id: 51214161,
+                                content:
+                                    "Bien sûr. Je ne vais pas blâmer une nouvelle recrue, surtout après tout ce que vous avez déjà accompli.",
+                                npc: 700400,
+                                next: 51214162,
+                            },
+                            {
+                                id: 51214162,
+                                content: "Je pense que vous l’avez fait exprès.",
+                                npc: 100001,
+                                next: 51214163,
+                            },
+                            {
+                                id: 51214163,
+                                content:
+                                    "Voyons... Comment pourriez-vous croire une chose pareille ? Le Salon du Sifflet représente l’honneur d’Eisenbahn. Tout ce que nous faisons vise simplement à offrir un avenir meilleur à la Gare des Cent-Fleurs... et à Eisenbahn lui-même.",
+                                npc: 700400,
+                                next: 51214164,
+                            },
+                            {
+                                id: 51214164,
+                                content: "Encore faut-il qu’il soit réellement quelqu’un de bien, n’est-ce pas ?",
+                                npc: 700400,
+                                next: 51214165,
+                            },
+                            {
+                                id: 51214165,
+                                content:
+                                    "Tout cela n’a de sens que si l’homme que nous suivons mérite réellement notre loyauté. Et malheureusement... jamais de toute ma vie je n’ai autant regretté de ne pas posséder des yeux capables de voir au fond du cœur des hommes.",
+                                npc: 700400,
+                                next: 51214166,
+                            },
+                            {
+                                id: 51214166,
+                                content:
+                                    "Vous aussi, vous êtes {性别:déçu|déçue}, pas vrai ? Vous aviez pris cette photographie avec admiration et sincérité... une image si remarquable.",
+                                npc: 700400,
+                                next: 51214167,
+                            },
+                            {
+                                id: 51214167,
+                                content:
+                                    "En tant que président du Salon du Sifflet, il vous était impossible de ne pas voir le problème avec cette photo.",
+                                npc: 100001,
+                                next: 51214168,
+                            },
+                            {
+                                id: 51214168,
+                                content:
+                                    "Et parmi les dizaines de membres du Salon, il est impossible que personne n’ait remarqué qu’elle nuisait à la réputation d’Eisenbahn. À moins que...",
+                                npc: 100001,
+                                next: 51214169,
+                            },
+                            {
+                                id: 51214169,
+                                content:
+                                    "À moins que tout cela ait été volontaire. Ce n’est pas ma technique photographique qui vous intéressait... mais le fait que j’aie capturé une preuve essentielle.",
+                                npc: 100001,
+                                next: 51214170,
+                            },
+                            {
+                                id: 51214170,
+                                content:
+                                    "... Vous avez immédiatement utilisé cette photo pour imprimer des affiches, puis lancé vos quiz et vos campagnes de promotion afin de la diffuser partout. Ensuite, vous avez laissé les rumeurs se propager d’elles-mêmes. Avec une image aussi convaincante comme preuve, elles ne pouvaient que se répandre rapidement.",
+                                npc: 100001,
+                                next: 51214171,
+                            },
+                            {
+                                id: 51214171,
+                                content: "...",
+                                npc: 700400,
+                                next: 51214172,
+                            },
+                            {
+                                id: 51214172,
+                                content: "Impressionnant.",
+                                npc: 700400,
+                                next: 51214173,
+                            },
+                            {
+                                id: 51214173,
+                                content:
+                                    "Vous m’avez envoyé faire taire les gens afin de rendre l’affaire encore plus crédible. Comme j’étais un nouveau visage du Salon, les habitants avaient encore plus de raisons de croire qu’Eisenbahn essayait lui-même d’étouffer les informations.",
+                                npc: 100001,
+                                next: 51214174,
+                            },
+                            {
+                                id: 51214174,
+                                content: "À votre avis... qu’est-ce que nous cherchons réellement à obtenir ?",
+                                npc: 700400,
+                                next: 51214175,
+                            },
+                            {
+                                id: 51214175,
+                                content: "Vous cherchez...",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 51214176,
+                                        content: "<I>... à détruire Eisenbahn.</>",
+                                        next: 51214177,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 51214179,
+                                        content: "<I>... à attirer l’attention d’Eisenbahn sur votre amour !</>",
+                                        next: 51214180,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214177,
+                                content:
+                                    "Le Salon du Sifflet... des partisans d’Eisenbahn qui cherchent en réalité à le détruire ? Vous voulez ruiner sa réputation.",
+                                npc: 100001,
+                                next: 51214178,
+                            },
+                            {
+                                id: 51214180,
+                                content:
+                                    "C’est un amour déformé né du rejet ! Parce qu’il brille comme le soleil sans n’éclairer personne exclusivement, vous avez fini par nourrir du ressentiment ! Vous voulez le détruire afin qu’il remarque enfin vos sentiments sincères...",
+                                npc: 100001,
+                                next: 51214181,
+                            },
+                            {
+                                id: 51214178,
+                                content: "Exactement. Vous êtes très perspicace.",
+                                npc: 700400,
+                                next: 51214184,
+                            },
+                            {
+                                id: 51214181,
+                                content: "... ? P-Pardon ?",
+                                npc: 700400,
+                                next: 51214182,
+                            },
+                            {
+                                id: 51214184,
+                                content:
+                                    "Vous vous êtes servi du titre de fidèle partisan pour approcher Eisenbahn... Depuis combien de temps préparez-vous tout cela ?",
+                                npc: 100001,
+                                next: 51214185,
+                            },
+                            {
+                                id: 51214182,
+                                content:
+                                    "{性别:Mon maître|Ma maîtresse} a parfois un sens de l’humour un peu particulier. {性别:Il|Elle} veut simplement dire que vous cherchez à ruiner Eisenbahn.",
+                                npc: 100401,
+                                next: 51214183,
+                            },
+                            {
+                                id: 51214185,
+                                content:
+                                    "Depuis combien de temps, hm... Deux ou trois ans, peut-être. Je ne m’en souviens même plus très bien. Après tout, les gens ne retiennent que ce qui compte réellement pour eux, n’est-ce pas ? Ce Salon du Sifflet n’a toujours été qu’une façade. Pourquoi me souviendrais-je même de sa date de création ?",
+                                npc: 700400,
+                                next: 51214186,
+                            },
+                            {
+                                id: 51214183,
+                                content: "... C’est effectivement le cas.",
+                                npc: 700400,
+                                next: 51214184,
+                            },
+                            {
+                                id: 51214186,
+                                content:
+                                    "Eisenbahn n’a jamais mérité tout cela. Celui qui aurait dû être envoyé à la Gare des Cent-Fleurs à l’époque... c’était moi.",
+                                npc: 700400,
+                                next: 51214187,
+                            },
+                            {
+                                id: 51214187,
+                                content:
+                                    "Il m’a volé cette gare. Il a exploité et écrasé les ouvriers avec une cruauté insoutenable... Les pauvres. Si j’avais été à sa place, jamais je ne les aurais traités ainsi.",
+                                npc: 700400,
+                                next: 51214189,
+                            },
+                            {
+                                id: 51214189,
+                                content: "...",
+                                npc: 100001,
+                                next: 51214190,
+                            },
+                            {
+                                id: 51214190,
+                                content: "Cet homme a toujours été cruel. Violent. Un véritable monstre.",
+                                npc: 700400,
+                                next: 51214191,
+                            },
+                            {
+                                id: 51214191,
+                                content:
+                                    "Retards de salaire, ouvriers malades abandonnés à la mort, racket des commerçants locaux... crime après crime. Toute la prospérité de cette gare a été bâtie au prix du sang.",
+                                npc: 700400,
+                                next: 51214192,
+                            },
+                            {
+                                id: 51214192,
+                                content:
+                                    "Regardez cette photo, jeune recrue. Cette preuve que vous avez capturée de vos propres mains... le coup final qui fera s’effondrer son hypocrisie. Regardez : le Phoxichor, les marchands... et Eisenbahn lui-même !",
+                                npc: 700400,
+                                next: 51214193,
+                            },
+                            {
+                                id: 51214193,
+                                content:
+                                    "C’est assez rare, finalement. En dehors d’étrangers comme Toran, nous avons trouvé quelqu’un comme vous au sein du Salon du Sifflet... quelqu’un de perspicace, de décisif et bien plus capable d’agir que tous les autres membres réunis.",
+                                npc: 700400,
+                                next: 51214194,
+                            },
+                            {
+                                id: 51214194,
+                                content: "Je suis vraiment heureux de vous avoir rencontré, jeune recrue... Non. Mon {性别:ami|amie}.",
+                                npc: 700400,
+                                next: 51214195,
+                            },
+                            {
+                                id: 51214195,
+                                content:
+                                    "Tout est déjà prêt. Désormais, vous allez assister à la renaissance de la Gare des Cent-Fleurs entre vos mains et les miennes. Les richesses qu’Eisenbahn a accumulées par des moyens honteux serviront enfin à améliorer la vie des gens ordinaires.",
+                                npc: 700400,
+                                next: 51214196,
+                            },
+                            {
+                                id: 51214196,
+                                content:
+                                    "Améliorer la vie des gens ordinaires... J’espère sincèrement que vous tiendrez parole. Je vous souhaite bonne chance.",
+                                npc: 100001,
+                                next: 51214197,
+                            },
+                            {
+                                id: 51214197,
+                                content: "Merci pour vos encouragements, mon {性别:ami|amie}. Levons nos verres à cet avenir radieux.",
+                                npc: 700400,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 200408,
+        quests: [
+            {
+                id: 20040801,
+                name: "Parler à Seaton",
+                desc: "Après avoir aidé le Salon du Sifflet à accomplir de nombreuses requêtes, cette organisation qui affichait son soutien à Eisenbahn tout en cherchant secrètement des preuves pour le faire tomber vous révèle enfin son véritable visage. Avant que cette opération minutieusement préparée ne soit lancée, Seaton semble avoir encore quelque chose à vous dire...",
+                nodes: [
+                    {
+                        id: "17823551146841591932",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32160, -6570],
+                        next: ["17823551146841591933"],
+                        dialogues: [
+                            {
+                                id: 51215001,
+                                content:
+                                    "Le soleil apporte une abondance éternelle, au point que les hommes s’enivrent de ses louanges dans leurs hymnes... oubliant qu’il peut aussi engendrer la mort.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146841591933",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32180, -6990],
+                        dialogues: [
+                            {
+                                id: 51215002,
+                                content:
+                                    "... Vous voilà revenu, mon {性别:ami|amie}. On dirait que vous êtes enfin {性别:prêt|prête} à assister avec le Salon du Sifflet à la chute d’Eisenbahn.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215003,
+                                content:
+                                    "Votre arrivée tombe à merveille. Le piège que j’ai préparé depuis si longtemps contre Eisenbahn a encore besoin d’un dernier coup de main avant de pouvoir se refermer parfaitement...",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215004,
+                                content: "Vous allez quand même pas me demander de vous aider à assassiner Eisenbahn ?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215005,
+                                content:
+                                    "Haha... Là, vous vous emballez un peu. Même si vous avez été particulièrement remarquable, sachez qu’au sein du Salon du Sifflet, nombreux sont ceux qui nourrissent depuis longtemps une haine profonde envers Eisenbahn.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215006,
+                                content:
+                                    "Ainsi, lorsque j’ai discrètement révélé mon plan aux membres du Salon en qui j’avais confiance, même ceux qui ne jetteraient normalement pas un regard vers un théâtre se sont précipités pour participer.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215007,
+                                content:
+                                    "Sans se soucier de leur âge, de leur voix ou du reste... ils ne pensaient qu’à une chose : tirer sur Eisenbahn lors du dernier acte.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215008,
+                                content:
+                                    "Pour être honnête, si je n’avais pas eu peur de laisser mon excitation prendre le dessus au point de gâcher la représentation, j’aurais insisté pour monter moi-même sur scène. Mais pour garantir le succès du plan, j’ai finalement choisi ce jeune Levi.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215009,
+                                content: "Après tout ce discours... qu’est-ce que vous attendez exactement de moi ?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215010,
+                                content:
+                                    "Allons, ne soyez pas si pressé, jeune {性别:homme|femme}. Mais peut-être est-ce justement cette impatience qui vous rend différent des autres.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215011,
+                                content:
+                                    "À vrai dire, vous êtes probablement la seule personne depuis des années à avoir obtenu à la fois la confiance du Salon du Sifflet... et celle de l’Union du Tournevis.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215012,
+                                content: "Comment êtes-vous au courant de ça ?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215013,
+                                content:
+                                    "Puisque je suis capable d’organiser une tentative d’assassinat contre Eisenbahn à son insu, c’est que je possède naturellement quelques réseaux d’informations.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215014,
+                                content:
+                                    "Bref. Étant donné vos relations plutôt amicales avec l’Union du Tournevis, j’aimerais que vous les convainquiez de provoquer quelques troubles dans la gare... afin qu’ils puissent eux aussi assister à la chute finale d’Eisenbahn.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215015,
+                                content:
+                                    "Sinon, ces types qui vivent sous terre comme des taupes risquent de ne même pas remarquer avant demain matin que la Gare des Cent-Fleurs a changé de maître.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215016,
+                                content:
+                                    "Je veux qu’ils comprennent immédiatement que cette gare appartiendra désormais à moi : Seaton Brutus.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215017,
+                                content: "Ainsi, ils seront intimidés, et cela facilitera votre prise de contrôle de la gare ?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215018,
+                                content:
+                                    "Exactement. Même si l’Union du Tournevis reste une organisation clandestine, son influence auprès des ouvriers est loin d’être négligeable. Ils seront donc le public parfait pour cette grande représentation.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215019,
+                                content:
+                                    "Alors ? Qu’en dites-vous ? Si vous parvenez à les convaincre de venir, après notre réussite, je pourrai vous céder un vingtième des richesses accumulées par Eisenbahn... Non, disons plutôt un dixième.",
+                                npc: 700580,
+                                options: [
+                                    {
+                                        id: 51215020,
+                                        content: "<I>J’accepte. Moi aussi, Eisenbahn m’inspire du dégoût depuis longtemps.</>",
+                                        next: 51215021,
+                                    },
+                                    {
+                                        id: 51215023,
+                                        content:
+                                            "<I>Vos promesses ne m’intéressent pas. Mais j’imagine que je n’ai pas vraiment le luxe de refuser.</>",
+                                        next: 51215024,
+                                    },
+                                    {
+                                        id: 51215026,
+                                        content: "<I>Refuser</>",
+                                        next: 51215027,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51215021,
+                                content: "Les grands esprits finissent toujours par se comprendre, mon {性别:ami|amie}.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215022,
+                                content:
+                                    "Je vais contacter l’Union du Tournevis pour vous... mais je ne peux pas garantir qu’ils réagiront exactement comme vous l’espérez.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215024,
+                                content:
+                                    "Intelligent. La Gare des Cent-Fleurs finira tôt ou tard sous mon contrôle. Dans ce cas, satisfaire ma demande est pour vous le choix le plus raisonnable... et probablement le seul.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215025,
+                                content:
+                                    "Je vais contacter l’Union du Tournevis pour vous... mais je ne peux pas garantir qu’ils réagiront exactement comme vous l’espérez.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215027,
+                                content:
+                                    "Dans un coin de la pièce, une sentinelle rouge fidèle à Seaton serre lentement le poing. Refuser trop brusquement ne semble clairement pas être une bonne idée.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215028,
+                                content:
+                                    "Très bien... Je vais contacter l’Union du Tournevis pour vous. Mais je ne peux pas garantir qu’ils réagiront exactement comme vous l’espérez.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215029,
+                                content:
+                                    "Haha, ne vous inquiétez pas. S’ils ont réussi à survivre aussi longtemps sous Eisenbahn, c’est qu’ils savent reconnaître quand le vent tourne.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215030,
+                                content: "Alors allez-y. Plus tard, nous contemplerons ensemble la chute de notre cher Eisenbahn.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215031,
+                                content:
+                                    "À votre avis... suppliera-t-il pour sa vie ? Ou bien nous traitera-t-il de monstres jusqu’au dernier instant ? À moins que Levi ne tire suffisamment bien pour qu’il meure avant même de comprendre ce qui lui arrive...",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215032,
+                                content:
+                                    "Hmm... Non, ce serait dommage. Je devrais peut-être avoir une petite discussion avec Levi avant le spectacle.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215033,
+                                content:
+                                    "Seaton se remit ensuite à marmonner dans son coin, continuant d’affiner les derniers détails de son plan. Il est probablement temps de partir et de rejoindre l’Union du Tournevis.",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040802,
+                name: "Se rendre à l’Union du Tournevis",
+                desc: "Une grande représentation est sur le point de commencer, mais tous les acteurs ne sont pas encore réunis. Seaton a besoin du soutien d’une autre organisation de la gare : l’Union du Tournevis. Pour une raison qui vous échappe, il sait que vous entretenez des liens étroits avec elle et vous confie cette mission. Vous n’avez guère le choix ; il ne vous reste qu’à avancer pas à pas.",
+                nodes: [
+                    {
+                        id: "17823551146841591940",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-18160, 11720],
+                        dialogues: [
+                            {
+                                id: 51215035,
+                                content: "Maggie ! On est revenus te voir !",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215036,
+                                content:
+                                    "Oh ? Mais regardez qui revoilà ! Tu viens à peine de repartir avec le Tournevis de la gloire que te voilà déjà de retour ? Et en plus, t’as ramené un grand gaillard avec toi...",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215037,
+                                content:
+                                    "Alors ? T’as raté le dernier train et tu viens boire un coup ici pour faire passer la nuit jusqu’au lever du soleil ? Ou tu voulais simplement voir comment fonctionne vraiment l’emblème de l’Union du Tournevis ?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215038,
+                                content:
+                                    "Rien de tout ça. On vient parler sérieusement. J’apporte un message concernant le Salon du Sifflet.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215039,
+                                content:
+                                    "Le Salon du Sifflet ? Alors comme ça, ces chiens domestiques arrivent maintenant à t’envoyer transmettre leurs messages ? Je croyais qu’ils passaient leurs journées à rêver de se frotter aux bottes d’Eisenbahn pour attirer son attention.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215040,
+                                content: "Alors, qu’est-ce qu’ils veulent cette fois ? Bah... je te fais confiance.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215041,
+                                content:
+                                    "Si tu penses que cette information vaut quelque chose, raconte-la-moi. Mais si c’est juste un tas d’ordures, alors retourne leur dire de ma part que ceux du Salon du Sifflet sont tous une bande de tocards.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215042,
+                                content:
+                                    "Tu recommences à insulter les gens ? Franchement... Avec ta façon de parler, je n’ose même plus garder un perroquet ici. Cette petite peste finirait par lui apprendre toutes les insultes possibles visant la famille entière des gens.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215043,
+                                content:
+                                    "Vous disiez que le Salon du Sifflet avait une affaire sérieuse à proposer ? Pour le coup, c’est rare. Même si nous vivons dans la même gare, nous n’avons jamais vraiment eu grand-chose à voir avec eux.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215044,
+                                content:
+                                    "Le président du Salon du Sifflet... Seaton, c’est ça ? Qu’est-ce qu’il veut ? Nous déclarer la guerre ? Haha... Ou alors annoncer qu’il a finalement décidé d’éliminer l’Union du Tournevis au nom d’Eisenbahn ?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215045,
+                                content: "Pas du tout. Au contraire... il veut votre aide.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215046,
+                                content:
+                                    "Vous expliquez alors à Lorent et Maggie le plan de Seaton : profiter du dixième anniversaire d’Eisenbahn à la Gare des Cent-Fleurs pour organiser une représentation théâtrale... et profiter de cette occasion pour l’assassiner.",
+                            },
+                            {
+                                id: 51215047,
+                                content:
+                                    "Quant à l’Union du Tournevis, son rôle sera de provoquer le chaos au même moment où Eisenbahn sera attaqué.",
+                            },
+                            {
+                                id: 51215048,
+                                content: "Attends... Tu veux dire le président du Salon du Sifflet... comment il s’appelle déjà ? Citron ?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215049,
+                                content: "Seaton.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215050,
+                                content:
+                                    "Ah oui, Seaton ! Donc il veut qu’on l’aide à éliminer Eisenbahn ? Sérieusement... Comment ça se fait qu’une occasion aussi incroyable leur soit tombée dessus avant nous ?!",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215051,
+                                content:
+                                    "Lorent, dis vite quelque chose pour me remonter le moral, sinon je vais vraiment commencer à douter de moi. Me dis pas qu’une bande de chiens domestiques a plus de cran que moi ?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215052,
+                                content:
+                                    "Mais non ! T’es déjà patronne à ton âge ! Quand t’auras l’âge de Seaton, tu seras sûrement devenue quelqu’un d’encore plus important !",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215053,
+                                content:
+                                    "Merci pour le soutien, Snow. Mais honnêtement, si je suis devenue patronne, c’est uniquement parce que j’ai plus de cran que tous les autres !",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215054,
+                                content:
+                                    "Les anciens patrons de l’Union finissaient tous par se suicider mystérieusement d’une balle dans le dos ou ce genre de trucs. Résultat : plus personne voulait du poste. Sauf moi ! Maggie la Brave ! Moi, j’ai accepté !",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215055,
+                                content:
+                                    "Hum hum... Disons plutôt qu’on s’est dit qu’Eisenbahn n’irait probablement pas jusqu’à s’en prendre sérieusement à une gamine. C’est surtout pour ça qu’on t’a choisie comme mascotte, d’accord ?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215056,
+                                content: "Pas important ! Dans tous les cas : Maggie est la plus forte !",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215057,
+                                content:
+                                    "Bon, revenons au sujet. Lorent, vu comme t’as immédiatement reconnu ce Seaton, j’imagine que tu le connais un peu. On peut lui faire confiance ? On se lance avec lui ou pas ?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215058,
+                                content:
+                                    "Honnêtement... ça fait tellement longtemps que j’attends une occasion pareille que si tu refuses, je vais finir par te fracasser le crâne avec une clé à molette.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215059,
+                                content:
+                                    "Le connaître... pas vraiment. Mais puisqu’il est venu nous chercher directement, ça veut dire qu’ils sont déjà décidés à agir, avec ou sans nous...",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215060,
+                                content:
+                                    "C’est peut-être une opportunité. Peu importe le genre d’homme qu’est Seaton, il ne pourra jamais contrôler cette gare aussi fermement qu’Eisenbahn. S’il prend sa place, alors au moins... nous aurons matière à négocier.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215061,
+                                content:
+                                    "Magnifique, Lorent ! Je crois que c’est la première fois que je te vois ne pas te dégonfler ! Alors, qu’est-ce qu’on fait ?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215062,
+                                content:
+                                    "On se met immédiatement au travail. Nous n’avons plus beaucoup de temps. Que tout le monde commence à prévenir les ouvriers des forges.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215063,
+                                content:
+                                    "Attendez... Vous n’envisagez même pas l’échec ? Si l’assassinat rate et qu’Eisenbahn survit, vous serez forcément les premiers à subir sa vengeance.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215064,
+                                content: "Les occasions comme celle-ci ne nous attendront pas éternellement.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215065,
+                                content:
+                                    "L’Union du Tournevis a été fondée pour aider les ouvriers. Et renverser Eisenbahn serait la plus grande aide que nous puissions leur apporter.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215066,
+                                content:
+                                    "Et puis, maintenant que nous sommes au courant, nous sommes déjà montés à bord de ce navire malgré nous. Faire semblant de n’avoir rien entendu ou tenter d’en descendre maintenant ne ferait qu’aggraver la situation.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215067,
+                                content:
+                                    "Alors il n’y a plus vraiment à hésiter. Aujourd’hui, nous allons enfin venger les anciens patrons de l’Union du Tournevis.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215068,
+                                content:
+                                    "On va tout faire exploser ! Tout exploser ! Franchement, Lorent, derrière tes airs de type respectable, t’es encore plus cinglé que moi quand ce genre d’occasion se présente. Et ce livre de comptes ? On continue de le chercher ou pas ?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215069,
+                                content:
+                                    "Le livre de comptes attendra. Pour l’instant, la priorité absolue est d’arracher Eisenbahn de son siège de chef de gare.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215070,
+                                content:
+                                    "Nous allons encore avoir besoin de votre aide. Je sais déjà que nous vous avons fait courir partout aujourd’hui... mais croyez-moi, ce sera la dernière fois.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215071,
+                                content:
+                                    "Les adultes et leurs belles paroles~♪ Du boulot interminable et des courses à répétition~♪ Autant rentrer boire jusqu’à l’oubli et dormir jusqu’au matin~♪",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215072,
+                                content:
+                                    "Continue de chanter comme ça et je t’attache avant de t’envoyer directement dans le bureau d’Eisenbahn.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215073,
+                                content:
+                                    "Pourquoi tu t’énerves comme ça ?! Si je finis dans son bureau, toi aussi tu y passeras. Bon, assez bavardé. Au travail, au travail ! Je vais aller prévenir mes copains sur les structures métalliques au sommet de la gare.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215074,
+                                content:
+                                    "Ils vont sûrement croire que je raconte n’importe quoi... mais quelques coups de clé à molette sur la tête devraient vite les ramener à la réalité.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215075,
+                                content:
+                                    "Très bien. Moi aussi, je vais prévenir les ingénieurs. Quant aux ouvriers des forges... je vous les confie.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215076,
+                                content: "Pas de problème.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040803,
+                name: "Aller prévenir les ouvriers",
+                desc: "Après avoir présenté le plan de Seaton à Maggie et Lorent, leur réaction dépasse toutes vos attentes. Maggie se montre très enthousiaste ; c’était peut-être même ce qu’elle espérait depuis toujours. Quant à Lorent, contre toute attente, lui qui s’était toujours montré prudent lorsqu’il était question de s’opposer à Eisenbahn, accepte cette fois sans hésiter. Il est temps de vous séparer pour aller prévenir les ouvriers.",
+                nodes: [
+                    {
+                        id: "17823551146841591947",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-17577, 14133],
+                        next: ["17823551146841591944"],
+                        dialogues: [
+                            {
+                                id: 51215078,
+                                content: "Le travail s’arrête là pour aujourd’hui. Alors viens pas me casser les pieds.",
+                                npc: 700584,
+                            },
+                            {
+                                id: 51215079,
+                                content: "Arrête de te reposer. Si tout se passe bien cette fois, tu pourras te reposer pendant longtemps.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215080,
+                                content: "Vous expliquez alors à l’ouvrier ce qui va bientôt se produire.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215081,
+                                content:
+                                    "Buter Eisenbahn ? Sérieusement ? C’est Maggie qui t’envoie ? Arrête tes conneries... Quoi ? Même Lorent dit que c’est vrai ?",
+                                npc: 700584,
+                            },
+                            {
+                                id: 51215082,
+                                content: "Alors là, faut que je me prépare sérieusement. Attends-moi ici !",
+                                npc: 700584,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146841591944",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-12457, 12181],
+                        next: ["17823551146841591946"],
+                        dialogues: [
+                            {
+                                id: 51215084,
+                                content:
+                                    "J’ai entendu dire qu’en haut, tout le monde racontait qu’Eisenbahn faisait de la contrebande et qu’il méritait plus d’être chef de gare.",
+                                npc: 700585,
+                            },
+                            {
+                                id: 51215085,
+                                content:
+                                    "Et alors ? Même si c’est vrai, qu’est-ce que ça change ? Eisenbahn dirige cette gare depuis tellement longtemps que ce serait presque plus bizarre s’il n’avait pas sa propre caisse noire. Tout le monde en fait des tonnes... comme si quelqu’un pouvait vraiment lui faire quoi que ce soit.",
+                                npc: 700586,
+                            },
+                            {
+                                id: 51215086,
+                                content: "Vous leur expliquez alors ce qui va bientôt se produire.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215087,
+                                content:
+                                    "Une affaire aussi énorme ?! Dire que même les nobles peuvent plus voir Eisenbahn en peinture... Ce type est vraiment pourri jusqu’à la moelle.",
+                                npc: 700585,
+                            },
+                            {
+                                id: 51215088,
+                                content: "Allez, venez ! Cette fois, on va enfin avoir droit à un vrai spectacle.",
+                                npc: 700586,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146841591946",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-12597, 12271],
+                        dialogues: [
+                            {
+                                id: 51215090,
+                                content:
+                                    "On dirait que les ouvriers sont prêts à suivre le mouvement... Mais je trouve quand même que tout ça se déroule un peu trop facilement. Eisenbahn est installé ici depuis tellement longtemps... Tu crois vraiment qu’il peut être renversé aussi simplement ?",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215091,
+                                content:
+                                    "J’en doute aussi... Mais maintenant qu’on est impliqués là-dedans, rester les bras croisés nous mettrait surtout en danger. Alors autant avancer étape par étape.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215092,
+                                content: "Oui. Dépêchons-nous de retourner voir Maggie et Lorent.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040805,
+                name: "Retourner voir Maggie",
+                desc: "Les ouvriers accueillent avec enthousiasme votre proposition de renverser Eisenbahn. Tout semble se dérouler bien trop facilement... Cet immense arbre qui domine la Gare des Cent-Fleurs plonge ses racines dans la chair des ouvriers et assombrit leur existence serait-il enfin sur le point d’être abattu ?",
+                nodes: [
+                    {
+                        id: "17823551146841591956",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-17780, 12200],
+                        dialogues: [
+                            {
+                                id: 51215094,
+                                content: "Maggie ! Lorent ! On a prévenu les ouvriers, on est revenus !",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215095,
+                                content: "Hein ? Ils sont où ?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215096,
+                                content:
+                                    "Peut-être qu’ils ne sont pas encore revenus après être allés prévenir leurs hommes respectifs... quoique, ça reste bizarre. Maggie est partie jusqu’aux structures métalliques au sommet de la gare, donc elle peut effectivement prendre un peu plus de temps.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215097,
+                                content:
+                                    "Mais Lorent devait simplement aller prévenir les ingénieurs du côté de la plateforme de fret. Il devrait normalement être revenu avant nous.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215098,
+                                content: "Oh non... Tu crois qu’il s’est fait repérer puis arrêter par les hommes d’Eisenbahn ?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215099,
+                                content: "Attends... J’entends quelque chose. On dirait des voix. Allons voir.",
+                                npc: 100402,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040806,
+                name: "Se rendre à l’origine de la voix",
+                desc: "À votre retour, Maggie est introuvable. En revanche, une voix familière attire soudain votre attention...",
+                nodes: [
+                    {
+                        id: "17823551146841591961",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-19270, 13830],
+                        next: ["17823551146841591963"],
+                        dialogues: [
+                            {
+                                id: 51215101,
+                                content: "Là ! Cette voix... je la reconnaîtrais entre mille.",
+                                npc: 100402,
+                                next: 51215102,
+                            },
+                            {
+                                id: 51215102,
+                                content: "Encore un peu plus loin... oui... C’est bien Lorent. Ouf...",
+                                npc: 100402,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146841591963",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-19270, 13830],
+                        dialogues: [
+                            {
+                                id: 51215103,
+                                content:
+                                    "Juste devant... Attends, c’est mauvais signe. Il parle vraiment avec des types en uniforme rouge. Des gardes de la gare !",
+                                npc: 100402,
+                                next: 51215104,
+                            },
+                            {
+                                id: 51215104,
+                                content: "Vite ! Il faut aller l’aider !",
+                                npc: 100402,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040807,
+                name: "Écouter la conversation",
+                desc: "Les voix appartiennent à Lorent et à des gardes de la gare. Pourquoi sont-ils ensemble ? Et de quoi peuvent-ils bien parler ?",
+                nodes: [
+                    {
+                        id: "17823551146841591969",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-18914, 11402],
+                        dialogues: [
+                            {
+                                id: 51215106,
+                                content:
+                                    "Attends, Snow. Pas si vite. Regarde-les bien... Lorent a l’air complètement détendu. Ça ressemble pas du tout à un interrogatoire. Cachons-nous d’abord et écoutons ce qu’ils racontent.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215107,
+                                content:
+                                    "... Bref, voilà la situation. Vous devez prévenir Eisenbahn immédiatement : il ne doit surtout pas assister à la représentation de ce soir. Sa vie est en danger.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215108,
+                                content:
+                                    "Calme-toi, Lorent. Eisenbahn reçoit plus de menaces de mort que tu n’as vu de pièces dans toute ta vie. T’as l’air au bout de ta vie.",
+                                npc: 700588,
+                            },
+                            {
+                                id: 51215109,
+                                content: "Et évite aussi d’attirer l’attention. Quelqu’un pourrait finir par te suivre.",
+                                npc: 700588,
+                            },
+                            {
+                                id: 51215110,
+                                content:
+                                    "Ne prenez pas ça à la légère. Cette fois, c’est différent. Vous le savez aussi bien que moi : depuis ce concours photo organisé par le Salon du Sifflet, toute la gare est au courant des accusations de contrebande visant Eisenbahn.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215111,
+                                content:
+                                    "Même certains gardes commencent à se demander si Eisenbahn sert réellement l’Empire comme il le prétend.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215112,
+                                content:
+                                    "Et même si la tentative d’assassinat échoue, cette agitation risque d’ébranler la loyauté d’autres personnes envers lui. À ce moment-là, les gardes deviendront aussi difficiles à contrôler que les ouvriers.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215113,
+                                content: "Facile. Il suffit d’infiltrer un ou deux hommes totalement loyaux à Eisenbahn parmi les gardes.",
+                                npc: 700588,
+                            },
+                            {
+                                id: 51215114,
+                                content: "Comme si c’était aussi simple...",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215115,
+                                content:
+                                    "Ah bon ? Moi, je trouve ça très simple. L’argent. Les femmes. Les hommes. Ou à défaut, une belle promotion. Tout le monde a un prix.",
+                                npc: 700588,
+                            },
+                            {
+                                id: 51215116,
+                                content:
+                                    "Après tout, Lorent... toi aussi, tu travailles pour nous contre de l’argent et tu nous fournis des informations sur l’Union du Tournevis, non ? Alors pourquoi douter de nos méthodes ? Tu serais pas en train de retrouver une conscience morale, par hasard ?",
+                                npc: 700588,
+                            },
+                            {
+                                id: 51215117,
+                                content:
+                                    "... Qu’est-ce qu’ils racontent ? Je ne comprends plus rien... Lorent fait partie de l’Union du Tournevis, non ? Alors pourquoi il parle d’Eisenbahn avec autant de respect, tout d’un coup ?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215118,
+                                content:
+                                    "... Il s’est fait acheter. Franchement, je m’y attendais pas. Je pensais qu’Eisenbahn avait forcément placé des informateurs au sein de l’Union du Tournevis, et j’avais peur qu’on déclenche quelque chose sans le vouloir... mais jamais j’aurais imaginé que ce soit Lorent lui-même.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215119,
+                                content:
+                                    "En y réfléchissant, ça explique beaucoup de choses. Pourquoi il connaissait déjà Seaton... et surtout pourquoi les précédents patrons de l’Union se faisaient arrêter les uns après les autres pendant que lui s’en sortait toujours sans problème.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215120,
+                                content:
+                                    "Écoute, {nickname}... On devrait peut-être juste partir d’ici. Cette gare cache des histoires beaucoup trop tordues. Ceux qui prétendent adorer Eisenbahn veulent le tuer... et ceux qui prétendent le détester travaillent finalement pour lui.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215121,
+                                content:
+                                    "Aujourd’hui, on a déjà des choses plus importantes à gérer. Pas besoin de s’enfoncer encore plus dans ce bourbier.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215122,
+                                content: "Je suis d’accord avec toi... mais il y a encore quelqu’un qui ignore tout de ça.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215123,
+                                content:
+                                    "Ah ! Maggie ! Il faut absolument la prévenir, sinon elle risque d’être en danger ! Elle nous a donné le Tournevis de la gloire, alors on lui doit bien ça nous aussi !",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215124,
+                                content: "Nom d’un chien... Lorent, tu parles avec qui exactement ? Un garde de la gare ?",
+                                npc: 700475,
+                            },
+                            {
+                                id: 51215125,
+                                content:
+                                    "Depuis quand vous êtes devenus aussi proches ? Ou alors c’est l’un de tes hommes déguisé ? Pas mal l’uniforme, d’ailleurs. Y a moyen d’en récupérer un pour moi aussi ?",
+                                npc: 700475,
+                            },
+                            {
+                                id: 51215126,
+                                content: "Maggie ?! T-tu es revenue ? Tu... tu as entendu quelque chose ?",
+                                npc: 700476,
+                            },
+                            {
+                                id: 51215127,
+                                content:
+                                    "Entendu quoi ? Quand je suis redescendue des structures métalliques, un train est justement passé juste à côté. Quel vacarme ! J’ai encore les oreilles qui bourdonnent.",
+                                npc: 700475,
+                            },
+                            {
+                                id: 51215128,
+                                content: "... Tant mieux.",
+                                npc: 700476,
+                            },
+                            {
+                                id: 51215129,
+                                content:
+                                    "Qu’est-ce qu’elle raconte avec son histoire de train ? T’avais pourtant dit que cette gamine était louche. Qui nous garantit qu’elle fait pas juste semblant d’être idiote ? On peut pas la laisser en vie.",
+                                npc: 700477,
+                            },
+                            {
+                                id: 51215130,
+                                content: "Louche ? Lorent, tu— Aaaah— !",
+                                npc: 700475,
+                            },
+                            {
+                                id: 51215131,
+                                content: "Merde... C’était trop beau pour durer. Vite, on sort de là ! Il faut sauver cette gamine !",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040808,
+                name: "Protéger Maggie et repousser les gardes de la gare",
+                desc: "Lorent est donc le véritable traître de l’Union du Tournevis ! Son prétendu refus de résister n’était qu’une façade destinée à tromper Maggie. Au moment le plus critique, Maggie revient sur les lieux. Les gardes de la gare s’apprêtent à la faire taire à jamais. Vous devez intervenir pour la protéger.",
+                nodes: [
+                    {
+                        id: "17823551146841591975",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-17835, 12760],
+                        dialogues: [
+                            {
+                                id: 51215133,
+                                content: "Maggie ! Maggie, ça va ?!",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215134,
+                                content:
+                                    "Elle va bien. Exactement comme les gardes que vous avez assommés tout à l’heure : elle est simplement inconsciente. Reste à savoir si c’est surtout la peur ou le coup qui l’a mise dans cet état.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215135,
+                                content: "Quant à vous... depuis quand vous écoutiez ?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215136,
+                                content: "Depuis qu’on est revenus après avoir prévenu les ouvriers.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215137,
+                                content:
+                                    "Mais eux ne savent probablement toujours pas que l’un des dirigeants mêmes de l’Union du Tournevis qui nous avait demandé de venir... était en réalité un homme de main d’Eisenbahn.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215138,
+                                content:
+                                    "... Haha. Oui, difficile de nier ça. Honnêtement, je m’attendais même à ce que vous utilisiez un terme encore moins flatteur. Quelque chose comme « chien d’Eisenbahn », par exemple.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215139,
+                                content:
+                                    "Mais je vais être clair : depuis le début, je suis persuadé de ne pas avoir fait le mauvais choix.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215140,
+                                content:
+                                    "Tout ce que j’ai fait, c’est essayer de préserver l’ordre dans la Gare des Cent-Fleurs... au prix le plus faible possible.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215141,
+                                content:
+                                    "Alors même toi, tu as une excuse tragique ? Très bien. Considérons ça comme tes dernières paroles.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215142,
+                                content:
+                                    "Pas étonnant venant d’un célèbre Chasseur de Phoxène de Givrelac. Vous savez agir vite... et devenir impitoyable quand il le faut.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215143,
+                                content:
+                                    "Vous devez comprendre une chose : la majorité des membres de l’Union du Tournevis ne sont que des gens ordinaires. Contrairement à vous, ils ne sont pas les héros intelligents et courageux des romans d’aventure.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215144,
+                                content:
+                                    "Le travail et les machines ont depuis longtemps écrasé leurs rêves et émoussé leurs esprits. Leur vie est banale, misérable. Aujourd’hui ils se saoulent et se battent dans un coin de rue ; demain ils perdent jusqu’à leur pantalon dans des jeux d’argent.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215145,
+                                content:
+                                    "Dans les romans d’aventure, ce sont généralement des figurants sans nom. Leur vie vaut si peu qu’une simple bagarre autour du héros suffit à les tuer.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215146,
+                                content: "Et pourtant... quelqu’un les attend malgré tout à la maison.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215147,
+                                content:
+                                    "Renverser Eisenbahn... Les promesses du Salon du Sifflet étaient séduisantes, évidemment. Mais aucun d’eux ne semble avoir réfléchi à ce qui arriverait aux simples ouvriers de l’Union du Tournevis si cette tentative d’assassinat échouait.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215148,
+                                content:
+                                    "Les nobles auront toujours une porte de sortie. Mais les gens ordinaires de l’Union du Tournevis ? Ceux qui vivent réellement ici, qui survivent ici en dépendant du bon vouloir des autres... c’est nous. Nous, les simples ouvriers enracinés dans ces usines.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215149,
+                                content:
+                                    "Si ce plan échoue, ce sont des coups de feu qui nous attendent. Et nos familles, alors ? Nos enfants ? Maggie... qu’adviendra-t-il de Maggie ?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215150,
+                                content:
+                                    "Repensez aux précédents patrons de l’Union. Exactement comme Maggie aujourd’hui, ils débordaient d’enthousiasme et rêvaient de faire tomber Eisenbahn... alors qu’en réalité, ils n’avaient même jamais tenu une arme.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215151,
+                                content:
+                                    "Pour Eisenbahn, les éliminer est aussi simple qu’écraser une fourmi. Quand on est incapable de se protéger soi-même, on ne devrait pas entraîner dans sa chute des ouvriers qui cherchent simplement à survivre.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215152,
+                                content:
+                                    "... Sur ce point, je peux difficilement lui donner tort. Rien que le fait d’aider à assassiner le chef de gare suffirait déjà à nous valoir des décennies de prison.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215153,
+                                content:
+                                    "Exactement. Alors je joue le rôle d’intermédiaire. D’un côté, j’empêche les ouvriers de provoquer Eisenbahn afin de maintenir un minimum d’ordre. De l’autre, je négocie avec lui pour arracher quelques maigres avantages pour tout le monde.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215154,
+                                content:
+                                    "Ce que je n’avais pas prévu, en revanche, c’est que ce genre d’idées suicidaires capables uniquement de tout détruire ne se trouverait pas seulement chez les pauvres qui ne savent même pas s’ils mangeront demain... mais aussi chez ces messieurs du Salon du Sifflet.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215155,
+                                content:
+                                    "On parle toujours des différences entre les classes sociales... mais au fond, les gens ont tous la même folie dans la tête.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215156,
+                                content: "Vous parlez de Seaton ?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215157,
+                                content:
+                                    "De qui d’autre ? Depuis le début, il était condamné à échouer. Alors autant vendre cette information à Eisenbahn pendant qu’elle vaut encore quelque chose. Dès l’instant où vous avez commencé à parler, c’est ce que j’ai décidé de faire.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215158,
+                                content:
+                                    "Et puis, est-ce que vous connaissez vraiment Seaton ? Qu’est-ce qui vous garantit que la Gare des Cent-Fleurs ne deviendra pas encore pire sous son contrôle ?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215159,
+                                content: "...",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215160,
+                                content:
+                                    "Très bien. Je pense avoir été suffisamment clair. Si l’assassinat réussit, l’Union du Tournevis ne gagnera peut-être rien. Mais s’il échoue, alors l’Union paiera forcément le prix du sang.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215161,
+                                content:
+                                    "Laissez-moi partir. Je peux encore rejoindre Eisenbahn et empêcher cet assassinat. C’est la seule manière de sauver l’Union du Tournevis du navire de fous dans lequel Seaton l’a embarquée.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215162,
+                                content: "Je dois reconnaître qu’il marque des points.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215163,
+                                content:
+                                    "Mais tout ce qu’il dit repose sur l’idée qu’Eisenbahn ne peut pas être renversé ! Moi, je pense que cette fois, ça pourrait marcher...",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215164,
+                                content:
+                                    "Et puis au final, c’est quand même à toi de choisir qui aider. Pour ce genre de décision importante, il faut écouter {性别:le|la} capitaine.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215165,
+                                content: "Vous songez à tous ceux qui vivent dans cette gare...",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215166,
+                                content:
+                                    "Avec dix pièces de cuivre, on peut en dépenser huit pour une miche de pain noir, puis garder les deux restantes pour un tout petit morceau de beurre presque périmé. Il a un goût un peu tourné, mais au moins, ça aide à faire passer le pain noir sans s’arracher la gorge.",
+                                npc: 700478,
+                            },
+                            {
+                                id: 51215167,
+                                content:
+                                    "J’ai entendu dire que même le steak des nobles devient difficile à avaler quand il est trop cuit. Finalement, ce que je mange ne doit pas être si différent de leur repas, non ?",
+                                npc: 700478,
+                            },
+                            {
+                                id: 51215168,
+                                content:
+                                    "Bon, maintenant il faut frapper un grand coup, récupérer l’argent et filer avant que Monsieur Jack et ses hommes remarquent ce qu’on fait.",
+                                npc: 700479,
+                            },
+                            {
+                                id: 51215169,
+                                content:
+                                    "Une fois qu’on aura empoché le pactole, on fait soixante-dix trente, ça te va ? Toi, tu prends l’argent pour sauver ta sœur... et moi, je reprends enfin ma vie en main.",
+                                npc: 700479,
+                            },
+                            {
+                                id: 51215170,
+                                content:
+                                    "Et quand les gens progressent, ils commencent aussi à penser qu’ils méritent un meilleur salaire. Alors ils sont allés réclamer une augmentation collective, en menaçant de partir si on refusait.",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215171,
+                                content:
+                                    "Et tu sais ce qui s’est passé ? La Gare des Cent-Fleurs s’en fichait complètement. Ils voulaient juste des ouvriers obéissants. Les dirigeants leur ont dit qu’ils coûtaient trop cher et les ont virés. Au final... Hugh a été le seul à rester.",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215172,
+                                content:
+                                    "Et puis il porte aussi des traces de tortures. Sur son poignet est gravé le nombre 608, au couteau. C’est très récent. À en juger par le saignement et par l’angle de l’entaille, il se l’est probablement gravé lui-même peu avant de mourir.",
+                                npc: 700481,
+                            },
+                            {
+                                id: 51215173,
+                                content: "{nickname}... Tu t’es {性别:perdu|perdue} dans tes pensées ? Qu’est-ce que tu veux faire ?",
+                                npc: 100401,
+                                options: [
+                                    {
+                                        id: 51215174,
+                                        content: "<I>Libérer Lorent pour aider l’Union du Tournevis</>",
+                                        next: 51215175,
+                                    },
+                                    {
+                                        id: 51215177,
+                                        content: "<I>Refuser de laisser partir Lorent et soutenir le Salon du Sifflet</>",
+                                        next: 51215178,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51215175,
+                                content:
+                                    "Faites comme si c’était pour Maggie... et pour les ouvriers. Dégagez d’ici et allez prévenir Eisenbahn.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215176,
+                                content: "Merci. Vous avez pris une décision raisonnable.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215178,
+                                content: "... Si on veut changer quelque chose, il faut être prêt à en payer le prix.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215179,
+                                content:
+                                    "Dans cette gare, j’ai vu trop de gens lutter à la frontière de la mort. Et honnêtement... je doute qu’ils puissent tomber dans une situation pire que celle qu’ils vivent déjà.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215180,
+                                content:
+                                    "Quand j’ai parlé du plan du Salon du Sifflet aux ouvriers, presque aucun n’a hésité avant d’accepter. Je pense que c’était leur propre choix. Ils ne sont ni aussi lâches ni aussi aveugles que vous le croyez.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215181,
+                                content:
+                                    "Parce qu’ils savent qu’en continuant simplement à endurer tout ça, rien ne changera dans cinq ans, ni dans dix, ni même dans plusieurs décennies. Alors même si cela implique de payer un prix... ils ont choisi de se battre.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215182,
+                                content: "Peut-être le seul combat de toute leur vie.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215183,
+                                content: "Très bien... Alors vous assisterez vous-mêmes à quel point votre choix était absurde.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215184,
+                                content:
+                                    "Vous assénez alors un violent coup derrière la nuque de Lorent, l’envoyant sombrer dans un sommeil loin d’être paisible.",
+                            },
+                            {
+                                id: 51215185,
+                                content: "Et maintenant, qu’est-ce qu’on fait ?",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215186,
+                                content:
+                                    "L’heure approche. La représentation du Salon du Sifflet va bientôt commencer, non ? Petit larbin, on va d’abord à la grande salle ?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215187,
+                                content:
+                                    "Attendez encore un peu. Maggie est toujours inconsciente. L’Étranger, emmène-la d’abord dans un endroit sûr. Snow, tu as du papier et un stylo ?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215188,
+                                content: "Oui ! Mais pourquoi faire ?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215189,
+                                content:
+                                    "Voyons voir ce que tu écris... « Pour Maggie »... « objet consigné »... {nickname}... numéro 712...",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215190,
+                                content: "Petit larbin... c’est pas l’héritage d’Handy Cicero ? Celui qui—",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215191,
+                                content:
+                                    "Le « Registre des comptes annuels de la Gare des Cent-Fleurs ». Le meilleur endroit pour cacher quelque chose reste parfois celui où personne n’oserait chercher. Alors nous l’avons simplement déplacé dans un autre casier avant de le remettre en consigne.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215192,
+                                content: "Tu veux que Maggie récupère ce livre de comptes ? Mais pourquoi ?",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215193,
+                                content:
+                                    "Une intuition... Je n’en suis pas encore {性别:certain|certaine}. Bien, le message est dans sa poche. Il est temps pour nous d’aller assister à la représentation.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040809,
+                name: "Aller assister à la représentation",
+                desc: "Trahie par Lorent, ou peut-être simplement assommée par le violent coup porté à sa nuque, Maggie perd connaissance. Il ne reste plus que vous face à Lorent, qui tente de vous convaincre par un long discours. Que vous décidiez de le croire ou non, votre choix est désormais arrêté. Mais avant d’aller assister à la représentation, une dernière chose reste à accomplir...",
+                nodes: [
+                    {
+                        id: "17823551146851591986",
+                        type: "TalkNode",
+                        name: "前往站厅，站厅中汽笛沙龙组织的戏剧即将开始表演",
+                        srId: 106001,
+                        pos: [-8920, 30],
+                        dialogues: [
+                            {
+                                id: 51215195,
+                                content:
+                                    "Il y a un monde, ici ! Ouah... Même en me mettant sur la pointe des pieds, j’arrive pas à voir devant moi. Petit larbin, l’Étranger, qu’est-ce qu’il se passe maintenant ?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215196,
+                                content: "Du calme, ça n’a pas encore commencé officiellement. Ah... c’est Seaton !",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215197,
+                                content:
+                                    "Ainsi donc, mon ancien et cher compagnon d’armes, le chef de gare Eisenbahn. Afin de célébrer vos dix années passées à la Gare des Cent-Fleurs, le Salon du Sifflet a préparé une pièce retraçant vos exploits. Nous espérons sincèrement qu’elle saura vous plaire.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215198,
+                                content:
+                                    "Je n’ai jamais beaucoup lu de livres... et les pièces de théâtre ne m’ont jamais vraiment intéressé non plus. Je pense que cela ne sera pas nécessaire.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215199,
+                                content:
+                                    "... Si telle est la volonté du chef de gare Eisenbahn, alors le Salon du Sifflet s’y pliera naturellement. Mais Levi s’est entraîné sans relâche pendant un mois entier pour cette représentation.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215200,
+                                content: "Je vous en prie, ne laissez pas tous ses efforts être réduits à néant !",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215201,
+                                content:
+                                    "Très bien... Alors je vais au moins regarder ça jusqu’au bout. Mais après aujourd’hui, évitez de refaire ce genre de spectacle.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215202,
+                                content: "À vos ordres, chef de gare. De toute façon... il n’y aura pas d’après.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215203,
+                                content:
+                                    "Les lumières du hall commencèrent peu à peu à s’assombrir. Puis Levi, vêtu comme un jeune Eisenbahn, apparut au centre de la scène sous le regard de toute l’assemblée.",
+                            },
+                            {
+                                id: 51215204,
+                                content:
+                                    "Moi... Eisenbahn. Dans les forteresses du Sud, j’ai vu la naissance de la mort de mes propres yeux. Tandis que les autres sombraient dans le sommeil, nous découpions nos pantalons au milieu de la fumée pour bander nos blessures.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215205,
+                                content:
+                                    "La guerre prit fin. Et vint enfin pour moi le moment de dormir seul. Pourtant, même dans mes rêves, ce démon perfide qu’est le sommeil ne m’accordait aucun répit. Il continuait de murmurer des chiffres à mon oreille... 214. 97. 83. 7,62. 1.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215206,
+                                content:
+                                    "214 jours : la durée de la rébellion. 97 escouades : le nombre d’unités envoyées pour la réprimer.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215207,
+                                content:
+                                    "83 grammes : le poids des rations distribuées chaque jour. 7,62 millimètres : le calibre des balles de nos fusils.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215208,
+                                content: "1 survivant... lorsque la guerre prit fin.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215209,
+                                content:
+                                    "Les balles de laiton ne m’ont pas tué. Les tranchées glaciales ne m’ont pas brisé non plus. Et les regards de mes compagnons tombés au combat... ne m’ont jamais quitté un seul instant.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215210,
+                                content:
+                                    "Si j’oublie leurs regards, je ne peux pas mourir en paix. Mais si je m’en souviens, je suis incapable de vivre correctement. Alors j’ai fui jusqu’à ce royaume enneigé du Nord... dans l’espoir de trouver, au milieu de la glace et de la neige, un soleil plus chaleureux que celui du Sud.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215211,
+                                content:
+                                    "Cette partie raconte sans doute la vie d’Eisenbahn avant son arrivée à la Gare des Cent-Fleurs. Je me souviens que le responsable de l’entrepôt avait mentionné qu’ils avaient autrefois combattu côte à côte.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215212,
+                                content: "Ouah... Eisenbahn est en train de se frotter les yeux. Il aurait vraiment été touché ?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215213,
+                                content:
+                                    "On dirait que Seaton s’est vraiment donné du mal. Il attend probablement qu’Eisenbahn soit complètement absorbé par la pièce avant de passer soudainement à l’action.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040810,
+                name: "Observer la réaction d’Eisenbahn",
+                desc: "Vous avez laissé partir Lorent. En tant que fidèle d’Eisenbahn, il ira sans aucun doute le prévenir. Vous en êtes convaincu : Eisenbahn est désormais parfaitement préparé. Reste à savoir comment il compte répondre à cette pièce mettant en scène son propre assassinat.",
+                nodes: [
+                    {
+                        id: "17823551146851591990",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-10600, -2120],
+                        next: ["17823551146851591993"],
+                        dialogues: [
+                            {
+                                id: 51215215,
+                                content: "Mais puisque nous avons laissé partir Lorent, Eisenbahn devrait déjà être préparé à tout ça.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215216,
+                                content:
+                                    "Ouah ! Je croyais qu’Eisenbahn allait vraiment pleurer... mais c’était juste des larmes de crocodile ?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215217,
+                                content:
+                                    "Vraies ou pas, peu importe. Observons discrètement les alentours et voyons quelles préparations Eisenbahn a mises en place.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851591993",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-10600, -2120],
+                        next: ["17823551146851591995"],
+                        dialogues: [
+                            {
+                                id: 51215220,
+                                content:
+                                    "Des gardes sont cachés derrière pratiquement chaque pilier... C’est pas normal. Seaton ne les a vraiment pas remarqués ?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215221,
+                                content:
+                                    "Avec cet angle-là, ils sont parfaitement dans son angle mort. Impossible pour lui de repérer les hommes embusqués.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215222,
+                                content:
+                                    "Mais il devrait quand même avoir des hommes chargés de le prévenir... À moins qu’Eisenbahn les ait déjà éliminés.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215223,
+                                content: "C’est très probable.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851591995",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-10600, -2120],
+                        next: ["17823551146851591991"],
+                        dialogues: [
+                            {
+                                id: 51215226,
+                                content:
+                                    "Les entrées sont toutes surveillées par des gardes. Du côté des cheminées menant aux usines, ce sont les membres de l’Union du Tournevis qui bloquent le passage. Toutes les issues sont verrouillées.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215227,
+                                content:
+                                    "Et les gens qui criaient tout à l’heure qu’Eisenbahn faisait de la contrebande ou qu’il fallait le renverser ont complètement disparu aussi. Il les a probablement fait évacuer.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215228,
+                                content:
+                                    "On dirait qu’Eisenbahn est absolument certain de sa victoire. Non seulement il ne craint pas cette tentative d’assassinat... mais il compte même profiter de l’occasion pour éliminer entièrement le Salon du Sifflet.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851591991",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-10600, -2120],
+                        dialogues: [
+                            {
+                                id: 51215230,
+                                content:
+                                    "À ce stade, je suis presque soulagé qu’on ait suivi les conseils de Lorent. Vouloir s’opposer à Eisenbahn ici, à la Gare des Cent-Fleurs... c’était probablement perdu d’avance. Seaton n’a aucune chance de s’en sortir.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215231,
+                                content: "... La scène où le coup de feu doit partir approche. Voyons comment Eisenbahn compte réagir.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040811,
+                name: "Parler à l’Étranger",
+                desc: "Vous avez assommé Lorent. Il lui faudra un moment avant de pouvoir rejoindre le lieu de la représentation. Avant que le spectacle ne commence, vous devez informer Seaton de la situation.",
+                nodes: [
+                    {
+                        id: "17823551146851592002",
+                        type: "TalkNode",
+                        name: "跟奥特赛德说话",
+                        srId: 106001,
+                        pos: [-10490, -2130],
+                        next: ["17823551146851592003"],
+                        dialogues: [
+                            {
+                                id: 51215233,
+                                content:
+                                    "Profitons-en pour aller parler à Seaton. Voyons où il en est dans ses préparatifs... et parlons-lui aussi de la taupe au sein de l’Union du Tournevis.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215234,
+                                content:
+                                    "Ah oui... depuis qu’on est montés ici, on n’a pas encore eu l’occasion de le revoir. Mais vu la performance de Levi, ils ont clairement tout préparé jusque dans les moindres détails.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851592003",
+                        type: "TalkNode",
+                        name: "跟西顿说话",
+                        srId: 106001,
+                        pos: [-8070, -780],
+                        dialogues: [
+                            {
+                                id: 51215236,
+                                content:
+                                    "Oh ? Vous voilà enfin. Vu votre retard, j’imagine que vous apportez d’excellentes nouvelles. Alors ? L’Union du Tournevis a accepté de nous soutenir ?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215237,
+                                content:
+                                    "Enfin... j’ai déjà ma réponse. Il suffit de regarder autour de nous : il y a des ouvriers des forges partout dans cette salle. C’est forcément grâce à vous.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215238,
+                                content:
+                                    "C’est surtout grâce à Eisenbahn. Sans lui, ces ouvriers n’auraient jamais accepté de se dresser contre lui.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215239,
+                                content:
+                                    "Bien dit ! Mais au fait... où sont les dirigeants de l’Union du Tournevis ? Je ne les ai encore jamais rencontrés. Ne me dites pas qu’ils comptent continuer à se cacher à un moment pareil ?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215240,
+                                content: "Eux, eh bien...",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215241,
+                                content: "Vous racontez alors à Seaton ce qu’il s’est passé au sein de l’Union du Tournevis.",
+                            },
+                            {
+                                id: 51215242,
+                                content:
+                                    "Vous voulez dire que ce Lorent... l’un des dirigeants de l’Union du Tournevis... travaillait en réalité avec Eisenbahn ?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215243,
+                                content:
+                                    "C’est scandaleux ! Vous n’avez parlé de ça à personne d’autre, j’espère ? Non... ça ne va pas du tout... Dès demain, je remplacerai tous ces ouvriers des forges sans exception !",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215244,
+                                content:
+                                    "Ils sont déloyaux. Pas fiables. Certains sont peut-être même encore des partisans cachés d’Eisenbahn.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215245,
+                                content:
+                                    "Attendez... vous parlez vraiment de tous les ouvriers ? Beaucoup sont pourtant ici aujourd’hui pour vous aider !",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215246,
+                                content:
+                                    "Aujourd’hui seulement. Quand le soleil se couchera ce soir, demain sera un autre monde. Notre position ne sera plus la même.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215247,
+                                content:
+                                    "Je vous conseille d’ailleurs de commencer à penser comme un vainqueur. Tout le monde ne mérite pas votre confiance.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215248,
+                                content:
+                                    "Bien. Assez perdu de temps avec ces bavardages inutiles. Concentrez-vous plutôt sur la représentation. Le véritable spectacle... va enfin commencer.",
+                                npc: 700580,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040812,
+                name: "Assister à la représentation...",
+                desc: "Après tant de préparatifs, cette pièce consacrée à un assassinat, que tous attendaient avec impatience, atteint enfin son apogée. Comment tout cela se terminera-t-il ? Il ne vous reste plus qu’à retenir votre souffle et assister à la représentation...",
+                nodes: [
+                    {
+                        id: "17823551146851592009",
+                        type: "TalkNode",
+                        name: "回舞台",
+                        srId: 106001,
+                        pos: [-9970, -20],
+                        next: ["17823551146851592010"],
+                        dialogues: [
+                            {
+                                id: 51215250,
+                                content: "À cet instant, la pièce interprétée par Levi atteignit son moment le plus intense—",
+                            },
+                            {
+                                id: 51215251,
+                                content:
+                                    "Qu’est-ce donc qui vous a arraché votre âme ? Non... même privés d’âme, vous ne devriez pas nourrir autant de doutes. Vous craignez que la neige ensevelisse les rails, que les vents renversent les wagons.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215252,
+                                content:
+                                    "Si de telles peurs suffisent à vous empêcher de devenir chef de gare... alors pourquoi êtes-vous capables de manger sans vous inquiéter de vous noyer dans votre soupe ou de mourir étouffés par son odeur ?",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215253,
+                                content:
+                                    "La tempête finira par disparaître, et cette longue nuit prendra fin elle aussi. Les trains deviendront comme des fils d’or tissés par le soleil, reliant Givrelac à Dismania.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215254,
+                                content:
+                                    "Alors je la maudis. Je maudis cette tempête qui ralentit toute chose. Je vais insuffler toute ma haine dans ces trois balles... et ouvrir le feu sur cette bête invisible qui rugit dans l’ombre.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215255,
+                                content: "Et finalement... devenir le soleil qui la dissipera—",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215256,
+                                content: "Crève, Eisenbahn !",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215257,
+                                content:
+                                    "Ton jeu d’acteur était remarquable. Malheureusement... je ne peux pas te laisser parvenir à tes fins.",
+                                npc: 100416,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851592010",
+                        type: "TalkNode",
+                        name: "站桩a",
+                        srId: 106001,
+                        pos: [-9970, -20],
+                        dialogues: [
+                            {
+                                id: 51215258,
+                                content:
+                                    "Levi pointa son arme sur Eisenbahn et appuya sur la détente... mais rien ne se produisit. Au même instant, plusieurs balles traversèrent son corps.",
+                            },
+                            {
+                                id: 51215259,
+                                content: "Qu... quoi... ?",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215260,
+                                content:
+                                    "Trop naïf, jeune homme. Les balles de ton arme avaient déjà été retirées bien avant ton entrée sur scène.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215261,
+                                content:
+                                    "Quelqu’un habitué à tuer remarque forcément la différence de poids de quelques balles manquantes. Alors, à l’instant même où tu es apparu devant moi avec cette haine dans le regard... j’avais déjà gagné.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215262,
+                                content:
+                                    "Tu es un excellent comédien. Mais le rôle que tu interprètes le mieux... reste celui d’un assassin raté.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215263,
+                                content:
+                                    "Lorent. Fais bouger tes hommes. Arrête tous les agitateurs du Salon du Sifflet. Quant à Seaton... descendez-le sur-le-champ.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215264,
+                                content: "À vos ordres, monsieur. Mais... vous ne souhaitez pas l’interroger personnellement ?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215265,
+                                content:
+                                    "Non. Cet homme est un idiot. Je n’ai même pas envie de voir son cadavre. Jetez-le dehors et laissez les loups des neiges s’en charger.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215266,
+                                content:
+                                    "Le temps est une chose précieuse. Le simple fait d’avoir accepté de participer à cette mascarade commence déjà à m’agacer. Et les véritables menaces n’ont pas encore été éliminées. Je dois m’en occuper personnellement.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215267,
+                                content: "N’est-ce pas... Chasseurs de Phoxène ?",
+                                npc: 100416,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040813,
+                name: "Assister à la représentation...",
+                desc: "Après tant de préparatifs, cette pièce consacrée à un assassinat, que tous attendaient avec impatience, atteint enfin son apogée. Comment tout cela se terminera-t-il ? Il ne vous reste plus qu’à retenir votre souffle et assister à la représentation...",
+                nodes: [
+                    {
+                        id: "17823551146851592015",
+                        type: "TalkNode",
+                        name: "回舞台",
+                        srId: 106001,
+                        pos: [-9970, -20],
+                        next: ["17823551146851592016"],
+                        dialogues: [
+                            {
+                                id: 51215250,
+                                content: "À cet instant, la pièce interprétée par Levi atteignit son moment le plus intense—",
+                            },
+                            {
+                                id: 51215251,
+                                content:
+                                    "Qu’est-ce donc qui vous a arraché votre âme ? Non... même privés d’âme, vous ne devriez pas nourrir autant de doutes. Vous craignez que la neige ensevelisse les rails, que les vents renversent les wagons.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215252,
+                                content:
+                                    "Si de telles peurs suffisent à vous empêcher de devenir chef de gare... alors pourquoi êtes-vous capables de manger sans vous inquiéter de vous noyer dans votre soupe ou de mourir étouffés par son odeur ?",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215253,
+                                content:
+                                    "La tempête finira par disparaître, et cette longue nuit prendra fin elle aussi. Les trains deviendront comme des fils d’or tissés par le soleil, reliant Givrelac à Dismania.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215254,
+                                content:
+                                    "Alors je la maudis. Je maudis cette tempête qui ralentit toute chose. Je vais insuffler toute ma haine dans ces trois balles... et ouvrir le feu sur cette bête invisible qui rugit dans l’ombre.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215255,
+                                content: "Et finalement... devenir le soleil qui la dissipera—",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215256,
+                                content: "Crève, Eisenbahn !",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215257,
+                                content:
+                                    "Ton jeu d’acteur était remarquable. Malheureusement... je ne peux pas te laisser parvenir à tes fins.",
+                                npc: 100416,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851592016",
+                        type: "TalkNode",
+                        name: "站桩b",
+                        srId: 106001,
+                        pos: [-9970, -20],
+                        dialogues: [
+                            {
+                                id: 51215269,
+                                content:
+                                    "Levi pointa son arme vers Eisenbahn et tenta d’appuyer sur la détente... mais Eisenbahn avait déjà levé la sienne avant lui et tiré.",
+                            },
+                            {
+                                id: 51215270,
+                                content: "Qu... quoi...? Comment... comment pouviez-vous savoir... ?",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215271,
+                                content: "J’aimerais surtout savoir pourquoi vous étiez convaincus que j’ignorais vos petits jeux.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215272,
+                                content:
+                                    "Seaton ne t’a donc jamais raconté ? À l’époque, il faisait partie de ces lâches qui refusaient d’assumer leurs responsabilités... et dont j’ai fini par prendre la place de chef de gare.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215273,
+                                content:
+                                    "Toutes ces années ont passé, et il n’a toujours pas changé. Même pour un assassinat, il est incapable de se salir les mains lui-même.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215274,
+                                content: "N’insultez pas le président Seaton... Il est...",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215275,
+                                content:
+                                    "Il n’est rien du tout. Toi, en revanche, tu as du courage. Malheureusement, tu ne verras jamais à quel point il peut être pitoyable.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215276,
+                                content: "Amenez-moi ce lâche.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215277,
+                                content:
+                                    "V-vous... qu’est-ce que vous comptez faire ?! Vous savez qui je suis ?! Je porte le nom des Brutus ! Je suis noble ! Si vous osez me toucher, réfléchissez bien aux conséquences !",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215278,
+                                content:
+                                    "Les conséquences ? Tout ce que ça changera, c’est une ligne supplémentaire dans un rapport d’accident.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215279,
+                                content: "...",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215280,
+                                content:
+                                    "... Dites-moi... comment avez-vous découvert la vérité ? Tout ce temps, j’ai joué le rôle de votre fidèle partisan. Je me suis humilié devant vous. À mes yeux, je n’avais laissé aucune faille. Alors pourquoi vous méfier de moi ?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215281,
+                                content: "Aucune faille ? Une flatterie sans raison est déjà la plus évidente des failles.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215282,
+                                content:
+                                    "Alors je t’ai simplement mis à l’épreuve. Après tout, lorsque je fais du commerce de Phoxichor, je veille habituellement à ce que personne ne le découvre.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215283,
+                                content: "Vous voulez dire que cette photo... vous avez volontairement laissé quelqu’un la prendre ?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215284,
+                                content:
+                                    "Ça suffit. Je n’ai aucune obligation de répondre à tes questions. Les ennuis que tu m’as causés restent encore gérables... mais ils deviennent malgré tout agaçants.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215285,
+                                content:
+                                    "Eisenbahn pointa alors son arme sur Seaton avec un visage parfaitement impassible... avant de tourner soudainement la tête dans votre direction.",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040814,
+                name: "Fuir la gare et neutraliser les soldats de la gare",
+                desc: "Quelles que soient les intentions de Seaton, ses manœuvres étaient bien trop grossières pour tromper un vieux renard comme Eisenbahn. Plus grave encore, votre présence a elle aussi été révélée. Face aux soldats qui vous encerclent, il ne vous reste qu’une seule issue : vous frayer un chemin par la force.",
+                nodes: [
+                    {
+                        id: "17823551146851592022",
+                        type: "TalkNode",
+                        name: "结束战斗后进站桩",
+                        srId: 106001,
+                        pos: [-9730, -70],
+                        dialogues: [
+                            {
+                                id: 51215291,
+                                content:
+                                    "Abandonnez. Ici, c’est la Gare des Cent-Fleurs. Pour moi, cet endroit est presque une extension de mon propre corps.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215292,
+                                content:
+                                    "Le moindre de vos mouvements ici ressemble à celui d’une taupe en plein soleil : maladroit, évident, impossible à manquer.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215293,
+                                content:
+                                    "Monsieur... ils m’ont beaucoup aidé au sein de l’Union du Tournevis... Ne pourriez-vous pas les laisser partir ?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215294,
+                                content:
+                                    "Vous voyez ? Vous voyez, Lorent ? Cette seule phrase suffit justement à me convaincre qu’ils ne peuvent pas quitter cette gare en vie.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215295,
+                                content:
+                                    "Jamais vous n’auriez plaidé la cause de Seaton. Même lorsque vous me demandiez d’améliorer les conditions des ouvriers, vous hésitiez toujours longuement avant d’ouvrir la bouche. Et pourtant, dans une situation pareille, vous avez pris leur défense sans attendre.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215296,
+                                content:
+                                    "Lorent... comprenez-vous à quel point cette sensation de perdre le contrôle est désagréable ? Depuis que je suis devenu chef de gare, je ne l’avais plus ressentie.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215297,
+                                content:
+                                    "Ils ont presque réussi à combler le fossé entre les deux organisations de cette gare. Comme s’ils essayaient de forcer ma main gauche et ma main droite à se retourner contre moi-même.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215298,
+                                content:
+                                    "Merci pour le compliment. Nous nous sommes simplement renseignés... tout en aidant, à notre échelle, les habitants de cette gare.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215299,
+                                content:
+                                    "Et si cela ressemble à une forme de magie, alors celui qui nous l’a offerte, c’est probablement vous, Eisenbahn. Si vous aviez été capable de résoudre leurs problèmes, nous n’aurions jamais trouvé la moindre ouverture.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215300,
+                                content:
+                                    "Chasseurs de Phoxène... À force de fixer la lune, vous avez fini par oublier certaines vérités élémentaires. Personne ne peut satisfaire tout le monde.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215301,
+                                content:
+                                    "Même le soleil, qui éclaire pourtant chaque chose de manière égale, finit toujours par créer des ombres. Et vous, tapis dans ces ombres, vous accusez ensuite le soleil d’être injuste. Vous ne trouvez pas cela ridicule ?",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215302,
+                                content:
+                                    "Si je voulais résoudre tous les problèmes de chacun, il me faudrait à la fois réduire les horaires des ouvriers des forges pour qu’ils puissent se reposer... tout en les augmentant afin qu’ils gagnent davantage d’argent.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215303,
+                                content:
+                                    "Il me faudrait attirer toujours plus de passagers pour assurer les bénéfices... tout en en acceptant le moins possible afin que les trains cessent d’être bondés.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215304,
+                                content:
+                                    "Je devrais soutenir l’Union du Tournevis afin de laisser les ingénieurs diriger la gare... tout en finançant le Salon du Sifflet afin de promouvoir leur prétendu raffinement.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215305,
+                                content:
+                                    "Voilà ce que j’avais devant les yeux durant mes premières années comme chef de gare. Non pas une gare... mais une monstruosité composée de milliers de bouches levant les yeux vers le ciel pour se plaindre, sans aucune oreille pour écouter, et d’un unique doigt pointé dans ma direction pour me dire quoi faire.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215306,
+                                content:
+                                    "Aucun train ne peut avancer en dépendant d’une chose pareille. Alors j’ai sorti mon arme... et je lui ai vidé un chargeur dessus.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215307,
+                                content:
+                                    "Le monde est devenu silencieux. Il reste bien quelques bruits parasites de temps à autre... mais la Gare des Cent-Fleurs continue malgré tout d’avancer. Ce monstre n’était plus jamais réapparu. Jusqu’à votre arrivée.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215308,
+                                content: "À vous entendre, on dirait qu’on est condamnés à mourir aujourd’hui quoi qu’il arrive.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215309,
+                                content:
+                                    "Des Chasseurs de Phoxène qui disparaissent mystérieusement à la Gare des Cent-Fleurs, ce n’est peut-être pas un événement majeur... mais c’est suffisant pour attirer l’attention de certaines personnes importantes.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215310,
+                                content:
+                                    "Haha... des personnes importantes ? Ne me faites pas rire. Si vous parlez de cette femme qui prétendait être commissaire aujourd’hui, laissez-moi vous dire qu’elle a déjà bien assez de problèmes pour se sauver elle-même. Elle n’a certainement plus le temps de s’inquiéter pour vous.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215311,
+                                content:
+                                    "À votre avis, pourquoi est-ce que je fais passer du Phoxichor en contrebande ? Simplement pour engraisser ces hauts placés obèses et insatiables.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215312,
+                                content:
+                                    "Seaton était naïf. Il croyait vraiment qu’un petit chaos de ce genre suffirait à me faire tomber. Il a probablement passé trop de temps à rêver.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215313,
+                                content:
+                                    "Sans l’approbation de ceux qui se trouvent au-dessus de moi, pensez-vous réellement que j’aurais pu conserver ce poste aussi longtemps ? Alors dites-moi... quelle « personne importante » êtes-vous encore en train d’espérer voir venir vous sauver ?",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215314,
+                                content:
+                                    "À l’origine, nous comptions garder ça comme dernier atout. Mais puisque vous insistez autant... il ne faudra pas nous reprocher ce qui va suivre.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215315,
+                                content: "Nous sommes tombés par hasard sur un petit carnet appartenant à quelqu’un.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215316,
+                                content:
+                                    "L’homme courageux que vous avez fait tuer a laissé derrière lui un ultime héritage : le « Registre des comptes annuels de la Gare des Cent-Fleurs ».",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215317,
+                                content:
+                                    "Et nous avons également découvert, tout à fait par hasard, que ce livre de comptes contenait plusieurs noms... accompagnés de certaines sommes. Snow.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215318,
+                                content:
+                                    "J’arrive, j’arrive ! Vice-ministre des Finances de la région de Cocytus, Fiscus : douze mille pièces d’or.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215319,
+                                content: "Vice-commandant de la VIᵉ Légion, Peso : trois mille pièces d’or.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215320,
+                                content: "Valet personnel de l’administrateur municipal de Givrelac, Nomen : quinze mille pièces d’or.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215321,
+                                content:
+                                    "Et toutes ces dépenses ont été enregistrées sous la rubrique « amélioration des conditions de travail des ouvriers de la gare » ! Alors ? Vous voulez que je continue ? Il y a encore plein d’autres lignes, et je les ai toutes retenues par cœur !",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215322,
+                                content:
+                                    "Malgré toutes mes précautions, je n’aurais jamais imaginé que ce livre de comptes disparu finirait entre vos mains. Vous êtes effectivement plus doués que je ne l’imaginais.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215323,
+                                content: "Alors ça vous fait peur ? Si c’est le cas, laissez-nous partir d’ici !",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215324,
+                                content:
+                                    "Hm. Vu votre assurance, je suppose aussi que vous avez pris soin de cacher l’original dans un endroit où je ne pourrai jamais le retrouver. Même votre mort ne résoudrait donc rien.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215325,
+                                content:
+                                    "Et pourtant, à voir votre expression, on dirait que cela ne vous inquiète pas vraiment. Ou alors... vous faites semblant ?",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215326,
+                                content:
+                                    "Vous savez plutôt bien lire les gens. Je vais être honnête : vous m’avez effectivement pris de court. Je ne peux pas me permettre que ce livre de comptes soit rendu public.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215327,
+                                content:
+                                    "Cependant... vous restez naïfs. Pourquoi croyez-vous que je craindrais qu’il quitte Givrelac ? Vous ne voyez donc pas que si toutes ces personnalités unissaient leurs forces, pas même un oiseau ne pourrait quitter cette ville ?",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215328,
+                                content:
+                                    "Alors qu’est-ce qui vous inquiète réellement ? Vu votre attitude, vous n’avez pas l’air de plaisanter avec nous.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215329,
+                                content: "... Je crois avoir compris. Le problème vient précisément de ces gens-là.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215330,
+                                content:
+                                    "Le vice-ministre des Finances est probablement responsable des fonds alloués à la Gare des Cent-Fleurs. Il est donc logique qu’Eisenbahn cherche à le ménager en lui versant douze mille pièces d’or.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215331,
+                                content:
+                                    "Le vice-commandant de la VIᵉ Légion possède un rang élevé et contrôle les forces stationnées ici... mais en réalité, il n’a aucun lien direct avec le fonctionnement quotidien de la gare. Voilà pourquoi il n’a reçu que trois mille pièces d’or.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215332,
+                                content: "Mais alors... pourquoi le simple valet d’un administrateur municipal reçoit-il autant ?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215333,
+                                content:
+                                    "C’est justement là tout le problème. Certains hauts placés considèrent leurs domestiques comme de véritables assistants personnels. Même si ce valet paraît insignifiant, il gère en réalité énormément d’affaires importantes. Parfois, ce genre de petite personne peut devenir bien plus utile que certains grands noms.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215334,
+                                content:
+                                    "Eisenbahn a distribué l’argent en fonction de l’importance réelle de chacun pour ses affaires. Sauf que... les montants semblent presque inversés par rapport à leur statut officiel.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215335,
+                                content:
+                                    "Autrement dit, ce qu’Eisenbahn redoute vraiment, c’est que si ce registre venait à circuler, chacun découvrirait combien les autres ont reçu. Et les hommes de la VIᵉ Légion risqueraient alors de venir réclamer des comptes parce qu’ils ont été moins bien payés que les autres.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215336,
+                                content:
+                                    "Eisenbahn peut régner ici comme il l’entend... mais une fois hors de cette gare, il ne peut certainement pas se permettre d’avoir la Légion pour ennemie.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215337,
+                                content: "Je comprends mieux maintenant... Le monde des puissants est vraiment difficile à comprendre.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215338,
+                                content: "Notre analyse est correcte, n’est-ce pas, monsieur le chef de gare ?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215339,
+                                content:
+                                    "En effet. Honnêtement, le fait que vous soyez capables de comprendre tout cela me donne presque envie de vous embaucher. Les membres du Salon du Sifflet étaient inutiles dans l’ensemble... mais perdre autant de personnes d’un seul coup finira forcément par perturber le fonctionnement quotidien de la gare.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215340,
+                                content:
+                                    "Je pense que nous allons refuser. Nous préférerions éviter qu’on pointe encore une arme sur nous à l’avenir.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215341,
+                                content:
+                                    "Je suis bien d’accord. Alors tâchons de ne plus jamais nous retrouver face à face après aujourd’hui. Je suppose que des gens aussi intelligents que vous sauront quoi faire de ce livre de comptes.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215342,
+                                content: "Nous nous en chargerons. Mais en échange, vous devrez accepter une condition.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215343,
+                                content:
+                                    "Épargnez les ouvriers de l’Union du Tournevis impliqués dans cette affaire aujourd’hui. Ne leur faites aucun mal. Sinon, dès demain matin, chacun des noms présents dans ce livre de comptes recevra sa propre copie.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215344,
+                                content: "Très bien. Et je vous fais confiance pour tenir parole.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215345,
+                                content:
+                                    "Depuis toutes ces années... vous êtes les seuls à avoir réussi à m’inquiéter ne serait-ce qu’un instant. Vous pouvez en être fiers.",
+                                npc: 100416,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040816,
+                name: "Parler à Snow",
+                desc: "Discuter avec un homme pareil est un véritable supplice. Parmi les rares preuves dont vous disposez, vous en trouvez une capable d’assurer votre survie. Pour Eisenbahn, cette révélation fait l’effet d’une véritable bombe. Estimez-vous heureux : une fois cette mascarade terminée, vous êtes encore en vie.",
+                nodes: [
+                    {
+                        id: "17823551146851592033",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-20930, -590],
+                        dialogues: [
+                            {
+                                id: 51215347,
+                                content:
+                                    "Pfiou... Cette histoire est enfin terminée. Ça faisait longtemps qu’on ne m’avait pas braqué une arme dessus. Enfin... pas si longtemps que ça, en fait.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215348,
+                                content: "Il nous reste encore une dernière chose à faire... Allons revoir Maggie.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215349,
+                                content: "À cause du livre de comptes ? Oui... il vaut mieux tout expliquer clairement à cette gamine.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215350,
+                                content:
+                                    "Ah oui ! Maggie doit être réveillée maintenant ! Elle ne sait probablement toujours pas que Lorent est un traître, non ? Dépêchons-nous d’aller la retrouver !",
+                                npc: 100402,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040817,
+                name: "Retourner à l’Union du Tournevis",
+                desc: "Sauver votre peau ne suffit pas. Vous devez remettre à Maggie la hache capable de menacer Eisenbahn, dans l’espoir qu’un jour elle devienne assez forte pour la brandir et abattre cet arbre parasite qui se nourrit du sang des ouvriers, mettant ainsi un terme à son règne.",
+                nodes: [
+                    {
+                        id: "17823551146851592039",
+                        type: "TalkNode",
+                        name: "回到螺丝刀协会驻地与玛吉和克罗格对话",
+                        srId: 106301,
+                        pos: [-18460, 11720],
+                        dialogues: [
+                            {
+                                id: 51215352,
+                                content:
+                                    "Va tout de suite casser la gueule de Lorent ! Ce type est un traître jusqu’au bout des ongles ! Il a laissé les gardes me frapper !",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215353,
+                                content:
+                                    "Putain, mais qu’est-ce qui s’est passé ici... ? Je suis juste revenu pour demander ce qu’était cette pièce bizarre dans le hall.",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215354,
+                                content:
+                                    "Arrête de poser des questions ! Lorent disait aux gardes que j’étais une gamine louche ! Et il les a regardés me frapper sans rien faire ! Je m’en fiche, va le retrouver et cogne-le pour me défouler !",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215355,
+                                content: "Maggie...",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215356,
+                                content: "Hein ?! {nickname} ? Snow ? Le grand gaillard ?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215357,
+                                content: "Je ne m’appelle pas « le grand gaillard », je m’appelle l’Étranger...",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215358,
+                                content:
+                                    "{nickname}, tu as tout vu tout à l’heure, hein ?! J’ai raison, pas vrai ?! Lorent est un traître ! Il me critiquait avec les gardes !",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215359,
+                                content: "Lorent est effectivement un traître... mais peut-être pas dans le sens que tu imagines.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215360,
+                                content:
+                                    "Vous expliquez alors en détail aux deux personnes présentes comment Lorent a trahi l’Union du Tournevis, ainsi que tout ce qui s’est produit aujourd’hui autour de la tentative d’assassinat contre Eisenbahn.",
+                            },
+                            {
+                                id: 51215361,
+                                content:
+                                    "Putain... Si j’avais su que la gare allait devenir un tel bordel aujourd’hui, je serais jamais sorti avec Hugh !",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215362,
+                                content: "Lorent... Comment a-t-il pu faire ça... ? Ce n’est pas quelqu’un comme ça... Il...",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215363,
+                                content:
+                                    "Comment ça, ce n’est pas quelqu’un comme ça ?! Moi, je trouvais déjà ce type louche depuis longtemps ! Un ouvrier qui jure jamais, qui parle poliment et qui affiche toujours son air de faux gentil ? Je savais depuis le début qu’il cachait quelque chose !",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215364,
+                                content: "Mais pourtant...",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215365,
+                                content:
+                                    "Petite... tu sais, le monde des adultes n’est pas toujours aussi simple que « gentils » et « méchants ».",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215366,
+                                content:
+                                    "L’Étranger a raison. Lorent... n’était peut-être pas aussi mauvais que tu le crois. Il avait simplement une manière différente de protéger l’Union du Tournevis.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215367,
+                                content:
+                                    "Mais il transmettait quand même des informations à Eisenbahn ! Bon... au final, ça n’aurait probablement rien changé, mais quand même...",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215368,
+                                content: "Alors ce livre de comptes que vous m’avez demandé d’aller récupérer...",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215369,
+                                content:
+                                    "Nous l’avions trouvé un peu par hasard auparavant. Nous ne resterons pas longtemps ici, alors ce livre de comptes ne nous servira à rien. Mais après ce qui s’est passé aujourd’hui avec Eisenbahn... il est évident qu’il pourrait devenir très important pour vous.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215370,
+                                content:
+                                    "Donc si Lorent cherchait désespérément ce livre de comptes... ce n’était pas pour faire tomber Eisenbahn avec moi... mais pour le lui rendre ?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215371,
+                                content: "Je peux seulement te répondre... que je l’ignore.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215372,
+                                content: "...",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215373,
+                                content:
+                                    "Nous ne pouvons pas faire davantage pour vous. Ce livre de comptes est probablement la seule chose capable d’ébranler les fondations d’Eisenbahn. Alors maintenant... nous te le confions, Maggie.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215374,
+                                content: "Tu portes désormais une lourde responsabilité sur les épaules. Il va falloir faire de ton mieux.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215375,
+                                content:
+                                    "Ouah ! On dirait presque que l’avenir entier de l’Union du Tournevis vient soudainement d’être confié à sa mascotte !",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215376,
+                                content:
+                                    "Qu’est-ce que t’as à avoir peur ?! Petite Maggie ! Même sans Lorent, tu m’as encore moi ! Avec ça, tôt ou tard, on finira par faire tomber Eisenbahn ! Et ensuite, on ira botter le cul de Lorent tous ensemble !",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215377,
+                                content: "O-oui ! On va faire tomber Eisenbahn ! Et botter le cul de Lorent !",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215378,
+                                content: "Faire tomber Eisenbahn ! Et botter le cul de Lorent !",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215379,
+                                content: "Faire tomber Eisenbahn ! Et botter le cul de Lorent !",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215380,
+                                content: "Petit champi, pourquoi tu cries avec eux, toi ? Allez, il est temps qu’on y aille~",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215381,
+                                content:
+                                    "Comme on dit dans un pays où je suis déjà passé : « Les montagnes et les rivières nous séparent peut-être, mais nos chemins finiront par se recroiser. »",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215382,
+                                content:
+                                    "<I>Il s’est passé énormément de choses aujourd’hui dans cette gare. Mais nous ne pouvons pas nous attarder ici plus longtemps. Nous avons encore une mission plus importante à accomplir. L’Union du Tournevis, le Salon du Sifflet, Eisenbahn... tous ces gens ne sont probablement qu’une étape passagère sur notre route.</>",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215383,
+                                content:
+                                    "<I>Et pourtant... les visages de toutes ces personnes continuent sans cesse de revenir dans mon esprit.</>",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215384,
+                                content:
+                                    "La gigantesque bête d’acier poursuivait sa course à travers les plaines sauvages d’Hyperborea. Son moteur rugissait, chaque engrenage brûlait à blanc, marqué par les âmes des hommes.",
+                            },
+                            {
+                                id: 51215385,
+                                content:
+                                    "Mais ces âmes finiront-elles un jour par s’enrouler autour des roues et des rênes de cette machine de guerre... jusqu’à entraîner la chute de la bête d’acier hors des rails ?",
+                            },
+                            {
+                                id: 51215386,
+                                content: "Je l’ignore. Mais une chose, en revanche, me paraît certaine...",
+                            },
+                            {
+                                id: 51215387,
+                                content:
+                                    "Le changement a déjà commencé à naître silencieusement. La rébellion égoïste de Seaton n’était qu’une minuscule étincelle... mais sous cette étincelle se trouvait le véritable combustible.",
+                            },
+                            {
+                                id: 51215388,
+                                content:
+                                    "Les jeunes idéalistes du Salon du Sifflet. Les ouvriers des forges de l’Union du Tournevis qui rêvent simplement d’une vie meilleure. Handy, qui poursuivait la vérité et la justice. Maggie, Connie... et tous ces enfants qui continuent de lever les yeux vers l’avenir.",
+                            },
+                            {
+                                id: 51215389,
+                                content: "L’avenir de cette gare... appartient désormais aux enfants qui en seront les témoins.",
                             },
                         ],
                     },

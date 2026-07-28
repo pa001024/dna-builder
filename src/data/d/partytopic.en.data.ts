@@ -10582,6 +10582,15 @@ export const partyTopicData_en: PartyTopic[] = [
         ],
     },
     {
+        id: 210201,
+        charId: 2102,
+        name: "",
+        reward: 7050,
+        consume: {
+            "19006": 2,
+        },
+    },
+    {
         id: 230101,
         charId: 2301,
         name: "Master of Disguise",
@@ -10878,7 +10887,7 @@ export const partyTopicData_en: PartyTopic[] = [
         dialogues: [
             {
                 id: 80090201,
-                content: "Mmm, this drink's a bit salty but so yummy — like sea breeze-flavored cotton candy!",
+                content: "Mmm, this drink's a bit salty but so yummy — like sea breeze-flavored cotton candy!\n",
                 npc: 92301,
                 next: 80090202,
             },

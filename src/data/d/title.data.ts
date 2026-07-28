@@ -528,7 +528,7 @@ export const titleData: Title[] = [
     },
     {
         id: 10093,
-        name: "伊薇的",
+        name: "艾达（？？）的",
         suf: false,
     },
     {
@@ -1109,7 +1109,7 @@ export const titleData: Title[] = [
     },
     {
         id: 20077,
-        name: "伊薇",
+        name: "艾达（？？）",
         suf: true,
     },
     {

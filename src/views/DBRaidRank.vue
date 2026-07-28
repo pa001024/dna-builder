@@ -85,7 +85,7 @@ const calculateRemainingTimeByScore = (baseRaidPoint: number, targetScore: numbe
 }
 
 // 状态管理
-const selectedSeason = useSearchParam<number>("s", 1004)
+const selectedSeason = useSearchParam<number>("s", 1005)
 const scoreInput = ref("")
 const remainingTime = ref(30)
 const selectedDungeon = useSearchParam<number>("d", 21213)

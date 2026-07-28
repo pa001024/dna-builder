@@ -132,7 +132,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80040117,
-                content: "… Exactement.",
+                content: "... Exactement.",
                 voice: "inv/Heitao/001/C85F3DB2",
                 npc: 790008,
                 next: 80040118,
@@ -402,7 +402,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80040215,
                 content:
-                    'Et chaque fois, tu disais : « C’est fini, la prochaine fois, je ferai attention. » Mais à chaque "prochaine fois", c’était encore : « Désolée... Je ferai attention la prochaine fois. »',
+                    "Et chaque fois, tu disais : « C’est fini, la prochaine fois, je ferai attention. » Mais à chaque « prochaine fois », c’était encore : « Désolée... Je ferai attention la prochaine fois. »",
                 voice: "inv/Heitao/002/C85F4DC6",
                 npc: 790008,
                 next: 80040216,
@@ -493,7 +493,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80040227,
-                content: 'Promis cette fois ? Pas de "prochaine fois", hein ?',
+                content: "Promis cette fois ? Pas de « prochaine fois », hein ?",
                 voice: "inv/Heitao/002/C85F4FBE",
                 npc: 790008,
             },
@@ -529,7 +529,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80040316,
-                content: "J’y pense souvent… Peut-être qu’un jour, on pourra quitter l’Île du Purgatoire. Qu’est-ce que t’en penses ?",
+                content: "J’y pense souvent... Peut-être qu’un jour, on pourra quitter l’Île du Purgatoire. Qu’est-ce que t’en penses ?",
                 voice: "inv/Heitao/003/C85F5E58",
                 npc: 790008,
                 next: 80040317,
@@ -582,7 +582,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80040323,
-                content: 'On l’appelle "Atlasia".',
+                content: "On l’appelle « Atlasia ».",
                 voice: "inv/Heitao/003/C85F5F7E",
                 npc: 790008,
                 next: 80040324,
@@ -869,7 +869,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80040420,
-                content: '… Il y a <H>elle</>. Je ne sais même pas si j’ai le droit de l’appeler "maman".\nEt puis il y a toi.',
+                content: "... Il y a <H>elle</>. Je ne sais même pas si j’ai le droit de l’appeler « maman ».\nEt puis il y a toi.",
                 voice: "inv/Heitao/004/C85F6F68",
                 npc: 790060,
                 next: 80040421,
@@ -883,7 +883,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80040422,
-                content: "… Repose-toi, {nickname}. Je veille sur toi cette nuit.",
+                content: "... Repose-toi, {nickname}. Je veille sur toi cette nuit.",
                 voice: "inv/Heitao/004/C85F6FBC",
                 npc: 790060,
                 next: 80040423,
@@ -2413,7 +2413,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80140113,
-                content: 'Tant que ces "cornes de démon" ne sont plus là, je pourrai enfin monter sur scène, non ?',
+                content: "Tant que ces « cornes de démon » ne sont plus là, je pourrai enfin monter sur scène, non ?",
                 voice: "inv/Tuosi/001/C89F534A",
                 npc: 790030,
                 next: 80140114,
@@ -2443,7 +2443,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80140117,
                 content:
-                    '... J’ai pris ma décision. Pour la prochaine représentation de <I>Né du blizzard</>, tu monteras sur scène avec Susanna et Fane. Tu seras le rôle principal : "La fée sans nom".',
+                    "... J’ai pris ma décision. Pour la prochaine représentation de <I>Né du blizzard</>, tu monteras sur scène avec Susanna et Fane. Tu seras le rôle principal : « La fée sans nom ».",
                 voice: "inv/Tuosi/001/C89F53F2",
                 npc: 790031,
                 next: 80140118,
@@ -2949,7 +2949,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80140254,
                 content:
-                    'Bien sûr, bien sûr ! Quel "comédien" tu fais ! Avec ta tenue impeccable, ton ton doucereux... Je t’ai accueilli, j’ai écouté toutes tes balivernes, et au final, tu n’es qu’un imposteur !',
+                    "Bien sûr, bien sûr ! Quel « comédien » tu fais ! Avec ta tenue impeccable, ton ton doucereux... Je t’ai accueilli, j’ai écouté toutes tes balivernes, et au final, tu n’es qu’un imposteur !",
                 voice: "inv/Tuosi/002/C89F6A6C",
                 npc: 790041,
                 next: 80140255,
@@ -3372,7 +3372,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80140308,
-                content: "Euh… Ici, c’est le laboratoire de la VIᵉ Légion...",
+                content: "Euh... Ici, c’est le laboratoire de la VIᵉ Légion...",
                 voice: "inv/Tuosi/003/C89F7348",
                 npc: 100336,
                 next: 80140309,
@@ -3657,7 +3657,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80140346,
                 content:
-                    'Ahah... Je me demande ce qu’ils deviennent maintenant. Sans moi, le "menteur", la troupe peut sûrement jouer en paix, non ?',
+                    "Ahah... Je me demande ce qu’ils deviennent maintenant. Sans moi, le « menteur », la troupe peut sûrement jouer en paix, non ?",
                 voice: "inv/Tuosi/003/C89F7984",
                 npc: 790036,
                 next: 80140347,
@@ -3961,7 +3961,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170111,
                 content:
-                    'Je me souviens que tu as parlé de ton rôle de "Passeuse de la Mer du Silence". Mais je dois avouer que je ne comprends pas encore très bien ce que ça signifie...',
+                    "Je me souviens que tu as parlé de ton rôle de « Passeuse de la Mer du Silence ». Mais je dois avouer que je ne comprends pas encore très bien ce que ça signifie...",
                 voice: "inv/Nifu/001/C8B28CD6",
                 npc: 790008,
                 next: 80170112,
@@ -3984,7 +3984,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170114,
                 content:
-                    'Toute vie vient de la Mer du Silence. Après avoir vogué un temps sur le fleuve nommé "Monde Mortel", tout finit par y retourner.',
+                    "Toute vie vient de la Mer du Silence. Après avoir vogué un temps sur le fleuve nommé « Monde Mortel », tout finit par y retourner.",
                 voice: "inv/Nifu/001/C8B28D54",
                 npc: 91502,
                 next: 80170115,
@@ -4236,7 +4236,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170145,
                 content:
-                    'Elle tenait bon, mue par une volonté inébranlable. Elle s’accrochait à ce "miracle" si chèrement obtenu. Mais son corps, fragile, ne pouvait suivre. Chaque jour, elle frôlait l’effondrement.',
+                    "Elle tenait bon, mue par une volonté inébranlable. Elle s’accrochait à ce « miracle » si chèrement obtenu. Mais son corps, fragile, ne pouvait suivre. Chaque jour, elle frôlait l’effondrement.",
                 voice: "inv/Nifu/001/C8B2926A",
                 npc: 91502,
                 options: [
@@ -4250,7 +4250,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170146,
                 content:
-                    'Ensuite... la cadette mit fin à ses jours. Avec ses dernières forces, elle repoussa le petit flacon de "miracle" que sa sœur lui avait rapporté... et la brisa au sol.',
+                    "Ensuite... la cadette mit fin à ses jours. Avec ses dernières forces, elle repoussa le petit flacon de « miracle » que sa sœur lui avait rapporté... et la brisa au sol.",
                 voice: "inv/Nifu/001/C8B29294",
                 npc: 91502,
                 next: 80170147,
@@ -4258,7 +4258,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170147,
                 content:
-                    'Peut-être avait-elle compris, enfin, que ce "miracle", pour elle comme pour sa sœur... n’était qu’un fardeau. Une chaîne invisible.',
+                    "Peut-être avait-elle compris, enfin, que ce « miracle », pour elle comme pour sa sœur... n’était qu’un fardeau. Une chaîne invisible.",
                 voice: "inv/Nifu/001/C8B292BE",
                 npc: 91502,
                 next: 80170148,
@@ -4272,7 +4272,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80170149,
-                content: 'Vu ton regard... quelque chose de doux, non ? Comme... "merci" ?',
+                content: "Vu ton regard... quelque chose de doux, non ? Comme... « merci » ?",
                 voice: "inv/Nifu/001/C8B29312",
                 npc: 790008,
                 next: 80170150,
@@ -4295,7 +4295,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170152,
                 content:
-                    'En entendant cela, l’aînée n’a pu s’empêcher de pleurer, répétant mille fois "pardon"...\n Mais à la fin, elle s’est tournée vers l’urne funéraire de sa sœur, emportée par le courant, et lui a simplement dit... "merci".',
+                    "En entendant cela, l’aînée n’a pu s’empêcher de pleurer, répétant mille fois « pardon »...\n Mais à la fin, elle s’est tournée vers l’urne funéraire de sa sœur, emportée par le courant, et lui a simplement dit... « merci ».",
                 voice: "inv/Nifu/001/C8B29390",
                 npc: 91502,
                 next: 80170153,
@@ -4311,7 +4311,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170154,
                 content:
-                    'C’est à ce moment-là que la femme comprit enfin pourquoi son amie... et sa fille... avaient refusé d’être "sauvées".',
+                    "C’est à ce moment-là que la femme comprit enfin pourquoi son amie... et sa fille... avaient refusé d’être « sauvées ».",
                 voice: "inv/Nifu/001/C8B293E4",
                 npc: 91502,
                 next: 80170155,
@@ -4467,7 +4467,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80170210,
-                content: 'Et parmi ces pleurs... se trouvait une jeune fille, qu’on disait bénie d’un "Sang d’Or".',
+                content: "Et parmi ces pleurs... se trouvait une jeune fille, qu’on disait bénie d’un « Sang d’Or ».",
                 voice: "inv/Nifu/002/C8B29D14",
                 npc: 91502,
                 next: 80170211,
@@ -4515,7 +4515,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170216,
                 content:
-                    'Il lui expliqua que la jeune fille au "Sang d’Or" n’était pas une sainte... Mais une prisonnière, exploitée par un grand noble pour sa richesse. Ce noble n’était autre que le père de la jeune noble.',
+                    "Il lui expliqua que la jeune fille au « Sang d’Or » n’était pas une sainte... Mais une prisonnière, exploitée par un grand noble pour sa richesse. Ce noble n’était autre que le père de la jeune noble.",
                 voice: "inv/Nifu/002/C8B29E10",
                 npc: 91502,
                 next: 80170217,
@@ -4756,7 +4756,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80170303,
-                content: 'Je me demandais... que penses-tu des "erreurs", Dame Nifle ?',
+                content: "Je me demandais... que penses-tu des « erreurs », Dame Nifle ?",
                 voice: "inv/Nifu/003/C8B2AC56",
                 npc: 790008,
                 next: 80170304,
@@ -4902,7 +4902,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170321,
                 content:
-                    'Ce "miracle" parvint jusqu’à l’oreille du maître des lieux, le noble Seigneur "Générosité". Il accourut, planta une dague dans la poitrine de la fillette... et vit, stupéfait, qu’elle ne mourait pas.',
+                    "Ce « miracle » parvint jusqu’à l’oreille du maître des lieux, le noble Seigneur « Générosité ». Il accourut, planta une dague dans la poitrine de la fillette... et vit, stupéfait, qu’elle ne mourait pas.",
                 voice: "inv/Nifu/003/C8B2AF4A",
                 npc: 91502,
                 next: 80170322,
@@ -4918,7 +4918,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170323,
                 content:
-                    'D’abord furieux, il eut vite une idée "brillante" : ce pouvoir, jamais vu à Élysium, pouvait passer pour une manifestation divine. En l’exploitant ainsi, il gagnerait richesse et prestige.',
+                    "D’abord furieux, il eut vite une idée « brillante » : ce pouvoir, jamais vu à Élysium, pouvait passer pour une manifestation divine. En l’exploitant ainsi, il gagnerait richesse et prestige.",
                 voice: "inv/Nifu/003/C8B2AF9E",
                 npc: 91502,
                 next: 80170324,
@@ -5049,7 +5049,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170339,
                 content:
-                    'Depuis ce jour, cet ancien chasseur est devenu un véritable "hérétique", aidant des civils à fuir Élysium, dans l’ombre, pendant des années.',
+                    "Depuis ce jour, cet ancien chasseur est devenu un véritable « hérétique », aidant des civils à fuir Élysium, dans l’ombre, pendant des années.",
                 voice: "inv/Nifu/003/C8B2B23E",
                 npc: 91502,
                 options: [
@@ -5283,7 +5283,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170414,
                 content:
-                    'À dix-huit ans, mon secret fut dévoilé par accident. C’est ainsi que le noble Seigneur "Générosité" apprit mon existence, et me gratifia du titre de "Bénie", un nom tressé d’épines.',
+                    "À dix-huit ans, mon secret fut dévoilé par accident. C’est ainsi que le noble Seigneur « Générosité » apprit mon existence, et me gratifia du titre de « Bénie », un nom tressé d’épines.",
                 voice: "inv/Nifu/004/C8B2BE8C",
                 npc: 91502,
                 next: 80170415,
@@ -5291,7 +5291,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170415,
                 content:
-                    'Dès lors, ma vie se réduisit à un petit sanctuaire. Le Seigneur "Générosité", lui, s’enrichissait en vendant mon sang.',
+                    "Dès lors, ma vie se réduisit à un petit sanctuaire. Le Seigneur « Générosité », lui, s’enrichissait en vendant mon sang.",
                 voice: "inv/Nifu/004/C8B2BEB6",
                 npc: 91502,
                 next: 80170416,
@@ -8291,7 +8291,7 @@ export const partyTopicData_fr: PartyTopic[] = [
         charId: 1801,
         name: "Le vœu de magie",
         desc: "Elle confia ses souhaits magiques à ses amis.",
-        memoryName: '"Blocs de construction" usés',
+        memoryName: "« Blocs de construction » usés",
         memoryDesc:
             "Une pile de douilles usagées qui, avec un peu d’imagination, deviennent pistolets, canons, dirigeables ou robots géants — les clés d’un monde de rêves.",
         reward: 7050,
@@ -8347,7 +8347,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80050107,
                 content:
-                    "Hmm… alors ces blocs s’appellent « douilles » ? Tu sais beaucoup de choses ! Merci de me l’avoir dit. En échange, je vais te montrer comment les assembler, c’est super amusant !",
+                    "Hmm... alors ces blocs s’appellent « douilles » ? Tu sais beaucoup de choses ! Merci de me l’avoir dit. En échange, je vais te montrer comment les assembler, c’est super amusant !",
                 voice: "inv/Feina/001/C865A4AE",
                 npc: 790017,
                 next: 80050108,
@@ -8521,7 +8521,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80050213,
-                content: "Je plaisantais. Dis-moi…",
+                content: "Je plaisantais. Dis-moi...",
                 voice: "inv/Feina/002/C865B612",
                 npc: 100001,
                 options: [
@@ -8534,7 +8534,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80050216,
-                content: "Je plaisantais. Dis-moi…",
+                content: "Je plaisantais. Dis-moi...",
                 voice: "inv/Feina/002/C865B690",
                 npc: 100001,
                 options: [
@@ -8903,7 +8903,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80050325,
-                content: 'Mon père a été emmené par un "chasseur cruel", il avait une corde au cou, son corps pendait dans le ciel.',
+                content: "Mon père a été emmené par un « chasseur cruel », il avait une corde au cou, son corps pendait dans le ciel.",
                 voice: "inv/Feina/003/C865C872",
                 npc: 790017,
                 next: 80050326,
@@ -8911,7 +8911,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80050326,
                 content:
-                    'Ma mère a été tuée par une "bête sauvage", la pluie a emporté son sang rouge comme une rose, il ne reste plus rien.',
+                    "Ma mère a été tuée par une « bête sauvage », la pluie a emporté son sang rouge comme une rose, il ne reste plus rien.",
                 voice: "inv/Feina/003/C865C89C",
                 npc: 790017,
                 next: 80050327,
@@ -9256,7 +9256,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80050441,
-                content: "J’ai l’impression… qu’il manque quelque chose dans notre histoire…",
+                content: "J’ai l’impression... qu’il manque quelque chose dans notre histoire...",
                 voice: "inv/Feina/004/C865DB7A",
                 npc: 790017,
                 next: 80050442,
@@ -9290,12 +9290,12 @@ export const partyTopicData_fr: PartyTopic[] = [
                 options: [
                     {
                         id: 80050446,
-                        content: '<I>Parce qu’elle est "trop parfaite".</>',
+                        content: "<I>Parce qu’elle est « trop parfaite ».</>",
                         next: 80050448,
                     },
                     {
                         id: 80050447,
-                        content: '<I>Ce qui manque, c’est un peu de tristesse... un "regret".</>',
+                        content: "<I>Ce qui manque, c’est un peu de tristesse... un « regret ».</>",
                         next: 80050448,
                     },
                 ],
@@ -10084,7 +10084,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80100301,
                 content:
-                    'Aujourd’hui, c’est le "lien muet de l’amour" qui m’a appelée. Chaque goutte de mon venin brûle d’envie de te voir.',
+                    "Aujourd’hui, c’est le « lien muet de l’amour » qui m’a appelée. Chaque goutte de mon venin brûle d’envie de te voir.",
                 voice: "inv/Shuimu/003/C885CFA2",
                 npc: 92101,
                 next: 80100302,
@@ -10472,7 +10472,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80100404,
-                content: 'Tu sais... malgré ton apparence immaculée, tu es capable d’étouffer quelqu’un avec ton propre "venin".',
+                content: "Tu sais... malgré ton apparence immaculée, tu es capable d’étouffer quelqu’un avec ton propre « venin ».",
                 voice: "inv/Shuimu/004/C885E088",
                 npc: 92101,
                 next: 80100405,
@@ -10654,6 +10654,15 @@ export const partyTopicData_fr: PartyTopic[] = [
                 npc: 92101,
             },
         ],
+    },
+    {
+        id: 210201,
+        charId: 2102,
+        name: "",
+        reward: 7050,
+        consume: {
+            "19006": 2,
+        },
     },
     {
         id: 230101,
@@ -11018,7 +11027,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80090210,
-                content: "… C’est bizarre, ça sonne un peu louche, mais bon, c’est pas ça le plus important !",
+                content: "... C’est bizarre, ça sonne un peu louche, mais bon, c’est pas ça le plus important !",
                 npc: 92301,
                 next: 80090213,
             },
@@ -11068,7 +11077,7 @@ export const partyTopicData_fr: PartyTopic[] = [
                     },
                     {
                         id: 80090220,
-                        content: '<I>Ces "riches" avaient l’air bien louches, Tabethe, tu as eu raison de te méfier. </>',
+                        content: "<I>Ces « riches » avaient l’air bien louches, Tabethe, tu as eu raison de te méfier. </>",
                         next: 80090221,
                     },
                 ],
@@ -11354,7 +11363,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80090333,
-                content: 'J’étais vraiment un "démon"...',
+                content: "J’étais vraiment un « démon »...",
                 npc: 92301,
                 options: [
                     {
@@ -11405,7 +11414,8 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80090341,
-                content: 'Exact ! Hein, non ! C’est pour "rendre justice". Comme ça, ils comprennent qu’on ne s’en prend pas aux gentils.',
+                content:
+                    "Exact ! Hein, non ! C’est pour « rendre justice ». Comme ça, ils comprennent qu’on ne s’en prend pas aux gentils.",
                 npc: 92301,
                 next: 80090342,
             },
@@ -11555,7 +11565,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80090413,
                 content:
-                    'Une boisson aussi précieuse, je me suis demandé à qui je pourrais bien l’offrir... et au final je me suis dit qu’il n’y avait que toi. Mais euh... tu m’en laisserais une gorgée ? Hihi, je suis un peu curieuse moi aussi du goût de "la meilleure boisson du monde" !',
+                    "Une boisson aussi précieuse, je me suis demandé à qui je pourrais bien l’offrir... et au final je me suis dit qu’il n’y avait que toi. Mais euh... tu m’en laisserais une gorgée ? Hihi, je suis un peu curieuse moi aussi du goût de « la meilleure boisson du monde » !",
                 npc: 92301,
                 next: 80090414,
             },
@@ -11710,7 +11720,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80090438,
                 content:
-                    "… J’suis né en pleine mer, juste après le naufrage. On était seuls, à dériver. Tabethe m’a parlé tous les jours pour tenir le coup.",
+                    "... J’suis né en pleine mer, juste après le naufrage. On était seuls, à dériver. Tabethe m’a parlé tous les jours pour tenir le coup.",
                 npc: 92301,
                 next: 80090439,
             },
@@ -11832,7 +11842,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80090457,
                 content:
-                    "Juste avant de reperdre connaissance, tu entends une cacophonie : « Que les gentils vivent longtemps », « C’est pas sale, c’est comestible », « C’est moi qui pilote la tête » … et surtout : beaucoup, beaucoup de « Merci ».",
+                    "Juste avant de reperdre connaissance, tu entends une cacophonie : « Que les gentils vivent longtemps », « C’est pas sale, c’est comestible », « C’est moi qui pilote la tête » ... et surtout : beaucoup, beaucoup de « Merci ».",
             },
         ],
     },
@@ -13527,7 +13537,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80110104,
-                content: 'Attends... t’as dit "Légion"...',
+                content: "Attends... t’as dit « Légion »...",
                 voice: "inv/Linen/001/C88C17F0",
                 npc: 93101,
                 next: 80110105,
@@ -13541,7 +13551,7 @@ export const partyTopicData_fr: PartyTopic[] = [
                 options: [
                     {
                         id: 801101051,
-                        content: '<I>Il paraît que la Légion a récupéré un certain "n° 0"...</>',
+                        content: "<I>Il paraît que la Légion a récupéré un certain « n° 0 »...</>",
                         next: 80110106,
                     },
                     {
@@ -13696,7 +13706,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80110122,
-                content: 'Bien ? Tu trouves que "c’est avoir la classe", de risquer sa peau tous les jours ? Tu le ferais, toi ?',
+                content: "Bien ? Tu trouves que « c’est avoir la classe », de risquer sa peau tous les jours ? Tu le ferais, toi ?",
                 voice: "inv/Linen/001/C88C1AE4",
                 npc: 93101,
                 next: 80110123,
@@ -13732,14 +13742,14 @@ export const partyTopicData_fr: PartyTopic[] = [
                 options: [
                     {
                         id: 801101261,
-                        content: "<I>… Je suis {性别:censé|censée} écouter ça ?</>",
+                        content: "<I>... Je suis {性别:censé|censée} écouter ça ?</>",
                         next: 80110127,
                     },
                 ],
             },
             {
                 id: 80110127,
-                content: 'Tu crois pas que ce genre de propos pourrait te faire "griller" ?',
+                content: "Tu crois pas que ce genre de propos pourrait te faire « griller » ?",
                 voice: "inv/Linen/001/C88C1BB6",
                 next: 80110128,
             },
@@ -13859,7 +13869,7 @@ export const partyTopicData_fr: PartyTopic[] = [
         dialogues: [
             {
                 id: 80110201,
-                content: "… Encore un verre.",
+                content: "... Encore un verre.",
                 voice: "inv/Linen/002/C88C27DA",
                 npc: 93101,
                 next: 80110202,
@@ -13926,7 +13936,7 @@ export const partyTopicData_fr: PartyTopic[] = [
                 options: [
                     {
                         id: 801102071,
-                        content: "<I>… C’est qui, ta supérieure ?</>",
+                        content: "<I>... C’est qui, ta supérieure ?</>",
                         next: 80110208,
                     },
                 ],
@@ -13940,7 +13950,7 @@ export const partyTopicData_fr: PartyTopic[] = [
                 options: [
                     {
                         id: 801102071,
-                        content: "<I>… C’est qui, ta supérieure ?</>",
+                        content: "<I>... C’est qui, ta supérieure ?</>",
                         next: 80110208,
                     },
                 ],
@@ -14127,7 +14137,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80110104,
-                content: 'Attends... t’as dit "Légion"...',
+                content: "Attends... t’as dit « Légion »...",
                 voice: "inv/Linen/001/C88C17F0",
                 npc: 93101,
                 next: 80110105,
@@ -14141,7 +14151,7 @@ export const partyTopicData_fr: PartyTopic[] = [
                 options: [
                     {
                         id: 801101051,
-                        content: '<I>Il paraît que la Légion a récupéré un certain "n° 0"...</>',
+                        content: "<I>Il paraît que la Légion a récupéré un certain « n° 0 »...</>",
                         next: 80110106,
                     },
                     {
@@ -14296,7 +14306,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80110122,
-                content: 'Bien ? Tu trouves que "c’est avoir la classe", de risquer sa peau tous les jours ? Tu le ferais, toi ?',
+                content: "Bien ? Tu trouves que « c’est avoir la classe », de risquer sa peau tous les jours ? Tu le ferais, toi ?",
                 voice: "inv/Linen/001/C88C1AE4",
                 npc: 93101,
                 next: 80110123,
@@ -14332,14 +14342,14 @@ export const partyTopicData_fr: PartyTopic[] = [
                 options: [
                     {
                         id: 801101261,
-                        content: "<I>… Je suis {性别:censé|censée} écouter ça ?</>",
+                        content: "<I>... Je suis {性别:censé|censée} écouter ça ?</>",
                         next: 80110127,
                     },
                 ],
             },
             {
                 id: 80110127,
-                content: 'Tu crois pas que ce genre de propos pourrait te faire "griller" ?',
+                content: "Tu crois pas que ce genre de propos pourrait te faire « griller » ?",
                 voice: "inv/Linen/001/C88C1BB6",
                 next: 80110128,
             },
@@ -14691,7 +14701,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80110320,
                 content:
-                    'Moi et Riola, on lisait une BD quand on était petites. Ça racontait l’histoire d’un voleur masqué, Leblanc. Il volait les riches pour aider les pauvres. On l’appelait "le héros masqué".',
+                    "Moi et Riola, on lisait une BD quand on était petites. Ça racontait l’histoire d’un voleur masqué, Leblanc. Il volait les riches pour aider les pauvres. On l’appelait « le héros masqué ».",
                 voice: "inv/Linen/003/C88C3B60",
                 npc: 93101,
                 next: 80110321,
@@ -15208,7 +15218,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80020316,
                 content:
-                    'Alors j’ai commencé par les bases : une petite marchande de fleurs, une noble couverte de bijoux, une vieille femme chancelante... ou même, parfois, un "prince" ou une "princesse".',
+                    "Alors j’ai commencé par les bases : une petite marchande de fleurs, une noble couverte de bijoux, une vieille femme chancelante... ou même, parfois, un « prince » ou une « princesse ».",
                 npc: 93102,
                 options: [
                     {
@@ -15652,7 +15662,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80130102,
                 content:
-                    'Euh... p-permets-moi de me présenter... Je m’appelle Yale, je viens de Rougerive, et... je tiens une petite boutique de jouets qu’on appelle "Crac’n’Pop".',
+                    "Euh... p-permets-moi de me présenter... Je m’appelle Yale, je viens de Rougerive, et... je tiens une petite boutique de jouets qu’on appelle « Crac’n’Pop ».",
                 voice: "inv/Yeer/001/C898E8DC",
                 npc: 93103,
                 next: 80130103,
@@ -15881,14 +15891,14 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80130128,
                 content:
-                    'Bon, voilà, le topo est fait. Si t’es {性别:tenté|tentée}, t’as qu’à nous écrire. Tu dis que tu veux une "Brise-Étoiles", et c’est tout.',
+                    "Bon, voilà, le topo est fait. Si t’es {性别:tenté|tentée}, t’as qu’à nous écrire. Tu dis que tu veux une « Brise-Étoiles », et c’est tout.",
                 voice: "inv/Yeer/001/C898ED20",
                 npc: 93103,
                 next: 80130129,
             },
             {
                 id: 80130129,
-                content: 'Mais écris bien "P’tit Boum", sinon on va se faire griller.',
+                content: "Mais écris bien « P’tit Boum », sinon on va se faire griller.",
                 voice: "inv/Yeer/001/C898ED4A",
                 npc: 93103,
                 next: 80130130,
@@ -15925,7 +15935,7 @@ export const partyTopicData_fr: PartyTopic[] = [
         dialogues: [
             {
                 id: 80130201,
-                content: "B-Bonjour…",
+                content: "B-Bonjour...",
                 voice: "inv/Yeer/002/C898F91A",
                 npc: 93103,
                 next: 80130202,
@@ -17200,7 +17210,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160127,
                 content:
-                    'Je suis venue à Givrelac pour mes raisons, et vous avez les vôtres. Inutile de perdre du temps à débattre de "recettes de jambon".',
+                    "Je suis venue à Givrelac pour mes raisons, et vous avez les vôtres. Inutile de perdre du temps à débattre de « recettes de jambon ».",
                 voice: "inv/Haier/001/C8AC26D6",
                 npc: 790055,
                 next: 80160128,
@@ -17353,7 +17363,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160205,
                 content:
-                    'Disons que je parle d’expérience. J’ai visité bien des maisons avec ma plus fidèle collègue. Des "foyers chaleureux", en apparence.',
+                    "Disons que je parle d’expérience. J’ai visité bien des maisons avec ma plus fidèle collègue. Des « foyers chaleureux », en apparence.",
                 voice: "inv/Haier/002/C8AC33A2",
                 npc: 93201,
                 next: 80160206,
@@ -17575,7 +17585,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160228,
                 content:
-                    "Quand je la verrai… est-ce que je dois la condamner ? Ou la pleurer ? Suis-je son amie ? Sa supérieure ? Une juge ? Ou simplement une ex-partenaire brisée ?",
+                    "Quand je la verrai... est-ce que je dois la condamner ? Ou la pleurer ? Suis-je son amie ? Sa supérieure ? Une juge ? Ou simplement une ex-partenaire brisée ?",
                 voice: "inv/Haier/002/C8AC3768",
                 npc: 93201,
                 next: 80160229,
@@ -17785,7 +17795,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160365,
                 content:
-                    'Peut-être qu’un jour, ce rêve s’effacera complètement, et que je me libérerai enfin de cette prison d’illusions qu’a forgée "L’être destiné" . Mais aujourd’hui... j’ai encore besoin de ce calme.',
+                    "Peut-être qu’un jour, ce rêve s’effacera complètement, et que je me libérerai enfin de cette prison d’illusions qu’a forgée « L’être destiné » . Mais aujourd’hui... j’ai encore besoin de ce calme.",
                 voice: "inv/Haier/003/C8AC4DE2",
                 npc: 93201,
                 next: 80160366,
@@ -17912,7 +17922,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160312,
                 content:
-                    'Ce miel me rappelle seulement une maîtresse parfumeuse, et une criminelle jusqu’au bout des ongles. Elle utilisait la Rosée pourpre pour créer un parfum envoûtant, capable d’envoyer les gens dans un sommeil éternel : "L’être destiné".',
+                    "Ce miel me rappelle seulement une maîtresse parfumeuse, et une criminelle jusqu’au bout des ongles. Elle utilisait la Rosée pourpre pour créer un parfum envoûtant, capable d’envoyer les gens dans un sommeil éternel : « L’être destiné ».",
                 voice: "inv/Haier/003/C8AC4530",
                 npc: 93201,
                 options: [
@@ -18083,7 +18093,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160330,
                 content:
-                    'Elle ne s’est pas enfuie, ni profité de l’occasion pour me tuer. Au contraire, elle m’a soignée. Mais quand je refusais de perdre conscience, elle m’a vaporisé son parfum signature, "L’être destiné".',
+                    "Elle ne s’est pas enfuie, ni profité de l’occasion pour me tuer. Au contraire, elle m’a soignée. Mais quand je refusais de perdre conscience, elle m’a vaporisé son parfum signature, « L’être destiné ».",
                 voice: "inv/Haier/003/C8AC4824",
                 npc: 93201,
                 next: 80160331,
@@ -18104,7 +18114,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80160333,
-                content: 'As-tu déjà imaginé comment ta vie aurait pu être si un "accident" particulier ne s’était jamais produit ? ',
+                content: "As-tu déjà imaginé comment ta vie aurait pu être si un « accident » particulier ne s’était jamais produit ? ",
                 voice: "inv/Haier/003/C8AC48A2",
                 npc: 93201,
                 next: 80160334,
@@ -18143,7 +18153,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160338,
                 content:
-                    'Au début, j’avais encore les yeux ouverts sur ce monde trop "gentil", un leurre sucré. Quelqu’un tirait les ficelles.',
+                    "Au début, j’avais encore les yeux ouverts sur ce monde trop « gentil », un leurre sucré. Quelqu’un tirait les ficelles.",
                 voice: "inv/Haier/003/C8AC4974",
                 npc: 93201,
                 next: 80160339,
@@ -18158,7 +18168,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80160340,
-                content: 'Oui. Ce genre de "bonheur" dure sans fin.',
+                content: "Oui. Ce genre de « bonheur » dure sans fin.",
                 voice: "inv/Haier/003/C8AC49C8",
                 npc: 93201,
                 next: 80160341,
@@ -19992,7 +20002,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80120207,
                 content:
-                    'Avec mon flair de "détective", je te le dis : cette planche cache forcément un truc ! Depuis que je fouille les poubelles, tous les secrets du coin, que je les cherche ou pas, viennent finir dans mon sac.',
+                    "Avec mon flair de « détective », je te le dis : cette planche cache forcément un truc ! Depuis que je fouille les poubelles, tous les secrets du coin, que je les cherche ou pas, viennent finir dans mon sac.",
                 voice: "inv/Maer/002/C8929176",
                 npc: 790019,
                 next: 80120208,
@@ -20225,7 +20235,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80120316,
                 content:
-                    'Et puis, à peine arrivés à Givrelac, ce vieux crétin a commencé à "se tailler son territoire", "recruter des hommes de main", "organiser un racket de protection", "s’allier avec les puissants locaux" et "devenir le grand chef". Il avait l’air de bien s’amuser tout seul.',
+                    "Et puis, à peine arrivés à Givrelac, ce vieux crétin a commencé à « se tailler son territoire », « recruter des hommes de main », « organiser un racket de protection », « s’allier avec les puissants locaux » et « devenir le grand chef ». Il avait l’air de bien s’amuser tout seul.",
                 voice: "inv/Maer/003/C892A358",
                 npc: 93301,
                 options: [
@@ -20260,7 +20270,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80120319,
-                content: 'C’est pas simple à dire ! Le vieux adore se vanter de ses "exploits glorieux" là-bas. Genre...',
+                content: "C’est pas simple à dire ! Le vieux adore se vanter de ses « exploits glorieux » là-bas. Genre...",
                 voice: "inv/Maer/003/C892A3D6",
                 npc: 93301,
                 next: 80120320,
@@ -21527,7 +21537,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80150214,
                 content:
-                    'Alors j’ai foncé tête baissée, sans me poser de questions. Je poursuivais ce mirage glorieux qu’on appelle "Charon Couronnée", pensant avancer... Mais au bout du compte, ce que je cherchais se trouvait dans la direction opposée.',
+                    "Alors j’ai foncé tête baissée, sans me poser de questions. Je poursuivais ce mirage glorieux qu’on appelle « Charon Couronnée », pensant avancer... Mais au bout du compte, ce que je cherchais se trouvait dans la direction opposée.",
                 voice: "inv/Lise/002/C8A5CC7C",
                 npc: 790044,
                 next: 80150215,
@@ -21741,7 +21751,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80150239,
                 content:
-                    'Alors c’est décidé. À partir d’aujourd’hui, je vais sérieusement... "m’arrêter". Et tester les métiers... dans l’ordre alphabétique.',
+                    "Alors c’est décidé. À partir d’aujourd’hui, je vais sérieusement... « m’arrêter ». Et tester les métiers... dans l’ordre alphabétique.",
                 voice: "inv/Lise/002/C8A5D096",
                 npc: 790044,
                 next: 80150240,
@@ -24919,7 +24929,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80030108,
-                content: 'C’est mon fameux "Mode Howard énergie optimale" que j’ai inventé, un vrai boulot de titan.',
+                content: "C’est mon fameux « Mode Howard énergie optimale » que j’ai inventé, un vrai boulot de titan.",
                 npc: 94202,
                 next: 80030109,
             },
@@ -24937,7 +24947,8 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80030111,
-                content: 'Ça me permet de trouver la solution la plus "économe" en énergie pour n’importe quel problème, en un clin d’œil.',
+                content:
+                    "Ça me permet de trouver la solution la plus « économe » en énergie pour n’importe quel problème, en un clin d’œil.",
                 npc: 94202,
                 next: 80030112,
             },
@@ -24992,14 +25003,14 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80030120,
-                content: 'Deuxièmement, avec mon "Mode Howard énergie optimale", le boulot c’est le boulot, la vie c’est la vie.',
+                content: "Deuxièmement, avec mon « Mode Howard énergie optimale », le boulot c’est le boulot, la vie c’est la vie.",
                 npc: 94202,
                 next: 80030121,
             },
             {
                 id: 80030121,
                 content:
-                    'La vie peut s’immiscer dans le boulot, mais pas l’inverse. Là, je suis en congé, donc je fais comme si on se voyait en pause. C’est la manière la plus "éco-énergétique" de gérer ça.',
+                    "La vie peut s’immiscer dans le boulot, mais pas l’inverse. Là, je suis en congé, donc je fais comme si on se voyait en pause. C’est la manière la plus « éco-énergétique » de gérer ça.",
                 npc: 94202,
                 next: 80030122,
             },
@@ -25147,7 +25158,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80030208,
                 content:
-                    'Avec le temps, j’ai compris qu’on utilise surtout "gentleman" pour taquiner, rarement pour vraiment complimenter.',
+                    "Avec le temps, j’ai compris qu’on utilise surtout « gentleman » pour taquiner, rarement pour vraiment complimenter.",
                 npc: 94202,
                 next: 80030209,
             },
@@ -25191,7 +25202,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80030213,
                 content:
-                    'J’ai grandi sous la "bienveillance" de mes sœurs ! Pour survivre à leurs griffes... euh, à leur attention, j’ai dû développer des talents...',
+                    "J’ai grandi sous la « bienveillance » de mes sœurs ! Pour survivre à leurs griffes... euh, à leur attention, j’ai dû développer des talents...",
                 npc: 94202,
                 options: [
                     {
@@ -25201,7 +25212,7 @@ export const partyTopicData_fr: PartyTopic[] = [
                     },
                     {
                         id: 800302132,
-                        content: '<I>Bienveillance ? Ça me rappelle le sens sarcastique de "gentleman". Tu as dû souffrir, dis donc.</>',
+                        content: "<I>Bienveillance ? Ça me rappelle le sens sarcastique de « gentleman ». Tu as dû souffrir, dis donc.</>",
                         next: 80030215,
                     },
                 ],
@@ -25276,7 +25287,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80030402,
                 content:
-                    'Tiens, voilà le "Conteneur militaire à régulation thermique" amélioré. Je l’ai déjà testé, aucun souci... <I>bâille</>...',
+                    "Tiens, voilà le « Conteneur militaire à régulation thermique » amélioré. Je l’ai déjà testé, aucun souci... <I>bâille</>...",
                 npc: 94202,
                 next: 80030403,
             },
@@ -25387,7 +25398,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80030415,
-                content: 'J’ai essayé de parler d’autre chose, mais rien ne l’intéressait en dehors d’être "soldat".',
+                content: "J’ai essayé de parler d’autre chose, mais rien ne l’intéressait en dehors d’être « soldat ».",
                 npc: 94202,
                 next: 80030416,
             },
@@ -25727,7 +25738,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80030529,
-                content: 'Pas besoin de poser mes précieux jours de congé juste pour organiser une "soirée piège".',
+                content: "Pas besoin de poser mes précieux jours de congé juste pour organiser une « soirée piège ».",
                 npc: 94202,
                 next: 80030530,
             },
@@ -26245,7 +26256,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80070115,
                 content:
-                    'Quand nos opérations croisent d’autres institutions impériales, le "comment" importe peu. La XIIIᵉ ne regarde que les "résultats" souhaités par Sa Majesté.',
+                    "Quand nos opérations croisent d’autres institutions impériales, le « comment » importe peu. La XIIIᵉ ne regarde que les « résultats » souhaités par Sa Majesté.",
                 voice: "inv/Xibi/001/C872773E",
                 npc: 790013,
             },
@@ -26416,7 +26427,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80070208,
                 content:
-                    '... Sur le papier, c’est vrai. La XIIIᵉ a contourné les lignes de front, attaqué une tour jamais approchée, et pour la première fois, affronté les "dieux" de près. Digne d’être chanté, oui.',
+                    "... Sur le papier, c’est vrai. La XIIIᵉ a contourné les lignes de front, attaqué une tour jamais approchée, et pour la première fois, affronté les « dieux » de près. Digne d’être chanté, oui.",
                 voice: "inv/Xibi/002/C8728680",
                 npc: 790013,
                 next: 80070209,
@@ -26650,7 +26661,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80070302,
-                content: 'Pourquoi vous appelez tout le monde "naïf", commandante ?',
+                content: "Pourquoi vous appelez tout le monde « naïf », commandante ?",
                 voice: "inv/Xibi/003/C87295EC",
                 npc: 790014,
                 next: 80070303,
@@ -27757,7 +27768,7 @@ export const partyTopicData_fr: PartyTopic[] = [
                 options: [
                     {
                         id: 80060336,
-                        content: '<I>Ah oui, je me souviens, c’est la "Commissaire d’élite au Ravitaillement".</>',
+                        content: "<I>Ah oui, je me souviens, c’est la « Commissaire d’élite au Ravitaillement ».</>",
                         next: 80060337,
                     },
                 ],
@@ -28273,7 +28284,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80190214,
-                content: 'Au final, on a dû faire passer ces armes par les égouts pour boucler la "livraison".',
+                content: "Au final, on a dû faire passer ces armes par les égouts pour boucler la « livraison ».",
                 npc: 95102,
                 next: 80190215,
             },
@@ -29028,7 +29039,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80080116,
                 content:
-                    "... La mer, une brise tiède... Un Arbre Céleste qui n’est pas une machine remplie de Phoxichor, mais… un phare pour les voyageurs...",
+                    "... La mer, une brise tiède... Un Arbre Céleste qui n’est pas une machine remplie de Phoxichor, mais... un phare pour les voyageurs...",
                 voice: "inv/Saiqi/001/C878E008",
                 npc: 790001,
                 next: 80080117,
@@ -29152,7 +29163,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80080133,
                 content:
-                    'Je sais que je n’en ai plus pour très longtemps... ça, je ne peux pas le changer. Mais si je fais rien... si je me contente d’attendre que "ce jour" arrive...',
+                    "Je sais que je n’en ai plus pour très longtemps... ça, je ne peux pas le changer. Mais si je fais rien... si je me contente d’attendre que « ce jour » arrive...",
                 voice: "inv/Saiqi/001/C878E2D2",
                 npc: 790004,
                 next: 80080134,
@@ -29559,7 +29570,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80080242,
-                content: 'Je sais ce que je vais lui donner... J’ai un "trésor" parfait pour {性别:lui|elle}... !',
+                content: "Je sais ce que je vais lui donner... J’ai un « trésor » parfait pour {性别:lui|elle}... !",
                 voice: "inv/Saiqi/002/C878F4B4",
                 npc: 790004,
                 next: 80080243,
@@ -29846,7 +29857,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80080331,
-                content: '"Changée"... ?',
+                content: "« Changée »... ?",
                 voice: "inv/Saiqi/003/C879034E",
                 npc: 790005,
                 next: 80080332,
@@ -30243,7 +30254,7 @@ export const partyTopicData_fr: PartyTopic[] = [
         desc: "Retournez en arrière — vite ! Ce n’est pas la tour dont je rêvais.\nDans mes rêves, il n’y avait ni sang... ni cris.",
         memoryName: "Scalpel ensanglanté",
         memoryDesc:
-            'Un scalpel encore taché de sang, témoin silencieux d’une tragédie déguisée en "accident". Mais elle sait que ce n’en était pas un. Le véritable coupable n’était pas une seule personne... — peut-être était-ce tout le monde.',
+            "Un scalpel encore taché de sang, témoin silencieux d’une tragédie déguisée en « accident ». Mais elle sait que ce n’en était pas un. Le véritable coupable n’était pas une seule personne... — peut-être était-ce tout le monde.",
         reward: 7051,
         consume: {
             "19002": 5,
@@ -30309,14 +30320,14 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80180209,
-                content: '... Oui, Madame Mason. Non... je devrais dire : "Commandante".',
+                content: "... Oui, Madame Mason. Non... je devrais dire : « Commandante ».",
                 voice: "inv/Dafu/002/C8B9058A",
                 npc: 790045,
                 next: 80180210,
             },
             {
                 id: 80180210,
-                content: 'Tu m’appelais "Sibylle" avant... Mais peu importe.',
+                content: "Tu m’appelais « Sibylle » avant... Mais peu importe.",
                 voice: "inv/Dafu/002/C8B905B4",
                 npc: 790013,
                 next: 80180211,
@@ -30915,7 +30926,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80180339,
                 content:
-                    'Il y a tant de gens rationnels dans ce monde. Ils pèsent le pour et le contre... choisissent toujours "la moins mauvaise" option. Ce sont des leaders nés, qui tracent la voie de chaque époque.',
+                    "Il y a tant de gens rationnels dans ce monde. Ils pèsent le pour et le contre... choisissent toujours « la moins mauvaise » option. Ce sont des leaders nés, qui tracent la voie de chaque époque.",
                 voice: "inv/Dafu/003/C8B91ADE",
                 npc: 790045,
                 next: 80180340,

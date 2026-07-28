@@ -9872,6 +9872,8 @@ export const questData_en: QuestStory[] = [
                         id: "1723688248145173143",
                         type: "TalkNode",
                         name: "所以，你敲开",
+                        srId: 101101,
+                        pos: [-949, 6039],
                         next: ["17232012426941489991"],
                         dialogues: [
                             {
@@ -9893,6 +9895,8 @@ export const questData_en: QuestStory[] = [
                         id: "17232012426941489991",
                         type: "TalkNode",
                         name: "都备妥了。",
+                        srId: 101101,
+                        pos: [-949, 6039],
                         dialogues: [
                             {
                                 id: 10110501,
@@ -25976,10 +25980,18 @@ export const questData_en: QuestStory[] = [
                         name: "对话节点",
                         dialogues: [
                             {
+                                id: 10049700,
+                                content: "It's back in place already? Not bad. Alright. Testing's over for today. Back to your stations.",
+                                voice: "story/1004/100499/1928AEAD",
+                                npc: 100407,
+                                next: 10049701,
+                            },
+                            {
                                 id: 10049701,
                                 content: "Yes, sir.",
                                 voice: "story/1004/100497/19288B12",
                                 npc: 100418,
+                                next: 10049702,
                             },
                             {
                                 id: 10049702,
@@ -25987,12 +25999,14 @@ export const questData_en: QuestStory[] = [
                                     "You lot are quick. Tell you what — before your lungs fill up with soot, stop climbing stacks and come work on my floor.",
                                 voice: "story/1004/100497/19288B3C",
                                 npc: 100407,
+                                next: 10049703,
                             },
                             {
                                 id: 10049703,
                                 content: "No, thanks. We've got somewhere else to be.",
                                 voice: "story/1004/100497/19288B66",
                                 npc: 100001,
+                                next: 10049704,
                             },
                             {
                                 id: 10049704,
@@ -27897,16 +27911,16 @@ export const questData_en: QuestStory[] = [
                         id: "177763795518716773324",
                         type: "TalkNode",
                         name: "对话节点",
-                        srId: 106001,
-                        pos: [-38560, -6600],
+                        srId: 106301,
+                        pos: [-38250, -6680],
                         next: ["177763795518716773319"],
                     },
                     {
                         id: "177763795518716773319",
                         type: "TalkNode",
                         name: "芙罗拉出场",
-                        srId: 106001,
-                        pos: [-38560, -6600],
+                        srId: 106301,
+                        pos: [-38250, -6680],
                         next: ["177763795518716773320"],
                         dialogues: [
                             {
@@ -28138,8 +28152,8 @@ export const questData_en: QuestStory[] = [
                         id: "177763795518716773320",
                         type: "TalkNode",
                         name: "与芙罗拉交谈",
-                        srId: 106001,
-                        pos: [-38560, -6600],
+                        srId: 106301,
+                        pos: [-38250, -6680],
                         next: ["177763795518716773321"],
                         dialogues: [
                             {
@@ -28252,8 +28266,8 @@ export const questData_en: QuestStory[] = [
                         id: "177763795518716773321",
                         type: "TalkNode",
                         name: "与希尔妲交谈",
-                        srId: 106001,
-                        pos: [-38560, -6600],
+                        srId: 106301,
+                        pos: [-38250, -6680],
                         dialogues: [
                             {
                                 id: 10042801,
@@ -29510,7 +29524,7 @@ export const questData_en: QuestStory[] = [
                         type: "TalkNode",
                         name: "（可选）和希尔妲对话",
                         srId: 106001,
-                        pos: [-16340, -90],
+                        pos: [-16500, -90],
                         dialogues: [
                             {
                                 id: 10049962,
@@ -30323,7 +30337,7 @@ export const questData_en: QuestStory[] = [
                         type: "TalkNode",
                         name: "对话节点",
                         srId: 106001,
-                        pos: [-11980, -930],
+                        pos: [-12230, -880],
                         next: ["17782428113416680851"],
                         dialogues: [
                             {
@@ -32596,7 +32610,7 @@ export const questData_en: QuestStory[] = [
         quests: [
             {
                 id: 10040401,
-                name: "Follow the overseer into the carriage",
+                name: "Board the Train",
                 desc: "Flora, who until now had no connection to the Empire, has now asked us to help her escape. Prepare to board the train and begin the plan.",
                 nodes: [
                     {
@@ -42637,7 +42651,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 11011903,
                                 content:
-                                    "You expect me to storm the central control room with just two battered squads? You can't be serious, Fulvis. They've got <H>The Hazering</> <H>Messengers</> in there!",
+                                    "You expect me to storm the central control room with just two battered squads? You can't be serious, Fulvis. They've got <H>the Hazering</> <H>Messengers</> in there!",
                                 voice: "story/1002/110119/1B913056",
                                 npc: 110010,
                                 next: 11011904,
@@ -50961,7 +50975,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 12010513,
                                 content:
-                                    "But seriously, what was that!? I wasn't seeing things, was I? Why would one of Huaxu's guardian beasts suddenly attack us!?",
+                                    "But seriously, what was that!? I wasn't seeing things, was I? Why would Huaxu's guardian beasts suddenly attack us!?",
                                 voice: "story/1201/120105/1E112ACA",
                                 npc: 200002,
                                 next: 12010514,
@@ -50991,7 +51005,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 12010517,
                                 content:
-                                    "There's no need to panic. That sable Bi'an may look like the argent ones, but it's not an enforcer of Huaxu. They're aberrations, born from the <H>Scourge of Zhuyin</>.",
+                                    "There's no need to panic. The sable Bi'an may look like the argent ones, but the beasts are not the enforcer of Huaxu. They're aberrations, born from the <H>Scourge of Zhuyin</>.",
                                 voice: "story/1201/120105/1E112B72",
                                 npc: 210033,
                                 next: 12010518,
@@ -51620,7 +51634,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 12010808,
                                 content:
-                                    "On our way here, we were attacked by a Sable Bi'an. Fortunately, a passing trader helped us out, and we managed to drive it off without getting hurt.",
+                                    "On our way here, we were attacked by Sable Bi'an. Fortunately, a passing trader helped us out, and we managed to drive them off without getting hurt.",
                                 voice: "story/1201/120108/1E115B30",
                                 npc: 100001,
                                 next: 12010809,
@@ -51628,7 +51642,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 12010809,
                                 content:
-                                    "She told us the Scourge of Zhuyin creates all kinds of nasty beasts like that Sable Bi'an — and they go around biting people and making life miserable!",
+                                    "She told us the Scourge of Zhuyin creates all kinds of nasty beasts like the Sable Bi'an — and they go around biting people and making life miserable!",
                                 voice: "story/1201/120108/1E115B5A",
                                 npc: 200002,
                                 next: 12010810,
@@ -52014,7 +52028,7 @@ export const questData_en: QuestStory[] = [
                             },
                             {
                                 id: 12011202,
-                                content: "Another Sable Bi'an... Where do they keep coming from!?",
+                                content: "Sable Bi'an again... Where do they keep coming from!?",
                                 voice: "story/1201/120112/1E119BD4",
                                 npc: 100001,
                             },
@@ -52590,7 +52604,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 12011409,
                                 content:
-                                    "Speaking of which — the incense we just replaced ran out the second we faced that beast. Total rip-off if you ask me...",
+                                    "Speaking of which — the incense we just replaced ran out the second we faced those beasts. Total rip-off if you ask me...",
                                 voice: "story/1201/120114/1E11BDCA",
                                 npc: 200002,
                                 next: 12011410,
@@ -57357,7 +57371,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 12017006,
                                 content:
-                                    "The way out lies just ahead. Cross the Lethe, then step onto the Bridge of Forgetfulness — it will carry you back to the living world.",
+                                    "The way out lies just ahead. Cross the River of Forgetting, then step onto the Bridge of Forgetfulness — it will carry you back to the living world.",
                                 voice: "story/1201/120170/1E15540C",
                                 npc: 210013,
                             },
@@ -58104,7 +58118,7 @@ export const questData_en: QuestStory[] = [
                         name: "对话节点",
                         srId: 105001,
                         pos: [58542, -25491],
-                        next: ["176543733256461290249", "176543733256461290250", "176543733256461290252"],
+                        next: ["176543733256461290249"],
                         dialogues: [
                             {
                                 id: 12018216,
@@ -58151,38 +58165,6 @@ export const questData_en: QuestStory[] = [
                                 id: 12018221,
                                 content: "Dim stones... with strength, and they glow!",
                                 voice: "story/1201/120182/1E161B62",
-                                npc: 210017,
-                            },
-                        ],
-                    },
-                    {
-                        id: "176543733256461290250",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        dialogues: [
-                            {
-                                id: 12018222,
-                                content: "The road ahead is blocked by a stone gate...",
-                                npc: 100001,
-                                next: 12018223,
-                            },
-                            {
-                                id: 12018223,
-                                content: "Let us take a closer look around. There might be some hidden mechanism or clue.",
-                                voice: "story/1201/120182/1E161BB6",
-                                npc: 210013,
-                            },
-                        ],
-                    },
-                    {
-                        id: "176543733256461290252",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        dialogues: [
-                            {
-                                id: 12018224,
-                                content: "Dim stones... light up, all at once!",
-                                voice: "story/1201/120182/1E161BE0",
                                 npc: 210017,
                             },
                         ],
@@ -75000,7 +74982,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 12045651,
                                 content:
-                                    "Oh my... I didn't realise I'd gone on so long. In any case, whether grand or fallen, the Jishu Sect's glory days are just that now — days long past.",
+                                    "Oh my... I didn't realise I'd gone on so long. In any case, whether grand or fallen, Jishu Sect's glory days are just that now — days long past.",
                                 voice: "story/1204/120456/1E27AF9E",
                                 npc: 240026,
                                 next: 12045652,
@@ -82466,7 +82448,7 @@ export const questData_en: QuestStory[] = [
                                     },
                                     {
                                         id: 12061216,
-                                        content: "Come on, Let's fight!",
+                                        content: "Come on, Let's fight! ",
                                         next: 12061217,
                                         impr: [1041, "Chaos", 3],
                                     },
@@ -93374,7 +93356,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51003101,
                                 content:
-                                    "Camila said Mr Buck can't handle alcohol — he never drinks. So... someone must've spiked the milk.",
+                                    "Camilla said Mr Buck can't handle alcohol — he never drinks. So... someone must've spiked the milk.",
                                 npc: 100001,
                                 next: 51003102,
                             },
@@ -94388,7 +94370,7 @@ export const questData_en: QuestStory[] = [
                             },
                             {
                                 id: 51004908,
-                                content: "Ah... Uhm... I...",
+                                content: "Ah... Ah... I... um...",
                                 npc: 700010,
                                 next: 51004909,
                             },
@@ -95619,7 +95601,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51008054,
                                 content:
-                                    "(With that pack of Filthoids out of the way, something once buried now lies exposed on the ground. You move closer to investigate.)",
+                                    "(After dispatching the troublesome Filthoids, you spot something half-buried in the dirt. Curious, you move in for a closer look.)",
                             },
                         ],
                     },
@@ -99701,7 +99683,7 @@ export const questData_en: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 51007501,
-                                content: "Hmm... I've made up my mind — hello, Test Subject #1!",
+                                content: "Hmm... I've made up my mind — hello, Test Subject No. 1!",
                                 npc: 700011,
                                 next: 51007502,
                             },
@@ -112986,7 +112968,7 @@ export const questData_en: QuestStory[] = [
                             },
                             {
                                 id: 51125078,
-                                content: "Hey, look at me now, I'm a Magistrate! Cool, right? Swoosh — zing — Aiyah!",
+                                content: "Hey, look at me now, I'm a Magistrate! Cool, right? Swoosh —  zing — Aiyah!",
                                 npc: 700379,
                                 next: 51125079,
                             },
@@ -117581,7 +117563,7 @@ export const questData_en: QuestStory[] = [
                             },
                             {
                                 id: 51164920,
-                                content: "(Xiaoyao turns toward the lake.)",
+                                content: "(Xiaoyao turns towards the lake.)",
                             },
                             {
                                 id: 51164921,
@@ -122120,7 +122102,7 @@ export const questData_en: QuestStory[] = [
             },
             {
                 id: 20040201,
-                name: "For your own reasons, you decide to buy the cigarette pack.",
+                name: "Buy the cigarette pack for your own reasons",
                 desc: "The merchant shows you a strange, antique-looking cigarette pack. You cannot help wondering whether something so small could really contain any treasure.",
                 nodes: [
                     {
@@ -122522,7 +122504,7 @@ export const questData_en: QuestStory[] = [
             },
             {
                 id: 20040202,
-                name: "Open the cigarette pack and see what is inside.",
+                name: "Open the cigarette pack and see what's inside",
                 desc: "You pay a hefty sum for the cigarette pack. Snow turns it over in her hands, unable to believe you spent so much on an ordinary pack. Just as she is about to resort to rather unorthodox methods to uncover its secret, a passer-by stops her.",
                 nodes: [
                     {
@@ -122699,7 +122681,7 @@ export const questData_en: QuestStory[] = [
             },
             {
                 id: 20040203,
-                name: "A helpful passer-by wants to buy the cigarette pack. Ask how much he is offering.",
+                name: "Ask the helpful passer-by how much he is offering for the cigarette pack",
                 desc: "The passer-by introduces himself as Toran, a member of the Steamwhistle Salon who claims to know a thing or two about such objects, and offers to buy the cigarette pack from you. When you hear his offer, you realise you have been ripped off. Furious, Snow grabs Outsider and tears off after the merchant.",
                 nodes: [
                     {
@@ -123109,7 +123091,7 @@ export const questData_en: QuestStory[] = [
             },
             {
                 id: 20040204,
-                name: "Tell Snow and Outsider what happened.",
+                name: "Tell Snow and Outsider what happened",
                 desc: "Snow and Outsider fail to catch the slippery merchant. You tell them what Toran just told you, and the group prepares to look further into the Steamwhistle Salon. Just then, a young nobleman happens to overhear your conversation.",
                 nodes: [
                     {
@@ -123331,7 +123313,7 @@ export const questData_en: QuestStory[] = [
             },
             {
                 id: 20040205,
-                name: "Head to the nobles' lounge where the Steamwhistle Salon meets.",
+                name: "Head to the nobles' lounge where the Steamwhistle Salon meets",
                 desc: "As planned, you head to the Steamwhistle Salon to investigate the matter of Eisenbahn's outsized personal fame. Toran has been waiting for you there.",
                 nodes: [
                     {
@@ -123529,7 +123511,7 @@ export const questData_en: QuestStory[] = [
             },
             {
                 id: 20040206,
-                name: "Enter the lounge.",
+                name: "Enter the lounge",
                 desc: "You enter the Steamwhistle Salon, where its chairman, Seaton, gives you a warm welcome. He invites you to take part in the Salon's upcoming photography contest, which will also serve as a trial for newcomers like yourselves.",
                 nodes: [
                     {
@@ -123722,7 +123704,7 @@ export const questData_en: QuestStory[] = [
             },
             {
                 id: 20040207,
-                name: "Find Toran and ask him about the photography contest.",
+                name: "Find Toran and ask him about the photography contest",
                 desc: "You ask Toran, the person in charge, about the arrangements and procedures for the photography contest.",
                 nodes: [
                     {
@@ -123815,7 +123797,7 @@ export const questData_en: QuestStory[] = [
             },
             {
                 id: 20040208,
-                name: "Find a good spot in the station and start taking photos.",
+                name: "Find a good spot in the station and start taking photos!",
                 desc: "You and Toran head into the station to take photos, and he teaches you a few useful techniques along the way. At first, everything goes smoothly: you capture several shots of Eisenbahn from the designated locations, and Toran grows visibly excited.",
                 nodes: [
                     {
@@ -124166,7 +124148,7 @@ export const questData_en: QuestStory[] = [
             },
             {
                 id: 20040209,
-                name: "Wait for the results.",
+                name: "Wait for the results",
                 desc: "The results will take a little while, though not too long. Toran is handling everything, so all you need to do is wait.",
                 nodes: [
                     {
@@ -124465,7 +124447,7 @@ export const questData_en: QuestStory[] = [
                             },
                             {
                                 id: 51200807,
-                                content: "We weren't fighting.\nKnock what off?",
+                                content: "We weren't fighting.\n Knock what off?",
                                 npc: 700409,
                                 next: 51200808,
                             },
@@ -125783,6 +125765,11218 @@ export const questData_en: QuestStory[] = [
                                 id: 51200979,
                                 content: "Looks like Handy left us quite a parting gift. The question now is how best to make use of it.",
                                 npc: 700409,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 200404,
+        quests: [
+            {
+                id: 20040400,
+                name: "",
+                nodes: [
+                    {
+                        id: "17799526697681733",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-16579, 13157],
+                        next: ["17807363385121523745"],
+                        dialogues: [
+                            {
+                                id: 51206801,
+                                content:
+                                    "Glad we finally have a moment to speak in private. People like you don't turn up at the station every day: kind, capable, and generous enough to help a stranger.",
+                                npc: 700486,
+                                next: 51206802,
+                            },
+                            {
+                                id: 51206802,
+                                content:
+                                    "Before I take you to the chairman, let me introduce myself properly. Lorent. Though I suppose you already knew that. I'm the Screwdriver Union's... second-in-command, more or less.",
+                                npc: 700486,
+                                next: 51206803,
+                            },
+                            {
+                                id: 51206803,
+                                content: "Oho! Second-in-command? A big shot, then! Just like me at The Asphodel!",
+                                npc: 700449,
+                                next: 51206804,
+                            },
+                            {
+                                id: 51206804,
+                                content: "I don't have time for small talk. What do you want from me?",
+                                npc: 100001,
+                                next: 51206805,
+                            },
+                            {
+                                id: 51206805,
+                                content:
+                                    "Fair enough. Straight to the point — I like that. The Union's in trouble, and we could use someone capable — someone kind enough to help.",
+                                npc: 700486,
+                                options: [
+                                    {
+                                        id: 51206806,
+                                        content: "Why should I help you?",
+                                        next: 51206809,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 51206807,
+                                        content: "What's in it for me?",
+                                        next: 51206809,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 51206808,
+                                        content: "Helping Coney doesn't mean I'm on your side.",
+                                        next: 51206809,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51206809,
+                                content:
+                                    "Heh. Direct, and sharp too. I like that. That's exactly why I wanted to start with a proper introduction.",
+                                npc: 700486,
+                                next: 51206810,
+                            },
+                            {
+                                id: 51206810,
+                                content:
+                                    "You don't really know us yet. Everything you've heard about the Screwdriver Union came from Coney, and he only gave you one side of the story. You still don't know what the Union actually does.",
+                                npc: 700486,
+                                next: 51206811,
+                            },
+                            {
+                                id: 51206811,
+                                content: "You've lost me already... So are you saying your Union is secretly amazing?",
+                                npc: 700449,
+                                next: 51206812,
+                            },
+                            {
+                                id: 51206812,
+                                content:
+                                    "Quite the opposite. The Union is made up of people like Coney — poor souls scraping by beneath the station's polished surface.",
+                                npc: 700486,
+                                next: 51206813,
+                            },
+                            {
+                                id: 51206813,
+                                content:
+                                    "We band together and look after our own. When someone gets into trouble at work, we help them through it — just like we did for Coney. Day after day, we keep the workers here from going under.",
+                                npc: 700486,
+                                next: 51206814,
+                            },
+                            {
+                                id: 51206814,
+                                content: "Coney never told us that... But he did say the Union lent him the money to treat his broken leg.",
+                                npc: 700449,
+                                next: 51206815,
+                            },
+                            {
+                                id: 51206815,
+                                content:
+                                    "It did. Put simply, we're a mutual aid organisation for the workers of Bloomfield Station. Anyone who earns a living with a screwdriver is a brother or sister to us. In theory, at least.",
+                                npc: 700486,
+                                next: 51206816,
+                            },
+                            {
+                                id: 51206816,
+                                content:
+                                    "The money Coney owes came from dues paid by workers no better off than him. They scraped it together coin by coin. You helped Coney... but what about the rest of them?",
+                                npc: 700486,
+                                next: 51206817,
+                            },
+                            {
+                                id: 51206817,
+                                content: "Fine. What exactly do you want me to do?",
+                                npc: 100001,
+                                next: 51206818,
+                            },
+                            {
+                                id: 51206818,
+                                content: "Come to our place. I'll explain the details once we're there.",
+                                npc: 700486,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17807363385121523745",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-16579, 13157],
+                        dialogues: [
+                            {
+                                id: 51206901,
+                                content: "Little Minion, what do you think they really want from us?",
+                                npc: 700449,
+                                next: 51206902,
+                            },
+                            {
+                                id: 51206902,
+                                content: "No idea. Let's hope this doesn't take long.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040401,
+                name: "Go to the Screwdriver Union base",
+                desc: "You have only just seen Coney off when a strange man approaches you. He looks vaguely familiar... Lorent, was it? What could he want?",
+                nodes: [
+                    {
+                        id: "17803000081561484645",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-17680, 12339],
+                        dialogues: [
+                            {
+                                id: 51207001,
+                                content: "Here we are—",
+                                npc: 700428,
+                                next: 51207002,
+                            },
+                            {
+                                id: 51207002,
+                                content:
+                                    "Get lost! I'm not lending you another damn coin. Last time I gave you money, you lost the lot. Then you came crawling back for more, lost that too, and now you've got the nerve to show your face and ask again?",
+                                next: 51207003,
+                            },
+                            {
+                                id: 51207003,
+                                content:
+                                    "Please, Kroger, you have to believe me! I was still figuring things out back then. But I've cracked it this time! Lend me the money, and I'll pay back every last coin!",
+                                next: 51207004,
+                            },
+                            {
+                                id: 51207004,
+                                content:
+                                    "Hah! Do you even hear yourself? Go say that to the wife who walked out on you and took the kids with her. See if she believes it.",
+                                npc: 700429,
+                                next: 51207005,
+                            },
+                            {
+                                id: 51207005,
+                                content:
+                                    "No! This time is different! I can really win! Kroger, I'm the Union's only accountant! I've worked out every rule of that \"game\". This time... this time, I can't lose!",
+                                next: 51207006,
+                            },
+                            {
+                                id: 51207006,
+                                content:
+                                    "Beat it, Rowan. Beg on your knees till nightfall if you like. You're not getting a single coin from me.",
+                                npc: 700429,
+                                next: 51207007,
+                            },
+                            {
+                                id: 51207007,
+                                content: "Fine! Keep your damn money! If you won't lend it to me, I'll get it somewhere else. Like I care!",
+                                npc: 700430,
+                                next: 51207008,
+                            },
+                            {
+                                id: 51207008,
+                                content:
+                                    "Ha! Good. Now get the hell out. And when that damn game's taken your money and your life, I'll know which rubbish bin to check for your frozen corpse.",
+                                npc: 700429,
+                                next: 51207009,
+                            },
+                            {
+                                id: 51207009,
+                                content:
+                                    "(There's a shuffling behind the door. A moment later, a man bursts out with his head down, shoulders past you, and hurries away.)",
+                                next: 51207010,
+                            },
+                            {
+                                id: 51207010,
+                                content: "Sorry about that. Let's go inside.",
+                                npc: 700428,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040402,
+                name: "Enter the Screwdriver Union base",
+                desc: "To be fair, Lorent seems decent enough. When the other workers were mocking Coney, he was the one who spoke up for the boy. Still, what really interests you is the Screwdriver Union Coney kept mentioning. Since they have gone to the trouble of inviting you, it cannot hurt to take a look.",
+                nodes: [
+                    {
+                        id: "17803003214772966199",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-18248, 11633],
+                        dialogues: [
+                            {
+                                id: 51207101,
+                                content:
+                                    "There you are. Can you believe that idiot? I swear, Rowan's going to drive me out of my damn mind... Who's this?",
+                                npc: 700429,
+                                next: 51207102,
+                            },
+                            {
+                                id: 51207102,
+                                content:
+                                    "You really ought to do something about that temper, Kroger. Flying off the handle, drinking yourself senseless... At this rate, rage or liquor will kill you before you ever get the chance to go looking for Rowan's body in the bins.",
+                                npc: 700428,
+                                next: 51207103,
+                            },
+                            {
+                                id: 51207103,
+                                content:
+                                    "Oh, piss off. What, you're taking his side now? You think I should lend him money? Lorent, you don't understand — he's lost his mind. He's not the Rowan we knew. The man's gone bloody insane, you hear me? Insane!",
+                                npc: 700429,
+                                next: 51207104,
+                            },
+                            {
+                                id: 51207104,
+                                content: "But he did say that if we wouldn't lend him the money, he'd find it somewhere else.",
+                                npc: 700428,
+                                next: 51207105,
+                            },
+                            {
+                                id: 51207105,
+                                content: "Hah! From who? Apart from us, who around here would be stupid enough to lend him a single coin?",
+                                npc: 700429,
+                                next: 51207106,
+                            },
+                            {
+                                id: 51207106,
+                                content: "We'll come back to that. First, let me introduce our ace in the hole.",
+                                npc: 700428,
+                                next: 51207107,
+                            },
+                            {
+                                id: 51207107,
+                                content: "Ace in the hole? Who's he talking about? Us?",
+                                npc: 700449,
+                                next: 51207108,
+                            },
+                            {
+                                id: 51207108,
+                                content:
+                                    'More specifically, your "Little Minion" here. This isn\'t exactly the sort of business children should get mixed up in.',
+                                npc: 700428,
+                                next: 51207109,
+                            },
+                            {
+                                id: 51207109,
+                                content: "Hey! How dare you look down on me! Do you have any idea who I—",
+                                npc: 700449,
+                                next: 51207110,
+                            },
+                            {
+                                id: 51207110,
+                                content: "Snow, calm down...",
+                                npc: 100001,
+                                next: 51207111,
+                            },
+                            {
+                                id: 51207111,
+                                content: "And this would be our... hired Phoxhunter, I suppose. Is that all right with you?",
+                                npc: 700428,
+                                next: 51207112,
+                            },
+                            {
+                                id: 51207112,
+                                content:
+                                    "Just call me {nickname}. I didn't come here to listen to you two argue. Tell me what you want from me.",
+                                npc: 100001,
+                                next: 51207113,
+                            },
+                            {
+                                id: 51207113,
+                                content:
+                                    "Very well, {nickname}. Picture this: you're an ordinary worker who's spent the past year labouring at the station.",
+                                npc: 700428,
+                                next: 51207114,
+                            },
+                            {
+                                id: 51207114,
+                                content:
+                                    "The pay is poor, but it keeps you fed. Every night, you dream of leaving, because everyone knows what happens if you stay too long — the work wears you down, little by little. By the time you're old, your body's already given out.",
+                                npc: 700428,
+                                next: 51207115,
+                            },
+                            {
+                                id: 51207115,
+                                content: "What the hell are you getting at?",
+                                npc: 700429,
+                                next: 51207116,
+                            },
+                            {
+                                id: 51207116,
+                                content: "Easy. Let me finish.",
+                                npc: 700428,
+                                next: 51207117,
+                            },
+                            {
+                                id: 51207117,
+                                content:
+                                    "Now imagine this: in the middle of that hopeless, suffocating life, a man calling himself Mr Jack appears with a new \"game\" no one's ever seen before. Mr Jack's game is simple, easy to understand, and most importantly... profitable.",
+                                npc: 700428,
+                                next: 51207118,
+                            },
+                            {
+                                id: 51207118,
+                                content:
+                                    "One lucky win could pay more than a month of backbreaking work. Tell me, {nickname}... would you take that chance?",
+                                npc: 700428,
+                                options: [
+                                    {
+                                        id: 51207119,
+                                        content: "And what happens if I lose?",
+                                        next: 51207120,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 51207121,
+                                        content: "Sure — as long as losing doesn't cost me anything.",
+                                        next: 51207122,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 51207123,
+                                        content: "I wouldn't touch it. Sounds shady.",
+                                        next: 51207124,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 51207125,
+                                        content: "And if I lose? Do I get a complimentary rubbish bin to freeze in?",
+                                        next: 51207126,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51207120,
+                                content: "Heh. See? That's why I called you sharp. You know there's no such thing as easy money.",
+                                npc: 700428,
+                                next: 51207127,
+                            },
+                            {
+                                id: 51207122,
+                                content: "Oh, it does. If it didn't, I wouldn't be standing here talking to you. I'd be playing it myself.",
+                                npc: 700428,
+                                next: 51207127,
+                            },
+                            {
+                                id: 51207124,
+                                content: "Huh. That's a rare answer. Is that your conscience talking... or a Phoxhunter's instincts?",
+                                npc: 700428,
+                                next: 51207127,
+                            },
+                            {
+                                id: 51207126,
+                                content: "Hahaha... You've got quite the sense of humour.",
+                                npc: 700428,
+                                next: 51207127,
+                            },
+                            {
+                                id: 51207127,
+                                content:
+                                    "Whatever your answer, let's say you get pulled into Mr Jack's game somehow. At first, luck seems to be on your side. You win some, you lose some, but overall, you're still ahead.",
+                                npc: 700428,
+                                next: 51207128,
+                            },
+                            {
+                                id: 51207128,
+                                content:
+                                    "Then you get cocky. You start thinking your luck won't run out. You play more often... and every bet gets bigger than the last. Until, eventually...",
+                                npc: 700428,
+                                next: 51207129,
+                            },
+                            {
+                                id: 51207129,
+                                content: "Until you piss away every damn coin you've got!",
+                                npc: 700429,
+                                next: 51207130,
+                            },
+                            {
+                                id: 51207130,
+                                content: "Kroger, must you put it so crudely? But... yes. More or less. You lose everything.",
+                                npc: 700428,
+                                next: 51207131,
+                            },
+                            {
+                                id: 51207131,
+                                content:
+                                    "Then I would simply stop playing! Even if I lost every coin I had, I could always go back to The Asphodel and ask Camilla for pocket money~",
+                                npc: 700449,
+                                next: 51207132,
+                            },
+                            {
+                                id: 51207132,
+                                content: "Is that so? What about you, {nickname}? Do you think you could walk away?",
+                                npc: 700428,
+                                next: 51207133,
+                            },
+                            {
+                                id: 51207133,
+                                content:
+                                    "In the situation you're describing... if I'd already lost that much, I probably wouldn't see money the same way anymore. It would just be numbers to me. And if earning it all back honestly would take months — maybe even a year...",
+                                npc: 100001,
+                                next: 51207134,
+                            },
+                            {
+                                id: 51207134,
+                                content:
+                                    "Once you've tasted victory, once you've felt what it's like to get something for nothing, you start believing you can win it all back. Everything you lost, and more besides.",
+                                npc: 100001,
+                                next: 51207135,
+                            },
+                            {
+                                id: 51207135,
+                                content:
+                                    "I don't think I could resist a temptation that strong. That's exactly why I would have stayed away from Mr Jack's game in the first place.",
+                                npc: 100001,
+                                next: 51207136,
+                            },
+                            {
+                                id: 51207136,
+                                content:
+                                    'But people already caught in it... they\'d probably keep playing until they finally "turn things around".',
+                                npc: 100001,
+                                next: 51207137,
+                            },
+                            {
+                                id: 51207137,
+                                content:
+                                    "Exactly. So where do you get the money to keep playing? Well... Mr Jack has a convenient little answer to that.",
+                                npc: 700428,
+                                next: 51207138,
+                            },
+                            {
+                                id: 51207138,
+                                content:
+                                    "\"Why not borrow from me?\" The great Mr Jack is willing to fund your next round. And if you win, he won't even charge you interest. Pay back what you borrowed, and the rest is yours to keep. Hard to refuse, isn't it?",
+                                npc: 700428,
+                                next: 51207139,
+                            },
+                            {
+                                id: 51207139,
+                                content:
+                                    "You're sneaky! Every time you explain something, you only mention the nice parts... What's the catch? What happens if they lose again?",
+                                npc: 700449,
+                                next: 51207140,
+                            },
+                            {
+                                id: 51207140,
+                                content:
+                                    "It's not that he's hiding the catch... It's that by then, they wouldn't be able to see it anymore.",
+                                npc: 100001,
+                                next: 51207141,
+                            },
+                            {
+                                id: 51207141,
+                                content:
+                                    "This is what I hate about you, Lorent! You take something dead simple and turn it into a bloody lecture! You're saying that old bastard Jack's lending money now, and Rowan, that idiot, is going to borrow from him. That's what you're trying to tell us, right?",
+                                npc: 700429,
+                                next: 51207142,
+                            },
+                            {
+                                id: 51207142,
+                                content:
+                                    "Not just Rowan. Almost everyone we've refused to lend money to is trying to borrow from Jack instead.",
+                                npc: 700428,
+                                next: 51207143,
+                            },
+                            {
+                                id: 51207143,
+                                content:
+                                    "And now they're calling the Screwdriver Union useless. They say we can't help them keep food on the table, and we won't even lend them the money to try for a better life.",
+                                npc: 700428,
+                                next: 51207144,
+                            },
+                            {
+                                id: 51207144,
+                                content: "Hah! A better life, my arse!",
+                                npc: 700429,
+                                next: 51207145,
+                            },
+                            {
+                                id: 51207145,
+                                content:
+                                    "(He slams his fist into the crate beside him. Blood immediately seeps between his fingers, but he doesn't seem to notice.)",
+                                next: 51207146,
+                            },
+                            {
+                                id: 51207146,
+                                content:
+                                    "So that's it!? We try to keep these idiots alive, and now they blame us for looking out for them!?",
+                                npc: 700429,
+                                next: 51207147,
+                            },
+                            {
+                                id: 51207147,
+                                content:
+                                    "You think we're helping them, but they don't see it that way. If we refuse to lend them money, do you think they'll just stop playing? No. They'll borrow from someone else and keep going.",
+                                npc: 700428,
+                                next: 51207148,
+                            },
+                            {
+                                id: 51207148,
+                                content: "Then what the hell are we supposed to do!? Sit here and let them call the Union useless!?",
+                                npc: 700429,
+                                next: 51207149,
+                            },
+                            {
+                                id: 51207149,
+                                content:
+                                    "See? There you go again, getting worked up. Didn't I tell you? The person I brought back is our ace in the hole. Isn't that right, {性别：sir|miss}?",
+                                npc: 700428,
+                                options: [
+                                    {
+                                        id: 51207150,
+                                        content: "I see what you're getting at. What do you need me to do?",
+                                        next: 51207151,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51207152,
+                                        content: "I see what you're getting at. So what do I get out of it?",
+                                        next: 51207153,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 51207157,
+                                        content: "I see what you're getting at. But why me?",
+                                        next: 51207158,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51207151,
+                                content:
+                                    "I knew you'd help us the moment I saw you help Coney. We'll be counting on you, then. Whether we bring Mr Jack down is in your hands.",
+                                npc: 700428,
+                                next: 51207162,
+                            },
+                            {
+                                id: 51207153,
+                                content: "I thought as much. You're a good person — I knew that the moment I saw you help Coney.",
+                                npc: 700428,
+                                next: 51207154,
+                            },
+                            {
+                                id: 51207158,
+                                content:
+                                    "Everyone in Icelake knows the pay and conditions at Bloomfield Station are miserable. Hardly anyone new wants to work there anymore. You're the first fresh face we've seen in a long while.",
+                                npc: 700428,
+                                next: 51207159,
+                            },
+                            {
+                                id: 51207162,
+                                content: "...All right. What's the plan?",
+                                npc: 100001,
+                                next: 51207163,
+                            },
+                            {
+                                id: 51207154,
+                                content:
+                                    "Help us bring Jack down, and I'll personally introduce you to the Screwdriver Union. You'll be our honoured guest, and every worker in the Union will have your back.",
+                                npc: 700428,
+                                next: 51207155,
+                            },
+                            {
+                                id: 51207159,
+                                content:
+                                    "Mr Jack has never seen you before, and neither have his people. They don't know a thing about you. That means you can go places the rest of us can't without drawing attention.",
+                                npc: 700428,
+                                next: 51207160,
+                            },
+                            {
+                                id: 51207163,
+                                content:
+                                    "(Lorent glances at Kroger. Kroger takes the hint and leads Snow out of the room. Once the two of you are alone, Lorent lets out a long breath and begins explaining his plan. It takes some time before he finally lets you leave.)",
+                            },
+                            {
+                                id: 51207155,
+                                content: "Not interested. I won't be staying here long anyway. If I do this, you wipe Coney's debt clean.",
+                                npc: 100001,
+                                next: 51207156,
+                            },
+                            {
+                                id: 51207160,
+                                content:
+                                    "And most importantly... you're kind. You helped Coney. That tells me you won't just stand by while these workers are tricked out of their money, have their lives ruined... or worse.",
+                                npc: 700428,
+                                next: 51207161,
+                            },
+                            {
+                                id: 51207156,
+                                content: "Hm... That works for us. We have a deal, then. Whether we bring Mr Jack down is in your hands.",
+                                npc: 700428,
+                                next: 51207162,
+                            },
+                            {
+                                id: 51207161,
+                                content: "So... we'll be counting on you. Whether we bring Mr Jack down is in your hands.",
+                                npc: 700428,
+                                next: 51207162,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040403,
+                name: "Leave and find Snow",
+                desc: "After accepting the Screwdriver Union's request, you and Lorent stay behind to discuss the plan. Snow has been waiting outside for some time. Go and find her.",
+                nodes: [
+                    {
+                        id: "17804712788094162",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-18345, 12347],
+                        dialogues: [
+                            {
+                                id: 51207201,
+                                content: "1901, 1902, 1903, 1904...",
+                                npc: 700449,
+                                next: 51207202,
+                            },
+                            {
+                                id: 51207202,
+                                content: "Snow, what are you doing?",
+                                npc: 100001,
+                                next: 51207203,
+                            },
+                            {
+                                id: 51207203,
+                                content:
+                                    "Wah—! Little Minion! You're finally out! I thought that suspicious smiley man was going to abduct you and sell you off or something! I was going to storm in and rescue you once I counted to 2000!",
+                                npc: 700449,
+                                next: 51207204,
+                            },
+                            {
+                                id: 51207204,
+                                content: "Uh... We were just talking for a while.",
+                                npc: 100001,
+                                next: 51207205,
+                            },
+                            {
+                                id: 51207205,
+                                content: "So what did you talk about? What does he want us to do?",
+                                npc: 700449,
+                                next: 51207206,
+                            },
+                            {
+                                id: 51207206,
+                                content: "He said...",
+                                npc: 100001,
+                                next: 51207207,
+                            },
+                            {
+                                id: 51207207,
+                                content:
+                                    "Since you won't be staying here long, I'll keep this simple. Mr Jack — the man running that gaming parlour inside the station — has people planted throughout the ironworks. We call them hooks.",
+                                npc: 700428,
+                                next: 51207208,
+                            },
+                            {
+                                id: 51207208,
+                                content:
+                                    "The hooks look for workers most likely to bite: young, short on money, and sick of their dull, miserable lives. That's exactly the sort of person you'll need to pretend to be.",
+                                npc: 700428,
+                                next: 51207209,
+                            },
+                            {
+                                id: 51207209,
+                                content:
+                                    "I need you to be the fish that takes the bait. Do something — anything — to draw their attention. It shouldn't be difficult. You're new here. They'll notice you soon enough.",
+                                npc: 700428,
+                                next: 51207210,
+                            },
+                            {
+                                id: 51207210,
+                                content: "Hm... Then again, perhaps you're the hook after all, and Mr Jack is the fish.",
+                                npc: 700428,
+                                next: 51207211,
+                            },
+                            {
+                                id: 51207211,
+                                content: "Snow, let's start by hanging around the places where workers gather.",
+                                npc: 100001,
+                                next: 51207212,
+                            },
+                            {
+                                id: 51207212,
+                                content: "Right! With the Demon King and her Little Minion on the case, Mr Jack doesn't stand a chance!",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040404,
+                name: "Go to the ironworks",
+                desc: 'Your first objective is to find Mr Jack\'s plants inside the ironworks. They should not be hard to spot. Show even the faintest interest in the "game", and sooner or later, they will bite. Which makes you the bait the Screwdriver Union has sent in.',
+                nodes: [
+                    {
+                        id: "17805606375361516373",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-10710, 7990],
+                        next: ["17803044888741910"],
+                        dialogues: [
+                            {
+                                id: 51207301,
+                                content: "Everyone looks so miserable... Guess we came to the right place. Little Minion, what now?",
+                                npc: 700449,
+                                next: 51207302,
+                            },
+                            {
+                                id: 51207302,
+                                content: "Over here.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17803044888741910",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-13878, 5174],
+                        dialogues: [
+                            {
+                                id: 51207401,
+                                content: "Hello. On a break?",
+                                npc: 100001,
+                                next: 51207402,
+                            },
+                            {
+                                id: 51207402,
+                                content:
+                                    "(One of the workers raises the tired eyes and gives the two of you a quick once-over, but says nothing.)",
+                                next: 51207403,
+                            },
+                            {
+                                id: 51207403,
+                                content: "Another pair of fools tricked into coming here...",
+                                npc: 700431,
+                                next: 51207404,
+                            },
+                            {
+                                id: 51207404,
+                                content:
+                                    "Come on, be nice. We've got to look after the newcomers. Hey there. Welcome to Bloomfield Station. Though you'll figure out soon enough this isn't exactly where dreams come true.",
+                                npc: 700432,
+                                next: 51207405,
+                            },
+                            {
+                                id: 51207405,
+                                content: "How'd you know I'm new?",
+                                npc: 100001,
+                                next: 51207406,
+                            },
+                            {
+                                id: 51207406,
+                                content:
+                                    "Because only fresh fools still have the energy to walk up and say hello. Give it time. This place'll squeeze the life out of you too. Around here, even standing still before your shift starts is enough to make people think you're slacking off.",
+                                npc: 700431,
+                                next: 51207407,
+                            },
+                            {
+                                id: 51207407,
+                                content:
+                                    "That's just how she is. Don't mind her. So, what brings you over? Looking for someone to show you around? Or...",
+                                npc: 700432,
+                                next: 51207408,
+                            },
+                            {
+                                id: 51207408,
+                                content: "Ah, you've got a Luno with you? What, taking her with the other kids to clean the skylights?",
+                                npc: 700432,
+                                next: 51207409,
+                            },
+                            {
+                                id: 51207409,
+                                content: "Uh... That's right! We started working here together!",
+                                npc: 700449,
+                                next: 51207410,
+                            },
+                            {
+                                id: 51207410,
+                                content: "One big fool and one little fool.",
+                                npc: 700431,
+                                options: [
+                                    {
+                                        id: 51207411,
+                                        content: "(Play along.)",
+                                        next: 51207412,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 51207413,
+                                        content: "(Change the subject.)",
+                                        next: 51207414,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51207415,
+                                        content: "Takes one to know one.",
+                                        next: 51207416,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51207412,
+                                content:
+                                    "You're probably right. If we weren't fools, why would we come here knowing what this place is like?",
+                                npc: 100001,
+                                next: 51207419,
+                            },
+                            {
+                                id: 51207414,
+                                content: "It's not like we had much choice.",
+                                npc: 100001,
+                                next: 51207419,
+                            },
+                            {
+                                id: 51207416,
+                                content: "You must be an even bigger fool, then. You got here before we did.",
+                                npc: 100001,
+                                next: 51207417,
+                            },
+                            {
+                                id: 51207419,
+                                content: "Wh—What do you mean...?",
+                                npc: 700432,
+                                next: 51207420,
+                            },
+                            {
+                                id: 51207417,
+                                content: "I didn't have a choice! I need money to live, all right!?",
+                                npc: 700431,
+                                next: 51207418,
+                            },
+                            {
+                                id: 51207420,
+                                content: "We didn't have a choice.",
+                                npc: 100001,
+                                next: 51207421,
+                            },
+                            {
+                                id: 51207418,
+                                content: "Same here. Only I need it for something more important than just staying alive.",
+                                npc: 100001,
+                                next: 51207419,
+                            },
+                            {
+                                id: 51207421,
+                                content: "Hm? Little Mi— Um, I mean, {nickname}, what are you talking about?",
+                                npc: 700449,
+                                next: 51207422,
+                            },
+                            {
+                                id: 51207422,
+                                content:
+                                    "Our older sister raised the two of us. Then one day, a gang of thugs came to our home and took her away.",
+                                npc: 100001,
+                                next: 51207423,
+                            },
+                            {
+                                id: 51207423,
+                                content:
+                                    "We came all the way to Icelake to find her. Now we're flat broke. Work is the only way we've got left to keep ourselves alive... and to save up enough ransom money to get her back.",
+                                npc: 100001,
+                                next: 51207424,
+                            },
+                            {
+                                id: 51207424,
+                                content: "What are you... Oh!",
+                                npc: 700449,
+                                next: 51207425,
+                            },
+                            {
+                                id: 51207425,
+                                content:
+                                    "Mm-hm! {性别：He|She}'s right! We haven't had a proper meal in ages! If the kind lady at The Asphodel hadn't taken us in and fed us, we would have starved already!",
+                                npc: 700449,
+                                next: 51207426,
+                            },
+                            {
+                                id: 51207426,
+                                content: "...",
+                                npc: 700431,
+                                next: 51207427,
+                            },
+                            {
+                                id: 51207427,
+                                content: "...Well. That's rough. Really rough.",
+                                npc: 700432,
+                                next: 51207428,
+                            },
+                            {
+                                id: 51207428,
+                                content: "We need money. Badly. Not just enough to eat — enough to pay my sister's ransom.",
+                                npc: 100001,
+                                next: 51207429,
+                            },
+                            {
+                                id: 51207429,
+                                content: "Aww... If only there were somewhere we could make a whole lot of money all at once.",
+                                npc: 700449,
+                                next: 51207430,
+                            },
+                            {
+                                id: 51207430,
+                                content:
+                                    "Well... a place like that does exist. But honestly, wouldn't it make more sense to hire someone to get your sister back instead of scraping together the ransom bit by bit?",
+                                npc: 700432,
+                                next: 51207431,
+                            },
+                            {
+                                id: 51207431,
+                                content:
+                                    "Don't you know the owner of The Asphodel? There's a group of bounty hunters at her tavern called... Phoxhunters, right? Heard they're pretty tough.",
+                                npc: 700431,
+                                next: 51207432,
+                            },
+                            {
+                                id: 51207432,
+                                content:
+                                    "If they were ordinary kidnappers, maybe. But the one who took my sister is really strong. Brutal. Some kind of monster.",
+                                npc: 100001,
+                                next: 51207433,
+                            },
+                            {
+                                id: 51207433,
+                                content: "Wouldn't have guessed you two had it that bad... I take back what I said earlier. Sorry.",
+                                npc: 700431,
+                                next: 51207434,
+                            },
+                            {
+                                id: 51207434,
+                                content:
+                                    "Still, no matter how hard you work here, the best you'll manage is keeping yourselves fed. As for saving up ransom money? Not a chance.",
+                                npc: 700431,
+                                next: 51207438,
+                            },
+                            {
+                                id: 51207435,
+                                content:
+                                    "Well, hello there. Having a little chat, are we? You two — the foreman's calling for you over there. Needs a hand with some cargo.",
+                                npc: 700448,
+                                next: 51207436,
+                            },
+                            {
+                                id: 51207436,
+                                content:
+                                    "Finally. We've been waiting forever. All right, we'd better get going. Since you're working here now, we'll probably see each other around.",
+                                npc: 700432,
+                                next: 51207437,
+                            },
+                            {
+                                id: 51207437,
+                                content: "See you around.",
+                                npc: 700431,
+                                next: 51207439,
+                            },
+                            {
+                                id: 51207501,
+                                content: "Ah, so you're new here? I hear you're looking to make some money.",
+                                npc: 700448,
+                                next: 51207502,
+                            },
+                            {
+                                id: 51207502,
+                                content: "That's right! We need money — lots and lots of it!",
+                                npc: 700449,
+                                next: 51207503,
+                            },
+                            {
+                                id: 51207503,
+                                content:
+                                    "I see... Well, as it happens, I know a place. Somewhere a little money can become a great deal more.",
+                                npc: 700448,
+                                next: 51207504,
+                            },
+                            {
+                                id: 51207504,
+                                content: "Really? Where is it? Can we go?",
+                                npc: 100001,
+                                next: 51207505,
+                            },
+                            {
+                                id: 51207505,
+                                content: "You? Of course. I can take you whenever you like. Her, though...",
+                                npc: 700448,
+                                next: 51207506,
+                            },
+                            {
+                                id: 51207506,
+                                content: "Huh? What's wrong with me?",
+                                npc: 700449,
+                                next: 51207507,
+                            },
+                            {
+                                id: 51207507,
+                                content:
+                                    "...Never mind. One kid won't make any difference. I'm heading there myself, as it happens. Care to come along?",
+                                npc: 700448,
+                                next: 51207508,
+                            },
+                            {
+                                id: 51207508,
+                                content: "I've never been anywhere like that before. Is that all right?",
+                                npc: 100001,
+                                next: 51207509,
+                            },
+                            {
+                                id: 51207509,
+                                content: "Not a problem. I'll take you there.",
+                                npc: 700448,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040405,
+                name: "Head to the parlour",
+                desc: 'Sure enough, it is not long before a friendly-looking man takes the bait. Following the plan, you let him lead you to the "game" parlour. Whatever this game really is, you have no intention of playing.',
+                nodes: [
+                    {
+                        id: "17803047516302753",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-33804, 5173],
+                        dialogues: [
+                            {
+                                id: 51207601,
+                                content:
+                                    "Why does everyone keep calling me a kid today? And since when are kids not allowed to play games?",
+                                npc: 700449,
+                                next: 51207602,
+                            },
+                            {
+                                id: 51207602,
+                                content: "Maybe this isn't that kind of game.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040406,
+                name: "Head to the parlour",
+                desc: 'Sure enough, it is not long before a friendly-looking man takes the bait. Following the plan, you let him lead you to the "game" parlour. Whatever this game really is, you have no intention of playing.',
+                nodes: [
+                    {
+                        id: "17803048919444526",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-33804, 5173],
+                        dialogues: [
+                            {
+                                id: 51207701,
+                                content:
+                                    "(The cramped, airless room is packed with makeshift gaming tables. Players and onlookers crowd around every table, and the noise is so overwhelming that people have to shout themselves hoarse just to be heard.)",
+                                next: 51207702,
+                            },
+                            {
+                                id: 51207702,
+                                content: "Lucky Jack! Know the rules?",
+                                npc: 700433,
+                                next: 51207703,
+                            },
+                            {
+                                id: 51207703,
+                                content:
+                                    "Take any open seat. The dealer deals one card at a time to each player at the table. Number cards from 2 to 10 are worth their face value. Jacks, Queens, and Kings count as 10. An Ace can count as either 1 or 11.",
+                                npc: 700433,
+                                next: 51207704,
+                            },
+                            {
+                                id: 51207704,
+                                content:
+                                    "21 is the best hand. Hit it exactly, and you're sitting pretty. If no one reaches 21, the highest total wins. Go over 21, and you bust — and lose the round.",
+                                npc: 700433,
+                                next: 51207705,
+                            },
+                            {
+                                id: 51207705,
+                                content: "Think I've got it... Can I try a round now?",
+                                npc: 700434,
+                                next: 51207706,
+                            },
+                            {
+                                id: 51207706,
+                                content: "Little Minion? What are you staring at?",
+                                npc: 700449,
+                                next: 51207707,
+                            },
+                            {
+                                id: 51207707,
+                                content: "Nothing... I was just listening to the rules for Lucky Jack.",
+                                npc: 100001,
+                                next: 51207708,
+                            },
+                            {
+                                id: 51207708,
+                                content: "Oh? Lucky Jack caught your eye, has it? Want me to get you into a round?",
+                                npc: 700448,
+                                next: 51207709,
+                            },
+                            {
+                                id: 51207709,
+                                content: "No thanks.",
+                                npc: 100001,
+                                next: 51207710,
+                            },
+                            {
+                                id: 51207710,
+                                content: "Oh, are the rules too much? That's all right. We've got simpler games too—",
+                                npc: 700448,
+                                next: 51207711,
+                            },
+                            {
+                                id: 51207711,
+                                content: "...Can't play those either.",
+                                npc: 100001,
+                                next: 51207712,
+                            },
+                            {
+                                id: 51207712,
+                                content:
+                                    "What's that supposed to mean? You're not interested, and you can't play? Then why did you come here with me?",
+                                npc: 700448,
+                                next: 51207713,
+                            },
+                            {
+                                id: 51207713,
+                                content:
+                                    "Um, don't be upset, sir. It's not that we don't want to play, it's just... um... we don't have any money.",
+                                npc: 700449,
+                                next: 51207714,
+                            },
+                            {
+                                id: 51207714,
+                                content: "You don't?",
+                                npc: 700448,
+                                next: 51207715,
+                            },
+                            {
+                                id: 51207715,
+                                content:
+                                    "Uh-huh! We only just started working at the station, remember? We haven't even been paid yet, so we don't have any coins to play with.",
+                                npc: 700449,
+                                next: 51207716,
+                            },
+                            {
+                                id: 51207716,
+                                content: "Exactly. Is there anything we can play without money?",
+                                npc: 100001,
+                                next: 51207717,
+                            },
+                            {
+                                id: 51207717,
+                                content: "You can't be serious. Why would a place like this let people play for free?",
+                                npc: 700448,
+                                next: 51207718,
+                            },
+                            {
+                                id: 51207718,
+                                content:
+                                    "I brought you here because I thought you wanted in. Now you're backing out? Are you wasting my time?",
+                                npc: 700448,
+                                next: 51207719,
+                            },
+                            {
+                                id: 51207719,
+                                content: "We do want to make money. We just didn't know we needed money to start.",
+                                npc: 100001,
+                                next: 51207720,
+                            },
+                            {
+                                id: 51207720,
+                                content: "How about this — lend me a little. I'll pay you back as soon as I win.",
+                                npc: 100001,
+                                next: 51207721,
+                            },
+                            {
+                                id: 51207721,
+                                content: "What? {nickname}, didn't you say—",
+                                npc: 700449,
+                                next: 51207722,
+                            },
+                            {
+                                id: 51207722,
+                                content:
+                                    "You want to borrow money? Well... that can be arranged. Not through me, though. You can borrow from Mr Jack himself.",
+                                npc: 700448,
+                                next: 51207723,
+                            },
+                            {
+                                id: 51207723,
+                                content: "All right. Then take me to Mr Jack. I'll borrow a little money from him and try a round.",
+                                npc: 100001,
+                                next: 51207724,
+                            },
+                            {
+                                id: 51207724,
+                                content:
+                                    "(Your request makes the man's eyes light up. Barely able to hide his excitement, he exchanges a glance with the dealer at the table and starts leading you away at once. But just then, a blunt voice stops you.)",
+                                next: 51207725,
+                            },
+                            {
+                                id: 51207725,
+                                content: "Hold on! {nickname}? Aren't you my uncle's cousin's nephew's neighbour? What are you doing here?",
+                                next: 51207726,
+                            },
+                            {
+                                id: 51207726,
+                                content: "(That voice sounds familiar...)",
+                                npc: 100001,
+                                next: 51207727,
+                            },
+                            {
+                                id: 51207727,
+                                content:
+                                    "{nickname}, long time no see! We used to climb trees and catch bugs together when we were kids, remember?",
+                                npc: 700430,
+                                next: 51207728,
+                            },
+                            {
+                                id: 51207728,
+                                content: "...",
+                                npc: 100001,
+                                next: 51207729,
+                            },
+                            {
+                                id: 51207729,
+                                content:
+                                    'Rowan? What are you doing back here? I don\'t have time for you. I need to take this one to buy into the "Change Your Life" Fund.',
+                                npc: 700448,
+                                next: 51207730,
+                            },
+                            {
+                                id: 51207730,
+                                content:
+                                    "Come on, mate. This is an old friend of mine. We haven't seen each other in years. Forget the loan for now — we've got loads to catch up on.",
+                                npc: 700430,
+                                next: 51207731,
+                            },
+                            {
+                                id: 51207731,
+                                content: "Can't you catch up later?",
+                                npc: 700448,
+                                next: 51207732,
+                            },
+                            {
+                                id: 51207732,
+                                content: "Nah. We've got loads to talk about. We'll be back in a bit. Bye!",
+                                npc: 700430,
+                                next: 51207733,
+                            },
+                            {
+                                id: 51207733,
+                                content:
+                                    "(Rowan grabs you and pulls you along. You grab Snow in turn, and the three of you hurry out of the room in a line.)",
+                                next: 51207734,
+                            },
+                            {
+                                id: 51207734,
+                                content:
+                                    "Once you've taken the bait, they'll bring you to the parlour. And if everything goes according to plan, you'll run into Rowan there.",
+                                npc: 700428,
+                                next: 51207735,
+                            },
+                            {
+                                id: 51207735,
+                                content: "Rowan?",
+                                npc: 100001,
+                                next: 51207736,
+                            },
+                            {
+                                id: 51207736,
+                                content:
+                                    "You've already met him — the man who was begging us for money earlier. Get close to him. Strike up a conversation, offer to cover his stake for a round... whatever works. The important thing is that the two of you get to know each other.",
+                                npc: 700428,
+                                next: 51207737,
+                            },
+                            {
+                                id: 51207737,
+                                content: "Why him?",
+                                npc: 100001,
+                                next: 51207738,
+                            },
+                            {
+                                id: 51207738,
+                                content: "Because it has to be him.",
+                                npc: 700428,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040407,
+                name: "Talk to Rowan",
+                desc: 'You refuse to join the "game", then lower the man\'s guard by pretending you want to borrow money. Just as the deal is about to go through, Rowan bursts in and drags you away under some flimsy pretext.',
+                nodes: [
+                    {
+                        id: "178047184382310203",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-35202, 2902],
+                        dialogues: [
+                            {
+                                id: 51207801,
+                                content: "Huff... huff... Not bad, Luno. Didn't think you'd keep up with those little legs.",
+                                npc: 700430,
+                                next: 51207802,
+                            },
+                            {
+                                id: 51207802,
+                                content: "I didn't! {nickname} dragged me the whole way — my feet barely touched the floor!",
+                                npc: 700449,
+                                next: 51207803,
+                            },
+                            {
+                                id: 51207803,
+                                content: "That's your name? {nickname}? That's an unusual one.",
+                                npc: 700430,
+                                options: [
+                                    {
+                                        id: 51207804,
+                                        content: "Hello. Nice to meet you.",
+                                        next: 51207805,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 51207806,
+                                        content: "So you really are my neighbour's uncle's cousin's nephew?",
+                                        next: 51207807,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51207805,
+                                content:
+                                    "Nice to meet you. Name's Rowan. Sorry about the nonsense back there — I had to get you out somehow. I wasn't messing with you. I just didn't want you getting suckered into their trap.",
+                                npc: 700430,
+                                next: 51207808,
+                            },
+                            {
+                                id: 51207807,
+                                content:
+                                    "Pfft, no. Complete rubbish. Name's Rowan. Seriously, though — I wasn't messing with you. I just didn't want you getting suckered into their trap.",
+                                npc: 700430,
+                                next: 51207808,
+                            },
+                            {
+                                id: 51207808,
+                                content: "What trap?",
+                                npc: 100001,
+                                next: 51207809,
+                            },
+                            {
+                                id: 51207809,
+                                content:
+                                    "You were about to borrow money from them, weren't you? Don't. I asked around earlier. That so-called \"Change Your Life\" Fund is just loan-sharking with a pretty name.",
+                                npc: 700430,
+                                next: 51207810,
+                            },
+                            {
+                                id: 51207810,
+                                content:
+                                    "Loan-sharking? That's when they lend you a little money, then make you pay back loads more, right? Camilla mentioned something like that before.",
+                                npc: 700449,
+                                next: 51207811,
+                            },
+                            {
+                                id: 51207811,
+                                content:
+                                    'Exactly. They dress it up to sound harmless: repay daily, weekly, monthly — whatever suits you — all at "super-low" interest. Maybe that fools some brainless idiot, but me? Not a chance.',
+                                npc: 700430,
+                                next: 51207812,
+                            },
+                            {
+                                id: 51207812,
+                                content:
+                                    "Take the rate they quote you: 0.3% a day. Sounds tiny, right? But annualised, that's 109.5%. Borrow 10,000 copper, and it looks like you're only paying 30 a day. Leave it for a year at that rate, and you owe 20,950 in total.",
+                                npc: 700430,
+                                next: 51207813,
+                            },
+                            {
+                                id: 51207813,
+                                content:
+                                    "And that's before compound interest even gets involved. I didn't read every clause, but I'd bet there are plenty more traps buried in the fine print.",
+                                npc: 700430,
+                                next: 51207814,
+                            },
+                            {
+                                id: 51207814,
+                                content: "Wow... You're really good with numbers! Just hearing all that made my head spin.",
+                                npc: 700449,
+                                next: 51207815,
+                            },
+                            {
+                                id: 51207815,
+                                content: "Of course! I'm the accountant for Bloomfield Station's ironworks! Well... I was.",
+                                npc: 700430,
+                                next: 51207816,
+                            },
+                            {
+                                id: 51207816,
+                                content: 'What do you mean, "was"?',
+                                npc: 100001,
+                                next: 51207817,
+                            },
+                            {
+                                id: 51207817,
+                                content:
+                                    "I quit! Why slave away for scraps when I can play Lucky Jack instead? A couple of cards in your hand, and bang — easy money.",
+                                npc: 700430,
+                                next: 51207818,
+                            },
+                            {
+                                id: 51207818,
+                                content:
+                                    "But if you're that good with numbers, shouldn't you be able to see through a game like this? How did you miss the trap?",
+                                npc: 100001,
+                                next: 51207819,
+                            },
+                            {
+                                id: 51207819,
+                                content:
+                                    "You don't get it! It's exactly because I'm good with numbers that I know I can beat them! I just hadn't worked it all out before. This time, I've cracked it. I really have.",
+                                npc: 700430,
+                                next: 51207820,
+                            },
+                            {
+                                id: 51207820,
+                                content:
+                                    "Still... you sound awfully clear-headed. People that clear-headed usually stay well away from games like this.",
+                                npc: 700430,
+                                next: 51207821,
+                            },
+                            {
+                                id: 51207821,
+                                content: "We're doing it because—",
+                                npc: 700449,
+                                next: 51207822,
+                            },
+                            {
+                                id: 51207822,
+                                content:
+                                    "Because we need money. Desperately. My sister was kidnapped, and we need a huge ransom to get her back.",
+                                npc: 100001,
+                                next: 51207823,
+                            },
+                            {
+                                id: 51207823,
+                                content: "Seriously? Then you ought to be thanking me. I just saved you from losing the ransom money too.",
+                                npc: 700430,
+                                next: 51207824,
+                            },
+                            {
+                                id: 51207824,
+                                content: "But if I don't play, I still won't have enough money to get my sister back...",
+                                npc: 100001,
+                                next: 51207825,
+                            },
+                            {
+                                id: 51207825,
+                                content: "Ah... So you've had it rough too, huh.",
+                                npc: 700430,
+                                next: 51207826,
+                            },
+                            {
+                                id: 51207826,
+                                content: "Waaaah... Life is so hard... Waaaah...",
+                                npc: 700449,
+                                next: 51207827,
+                            },
+                            {
+                                id: 51207827,
+                                content:
+                                    "Aw, don't cry. Tell you what — maybe I'm feeling generous today. Team up with me. I'll help you make some real money.",
+                                npc: 700430,
+                                next: 51207828,
+                            },
+                            {
+                                id: 51207828,
+                                content: "How?",
+                                npc: 100001,
+                                next: 51207829,
+                            },
+                            {
+                                id: 51207829,
+                                content: "Come closer. I'll explain.",
+                                npc: 700430,
+                                next: 51207830,
+                            },
+                            {
+                                id: 51207830,
+                                content:
+                                    "Rowan keeps our books — or kept them, until recently. He's one of the few workers here with any schooling, and he has a real head for figures.",
+                                npc: 700428,
+                                next: 51207831,
+                            },
+                            {
+                                id: 51207831,
+                                content:
+                                    "He was born into some minor noble family, from what I hear. Then the family fell on hard times, and he ended up here as an accountant. About a month ago, he quit.",
+                                npc: 700428,
+                                next: 51207832,
+                            },
+                            {
+                                id: 51207832,
+                                content:
+                                    "All because of Lucky Jack. I've never played it myself, but from what I hear, it's a simple numbers game. He quit his job so he could spend more time studying it.",
+                                npc: 700428,
+                                next: 51207833,
+                            },
+                            {
+                                id: 51207833,
+                                content:
+                                    "He claims he's worked out a system that can push his odds of winning to seventy, maybe even eighty percent. But it takes two people: one to move from table to table and track the cards, and one to sit down and play when the odds look good.",
+                                npc: 700428,
+                                next: 51207834,
+                            },
+                            {
+                                id: 51207834,
+                                content:
+                                    "He tried selling that system to half the station, but no one believed him. So he tried doing it alone instead. And, well... you saw how that ended.",
+                                npc: 700428,
+                                next: 51207835,
+                            },
+                            {
+                                id: 51207835,
+                                content:
+                                    "That's why I need you to get close to him. He's bound to ask you to help with his so-called system. No matter what he says, go along with it.",
+                                npc: 700428,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040408,
+                name: "Go back to the parlour",
+                desc: 'As the ironworks\' former accountant, Rowan has a good head for numbers. He asks you to help him cheat at the "game", but says you will not need to play yourselves. All he wants is your help choosing the most favourable tables. This was part of the plan anyway, so you decide to go along with it.',
+                nodes: [
+                    {
+                        id: "17799541764754544",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-33894, 5999],
+                        dialogues: [
+                            {
+                                id: 51207901,
+                                content:
+                                    "Got all that? Your part's simple. This place is basically a back-room dump — single decks, no automatic shufflers, nothing fancy.",
+                                npc: 700430,
+                                options: [
+                                    {
+                                        id: 51207902,
+                                        content:
+                                            "I got it. (Enter Simple Mode. The story progresses without requiring the player to remember the cards.)",
+                                        next: 51207903,
+                                    },
+                                    {
+                                        id: 51207904,
+                                        content: "Can you explain it again?",
+                                        next: 51207905,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51207903,
+                                content: "Good. I was worried it'd gone straight over your head.",
+                                npc: 700430,
+                                next: 51207913,
+                            },
+                            {
+                                id: 51207905,
+                                content: "All right. Listen closely this time.",
+                                npc: 700430,
+                                next: 51207906,
+                            },
+                            {
+                                id: 51207913,
+                                content: "I can help keep track of the cards too! My memory's amazing — I won't miss a single one!",
+                                npc: 700449,
+                                next: 51207914,
+                            },
+                            {
+                                id: 51207906,
+                                content: "You don't actually need to play. Just keep track of the cards at each table for me.",
+                                npc: 700430,
+                                next: 51207907,
+                            },
+                            {
+                                id: 51207914,
+                                content:
+                                    "Even better. Though with your height... maybe you'd be better off peeking under the table at the dealer's hole card.",
+                                npc: 700430,
+                                next: 51207915,
+                            },
+                            {
+                                id: 51207907,
+                                content:
+                                    "We're looking for decks with plenty of high cards left. By high cards, I mean 10s, face cards, and Aces. The more of those still in the deck, the better our chances.",
+                                npc: 700430,
+                                next: 51207908,
+                            },
+                            {
+                                id: 51207915,
+                                content: "Hey! What's that supposed to mean?",
+                                npc: 700449,
+                                next: 51207916,
+                            },
+                            {
+                                id: 51207908,
+                                content:
+                                    "The dealer has to keep drawing until they reach 17 or higher. So when the deck is heavy with high cards, the dealer is more likely to go over 21 and bust.",
+                                npc: 700430,
+                                next: 51207909,
+                            },
+                            {
+                                id: 51207916,
+                                content: "Come on, Snow. Let's get moving.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51207909,
+                                content:
+                                    'And if we draw an Ace with a 10 or a face card, that\'s a "Super Jack". Pays three to two. In short, high cards are where the money is.',
+                                npc: 700430,
+                                next: 51207910,
+                            },
+                            {
+                                id: 51207910,
+                                content:
+                                    "Every deck only has so many cards. If a table's already burned through a lot of low cards, that means the good cards are still sitting in the deck. That's the table we want.",
+                                npc: 700430,
+                                next: 51207911,
+                            },
+                            {
+                                id: 51207911,
+                                content:
+                                    "Once you find one, give me the signal — pretend to stretch and raise your hand. I'll come over, sit down, take the money, and walk away. Nice and clean.",
+                                npc: 700430,
+                                next: 51207912,
+                            },
+                            {
+                                id: 51207912,
+                                content: "Simple, right? Just act natural. Don't let anyone notice what you're watching.",
+                                npc: 700430,
+                                next: 51207913,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040409,
+                name: 'Start the "game"',
+                desc: 'After going over the rules one last time, you agree to help Rowan play the "game".',
+                nodes: [
+                    {
+                        id: "17804736159833025171",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34708, 4774],
+                        dialogues: [
+                            {
+                                id: 51208001,
+                                content:
+                                    "(You watch the table for a while. The cards dealt so far seem fairly even. This isn't the right table.)",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804736247503025416",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34434, 4410],
+                        dialogues: [
+                            {
+                                id: 51208101,
+                                content:
+                                    "(You watch the table for a while. Too many high cards have already been dealt. This isn't the right table.)",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804736231173025369",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34309, 5006],
+                        next: ["17804736159833025171", "17804736247503025416", "17804738120483026884"],
+                        dialogues: [
+                            {
+                                id: 51208201,
+                                content:
+                                    "(You watch the table for a while. Plenty of low cards have already been dealt. This is the table Rowan wants.)",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738120483026884",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        next: ["17804736159833025171", "17804738675223028184", "17804738675223028183"],
+                        dialogues: [
+                            {
+                                id: 51208403,
+                                content: "Dealer shows 4. Hole card: Jack. Draws a 9... Bust! Player wins!",
+                                npc: 700435,
+                                next: 51208404,
+                            },
+                            {
+                                id: 51208404,
+                                content: "What the hell!? Rowan! You're definitely buying everyone a drink tonight!",
+                                npc: 700436,
+                                next: 51208405,
+                            },
+                            {
+                                id: 51208405,
+                                content: "Later! I'm not done yet.",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738675223028184",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34309, 5006],
+                        dialogues: [
+                            {
+                                id: 51208101,
+                                content:
+                                    "(You watch the table for a while. Too many high cards have already been dealt. This isn't the right table.)",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738675223028183",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34434, 4410],
+                        next: ["17804736159833025171", "17804738675223028184", "17804738675223028186"],
+                        dialogues: [
+                            {
+                                id: 51208301,
+                                content:
+                                    "(You watch the table for a while. Plenty of low cards have already been dealt. This is the table Rowan wants.)",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738675223028186",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        next: ["17804738706543028309", "17804738675223028184", "17804738706543028310"],
+                        dialogues: [
+                            {
+                                id: 51208303,
+                                content: "Dealer shows Ace. Hole card: 8. Player has Ace and King — Super Jack! Player wins!",
+                                npc: 700435,
+                                next: 51208304,
+                            },
+                            {
+                                id: 51208304,
+                                content: "Rowan, you're on fire today! This is insane!",
+                                npc: 700436,
+                                next: 51208305,
+                            },
+                            {
+                                id: 51208305,
+                                content: "Just luck. Anyone could've done it.",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738706543028309",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34434, 4410],
+                        dialogues: [
+                            {
+                                id: 51208001,
+                                content:
+                                    "(You watch the table for a while. The cards dealt so far seem fairly even. This isn't the right table.)",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738706543028310",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34708, 4774],
+                        next: ["17804738706543028309", "17804738675223028184", "17804738706543028313"],
+                        dialogues: [
+                            {
+                                id: 51208401,
+                                content:
+                                    "(You watch the table for a while. Plenty of low cards have already been dealt. This is the table Rowan wants.)",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804738706543028313",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        next: ["17804740047553030191"],
+                        dialogues: [
+                            {
+                                id: 51208203,
+                                content:
+                                    "(Rowan catches your signal, squeezes through the crowd, and takes a seat at the table. The show begins.)",
+                                next: 51208204,
+                            },
+                            {
+                                id: 51208204,
+                                content: "Dealer shows 9. Hole card: 5. Draws a Queen... Bust! Player wins!",
+                                npc: 700435,
+                                next: 51208205,
+                            },
+                            {
+                                id: 51208205,
+                                content: "Rowan, you lucky bastard!",
+                                npc: 700436,
+                                next: 51208206,
+                            },
+                            {
+                                id: 51208206,
+                                content: "Haha. Just watch. I'm not leaving until I'm rolling in money!",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804740047553030191",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        dialogues: [
+                            {
+                                id: 51208501,
+                                content:
+                                    "(You keep moving from table to table, but never find another one worth playing. You and Rowan exchange a glance, then quietly slip away together.)",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040410,
+                name: 'Start the "game"',
+                desc: 'After going over the rules one last time, you agree to help Rowan play the "game".',
+                nodes: [
+                    {
+                        id: "17804741378814538648",
+                        type: "TalkNode",
+                        name: "调查第一张桌子",
+                        srId: 106301,
+                        pos: [-34708, 4774],
+                        next: ["17804742700314540828"],
+                        dialogues: [
+                            {
+                                id: 51208601,
+                                content: "(You move closer to a table and quietly start keeping track of the cards as they're dealt...)",
+                                next: 51208602,
+                            },
+                            {
+                                id: 51208602,
+                                content:
+                                    "Dealer shows 7. Hole card: Queen. Dealer stands on 17. Player has 2, Jack, and 6 — 18. Player wins!",
+                                npc: 700437,
+                                next: 51208603,
+                            },
+                            {
+                                id: 51208603,
+                                content: "Hehe~ One more round!",
+                                npc: 700438,
+                                next: 51208604,
+                            },
+                            {
+                                id: 51208604,
+                                content:
+                                    "Dealer shows 5. Hole card: 6. Draws a 9. Dealer stands on 20. Player has 3, King, and 4 — 17. Dealer wins!",
+                                npc: 700437,
+                                next: 51208605,
+                            },
+                            {
+                                id: 51208605,
+                                content: "Damn it! Again!",
+                                npc: 700438,
+                                next: 51208606,
+                            },
+                            {
+                                id: 51208606,
+                                content:
+                                    "Dealer shows 9. Hole card: 10. Dealer stands on 19. Player has 8 and Ace, with the Ace counting as 11 — 19. Push!",
+                                npc: 700437,
+                                next: 51208607,
+                            },
+                            {
+                                id: 51208607,
+                                content: "Tch... So close!",
+                                npc: 700438,
+                                next: 51208608,
+                            },
+                            {
+                                id: 51208608,
+                                content: "Little Minion, is this table good enough to call Rowan over?",
+                                npc: 700449,
+                                options: [
+                                    {
+                                        id: 51208609,
+                                        content: "Call Rowan over.",
+                                        next: 51208610,
+                                    },
+                                    {
+                                        id: 51208612,
+                                        content: "Don't call Rowan over.",
+                                        next: 51208613,
+                                    },
+                                    {
+                                        id: 51208614,
+                                        content: "Recall the cards from this table.",
+                                        next: 51208615,
+                                    },
+                                    {
+                                        id: 51208616,
+                                        content: "Recall what Rowan said.",
+                                        next: 51208617,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51208610,
+                                content:
+                                    "Are you sure...? I don't think this is the right table. There are still too many low cards left in the deck. Maybe we should keep looking.",
+                                npc: 700449,
+                                next: 51208611,
+                            },
+                            {
+                                id: 51208611,
+                                content: "All right.",
+                                npc: 100001,
+                                next: 51208612,
+                            },
+                            {
+                                id: 51208613,
+                                content: "Not this table. Let's keep looking.",
+                                npc: 100001,
+                                next: 51208614,
+                            },
+                            {
+                                id: 51208615,
+                                content:
+                                    "(A lot of high cards have already been dealt at this table — 10s, face cards, Aces... Definitely not ideal.)",
+                                npc: 100001,
+                                next: 51208616,
+                            },
+                            {
+                                id: 51208617,
+                                content:
+                                    "Every deck only has so many cards. If a table's already burned through a lot of low cards, that means the good cards are still sitting in the deck. That's the table we want.",
+                                npc: 700430,
+                                next: 51208618,
+                            },
+                            {
+                                id: 51208618,
+                                content: "All right~",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804741607864539000",
+                        type: "TalkNode",
+                        name: "调查第二张桌子",
+                        srId: 106301,
+                        pos: [-34434, 4410],
+                        next: ["17804742700314540828"],
+                        dialogues: [
+                            {
+                                id: 51208701,
+                                content: "(You move closer to a table and quietly start keeping track of the cards as they're dealt...)",
+                                next: 51208702,
+                            },
+                            {
+                                id: 51208702,
+                                content:
+                                    "Dealer shows 8. Hole card: 7. Draws a 2. Dealer stands on 17. Player has 9, 7, and 2 — 18. Player wins!",
+                                npc: 700437,
+                                next: 51208703,
+                            },
+                            {
+                                id: 51208703,
+                                content: "Hehe! I'm treating myself to a proper meal tonight!",
+                                npc: 700439,
+                                next: 51208704,
+                            },
+                            {
+                                id: 51208704,
+                                content:
+                                    "Dealer shows 2. Hole card: 6. Draws a 9. Dealer stands on 17. Player has 6, 5, and 4 — 15. Dealer wins!",
+                                npc: 700437,
+                                next: 51208705,
+                            },
+                            {
+                                id: 51208705,
+                                content: "Ugh! I should've taken one more card!",
+                                npc: 700439,
+                                next: 51208706,
+                            },
+                            {
+                                id: 51208706,
+                                content:
+                                    "Dealer shows 4. Hole card: 2. Draws a 9. Draws a 7. Dealer busts at 22. Player has 3, 5, and 9 — 17. Player wins!",
+                                npc: 700437,
+                                next: 51208707,
+                            },
+                            {
+                                id: 51208707,
+                                content: "Yes! I'm cashing out! I won back everything I lost!",
+                                npc: 700439,
+                                next: 51208708,
+                            },
+                            {
+                                id: 51208708,
+                                content: "Little Minion, is this table good enough to call Rowan over?",
+                                npc: 700449,
+                                options: [
+                                    {
+                                        id: 51208709,
+                                        content: "Call Rowan over.",
+                                        next: 51208710,
+                                    },
+                                    {
+                                        id: 51208711,
+                                        content: "Don't call Rowan over.",
+                                        next: 51208712,
+                                    },
+                                    {
+                                        id: 51208714,
+                                        content: "Recall the cards from this table.",
+                                        next: 51208715,
+                                    },
+                                    {
+                                        id: 51208716,
+                                        content: "Recall what Rowan said.",
+                                        next: 51208717,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51208710,
+                                content:
+                                    "Hardly any high cards have come out in the last few hands. The deck looks good now. I should signal Rowan.",
+                                npc: 100001,
+                                next: 51208711,
+                            },
+                            {
+                                id: 51208712,
+                                content:
+                                    "Hm? But hardly any high cards have come out in the last few hands. Doesn't that mean the deck is full of high cards now?",
+                                npc: 700449,
+                                next: 51208713,
+                            },
+                            {
+                                id: 51208713,
+                                content: "You're right. I'll call him over.",
+                                npc: 100001,
+                                next: 51208714,
+                            },
+                            {
+                                id: 51208715,
+                                content: "(Hardly any high cards have been dealt at this table... This looks like the right table.)",
+                                npc: 100001,
+                                next: 51208716,
+                            },
+                            {
+                                id: 51208717,
+                                content:
+                                    "Every deck only has so many cards. If a table's already burned through a lot of low cards, that means the good cards are still sitting in the deck. That's the table we want.",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804742700314540828",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        dialogues: [
+                            {
+                                id: 51208801,
+                                content:
+                                    "(The three of you linger around the tables, steadily raking in winnings hand after hand. Eventually, the attendants start reshuffling the decks, and no more favourable openings appear. You exchange a glance, then quietly slip away together.)",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040411,
+                name: "Leave the parlour",
+                desc: "Rowan's plan works almost too well. Before long, the two of you are leaving with a tidy profit — but winning that often in a place like this is bound to draw attention. For now, you need to lie low.",
+                nodes: [
+                    {
+                        id: "17804757854444544079",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-27560, 4836],
+                        dialogues: [
+                            {
+                                id: 51208901,
+                                content:
+                                    "Oof... Didn't think it'd go that smoothly. Apart from a couple of rotten hands, everything went just like I said it would. We made a fortune!",
+                                npc: 700430,
+                                next: 51208902,
+                            },
+                            {
+                                id: 51208902,
+                                content:
+                                    "Shame we couldn't find any more tables worth playing. Otherwise, we could've... Ah, forget it. There'll be plenty more chances. Come on — let's get a drink first, then come back later and try our luck again!",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040412,
+                name: "Leave the parlour",
+                desc: "Rowan's plan works almost too well. Before long, the two of you are leaving with a tidy profit — but winning that often in a place like this is bound to draw attention. For now, you need to lie low.",
+                nodes: [
+                    {
+                        id: "17804765855464545597",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-27560, 4836],
+                        dialogues: [
+                            {
+                                id: 51209001,
+                                content:
+                                    "(Rowan tells you and Snow to wait for a moment. Before long, he comes hurrying back, beaming, with three steaming mugs in his hands.)",
+                                next: 51209002,
+                            },
+                            {
+                                id: 51209002,
+                                content:
+                                    "Here. Got this back when I was winning a bit. Fancy stuff — the kind those inner-city toffs drink. You can hardly find it out here.",
+                                npc: 700430,
+                                next: 51209003,
+                            },
+                            {
+                                id: 51209003,
+                                content:
+                                    "I'd been saving it for a special occasion. Couldn't bring myself to drink it, couldn't bring myself to sell it either. People like me don't get their hands on stuff like this every day. But after what we pulled off just now, I figured you deserved a taste.",
+                                npc: 700430,
+                                next: 51209004,
+                            },
+                            {
+                                id: 51209004,
+                                content:
+                                    "And you too, little one. Here — hot chocolate. The kids up cleaning the skylights would fight over a mug of this stuff.",
+                                npc: 700430,
+                                next: 51209005,
+                            },
+                            {
+                                id: 51209005,
+                                content: "How many times do I have to say it? I'm not a kid!",
+                                npc: 700449,
+                                next: 51209006,
+                            },
+                            {
+                                id: 51209006,
+                                content: "...Though, fine. I'll forgive you for now. Because hot chocolate.",
+                                npc: 700449,
+                                options: [
+                                    {
+                                        id: 51209007,
+                                        content: "(Take the mug and have a sip.)",
+                                        next: 51209008,
+                                    },
+                                    {
+                                        id: 51209009,
+                                        content: "(Take the mug and set it aside.)",
+                                        next: 51209010,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51209008,
+                                content:
+                                    "(You take the mug and have a small sip. It's mulled wine. You can't tell whether it's good or not — only that it leaves a pleasant warmth behind.)",
+                                next: 51209011,
+                            },
+                            {
+                                id: 51209010,
+                                content:
+                                    "(You leave the mug untouched. Rowan doesn't seem to mind. He simply sits there savouring his own drink, smacking his lips now and then in obvious satisfaction.)",
+                                next: 51209011,
+                            },
+                            {
+                                id: 51209011,
+                                content: "Tell me something... What do you think people live for?",
+                                npc: 700430,
+                                options: [
+                                    {
+                                        id: 51209012,
+                                        content: "To get rich.",
+                                        next: 51209013,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 51209014,
+                                        content: "To save the world.",
+                                        next: 51209015,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 51209016,
+                                        content: "To protect the people they care about.",
+                                        next: 51209017,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51209018,
+                                        content: "Making it through another day is already a win.",
+                                        next: 51209019,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51209013,
+                                content: "Yeah... getting rich... winning big at the tables...",
+                                npc: 700430,
+                                next: 51209020,
+                            },
+                            {
+                                id: 51209015,
+                                content: "Hahaha! That's a bit grand, isn't it? So serious it almost sounds like a joke.",
+                                npc: 700430,
+                                next: 51209020,
+                            },
+                            {
+                                id: 51209017,
+                                content: "Mm... yeah. Your sister. Your Luno friend. My wife and kids...",
+                                npc: 700430,
+                                next: 51209020,
+                            },
+                            {
+                                id: 51209019,
+                                content: "Exactly! That's it! Here's to making it through another day alive!",
+                                npc: 700430,
+                                next: 51209020,
+                            },
+                            {
+                                id: 51209020,
+                                content: "Truth is... I didn't grow up in a place like this.",
+                                npc: 700430,
+                                next: 51209021,
+                            },
+                            {
+                                id: 51209021,
+                                content:
+                                    "Back then, I was one of those inner-city toffs. I could drink as much of this fancy stuff as I liked, hop on a train whenever I felt like it, even run off to the Imperial Capital on a whim.",
+                                npc: 700430,
+                                next: 51209022,
+                            },
+                            {
+                                id: 51209022,
+                                content:
+                                    "I never had to worry about anything. I'd open my eyes in the morning, and the servants would already be waiting — clothes laid out, water ready for me to rinse my mouth, every button fastened and every collar straightened before I stepped out the door. When I went out, someone would kneel beside the carriage so I could step on their back to climb in. When I got out, someone would set a cushion under my feet.",
+                                npc: 700430,
+                                next: 51209023,
+                            },
+                            {
+                                id: 51209023,
+                                content: "Bet you think I'm full of it, huh? A station accountant claiming he used to be nobility. Hah.",
+                                npc: 700430,
+                                next: 51209024,
+                            },
+                            {
+                                id: 51209024,
+                                content: "I don't think you're making it up...",
+                                npc: 700449,
+                                next: 51209025,
+                            },
+                            {
+                                id: 51209025,
+                                content: "Oh? Sharp eye for a little Luno.",
+                                npc: 700430,
+                                next: 51209026,
+                            },
+                            {
+                                id: 51209026,
+                                content: "People don't look that sad when they're making things up.",
+                                npc: 700449,
+                                next: 51209027,
+                            },
+                            {
+                                id: 51209027,
+                                content: "Heh... If only I had made it all up.",
+                                npc: 700430,
+                                next: 51209028,
+                            },
+                            {
+                                id: 51209028,
+                                content: "How did you end up here?",
+                                npc: 100001,
+                                next: 51209029,
+                            },
+                            {
+                                id: 51209029,
+                                content:
+                                    "Lots of reasons. The biggest was my old man. He was the only one in the family who knew how to make money. Then his business went under. He lost everything. After that... I suppose he lost the will to keep going, too. Then one morning, he went to sleep... and never woke up.",
+                                npc: 700430,
+                                next: 51209030,
+                            },
+                            {
+                                id: 51209030,
+                                content:
+                                    "After that, it all went the way it does in cheap novels. The mansion was sold, then the jewellery, then anything else worth a coin. All we had left were debt collectors at the door and relatives circling like vultures.",
+                                npc: 700430,
+                                next: 51209031,
+                            },
+                            {
+                                id: 51209031,
+                                content:
+                                    "So I brought my wife and kids out to the outer city. But what sort of life could I give them here? I had to look after them. And that takes money... much more money than I had.",
+                                npc: 700430,
+                                next: 51209032,
+                            },
+                            {
+                                id: 51209032,
+                                content: "My wages barely kept me fed, never mind giving them anything like a decent life.",
+                                npc: 700430,
+                                next: 51209033,
+                            },
+                            {
+                                id: 51209033,
+                                content: "So that's why you started playing Lucky Jack? To support your family?",
+                                npc: 700449,
+                                next: 51209034,
+                            },
+                            {
+                                id: 51209034,
+                                content:
+                                    "Nah. They left ages ago. No idea where they ended up. Back to Dismania, probably. My wife was from there. Can't blame her. It was my fault.",
+                                npc: 700430,
+                                next: 51209035,
+                            },
+                            {
+                                id: 51209035,
+                                content: "If your family's already gone, why keep playing?",
+                                npc: 100001,
+                                next: 51209036,
+                            },
+                            {
+                                id: 51209036,
+                                content:
+                                    "Mm... good question. Why do I keep playing...? I don't know. Maybe I just want money. A mountain of it. More than my dead old man ever made in his life. Then maybe I can walk back into the inner city with my head held high. Maybe I can live like I matter again.",
+                                npc: 700430,
+                                next: 51209037,
+                            },
+                            {
+                                id: 51209037,
+                                content: "But... this game is wrong.",
+                                npc: 100001,
+                                next: 51209038,
+                            },
+                            {
+                                id: 51209038,
+                                content: "Heh... You know that, do you? Then why did you help me?",
+                                npc: 700430,
+                                next: 51209039,
+                            },
+                            {
+                                id: 51209039,
+                                content: "Because we don't have a choice! We need to... to save up the ransom money!",
+                                npc: 700449,
+                                next: 51209040,
+                            },
+                            {
+                                id: 51209040,
+                                content: "Well... neither do I.",
+                                npc: 700430,
+                                next: 51209041,
+                            },
+                            {
+                                id: 51209041,
+                                content: "...",
+                                npc: 100001,
+                                next: 51209042,
+                            },
+                            {
+                                id: 51209042,
+                                content:
+                                    "Losing isn't the worst part, is it? The worst part is losing and giving up on yourself completely. Not even having the guts to crawl back out of the hole. Right?",
+                                npc: 700430,
+                                next: 51209043,
+                            },
+                            {
+                                id: 51209043,
+                                content: "Go along with it? What if he loses because of me?",
+                                npc: 100001,
+                                next: 51209044,
+                            },
+                            {
+                                id: 51209044,
+                                content:
+                                    "That's the point. I need him beaten badly enough that he stops believing he can claw his way back — badly enough that he never dares sit at that table again.",
+                                npc: 700428,
+                                next: 51209045,
+                            },
+                            {
+                                id: 51209045,
+                                content: "You mean... you want me to make him lose on purpose?",
+                                npc: 100001,
+                                next: 51209046,
+                            },
+                            {
+                                id: 51209046,
+                                content:
+                                    "I wouldn't put it like that. In that game, no one wins except Mr Jack. You wouldn't be ruining Rowan. You'd be letting the game do what it was always going to do, only faster.",
+                                npc: 700428,
+                                next: 51209047,
+                            },
+                            {
+                                id: 51209047,
+                                content: "What happens to him if he loses?",
+                                npc: 100001,
+                                next: 51209048,
+                            },
+                            {
+                                id: 51209048,
+                                content:
+                                    "No idea. He didn't borrow from us. He borrowed from Mr Jack. Most likely, they'll work him to the bone until they decide he's paid enough.",
+                                npc: 700428,
+                                next: 51209049,
+                            },
+                            {
+                                id: 51209049,
+                                content:
+                                    "I thought the Screwdriver Union was founded so workers could help each other. Isn't there a better way than this?",
+                                npc: 100001,
+                                next: 51209050,
+                            },
+                            {
+                                id: 51209050,
+                                content:
+                                    "You still don't understand. Some people don't hear reason. Drunks. Gamblers. People who walk back into the fire no matter how badly it burns them. You can talk until you're hoarse, and they'll still go back.",
+                                npc: 700428,
+                                next: 51209051,
+                            },
+                            {
+                                id: 51209051,
+                                content:
+                                    "We help the people we can. If we spend everything trying to save people who won't be pulled back, there'll be nothing left for the ones we still can save. We live in the cracks of this city. Sometimes, one man has to suffer badly enough that the rest are too scared to follow him.",
+                                npc: 700428,
+                                next: 51209052,
+                            },
+                            {
+                                id: 51209052,
+                                content:
+                                    "So that's what we do. Let Rowan believe he's finally beaten the odds. Then, just when he thinks he's won, let the game take it all back. Make the fall hard enough that he can't climb back up. Make sure everyone sees it.",
+                                npc: 700428,
+                                next: 51209053,
+                            },
+                            {
+                                id: 51209053,
+                                content:
+                                    "They'll look at Rowan and think: even he was swallowed by this game, and he knows numbers better than anyone here. What chance do the rest of us have? We're ordinary workers. What makes us think we can gamble our way into a better life?",
+                                npc: 700428,
+                                next: 51209054,
+                            },
+                            {
+                                id: 51209054,
+                                content:
+                                    "One Rowan, to keep countless others from stepping into the abyss. Tell me that isn't a fair trade.",
+                                npc: 700428,
+                                next: 51209055,
+                            },
+                            {
+                                id: 51209055,
+                                content:
+                                    "Hey... you all right? You've been staring into space. Don't tell me that little speech of mine actually got to you.",
+                                npc: 700430,
+                                next: 51209056,
+                            },
+                            {
+                                id: 51209056,
+                                content: "No... It's just...",
+                                npc: 100001,
+                                next: 51209057,
+                            },
+                            {
+                                id: 51209057,
+                                content: "Haha! Relax, I'm joking!",
+                                npc: 700430,
+                                next: 51209058,
+                            },
+                            {
+                                id: 51209058,
+                                content:
+                                    "Come on, we should move. We need to win big and get out fast this time. We've already won plenty — if we keep this up, Mr Jack's people are going to notice.",
+                                npc: 700430,
+                                next: 51209059,
+                            },
+                            {
+                                id: 51209059,
+                                content:
+                                    "Once we cash out, we'll split it seventy-thirty. Sound good? You take your share and save your sister. I get my life back.",
+                                npc: 700430,
+                                next: 51209060,
+                            },
+                            {
+                                id: 51209060,
+                                content:
+                                    "Why've you gone quiet again? What, not enough? Fine, I'll give you another five per cent. But that's as high as I go! This was my plan, after all.",
+                                npc: 700430,
+                                next: 51209061,
+                            },
+                            {
+                                id: 51209061,
+                                content: "It's not about the money.",
+                                npc: 100001,
+                                next: 51209062,
+                            },
+                            {
+                                id: 51209062,
+                                content: "Not about the money? Then wake up — we need to move before they catch on. Come on!",
+                                npc: 700430,
+                                next: 51209063,
+                            },
+                            {
+                                id: 51209063,
+                                content: "This time... we go all in!",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040413,
+                name: "Go back to the parlour",
+                desc: "After talking with Rowan, you understand a little more about the life that led him here. But the wins have gone to his head. Now he wants to go all-in, every coin he has on the line. This is exactly the opening Lorent wanted: let Rowan lose everything, then walk away. Everything is unfolding just as he said it would. And yet you keep thinking of the drink Rowan poured for you, and the way his eyes softened when he spoke about the past. So what now? What choice will you make?",
+                nodes: [
+                    {
+                        id: "17804768563516053869",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-33804, 5173],
+                        dialogues: [
+                            {
+                                id: 51209101,
+                                content: "Little Minion... is everything all right? You look all gloomy.",
+                                npc: 700449,
+                                next: 51209102,
+                            },
+                            {
+                                id: 51209102,
+                                content: "...It's nothing.",
+                                npc: 100001,
+                                next: 51209103,
+                            },
+                            {
+                                id: 51209103,
+                                content:
+                                    "Oh, all right. You know, Rowan's actually pretty nice. Before we left, he slipped me some more sweets.",
+                                npc: 700449,
+                                next: 51209104,
+                            },
+                            {
+                                id: 51209104,
+                                content: "He said his daughter used to love them. I tried one, and it was really good. Want one?",
+                                npc: 700449,
+                                next: 51209105,
+                            },
+                            {
+                                id: 51209105,
+                                content: "...No, I'm all right.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040414,
+                name: "Go back to the parlour",
+                desc: "After talking with Rowan, you understand a little more about the life that led him here. But the wins have gone to his head. Now he wants to go all-in, every coin he has on the line. This is exactly the opening Lorent wanted: let Rowan lose everything, then walk away. Everything is unfolding just as he said it would. And yet you keep thinking of the drink Rowan poured for you, and the way his eyes softened when he spoke about the past. So what now? What choice will you make?",
+                nodes: [
+                    {
+                        id: "17804769256626055012",
+                        type: "TalkNode",
+                        name: "交互第一张桌子",
+                        srId: 106301,
+                        pos: [-34434, 4410],
+                        next: ["17804769411196055212"],
+                        dialogues: [
+                            {
+                                id: 51209201,
+                                content:
+                                    "(You keep your eyes on the cards, silently counting what has already been played. This is not the right moment to bring Rowan in.)",
+                                next: 51209202,
+                            },
+                            {
+                                id: 51209202,
+                                content: "What's wrong? Bad table?",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804769411196055212",
+                        type: "TalkNode",
+                        name: "交互第二张桌子",
+                        srId: 106301,
+                        pos: [-34708, 4774],
+                        next: ["17799594576023798"],
+                        dialogues: [
+                            {
+                                id: 51209301,
+                                content: "{nickname}! {nickname}! What about this one? Look!",
+                                npc: 700449,
+                                next: 51209302,
+                            },
+                            {
+                                id: 51209302,
+                                content:
+                                    "(You keep your eyes on the cards, silently counting what has already been played. The count looks good. If Rowan sits down now, he has a real chance of winning.)",
+                                next: 51209303,
+                            },
+                            {
+                                id: 51209303,
+                                content: "This is the one, right? Little Minion, we're about to get rich, aren't we? Aren't we!?",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17799594576023798",
+                        type: "TalkNode",
+                        name: "和白对话",
+                        srId: 106301,
+                        pos: [-33799, 4412],
+                        dialogues: [
+                            {
+                                id: 51209401,
+                                content: "Little Minion? Have you decided?",
+                                npc: 700449,
+                                next: 51209402,
+                            },
+                            {
+                                id: 51209402,
+                                content: "(...Time to choose.)",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 51209403,
+                                        content: "(Help Rowan win.)",
+                                        next: 51209405,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51209404,
+                                        content: "(Make Rowan lose.)",
+                                        next: 51209405,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51209405,
+                                content: "(Rowan catches your signal and makes his way over.)",
+                                next: 51209406,
+                            },
+                            {
+                                id: 51209406,
+                                content: "Come on... This is where I turn my life around.",
+                                npc: 700430,
+                                next: 51209407,
+                            },
+                            {
+                                id: 51209407,
+                                content: "(You close your eyes and wait for the game to play out.)",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040415,
+                name: "Help Rowan",
+                desc: "You know helping him would be unwise. One act of kindness will not save him. And yet... sometimes you simply cannot bring yourself to sell someone out.",
+                nodes: [
+                    {
+                        id: "17804772972276058267",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        dialogues: [
+                            {
+                                id: 51209601,
+                                content: "Ha! Lady Luck's smiling on me today — I'm going all in!",
+                                npc: 700430,
+                                next: 51209602,
+                            },
+                            {
+                                id: 51209602,
+                                content: "Rowan, are you out of your mind!? That's your whole life on the table! What if you lose?",
+                                npc: 700440,
+                                next: 51209603,
+                            },
+                            {
+                                id: 51209603,
+                                content: "Then I lose properly! I'm sick of clinging on like a coward!",
+                                npc: 700430,
+                                next: 51209604,
+                            },
+                            {
+                                id: 51209604,
+                                content: "(The attendant gives him an indifferent glance, then begins dealing without a word.)",
+                                next: 51209605,
+                            },
+                            {
+                                id: 51209605,
+                                content: "Stand.",
+                                npc: 700430,
+                                next: 51209606,
+                            },
+                            {
+                                id: 51209606,
+                                content: "Rowan, what've you got? Standing after two cards? Come on, show us!",
+                                npc: 700440,
+                                next: 51209607,
+                            },
+                            {
+                                id: 51209607,
+                                content: "Where's the fun in showing a good hand all at once? Here, I'll give you one.",
+                                npc: 700430,
+                                next: 51209608,
+                            },
+                            {
+                                id: 51209608,
+                                content: "A King!? That's a strong start. What's the other card?",
+                                npc: 700440,
+                                next: 51209609,
+                            },
+                            {
+                                id: 51209609,
+                                content: "Patience. Let's see what the dealer does first.",
+                                npc: 700430,
+                                next: 51209610,
+                            },
+                            {
+                                id: 51209610,
+                                content: "Hit me.",
+                                npc: 700435,
+                                next: 51209611,
+                            },
+                            {
+                                id: 51209611,
+                                content:
+                                    "(The attendant deals the dealer a 9. For a moment, the dealer's expression darkens. Then he turns over the hole card: a Jack.)",
+                                next: 51209612,
+                            },
+                            {
+                                id: 51209612,
+                                content: "4 showing, Jack in the hole, then a 9. That's a bust, isn't it?",
+                                npc: 700430,
+                                next: 51209613,
+                            },
+                            {
+                                id: 51209613,
+                                content: "Cut the crap. Show your hand.",
+                                npc: 700435,
+                                next: 51209614,
+                            },
+                            {
+                                id: 51209614,
+                                content: "(Rowan leisurely lays his two cards on the table, one after the other.)",
+                                next: 51209615,
+                            },
+                            {
+                                id: 51209615,
+                                content: "King and Ace. Super Jack.",
+                                npc: 700430,
+                                next: 51209616,
+                            },
+                            {
+                                id: 51209616,
+                                content: "No way! How the hell did you...!? How did you win!?",
+                                npc: 700440,
+                                next: 51209617,
+                            },
+                            {
+                                id: 51209617,
+                                content: "Little Minion, look! Rowan won! It's a Super Jack!",
+                                npc: 700449,
+                                next: 51209618,
+                            },
+                            {
+                                id: 51209618,
+                                content: "...Yeah.",
+                                npc: 100001,
+                                next: 51209619,
+                            },
+                            {
+                                id: 51209619,
+                                content: "Well? Super Jack pays three to two. Pay up.",
+                                npc: 700430,
+                                next: 51209620,
+                            },
+                            {
+                                id: 51209620,
+                                content: "Mr Rowan. An impressive run of luck tonight. Very impressive.",
+                                npc: 700441,
+                                next: 51209621,
+                            },
+                            {
+                                id: 51209621,
+                                content: "Unfortunately, we have reason to suspect foul play. You'll need to come with us.",
+                                npc: 700441,
+                                next: 51209622,
+                            },
+                            {
+                                id: 51209622,
+                                content:
+                                    "Foul play? What the hell are you talking about? I won fair and square. What, can't afford to pay me?",
+                                npc: 700430,
+                                next: 51209623,
+                            },
+                            {
+                                id: 51209623,
+                                content: "Mr Rowan. Please come with us.",
+                                npc: 700441,
+                                next: 51209624,
+                            },
+                            {
+                                id: 51209624,
+                                content: "Like hell I will! What're you going to do, drag me out!?",
+                                npc: 700430,
+                                next: 51209625,
+                            },
+                            {
+                                id: 51209625,
+                                content: "If necessary.",
+                                npc: 700441,
+                                next: 51209626,
+                            },
+                            {
+                                id: 51209626,
+                                content: "Oh, no! They're trying to take Rowan by force! Little Minion, quick, help him!",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040416,
+                name: "Leave",
+                desc: 'After driving off Mr Jack\'s men, you strip away the false hope sold to these workers: the belief that the "game" might win them enough money to change their lives. In truth, it was only ever a trap designed to bleed them dry.',
+                nodes: [
+                    {
+                        id: "17804782483216063600",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-35202, 2902],
+                        dialogues: [
+                            {
+                                id: 51209801,
+                                content: "All that for nothing... What a bloody waste!",
+                                npc: 700430,
+                                next: 51209802,
+                            },
+                            {
+                                id: 51209802,
+                                content:
+                                    "Well, I thought it was fun! That last hand was amazing! Rowan won, and I got to watch {nickname} beat up a whole lot of bad guys!",
+                                npc: 700449,
+                                next: 51209803,
+                            },
+                            {
+                                id: 51209803,
+                                content:
+                                    "...Anyway, after the mess you made in there, Mr Jack's little parlour is probably finished. Not that we were ever going to walk away with any real money from his game, so I suppose that's no great loss...",
+                                npc: 700430,
+                                next: 51209804,
+                            },
+                            {
+                                id: 51209804,
+                                content:
+                                    "Why didn't you tell me you were that good in a fight? If I'd known, I wouldn't have wasted our time at a card table. I'd have taken you straight to the back-alley fight pits instead!",
+                                npc: 700430,
+                                next: 51209805,
+                            },
+                            {
+                                id: 51209805,
+                                content:
+                                    "Ah, forget it... Too late for that now. I need to get something out of this mess. Before Mr Jack comes after me over those loans, I need to get out of here. Fast.",
+                                npc: 700430,
+                                next: 51209806,
+                            },
+                            {
+                                id: 51209806,
+                                content:
+                                    "But before that... we did win some money earlier. Here. Your share. Seventy-thirty — seventy for me, thirty for you.",
+                                npc: 700430,
+                                next: 51209807,
+                            },
+                            {
+                                id: 51209807,
+                                content: "Wow! We really get a share!?",
+                                npc: 700449,
+                                next: 51209808,
+                            },
+                            {
+                                id: 51209808,
+                                content:
+                                    "All right. Enough talking. They'll be after us soon, so we'd better split up and run while we can.",
+                                npc: 700430,
+                                next: 51209809,
+                            },
+                            {
+                                id: 51209809,
+                                content: "All right.",
+                                npc: 100001,
+                                next: 51209810,
+                            },
+                            {
+                                id: 51209810,
+                                content: "Right, I'm off. See you around! Oh, and... hope you find your sister soon!",
+                                npc: 700430,
+                                next: 51209811,
+                            },
+                            {
+                                id: 51209811,
+                                content: "(Rowan breaks into a sprint and disappears in moments, leaving only you and Snow behind.)",
+                                next: 51209812,
+                            },
+                            {
+                                id: 51209812,
+                                content:
+                                    "Little Minion, do you think he'll keep playing games like that? If he does... maybe helping him today only made things worse.",
+                                npc: 700449,
+                                next: 51209813,
+                            },
+                            {
+                                id: 51209813,
+                                content:
+                                    "I don't know... But he reached out to help me back then. I couldn't lie to his face and watch him lose everything.",
+                                npc: 100001,
+                                next: 51209814,
+                            },
+                            {
+                                id: 51209814,
+                                content: "Help you? You mean when he pulled us away before you could borrow money from Mr Jack?",
+                                npc: 700449,
+                                next: 51209815,
+                            },
+                            {
+                                id: 51209815,
+                                content: "Something like that... And the wine, too. And the hot chocolate he made for you.",
+                                npc: 100001,
+                                next: 51209816,
+                            },
+                            {
+                                id: 51209816,
+                                content: "That's true! Well, humans really are complicated...",
+                                npc: 700449,
+                                next: 51209817,
+                            },
+                            {
+                                id: 51209817,
+                                content:
+                                    "Yeah. Maybe a bit too complicated for that little head of yours. Anyway, we're done here. Let's head back to the Screwdriver Union and report back.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040417,
+                name: "Betray Rowan",
+                desc: 'Anyone who would willingly play a "game" like this is beyond saving. That was always the plan, wasn\'t it?',
+                nodes: [
+                    {
+                        id: "17804788252186065263",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        dialogues: [
+                            {
+                                id: 51209501,
+                                content: "Ha! Lady Luck's smiling on me today — I'm going all in!",
+                                npc: 700430,
+                                next: 51209502,
+                            },
+                            {
+                                id: 51209502,
+                                content: "Rowan, are you out of your mind!? That's your whole life on the table! What if you lose?",
+                                npc: 700440,
+                                next: 51209503,
+                            },
+                            {
+                                id: 51209503,
+                                content: "Then I lose properly! I'm sick of clinging on like a coward!",
+                                npc: 700430,
+                                next: 51209504,
+                            },
+                            {
+                                id: 51209504,
+                                content: "(The attendant gives him an indifferent glance, then begins dealing without a word.)",
+                                next: 51209505,
+                            },
+                            {
+                                id: 51209505,
+                                content: "See that? See!? That's a good hand!",
+                                npc: 700430,
+                                next: 51209506,
+                            },
+                            {
+                                id: 51209506,
+                                content:
+                                    "Damn, Rowan... maybe you really are about to win big. 8 and 9 — 17. Dealer's showing 5. Let's see what he draws.",
+                                npc: 700440,
+                                next: 51209507,
+                            },
+                            {
+                                id: 51209507,
+                                content: "Hit me.",
+                                npc: 700435,
+                                next: 51209508,
+                            },
+                            {
+                                id: 51209508,
+                                content: "Huh. A 3. Wonder what the hole card is.",
+                                npc: 700440,
+                                next: 51209509,
+                            },
+                            {
+                                id: 51209509,
+                                content: "Why are there still so many low cards...? That's not right...",
+                                npc: 700430,
+                                next: 51209510,
+                            },
+                            {
+                                id: 51209510,
+                                content: "Hmm? Rowan? Are you taking another card or not? Dealer just drew another 2!",
+                                npc: 700440,
+                                next: 51209511,
+                            },
+                            {
+                                id: 51209511,
+                                content: "No... No, that can't be. This isn't right!",
+                                npc: 700430,
+                                next: 51209512,
+                            },
+                            {
+                                id: 51209512,
+                                content:
+                                    "What are you talking about? Looks like there are still plenty of low cards in the deck. Are you hitting or not?",
+                                npc: 700440,
+                                next: 51209513,
+                            },
+                            {
+                                id: 51209513,
+                                content: "But there shouldn't be... There shouldn't be this many left...",
+                                npc: 700430,
+                                next: 51209514,
+                            },
+                            {
+                                id: 51209514,
+                                content: "Dealer stood! Rowan, hit or stand?",
+                                npc: 700440,
+                                next: 51209515,
+                            },
+                            {
+                                id: 51209515,
+                                content: "He stood... so he's on at least 17... What do I do...? I...",
+                                npc: 700430,
+                                next: 51209516,
+                            },
+                            {
+                                id: 51209516,
+                                content: "Rowan! Take another card! If you stand now, you're finished!",
+                                npc: 700440,
+                                next: 51209517,
+                            },
+                            {
+                                id: 51209517,
+                                content: "I... I... Fine. Hit me!",
+                                npc: 700430,
+                                next: 51209518,
+                            },
+                            {
+                                id: 51209518,
+                                content:
+                                    "(He practically screams the words. For a moment, the crowd around the table falls silent, startled by the outburst. Without a word, the attendant slides another card into his hand.)",
+                                next: 51209519,
+                            },
+                            {
+                                id: 51209519,
+                                content: "...It's a 7.",
+                                npc: 700440,
+                                next: 51209520,
+                            },
+                            {
+                                id: 51209520,
+                                content: "...I busted.",
+                                npc: 700430,
+                                next: 51209521,
+                            },
+                            {
+                                id: 51209521,
+                                content: "Oof. Dealer's hole card was a 7. 17 total. Could've been a push.",
+                                npc: 700440,
+                                next: 51209522,
+                            },
+                            {
+                                id: 51209522,
+                                content:
+                                    "Little Minion... what just happened? Rowan lost? But... why were there so many low cards left in the deck?",
+                                npc: 700449,
+                                next: 51209523,
+                            },
+                            {
+                                id: 51209523,
+                                content: "...",
+                                npc: 100001,
+                                next: 51209524,
+                            },
+                            {
+                                id: 51209524,
+                                content: "No... Why...? Why would you...?",
+                                npc: 700430,
+                                next: 51209525,
+                            },
+                            {
+                                id: 51209525,
+                                content:
+                                    "Mr Rowan, it seems your all-in did not bring you the fortune you were hoping for. In that case, I believe it's time we settled your debt to Mr Jack.",
+                                npc: 700441,
+                                next: 51209526,
+                            },
+                            {
+                                id: 51209526,
+                                content: "Debt...? No... no, I can win it back! I just need one more hand. Once I win, I can pay him back!",
+                                npc: 700430,
+                                next: 51209527,
+                            },
+                            {
+                                id: 51209527,
+                                content:
+                                    "Pfft. Give it up, Rowan. You shoved everything you had onto the table. What are you going to bet with now? Your bones?",
+                                npc: 700440,
+                                next: 51209528,
+                            },
+                            {
+                                id: 51209528,
+                                content: "Mr Rowan. Please come with us.",
+                                npc: 700441,
+                                next: 51209529,
+                            },
+                            {
+                                id: 51209529,
+                                content:
+                                    "See that? That's what this game does to you. One loan from Mr Jack, one bad hand, and suddenly you're paying with more than money.",
+                                npc: 700440,
+                                next: 51209530,
+                            },
+                            {
+                                id: 51209530,
+                                content: "So go on! Borrow from Jack! Keep playing! Then you'll end up just like this idiot! Hahaha!",
+                                npc: 700440,
+                                next: 51209531,
+                            },
+                            {
+                                id: 51209531,
+                                content:
+                                    "(You watch the righteous \"player\" deliver his warning to the crowd. Something about him feels familiar. You can't shake the feeling that you've seen him before — perhaps somewhere near Lorent.)",
+                                next: 51209532,
+                            },
+                            {
+                                id: 51209532,
+                                content:
+                                    "(From start to finish, this was part of Lorent's arrangement. You take Snow by the hand, turn away from the table, and leave. It's time to return to the Screwdriver Union and report back to Lorent.)",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040418,
+                name: "Defeat Jack's men",
+                desc: "The people running this place may have seen through your trick. Or perhaps they never knew anything at all, and simply had no intention of letting a winner walk away. Either way, you have chosen to see this through.",
+            },
+            {
+                id: 20040419,
+                name: "Defeat Jack's men",
+                desc: "The people running this place may have seen through your trick. Or perhaps they never knew anything at all, and simply had no intention of letting a winner walk away. Either way, you have chosen to see this through.",
+                nodes: [
+                    {
+                        id: "17804776884446062778",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-34548, 4633],
+                        dialogues: [
+                            {
+                                id: 51209701,
+                                content: "You all right?",
+                                npc: 100001,
+                                next: 51209702,
+                            },
+                            {
+                                id: 51209702,
+                                content: "I'm fine... I'm fine... That bastard never meant to let us walk out with the money, did he!?",
+                                npc: 700430,
+                                next: 51209703,
+                            },
+                            {
+                                id: 51209703,
+                                content:
+                                    "Yeah. You all saw that, didn't you? That's how this place works. When you lose, they let you keep playing. They lend you money, take their cut, and watch you sink deeper.",
+                                npc: 100001,
+                                next: 51209704,
+                            },
+                            {
+                                id: 51209704,
+                                content:
+                                    'But the moment someone wins too much — like Rowan just did — they call it cheating. Then Mr Jack\'s men come out to drag you away for a "little talk."',
+                                npc: 100001,
+                                next: 51209705,
+                            },
+                            {
+                                id: 51209705,
+                                content:
+                                    'So even if you win here, do you really think they\'ll let you leave with the money? Every hand you play in this "game" only costs you more. Is this really where you want all your hard-earned wages to end up?',
+                                npc: 100001,
+                                next: 51209706,
+                            },
+                            {
+                                id: 51209706,
+                                content:
+                                    '(Uneasy murmurs spread through the crowd. Some of the more cautious workers quietly slip away from the room. You notice the "player" who had been egging Rowan on earlier staring at you with a conflicted expression.)',
+                                next: 51209707,
+                            },
+                            {
+                                id: 51209707,
+                                content: "(You give him a small smile.)",
+                                next: 51209708,
+                            },
+                            {
+                                id: 51209708,
+                                content:
+                                    "Who're you standing there grinning at? Come on, let's get out of here. You've scared off half the crowd already.",
+                                npc: 700430,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 200405,
+        quests: [
+            {
+                id: 20040501,
+                name: "Report back to the Screwdriver Union",
+                desc: "However you handled it, you successfully completed Lorent's request and cooled most of the workers' interest in Mr Jack's game. It's time to return to the Screwdriver Union and collect your reward.",
+                nodes: [
+                    {
+                        id: "17796899057061462681",
+                        type: "TalkNode",
+                        name: "克罗格对话",
+                        srId: 106301,
+                        pos: [-17948, 12385],
+                        next: ["17796912649381470138"],
+                        dialogues: [
+                            {
+                                id: 51209901,
+                                content:
+                                    "(You and Snow return to the Screwdriver Union. As you approach the entrance, you spot a familiar figure loitering outside, a cigarette clamped between his teeth. He sees you, stubs it out, and turns to face you.)",
+                                next: 51209902,
+                            },
+                            {
+                                id: 51209902,
+                                content:
+                                    "Back already, huh? Gotta say, I didn't think you had it in you. Heard you turned Jack's little parlour inside out. Now the workers are back on the job instead of chasing easy money.",
+                                npc: 700429,
+                                next: 51209903,
+                            },
+                            {
+                                id: 51209903,
+                                content: "It was nothing. What are you doing out here?",
+                                npc: 100001,
+                                next: 51209904,
+                            },
+                            {
+                                id: 51209904,
+                                content: "The chairman's back. Lorent's talking to her right now.",
+                                npc: 700429,
+                                next: 51209905,
+                            },
+                            {
+                                id: 51209905,
+                                content:
+                                    "Wait, what? I thought you and Lorent were the ones running the Screwdriver Union. Since when do you have a chairman?",
+                                npc: 700449,
+                                next: 51209906,
+                            },
+                            {
+                                id: 51209906,
+                                content:
+                                    "Who told you that? Don't believe every rumour you hear. Though, knowing Maggie, she probably started that one herself. Nobody else wants the job.",
+                                npc: 700429,
+                                next: 51209907,
+                            },
+                            {
+                                id: 51209907,
+                                content: "Maggie?",
+                                npc: 100001,
+                                next: 51209908,
+                            },
+                            {
+                                id: 51209908,
+                                content: "Come on. We'll talk inside. The people you need to meet are all in there.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17796912649381470138",
+                        type: "TalkNode",
+                        name: "触发玛吉罗连特对话",
+                        srId: 106301,
+                        pos: [-15540, 9140],
+                        dialogues: [
+                            {
+                                id: 51210001,
+                                content:
+                                    "We're dealing with it, one thing at a time. Just try not to make any more trouble while we clean up this mess, all right? Now — have you found the ledger yet?",
+                                npc: 700428,
+                                next: 51210002,
+                            },
+                            {
+                                id: 51210002,
+                                content: "What ledger? No idea what you're talking about.",
+                                npc: 700442,
+                                next: 51210003,
+                            },
+                            {
+                                id: 51210003,
+                                content: "Don't play dumb, Maggie. You know exactly what I'm talking about. It's important.",
+                                npc: 700428,
+                                next: 51210004,
+                            },
+                            {
+                                id: 51210004,
+                                content:
+                                    "Tch... yeah, yeah, I know. I've already got the kids up on the skylights asking around. These things take time, you know. Eisenbahn's been keeping us on a pretty short leash lately.",
+                                npc: 700442,
+                                next: 51210005,
+                            },
+                            {
+                                id: 51210005,
+                                content: "Fine. As for the other matter... Wait.",
+                                npc: 700428,
+                                next: 51210006,
+                            },
+                            {
+                                id: 51210006,
+                                content: "Well, look who's back. Our hero.",
+                                npc: 700428,
+                                options: [
+                                    {
+                                        id: 51210007,
+                                        content: "Hello, everyone.",
+                                        next: 51210009,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 51210008,
+                                        content: "Rejoice! Your saviour has returned!",
+                                        next: 51210009,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210009,
+                                content: "Hero? What'd {性别：he|she} do?",
+                                npc: 700442,
+                                next: 51210010,
+                            },
+                            {
+                                id: 51210010,
+                                content:
+                                    "{性别：He|She} tore Jack's little parlour apart. Lorent didn't tell you? All those hooks that bastard had planted in the ironworks got rooted out with it. Puts me in a damn good mood just thinking about it.",
+                                npc: 700429,
+                                next: 51210011,
+                            },
+                            {
+                                id: 51210011,
+                                content: "It's not all good news. Now we'll need people to cover those shifts for now.",
+                                npc: 700428,
+                                next: 51210012,
+                            },
+                            {
+                                id: 51210012,
+                                content:
+                                    "Ah, to hell with that. They never did any work anyway. Spent all day dragging people off to gamble.",
+                                npc: 700429,
+                                next: 51210013,
+                            },
+                            {
+                                id: 51210013,
+                                content:
+                                    "Ohhh, so you're the one who did all that! Nice to meet you. I'm Maggie, Chairman of the Screwdriver Union.",
+                                npc: 700442,
+                                next: 51210014,
+                            },
+                            {
+                                id: 51210014,
+                                content: "And me! Me too! I helped take down the parlour!",
+                                npc: 700449,
+                                next: 51210015,
+                            },
+                            {
+                                id: 51210015,
+                                content:
+                                    "And you've got a Luno tagging along? What's she do, then? Is she like that one at the platform who won't shut up about trains? Only this one won't shut up about you?",
+                                npc: 700442,
+                                next: 51210016,
+                            },
+                            {
+                                id: 51210016,
+                                content:
+                                    "Hey! Watch it! I am the Pure-White Redeemer ☆ Demon King of Light! Loyal companion to my Little Minion! Ace Phoxhunter of The Asphodel — Snow!",
+                                npc: 700449,
+                                next: 51210017,
+                            },
+                            {
+                                id: 51210017,
+                                content:
+                                    "Right. So {性别：he|she} does all the work, and you stand there making up fancy titles. You're just there for show, then? Same as me.",
+                                npc: 700442,
+                                next: 51210018,
+                            },
+                            {
+                                id: 51210018,
+                                content: "What's that supposed to mean? For your information, I am—",
+                                npc: 700449,
+                                next: 51210019,
+                            },
+                            {
+                                id: 51210019,
+                                content: "Snow, you can list your mighty titles later...",
+                                npc: 100001,
+                                next: 51210020,
+                            },
+                            {
+                                id: 51210020,
+                                content: "Well. As you've probably gathered, the Chairman of the Screwdriver Union is, in fact, a child.",
+                                npc: 700428,
+                                next: 51210021,
+                            },
+                            {
+                                id: 51210021,
+                                content:
+                                    "Having a figurehead wasn't exactly the plan. The problem was, no adult was willing to take the position. Being Chairman of the Screwdriver Union means openly standing up to Eisenbahn.",
+                                npc: 700428,
+                                next: 51210022,
+                            },
+                            {
+                                id: 51210022,
+                                content:
+                                    'Mhm. They told me, "It\'s just like being in charge of the kids up on the skylights. Only now, you get to boss around all the workers at the station too. Proper big-shot stuff, right?"',
+                                npc: 700442,
+                                next: 51210023,
+                            },
+                            {
+                                id: 51210023,
+                                content:
+                                    "So I said yes. Then I got here and realised they'd handed me a sack of crap and called it a crown.",
+                                npc: 700442,
+                                next: 51210024,
+                            },
+                            {
+                                id: 51210024,
+                                content: "Kroger, I've told you not to use that kind of language around her. Look at her now.",
+                                npc: 700428,
+                                next: 51210025,
+                            },
+                            {
+                                id: 51210025,
+                                content: "Oh, piss off. How's that on me? She picked up plenty of it herself out there.",
+                                npc: 700429,
+                                next: 51210073,
+                            },
+                            {
+                                id: 51210027,
+                                content:
+                                    "You've got a decent idea of what the Screwdriver Union is by now, haven't you? We're a workers' union here at the station. We look out for one another. But when all's said and done, we're still workers. We make our living under the people at the top.",
+                                npc: 700428,
+                                next: 51210028,
+                            },
+                            {
+                                id: 51210028,
+                                content:
+                                    "Whether we eat well or go hungry depends on what they decide. If management's in a good mood, maybe there's an extra loaf of bread on our table. If they're not, we might go two days without a proper meal.",
+                                npc: 700428,
+                                next: 51210029,
+                            },
+                            {
+                                id: 51210029,
+                                content: "And who sits at the top of Bloomfield Station?",
+                                npc: 700428,
+                                next: 51210030,
+                            },
+                            {
+                                id: 51210030,
+                                content:
+                                    "Eisenbahn's the sun above us! The very reason this station shines! Eisenbahn's the ground beneath us! The very reason this station stands!",
+                                npc: 700442,
+                                next: 51210031,
+                            },
+                            {
+                                id: 51210031,
+                                content:
+                                    "Whoa! Don't look at me. I never taught her that. I couldn't make myself sing that rubbish if you paid me.",
+                                npc: 700429,
+                                next: 51210032,
+                            },
+                            {
+                                id: 51210032,
+                                content: "That's what those bloody nobles at the Steamwhistle Salon sing.",
+                                npc: 700442,
+                                next: 51210073,
+                            },
+                            {
+                                id: 51210034,
+                                content: "Don't underestimate her. She's got a name all across the station — Mad Maggie.",
+                                npc: 700429,
+                                next: 51210035,
+                            },
+                            {
+                                id: 51210035,
+                                content:
+                                    "Uh-uh. It's Maggie the Mighty! Back in the day, I grabbed a wrench in each hand and fought my way down from the skylights to the underground ironworks. Anyone who crossed me got WHAM! WHAM! Three days and three nights, I fought without stopping! Rivers of blood!",
+                                npc: 700442,
+                                next: 51210036,
+                            },
+                            {
+                                id: 51210036,
+                                content: "Wrench up, wrench down, up and down! Didn't blink once!",
+                                npc: 700442,
+                                next: 51210037,
+                            },
+                            {
+                                id: 51210037,
+                                content: "She picked that one up from a bunch of drunks. Nothing to do with me.",
+                                npc: 700429,
+                                next: 51210038,
+                            },
+                            {
+                                id: 51210038,
+                                content: "That's rich, coming from you. You're one of those drunks yourself. The worst of them, in fact.",
+                                npc: 700428,
+                                next: 51210039,
+                            },
+                            {
+                                id: 51210039,
+                                content:
+                                    "Anyway. The point is, Maggie is more or less the boss of the kids who work up on the skylights. Bringing her on board was our way of tying them together with the adult workers.",
+                                npc: 700428,
+                                next: 51210073,
+                            },
+                            {
+                                id: 51210040,
+                                content: "I think I understand now. But there's still one thing I'm curious about.",
+                                npc: 100001,
+                                next: 51210041,
+                            },
+                            {
+                                id: 51210041,
+                                content:
+                                    "With things the way they are... what leverage do you actually have against Eisenbahn? Or put another way, what's stopping him from crushing the Union outright?",
+                                npc: 100001,
+                                next: 51210042,
+                            },
+                            {
+                                id: 51210042,
+                                content:
+                                    "Now that's a good question! Right on the mark! Lorent, go on — give {性别：him|her} that fancy load of rubbish you always give.",
+                                npc: 700442,
+                                next: 51210043,
+                            },
+                            {
+                                id: 51210043,
+                                content: "...Do you know why we're called the Screwdriver Union?",
+                                npc: 700428,
+                                next: 51210044,
+                            },
+                            {
+                                id: 51210044,
+                                content:
+                                    "I do, I do! Coney told us! You were named after some genius engineer from the Alchemy Academy, right? The one who even improved Phoxichor engines!",
+                                npc: 700449,
+                                next: 51210045,
+                            },
+                            {
+                                id: 51210045,
+                                content:
+                                    "Then Coney gave you the basics. That engineer died not long after founding the Union, but his knowledge didn't die with him. Before he passed, he taught the workers what he knew. They passed it down from one generation to the next, and we still carry it today.",
+                                npc: 700428,
+                                next: 51210046,
+                            },
+                            {
+                                id: 51210046,
+                                content: "Ohhh, I get it~ So you know things about Phoxichor engines that Eisenbahn doesn't!",
+                                npc: 700449,
+                                next: 51210047,
+                            },
+                            {
+                                id: 51210047,
+                                content:
+                                    "Exactly. We rely on Eisenbahn for our wages, but Eisenbahn relies on us to keep his Phoxichor engines running.",
+                                npc: 700428,
+                                next: 51210048,
+                            },
+                            {
+                                id: 51210048,
+                                content:
+                                    "That's the balance we're trapped in. He can work us to the bone, but he can't afford to drive us away completely. We can push back, but only so far. At the end of the day, he still controls the work we need to survive.",
+                                npc: 700428,
+                                next: 51210049,
+                            },
+                            {
+                                id: 51210049,
+                                content:
+                                    "Tch... bunch of cowards. If you ask me, we should grab our wrenches and smash every one of Eisenbahn's house dogs.",
+                                npc: 700442,
+                                next: 51210050,
+                            },
+                            {
+                                id: 51210050,
+                                content: "Now that's a plan I can get behind.",
+                                npc: 700429,
+                                next: 51210051,
+                            },
+                            {
+                                id: 51210051,
+                                content: "...Before anyone starts swinging a wrench, there is something else we need your help with...",
+                                npc: 700428,
+                                next: 51210052,
+                            },
+                            {
+                                id: 51210052,
+                                content: "Me? Again?",
+                                npc: 100001,
+                                next: 51210053,
+                            },
+                            {
+                                id: 51210053,
+                                content:
+                                    "Sorry, but yes — again. One of our people has gone missing. He's the current keeper of the Screwdriver Union's engineering know-how. Everyone calls him the Sleep-On-It Zen Master.",
+                                npc: 700428,
+                                next: 51210054,
+                            },
+                            {
+                                id: 51210054,
+                                content: "The Sleep-On-It Zen Master...? How do you even end up with a name like that?",
+                                npc: 700449,
+                                next: 51210055,
+                            },
+                            {
+                                id: 51210055,
+                                content:
+                                    "Because the man's an idiot. Ask him a question and he'll never answer you on the spot. He'll go home, sleep on it, then come back the next day as if the answer came to him in some grand bloody revelation.",
+                                npc: 700429,
+                                next: 51210056,
+                            },
+                            {
+                                id: 51210056,
+                                content:
+                                    "He calls it Zen and the Art of Locomotive Maintenance. I think he just wanted an excuse to go drinking.",
+                                npc: 700442,
+                                next: 51210057,
+                            },
+                            {
+                                id: 51210057,
+                                content:
+                                    "Funny thing is, he only got into all that Zen nonsense after a night out drinking with some Starweavers from Huaxu. Pinched the whole idea and started acting like it was his life's philosophy. Load of rubbish, if you ask me.",
+                                npc: 700429,
+                                next: 51210058,
+                            },
+                            {
+                                id: 51210058,
+                                content:
+                                    "Anyway. He's gone missing, and we need someone to find him. Our last lead points to one of the foremen, so...",
+                                npc: 700428,
+                                options: [
+                                    {
+                                        id: 51210059,
+                                        content: "Let me guess. You need me to look into it?",
+                                        next: 51210060,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51210063,
+                                        content: "So I'm working for free again?",
+                                        next: 51210064,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210060,
+                                content: "...Right. As I said, our last lead points to one of the foremen.",
+                                npc: 700428,
+                                next: 51210061,
+                            },
+                            {
+                                id: 51210064,
+                                content:
+                                    "Exactly! But you're right. You've been helping us all this time, and you're not even one of us. So I've decided — you can have my title. From now on, you're Chairman of the Screwdriver Union!",
+                                npc: 700442,
+                                next: 51210065,
+                            },
+                            {
+                                id: 51210061,
+                                content:
+                                    "Truth be told, he's one of Eisenbahn's lapdogs. Start digging into him, and you're practically picking a fight with Eisenbahn himself. Especially since they know every face in the Union.",
+                                npc: 700428,
+                                next: 51210062,
+                            },
+                            {
+                                id: 51210065,
+                                content:
+                                    "(She solemnly lifts an imaginary crown from her head and tries to place it on yours, only for Kroger to stop her at once.)",
+                                next: 51210066,
+                            },
+                            {
+                                id: 51210062,
+                                content:
+                                    "Under the circumstances, an outsider is our best option. A fresh face. Someone who won't be staying at the station for long.",
+                                npc: 700428,
+                                next: 51210067,
+                            },
+                            {
+                                id: 51210066,
+                                content: "You little menace, knock it off!",
+                                npc: 700429,
+                                next: 51210067,
+                            },
+                            {
+                                id: 51210067,
+                                content: "Fine, fine. I'll help you.",
+                                npc: 100001,
+                                next: 51210068,
+                            },
+                            {
+                                id: 51210068,
+                                content:
+                                    "You know, there's a reason I keep turning to you. People like us learn not to expect kindness from anyone. But somehow, you still have some to spare.",
+                                npc: 700428,
+                                next: 51210069,
+                            },
+                            {
+                                id: 51210069,
+                                content:
+                                    "Pff, save it! That's exactly what people say when they're trying to sweet-talk you into more work! So lame!",
+                                npc: 700449,
+                                next: 51210070,
+                            },
+                            {
+                                id: 51210070,
+                                content: "Exactly! See? Even the Luno sees through you, Lorent. You're a jerk.",
+                                npc: 700442,
+                                next: 51210071,
+                            },
+                            {
+                                id: 51210071,
+                                content:
+                                    "Yes, yes, I deserve that. And you're right — it's not fair to keep asking you to do this on your own. So this time...",
+                                npc: 700428,
+                                next: 51210072,
+                            },
+                            {
+                                id: 51210072,
+                                content: "Kroger is coming with you.",
+                                npc: 700428,
+                            },
+                            {
+                                id: 51210026,
+                                content: 'What do you mean by "openly standing up to Eisenbahn"?',
+                                next: 51210027,
+                            },
+                            {
+                                id: 51210033,
+                                content: "Why her, of all people?",
+                                next: 51210034,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040502,
+                name: "Go to the ironworks",
+                desc: "Before you can even collect your reward for the last request, another one lands in your lap. At your first meeting with the actual chairman of the Screwdriver Union, you discover — to your surprise — that the chairman is only a child. Somehow, one small act of kindness leaves you with the job of finding the union's Sleep-On-It Zen Master. Since you've already agreed, you might as well help them one last time.",
+                nodes: [
+                    {
+                        id: "17796930161731480984",
+                        type: "TalkNode",
+                        name: "触发工厂对话",
+                        srId: 106301,
+                        pos: [-18580, 12750],
+                        dialogues: [
+                            {
+                                id: 51210101,
+                                content: "We're back here again...? Haven't we been running in circles through this place all day?",
+                                npc: 700449,
+                                next: 51210102,
+                            },
+                            {
+                                id: 51210102,
+                                content:
+                                    "Pff. I've been running in circles round here for years. Keeps life interesting, doesn't it? New faces every day.",
+                                npc: 700429,
+                                next: 51210103,
+                            },
+                            {
+                                id: 51210103,
+                                content: "Really? They all look the same to me. Tired.",
+                                npc: 700449,
+                                next: 51210104,
+                            },
+                            {
+                                id: 51210104,
+                                content: "Let's stay focused. Which one is the foreman Lorent wanted us to talk to?",
+                                npc: 100001,
+                                next: 51210105,
+                            },
+                            {
+                                id: 51210105,
+                                content:
+                                    "Easy. Look around. See the bloke strutting about like he owns the place, with that smug grin you just want to punch off his stupid face? That's your foreman.",
+                                npc: 700429,
+                                next: 51210106,
+                            },
+                            {
+                                id: 51210106,
+                                content: "...That does narrow it down.",
+                                npc: 100001,
+                                next: 51210107,
+                            },
+                            {
+                                id: 51210107,
+                                content: "Work here a few days and you'll stop smiling too.",
+                                npc: 700429,
+                                next: 51210108,
+                            },
+                            {
+                                id: 51210108,
+                                content:
+                                    "So how are we supposed to ask him about the Sleep-On-It Zen Master? Play the sympathy card again? I'm ready!",
+                                npc: 700449,
+                                next: 51210109,
+                            },
+                            {
+                                id: 51210109,
+                                content:
+                                    "The sympathy card? On a foreman? Now that's funny. The workers here are miserable for real. Foremen hear sob stories all day long. They won't blink at your little act.",
+                                npc: 700429,
+                                next: 51210110,
+                            },
+                            {
+                                id: 51210110,
+                                content: "That said... I've got an idea. Might be a bit risky, though.",
+                                npc: 700429,
+                                next: 51210111,
+                            },
+                            {
+                                id: 51210111,
+                                content: "(How should we go about this?)",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 51210112,
+                                        content: "(Come up with your own plan.)",
+                                        next: 51210113,
+                                    },
+                                    {
+                                        id: 51210118,
+                                        content: "(Hear Kroger out.)",
+                                        next: 51210119,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210113,
+                                content: "If these foremen are all Eisenbahn's men, then we'll act like Eisenbahn's biggest admirers.",
+                                npc: 100001,
+                                next: 51210114,
+                            },
+                            {
+                                id: 51210119,
+                                content: "Let's hear it. We're not scared of a little risk.",
+                                npc: 100001,
+                                next: 51210120,
+                            },
+                            {
+                                id: 51210114,
+                                content:
+                                    "Admirers? Of Eisenbahn? How'd you say that with a straight face? Ugh... now you've got me thinking about it. Makes my skin crawl.",
+                                npc: 700429,
+                                next: 51210115,
+                            },
+                            {
+                                id: 51210120,
+                                content:
+                                    "Hah. Got some guts, I'll give you that. Fine, then I'd better not disappoint. Here's the plan: we rough him up till he talks. See that spot over there?",
+                                npc: 700429,
+                                next: 51210121,
+                            },
+                            {
+                                id: 51210115,
+                                content: "Do you know this foreman's name?",
+                                npc: 100001,
+                                next: 51210116,
+                            },
+                            {
+                                id: 51210121,
+                                content: "Where?",
+                                npc: 700449,
+                                next: 51210122,
+                            },
+                            {
+                                id: 51210116,
+                                content: "His name? Olaf.",
+                                npc: 700429,
+                                next: 51210117,
+                            },
+                            {
+                                id: 51210122,
+                                content:
+                                    "Right there. That spot. Here's how it goes. I'll shout when it's time. Then I act drunk and kick up a fuss. I jump you, you scream for help and run over there. Make enough noise to catch the foreman's eye and draw him in.",
+                                npc: 700429,
+                                next: 51210123,
+                            },
+                            {
+                                id: 51210117,
+                                content: "Olaf... Right. Snow, let's go.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51210123,
+                                content: "...Jump me?",
+                                npc: 100001,
+                                next: 51210124,
+                            },
+                            {
+                                id: 51210124,
+                                content:
+                                    "Pretend to. Don't get precious. Make sure to make a racket, and get the foreman looking this way. Soon as he comes over... we jump him.",
+                                npc: 700429,
+                                next: 51210125,
+                            },
+                            {
+                                id: 51210125,
+                                content: "...Jump him?",
+                                npc: 700449,
+                                next: 51210126,
+                            },
+                            {
+                                id: 51210126,
+                                content:
+                                    "Yeah. You two really are friends, aren't you? Even say the same things. Anyway, that's the plan. Let me know when you're ready.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040503,
+                name: "Trick the foreman",
+                desc: "Your group manages to find the foreman — the last person to see the Sleep-On-It Zen Master before he disappeared. When it comes time to decide how to get him to talk, you reject Kroger's suggestion and offer another way.",
+                nodes: [
+                    {
+                        id: "17796949056624387885",
+                        type: "TalkNode",
+                        name: "对话奥拉夫",
+                        srId: 106301,
+                        pos: [-13600, 10240],
+                        dialogues: [
+                            {
+                                id: 51210601,
+                                content: "Excuse me, sir.",
+                                npc: 100001,
+                                next: 51210602,
+                            },
+                            {
+                                id: 51210602,
+                                content:
+                                    "Hm? Who're you? Don't think I've seen you before. You don't work at the ironworks, that's for sure.",
+                                npc: 700443,
+                                next: 51210603,
+                            },
+                            {
+                                id: 51210603,
+                                content: "No. But I know who you are. Olaf, one of Mr Eisenbahn's most trusted foremen.",
+                                npc: 100001,
+                                next: 51210604,
+                            },
+                            {
+                                id: 51210604,
+                                content:
+                                    "You know my name? Wait... Don't tell me I've finally made it into one of the <H>Steamwhistle Salon</>'s rankings. Which one was it? Employee of the Year? Stationmaster's Favourite?",
+                                npc: 700443,
+                                next: 51210605,
+                            },
+                            {
+                                id: 51210605,
+                                content:
+                                    "Ahem. Well... either one would make sense. I have been doing excellent work lately. Come to think of it, Mr Eisenbahn has been trusting me with more and more important duties...",
+                                npc: 700443,
+                                next: 51210606,
+                            },
+                            {
+                                id: 51210606,
+                                content:
+                                    "Exactly. You're quite the name at the Steamwhistle Salon these days. Some people are even saying you might replace Mr Eisenbahn's current adjutant and become his new right-hand man.",
+                                npc: 100001,
+                                next: 51210607,
+                            },
+                            {
+                                id: 51210607,
+                                content:
+                                    "That's right! We're here to interview you! The Steamwhistle Salon never misses a story about Mr Eisenbahn!",
+                                npc: 700449,
+                                next: 51210608,
+                            },
+                            {
+                                id: 51210608,
+                                content:
+                                    "Oh, you're too kind. I wouldn't dare dream of replacing his adjutant. Employee of the Year, though... Well, that's certainly possible. So you're from the Steamwhistle Salon? Then you must be...",
+                                npc: 700443,
+                                next: 51210609,
+                            },
+                            {
+                                id: 51210609,
+                                content:
+                                    "That's right. And if you answer our questions, we'll make sure the right people at the Salon hear about it.",
+                                npc: 100001,
+                                next: 51210610,
+                            },
+                            {
+                                id: 51210610,
+                                content: "Oh, of course! Absolutely! Ask away! I'll tell you everything I know.",
+                                npc: 700443,
+                                options: [
+                                    {
+                                        id: 51210611,
+                                        content: "You mentioned Mr Eisenbahn had trusted you with some important work recently?",
+                                        next: 51210612,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210612,
+                                content:
+                                    "Oh, nothing terribly important. Some of the workers have been getting sticky fingers lately. A few days ago, we caught a petty thief sneaking into the infirmary.",
+                                npc: 700443,
+                                next: 51210613,
+                            },
+                            {
+                                id: 51210613,
+                                content:
+                                    "The Stationmaster ordered us to keep him locked up in there and make sure the Screwdriver Union didn't hear a word. Naturally, I was chosen to oversee the matter personally.",
+                                npc: 700443,
+                                options: [
+                                    {
+                                        id: 51210614,
+                                        content: "Stealing? From the infirmary?",
+                                        next: 51210615,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210615,
+                                content:
+                                    "That's right. The thief's name is Hugh. Quiet fellow, normally. Never causes trouble. Maybe he'd had too much to drink that night. Anyway, he broke into the infirmary and started poking around before a patrol caught him red-handed.",
+                                npc: 700443,
+                                next: 51210616,
+                            },
+                            {
+                                id: 51210616,
+                                content:
+                                    "We checked with the doctor on duty afterwards. Nothing was missing. Otherwise, he'd be in far worse trouble than he is now.",
+                                npc: 700443,
+                                options: [
+                                    {
+                                        id: 51210617,
+                                        content: "Why keep it from the Screwdriver Union?",
+                                        next: 51210618,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210618,
+                                content:
+                                    "Oh, come now. The Steamwhistle Salon must know that much already. The Screwdriver Union is always making trouble for the Stationmaster. And now we've caught one of theirs red-handed. Naturally, the Stationmaster means to make use of it.",
+                                npc: 700443,
+                                next: 51210619,
+                            },
+                            {
+                                id: 51210619,
+                                content:
+                                    "Though lately... well, you know how it is. We have someone important at the station, and the Stationmaster has been rather occupied. Once things settle down, I imagine he'll use Hugh to put the Union back in its place.",
+                                npc: 700443,
+                                options: [
+                                    {
+                                        id: 51210620,
+                                        content: "(That's all I needed to know.)",
+                                        next: 51210621,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51210621,
+                                content:
+                                    "It seems Mr Eisenbahn really does trust you. Leaving such a delicate matter in your hands... I may have to move you up a few places on my list of his most capable subordinates.",
+                                npc: 100001,
+                                next: 51210622,
+                            },
+                            {
+                                id: 51210622,
+                                content:
+                                    "R—Really? You mean that? Thank you! Thank you very much! I'll work even harder from now on! Please put in a good word for me!",
+                                npc: 700443,
+                                next: 51210623,
+                            },
+                            {
+                                id: 51210623,
+                                content: "You've been very helpful. That will be all for today's interview.",
+                                npc: 100001,
+                                next: 51210624,
+                            },
+                            {
+                                id: 51210624,
+                                content: "Of course! Thank you for your time! See you around!",
+                                npc: 700443,
+                                next: 51210625,
+                            },
+                            {
+                                id: 51210625,
+                                content:
+                                    "(He snaps into a perfect Imperial salute, looking less like a foreman than a soldier reporting for duty.)",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040504,
+                name: "Beat up the foreman",
+                desc: "Your group manages to find the foreman — the last person to see the Sleep-On-It Zen Master before he disappeared. When it comes time to decide how to get him to talk, you decide to go with Kroger's suggestion.",
+                nodes: [
+                    {
+                        id: "17796966937604396312",
+                        type: "TalkNode",
+                        name: "战斗1开车",
+                        srId: 106301,
+                        pos: [-12590, 10510],
+                        dialogues: [
+                            {
+                                id: 51210201,
+                                content: "Little Minion, why would you agree to a plan this stupid!?",
+                                npc: 700449,
+                                next: 51210202,
+                            },
+                            {
+                                id: 51210202,
+                                content:
+                                    "AAAAAAARGH! Sod this job! I'd rather be having a beer than breaking my back here! You! Yeah, you! Foreman! This is your fault! I'm gonna kick your arse!",
+                                npc: 700429,
+                                next: 51210203,
+                            },
+                            {
+                                id: 51210203,
+                                content: "Help! He's really coming after us!",
+                                npc: 700449,
+                                next: 51210301,
+                            },
+                            {
+                                id: 51210301,
+                                content: "Oi! What the hell!? I'm supposed to be hitting you! Why are you hitting me back!?",
+                                npc: 700429,
+                                next: 51210302,
+                            },
+                            {
+                                id: 51210302,
+                                content: "Same difference. I'd rather not be the only one getting punched.",
+                                npc: 100001,
+                                next: 51210303,
+                            },
+                            {
+                                id: 51210303,
+                                content: "Bloody hell! Knock it off... Wait, he's coming! Get over there! Now!",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797832081655957882",
+                        type: "TalkNode",
+                        name: "触发工头警觉",
+                        srId: 106301,
+                        pos: [-12590, 10510],
+                        next: ["17797835188985962708"],
+                        dialogues: [
+                            {
+                                id: 51210401,
+                                content: "What's going on here? Had too much beer and lost your mind again?",
+                                next: 51210402,
+                            },
+                            {
+                                id: 51210402,
+                                content: "Now! Get him!",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797835188985962708",
+                        type: "TalkNode",
+                        name: "触发揍人结尾对话",
+                        srId: 106301,
+                        pos: [-12270, 10270],
+                        dialogues: [
+                            {
+                                id: 51210501,
+                                content: "Nice punches, Little Minion!",
+                                npc: 700449,
+                                next: 51210502,
+                            },
+                            {
+                                id: 51210502,
+                                content: "Ugh... That wasn't the plan.",
+                                npc: 700429,
+                                next: 51210503,
+                            },
+                            {
+                                id: 51210503,
+                                content: "If I'd really been trying to beat you up, you'd be on the floor with him.",
+                                npc: 100001,
+                                next: 51210504,
+                            },
+                            {
+                                id: 51210504,
+                                content: "Urgh... My head... My arse... Have you all lost your minds!?",
+                                next: 51210505,
+                            },
+                            {
+                                id: 51210505,
+                                content:
+                                    "Huh? Wait... Aren't you our foreman? Why are there three of you? You got twin brothers or something?",
+                                npc: 700429,
+                                next: 51210506,
+                            },
+                            {
+                                id: 51210506,
+                                content:
+                                    "Kroger! Drinking on the job again, are you? You really want your pay docked this time? I'm telling you, even if Lorent comes begging on your behalf, it won't do a damn thing. You asked for this.",
+                                next: 51210507,
+                            },
+                            {
+                                id: 51210507,
+                                content: "Nah. Don't like that answer.",
+                                npc: 700429,
+                                next: 51210508,
+                            },
+                            {
+                                id: 51210508,
+                                content:
+                                    "(Still playing the drunken lunatic, Kroger lunges forward and starts pummelling the foreman again.)",
+                                next: 51210509,
+                            },
+                            {
+                                id: 51210509,
+                                content: "Stop it! Stop! Why do you always get like this when you're drunk!?",
+                                next: 51210510,
+                            },
+                            {
+                                id: 51210510,
+                                content: "Mmm... Your twin brother's talking to me... Hmm? Now your twin's got a twin too...",
+                                npc: 700429,
+                                next: 51210511,
+                            },
+                            {
+                                id: 51210511,
+                                content: '(Kroger shoots you a quick look, then dramatically "passes out" at your feet.)',
+                                next: 51210512,
+                            },
+                            {
+                                id: 51210512,
+                                content:
+                                    "You drunken bastard. You hopeless bloody idiot. And you — who the hell are you supposed to be? You hit me too! Don't think I didn't notice! You work here? I'll remember that face!",
+                                next: 51210513,
+                            },
+                            {
+                                id: 51210513,
+                                content: "Suit yourself.",
+                                npc: 100001,
+                                next: 51210514,
+                            },
+                            {
+                                id: 51210514,
+                                content: "Don't get clever with me! You'll regret this!",
+                                next: 51210515,
+                            },
+                            {
+                                id: 51210515,
+                                content: "Where's the Sleep-On-It Zen Master?",
+                                npc: 100001,
+                                next: 51210516,
+                            },
+                            {
+                                id: 51210516,
+                                content: "Sleep-On what? What are you talking about?",
+                                next: 51210517,
+                            },
+                            {
+                                id: 51210517,
+                                content: "Oh no! Little Minion, nobody told us his real name!",
+                                npc: 700449,
+                                next: 51210518,
+                            },
+                            {
+                                id: 51210518,
+                                content: "Hugh! One more drink! Just one more! Hugh! Where are you going?",
+                                npc: 700429,
+                                next: 51210519,
+                            },
+                            {
+                                id: 51210519,
+                                content: "...Where's Hugh?",
+                                npc: 100001,
+                                next: 51210520,
+                            },
+                            {
+                                id: 51210520,
+                                content: "Wait... You lot are in on this too? You're working with that thief?",
+                                next: 51210521,
+                            },
+                            {
+                                id: 51210521,
+                                content: "What? Hugh is a thief?",
+                                npc: 700449,
+                                next: 51210522,
+                            },
+                            {
+                                id: 51210522,
+                                content:
+                                    "What is wrong with you people!? You beat the hell out of me, and now you're acting like you don't even know what's going on!? Did you lot hit me for nothing!?",
+                                next: 51210523,
+                            },
+                            {
+                                id: 51210523,
+                                content: "Cut the crap. Where's Hugh? Tell me, or I'll hit you again.",
+                                npc: 100001,
+                                next: 51210524,
+                            },
+                            {
+                                id: 51210524,
+                                content:
+                                    "All right! All right! I'll talk! Don't hit me! Hugh snuck into the infirmary a while back, middle of the night. Tried to steal something. We caught him red-handed.",
+                                next: 51210525,
+                            },
+                            {
+                                id: 51210525,
+                                content:
+                                    "Nothing was missing when we checked, but the Stationmaster said to keep him there unless someone came looking. So he's been tied up in the infirmary ever since. If you want him, that's where he is.",
+                                next: 51210526,
+                            },
+                            {
+                                id: 51210526,
+                                content: "Huh? So they tied him up and just... waited for someone to come looking?",
+                                npc: 700449,
+                                next: 51210527,
+                            },
+                            {
+                                id: 51210527,
+                                content:
+                                    "Stationmaster Eisenbahn wanted him kept there. We were just following orders. I've told you everything. Can I go now?",
+                                next: 51210528,
+                            },
+                            {
+                                id: 51210528,
+                                content: "Get lost.",
+                                npc: 100001,
+                                next: 51210529,
+                            },
+                            {
+                                id: 51210529,
+                                content:
+                                    "(The foreman scrambles away as fast as he can. Only then does Kroger spring back to his feet, looking remarkably refreshed.)",
+                                next: 51210530,
+                            },
+                            {
+                                id: 51210530,
+                                content: "Heh heh...",
+                                npc: 700429,
+                                next: 51210531,
+                            },
+                            {
+                                id: 51210531,
+                                content: "You enjoyed that, didn't you?",
+                                npc: 100001,
+                                next: 51210532,
+                            },
+                            {
+                                id: 51210532,
+                                content: "Heh heh... Maybe a little. Come on. Let's go.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040505,
+                name: "Head to the infirmary",
+                desc: "After prying the Sleep-On-It Zen Master's whereabouts out of Olaf, the foreman, you learn that Eisenbahn's men somehow mistook him for a thief and locked him up in the infirmary. Time to bust him out.",
+                nodes: [
+                    {
+                        id: "17796997348224400654",
+                        type: "TalkNode",
+                        name: "前往医务室开车",
+                        srId: 106001,
+                        pos: [-30780, 6480],
+                        dialogues: [
+                            {
+                                id: 51210701,
+                                content:
+                                    "Back when Lorent said there was something special about you, I thought he was talking rubbish. Now... I think I see what he meant.",
+                                npc: 700429,
+                                next: 51210702,
+                            },
+                            {
+                                id: 51210702,
+                                content: "What is it, kindness?",
+                                npc: 100001,
+                                next: 51210703,
+                            },
+                            {
+                                id: 51210703,
+                                content:
+                                    "Pff. None of that crap. Can't tell you what it is. I can barely read, and I don't have the fancy words for it. Just... something. And it sure as hell isn't kindness.",
+                                npc: 700429,
+                                next: 51210704,
+                            },
+                            {
+                                id: 51210704,
+                                content:
+                                    "I know what it is! {nickname} has amazing fighting skills, and I have a very smart brain! Together, we are invincible!",
+                                npc: 700449,
+                                next: 51210705,
+                            },
+                            {
+                                id: 51210705,
+                                content: "Heh. Whatever it is, it's got nothing to do with you.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797044901284418825",
+                        type: "TalkNode",
+                        name: "对话克罗格嘲笑休",
+                        srId: 106001,
+                        pos: [-34100, 5970],
+                        dialogues: [
+                            {
+                                id: 51210801,
+                                content:
+                                    "(Kroger picks the infirmary lock with practised ease. Inside, you finally come face-to-face with the Sleep-On-It Zen Master himself — bound hand and foot, with a strip of tape over his mouth.)",
+                                next: 51210802,
+                            },
+                            {
+                                id: 51210802,
+                                content: "Hahahaha! Look at you! Trussed up like a chicken!",
+                                npc: 700429,
+                                next: 51210803,
+                            },
+                            {
+                                id: 51210803,
+                                content: "Mmph! Mmph-mmph! MMPHHH!",
+                                npc: 700444,
+                                next: 51210804,
+                            },
+                            {
+                                id: 51210804,
+                                content: "What's that? Couldn't quite catch it. Hahahaha!",
+                                npc: 700429,
+                                next: 51210805,
+                            },
+                            {
+                                id: 51210805,
+                                content: "Aww... poor guy. Little Minion, let's untie him first!",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040506,
+                name: 'Help Hugh "remember"',
+                desc: "After a less-than-friendly exchange, you finally learn why Hugh was arrested and what kind of trouble he's in. But the ironworks can't afford to lose an engineer — even one as hopelessly incompetent as him. And so, you decide to help him recover the manual he values more than life itself.",
+                nodes: [
+                    {
+                        id: "17833911874975002",
+                        type: "TalkNode",
+                        name: "前往喝酒点开车",
+                        srId: 106301,
+                        pos: [-10700, 7590],
+                        dialogues: [
+                            {
+                                id: 51211001,
+                                content: "Snow, this is rare.",
+                                npc: 100001,
+                                next: 51211002,
+                            },
+                            {
+                                id: 51211002,
+                                content: "Hm? What is? What's rare?",
+                                npc: 700449,
+                                next: 51211003,
+                            },
+                            {
+                                id: 51211003,
+                                content: "Two good ideas in one day. That has to be a personal best.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797634539585883653",
+                        type: "TalkNode",
+                        name: "对话克罗格休喝酒",
+                        srId: 106301,
+                        pos: [-13050, 5840],
+                        next: ["17821909127516479"],
+                        dialogues: [
+                            {
+                                id: 51211101,
+                                content:
+                                    "(Kroger somehow turns up with several bottles of cheap, sharp-smelling liquor and lines them up neatly across the table.)",
+                                next: 51211102,
+                            },
+                            {
+                                id: 51211102,
+                                content:
+                                    "Three bottles of Rustgut and one bottle of rough spirits. Your usual, right? If that's not enough, I'll fetch more.",
+                                npc: 700429,
+                                next: 51211103,
+                            },
+                            {
+                                id: 51211103,
+                                content: "Should be enough... Unless you're drinking too.",
+                                npc: 700444,
+                                next: 51211104,
+                            },
+                            {
+                                id: 51211104,
+                                content:
+                                    "And if I get drunk, who's supposed to get anything done? Less talking, more drinking. If that's enough, get on with it. Not like you're much use for anything else.",
+                                npc: 700429,
+                                next: 51211105,
+                            },
+                            {
+                                id: 51211105,
+                                content:
+                                    "I'm useless? I'm the Union's Sleep-On-It Zen Master. You're the one who's good for nothing but drinking and picking fights. In fact, this whole mess started because you got drunk and beat me up last time—",
+                                npc: 700444,
+                                next: 51211106,
+                            },
+                            {
+                                id: 51211106,
+                                content:
+                                    "Everyone in the Union knows I start swinging when I'm drunk! You're the idiot who picked a fight with a drunk and lost! Now stop yapping and drink, or I'll knock your teeth out.",
+                                npc: 700429,
+                                next: 51211107,
+                            },
+                            {
+                                id: 51211107,
+                                content: "You brute! Rabid dog! Violent lunatic! I'm not wasting another breath on a savage like you.",
+                                npc: 700444,
+                                next: 51211108,
+                            },
+                            {
+                                id: 51211108,
+                                content: "Can these two get through a normal conversation without starting a fight?",
+                                npc: 700449,
+                                next: 51211109,
+                            },
+                            {
+                                id: 51211109,
+                                content: "Guys, remember why we're here?",
+                                npc: 100001,
+                                next: 51211110,
+                            },
+                            {
+                                id: 51211110,
+                                content: "(Hugh rolls his eyes at Kroger, grabs a bottle, and starts chugging without another word.)",
+                                next: 51211111,
+                            },
+                            {
+                                id: 51211111,
+                                content:
+                                    "Those inner-city toffs always want something to nibble while they drink. We've got no snacks, so we'll make do with conversation.",
+                                npc: 700429,
+                                next: 51211112,
+                            },
+                            {
+                                id: 51211112,
+                                content: "You mean a little chat? Ooh, sounds fun! What should we talk about? Little Minion, you pick!",
+                                npc: 700449,
+                                next: 51211146,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17821909127516479",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-13050, 5690],
+                        dialogues: [
+                            {
+                                id: 51211142,
+                                content: "Hugh, remember that time you and Kroger got drunk, and he beat you up?",
+                                npc: 700449,
+                                next: 51211143,
+                            },
+                            {
+                                id: 51211143,
+                                content:
+                                    "Hic... What? I'm not drunk... I'm Hugh! Kro-Kro-Kroger... hic! That rabid dog! Wasn't he here just now? Where'd he go? I should've—hic!—given him a proper beating!",
+                                npc: 700444,
+                                next: 51211144,
+                            },
+                            {
+                                id: 51211144,
+                                content: "No idea. Maybe he went back to the ironworks. Want to go find him?",
+                                npc: 700449,
+                                next: 51211145,
+                            },
+                            {
+                                id: 51211145,
+                                content: "Right... hic! Find him... make him paaay... hic!",
+                                npc: 700444,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040507,
+                name: "Follow Hugh",
+                desc: "Under Kroger's relentless verbal assault, Hugh soon drinks himself into a stupor. Now all you need to do is follow close behind and watch where he stops — you never know where the missing manual might turn up.",
+                nodes: [
+                    {
+                        id: "17797755431235894134",
+                        type: "TalkNode",
+                        name: "跟踪开车A",
+                        srId: 106301,
+                        pos: [-13050, 5690],
+                        dialogues: [
+                            {
+                                id: 51211201,
+                                content: "Whoa... Look at him wobbling all over the place. Are we sure this is going to work?",
+                                npc: 700449,
+                                next: 51211202,
+                            },
+                            {
+                                id: 51211202,
+                                content: "He's like this every time he gets drunk. He's fine. Besides, this was your idea, wasn't it?",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797756150125894750",
+                        type: "TalkNode",
+                        name: "触发查看对话A",
+                        srId: 106301,
+                        pos: [-13050, 5690],
+                        dialogues: [
+                            {
+                                id: 51211301,
+                                content: "(The Sleep-On-It Zen Master stops here. Could this be where he lost the manual?)",
+                                next: 51211302,
+                            },
+                            {
+                                id: 51211302,
+                                content: "There's nothing here...",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040508,
+                name: "Keep an eye on Hugh",
+                desc: "Following a drunk around is an absurd way to solve a problem, but at this point, it's the only lead you've got.",
+                nodes: [
+                    {
+                        id: "17797759998105901047",
+                        type: "TalkNode",
+                        name: "跟踪开车B",
+                        srId: 106301,
+                        pos: [-14610, 4670],
+                        dialogues: [
+                            {
+                                id: 51211401,
+                                content: "Hey, isn't that the Sleep-On-It Zen Master? What's he doing plastered at this hour?",
+                                npc: 700445,
+                                next: 51211402,
+                            },
+                            {
+                                id: 51211402,
+                                content: "Sleep-On-It Sot, more like~ Leave him. We've got work to do.",
+                                npc: 700446,
+                                next: 51211403,
+                            },
+                            {
+                                id: 51211403,
+                                content: "Sounds like everyone knows him around here.",
+                                npc: 100001,
+                                next: 51211404,
+                            },
+                            {
+                                id: 51211404,
+                                content:
+                                    "Course they do. When half the machines in the ironworks have passed through your hands at some point, people remember your name. If only he'd lay off the drink...",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797759998105901048",
+                        type: "TalkNode",
+                        name: "触发查看对话B",
+                        srId: 106301,
+                        pos: [-14610, 4670],
+                        dialogues: [
+                            {
+                                id: 51211501,
+                                content: "(The Sleep-On-It Zen Master stops here. Could this be where he lost the manual?)",
+                                next: 51211502,
+                            },
+                            {
+                                id: 51211502,
+                                content: "Nothing here but rubbish!",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040509,
+                name: "Keep following Hugh",
+                desc: "Is this really going to work...?",
+                nodes: [
+                    {
+                        id: "17797767859345911260",
+                        type: "TalkNode",
+                        name: "终点对话",
+                        srId: 106301,
+                        pos: [-14153, 2559],
+                        dialogues: [
+                            {
+                                id: 51211601,
+                                content: "(The Sleep-On-It Zen Master finally collapses by the roadside, out cold.)",
+                                next: 51211602,
+                            },
+                            {
+                                id: 51211602,
+                                content: "Oi! You moron! Get up!",
+                                npc: 700429,
+                                next: 51211603,
+                            },
+                            {
+                                id: 51211603,
+                                content: "Um... maybe try waking him up without kicking him?",
+                                npc: 700449,
+                                next: 51211604,
+                            },
+                            {
+                                id: 51211604,
+                                content:
+                                    "Damn it! We've been trailing this idiot across half the station and found nothing. Bloody waste of time!",
+                                npc: 700429,
+                                next: 51211605,
+                            },
+                            {
+                                id: 51211605,
+                                content: "Excuse me...",
+                                npc: 700447,
+                                next: 51211606,
+                            },
+                            {
+                                id: 51211606,
+                                content: "What? Who the hell are you?",
+                                npc: 700429,
+                                next: 51211607,
+                            },
+                            {
+                                id: 51211607,
+                                content: "Mr Kroger... I—I'm not here for you. I'm looking for the Sleep-On-It Zen Master. He—",
+                                npc: 700447,
+                                next: 51211608,
+                            },
+                            {
+                                id: 51211608,
+                                content: "No Zen Master here. Just a drunken moron passed out on the ground.",
+                                npc: 700429,
+                                next: 51211609,
+                            },
+                            {
+                                id: 51211609,
+                                content:
+                                    "Huh? He's that far gone? He was completely wasted a couple of days ago too, but at least he could still take a look at one of our machines.",
+                                npc: 700447,
+                                next: 51211610,
+                            },
+                            {
+                                id: 51211610,
+                                content: "A couple of days ago?",
+                                npc: 100001,
+                                next: 51211611,
+                            },
+                            {
+                                id: 51211611,
+                                content:
+                                    "Yeah. Haven't seen him in the ironworks these past few days. One of our machines has been acting up, and we didn't know who else to ask.",
+                                npc: 700447,
+                                next: 51211612,
+                            },
+                            {
+                                id: 51211612,
+                                content: "What's wrong with it? Is it holding up work?",
+                                npc: 700429,
+                                next: 51211613,
+                            },
+                            {
+                                id: 51211613,
+                                content:
+                                    "Nothing major. Still, we'd feel better if someone looked at it. Since he's obviously in no state to help right now... would you mind coming over instead?",
+                                npc: 700447,
+                                next: 51211614,
+                            },
+                            {
+                                id: 51211614,
+                                content: "Us? We don't know the first thing about fixing machines.",
+                                npc: 700449,
+                                next: 51211615,
+                            },
+                            {
+                                id: 51211615,
+                                content:
+                                    "Doesn't matter. Just go and have a look. If you can't fix it, come back. I'm going to find a bucket of cold water and wake this idiot up properly.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040510,
+                name: "Inspect the malfunctioning machine",
+                desc: "After following Hugh around for ages without finding a thing, an ironworker comes looking for help with a malfunctioning machine, interrupting this ridiculous little chase. Kroger tells you to go take a look, though you're not at all sure you'll be any help.",
+                nodes: [
+                    {
+                        id: "17797774274955922936",
+                        type: "TalkNode",
+                        name: "对话工厂工人",
+                        srId: 106301,
+                        pos: [-14644, 287],
+                        next: ["17797780721365928144"],
+                        dialogues: [
+                            {
+                                id: 51211701,
+                                content: "Stand aside! Let the great Demon King inspect the source of your suffering!",
+                                npc: 700449,
+                                next: 51211702,
+                            },
+                            {
+                                id: 51211702,
+                                content:
+                                    "It's this thermometer. The Sleep-On-It Zen Master worked on it last time he came by, but for some reason it started acting up again a couple of days ago.",
+                                npc: 700447,
+                                next: 51211703,
+                            },
+                            {
+                                id: 51211703,
+                                content:
+                                    "It's not essential, but we use it to check the warehouse temperature before newly delivered Phoxichor goes into storage. If it gets too cold, it can start to solidify.",
+                                npc: 700447,
+                                next: 51211704,
+                            },
+                            {
+                                id: 51211704,
+                                content: "Put it here. Let me take a look.",
+                                npc: 100001,
+                                next: 51211711,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797780721365928144",
+                        type: "TalkNode",
+                        name: "触发检修后对话",
+                        srId: 106301,
+                        pos: [-14644, 287],
+                        dialogues: [
+                            {
+                                id: 51211801,
+                                content: "All right! Huh? Why's the wobbling?",
+                                npc: 700449,
+                                next: 51211802,
+                            },
+                            {
+                                id: 51211802,
+                                content:
+                                    "Ah, sorry. There's something off down here. I reported it for repair a couple of days ago, but nobody's done anything about it yet. Last time the Sleep-On-It Zen Master came by, he noticed it too.",
+                                npc: 700447,
+                                next: 51211803,
+                            },
+                            {
+                                id: 51211803,
+                                content:
+                                    "I thought he was just swaying because he was drunk, but then he pulled something from his pocket and wedged it under the leg. Stopped the wobbling right away. Do you have anything we could use? If not, I can go and find a brick.",
+                                npc: 700447,
+                                next: 51211804,
+                            },
+                            {
+                                id: 51211804,
+                                content: "I don't have anything on me. Could you?",
+                                npc: 100001,
+                                next: 51211805,
+                            },
+                            {
+                                id: 51211805,
+                                content: "(The worker hurries off and returns moments later with a brick, which he wedges underneath.)",
+                                next: 51211806,
+                            },
+                            {
+                                id: 51211806,
+                                content: "That should do it! Now, let's see what's wrong with this thing!",
+                                npc: 700449,
+                                next: 51211807,
+                            },
+                            {
+                                id: 51211807,
+                                content: "Looks like something's jamming the needle...",
+                                npc: 100001,
+                                next: 51211808,
+                            },
+                            {
+                                id: 51211808,
+                                content:
+                                    "Let me see! Hmm... Oh! It's a little pebble! How did that get in there? My hands are smaller — I'll fish it out!",
+                                npc: 700449,
+                                next: 51211809,
+                            },
+                            {
+                                id: 51211809,
+                                content:
+                                    "(Snow carefully removes the pebble jamming the needle. The needle gives a cheerful little twitch, then slowly settles on the correct temperature.)",
+                                next: 51211810,
+                            },
+                            {
+                                id: 51211810,
+                                content: "Looks like that did it.",
+                                npc: 100001,
+                                next: 51211811,
+                            },
+                            {
+                                id: 51211811,
+                                content:
+                                    "That's amazing! You two must be geniuses! Honestly, I don't know what we would've done without you.",
+                                npc: 700447,
+                                next: 51211812,
+                            },
+                            {
+                                id: 51211812,
+                                content: "Hehe~ Easy-peasy!",
+                                npc: 700449,
+                                next: 51211813,
+                            },
+                            {
+                                id: 51211813,
+                                content:
+                                    "Well, I'd better go and tell the foreman the thermometer's working again. Now the next shipment of Phoxichor can come in on schedule. Thanks again!",
+                                npc: 700447,
+                                next: 51211814,
+                            },
+                            {
+                                id: 51211814,
+                                content:
+                                    "Don't mention it~ A little job like that is nothing for the great Demon King! Come on, Little Minion, let's go find Kroger and Hugh!",
+                                npc: 700449,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040511,
+                name: "Return to Kroger",
+                desc: "You and Snow solve the workers' problem with ease — and realise it was simple enough that even Snow could have handled it on her own. That leaves you wondering: if the ironworkers' everyday mechanical troubles are really this basic, what is the Sleep-On-It Zen Master actually for? Kroger is probably the only one who can answer that.",
+                nodes: [
+                    {
+                        id: "17797787957135933080",
+                        type: "TalkNode",
+                        name: "对话克罗格",
+                        srId: 106301,
+                        pos: [-14195, 2328],
+                        dialogues: [
+                            {
+                                id: 51211901,
+                                content:
+                                    "(By the time you return, Hugh is sitting on the ground, soaked from head to toe and staring blankly into space. Kroger stands nearby, dragging on a cigarette.)",
+                                next: 51211902,
+                            },
+                            {
+                                id: 51211902,
+                                content: "Hey, you're back. This idiot still hasn't sobered up properly. Any luck?",
+                                npc: 700429,
+                                next: 51211903,
+                            },
+                            {
+                                id: 51211903,
+                                content: "It was too easy! The great Demon King and her Little Minion fixed it in no time!",
+                                npc: 700449,
+                                next: 51211904,
+                            },
+                            {
+                                id: 51211904,
+                                content:
+                                    "It was so simple I'm not sure it needed an engineer. If they'd looked a little closer, they could've fixed it themselves.",
+                                npc: 100001,
+                                next: 51211905,
+                            },
+                            {
+                                id: 51211905,
+                                content: "Heh. Thought so.",
+                                npc: 700429,
+                                next: 51211906,
+                            },
+                            {
+                                id: 51211906,
+                                content: "That's odd, though, isn't it?",
+                                npc: 100001,
+                                next: 51211907,
+                            },
+                            {
+                                id: 51211907,
+                                content: "Huh? What's odd, Little Minion?",
+                                npc: 700449,
+                                next: 51211908,
+                            },
+                            {
+                                id: 51211908,
+                                content:
+                                    "Hugh is the only engineer the ironworks has, and most of what he handles seems to be simple problems like that. If one manual was enough to make him look like an expert, why not share it and train more people?",
+                                npc: 100001,
+                                next: 51211909,
+                            },
+                            {
+                                id: 51211909,
+                                content: "Whichever way you look at it, something doesn't add up.",
+                                npc: 100001,
+                                next: 51211910,
+                            },
+                            {
+                                id: 51211910,
+                                content: "And why do you think this idiot was the only apprentice who stayed?",
+                                npc: 700429,
+                                next: 51211911,
+                            },
+                            {
+                                id: 51211911,
+                                content: "You two keep answering each other's questions with more questions... I'm completely lost.",
+                                npc: 700449,
+                                next: 51211912,
+                            },
+                            {
+                                id: 51211912,
+                                content:
+                                    "The old engineer who trained Hugh was the best we had in the ironworks. A little thing like that thermometer? He could've fixed it in his sleep. If he'd wanted to, he could've improved locomotive blueprints. We figured more people should learn what he knew, so we had him start teaching the others.",
+                                npc: 700429,
+                                next: 51211913,
+                            },
+                            {
+                                id: 51211913,
+                                content:
+                                    "And at first, it worked. Workers picked it up fast. The talented ones learned maintenance and repairs in no time, and they got damn good at their jobs.",
+                                npc: 700429,
+                                next: 51211914,
+                            },
+                            {
+                                id: 51211914,
+                                content:
+                                    "Then they got good enough to realise they deserved better pay. So they went to management and asked for a pay rise. Said they'd walk if they didn't get one.",
+                                npc: 700429,
+                                next: 51211915,
+                            },
+                            {
+                                id: 51211915,
+                                content:
+                                    "And you know what happened? Bloomfield Station didn't care if they stayed, left, or starved. Management didn't want skilled workers. They wanted obedient ones. So they told them they weren't worth the money and showed them the door. In the end... Hugh was the only one left.",
+                                npc: 700429,
+                                next: 51211916,
+                            },
+                            {
+                                id: 51211916,
+                                content: "So Hugh wasn't the best one. He was...",
+                                npc: 100001,
+                                next: 51211917,
+                            },
+                            {
+                                id: 51211917,
+                                content: "The cheapest one.",
+                                npc: 700429,
+                                next: 51211918,
+                            },
+                            {
+                                id: 51211918,
+                                content:
+                                    "Why is that the first thing I hear when I wake up? Life's hard enough. Where's the booze? I need another drink.",
+                                npc: 700444,
+                                next: 51211919,
+                            },
+                            {
+                                id: 51211919,
+                                content:
+                                    "You stupid bloody moron! Forget the booze! Wake the hell up! We spent half the day chasing you all over the station and still didn't find your damn manual!",
+                                npc: 700429,
+                                next: 51211920,
+                            },
+                            {
+                                id: 51211920,
+                                content:
+                                    "It's not a damn manual...! How can you even say that? That manual is brilliant. I'll never be half the engineer its author was.",
+                                npc: 700444,
+                                next: 51211921,
+                            },
+                            {
+                                id: 51211921,
+                                content:
+                                    "Every word out of your mouth makes me want to punch something. So what now? We can't find the manual anywhere. But you've been using the thing for years. You must remember some of it, right?",
+                                npc: 700429,
+                                next: 51211922,
+                            },
+                            {
+                                id: 51211922,
+                                content: "I... I can't. I never thought I'd have to... I...",
+                                npc: 700444,
+                                next: 51211923,
+                            },
+                            {
+                                id: 51211923,
+                                content: "...I want to punch you in the—",
+                                npc: 700429,
+                                next: 51211924,
+                            },
+                            {
+                                id: 51211924,
+                                content: "Uh-uh! No fighting!!!",
+                                npc: 700449,
+                                next: 51211925,
+                            },
+                            {
+                                id: 51211925,
+                                content: "Zen Master! You're awake!",
+                                npc: 700447,
+                                next: 51211926,
+                            },
+                            {
+                                id: 51211926,
+                                content: "Oh, it's you! The thermometer guy. What's wrong? Did it break again?",
+                                npc: 700449,
+                                next: 51211927,
+                            },
+                            {
+                                id: 51211927,
+                                content: "No, no! I came to return something.",
+                                npc: 700447,
+                                next: 51211928,
+                            },
+                            {
+                                id: 51211928,
+                                content: "What is it?",
+                                npc: 700429,
+                                next: 51211929,
+                            },
+                            {
+                                id: 51211929,
+                                content: "This.",
+                                npc: 700447,
+                                next: 51211930,
+                            },
+                            {
+                                id: 51211930,
+                                content:
+                                    "(The worker pulls a book from inside his coat and places it in Hugh's hands with a friendly smile.)",
+                                next: 51211931,
+                            },
+                            {
+                                id: 51211931,
+                                content:
+                                    "Remember this? You were completely plastered that day. Used it to prop up a loose bit. Then after you fixed the machine, you just walked off and left it there.",
+                                npc: 700447,
+                                next: 51211932,
+                            },
+                            {
+                                id: 51211932,
+                                content:
+                                    "None of us can read, so we had no idea what kind of book it was. We thought if you were using it to prop up a loose bit, it couldn't be all that important. But one of the lads pointed out it was yours, and that we ought to return it out of respect. So... here I am.",
+                                npc: 700447,
+                                next: 51211933,
+                            },
+                            {
+                                id: 51211933,
+                                content: "You must be under a lot of pressure, helping people all day. No wonder you drink so much.",
+                                npc: 700447,
+                                next: 51211934,
+                            },
+                            {
+                                id: 51211934,
+                                content: "Him? Pressure?",
+                                npc: 700429,
+                                next: 51211935,
+                            },
+                            {
+                                id: 51211935,
+                                content:
+                                    "No, no... I'm fine... Thank you! This means more to me than you know. This book is... it's practically my life!",
+                                npc: 700444,
+                                next: 51211936,
+                            },
+                            {
+                                id: 51211936,
+                                content:
+                                    "Zen Master, are you crying? Ah, don't cry. If I'd known it meant that much to you, I'd have brought it back sooner. Sorry about all this.",
+                                npc: 700447,
+                                next: 51211937,
+                            },
+                            {
+                                id: 51211937,
+                                content:
+                                    "No... It's all right... It's back. That's all that matters. Kroger, I can go back to the Union now. The manual's back!",
+                                npc: 700444,
+                                next: 51211938,
+                            },
+                            {
+                                id: 51211938,
+                                content: "...Well, I'll be damned. After all that running around, this is how we find it?",
+                                npc: 700429,
+                                next: 51211939,
+                            },
+                            {
+                                id: 51211939,
+                                content: "Well, however it happened, it's a happy ending!",
+                                npc: 700449,
+                                next: 51211940,
+                            },
+                            {
+                                id: 51211940,
+                                content: "I need to get this idiot back to the Union and report to the chairman. You get back to work.",
+                                npc: 700429,
+                                next: 51211941,
+                            },
+                            {
+                                id: 51211941,
+                                content: "Right. I'll be off, then. Mr Kroger, please say hello to Mr Lorent for me.",
+                                npc: 700447,
+                                next: 51211942,
+                            },
+                            {
+                                id: 51211942,
+                                content: "Sure. I'll tell him. As for you two...",
+                                npc: 700429,
+                                next: 51211943,
+                            },
+                            {
+                                id: 51211943,
+                                content: "Huh...?",
+                                next: 51211944,
+                            },
+                            {
+                                id: 51211944,
+                                content: "You're coming too.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040512,
+                name: "Return to the Screwdriver Union",
+                desc: "With the matter resolved, you've gained a clearer glimpse into the lives of the ironworkers under Eisenbahn's management. Now that you've found the Sleep-On-It Zen Master and the Maintenance Manual he relies on, surely it's time to collect your reward at last.",
+                nodes: [
+                    {
+                        id: "17797807357515940604",
+                        type: "TalkNode",
+                        name: "触发门口对话",
+                        srId: 106301,
+                        pos: [-17836, 12365],
+                        next: ["17797813277975941798"],
+                        dialogues: [
+                            {
+                                id: 51212001,
+                                content: "Lorent, just admit it! You're a bloody coward!",
+                                next: 51212002,
+                            },
+                            {
+                                id: 51212002,
+                                content:
+                                    "Maggie, not every problem can be solved by throwing punches. Besides, do you really think we have the strength to go up against him?",
+                                next: 51212003,
+                            },
+                            {
+                                id: 51212003,
+                                content: "That's exactly what a coward would say!",
+                                next: 51212004,
+                            },
+                            {
+                                id: 51212004,
+                                content: "Does anyone in this Union ever do any actual work besides fighting...?",
+                                npc: 700449,
+                                next: 51212005,
+                            },
+                            {
+                                id: 51212005,
+                                content: "...Maybe Snow and I should just leave. The job's done, after all.",
+                                npc: 100001,
+                                next: 51212006,
+                            },
+                            {
+                                id: 51212006,
+                                content:
+                                    "Oh, don't give me that. You've come this far already. Besides, the Union's always been a mess. Come on.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797813277975941798",
+                        type: "TalkNode",
+                        name: "玩家被推进屋内",
+                        srId: 106301,
+                        pos: [-17836, 12365],
+                        next: ["17797820469805943781"],
+                        dialogues: [
+                            {
+                                id: 51212007,
+                                content: "(Before either of you can object, Kroger shoves you through the door.)",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17797820469805943781",
+                        type: "TalkNode",
+                        name: "触发完成对话",
+                        srId: 106301,
+                        pos: [-17836, 12365],
+                        dialogues: [
+                            {
+                                id: 51212008,
+                                content: "I'm not saying another word until you calm down.",
+                                npc: 700428,
+                                next: 51212009,
+                            },
+                            {
+                                id: 51212009,
+                                content: "You—",
+                                npc: 700442,
+                                next: 51212010,
+                            },
+                            {
+                                id: 51212010,
+                                content: "Bad time?",
+                                npc: 700429,
+                                next: 51212011,
+                            },
+                            {
+                                id: 51212011,
+                                content: "No. Couldn't be better.",
+                                npc: 700428,
+                                next: 51212012,
+                            },
+                            {
+                                id: 51212012,
+                                content: "Haha... Uh, hello, Lorent...",
+                                npc: 700444,
+                                next: 51212013,
+                            },
+                            {
+                                id: 51212013,
+                                content:
+                                    "Hugh. Good to see you're alive. Why are you soaked through and reeking of alcohol? Where did they find you? In a gutter outside a tavern? Face-down in a barrel?",
+                                npc: 700428,
+                                next: 51212014,
+                            },
+                            {
+                                id: 51212014,
+                                content:
+                                    "Worse. The infirmary. Eisenbahn's lot had him tied up in there. According to them, he was caught trying to steal something.",
+                                npc: 700429,
+                                next: 51212015,
+                            },
+                            {
+                                id: 51212015,
+                                content:
+                                    "See!? That's what I've been saying! Eisenbahn's doing this on purpose. He's testing how far he can push us. First he had someone steal our ledger, then his people kidnapped Hugh — what's next?",
+                                npc: 700442,
+                                next: 51212016,
+                            },
+                            {
+                                id: 51212016,
+                                content:
+                                    "Lorent, all you ever do is back down. You keep giving ground, and his dogs keep sinking their teeth deeper into us. By the time he takes the last thing we have to fight back with, it'll be too late!",
+                                npc: 700442,
+                                next: 51212017,
+                            },
+                            {
+                                id: 51212017,
+                                content: "I wasn't kidnapped! I went there myself! That's how I got caught!",
+                                npc: 700444,
+                                next: 51212018,
+                            },
+                            {
+                                id: 51212018,
+                                content: "You did what? Have you lost your mind? Has all that booze finally pickled your brain?",
+                                npc: 700442,
+                                next: 51212019,
+                            },
+                            {
+                                id: 51212019,
+                                content: "No... It's... complicated. I'd have to start from the beginning...",
+                                npc: 700444,
+                                next: 51212020,
+                            },
+                            {
+                                id: 51212020,
+                                content:
+                                    "Tell her later. I brought back the people who got us out of this mess. We only found Hugh because of them. So how about we stop bickering for five minutes and thank them properly? Maybe even celebrate a little.",
+                                npc: 700429,
+                                next: 51212021,
+                            },
+                            {
+                                id: 51212021,
+                                content:
+                                    "Exactly! We've done so much for your Union. Surely it's time your great heroes received their reward!",
+                                npc: 700449,
+                                next: 51212022,
+                            },
+                            {
+                                id: 51212022,
+                                content:
+                                    "Thank you so much. Without you, the Union would be in far worse shape than it already is. And after everything you've helped us with, I imagine you have a fairly clear picture of what we're up against.",
+                                npc: 700428,
+                                next: 51212023,
+                            },
+                            {
+                                id: 51212023,
+                                content:
+                                    "As for a celebration... we can manage that. Would you stay for dinner? We'll skip the drinks, though. I don't trust Kroger not to start another scene.",
+                                npc: 700428,
+                                next: 51212024,
+                            },
+                            {
+                                id: 51212024,
+                                content: "We still have something important to take care of. We can't stay.",
+                                npc: 100001,
+                                next: 51212025,
+                            },
+                            {
+                                id: 51212025,
+                                content:
+                                    "Right... Of course. You did say from the start that you wouldn't be staying at the station for long.",
+                                npc: 700428,
+                                next: 51212026,
+                            },
+                            {
+                                id: 51212026,
+                                content:
+                                    "Honestly, I don't know how you managed to get this much done in such a short time. If every station hand here were even half as productive as you, Bloomfield would have outdone the Imperial Capital's central station years ago.",
+                                npc: 700428,
+                                next: 51212027,
+                            },
+                            {
+                                id: 51212027,
+                                content:
+                                    "Still, if you're in a hurry to leave, I won't keep you any longer. Here's something for your trouble, and...",
+                                npc: 700428,
+                                next: 51212028,
+                            },
+                            {
+                                id: 51212028,
+                                content: "Here. Take this too.",
+                                npc: 700442,
+                                next: 51212029,
+                            },
+                            {
+                                id: 51212029,
+                                content: "(Maggie dashes over, pulls a screwdriver from her pocket, and places it solemnly in your hand.)",
+                                next: 51212030,
+                            },
+                            {
+                                id: 51212030,
+                                content:
+                                    "This is the biggest sign of trust the Screwdriver Union can give. Carry it with you, and any Union member who sees it will know what it means: if you ever need us, we'll do everything we can to help.",
+                                npc: 700442,
+                                next: 51212031,
+                            },
+                            {
+                                id: 51212031,
+                                content: "Whoa. Even I don't have one of those.",
+                                npc: 700429,
+                                next: 51212032,
+                            },
+                            {
+                                id: 51212032,
+                                content:
+                                    "That's how we do things in the Screwdriver Union. Around here, we stand by our own. You stood by us when we needed it, and we don't have much to give back. So we're giving you the one thing we do have: our loyalty.",
+                                npc: 700442,
+                                next: 51212033,
+                            },
+                            {
+                                id: 51212033,
+                                content:
+                                    "If you ever run into trouble, just bring that screwdriver back to this station. Everyone in the Screwdriver Union will know you're one of us. Say the word, and we'll come running. Blood, sweat, fists — whatever it takes. So? That loyal enough for you?",
+                                npc: 700442,
+                                next: 51212034,
+                            },
+                            {
+                                id: 51212034,
+                                content: "Thank you. I'll treasure it.",
+                                npc: 100001,
+                                next: 51212035,
+                            },
+                            {
+                                id: 51212035,
+                                content: "Then I'm afraid this is where we part ways...",
+                                npc: 700428,
+                                next: 51212036,
+                            },
+                            {
+                                id: 51212036,
+                                content: "Take care. And next time you're back, drinks are on me.",
+                                npc: 700444,
+                                next: 51212037,
+                            },
+                            {
+                                id: 51212037,
+                                content: "So we can watch you drink yourself back into the infirmary? Hah!",
+                                npc: 700429,
+                                next: 51212038,
+                            },
+                            {
+                                id: 51212038,
+                                content:
+                                    "Kroger! You know what? I don't need booze to work up the nerve this time. I'm going to give you a proper thrashing right now!",
+                                npc: 700444,
+                                next: 51212039,
+                            },
+                            {
+                                id: 51212039,
+                                content: "Bring it on, then. With those twig arms? I'd like to see you try—",
+                                npc: 700429,
+                                next: 51212040,
+                            },
+                            {
+                                id: 51212040,
+                                content:
+                                    "(Behind you, their bickering rises in a rough chorus, like screwdrivers and wrenches clattering against empty bottles. With that rowdy racket following you out, you and Snow leave the Union office behind.)",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040513,
+                name: "Get Hugh out",
+                desc: "Following the trail, you locate the infirmary where Hugh is being held. Inside, you find the Sleep-On-It Zen Master himself — Hugh, bound hand and foot, and gagged.",
+                nodes: [
+                    {
+                        id: "17811719221036155011",
+                        type: "TalkNode",
+                        name: "触发和二人对话",
+                        srId: 106001,
+                        pos: [-30780, 6480],
+                        dialogues: [
+                            {
+                                id: 51210901,
+                                content: "Hah...! Oof... Finally. I can talk again!",
+                                npc: 700444,
+                                next: 51210902,
+                            },
+                            {
+                                id: 51210902,
+                                content:
+                                    "Sleep-On-It Zen Master? More like the Hungover Zen Master. Hahaha! You've really outdone yourself this time, haven't you?",
+                                npc: 700429,
+                                next: 51210903,
+                            },
+                            {
+                                id: 51210903,
+                                content: "So, what happened? How much did you drink before you got yourself tied up in the infirmary?",
+                                npc: 700429,
+                                next: 51210904,
+                            },
+                            {
+                                id: 51210904,
+                                content: "I wasn't drunk... Why would I be drunk?",
+                                npc: 700444,
+                                next: 51210905,
+                            },
+                            {
+                                id: 51210905,
+                                content:
+                                    "Rubbish. Nobody ends up like this sober. Never mind. You can explain yourself once we're back at the Union.",
+                                npc: 700429,
+                                next: 51210906,
+                            },
+                            {
+                                id: 51210906,
+                                content: "No! I can't! I can't go back to the Union!",
+                                npc: 700444,
+                                next: 51210907,
+                            },
+                            {
+                                id: 51210907,
+                                content: "...What?",
+                                npc: 700429,
+                                next: 51210908,
+                            },
+                            {
+                                id: 51210908,
+                                content: "Anywhere else is fine. Just not the Union. Not right now.",
+                                npc: 700444,
+                                next: 51210909,
+                            },
+                            {
+                                id: 51210909,
+                                content:
+                                    "Did they knock something loose in that head of yours? You're the Sleep-On-It Zen Master. Everyone's counting on you to keep those blasted locomotives running. If you don't go back, what are we supposed to do?",
+                                npc: 700429,
+                                next: 51210910,
+                            },
+                            {
+                                id: 51210910,
+                                content: "No... I...",
+                                npc: 700444,
+                                next: 51210911,
+                            },
+                            {
+                                id: 51210911,
+                                content: "Spit it out already, for f***'s sake!",
+                                npc: 700429,
+                                next: 51210912,
+                            },
+                            {
+                                id: 51210912,
+                                content: "Snow, cover your ears. That was rude.",
+                                npc: 100001,
+                                next: 51210913,
+                            },
+                            {
+                                id: 51210913,
+                                content: "Too late. I already heard it...",
+                                npc: 700449,
+                                next: 51210914,
+                            },
+                            {
+                                id: 51210914,
+                                content:
+                                    "I... I don't deserve to be called the Sleep-On-It Zen Master. It was all rubbish. I'm a fraud... It was all because of the book. The Maintenance Manual!",
+                                npc: 700444,
+                                next: 51210915,
+                            },
+                            {
+                                id: 51210915,
+                                content: "What!?",
+                                next: 51210916,
+                            },
+                            {
+                                id: 51210916,
+                                content: "Wait. I thought you inherited the founder's techniques.",
+                                npc: 100001,
+                                next: 51210917,
+                            },
+                            {
+                                id: 51210917,
+                                content:
+                                    '"Inherited" makes it sound far grander than it was. Sure, some of the veteran engineers taught me a few things, but I never paid proper attention. Then I found that manual. It had answers to nearly every common mechanical fault you could think of.',
+                                npc: 700444,
+                                next: 51210918,
+                            },
+                            {
+                                id: 51210918,
+                                content:
+                                    "So I thought, why bother learning the principles? Why crack my skull over measurements and adjustments when the answers were right there? Whenever something broke, I'd look it up, follow the steps, and there it was. Problem solved.",
+                                npc: 700444,
+                                next: 51210919,
+                            },
+                            {
+                                id: 51210919,
+                                content:
+                                    'Wait... So all that "sleep on it and find enlightenment" stuff... was just you going home to check the manual?',
+                                npc: 700449,
+                                next: 51210920,
+                            },
+                            {
+                                id: 51210920,
+                                content:
+                                    "Exactly! There were several of us apprenticed under the veteran engineers. They all knew I had no head for machinery, and no one expected much from me. But one by one, the others left. And somehow... somehow the only hopeless case was the one who stayed.",
+                                npc: 700444,
+                                next: 51210921,
+                            },
+                            {
+                                id: 51210921,
+                                content:
+                                    "I couldn't exactly tell everyone the truth, could I? So I made up that ridiculous Zen Master story. Whenever someone came to me for help, I'd say I needed to sleep on it. Then I'd memorise the problem, go home, dig through the manual, and come back the next day with an answer.",
+                                npc: 700444,
+                                next: 51210922,
+                            },
+                            {
+                                id: 51210922,
+                                content: "Oh... So that's what was really going on...",
+                                npc: 700449,
+                                next: 51210923,
+                            },
+                            {
+                                id: 51210923,
+                                content:
+                                    "Book or no book, I don't care. You kept the machines running before, didn't you? Then you can keep doing it now. Come on. You're coming back to the Union.",
+                                npc: 700429,
+                                next: 51210924,
+                            },
+                            {
+                                id: 51210924,
+                                content: "No! I can't! I can't go back!",
+                                npc: 700444,
+                                next: 51210925,
+                            },
+                            {
+                                id: 51210925,
+                                content: "Why the hell not!? What's gotten into you!?",
+                                npc: 700429,
+                                next: 51210926,
+                            },
+                            {
+                                id: 51210926,
+                                content: "Calm down, Kroger. I think I know what this is about.",
+                                npc: 100001,
+                                next: 51210927,
+                            },
+                            {
+                                id: 51210927,
+                                content: "What?",
+                                npc: 700429,
+                                next: 51210928,
+                            },
+                            {
+                                id: 51210928,
+                                content:
+                                    "Sleep-On-It Zen Master — or should I just say Hugh? The thing you tried to steal from the infirmary... it was the Maintenance Manual, wasn't it?",
+                                npc: 100001,
+                                next: 51210929,
+                            },
+                            {
+                                id: 51210929,
+                                content: "Ah... hahah... I suppose you figured it out.",
+                                npc: 700444,
+                                next: 51210931,
+                            },
+                            {
+                                id: 51210931,
+                                content: "We searched everywhere, but there's no sign of the manual!",
+                                npc: 700449,
+                                next: 51210932,
+                            },
+                            {
+                                id: 51210932,
+                                content:
+                                    "I tore the infirmary apart before they tied me up. That snake of a doctor must've hidden it somewhere!",
+                                npc: 700444,
+                                next: 51210933,
+                            },
+                            {
+                                id: 51210933,
+                                content: "And what makes you so sure of that?",
+                                npc: 700429,
+                                next: 51210934,
+                            },
+                            {
+                                id: 51210934,
+                                content:
+                                    "Because the other day, I woke up in the infirmary with the doctor standing over me, smiling down at me and asking if I felt all right. I didn't dare say a word, so I bolted the first chance I got. When I made it home, the manual was gone.",
+                                npc: 700444,
+                                next: 51210935,
+                            },
+                            {
+                                id: 51210935,
+                                content:
+                                    "Nobody knew where I kept it — unless the rats in my room suddenly learned to read. So no one could've taken it from there. I must've had it on me when I went out drinking.",
+                                npc: 700444,
+                                next: 51210936,
+                            },
+                            {
+                                id: 51210936,
+                                content: "Could someone have taken it before you got to the infirmary?",
+                                npc: 100001,
+                                next: 51210937,
+                            },
+                            {
+                                id: 51210937,
+                                content:
+                                    "Right! If the doctor had found something that important on you, wouldn't he have reported it straight to Eisenbahn?",
+                                npc: 700449,
+                                next: 51210938,
+                            },
+                            {
+                                id: 51210938,
+                                content:
+                                    "And if Eisenbahn knew about it, would his people really have left you tied up in here? They'd have been asking where the manual came from and how you got it.",
+                                npc: 700449,
+                                next: 51210939,
+                            },
+                            {
+                                id: 51210939,
+                                content: "Good point... Snow, that was clever. Surprisingly clever.",
+                                npc: 100001,
+                                next: 51210940,
+                            },
+                            {
+                                id: 51210940,
+                                content: 'What do you mean, "surprisingly"!? I\'m always clever!',
+                                npc: 700449,
+                                next: 51210941,
+                            },
+                            {
+                                id: 51210941,
+                                content:
+                                    "They're right. Every time you get drunk, you lose your damn mind. You need to do something about that.",
+                                npc: 700429,
+                                next: 51210942,
+                            },
+                            {
+                                id: 51210942,
+                                content:
+                                    "Oh, you're one to talk! You start picking fights the second you've had a few. That night, I was looking for you, actually.",
+                                npc: 700444,
+                                next: 51210943,
+                            },
+                            {
+                                id: 51210943,
+                                content: "Me? What for?",
+                                npc: 700429,
+                                next: 51210944,
+                            },
+                            {
+                                id: 51210944,
+                                content:
+                                    "Last time you got drunk, you beat me black and blue. So I thought maybe... if I had a few drinks in me... I could...",
+                                npc: 700444,
+                                next: 51210945,
+                            },
+                            {
+                                id: 51210945,
+                                content: "What? Get drunk and settle the score?",
+                                npc: 700429,
+                                next: 51210946,
+                            },
+                            {
+                                id: 51210946,
+                                content:
+                                    "That's not the point! This is your fault too! If you'd come drinking with me that night, none of this would've happened!",
+                                npc: 700444,
+                                next: 51210947,
+                            },
+                            {
+                                id: 51210947,
+                                content: "Piss off! You're begging for another beating, you know that? I ought to—",
+                                npc: 700429,
+                                next: 51210948,
+                            },
+                            {
+                                id: 51210948,
+                                content: "Enough.",
+                                npc: 100001,
+                                next: 51210949,
+                            },
+                            {
+                                id: 51210949,
+                                content:
+                                    "Hehe~ Back at The Asphodel, whenever two customers looked ready to start swinging, Camilla would stick a knife in the chair between them and tell them to behave.",
+                                npc: 700449,
+                                next: 51210950,
+                            },
+                            {
+                                id: 51210950,
+                                content:
+                                    "Violence isn't going to fix this. Let's focus on the manual. If the doctor didn't take it, maybe you dropped it somewhere else. Do you remember anything?",
+                                npc: 100001,
+                                next: 51210951,
+                            },
+                            {
+                                id: 51210951,
+                                content: "I don't know... I don't even remember where I went that night. The whole night's a blur.",
+                                npc: 700444,
+                                next: 51210952,
+                            },
+                            {
+                                id: 51210952,
+                                content: "I have an idea!",
+                                npc: 700449,
+                                next: 51210953,
+                            },
+                            {
+                                id: 51210953,
+                                content: "It had better be a good one. I'm in a punching mood.",
+                                npc: 700429,
+                                next: 51210954,
+                            },
+                            {
+                                id: 51210954,
+                                content:
+                                    "Lay one finger on me and my Little Minion will flatten you~ But the Demon King is feeling merciful today, so I'll let that slide. If Mr Hugh lost the manual while he was drunk, why don't we retrace his steps from when he started drinking?",
+                                npc: 700449,
+                                next: 51210955,
+                            },
+                            {
+                                id: 51210955,
+                                content: "That... might actually work.",
+                                npc: 100001,
+                                next: 51210956,
+                            },
+                            {
+                                id: 51210956,
+                                content: "Maybe. But I can't promise I'll remember much. My memory's never been great.",
+                                npc: 700444,
+                                next: 51210957,
+                            },
+                            {
+                                id: 51210957,
+                                content: "We'll take what we can get. Not like we've got a better option.",
+                                npc: 700429,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 200406,
+        quests: [
+            {
+                id: 20040601,
+                name: "Go to the nobles' lounge entrance and speak with Snow",
+                desc: "Snow is fuming outside the lounge. Something must have happened. Talk to her at the entrance to the nobles' lounge and find out what made her so upset.",
+                nodes: [
+                    {
+                        id: "17804122730321542",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-31420, -5500],
+                        dialogues: [
+                            {
+                                id: 51213001,
+                                content: "{nickname}! There you are.",
+                                npc: 700450,
+                                next: 51213002,
+                            },
+                            {
+                                id: 51213002,
+                                content: "The chairman of the Steamwhistle Salon is back. He's been asking to see you...",
+                                npc: 700450,
+                                options: [
+                                    {
+                                        id: 51213003,
+                                        content: "Why do you look so upset, Snow?",
+                                        next: 51213004,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213004,
+                                content:
+                                    "Haha, funny you should ask. This actually has something to do with you. Remember that photo of yours that won first place in the contest? The chairman was away at the time. Now that he's back, he's been asking everyone where to find you.",
+                                npc: 700457,
+                                next: 51213005,
+                            },
+                            {
+                                id: 51213005,
+                                content:
+                                    "Snow heard the chairman was looking for you and got it into her head that she'd collect your grand prize for you. Next thing I knew, she was charging straight into the nobles' lounge, all fired up.",
+                                npc: 700457,
+                                next: 51213006,
+                            },
+                            {
+                                id: 51213006,
+                                content:
+                                    "And I was sent straight back out! He treated me like some servant he could summon and dismiss as he pleased. Hmph! The nerve!!",
+                                npc: 700450,
+                                next: 51213007,
+                            },
+                            {
+                                id: 51213007,
+                                content: "Hey! What's so funny? You got thrown out too, remember?",
+                                npc: 700450,
+                                next: 51213008,
+                            },
+                            {
+                                id: 51213008,
+                                content: "The chairman barely even looked at Snow before sending us both away.",
+                                npc: 700457,
+                                next: 51213009,
+                            },
+                            {
+                                id: 51213009,
+                                content:
+                                    "Your great Demon King has suffered a terrible injustice! As my loyal little servants, shouldn't you be defending my honour? That man kept grilling me for ages. I was so worried I'd say the wrong thing and get you into trouble.",
+                                npc: 700450,
+                                next: 51213010,
+                            },
+                            {
+                                id: 51213010,
+                                content:
+                                    "Hngh... So this is what my Little Minion has to put up with every day. Dealing with people like that must be awful...",
+                                npc: 700450,
+                                options: [
+                                    {
+                                        id: 51213011,
+                                        content: "Tribulation is how the great Demon King grows.",
+                                        next: 51213012,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                    {
+                                        id: 51213017,
+                                        content: "You did well, Snow.",
+                                        next: 51213018,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213012,
+                                content: "Tri... what? What's that supposed to mean?",
+                                npc: 700450,
+                                next: 51213013,
+                            },
+                            {
+                                id: 51213018,
+                                content:
+                                    "You've been working hard lately, Snow. You did great today too. Even as a temporary servant, you're already showing the rest of us how it's done.",
+                                npc: 100001,
+                                next: 51213019,
+                            },
+                            {
+                                id: 51213013,
+                                content: "It means you'll become a greater, bigger, stronger Demon King.",
+                                npc: 100001,
+                                next: 51213014,
+                            },
+                            {
+                                id: 51213019,
+                                content:
+                                    "Mhm! Even if I'm only your servant for this investigation, I'll be the greatest servant ever! A Demon King excels at everything!",
+                                npc: 700450,
+                                next: 51213020,
+                            },
+                            {
+                                id: 51213014,
+                                content: "Getting picked on makes you taller? You're trying to trick me again! Lunarians don't grow!",
+                                npc: 700450,
+                                next: 51213015,
+                            },
+                            {
+                                id: 51213020,
+                                content:
+                                    "Alright, Snow, you can boast later. {nickname}, you should probably head over to the Steamwhistle Salon. Better not keep Mr Seaton waiting. Snow and I will ask around and see what else we can find. We'll catch up with you later.",
+                                npc: 700457,
+                                next: 51213021,
+                            },
+                            {
+                                id: 51213015,
+                                content:
+                                    'Strength comes in many forms. Resilience is one of them. One day, Lunarians, Charons, Solarians — everyone — will gather around you and cry, "Your Majesty!"',
+                                npc: 100001,
+                                next: 51213016,
+                            },
+                            {
+                                id: 51213021,
+                                content: "Got it.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51213016,
+                                content:
+                                    "...Is that true? If I become stronger, will everyone really follow me? Hehe... That does sound rather nice. In that case, I'll keep playing your little servant a while longer!",
+                                npc: 700450,
+                                next: 51213020,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040602,
+                name: "Enter the nobles' lounge and speak with Seaton",
+                desc: "As Snow grumbles her way through what happened, you arrive at Steamwhistle Salon. Seaton seems to have been waiting for you for quite some time.",
+                nodes: [
+                    {
+                        id: "17804128269361506229",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32190, -6990],
+                        dialogues: [
+                            {
+                                id: 51213023,
+                                content:
+                                    "Sorry to keep you waiting. I got held up at the printing house and came back later than expected.",
+                                npc: 700460,
+                                next: 51213024,
+                            },
+                            {
+                                id: 51213024,
+                                content:
+                                    "I should have been here to welcome you today and give you the good news in person... though I imagine you've already heard. Your photograph won first place in the contest.",
+                                npc: 700460,
+                                next: 51213025,
+                            },
+                            {
+                                id: 51213025,
+                                content:
+                                    "To be honest, the contest was mostly a way for us to see whether you were genuinely interested in joining the Salon — whether you had the right spirit for it. The photograph itself was never the deciding factor. You would have passed the membership trial either way.",
+                                npc: 700460,
+                                next: 51213026,
+                            },
+                            {
+                                id: 51213026,
+                                content:
+                                    "That said, you exceeded our expectations. You're not only a refined and spirited {性别:gentleman|lady}, but a remarkably talented one as well. That single photograph tells a story, and captures such a vivid sense of movement... impressive.",
+                                npc: 700460,
+                                next: 51213027,
+                            },
+                            {
+                                id: 51213027,
+                                content:
+                                    "So, I, Seaton Brutus, Chairman of the Steamwhistle Salon, formally invite you to join us. As one of our members, you would become a follower of Stationmaster Eisenbahn, standing together with the people of Bloomfield Station as we support one another.",
+                                npc: 700460,
+                                next: 51213028,
+                            },
+                            {
+                                id: 51213028,
+                                content: "What do you say?",
+                                npc: 700460,
+                                next: 51213029,
+                            },
+                            {
+                                id: 51213029,
+                                content:
+                                    "(This is getting ridiculous. I only took that photo to get the job done. How did he get all that from one picture?)",
+                                npc: 100001,
+                                next: 51213030,
+                            },
+                            {
+                                id: 51213030,
+                                content: "Ahem... the honour is mine.",
+                                npc: 100001,
+                                next: 51213031,
+                            },
+                            {
+                                id: 51213031,
+                                content: "Then welcome to the Steamwhistle Salon. Let us work together in pursuit of our ideals.",
+                                npc: 700460,
+                                next: 51213032,
+                            },
+                            {
+                                id: 51213032,
+                                content:
+                                    "Ah, yes — your attendants are not with you today, are they? We prepared a small welcome gift for each of you — three in total. Since they are absent, would you kindly accept theirs on their behalf?",
+                                npc: 700460,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040603,
+                name: "Speak with Seaton again",
+                desc: "Seaton heaps extravagant praise on your photograph, then personally presents you with the top prize from the photography contest. But it seems he has one more favour to ask. Speak with him again and see what he wants.",
+                nodes: [
+                    {
+                        id: "17804129519603010143",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32190, -6990],
+                        dialogues: [
+                            {
+                                id: 51213034,
+                                content: "Thank you.",
+                                npc: 100001,
+                                next: 51213035,
+                            },
+                            {
+                                id: 51213035,
+                                content: "Think nothing of it. You've earned it.",
+                                npc: 700460,
+                                next: 51213036,
+                            },
+                            {
+                                id: 51213036,
+                                content:
+                                    "There is one more thing I'd like to ask. Would you have time to check how the preparations for the celebration are coming along?",
+                                npc: 700460,
+                                next: 51213037,
+                            },
+                            {
+                                id: 51213037,
+                                content:
+                                    "Ah, of course — you have only just joined the Salon, so you may not know the details yet. It's quite simple: we're holding a celebration in honour of Stationmaster Eisenbahn.",
+                                npc: 700460,
+                                next: 51213038,
+                            },
+                            {
+                                id: 51213038,
+                                content:
+                                    "You must have noticed how lively Bloomfield Station has been lately. I am sure you have also heard the reason by now: the tenth anniversary of Stationmaster Eisenbahn's appointment is just around the corner.",
+                                npc: 700460,
+                                next: 51213039,
+                            },
+                            {
+                                id: 51213039,
+                                content:
+                                    "It marks the rebirth of Bloomfield Station — and, as it happens, it falls on Stationmaster Eisenbahn's birthday as well. The Steamwhistle Salon has organised a celebration, and everyone at the station is invited to take part.",
+                                npc: 700460,
+                                next: 51213040,
+                            },
+                            {
+                                id: 51213040,
+                                content: "Which brings me to my request.",
+                                npc: 700460,
+                                options: [
+                                    {
+                                        id: 51213041,
+                                        content: "Why me?",
+                                        next: 51213042,
+                                    },
+                                    {
+                                        id: 51213045,
+                                        content: "Sure, I'll take a look.",
+                                        next: 51213046,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213042,
+                                content:
+                                    "Everyone else is tied up with the lead-up events at the moment. As for me, I still have to meet the manager at the printing house... so I am afraid my hands are full as well.",
+                                npc: 700460,
+                                next: 51213043,
+                            },
+                            {
+                                id: 51213046,
+                                content:
+                                    "I would appreciate that. My apologies — you have only just joined, and I am already putting you to work.",
+                                npc: 700460,
+                                options: [
+                                    {
+                                        id: 51213048,
+                                        content: "What sort of events are there?",
+                                        next: 51213049,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213043,
+                                content:
+                                    "You remember that photograph of yours — the one that won first prize? We are using it as the main image on the celebration posters. Soon, everyone in Bloomfield Station will see your work.",
+                                npc: 700460,
+                                options: [
+                                    {
+                                        id: 51213048,
+                                        content: "What sort of events are there?",
+                                        next: 51213049,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213049,
+                                content:
+                                    "Mainly a quiz, a themed raffle, and a stage play. The first two have been under way for some time. The play should still be in rehearsal.",
+                                npc: 700460,
+                                next: 51213050,
+                            },
+                            {
+                                id: 51213050,
+                                content:
+                                    "Quite a few of our Salon members have seen more operas than they can count, and now they fancy themselves performers. Of course, once rehearsals began, most of them could barely get through a single line. I had to bring in professional performers from a theatre troupe to coach them.",
+                                npc: 700460,
+                                next: 51213051,
+                            },
+                            {
+                                id: 51213051,
+                                content:
+                                    "The quiz and raffle are being handled by the same event staff member. You'll find him in the concourse. The play rehearsals should be somewhere near the overpass.",
+                                npc: 700460,
+                                next: 51213052,
+                            },
+                            {
+                                id: 51213052,
+                                content:
+                                    "Since we still have a little time, why don't we talk? As chairman of the Steamwhistle Salon, I ought to get to know our members.",
+                                npc: 700460,
+                                next: 51213053,
+                            },
+                            {
+                                id: 51213053,
+                                content: "No need to be nervous. Just a casual chat.",
+                                npc: 700460,
+                                next: 51213054,
+                            },
+                            {
+                                id: 51213054,
+                                content:
+                                    "(Seaton keeps the conversation going with ease, moving from one topic to the next. From Icelake's municipal administration to Eisenbahn's rise to prominence, there seems to be almost nothing he cannot discuss at length.)",
+                                next: 51213055,
+                            },
+                            {
+                                id: 51213055,
+                                content:
+                                    "(Yet whenever you try to ask more about Eisenbahn himself, Seaton always sidesteps the question. Each time, a faint trace of impatience crosses his face.)",
+                                next: 51213056,
+                            },
+                            {
+                                id: 51213056,
+                                content:
+                                    "(He keeps fussing with his collar, rubbing at his nose, or spinning the pen in his hand. Those small, restless gestures make him seem distracted. Beneath his composed manner, he looks strangely detached and tired.)",
+                                next: 51213057,
+                            },
+                            {
+                                id: 51213057,
+                                content:
+                                    "(Eventually, Seaton takes his leave. You get the impression that he does not admire Eisenbahn nearly as much as he claims. At the very least, he is nowhere near as devoted to the stationmaster as Toran was.)",
+                                next: 51213058,
+                            },
+                            {
+                                id: 51213058,
+                                content:
+                                    "(With all the time he spent talking to me, he probably could've inspected the lead-up events himself.)",
+                                npc: 100001,
+                                next: 51213059,
+                            },
+                            {
+                                id: 51213059,
+                                content: "I should go and meet the manager at the printing house... I'll leave the rest to you.",
+                                npc: 700460,
+                                next: 51213060,
+                            },
+                            {
+                                id: 51213060,
+                                content:
+                                    "Oh, and take this. You're new here, so some people may not know you yet. Show them this, and you should be able to get in without anyone stopping you.",
+                                npc: 700460,
+                                next: 51213061,
+                            },
+                            {
+                                id: 51213061,
+                                content: "Good luck. I look forward to hearing how it goes.",
+                                npc: 700460,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040604,
+                name: "Leave the nobles' lounge and compare notes with Snow and Outsider",
+                desc: "The generous reward comes with another request: Seaton wants you to check on the events leading up to Stationmaster Eisenbahn's tenth anniversary celebration. Leave the lounge and discuss the request with Snow and Outsider.",
+                nodes: [
+                    {
+                        id: "17804137225865014740",
+                        type: "TalkNode",
+                        name: "开车",
+                        srId: 106001,
+                        pos: [-31420, -5500],
+                        dialogues: [
+                            {
+                                id: 51213063,
+                                content: "(I wonder how Outsider and Snow are getting on. I'd better compare notes with them.)",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804136867165013967",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-31420, -5500],
+                        dialogues: [
+                            {
+                                id: 51213065,
+                                content:
+                                    "Took you long enough. Snow and I asked around while you were busy. Turns out the station's been unusually lively lately. They're running some... odd little events.",
+                                npc: 700457,
+                                next: 51213066,
+                            },
+                            {
+                                id: 51213066,
+                                content: "That's right! Someone even tried to give me a leaflet!",
+                                npc: 700450,
+                                next: 51213067,
+                            },
+                            {
+                                id: 51213067,
+                                content: "(You tell Outsider and Snow about Seaton's request.)",
+                                next: 51213068,
+                            },
+                            {
+                                id: 51213068,
+                                content: "A quiz and a raffle? Yeah, we saw those too. Crowds were heading that way.",
+                                npc: 700457,
+                                next: 51213069,
+                            },
+                            {
+                                id: 51213069,
+                                content:
+                                    "Some people even brought their whole families. Apparently, you get free goodies just for taking part.",
+                                npc: 700457,
+                                next: 51213070,
+                            },
+                            {
+                                id: 51213070,
+                                content: "Free goodies? Then what are we waiting for?!",
+                                npc: 700450,
+                                next: 51213071,
+                            },
+                            {
+                                id: 51213071,
+                                content: "Hey. We're here to check on the lead-up events, remember? Don't get distracted.",
+                                npc: 700457,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040605,
+                name: "Head to the concourse and speak with the event staff",
+                desc: "While you were speaking with Seaton, Snow and Outsider also asked around about the celebration. Apparently, one of the events is giving out delicious treats as prizes. Follow the lead, find the event staff, take part, and see if you can win some.",
+                nodes: [
+                    {
+                        id: "17804154220376519690",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-12980, -3070],
+                        dialogues: [
+                            {
+                                id: 51213073,
+                                content: "Hello. Are you here for the Stationmaster Eisenbahn quiz, or the raffle?",
+                                npc: 700454,
+                                options: [
+                                    {
+                                        id: 51213074,
+                                        content: "Neither.",
+                                        next: 51213075,
+                                    },
+                                    {
+                                        id: 51213076,
+                                        content: "We'd like to try both.",
+                                        next: 51213077,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213075,
+                                content:
+                                    "Then what are you doing here? You're not one of those Stationmaster Eisenbahn haters here to cause trouble, are you? We don't have time for that right now. We're all busy with the celebration.",
+                                npc: 700454,
+                                next: 51213078,
+                            },
+                            {
+                                id: 51213077,
+                                content: "Then join the queue at the back. Should only be another two or three hours before your turn.",
+                                npc: 700454,
+                                next: 51213078,
+                            },
+                            {
+                                id: 51213078,
+                                content: "Right... Actually, Mr Seaton asked me to check on the preparations. He gave me this.",
+                                npc: 100001,
+                                next: 51213079,
+                            },
+                            {
+                                id: 51213079,
+                                content: "Oh! Mr Seaton sent you? Haven't seen you around before. New member?",
+                                npc: 700454,
+                                next: 51213080,
+                            },
+                            {
+                                id: 51213080,
+                                content: "Yeah. I just joined today.",
+                                npc: 100001,
+                                next: 51213081,
+                            },
+                            {
+                                id: 51213081,
+                                content:
+                                    "Is that so...? Then Mr Seaton must think highly of you. Newcomers don't usually get important errands like this.",
+                                npc: 700454,
+                                next: 51213082,
+                            },
+                            {
+                                id: 51213082,
+                                content: "(...What's so important about this? Isn't this just one of the lead-up events?)",
+                                npc: 100001,
+                                next: 51213083,
+                            },
+                            {
+                                id: 51213083,
+                                content:
+                                    "Well, if Mr Seaton trusts you, that's good enough for me. As for the events, everything's running smoothly. The quiz is doing a fine job of spreading the word already.",
+                                npc: 700454,
+                                next: 51213084,
+                            },
+                            {
+                                id: 51213084,
+                                content:
+                                    "Just as expected, it's drawn in plenty of people with time to spare. Exactly the sort who'll spread it around fast. Everything's going according to Mr Seaton's plan.",
+                                npc: 700454,
+                                next: 51213085,
+                            },
+                            {
+                                id: 51213085,
+                                content:
+                                    "Before long, all of Bloomfield Station will be talking about how Stationmaster Eisenbahn worked late into the night to receive those visiting foreign merchants... And your photograph has helped more than you might think.",
+                                npc: 700454,
+                                next: 51213086,
+                            },
+                            {
+                                id: 51213086,
+                                content: "You know about that? Well, I guess news travels fast.",
+                                npc: 100001,
+                                next: 51213087,
+                            },
+                            {
+                                id: 51213087,
+                                content:
+                                    "Of course. I didn't recognise your face, but once you said you were the new member who'd won the chairman's trust, it all clicked.",
+                                npc: 700454,
+                                next: 51213088,
+                            },
+                            {
+                                id: 51213088,
+                                content: "That photograph was fantastic! Keep it up. Take a few more when you get the chance.",
+                                npc: 700454,
+                                next: 51213089,
+                            },
+                            {
+                                id: 51213089,
+                                content: "Um... about those goodies...",
+                                npc: 100402,
+                                next: 51213090,
+                            },
+                            {
+                                id: 51213090,
+                                content:
+                                    "Oh, you're after those too? Sure. Here, take the whole crate. Just remember to put in a good word for me with Mr Seaton. Tell him I've been working hard. Once this is all over, I ought to be getting a bigger cut!",
+                                npc: 700454,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040606,
+                name: "Talk with Snow and Outsider about the next steps",
+                desc: "You receive a surprisingly generous prize. Connections really do open doors. Talk to Outsider and Snow about what to do next.",
+                nodes: [
+                    {
+                        id: "17804164294298024034",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-31420, -5500],
+                        dialogues: [
+                            {
+                                id: 51213092,
+                                content: "How'd you manage to walk away with this much? That's a whole crate.",
+                                npc: 700457,
+                                next: 51213093,
+                            },
+                            {
+                                id: 51213093,
+                                content:
+                                    "So this is what connections can do? Amazing! The power of influence! We didn't even do anything. My Little Minion only talked to him for a moment, and he gave us the whole crate. Little Minion, you're incredible!",
+                                npc: 700450,
+                                next: 51213094,
+                            },
+                            {
+                                id: 51213094,
+                                content:
+                                    "When we get back, I'm asking Camilla to cook them every way she can. I'm going to enjoy every single one!",
+                                npc: 700450,
+                                next: 51213095,
+                            },
+                            {
+                                id: 51213095,
+                                content:
+                                    "I bet you'll be excited for about two minutes, then get bored and start asking for something else.",
+                                npc: 700457,
+                                next: 51213096,
+                            },
+                            {
+                                id: 51213096,
+                                content:
+                                    "Right, before Snow completely derails us — there was another event, wasn't there? Some kind of stage rehearsal?",
+                                npc: 700457,
+                                next: 51213097,
+                            },
+                            {
+                                id: 51213097,
+                                content: "They said it was near the overpass.",
+                                npc: 100001,
+                                next: 51213098,
+                            },
+                            {
+                                id: 51213098,
+                                content: "Then we'd better get moving before rehearsals are over.",
+                                npc: 700457,
+                                next: 51213099,
+                            },
+                            {
+                                id: 51213099,
+                                content:
+                                    "I heard what the guy running the quiz and raffle said, too. We should get over there before they realise someone's poking around. No point giving them time to cover their tracks.",
+                                npc: 700457,
+                                next: 51213100,
+                            },
+                            {
+                                id: 51213100,
+                                content:
+                                    "Let's keep an ear out. If they're rehearsing, they won't exactly be quiet. Somewhere enclosed, with music coming from inside... that's probably what we're after.",
+                                npc: 700457,
+                                next: 51213101,
+                            },
+                            {
+                                id: 51213101,
+                                content:
+                                    "Though the soundproofing around here is pretty good. Hard to tell much from outside. Listen carefully and make sure we don't go into the wrong room.",
+                                npc: 700457,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040607,
+                name: "Search the overpass for the rehearsal venue",
+                desc: "Seaton never actually told you where the play rehearsal is being held. You may have to search the overpass yourselves.",
+                nodes: [
+                    {
+                        id: "17809025659893170",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        next: ["17809026938035217", "17809026938035216"],
+                        dialogues: [
+                            {
+                                id: 51213106,
+                                content: "So what if I like commoners' food? If you think it's that filthy, then don't kiss me!",
+                                npc: 700455,
+                                next: 51213107,
+                            },
+                            {
+                                id: 51213107,
+                                content:
+                                    "I'm not saying you can't eat it. I'm just asking you to brush your teeth afterwards. I really can't—",
+                                npc: 700456,
+                                next: 51213108,
+                            },
+                            {
+                                id: 51213108,
+                                content: "...Who are you?",
+                                npc: 700455,
+                                next: 51213109,
+                            },
+                            {
+                                id: 51213109,
+                                content: "Sorry. Wrong place.",
+                                npc: 700457,
+                                next: 51213110,
+                            },
+                            {
+                                id: 51213110,
+                                content: "(Outsider clamps a hand over Snow's mouth and drags her away from the arguing couple.)",
+                                next: 51213111,
+                            },
+                            {
+                                id: 51213111,
+                                content:
+                                    "Why would a couple fight over something so silly...? Still, you should brush your teeth after eating, shouldn't you? Outsider, don't forget that! Especially if you ever want a girlfriend—",
+                                npc: 700450,
+                                next: 51213112,
+                            },
+                            {
+                                id: 51213112,
+                                content: "Whoa, whoa, whoa. Leave my love life out of this.",
+                                npc: 700457,
+                                next: 51213113,
+                            },
+                            {
+                                id: 51213113,
+                                content: "Come on, let's keep looking. At least we've ruled this place out.",
+                                npc: 700457,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809025659893171",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        dialogues: [
+                            {
+                                id: 51213103,
+                                content: "Ooh, I hear something up ahead! Let's go see!",
+                                npc: 700450,
+                                next: 51213104,
+                            },
+                            {
+                                id: 51213104,
+                                content: "Wait, Snow. That's definitely not—",
+                                npc: 700457,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809026938035217",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        next: ["17809027454876886"],
+                        dialogues: [
+                            {
+                                id: 51213119,
+                                content: "Hellooo~ Snow's here! And she brought Outsider and {nickname} with her~",
+                                npc: 700450,
+                                next: 51213121,
+                            },
+                            {
+                                id: 51213121,
+                                content:
+                                    "So that's where the music was coming from. Guess this isn't the place either. Let's go. And Snow — don't touch it.",
+                                npc: 700457,
+                                next: 51213122,
+                            },
+                            {
+                                id: 51213122,
+                                content:
+                                    "But it was just sitting there on the floor. Doesn't that mean nobody wants it anymore? Camilla said she wanted a new radio. If I bring this back, she'll be so happy... and she'll tell me I did a good job!",
+                                npc: 700450,
+                                next: 51213123,
+                            },
+                            {
+                                id: 51213123,
+                                content:
+                                    "I'm sure The Asphodel can afford a new radio. Camilla just likes saving money where she can. Besides, it's not much of a gift if you're giving her something you found on the floor.",
+                                npc: 700457,
+                                next: 51213124,
+                            },
+                            {
+                                id: 51213124,
+                                content:
+                                    "And for all we know, it could be a trap. A radio tucked behind a notice board is suspicious enough already.",
+                                npc: 700457,
+                                next: 51213125,
+                            },
+                            {
+                                id: 51213125,
+                                content: "Fine... But it looks so pretty... Can I buy one someday too?",
+                                npc: 700450,
+                                next: 51213126,
+                            },
+                            {
+                                id: 51213126,
+                                content: "That's up to {nickname}, not me. So, {nickname}, are you buying Snow a radio?",
+                                npc: 700457,
+                                options: [
+                                    {
+                                        id: 51213127,
+                                        content: "If Snow likes it that much, we can get one later.",
+                                        next: 51213128,
+                                    },
+                                    {
+                                        id: 51213129,
+                                        content: "Could you buy one for me, Snow?",
+                                        next: 51213130,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213128,
+                                content: "Little Minion... I knew you were the best!",
+                                npc: 700450,
+                                next: 51213133,
+                            },
+                            {
+                                id: 51213130,
+                                content:
+                                    "B—But I don't have any money! Besides, Little Minion, you've still got all those cheques, haven't you? There's no way you've spent them all already.",
+                                npc: 700450,
+                                next: 51213131,
+                            },
+                            {
+                                id: 51213133,
+                                content: "Not this one either... Let's keep looking.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51213131,
+                                content:
+                                    "You're the boss, and I'm your loyal little minion. Since when does a Demon King mooch off her own servants? Shouldn't it be the other way around?",
+                                npc: 100001,
+                                next: 51213132,
+                            },
+                            {
+                                id: 51213132,
+                                content:
+                                    "Uh... That actually makes sense. Then I'll work hard, save up lots of money, and take care of my Little Minion!",
+                                npc: 700450,
+                                next: 51213133,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809026938035216",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        dialogues: [
+                            {
+                                id: 51213115,
+                                content: "Hello? Anyone there? We're looking for the stage rehearsal. Is this the place?",
+                                npc: 700457,
+                                next: 51213117,
+                            },
+                            {
+                                id: 51213117,
+                                content: "Weird. I could've sworn the music was coming from here. Maybe they didn't hear me?",
+                                npc: 700457,
+                                next: 51213118,
+                            },
+                            {
+                                id: 51213118,
+                                content: "Then let's go take a look!",
+                                npc: 700450,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809027454876886",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        next: ["1782198002031986"],
+                        dialogues: [
+                            {
+                                id: 51213135,
+                                content:
+                                    "Sounds like we've found it, {nickname}. You take the lead. Snow and I will be right behind you, playing the loyal servants.",
+                                npc: 700457,
+                                next: 51213136,
+                            },
+                            {
+                                id: 51213136,
+                                content:
+                                    "That's right! Little Minion, is this your first time having servants of your very own? Are you nervous? Would you like a few tips?",
+                                npc: 700450,
+                                next: 51213137,
+                            },
+                            {
+                                id: 51213137,
+                                content: "First, chin up, and make everyone look up to you—",
+                                npc: 700450,
+                                next: 51213138,
+                            },
+                            {
+                                id: 51213138,
+                                content:
+                                    "So that's how you think you usually carry yourself? Sorry, Snow, but we're a bit too tall to play along. From up here, we can't even see your chin — just the horns.",
+                                npc: 700457,
+                                next: 51213139,
+                            },
+                            {
+                                id: 51213139,
+                                content:
+                                    "...How rude! But we have something important to do here, so I'll let you off this time, Outsider!",
+                                npc: 700450,
+                                next: 51213140,
+                            },
+                            {
+                                id: 51213140,
+                                content:
+                                    "Look at that. Snow's actually taking this seriously. Go on, {nickname}. If we're doing this, let's do it properly. Just don't give the game away in there.",
+                                npc: 700457,
+                                next: 51213142,
+                            },
+                            {
+                                id: 51213142,
+                                content:
+                                    "Behold! An enemy has strayed into the eye of the raging storm. From far beyond the horizon, a song of triumph rings out. The steam whistle sings clear... and calls for—",
+                                npc: 700458,
+                                next: 51213143,
+                            },
+                            {
+                                id: 51213143,
+                                content: "A performance fit to shake the heavens!",
+                                npc: 700458,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1782198002031986",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25330, 14220],
+                        dialogues: [
+                            {
+                                id: 51213145,
+                                content: "Oh? Not bad. You've got some skill. Even so, I can't let you in.",
+                                npc: 700458,
+                                next: 51213146,
+                            },
+                            {
+                                id: 51213146,
+                                content:
+                                    "Honestly, how do you fans always find out so quickly...? Here. A special autograph, just for you. Happy now? The troupe isn't seeing visitors today. We have something important to prepare.",
+                                npc: 700458,
+                                next: 51213147,
+                            },
+                            {
+                                id: 51213147,
+                                content: "...",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 51213148,
+                                        content: "Give her your own autograph.",
+                                        next: 51213149,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                    {
+                                        id: 51213153,
+                                        content: "Hand over the pen and paper. Never turn down a free autograph.",
+                                        next: 51213154,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 51213159,
+                                        content: "Decline the autograph and explain why you are here.",
+                                        next: 51213160,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213149,
+                                content:
+                                    "...Why are you giving me this? You're not even a celebrity— Wait. {nickname}!? You're the Phoxhunter people have been talking about, aren't you?",
+                                npc: 700458,
+                                next: 51213150,
+                            },
+                            {
+                                id: 51213154,
+                                content: "There. Now please leave us alone.",
+                                npc: 700458,
+                                next: 51213155,
+                            },
+                            {
+                                id: 51213160,
+                                content:
+                                    "Ah... So you're not one of my admirers after all. Sorry. Fans keep turning up here looking for me, and it's been interrupting rehearsals. I thought you were here for the same reason.",
+                                npc: 700458,
+                                next: 51213161,
+                            },
+                            {
+                                id: 51213150,
+                                content:
+                                    '"Never did I dream that the star I admired from afar would one day fall outside my window!" Oh dear, oh dear... I wasn\'t ready for this at all. Is my dress sitting properly? Do I look presentable?',
+                                npc: 700458,
+                                next: 51213151,
+                            },
+                            {
+                                id: 51213155,
+                                content: "Thank you... Though, what exactly does this say?",
+                                npc: 100001,
+                                next: 51213156,
+                            },
+                            {
+                                id: 51213161,
+                                content:
+                                    "Hello. I'm Arcia Hall, a performer with the Magic Flute Troupe. The Steamwhistle Salon has hired me as a drama consultant for the time being.",
+                                npc: 700458,
+                                next: 51213162,
+                            },
+                            {
+                                id: 51213151,
+                                content:
+                                    "I've always wanted to become a Phoxhunter myself. Unfortunately, I have no talent for combat. I doubt I could even beat a Rottbird. Thank you for giving me your autograph! I'll treasure it forever.",
+                                npc: 700458,
+                                next: 51213152,
+                            },
+                            {
+                                id: 51213156,
+                                content:
+                                    "Arcia! Arcia Hall! If you don't even know who I am, why were you looking for me in the first place? ...Wait. Don't tell me you weren't here for me at all.",
+                                npc: 700458,
+                                next: 51213157,
+                            },
+                            {
+                                id: 51213162,
+                                content:
+                                    "How can I help you? Hmm... If you're here to meet someone, you can wait nearby. Today's rehearsal is nearly over.",
+                                npc: 700458,
+                                next: 51213163,
+                            },
+                            {
+                                id: 51213152,
+                                content: "What a pleasant surprise... I never expected you to come all this way to watch our rehearsal.",
+                                npc: 700458,
+                                next: 51213161,
+                            },
+                            {
+                                id: 51213157,
+                                content: "I'm here for work.",
+                                npc: 100001,
+                                next: 51213158,
+                            },
+                            {
+                                id: 51213163,
+                                content: "Could I take a look?",
+                                npc: 100001,
+                                next: 51213164,
+                            },
+                            {
+                                id: 51213158,
+                                content:
+                                    "Oh dear... My apologies for being so rude earlier. Fans keep turning up here looking for me, and it's been disrupting rehearsals. I assumed you were one of them.",
+                                npc: 700458,
+                                next: 51213161,
+                            },
+                            {
+                                id: 51213164,
+                                content:
+                                    "I'm afraid not. The chairman of the Steamwhistle Salon specifically instructed us to keep everything confidential until the performance. I have to follow those instructions. Otherwise, I might not get paid, and all my work would be for nothing.",
+                                npc: 700458,
+                                next: 51213165,
+                            },
+                            {
+                                id: 51213165,
+                                content:
+                                    "I'm with the Steamwhistle Salon too. Mr Seaton asked me to check on the rehearsal's progress on his behalf. He's busy and can't come in person.",
+                                npc: 100001,
+                                next: 51213166,
+                            },
+                            {
+                                id: 51213166,
+                                content:
+                                    "I'm sorry, but I still can't let you in. I've never seen you here before, so I can't simply take your word for it.",
+                                npc: 700458,
+                                options: [
+                                    {
+                                        id: 51213167,
+                                        content: "Show the Salon token.",
+                                        next: 51213168,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51213168,
+                                content: "Oh, so you're the person in charge! I didn't expect you to be so young. Please, come with me.",
+                                npc: 700458,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040612,
+                name: "Speak with the two bickering young men",
+                desc: "Thanks to Arcia, you finally find the rehearsal venue — only to arrive in the middle of an argument. Speak with the two bickering young men and find out what is going on.",
+                nodes: [
+                    {
+                        id: "17804846466864534020",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-26070, 17150],
+                        dialogues: [
+                            {
+                                id: 51213170,
+                                content:
+                                    "Even Miss Arcia says it's fine. What are you still trying to stop? Could you, for once, stop making everything harder than it needs to be? Since when did you become a knight in shining armour?",
+                                npc: 700462,
+                                next: 51213171,
+                            },
+                            {
+                                id: 51213171,
+                                content:
+                                    "I am worried about Miss Arcia. But I'm even more worried about everyone's safety. Do the props really have to be real guns?",
+                                npc: 700461,
+                                next: 51213172,
+                            },
+                            {
+                                id: 51213172,
+                                content:
+                                    "I'll pay the carpenter extra. We can make the replicas look convincing enough... Will you please stop obsessing over the props?",
+                                npc: 700461,
+                                next: 51213173,
+                            },
+                            {
+                                id: 51213173,
+                                content:
+                                    "Didn't Mr Seaton say the more realistic, the better? We've got the money. We can get whatever we need, real guns included. This isn't the time to show Miss Arcia what a gentleman you are!",
+                                npc: 700462,
+                                next: 51213174,
+                            },
+                            {
+                                id: 51213174,
+                                content:
+                                    "We won't be pointing a gun at an empty seat that day. Stationmaster Eisenbahn himself will be sitting there. You're not seriously planning to follow Mr Seaton's instructions and— Actually... maybe we should call the whole thing off. We could all be dead on the spot if this goes wrong.",
+                                npc: 700461,
+                                next: 51213175,
+                            },
+                            {
+                                id: 51213175,
+                                content:
+                                    "We've come this far, and now you want out? You think you can just walk away at this point? Don't be naive. Mr Seaton may not be as cold and calculating as Eisenbahn, but he's watching us too.",
+                                npc: 700462,
+                                next: 51213176,
+                            },
+                            {
+                                id: 51213176,
+                                content:
+                                    "What's going on? What's gotten into you two today? You've been arguing nonstop. Still fighting over whether the prop should be a real gun? Break it up. Mr Seaton sent someone to inspect your rehearsal.",
+                                npc: 700458,
+                                next: 51213177,
+                            },
+                            {
+                                id: 51213177,
+                                content:
+                                    "We're not arguing. Not at all. We're just getting into character. Ready for inspection at any time!",
+                                npc: 700462,
+                                next: 51213178,
+                            },
+                            {
+                                id: 51213178,
+                                content:
+                                    "Ah, Eisenbahn — our hero! He walks with generosity at his side and shines with the radiance of justice! I know you have never approved of my ideals, but... I have long since come to understand you.",
+                                npc: 700462,
+                                next: 51213179,
+                            },
+                            {
+                                id: 51213179,
+                                content:
+                                    "The storm will pass. Even the longest night must one day give way. And the railway shall stretch forth like golden threads spun from the sun itself, linking Icelake and Dismania.",
+                                npc: 700462,
+                                next: 51213180,
+                            },
+                            {
+                                id: 51213180,
+                                content:
+                                    "And so I curse that storm — that howling, formless beast that holds all things back. Into these three bullets, I pour all my hatred.",
+                                npc: 700462,
+                                next: 51213181,
+                            },
+                            {
+                                id: 51213181,
+                                content: "And in the end... I shall become the sun that scatters it—",
+                                npc: 700462,
+                                next: 51213182,
+                            },
+                            {
+                                id: 51213182,
+                                content:
+                                    "(...What is he even talking about? Did he get too deep into character? Why does this place have so many theatre nuts?)",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040613,
+                name: "Defeat the performer caught up in the performance",
+                desc: "The enraged young man mistakes you for his rival in the play and decides to test your skills.",
+                nodes: [
+                    {
+                        id: "1782197711479674",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25860, 17150],
+                        dialogues: [
+                            {
+                                id: 51213184,
+                                content: "Hmph. Not bad. Honestly, I think you'd make a better scene partner than Kieran.",
+                                npc: 700462,
+                                next: 51213185,
+                            },
+                            {
+                                id: 51213185,
+                                content:
+                                    "Seriously...? Sorry about that. Theatre people can be like this. Once we get carried away, we start playing opposite whoever happens to be standing there. He was playing the former Stationmaster of Bloomfield Station, so I suppose he cast you as the current one for the scene.",
+                                npc: 700461,
+                                next: 51213186,
+                            },
+                            {
+                                id: 51213186,
+                                content:
+                                    "Arcia, would you mind introducing us? You said this {性别:gentleman|lady} was sent by Mr Seaton to inspect our progress?",
+                                npc: 700461,
+                                next: 51213187,
+                            },
+                            {
+                                id: 51213187,
+                                content:
+                                    "You're here earlier than I expected. Sorry for the spectacle. I'm Kieran, and the hot-headed one over there is Levi. Since you're with the Salon, I doubt we need much of an introduction.",
+                                npc: 700461,
+                                next: 51213188,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040616,
+                name: "Return to the nobles' lounge and speak with Seaton",
+                desc: "You have checked on the quiz, the themed raffle, and the rehearsal for Seaton, but you still cannot shake the feeling that something is wrong. Return to Steamwhistle Salon and tell Seaton what you found.",
+                nodes: [
+                    {
+                        id: "17804852955039055191",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32190, -6990],
+                        dialogues: [
+                            {
+                                id: 51213224,
+                                content: "Back so soon? I thought you would take a little longer.",
+                                npc: 700460,
+                                next: 51213225,
+                            },
+                            {
+                                id: 51213225,
+                                content: "(You fill Seaton in on what you discovered.)",
+                                next: 51213226,
+                            },
+                            {
+                                id: 51213226,
+                                content: "Hmm. Everyone is ready... Very good. I am ready as well.",
+                                npc: 700460,
+                                next: 51213227,
+                            },
+                            {
+                                id: 51213227,
+                                content:
+                                    "The Steamwhistle Salon really is serious about this gift for the stationmaster, huh? Feels like everyone has put their heart into preparing it.",
+                                npc: 100001,
+                                next: 51213228,
+                            },
+                            {
+                                id: 51213228,
+                                content:
+                                    "A celebration like this is exactly what everyone has been hoping for. Opportunities like this are rare. We cannot afford to waste one when it comes.",
+                                npc: 700460,
+                                next: 51213229,
+                            },
+                            {
+                                id: 51213229,
+                                content: "Thank you. The Steamwhistle Salon appreciates your efforts.",
+                                npc: 700460,
+                                next: 51213230,
+                            },
+                            {
+                                id: 51213230,
+                                content:
+                                    "(Seaton turns to leave the lounge. As he pushes the door open, he seems to mutter something under his breath... but you are too far away to catch it.)",
+                                next: 51213231,
+                            },
+                            {
+                                id: 51213231,
+                                content: "What was that?",
+                                npc: 100001,
+                                next: 51213232,
+                            },
+                            {
+                                id: 51213232,
+                                content: "He said... Um...",
+                                npc: 700450,
+                                next: 51213233,
+                            },
+                            {
+                                id: 51213233,
+                                content: "What's wrong, Snow? You're acting weird.",
+                                npc: 100001,
+                                next: 51213234,
+                            },
+                            {
+                                id: 51213234,
+                                content: "Button Mushroom probably got startled by what Seaton said. I heard it too. He said...",
+                                npc: 700457,
+                                next: 51213235,
+                            },
+                            {
+                                id: 51213235,
+                                content: '"To a soldier, his weapon is life itself. It is proof of my loyalty to the stationmaster."',
+                                npc: 700457,
+                                next: 51213236,
+                            },
+                            {
+                                id: 51213236,
+                                content: '"In return, please reward me... with your heart."',
+                                npc: 700457,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 200407,
+        quests: [
+            {
+                id: 20040700,
+                name: "",
+                nodes: [
+                    {
+                        id: "178062924055212129936",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 51214001,
+                                content: "There you are! Hurry — come with me to the Salon.",
+                                npc: 700398,
+                                next: 51214002,
+                            },
+                            {
+                                id: 51214002,
+                                content:
+                                    "Easy. Whatever this is, try using your words before grabbing {性别:milord|milady} by the wrist. Let go, or I stop being nice.",
+                                npc: 100401,
+                                next: 51214003,
+                            },
+                            {
+                                id: 51214003,
+                                content:
+                                    "Ah! Sorry... I was in such a rush, I forgot to explain. It's about the photography contest — or rather, your photograph. There's been a problem with the photo you took, and it's causing quite a stir.",
+                                npc: 700398,
+                                next: 51214004,
+                            },
+                            {
+                                id: 51214004,
+                                content: "Mr Seaton asked me to bring you in. He'd like to speak with you directly.",
+                                npc: 700398,
+                                next: 51214005,
+                            },
+                            {
+                                id: 51214005,
+                                content: "I'll be right there.",
+                                npc: 100001,
+                                next: 51214006,
+                            },
+                            {
+                                id: 51214006,
+                                content: "Alright... I'll let Mr Seaton know.",
+                                npc: 700398,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040701,
+                name: "Head to the nobles' lounge and speak with Seaton",
+                desc: "Toran rushes over and asks you to come to the Salon. Apparently, there's a problem with the photograph you took. Head to the nobles' lounge, where the Steamwhistle Salon is based, and speak with Seaton to find out what's going on.",
+                nodes: [
+                    {
+                        id: "17798655834755419",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32191, -7000],
+                        dialogues: [
+                            {
+                                id: 51214008,
+                                content: "They're the ones who picked that photo. What problem could they possibly have with it now?",
+                                npc: 100401,
+                                next: 51214009,
+                            },
+                            {
+                                id: 51214009,
+                                content:
+                                    "I knew something felt off... Maybe they stirred this up themselves. We'll ask around later, see what shakes loose.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17798656139715749",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32191, -7000],
+                        dialogues: [
+                            {
+                                id: 51214011,
+                                content: "They're not trying to take your prize back, are they!?",
+                                npc: 100402,
+                                next: 51214012,
+                            },
+                            {
+                                id: 51214012,
+                                content:
+                                    "The nerve! We are not handing it back. Little Minion, stand your ground! A prize won by my minion belongs to my minion, and no one gets to take it away! I'll protect you!",
+                                npc: 100402,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17798656987026906",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32191, -7000],
+                        next: ["17798655834755419", "17798656139715749", "17798692068108019"],
+                        dialogues: [
+                            {
+                                id: 51214014,
+                                content:
+                                    "Ah, you've arrived. I'm afraid I must ask another favour of you. But first, please take a look at this poster.",
+                                npc: 700400,
+                                next: 51214016,
+                            },
+                            {
+                                id: 51214016,
+                                content: "What's this? A poster...? Let's see.",
+                                npc: 100001,
+                                next: 51214017,
+                            },
+                            {
+                                id: 51214017,
+                                content:
+                                    '"Eisenbahn\'s Crimes Laid Bare! Suspected of Smuggling for Personal Gain! Unfit to Serve as Stationmaster!"',
+                                npc: 100001,
+                                next: 51214018,
+                            },
+                            {
+                                id: 51214018,
+                                content: "Wait. Isn't that the photo I took?",
+                                npc: 100001,
+                                next: 51214019,
+                            },
+                            {
+                                id: 51214019,
+                                content:
+                                    "Indeed. In hindsight, the photograph does lend itself to certain unfortunate interpretations. Phoxichor is military property; any shipment of it would ordinarily be transported under military escort. Without that context, I can see how some people might have drawn the wrong conclusion.",
+                                npc: 700400,
+                                next: 51214020,
+                            },
+                            {
+                                id: 51214020,
+                                content:
+                                    "The photograph has set the whole station talking. I would like you to act on behalf of both myself and the Steamwhistle Salon, and help settle these rumours before they spread any further.",
+                                npc: 700400,
+                                next: 51214021,
+                            },
+                            {
+                                id: 51214021,
+                                content:
+                                    "The tenth-anniversary celebrations are almost upon us. They should be a joyous occasion for everyone. The Salon merely wished to enliven the festivities and pay tribute to Stationmaster Eisenbahn. We had no intention of causing him embarrassment.",
+                                npc: 700400,
+                                next: 51214022,
+                            },
+                            {
+                                id: 51214022,
+                                content:
+                                    "Let me get this straight. You picked my photograph for your event, people started calling it evidence of Eisenbahn's crime, and now that it's caused trouble, you want me to clean up the mess?",
+                                npc: 100001,
+                                next: 51214023,
+                            },
+                            {
+                                id: 51214023,
+                                content:
+                                    "No, no. Nothing of the kind. Everyone in the Steamwhistle Salon recognises the merit of your work. It won first prize fairly, and by unanimous decision.",
+                                npc: 700400,
+                                next: 51214024,
+                            },
+                            {
+                                id: 51214024,
+                                content:
+                                    "If anything, perhaps its striking composition drew our attention away from certain details in the frame. That fault would be ours, not yours.",
+                                npc: 700400,
+                                next: 51214025,
+                            },
+                            {
+                                id: 51214025,
+                                content: "You proved yourself more than capable last time. We all have complete confidence in you.",
+                                npc: 700400,
+                                next: 51214026,
+                            },
+                            {
+                                id: 51214026,
+                                content: "...What exactly do you need me to do?",
+                                npc: 100001,
+                                next: 51214027,
+                            },
+                            {
+                                id: 51214027,
+                                content:
+                                    "I need you to deal with those spreading the rumours. At a time like this, we cannot afford further complications. If this were to reach Stationmaster Eisenbahn... the consequences would be most unfortunate.",
+                                npc: 700400,
+                                next: 51214028,
+                            },
+                            {
+                                id: 51214028,
+                                content: "To cause Stationmaster Eisenbahn even the slightest displeasure would be unforgivable.",
+                                npc: 700400,
+                                next: 51214029,
+                            },
+                            {
+                                id: 51214029,
+                                content:
+                                    "And while you are at it, I would like you to take the measure of public opinion around the station. Find out what people make of this rumour, then report back to me.",
+                                npc: 700400,
+                                options: [
+                                    {
+                                        id: 51214030,
+                                        content: "Fine. What do I get in return?",
+                                        next: 51214031,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214031,
+                                content: "The answers you are looking for. I would not send you on an errand without compensation.",
+                                npc: 700400,
+                                next: 51214032,
+                            },
+                            {
+                                id: 51214032,
+                                content: "You know what I'm looking for?",
+                                npc: 100001,
+                                next: 51214033,
+                            },
+                            {
+                                id: 51214033,
+                                content:
+                                    "Naturally... The inner circle of the Steamwhistle Salon was founded by people seeking the very same thing.",
+                                npc: 700400,
+                                next: 51214034,
+                            },
+                            {
+                                id: 51214034,
+                                content: "Go on, newcomer. I have every faith you will handle this beautifully.",
+                                npc: 700400,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17798692068108019",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32191, -7000],
+                        dialogues: [
+                            {
+                                id: 51214036,
+                                content: "Hey, you're back. What did Seaton want this time?",
+                                npc: 100401,
+                                next: 51214037,
+                            },
+                            {
+                                id: 51214037,
+                                content:
+                                    "Does he ever do anything besides dump work on you? The Steamwhistle Salon has dozens of members, so why can't he send them? Are they all just there for show?",
+                                npc: 100402,
+                                next: 51214038,
+                            },
+                            {
+                                id: 51214038,
+                                content:
+                                    "Little Minion, don't let him boss you around! Camilla taught me this: when someone tries to make you do something you don't like, you stand up straight and say \"no\"!",
+                                npc: 100402,
+                                next: 51214039,
+                            },
+                            {
+                                id: 51214039,
+                                content: "(You explain Seaton's request to Snow and Outsider.)",
+                                next: 51214040,
+                            },
+                            {
+                                id: 51214040,
+                                content:
+                                    "...What was he getting at with that last bit? The staff at the quiz and raffle had that same tone.",
+                                npc: 100401,
+                                next: 51214041,
+                            },
+                            {
+                                id: 51214041,
+                                content: "It's almost like they think you're already in on something...",
+                                npc: 100401,
+                                next: 51214042,
+                            },
+                            {
+                                id: 51214042,
+                                content:
+                                    "What do you mean, \"getting at\"? He was baiting you, obviously! Hmph. Empty promises, that's all. Be careful, Little Minion. You're about to get OTSD!",
+                                npc: 100402,
+                                next: 51214043,
+                            },
+                            {
+                                id: 51214043,
+                                content: "...About to get what?",
+                                npc: 100001,
+                                next: 51214044,
+                            },
+                            {
+                                id: 51214044,
+                                content:
+                                    "Outsidered! It's when Outsider talks you out of your ice cream with a lot of pretty words, and somehow makes you think you got the better deal. Then Camilla explains it to you later, and boom — you realise you were tricked all along!",
+                                npc: 100402,
+                                next: 51214045,
+                            },
+                            {
+                                id: 51214045,
+                                content: "Hey, I made it up to you, didn't I? One ice cream for three popsicles. That's a good deal.",
+                                npc: 100401,
+                                next: 51214046,
+                            },
+                            {
+                                id: 51214046,
+                                content:
+                                    "Hmph! The ice cream and the three popsicles should all have been mine in the first place! I was still one ice cream short!",
+                                npc: 100402,
+                                next: 51214047,
+                            },
+                            {
+                                id: 51214047,
+                                content:
+                                    "Let's start with the passenger area. You get all sorts passing through there, so we'll hear a bit of everything.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040702,
+                name: "Head to the passenger area and speak with the passengers",
+                desc: "Speak with passengers in the passenger area to find out what they think of the photograph.",
+                nodes: [
+                    {
+                        id: "177988305818611715021",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-31103, -806],
+                        next: ["17800415443431483869", "17800437873877392044"],
+                        dialogues: [
+                            {
+                                id: 51214062,
+                                content: "What happened?",
+                                npc: 100001,
+                                next: 51214063,
+                            },
+                            {
+                                id: 51214063,
+                                content:
+                                    'Didn\'t you get one of those leaflets? The ones with "Tenth Anniversary Celebration" printed in big letters across the front.',
+                                npc: 700465,
+                                next: 51214064,
+                            },
+                            {
+                                id: 51214064,
+                                content:
+                                    "Funny, isn't it? Eisenbahn spent years building that fine reputation of his, and in the end, his own worshippers brought him down. Serves him right.",
+                                npc: 700465,
+                                options: [
+                                    {
+                                        id: 51214065,
+                                        content: "Why do you hate Eisenbahn?",
+                                        next: 51214066,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214066,
+                                content: "Every worker hates him! That bastard is rotten to the core!",
+                                npc: 700465,
+                                next: 51214067,
+                            },
+                            {
+                                id: 51214067,
+                                content:
+                                    "Eisenbahn denied treatment to sick workers. He took what we earned, and when we needed help, he left us to die!",
+                                npc: 700465,
+                                next: 51214068,
+                            },
+                            {
+                                id: 51214068,
+                                content:
+                                    "My daughter... A length of rebar went straight through her arm, right here at the station. The wound festered, and she died in agony.",
+                                npc: 700465,
+                                next: 51214069,
+                            },
+                            {
+                                id: 51214069,
+                                content:
+                                    '"Treating her and letting her live would only be a waste of food." That\'s what they said. To Bloomfield Station, workers were no different from bolts and screws. Once we rusted, they threw us out and replaced us.',
+                                npc: 700465,
+                                next: 51214070,
+                            },
+                            {
+                                id: 51214070,
+                                content:
+                                    "But my daughter was a person! A living, breathing person! Vivian... she was named Model Child Worker again and again. She was still so young...",
+                                npc: 700465,
+                                next: 51214071,
+                            },
+                            {
+                                id: 51214071,
+                                content: "(The woman covers her face and slowly sinks to the ground, her voice breaking into sobs.)",
+                            },
+                        ],
+                    },
+                    {
+                        id: "177988304017511714591",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-29953, -666],
+                        next: ["17800415155751483369", "17800437873877392044"],
+                        dialogues: [
+                            {
+                                id: 51214051,
+                                content: "What happened?",
+                                npc: 100001,
+                                next: 51214052,
+                            },
+                            {
+                                id: 51214052,
+                                content:
+                                    "You haven't heard? Eisenbahn was smuggling Phoxichor. It's right there in the photo. You don't really think he just happened to be passing by, do you?",
+                                npc: 700464,
+                                next: 51214053,
+                            },
+                            {
+                                id: 51214053,
+                                content:
+                                    "I used to dream of joining the Steamwhistle Salon myself. I thought everything Eisenbahn did was for the good of the station. Even when his methods were harsh, I told myself there had to be a reason.",
+                                npc: 700464,
+                                next: 51214054,
+                            },
+                            {
+                                id: 51214054,
+                                content: "I should've known he was no good when he started stiffing workers on their pay.",
+                                npc: 700464,
+                                next: 51214055,
+                            },
+                            {
+                                id: 51214055,
+                                content:
+                                    "And yet... I watched Bloomfield Station grow from a forgotten backwater into the Empire's Lifeline with my own eyes. Eisenbahn... he...",
+                                npc: 700464,
+                                next: 51214056,
+                            },
+                            {
+                                id: 51214056,
+                                content:
+                                    "...I just don't understand why the Steamwhistle Salon would use a photograph like that for publicity.",
+                                npc: 700464,
+                                options: [
+                                    {
+                                        id: 51214057,
+                                        content: "(Warn him not to spread the rumour any further.)",
+                                        next: 51214058,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214058,
+                                content: "...",
+                                npc: 700464,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800415443431483869",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-30569, -734],
+                        next: ["17800415443431483869"],
+                        dialogues: [
+                            {
+                                id: 51214060,
+                                content: "I told you all Eisenbahn was a monster. But no one cares until the knife is at their own throat.",
+                                npc: 700465,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800415155751483369",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-30569, -734],
+                        next: ["17800415155751483369"],
+                        dialogues: [
+                            {
+                                id: 51214049,
+                                content: "Stationmaster Eisenbahn... No. Just Eisenbahn. I really believed in you.",
+                                npc: 700464,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800437873877392044",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-30569, -734],
+                        dialogues: [
+                            {
+                                id: 51214073,
+                                content:
+                                    "...Yeah. Bloomfield Station was built on the people it ground up. Feed enough flesh and blood into an engine, and it'll take you a long way.",
+                                npc: 100401,
+                                next: 51214074,
+                            },
+                            {
+                                id: 51214074,
+                                content:
+                                    "That poor lady... Even I'd be scared climbing up that high. Her daughter must have been terrified...",
+                                npc: 100402,
+                                next: 51214075,
+                            },
+                            {
+                                id: 51214075,
+                                content: "Let's check the freight yard next. The merchants there might know something else.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040703,
+                name: "Head to the freight yard and speak with one of the merchants",
+                desc: "Speak with the merchant in the freight yard to find out what he thinks of the photograph.",
+                nodes: [
+                    {
+                        id: "17800414090495400",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25183, 7668],
+                        next: ["17800414500575682", "17800444776118868860"],
+                        dialogues: [
+                            {
+                                id: 51214079,
+                                content: "About what?",
+                                npc: 100001,
+                                next: 51214080,
+                            },
+                            {
+                                id: 51214080,
+                                content: "Newspapers. Headlines. Prices.",
+                                npc: 700466,
+                                next: 51214081,
+                            },
+                            {
+                                id: 51214081,
+                                content:
+                                    "But judging by your attire... Ah, forgive me. How discourteous of me. Allow me to introduce myself. I am the proprietor of The Northern Dispatch, along with several other newspapers and courier stations.",
+                                npc: 700466,
+                                next: 51214082,
+                            },
+                            {
+                                id: 51214082,
+                                content:
+                                    "The Northern Dispatch may not carry much weight here in Icelake, but in Dismania it is one of the most widely read papers in circulation. Why, even His Imperial Majesty begins his mornings with a copy.",
+                                npc: 700466,
+                                next: 51214083,
+                            },
+                            {
+                                id: 51214083,
+                                content:
+                                    "All I intend to do is discuss a small matter with the stationmaster. He is a reasonable man. I imagine he would prefer these stories not find their way to Dismania, and I am sure he can name a price that suits us both.",
+                                npc: 700466,
+                                next: 51214084,
+                            },
+                            {
+                                id: 51214084,
+                                content:
+                                    "That's a pretty way to say blackmail. Eisenbahn isn't a pushover, you know. Push him too far, and you might not make it back to the capital.",
+                                npc: 100401,
+                                next: 51214085,
+                            },
+                            {
+                                id: 51214085,
+                                content: "That would be most unfortunate. But killing me would hardly solve his problem.",
+                                npc: 700466,
+                                next: 51214086,
+                            },
+                            {
+                                id: 51214086,
+                                content:
+                                    "As a shrewd businessman — or a perceptive journalist — I know exactly what I am doing. I will ask for just enough to make payment preferable, and not quite enough to make murder worthwhile.",
+                                npc: 700466,
+                                options: [
+                                    {
+                                        id: 51214087,
+                                        content: "(Warn him not to spread the rumours any further.)",
+                                        next: 51214088,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214088,
+                                content:
+                                    "Heh... Well, since you are being so insistent, I will do my best to accommodate your wishes. But I'm afraid convincing everyone else won't be nearly this easy.",
+                                npc: 700466,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800414500575682",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25183, 7668],
+                        next: ["17800414500575682"],
+                        dialogues: [
+                            {
+                                id: 51214077,
+                                content:
+                                    "A little scandal like this should be easy enough to contain. I'll just need to keep the workers quiet... I should have a word with Eisenbahn.",
+                                npc: 700466,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800444776118868860",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-25183, 7668],
+                        dialogues: [
+                            {
+                                id: 51214090,
+                                content: "This is spreading faster than I expected. Think someone's giving it a push?",
+                                npc: 100401,
+                                next: 51214091,
+                            },
+                            {
+                                id: 51214091,
+                                content:
+                                    "Or... maybe this is exactly what the Steamwhistle Salon wanted. Maybe they're steering the rumours themselves.",
+                                npc: 100401,
+                                next: 51214092,
+                            },
+                            {
+                                id: 51214092,
+                                content: "Let's keep digging. The concourse should give us a better picture.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040704,
+                name: "Head to the concourse and speak with the protester",
+                desc: "Speak with the protester in the concourse to learn how the photograph has affected public opinion.",
+                nodes: [
+                    {
+                        id: "17800431095975915144",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-12266, -226],
+                        next: ["17800431095985915145", "178004491486313298663"],
+                        dialogues: [
+                            {
+                                id: 51214096,
+                                content:
+                                    "I'm sure you've all seen it by now! Eisenbahn wears the face of a great stationmaster, but underneath it all, he's just another crook.",
+                                npc: 700467,
+                                next: 51214097,
+                            },
+                            {
+                                id: 51214097,
+                                content:
+                                    "He uses his position to cut deals and line his own pockets. He must've made a fortune. And our ironworkers? They can barely afford a decent meal or clothes on their backs.",
+                                npc: 700467,
+                                next: 51214098,
+                            },
+                            {
+                                id: 51214098,
+                                content:
+                                    "We kept telling ourselves he had his reasons. That things would turn around eventually. But now we know better. No more excuses!",
+                                npc: 700467,
+                                next: 51214099,
+                            },
+                            {
+                                id: 51214099,
+                                content:
+                                    "That's why we must seize this moment! Stand together, raise our voices, and put an end to Eisenbahn's reign as stationmaster!",
+                                npc: 700467,
+                                next: 51214100,
+                            },
+                            {
+                                id: 51214100,
+                                content:
+                                    "Of course, a movement like ours needs resources. I've pledged every last coin I own to bringing him down. If you feel as I do, even a small contribution would help the cause.",
+                                npc: 700467,
+                                next: 51214101,
+                            },
+                            {
+                                id: 51214101,
+                                content:
+                                    "And once we succeed, I'll personally recommend every loyal supporter for posts as conductors, heads of station security — whatever you deserve!",
+                                npc: 700467,
+                                next: 51214102,
+                            },
+                            {
+                                id: 51214102,
+                                content: "(He's using the chaos caused by the rumour to scam people... I need to stop him.)",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 51214103,
+                                        content: "(Warn him to stop stirring things up.)",
+                                        next: 51214104,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 51214106,
+                                        content: "(Take a gentler approach and hear him out.)",
+                                        next: 51214107,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 51214110,
+                                        content: "(Punch him in the face to shut him up.)",
+                                        next: 51214111,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214104,
+                                content:
+                                    "Whatever Eisenbahn may have done, standing here making empty promises and taking donations looks more like profiteering than justice.",
+                                npc: 100001,
+                                next: 51214105,
+                            },
+                            {
+                                id: 51214107,
+                                content:
+                                    "What happened to you? What do you actually want? You don't have to resort to something this extreme. Let's see what we can do for you.",
+                                npc: 100001,
+                                next: 51214108,
+                            },
+                            {
+                                id: 51214111,
+                                content:
+                                    "Whoa! What are you doing!? I—I'll have you know that... the more you try to silence us, the louder we'll shout! We will not bow before oppression!",
+                                npc: 700467,
+                            },
+                            {
+                                id: 51214105,
+                                content: "Oh, and now you're playing hero?",
+                                npc: 700467,
+                            },
+                            {
+                                id: 51214108,
+                                content:
+                                    "I... I just care about people, alright? I can't stand the way Eisenbahn treats people. Everyone knows he's rotten anyway.",
+                                npc: 700467,
+                                next: 51214109,
+                            },
+                            {
+                                id: 51214109,
+                                content: "Extreme? Don't tell me you're defending him! Come on, then — I'll knock some sense into you!",
+                                npc: 700467,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17800431095985915145",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-12493, -20],
+                        next: ["17800431095985915145"],
+                        dialogues: [
+                            {
+                                id: 51214094,
+                                content: "How could Eisenbahn be this corrupt!?",
+                                npc: 700467,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178004491486313298663",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-12493, -20],
+                        next: ["178004463604210345927"],
+                        dialogues: [
+                            {
+                                id: 51214113,
+                                content: "Alright, alright! Stop! I was wrong! Please stop hitting me! No more scams, I swear!",
+                                npc: 700467,
+                                next: 51214114,
+                            },
+                            {
+                                id: 51214114,
+                                content:
+                                    "Then why pretend this was about justice? Why use rumours about Stationmaster Eisenbahn to scam people?",
+                                npc: 100001,
+                                next: 51214115,
+                            },
+                            {
+                                id: 51214115,
+                                content:
+                                    "Tch. When the wind changes, you turn with it. Simple as that. Three days ago, I was one of Eisenbahn's loudest supporters. Gave speeches at the Steamwhistle Salon, sang his praises, and let his admirers fill the collection box.",
+                                npc: 700467,
+                                next: 51214116,
+                            },
+                            {
+                                id: 51214116,
+                                content:
+                                    "I just tell people what they want to hear. That's all. I'm a public speaker making an honest living from donations. It's not really a scam—",
+                                npc: 700467,
+                                next: 51214117,
+                            },
+                            {
+                                id: 51214117,
+                                content: "Hmm? Say that again.",
+                                npc: 100401,
+                                next: 51214118,
+                            },
+                            {
+                                id: 51214118,
+                                content: "(The protester glances at Outsider's fist and immediately wilts.)",
+                                next: 51214119,
+                            },
+                            {
+                                id: 51214119,
+                                content: "Sorry... You're right. I'm a filthy scammer.",
+                                npc: 700467,
+                                next: 51214120,
+                            },
+                            {
+                                id: 51214120,
+                                content: "What do you actually know? Why are you saying Eisenbahn was smuggling?",
+                                npc: 100001,
+                                next: 51214121,
+                            },
+                            {
+                                id: 51214121,
+                                content:
+                                    "Because everyone's saying it. I don't know the details. Some say he was smuggling Phoxichor, some say Geniemons. Everyone's got their own version.",
+                                npc: 700467,
+                                next: 51214122,
+                            },
+                            {
+                                id: 51214122,
+                                content: "And who told you all this?",
+                                npc: 100001,
+                                next: 51214123,
+                            },
+                            {
+                                id: 51214123,
+                                content:
+                                    "Uh... Some disappointed-looking bloke. A merchant. Oh, and this madwoman who kept saying Eisenbahn should pay with his life.",
+                                npc: 700467,
+                                next: 51214124,
+                            },
+                            {
+                                id: 51214124,
+                                content:
+                                    "I warned them not to spread those rumours. If polite requests aren't enough, Mr Seaton won't hesitate to use harsher methods to defend Stationmaster Eisenbahn's reputation.",
+                                npc: 100001,
+                                next: 51214125,
+                            },
+                            {
+                                id: 51214125,
+                                content:
+                                    "Hah. If warnings worked, the world would've been at peace ages ago. You've got to stir people up. Get their blood hot. Like I do. Though it's already too late now.",
+                                npc: 700467,
+                                next: 51214126,
+                            },
+                            {
+                                id: 51214126,
+                                content:
+                                    "Honestly? I didn't even believe the rumour at first. But after you showed up... now I'm convinced.",
+                                npc: 700467,
+                                next: 51214127,
+                            },
+                            {
+                                id: 51214127,
+                                content:
+                                    "You came because you're worried. Because you're scared. Otherwise, why bother? Rumours die down on their own eventually.",
+                                npc: 700467,
+                                next: 51214128,
+                            },
+                            {
+                                id: 51214128,
+                                content:
+                                    "And I doubt I'm the only one who sees it that way. Save your breath — Bloomfield Station isn't that big. News travels fast around here. By now, everyone at the station probably knows.",
+                                npc: 700467,
+                                next: 51214129,
+                            },
+                            {
+                                id: 51214129,
+                                content:
+                                    "(I don't work here. I didn't realise news could travel through the station this quickly... But Seaton is chairman of the Steamwhistle Salon, which is based right here in the station. Could he really have missed something this obvious?)",
+                                npc: 100001,
+                                next: 51214130,
+                            },
+                            {
+                                id: 51214130,
+                                content: "Button Mushroom probably got startled by what Seaton said. I heard it too. He said...",
+                                npc: 100401,
+                                next: 51214131,
+                            },
+                            {
+                                id: 51214131,
+                                content: '"To a soldier, his weapon is life itself. It is proof of my loyalty to the stationmaster."',
+                                npc: 100401,
+                                next: 51214132,
+                            },
+                            {
+                                id: 51214132,
+                                content: '"In return, please reward me... with your heart."',
+                                npc: 100401,
+                                next: 51214133,
+                            },
+                            {
+                                id: 51214133,
+                                content:
+                                    "(...What if Seaton never meant to stop the rumour? What if he actually wanted everyone to hear it?)",
+                                npc: 100001,
+                                next: 51214134,
+                            },
+                            {
+                                id: 51214134,
+                                content: "...Sometimes the fastest way to spread a rumour is to tell people not to talk about it.",
+                                npc: 100001,
+                                next: 51214135,
+                            },
+                            {
+                                id: 51214135,
+                                content:
+                                    "Exactly! That's what I've been saying. So don't beat yourself up. Sure, my little crusade was a sham... but what if Eisenbahn really is as bad as people say?",
+                                npc: 700467,
+                                next: 51214136,
+                            },
+                            {
+                                id: 51214136,
+                                content:
+                                    "You're a good talker, you know. Got the makings of a real orator. Why not learn a few tricks from me? Sign on as my apprentice today, and I'll even waive the tuition fee.",
+                                npc: 700467,
+                                next: 51214137,
+                            },
+                            {
+                                id: 51214137,
+                                content:
+                                    "You're not an orator. You're a fraud. Give it up — {nickname}'s not falling for it. And what did you mean by \"it's already too late now\"?",
+                                npc: 100401,
+                                next: 51214138,
+                            },
+                            {
+                                id: 51214138,
+                                content:
+                                    "Same trade, are we? Always out to spoil another man's act... Anyway, it's too late because someone made posters from that photograph, and they're all over the station now. Haven't you seen them?",
+                                npc: 700467,
+                                next: 51214139,
+                            },
+                            {
+                                id: 51214139,
+                                content:
+                                    "At this point, nobody's going to listen unless Eisenbahn comes out and explains himself. And even then, people will trust their own eyes over his words. I don't know who you people are, but if I were you, I'd give up.",
+                                npc: 700467,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178004463604210345927",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-12493, -20],
+                        dialogues: [
+                            {
+                                id: 51214141,
+                                content: "Little Minion, why did you let that con man go? Shouldn't we have dragged him back to Seaton?",
+                                npc: 100402,
+                                next: 51214142,
+                            },
+                            {
+                                id: 51214142,
+                                content:
+                                    "If everyone thinks like that man, doesn't that mean loads of people already believe Eisenbahn did something terrible?",
+                                npc: 100402,
+                                next: 51214143,
+                            },
+                            {
+                                id: 51214143,
+                                content:
+                                    "That's the complete opposite of what Seaton wants, right? Didn't he want people supporting Eisenbahn?",
+                                npc: 100402,
+                                next: 51214144,
+                            },
+                            {
+                                id: 51214144,
+                                content:
+                                    "Hmm... Seaton sent us out to clean up the mess caused by the photo. Somehow, all we did was make it worse.",
+                                npc: 100401,
+                                next: 51214145,
+                            },
+                            {
+                                id: 51214145,
+                                content: "...Or perhaps that's exactly what he wanted.",
+                                npc: 100001,
+                                next: 51214146,
+                            },
+                            {
+                                id: 51214146,
+                                content:
+                                    "Think about it. Sure, we took the photograph. But the commission came from the Steamwhistle Salon, and they were the ones who picked it as the winner.",
+                                npc: 100401,
+                                next: 51214147,
+                            },
+                            {
+                                id: 51214147,
+                                content:
+                                    'Then, the moment it caused trouble, they sent us out to "contain" it. No matter how you look at it, something doesn\'t add up.',
+                                npc: 100401,
+                                next: 51214148,
+                            },
+                            {
+                                id: 51214148,
+                                content:
+                                    "And that con man was right about one thing: the harder we tried to stop people talking, the further the story spread.",
+                                npc: 100401,
+                                next: 51214149,
+                            },
+                            {
+                                id: 51214149,
+                                content:
+                                    "So you think Seaton planned all this? That the Steamwhistle Salon wanted to turn the station against Eisenbahn?",
+                                npc: 100001,
+                                next: 51214150,
+                            },
+                            {
+                                id: 51214150,
+                                content:
+                                    "...You might be right. From what he said after I told him about the rehearsal... he certainly doesn't seem fond of Eisenbahn. He may even be working against him.",
+                                npc: 100001,
+                                next: 51214151,
+                            },
+                            {
+                                id: 51214151,
+                                content: "Exactly. Maybe we've been part of the plan from the beginning.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040705,
+                name: "Head to the nobles' lounge and speak with Seaton",
+                desc: "Public opinion has turned sharply against Eisenbahn. You begin to suspect this was what Seaton wanted all along. Return to the nobles' lounge and speak with him again to find out what he's really after.",
+                nodes: [
+                    {
+                        id: "17798719698297318137",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32191, -7000],
+                        dialogues: [
+                            {
+                                id: 51214153,
+                                content:
+                                    "Welcome back, newcomer. Please, sit. Have some tea. We can speak at our leisure. Now then... how did it go?",
+                                npc: 700400,
+                                next: 51214154,
+                            },
+                            {
+                                id: 51214154,
+                                content:
+                                    "(You explain that the rumours have continued to spread, and that your attempts to stop them only seemed to make things worse.)",
+                                next: 51214155,
+                            },
+                            {
+                                id: 51214155,
+                                content:
+                                    "I see you took a rather gentle approach. Did it not occur to you to be more forceful? To make quite certain they never spoke of it again?",
+                                npc: 700400,
+                                options: [
+                                    {
+                                        id: 51214156,
+                                        content: "...I don't think it needed to go that far.",
+                                        next: 51214157,
+                                    },
+                                    {
+                                        id: 51214158,
+                                        content: "You don't seem surprised.",
+                                        next: 51214159,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214157,
+                                content: "Heh. Do relax. I was only joking.",
+                                npc: 700400,
+                                next: 51214160,
+                            },
+                            {
+                                id: 51214159,
+                                content:
+                                    "Because I had prepared for every possibility. Whatever news you brought back, I was ready to hear it.",
+                                npc: 700400,
+                                next: 51214160,
+                            },
+                            {
+                                id: 51214160,
+                                content: "Is that so?",
+                                npc: 100001,
+                                next: 51214161,
+                            },
+                            {
+                                id: 51214161,
+                                content:
+                                    "Of course. I would never be harsh with a new member — especially not one who has done such excellent work.",
+                                npc: 700400,
+                                next: 51214162,
+                            },
+                            {
+                                id: 51214162,
+                                content: "I think this was all part of your plan from the beginning.",
+                                npc: 100001,
+                                next: 51214163,
+                            },
+                            {
+                                id: 51214163,
+                                content:
+                                    "What do you mean? The Steamwhistle Salon exists to uphold Stationmaster Eisenbahn's honour. Everything we do is for a better Bloomfield Station. A better Eisenbahn—",
+                                npc: 700400,
+                                next: 51214164,
+                            },
+                            {
+                                id: 51214164,
+                                content: "Assuming he truly deserves that devotion, of course.",
+                                npc: 700400,
+                                next: 51214165,
+                            },
+                            {
+                                id: 51214165,
+                                content:
+                                    "Assuming he truly is a leader worth following. Alas, if only we could see what truly lies in a man's heart.",
+                                npc: 700400,
+                                next: 51214166,
+                            },
+                            {
+                                id: 51214166,
+                                content:
+                                    "You are disappointed too, aren't you, newcomer? You took that remarkable photograph because you admired him. Because you believed in him.",
+                                npc: 700400,
+                                next: 51214167,
+                            },
+                            {
+                                id: 51214167,
+                                content:
+                                    "You're the chairman of the Steamwhistle Salon. Half the station noticed something was wrong with that photograph. There's no way you didn't.",
+                                npc: 100001,
+                                next: 51214168,
+                            },
+                            {
+                                id: 51214168,
+                                content:
+                                    "And with all the Salon's members, someone must have seen the problem. Someone must have realised that photo could damage Eisenbahn's reputation. Unless...",
+                                npc: 100001,
+                                next: 51214169,
+                            },
+                            {
+                                id: 51214169,
+                                content:
+                                    "Unless that was the point. You didn't choose my photograph for its artistry. You chose it because I happened to capture the evidence you needed.",
+                                npc: 100001,
+                                next: 51214170,
+                            },
+                            {
+                                id: 51214170,
+                                content:
+                                    "...You rushed posters bearing that photograph into print. Then you pushed it through every lead-up event you had planned, so it would spread across the station. After that, you let the rumours do the rest. With the photograph to back them up, they spread almost by themselves.",
+                                npc: 100001,
+                                next: 51214171,
+                            },
+                            {
+                                id: 51214171,
+                                content: "...",
+                                npc: 700400,
+                                next: 51214172,
+                            },
+                            {
+                                id: 51214172,
+                                content: "Sharp.",
+                                npc: 700400,
+                                next: 51214173,
+                            },
+                            {
+                                id: 51214173,
+                                content:
+                                    "You sent me after those people to make the rumours look real. Almost no one knows me here. If I go around telling people to keep quiet, it only makes me look like Eisenbahn's errand-runner, trying to bury the story.",
+                                npc: 100001,
+                                next: 51214174,
+                            },
+                            {
+                                id: 51214174,
+                                content: "And what do you believe we stand to gain from all this?",
+                                npc: 700400,
+                                next: 51214175,
+                            },
+                            {
+                                id: 51214175,
+                                content: "What you want is...",
+                                npc: 100001,
+                                options: [
+                                    {
+                                        id: 51214176,
+                                        content: "To ruin Eisenbahn.",
+                                        next: 51214177,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 51214179,
+                                        content: "To make Eisenbahn see how much you all love him!",
+                                        next: 51214180,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51214177,
+                                content: "The Steamwhistle Salon... his own fan club, and you wanted him ruined.",
+                                npc: 100001,
+                                next: 51214178,
+                            },
+                            {
+                                id: 51214180,
+                                content:
+                                    "This is the twisted desperation of unrequited love! He shines like the morning sun, but never for you alone — and you've never forgiven him for it! You're destroying him just to make him acknowledge your feelings...",
+                                npc: 100001,
+                                next: 51214181,
+                            },
+                            {
+                                id: 51214178,
+                                content: "Quite right. You are remarkably perceptive.",
+                                npc: 700400,
+                                next: 51214184,
+                            },
+                            {
+                                id: 51214181,
+                                content: "...Wh—What?",
+                                npc: 700400,
+                                next: 51214182,
+                            },
+                            {
+                                id: 51214184,
+                                content: "So this was planned from the beginning... How long have you been working on it?",
+                                npc: 100001,
+                                next: 51214185,
+                            },
+                            {
+                                id: 51214182,
+                                content:
+                                    "{性别:Milord|Milady} has a unique sense of humour. What {性别:he|she} means is, you're trying to ruin Eisenbahn.",
+                                npc: 100401,
+                                next: 51214183,
+                            },
+                            {
+                                id: 51214185,
+                                content:
+                                    "Two years? Three, perhaps. I don't really remember. One only needs to remember what matters, wouldn't you agree? The Steamwhistle Salon was nothing more than a façade from the very beginning. Why would I bother remembering the date it was founded?",
+                                npc: 700400,
+                                next: 51214186,
+                            },
+                            {
+                                id: 51214183,
+                                content: "...Indeed.",
+                                npc: 700400,
+                                next: 51214184,
+                            },
+                            {
+                                id: 51214186,
+                                content:
+                                    "Eisenbahn never deserved any of this. I was the one who should have been assigned to run Bloomfield Station.",
+                                npc: 700400,
+                                next: 51214187,
+                            },
+                            {
+                                id: 51214187,
+                                content:
+                                    "He stole my station. He bled the workers dry and built his success on their suffering. Tragic, really. Had I been in charge, I would never have treated them so poorly.",
+                                npc: 700400,
+                                next: 51214189,
+                            },
+                            {
+                                id: 51214189,
+                                content: "...",
+                                npc: 100001,
+                                next: 51214190,
+                            },
+                            {
+                                id: 51214190,
+                                content: "He has always been cruel. Ruthless. A devil wearing a human face.",
+                                npc: 700400,
+                                next: 51214191,
+                            },
+                            {
+                                id: 51214191,
+                                content:
+                                    "Delayed wages. Sick and wounded workers left to die. Protection money wrung from local merchants. One crime after another. This station's prosperity was bought with blood and tears.",
+                                npc: 700400,
+                                next: 51214192,
+                            },
+                            {
+                                id: 51214192,
+                                content:
+                                    "Look at this photograph, newcomer. Evidence captured by your own hand. The proof that will tear that righteous mask from his face. Here — Phoxichor, a merchant, and Eisenbahn himself.",
+                                npc: 700400,
+                                next: 51214193,
+                            },
+                            {
+                                id: 51214193,
+                                content:
+                                    "Most of the Salon saw only what they wanted to see. Toran included. But you — you saw what mattered. You were sharp enough to notice, and decisive enough to act.",
+                                npc: 700400,
+                                next: 51214194,
+                            },
+                            {
+                                id: 51214194,
+                                content: "It has been a pleasure working with you, newcomer. No... my friend.",
+                                npc: 700400,
+                                next: 51214195,
+                            },
+                            {
+                                id: 51214195,
+                                content:
+                                    "Everything is already in place. Soon, you will see Bloomfield Station reborn by our hand. The wealth Eisenbahn amassed through corruption and cruelty will finally be returned to the people who earned it.",
+                                npc: 700400,
+                                next: 51214196,
+                            },
+                            {
+                                id: 51214196,
+                                content: "Returned to the workers...? I hope you keep your word. Good luck.",
+                                npc: 100001,
+                                next: 51214197,
+                            },
+                            {
+                                id: 51214197,
+                                content: "Thank you, my friend. To a brighter future.",
+                                npc: 700400,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 200408,
+        quests: [
+            {
+                id: 20040801,
+                name: "Speak with Seaton",
+                desc: "After helping the Steamwhistle Salon with numerous commissions, the organisation that outwardly supports Eisenbahn while secretly seeking evidence to bring him down has finally revealed their true intentions. Just before this carefully orchestrated takedown begins, Seaton seems to have something to tell you...",
+                nodes: [
+                    {
+                        id: "17823551146841591932",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32160, -6570],
+                        next: ["17823551146841591933"],
+                        dialogues: [
+                            {
+                                id: 51215001,
+                                content:
+                                    "The sun, in its boundless mercy, bestows life upon all things. Yet in their hymns of praise, men forget: the same radiance that gives life may also burn it to ash.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146841591933",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-32180, -6990],
+                        dialogues: [
+                            {
+                                id: 51215002,
+                                content:
+                                    "...Ah, my friend. You've returned. Then I take it you have finally decided to join the Steamwhistle Salon for Eisenbahn's final curtain.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215003,
+                                content:
+                                    "As it happens, the plan I have spent so long preparing to bring Eisenbahn down is missing only one final piece...",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215004,
+                                content: "You're not asking me to assassinate Eisenbahn, are you?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215005,
+                                content:
+                                    "Ha! An amusing thought, but no. Capable as you are, there are plenty in the Salon who have spent years nursing their hatred of Eisenbahn.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215006,
+                                content:
+                                    "The moment I let a few trusted members in on the plan, even those who had never given the theatre more than a passing glance came rushing to volunteer.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215007,
+                                content:
+                                    "Age, stage presence, voice... none of it mattered. Each of them wanted only one thing: to be the one who put a bullet through Eisenbahn's heart at the climax of the play.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215008,
+                                content:
+                                    "Truth be told, I would have taken the stage myself, had I not feared that the thrill of finally killing Eisenbahn might compromise the performance. For the sake of the plan, I chose young Levi instead.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215009,
+                                content: "All right. So what do you actually want from me?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215010,
+                                content: "Patience, my young friend. Though perhaps that very impatience is what sets you apart.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215011,
+                                content:
+                                    "After all these years, you may be the only person to have won the favour of both the Steamwhistle Salon and the Screwdriver Union.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215012,
+                                content: "How do you know that?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215013,
+                                content:
+                                    "If I can arrange an assassination under Eisenbahn's very nose, then naturally I have sources of my own.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215014,
+                                content:
+                                    "In any case, since you have established such a useful rapport with the Screwdriver Union, I would like you to invite them to stir up a little disorder at the station — and to witness Eisenbahn's downfall with us.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215015,
+                                content:
+                                    "Otherwise, those poor devils labouring underground may not even hear what happened at Bloomfield Station until the next sunrise.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215016,
+                                content:
+                                    "I need them to understand, at once, whose hand will guide Bloomfield Station from now on: Seaton Brutus.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215017,
+                                content: "So you want to frighten them into line before you take over.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215018,
+                                content:
+                                    "Precisely. The Screwdriver Union may be an underground organisation, but its influence among the workers is considerable. That makes them the ideal audience for our little performance.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215019,
+                                content:
+                                    "Well? What do you say? Bring them in, and once this is over, I'll give you one-twentieth of Eisenbahn's private fortune... No. One-tenth.",
+                                npc: 700580,
+                                options: [
+                                    {
+                                        id: 51215020,
+                                        content: "I'm in. I've hated Eisenbahn for a long time myself.",
+                                        next: 51215021,
+                                    },
+                                    {
+                                        id: 51215023,
+                                        content: "I'm not interested. But I don't have much choice, do I?",
+                                        next: 51215024,
+                                    },
+                                    {
+                                        id: 51215026,
+                                        content: "(Refuse.)",
+                                        next: 51215027,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51215021,
+                                content: "Excellent. Great minds do think alike, my friend.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215022,
+                                content: "I'll speak to the Screwdriver Union. But I can't promise they'll do what you want.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215024,
+                                content:
+                                    "How perceptive. Bloomfield Station will be mine sooner or later. Doing as I ask is the sensible choice — the only choice, really.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215025,
+                                content: "I'll speak to the Screwdriver Union. But I can't promise they'll do what you want.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215027,
+                                content:
+                                    "(In the corner, one of Seaton's Red-clad Sentinels slowly curled his hands into fists. Refusing outright probably wouldn't end well.)",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215028,
+                                content: "Fine. I'll speak to the Screwdriver Union. But I can't promise they'll do what you want.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215029,
+                                content:
+                                    "Ha. That is quite all right. If they have survived this long under Eisenbahn, they must have some sense of which way the wind is blowing.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215030,
+                                content: "Off you go, then. Later, we shall all take a good, long look at our dear stationmaster.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215031,
+                                content:
+                                    "What do you think he'll do? Beg for mercy? Curse us? Or, if Levi's aim is true, die before he even realises what is happening...?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215032,
+                                content: "No... that would be too quick. Hm. Perhaps I should have a private word with Levi after all.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215033,
+                                content:
+                                    "(Seaton lapses into muttering, still turning the whole plan over in his mind. Time to leave for the Screwdriver Union.)",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040802,
+                name: "Head to the Screwdriver Union",
+                desc: "A grand performance is about to begin, but the cast hasn't been finalised yet. Seaton needs help from another faction in the station — the Screwdriver Union. For reasons unknown, he knows you have deep ties with them, and entrusts you with this task. You have no right to refuse. For now, all you can do is take it one step at a time.",
+                nodes: [
+                    {
+                        id: "17823551146841591940",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-18160, 11720],
+                        dialogues: [
+                            {
+                                id: 51215035,
+                                content: "Maggie! We're back!",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215036,
+                                content:
+                                    "Oi, look who's back. My best bud, the one I just handed the Master Screwdriver to! You only just left, and now you're already back with... some tall bloke.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215037,
+                                content:
+                                    "What's all this, then? Missed the last train and came looking for a drink? Or are you here to see what that Master Screwdriver can really do?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215038,
+                                content: "Neither. We're here about something important. I have a message from the Steamwhistle Salon.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215039,
+                                content:
+                                    "The Steamwhistle Salon? Those lapdogs sent you? I thought they spent all day licking Eisenbahn's boots, fighting for a spot at his feet.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215040,
+                                content: "So what is it? Actually, never mind. If you reckon it's worth hearing, let's hear it.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215041,
+                                content: "If it's rubbish, you can go back and tell the whole Salon to piss off.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215042,
+                                content:
+                                    "Language, Maggie. Honestly... I've given up on ever keeping a parrot. With that mouth of yours around, the poor thing would be swearing its head off before the week was out.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215043,
+                                content:
+                                    "Anyway, you said the Steamwhistle Salon had a message for us? That's rare. We all operate out of the same station, but we've never had much to do with each other.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215044,
+                                content:
+                                    "Their chairman... Seaton, was it? What does he want? Is he declaring war on us? Ha. Or has he finally decided to wipe us out on Eisenbahn's behalf?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215045,
+                                content: "Actually, it's the opposite. He wants your help.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215046,
+                                content:
+                                    "(You explain Seaton's plan to Lorent and Maggie: he intends to stage a play during the celebration of Eisenbahn's tenth year as stationmaster, then use it as cover to assassinate him.)",
+                            },
+                            {
+                                id: 51215047,
+                                content:
+                                    "(Seaton also wants the Screwdriver Union to stir up trouble throughout the station once the assassination begins.)",
+                            },
+                            {
+                                id: 51215048,
+                                content: "So you're saying the chairman of the Steamwhistle Salon... what's-his-name... Seafood?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215049,
+                                content: "Seaton.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215050,
+                                content: "Right, Seaton! And he wants us to help kill Eisenbahn? Hah! How did those lapdogs beat us to it?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215051,
+                                content: "Lorent, back me up here. Don't tell me those bootlickers have more guts than I do.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215052,
+                                content:
+                                    "Of course they don't! You're already the boss, and you're still so young. By the time you're Seaton's age, you'll probably be boss of something much, much bigger!",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215053,
+                                content: "Thanks, Snow. But honestly? I only got the job because nobody else had the guts.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215054,
+                                content:
+                                    "Every chairman the Union had before me somehow got himself shot in the back, so nobody wanted the chair. But me — Brave Maggie — I stepped right up!",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215055,
+                                content:
+                                    "Ahem... We chose you because we thought even Eisenbahn wouldn't have the heart to murder a child. You're more of a figurehead, all right?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215056,
+                                content: "Fine by me! I'm still Maggie the Mighty!",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215057,
+                                content:
+                                    "Anyway, back to business. Lorent, you knew that Seafood bloke's name, so you must know something about him. What do you think? Can we throw in with him?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215058,
+                                content:
+                                    "Because honestly, I've been waiting for a chance like this for ages. If you say no, I swear I'll smack you over the head with a wrench.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215059,
+                                content:
+                                    "I don't really know much about him. But if they've come to us, it means they're going through with this whether we join them or not...",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215060,
+                                content:
+                                    "This may be our chance. Whatever sort of man Seaton is, he won't have Eisenbahn's grip on the station. If he takes power, we may at least have room to negotiate.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215061,
+                                content: "That's what I like to hear, Lorent! Turns out you've got some balls after all. So what do we do?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215062,
+                                content:
+                                    "We make arrangements immediately. There's no time to waste. Get everyone moving, and notify the ironworkers.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215063,
+                                content:
+                                    "Hold on... Has anyone thought about what happens if the assassination fails? If Eisenbahn walks away alive, he'll come for you. You lot have spent years keeping your heads down, but once you're mixed up in this, there'll be no going back.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215064,
+                                content: "Chances like this don't come along every day.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215065,
+                                content:
+                                    "The Screwdriver Union was founded to look after the workers. Bringing down Eisenbahn may be the greatest thing we could ever do for them.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215066,
+                                content:
+                                    "Besides, if we had been kept in the dark, we might still have stayed out of it. But the moment we learned about the plan, we were already involved. Pretending nothing happened, or trying to back out now, would only make things worse.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215067,
+                                content:
+                                    "So there's no point hesitating. Today, we finally settle old accounts for the Union's former chairmen.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215068,
+                                content:
+                                    "Hell yeah! We're doing this! Lorent, who knew? Most days you talk like some prim little schoolmaster who's never heard a swear word, but when it counts, you've got more bloody nerve than me. What about the ledger? Are we still looking for it?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215069,
+                                content: "The ledger can wait. Right now, dragging Eisenbahn out of the stationmaster's chair comes first.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215070,
+                                content:
+                                    "We'll need your help one more time. I know we've already asked more than a few favours of you, but trust me — this will be the last.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215071,
+                                content:
+                                    '"Grown-ups talk and grown-ups lie♪\n Work all day till your bones run dry♪\n Grab a drink and crawl to bed♪\n Sleep till morning, good as dead♪"',
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215072,
+                                content: "Keep singing and I'll tie you up and dump you straight in Eisenbahn's office.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215073,
+                                content:
+                                    "Tch! If I end up in his office, I'll tell him to come and get you too. All right, all right, I'm on it. I'll go tell my lot up on the steelwork.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215074,
+                                content:
+                                    "They'll probably think I've lost my mind, but a few taps with a wrench should knock some sense into them.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215075,
+                                content: "Right. I'll go tell the engineers. We'll leave the ironworks to you.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215076,
+                                content: "Understood.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040803,
+                name: "Notify the workers",
+                desc: "After relaying Seaton's plan to Maggie and Lorent, you receive an unexpectedly positive response. Maggie is genuinely interested in your proposal — perhaps it's something she's always wanted to do. As for Lorent, surprisingly, he actually nods in agreement, despite his usual cautious stance against confronting Eisenbahn. Time to split up and notify the workers.",
+                nodes: [
+                    {
+                        id: "17823551146841591947",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-17577, 14133],
+                        next: ["17823551146841591944"],
+                        dialogues: [
+                            {
+                                id: 51215078,
+                                content: "I'm on my break. Leave me alone.",
+                                npc: 700584,
+                            },
+                            {
+                                id: 51215079,
+                                content: "Come on. Forget your break for now. After tonight, you might finally get a real rest.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215080,
+                                content: "(You explain what is about to happen.)",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215081,
+                                content:
+                                    "Kill Eisenbahn? Seriously? Maggie sent you? Come off it, you're winding me up. Wait... Mr Lorent says it's true too?",
+                                npc: 700584,
+                            },
+                            {
+                                id: 51215082,
+                                content: "Then I'd better get ready. Count me in.",
+                                npc: 700584,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146841591944",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-12457, 12181],
+                        next: ["17823551146841591946"],
+                        dialogues: [
+                            {
+                                id: 51215084,
+                                content:
+                                    "Word is, people up top are saying Stationmaster Eisenbahn's been smuggling military supplies, and that he doesn't deserve to sit in that chair.",
+                                npc: 700585,
+                            },
+                            {
+                                id: 51215085,
+                                content:
+                                    "So what if he has? He's been stationmaster for years. I'd be more surprised if he hadn't skimmed a bit for himself by now. What's it matter? It's not like anyone can touch him.",
+                                npc: 700586,
+                            },
+                            {
+                                id: 51215086,
+                                content: "(You explain what is about to happen.)",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215087,
+                                content:
+                                    "You're serious? Damn. So it's not just us ironworkers — even the nobles have had enough of Eisenbahn. He's had this coming.",
+                                npc: 700585,
+                            },
+                            {
+                                id: 51215088,
+                                content: "Come on, let's go! This is going to be one hell of a show.",
+                                npc: 700586,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146841591946",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-12597, 12271],
+                        dialogues: [
+                            {
+                                id: 51215090,
+                                content:
+                                    "Looks like the workers are more than willing to get on board... But I can't shake the feeling this went a little too smoothly. Eisenbahn's had this station in his grip for years. Can he really be brought down so easily?",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215091,
+                                content:
+                                    "I don't buy it either... But we've come this far. Backing out now would only put us in an even worse position. Let's see how this plays out.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215092,
+                                content: "Yeah. We'd better get back.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040805,
+                name: "Go back to Maggie",
+                desc: "The workers have responded enthusiastically to the plan to take down Eisenbahn. Everything seems to be going too smoothly. Could it be that the towering tree that looms over Bloomfield Station, rooted in the workers' very flesh and casting a shadow over their lives, will finally be felled today?",
+                nodes: [
+                    {
+                        id: "17823551146841591956",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-17780, 12200],
+                        dialogues: [
+                            {
+                                id: 51215094,
+                                content: "Maggie! Lorent! We're back. The workers all know!",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215095,
+                                content: "Huh? Where did they go?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215096,
+                                content:
+                                    "Maybe they're still passing the word along. But that doesn't quite add up. Maggie went up onto the station's steelwork, so she might take a while.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215097,
+                                content:
+                                    "But Lorent only had to go to the freight yard and tell the engineers. He shouldn't be taking longer than us.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215098,
+                                content: "Oh no... What if Eisenbahn's men caught him?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215099,
+                                content: "Wait... I hear something. Let's take a look.",
+                                npc: 100402,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040806,
+                name: "Head to the source of the voice",
+                desc: "When you return, Maggie is nowhere to be found — but you hear a familiar voice...",
+                nodes: [
+                    {
+                        id: "17823551146841591961",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-19270, 13830],
+                        next: ["17823551146841591963"],
+                        dialogues: [
+                            {
+                                id: 51215101,
+                                content: "This way. Hm... That voice sounds familiar.",
+                                npc: 100402,
+                                next: 51215102,
+                            },
+                            {
+                                id: 51215102,
+                                content: "A little closer... Oh, it's Lorent. Whew.",
+                                npc: 100402,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146841591963",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-19270, 13830],
+                        dialogues: [
+                            {
+                                id: 51215103,
+                                content: "He's just up ahead. Oh no — he's talking to someone in red... A station guard!",
+                                npc: 100402,
+                                next: 51215104,
+                            },
+                            {
+                                id: 51215104,
+                                content: "Quick! We have to help him!",
+                                npc: 100402,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040807,
+                name: "Listen to what's being said",
+                desc: "The speakers are Lorent and a station guard. Why are they together? And what are they discussing?",
+                nodes: [
+                    {
+                        id: "17823551146841591969",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-18914, 11402],
+                        dialogues: [
+                            {
+                                id: 51215106,
+                                content:
+                                    "Wait. Hold it, Snow. Lorent doesn't look like he's being interrogated. Let's stay hidden and hear what they're saying.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215107,
+                                content:
+                                    "...That's the situation. You need to inform Mr Eisenbahn at once. He must not attend the play later. If he does, his life may be in danger.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215108,
+                                content:
+                                    "Easy, Lorent. Mr Eisenbahn's had more death threats than you've had hot meals. Look at you, panting like you ran all the way here.",
+                                npc: 700588,
+                            },
+                            {
+                                id: 51215109,
+                                content: "And keep your voice down. You don't want the wrong people noticing you and following you here.",
+                                npc: 700588,
+                            },
+                            {
+                                id: 51215110,
+                                content:
+                                    "No, you don't understand. This time is different. Ever since the Steamwhistle Salon's little photography contest, rumours about Mr Eisenbahn's smuggling operations have spread across the station.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215111,
+                                content:
+                                    "Even some of the guards have started wondering whether Mr Eisenbahn is as loyal to the Empire as he claims.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215112,
+                                content:
+                                    "Even if the assassination fails, others may begin to wonder whether he is still worth serving. And once that happens, the guards could become as difficult to keep in line as the workers.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215113,
+                                content: "That's easy enough. We'll slip a few more of Mr Eisenbahn's trusted men into the ranks.",
+                                npc: 700588,
+                            },
+                            {
+                                id: 51215114,
+                                content: "If only it were that simple...",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215115,
+                                content: "Oh? Isn't it? Sounds simple enough to me. Money. Sex. Advancement. Everyone has a weak spot.",
+                                npc: 700588,
+                            },
+                            {
+                                id: 51215116,
+                                content:
+                                    "Lorent, you're the one taking our money and feeding us information on the Screwdriver Union. Why doubt our methods now? Don't tell me you've suddenly found a conscience.",
+                                npc: 700588,
+                            },
+                            {
+                                id: 51215117,
+                                content:
+                                    "...What are they talking about? I don't understand. Isn't Lorent with the Screwdriver Union? Why does he keep calling the stationmaster \"Mr Eisenbahn\"?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215118,
+                                content:
+                                    "...So he was bought off. Didn't see that coming. I figured Eisenbahn had someone inside the Screwdriver Union — just didn't think it was Lorent.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215119,
+                                content:
+                                    "Actually... that explains a lot. How he knew Seaton's name. How so many former chairmen were taken out by Eisenbahn while he stayed perfectly safe.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215120,
+                                content:
+                                    "Listen, {nickname}. Maybe we should walk away. Bloomfield Station is messier than I thought. The people who claim to support Eisenbahn want him dead, and the people who claim to oppose him are taking his orders.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215121,
+                                content: "We've got bigger problems today. No reason to get dragged any deeper into this mess.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215122,
+                                content: "I agree... but there's still someone who doesn't know what's going on.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215123,
+                                content:
+                                    "Oh! Maggie! We have to tell her, or she'll be in danger. She gave us the Master Screwdriver, remember? We can't just leave her in the dark!",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215124,
+                                content: "What the hell...? Lorent, who are you talking to? A station guard?",
+                                npc: 700475,
+                            },
+                            {
+                                id: 51215125,
+                                content:
+                                    "Since when were you so chummy with one of the guards? Or is that one of our lot in disguise? Nice uniform, by the way. Got a spare in my size? I want one.",
+                                npc: 700475,
+                            },
+                            {
+                                id: 51215126,
+                                content: "Maggie? Y—You're back? Did you hear all that?",
+                                npc: 700476,
+                            },
+                            {
+                                id: 51215127,
+                                content:
+                                    "You mean the train? One came roaring past while I was climbing down from the steelwork. Clang, bang, rumble — nearly blew my ears off.",
+                                npc: 700475,
+                            },
+                            {
+                                id: 51215128,
+                                content: "Good.",
+                                npc: 700476,
+                            },
+                            {
+                                id: 51215129,
+                                content:
+                                    "Train? I don't buy it. Didn't you say this brat was slippery? How do we know she isn't playing dumb? We can't let her walk away.",
+                                npc: 700477,
+                            },
+                            {
+                                id: 51215130,
+                                content: "What!? Lorent— Aaah—!!",
+                                npc: 700475,
+                            },
+                            {
+                                id: 51215131,
+                                content: "Damn it. Move! We've gotta save her!",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040808,
+                name: "Protect Maggie and repel the Station Guards",
+                desc: "Lorent is a traitor within the Screwdriver Union! His earlier refusal to resist was just a front to deceive Maggie. At this critical moment, Maggie returns. With the station guard about to silence her, you must step in to protect her.",
+                nodes: [
+                    {
+                        id: "17823551146841591975",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106301,
+                        pos: [-17835, 12760],
+                        dialogues: [
+                            {
+                                id: 51215133,
+                                content: "Maggie! Maggie, are you all right!?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215134,
+                                content:
+                                    "She's fine. Just unconscious. Same as the guard you put down. Though whether it was the blow or the shock that did it, I couldn't say.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215135,
+                                content: "And the rest of you... how long have you been listening?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215136,
+                                content: "Since we got back from the ironworks.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215137,
+                                content:
+                                    "Though I doubt the ironworkers know one of their own leaders has been feeding Eisenbahn information.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215138,
+                                content:
+                                    "...Ha. Fair enough. I expected something harsher, though. Lackey. Bootlicker. Eisenbahn's dog. Something along those lines.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215139,
+                                content: "Still, I stand by my choice. I have never doubted that I did the right thing.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215140,
+                                content: "All I have done is keep Bloomfield Station stable, with as little bloodshed as possible.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215141,
+                                content: "So you've got your reasons too, huh? Fine. Let's hear them. Call it your last words.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215142,
+                                content:
+                                    "Just what I'd expect from Icelake's finest Phoxhunters. Decisive, and not afraid to dirty your hands when the time comes.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215143,
+                                content:
+                                    "But understand this: most members of the Screwdriver Union are ordinary people. They're not like you. They're not heroes from some adventure tale, blessed with quick wits and the nerve to change the world.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215144,
+                                content:
+                                    "Years of labour have worn them down. Their lives are small, hard, and uneventful. One night they drink themselves senseless and get into fights. The next, they gamble away what little they have.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215145,
+                                content:
+                                    "In an adventure story, they're the nameless extras. The ones who stray too close to the hero's battle and die before anyone even notices.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215146,
+                                content:
+                                    "But there are still people waiting for them at home. People who expect them to come back safe every day.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215147,
+                                content:
+                                    "Bring down Eisenbahn? Of course it sounds tempting. But did any of the gentlemen in the Steamwhistle Salon stop to think what would happen to the Union's ordinary ironworkers if the assassination failed?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215148,
+                                content:
+                                    "The nobles might find ways to wash their hands of it. But what about us? We live here. We survive here. Our livelihoods depend on this station.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215149,
+                                content:
+                                    "If this plan fails, there'll be bullets waiting for us. And what happens to our families then? To the children? To Maggie?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215150,
+                                content:
+                                    "Think about the previous chairmen. They were just like Maggie — all fire and fury, shouting about bringing Eisenbahn down. But most of them had never even held a gun.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215151,
+                                content:
+                                    "Mr Eisenbahn crushed them like insects. If a leader can't even keep himself alive, what right does he have to ask ordinary workers to gamble with their lives?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215152,
+                                content:
+                                    "...Hard to argue with that. Helping assassinate a stationmaster would get you life in prison at the very least.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215153,
+                                content:
+                                    "Exactly. So I made myself the man in the middle. On one side, I keep the workers from provoking Eisenbahn and preserve what peace I can. On the other, I bargain with Eisenbahn and claw whatever small concessions I can from him.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215154,
+                                content:
+                                    "What I didn't expect was that desperate people at the bottom weren't the only ones willing to throw their lives away and drag everyone else down with them. Turns out the gentlemen of the Steamwhistle Salon are no different.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215155,
+                                content:
+                                    "They say some people are born above the rest. From where I'm standing, those fine gentlemen are just as short-sighted as the poor.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215156,
+                                content: "You mean Seaton?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215157,
+                                content:
+                                    "Who else? His plan is going to fail anyway. Going to Eisenbahn and securing something in return was the only sensible choice. The moment you told me the plan, my mind was made up.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215158,
+                                content:
+                                    "And tell me this: do you really know Seaton? How can you be so sure life will get any better for us once he takes control of Bloomfield Station?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215159,
+                                content: "...",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215160,
+                                content:
+                                    "All right. I believe I've made myself perfectly clear. If the assassination succeeds, the Union may gain nothing. If it fails, the Union pays in blood.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215161,
+                                content:
+                                    "Let me go. I can still reach Eisenbahn before it's too late. It's the only way to keep the Union from being dragged down alongside Seaton.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215162,
+                                content: "I hate to say it... but he's starting to make sense.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215163,
+                                content:
+                                    "Maybe. But what he said only makes sense if Eisenbahn wins. And... I don't know if he will. What if they really do bring him down this time?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215164,
+                                content: "Still, it's your call. When it matters this much, we'll follow your lead.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215165,
+                                content: "(You think of all the people trying to survive in this station...)",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215166,
+                                content:
+                                    "Ten coppers will get you a loaf of black bread, with just enough left over for a little knob of butter that's starting to turn. It's a bit sour, but it makes the bread easier to swallow, so it doesn't scrape your throat raw on the way down.",
+                                npc: 700478,
+                            },
+                            {
+                                id: 51215167,
+                                content:
+                                    "I've heard nobles complain that when their steak's overdone, it's hard to chew and catches in the throat. So I suppose I eat like a noble, in a way.",
+                                npc: 700478,
+                            },
+                            {
+                                id: 51215168,
+                                content:
+                                    "Come on, we should move. We need to win big and get out fast this time. We've already won plenty — if we keep this up, Mr Jack's people are going to notice.",
+                                npc: 700479,
+                            },
+                            {
+                                id: 51215169,
+                                content:
+                                    "Once we cash out, we'll split it seventy-thirty. Sound good? You take your share and save your sister. I get my life back.",
+                                npc: 700479,
+                            },
+                            {
+                                id: 51215170,
+                                content:
+                                    "Then they got good enough to realise they deserved better pay. So they went to management and asked for a pay rise. Said they'd walk if they didn't get one.",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215171,
+                                content:
+                                    "And you know what happened? Bloomfield Station didn't care if they stayed, left, or starved. Management didn't want skilled workers. They wanted obedient ones. So they told them they weren't worth the money and showed them the door. In the end... Hugh was the only one left.",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215172,
+                                content:
+                                    "And there are signs of torture. On his wrist, the number 608 was carved with a knife. The wound's fresh. Judging by the bleeding and the angle, he did it himself shortly before he died.",
+                                npc: 700481,
+                            },
+                            {
+                                id: 51215173,
+                                content: "{nickname}, we need a decision. What's your call?",
+                                npc: 100401,
+                                options: [
+                                    {
+                                        id: 51215174,
+                                        content: "(Help the Screwdriver Union. Let Lorent go.)",
+                                        next: 51215175,
+                                    },
+                                    {
+                                        id: 51215177,
+                                        content: "(Help the Steamwhistle Salon. Stop Lorent.)",
+                                        next: 51215178,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 51215175,
+                                content: "This is for Maggie. And for the workers. Now go. Warn Eisenbahn.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215176,
+                                content: "Thank you. You've made the sensible choice.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215178,
+                                content: "...Change comes at a price.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215179,
+                                content:
+                                    "I've seen too many people in this station living one step from death. For them, I'm not sure anything could be much worse than the way things are now.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215180,
+                                content:
+                                    "When I told the workers about the plan, almost all of them said yes on the spot. That was their choice. They're not as cowardly or as short-sighted as you think.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215181,
+                                content:
+                                    "They know that if they keep living like this, five years from now, ten years from now, fifty years from now — nothing will change. That's why they chose to fight back, even knowing there may be a price.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215182,
+                                content: "Perhaps this is the only chance they'll ever have.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215183,
+                                content: "Very well. Then you'll see for yourselves just how wrong you are.",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215184,
+                                content: "(You strike Lorent on the back of the neck, knocking him unconscious.)",
+                            },
+                            {
+                                id: 51215185,
+                                content: "What now?",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215186,
+                                content: "The play should be starting soon. Little Minion, should we head to the concourse?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215187,
+                                content:
+                                    "Not yet. Maggie's still unconscious. Outsider, get her somewhere safe. Snow, do you have paper and a pen?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215188,
+                                content: "Yep! What do you need them for?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215189,
+                                content: 'Let me see... "For Maggie... Locker No. 712... Registered under: {nickname}."',
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215190,
+                                content: "Little Minion, isn't that the thing Handy Cicero left behind? The... um...",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215191,
+                                content:
+                                    "The Flodia Bloomfield Station Annual Accounts Ledger. Sometimes the safest place to hide something is right under everyone's nose. So we moved it to another locker and registered it again under my name.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215192,
+                                content: "You want to give the ledger to Maggie? Why?",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215193,
+                                content:
+                                    "It just feels right. I can't really explain it yet. There — the note's in Maggie's pocket. Let's go. The play's about to begin.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040809,
+                name: "Go watch the performance",
+                desc: "Whether it was the shock of Lorent's betrayal or the force of the guard's strike to her neck, Maggie has passed out. You're left to face Lorent alone, listening to him spout his justifications. Regardless of whether you believe him, you've made your choice. But before you head to the performance, there's one last thing you must do...",
+                nodes: [
+                    {
+                        id: "17823551146851591986",
+                        type: "TalkNode",
+                        name: "前往站厅，站厅中汽笛沙龙组织的戏剧即将开始表演",
+                        srId: 106001,
+                        pos: [-8920, 30],
+                        dialogues: [
+                            {
+                                id: 51215195,
+                                content:
+                                    "So many people! Whoa... I can't see the stage, even on tiptoe. Little Minion, Outsider, what's happening up there?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215196,
+                                content: "Easy. Hasn't started yet. Wait — that's Seaton.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215197,
+                                content:
+                                    "And now, my dear old comrade, Stationmaster Eisenbahn. To mark the tenth anniversary of your appointment to Bloomfield Station, the Steamwhistle Salon has prepared a modest play in honour of your achievements. We sincerely hope it pleases you.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215198,
+                                content: "That won't be necessary. I'm no man of the theatre, and I've never cared much for plays.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215199,
+                                content:
+                                    "...If Your Honour truly does not wish to watch, we shall of course respect your decision. Still, young Levi has spent the past month rehearsing in hopes of performing before you.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215200,
+                                content: "Surely we needn't let all that effort go to waste, Your Honour?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215201,
+                                content: "Fine. I'll watch. But don't make a habit of this sort of thing.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215202,
+                                content: "As you wish, Your Honour. There won't be a next time.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215203,
+                                content:
+                                    "The lights in the concourse slowly dim. Levi, dressed as a younger Eisenbahn, steps into the spotlight.",
+                            },
+                            {
+                                id: 51215204,
+                                content:
+                                    "My name... is Eisenbahn. On the southern front, I saw Death walk the earth. While others slept soundly in warm beds, we sat in smoke and gunfire, tearing strips from our trousers to bind wounds that would not stop bleeding.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215205,
+                                content:
+                                    "The war ended, and at last sleep should have been mine. But the Devil of Slumber showed me no mercy. Each time I closed my eyes, it whispered the same numbers into my ear — 214. 97. 83. 7.62. 1.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215206,
+                                content: "214 days — the length of the rebellion.\n97 squads — sent to suppress it.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215207,
+                                content: "83 grams — the weight of a day's ration.\n7.62 millimetres — the calibre of a lead shot.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215208,
+                                content: "1 survivor — all that remained of my squad when the war was over.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215209,
+                                content:
+                                    "The bullets never found me. The frozen trenches never claimed me. Yet the eyes of my fallen brothers-in-arms have never stopped watching me.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215210,
+                                content:
+                                    "If I forget those eyes, I cannot face death with a clear conscience. If I remember them, I cannot truly live. So I fled north, to this realm of snow, hoping that in this frozen land I might find a warmer sun than the one I had left behind on the southern front.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215211,
+                                content:
+                                    "That must be from before Eisenbahn came to Bloomfield Station. I remember the storehouse keeper mentioning it — they served together during the war.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215212,
+                                content: "Whoa... Eisenbahn's rubbing his eyes. Is he crying?",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215213,
+                                content:
+                                    "Seaton really came prepared. He's probably waiting for Eisenbahn to get drawn into the performance before he makes his move.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040810,
+                name: "Observe Eisenbahn's reaction",
+                desc: "You let Lorent go. As Eisenbahn's lackey, he will surely report back to him. You're certain that Eisenbahn has prepared thoroughly. The question is — how will he respond to this murderous drama staged against him?",
+                nodes: [
+                    {
+                        id: "17823551146851591990",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-10600, -2120],
+                        next: ["17823551146851591993"],
+                        dialogues: [
+                            {
+                                id: 51215215,
+                                content: "But if Lorent reached him, Eisenbahn should already know what's coming.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215216,
+                                content: "Huh! So he's only pretending? Crocodile tears! And I almost felt sorry for him!",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215217,
+                                content: "Doesn't matter. Let's look around and see what Eisenbahn has prepared.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851591993",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-10600, -2120],
+                        next: ["17823551146851591995"],
+                        dialogues: [
+                            {
+                                id: 51215220,
+                                content: "There are station guards hiding behind nearly every pillar... How has Seaton not spotted them?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215221,
+                                content: "Not from where he's standing. They're all in his blind spot.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215222,
+                                content: "Even so, he should have people keeping watch... Unless Eisenbahn got to them first.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215223,
+                                content: "Wouldn't surprise me.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851591995",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-10600, -2120],
+                        next: ["17823551146851591991"],
+                        dialogues: [
+                            {
+                                id: 51215226,
+                                content:
+                                    "Station guards have the entrances covered. The Screwdriver Union is holding the route by the ironworks stack. Every way out is sealed.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215227,
+                                content:
+                                    "Hey, those protesters yelling about Eisenbahn's smuggling are gone too. Maybe he had them cleared out.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215228,
+                                content:
+                                    "Looks like Eisenbahn has everything under control. He's not just prepared for the assassination — he means to wipe out the entire Steamwhistle Salon in one move.",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851591991",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-10600, -2120],
+                        dialogues: [
+                            {
+                                id: 51215230,
+                                content:
+                                    "I'm starting to think we were right to let Lorent go. Taking on someone like Eisenbahn, in a place like Bloomfield Station, was always going to be nearly impossible. Seaton doesn't stand a chance.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215231,
+                                content: "...The gun scene should be coming up any moment. Let's see how Eisenbahn handles it.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040811,
+                name: "Speak with Outsider",
+                desc: "You've knocked Lorent out. He won't make it to the performance in time. Before the show officially begins, you need to inform Seaton.",
+                nodes: [
+                    {
+                        id: "17823551146851592002",
+                        type: "TalkNode",
+                        name: "跟奥特赛德说话",
+                        srId: 106001,
+                        pos: [-10490, -2130],
+                        next: ["17823551146851592003"],
+                        dialogues: [
+                            {
+                                id: 51215233,
+                                content:
+                                    "Let's check in with Seaton before the play starts. See if his side is ready. We should probably tell him there's a mole in the Screwdriver Union too.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215234,
+                                content:
+                                    "Good point. We haven't checked in with Seaton since we got here. But judging by Levi's performance, his side seems ready enough.",
+                                npc: 100401,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851592003",
+                        type: "TalkNode",
+                        name: "跟西顿说话",
+                        srId: 106001,
+                        pos: [-8070, -780],
+                        dialogues: [
+                            {
+                                id: 51215236,
+                                content:
+                                    "Ah, there you are. Fashionably late, I see. I trust you bring excellent news. Well? Has the Screwdriver Union agreed to join us?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215237,
+                                content:
+                                    "No need to answer, perhaps. One look at all the ironworkers gathered here tells me you have done your part splendidly.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215238,
+                                content:
+                                    "That's Eisenbahn's doing, not ours. If he hadn't treated those workers the way he has, they wouldn't be willing to stand against him.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215239,
+                                content:
+                                    "Well said! Speaking of which, where are the Union's leaders? I have never had the pleasure of meeting them myself. Surely they are not still skulking in the shadows at a time like this?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215240,
+                                content: "About that...",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215241,
+                                content: "(You explain what happened at the Screwdriver Union.)",
+                            },
+                            {
+                                id: 51215242,
+                                content: "You mean Lorent, the man running the Screwdriver Union, was Eisenbahn's man all along?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215243,
+                                content:
+                                    "Outrageous. You haven't told anyone else, have you? No... no, that will not do. First thing tomorrow, we clear out the ranks. Every last ironworker in the Union will have to go.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215244,
+                                content: "Disloyal. Unreliable. Who knows how many of them are Eisenbahn loyalists in secret?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215245,
+                                content: "Hold on. All of them? A lot of those workers are risking their lives for you today.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215246,
+                                content: "Today, yes. Tomorrow is another matter.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215247,
+                                content:
+                                    "You would do well to learn how victors think. A useful ally today may be the knife at your back tomorrow.",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215248,
+                                content: "Now then, enough idle chatter. Eyes on the stage. The show is about to get exciting.",
+                                npc: 700580,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040812,
+                name: "Enjoy the performance...",
+                desc: "After much planning, this long-awaited murder drama has finally reached its climax. How will it end? All you can do now is hold your breath and watch...",
+                nodes: [
+                    {
+                        id: "17823551146851592009",
+                        type: "TalkNode",
+                        name: "回舞台",
+                        srId: 106001,
+                        pos: [-9970, -20],
+                        next: ["17823551146851592010"],
+                        dialogues: [
+                            {
+                                id: 51215250,
+                                content: "By now, the play about Eisenbahn's past had reached its climax.",
+                            },
+                            {
+                                id: 51215251,
+                                content:
+                                    "What is it that has stolen your souls? No — even if they had been torn from you, you should not be so easily devoured by fear. You fear snow burying the tracks. You fear wind overturning the carriages.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215252,
+                                content:
+                                    "If such fears are enough to make you shrink from the stationmaster's burden, how do you find the courage to sit down to a meal? Do you not fear choking on your bread, or drowning in your soup?",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215253,
+                                content:
+                                    "The storm will pass. Even the longest night must one day give way. And the railway shall stretch forth like golden threads spun from the sun itself, linking Icelake and Dismania.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215254,
+                                content:
+                                    "And so I curse that storm — that howling, formless beast that holds all things back. Into these three bullets, I pour all my hatred.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215255,
+                                content: "And in the end... I shall become the sun that scatters it—",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215256,
+                                content: "Go to hell, Eisenbahn!",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215257,
+                                content: "An excellent performance. A pity I cannot grant your wish.",
+                                npc: 100416,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851592010",
+                        type: "TalkNode",
+                        name: "站桩a",
+                        srId: 106001,
+                        pos: [-9970, -20],
+                        dialogues: [
+                            {
+                                id: 51215258,
+                                content:
+                                    "Levi levelled his gun at Eisenbahn and pulled the trigger. Nothing happened. Before he could react, a volley of bullets tore through him.",
+                            },
+                            {
+                                id: 51215259,
+                                content: "What...?",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215260,
+                                content: "Naive, boy. Your gun was emptied before you ever set foot on that stage.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215261,
+                                content:
+                                    "A killer knows when a loaded gun is a few rounds light. You didn't. The moment I saw that look in your eyes, I knew I'd won.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215262,
+                                content: "You're a fine actor. Shame your finest role was a failed assassin.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215263,
+                                content:
+                                    "Lorent, get your people moving. Round up the conspirators from the Steamwhistle Salon. Seaton is to be shot on sight.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215264,
+                                content: "At once, sir. Though... don't you want to interrogate him yourself?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215265,
+                                content: "No. He's a fool. I don't even want to see the corpse. Throw it outside for the snow wolves.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215266,
+                                content:
+                                    "Time is precious. I've wasted enough of it playing along with this little farce. The real threat is still out there, and I'll deal with it myself.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215267,
+                                content: "Isn't that right... Phoxhunters?",
+                                npc: 100416,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040813,
+                name: "Enjoy the performance...",
+                desc: "After much planning, this long-awaited murder drama has finally reached its climax. How will it end? All you can do now is hold your breath and watch...",
+                nodes: [
+                    {
+                        id: "17823551146851592015",
+                        type: "TalkNode",
+                        name: "回舞台",
+                        srId: 106001,
+                        pos: [-9970, -20],
+                        next: ["17823551146851592016"],
+                        dialogues: [
+                            {
+                                id: 51215250,
+                                content: "By now, the play about Eisenbahn's past had reached its climax.",
+                            },
+                            {
+                                id: 51215251,
+                                content:
+                                    "What is it that has stolen your souls? No — even if they had been torn from you, you should not be so easily devoured by fear. You fear snow burying the tracks. You fear wind overturning the carriages.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215252,
+                                content:
+                                    "If such fears are enough to make you shrink from the stationmaster's burden, how do you find the courage to sit down to a meal? Do you not fear choking on your bread, or drowning in your soup?",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215253,
+                                content:
+                                    "The storm will pass. Even the longest night must one day give way. And the railway shall stretch forth like golden threads spun from the sun itself, linking Icelake and Dismania.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215254,
+                                content:
+                                    "And so I curse that storm — that howling, formless beast that holds all things back. Into these three bullets, I pour all my hatred.",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215255,
+                                content: "And in the end... I shall become the sun that scatters it—",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215256,
+                                content: "Go to hell, Eisenbahn!",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215257,
+                                content: "An excellent performance. A pity I cannot grant your wish.",
+                                npc: 100416,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823551146851592016",
+                        type: "TalkNode",
+                        name: "站桩b",
+                        srId: 106001,
+                        pos: [-9970, -20],
+                        dialogues: [
+                            {
+                                id: 51215269,
+                                content:
+                                    "Levi levelled his gun at Eisenbahn. Before he could pull the trigger, Eisenbahn drew his own pistol and fired.",
+                            },
+                            {
+                                id: 51215270,
+                                content: "What...? You... How did you know...?",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215271,
+                                content: "I'd sooner ask why you thought I wouldn't.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215272,
+                                content:
+                                    "Did Seaton never tell you? He was one of the spineless fools who refused to shoulder the burden of running this station. That's how the stationmaster's chair fell to me instead.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215273,
+                                content:
+                                    "All these years later, nothing has changed. Even when he tries to assassinate me, he still hasn't the nerve to dirty his own hands.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215274,
+                                content: "Don't you dare insult Mr Seaton... He is—",
+                                npc: 700594,
+                            },
+                            {
+                                id: 51215275,
+                                content: "He's nothing. You, on the other hand, have nerve. A pity you won't live to see what he becomes.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215276,
+                                content: "Bring that coward here.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215277,
+                                content:
+                                    "Wh—What are you doing!? You had better think very carefully before you act. I am a Brutus. A noble! Lay a hand on me, and there will be consequences!",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215278,
+                                content: "Consequences? What consequences? I'll simply file one more accident report.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215279,
+                                content: "...",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215280,
+                                content:
+                                    "How did you know? All these years, I played your loyal supporter. I bowed and scraped at your feet. As far as I know, I never once slipped. Why did you suspect me?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215281,
+                                content: "Never slipped? Empty flattery is the easiest tell of all.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215282,
+                                content: "So I decided to test you. I usually handle Phoxichor transactions rather discreetly, you know.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215283,
+                                content: "...You let me get that photograph?",
+                                npc: 700580,
+                            },
+                            {
+                                id: 51215284,
+                                content:
+                                    "Enough. I don't owe you answers. The trouble you caused me was manageable, but it has become more of a nuisance than I care to allow.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215285,
+                                content:
+                                    "Without a trace of emotion, Eisenbahn raised his pistol to shoot Seaton. At the last moment, however, he turned his head and looked at you...",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040814,
+                name: "Escape the station and defeat the soldiers",
+                desc: "Whatever the reason, Seaton's scheme was far too crude against a seasoned schemer like Eisenbahn. Unexpectedly, your presence has also been exposed. Faced with swarming soldiers, the only option is to fight your way out.",
+                nodes: [
+                    {
+                        id: "17823551146851592022",
+                        type: "TalkNode",
+                        name: "结束战斗后进站桩",
+                        srId: 106001,
+                        pos: [-9730, -70],
+                        dialogues: [
+                            {
+                                id: 51215291,
+                                content: "Give it up. This is Bloomfield Station. To me, this place is as much a part of me as any limb.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215292,
+                                content: "Here, you scurry like rats under the noonday sun — exposed, scrambling, impossible to miss.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215293,
+                                content: "Mr Eisenbahn... they've done a great deal for the Screwdriver Union. Could you let them go?",
+                                npc: 700582,
+                            },
+                            {
+                                id: 51215294,
+                                content:
+                                    "You see? That plea only convinces me further that they can't be allowed to leave this station alive.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215295,
+                                content:
+                                    "You would never speak up for Seaton. You hesitate even when asking me to throw the workers a few crumbs. Yet here you are, pleading for them.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215296,
+                                content:
+                                    "Do you understand, Lorent? There is no feeling I despise more than losing control. And since becoming stationmaster, I haven't felt it once.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215297,
+                                content:
+                                    "They nearly brought the station's two factions together. They nearly made my own two hands close around my throat. As though they possessed some kind of magic.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215298,
+                                content:
+                                    "I'll take that as a compliment. We were only gathering the information we needed and helping people where we could.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215299,
+                                content:
+                                    "If that counts as magic, Eisenbahn, then you are the one who gave it to us. If you had taken care of your own people, they would never have needed us.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215300,
+                                content:
+                                    "Phoxhunters, have you spent so long chasing bounty money that you've forgotten a simple fact of life? No one can please everyone.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215301,
+                                content:
+                                    "Even the sun, shining equally upon all things, casts shadows. Yet you hide in those shadows and accuse the sun of injustice. Don't you find that ridiculous?",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215302,
+                                content:
+                                    "If I tried to satisfy everyone, I'd have to shorten the ironworkers' hours so they could rest, and lengthen them so they could earn more.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215303,
+                                content:
+                                    "I'd have to pack more passengers in to keep revenue up, and hold the numbers down so the trains wouldn't be overcrowded.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215304,
+                                content:
+                                    "I'd have to support the Screwdriver Union and let the engineers run everything, while also funding the Steamwhistle Salon so they could indulge their refined tastes.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215305,
+                                content:
+                                    "That was what I faced in my first years as stationmaster. Not a station, but a monster with a thousand mouths to complain, no ears to listen, and fingers enough to point blame in every direction.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215306,
+                                content:
+                                    "A railway can't run on something like that. So I drew my gun and fed the monster a full magazine.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215307,
+                                content:
+                                    "The world grew quiet. There was the occasional noise, of course, but Bloomfield Station kept moving forward. The monster never stirred again. Until... you arrived.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215308,
+                                content: "So... what you're saying is, we're not walking out of here alive today?",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215309,
+                                content:
+                                    "A few Phoxhunters disappearing at Bloomfield Station might not make the papers. But it'd be enough to make some of your big shots start paying attention.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215310,
+                                content:
+                                    "Big shots? Don't make me laugh. If you mean that woman calling herself a Legion Overseer, I can assure you — by now, she's in far deeper trouble than you are.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215311,
+                                content:
+                                    "Why do you think I smuggle Phoxichor? To feed the bloated appetites of the greedy bastards above me.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215312,
+                                content:
+                                    "That's why Seaton was such a fool. He thought a little commotion would be enough to bring me down. Too much theatre, not enough sense.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215313,
+                                content:
+                                    "Do you really think I could have kept this chair for so many years if the higher-ups hadn't signed off on it? So, who else do you imagine will notice when you're gone? Go on. Name them.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215314,
+                                content: "We were hoping not to use this. But since you asked...",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215315,
+                                content: "Funny thing. We happened to get our hands on a little book.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215316,
+                                content:
+                                    "The brave young man you murdered managed to leave one last piece of evidence behind — the Flodia Bloomfield Station Annual Accounts Ledger.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215317,
+                                content: "And as luck would have it, that ledger contains a long list of names and figures. Snow?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215318,
+                                content: "Uh-huh! Fiscus, Deputy Finance Secretary for Cocytus — 12,000 gold.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215319,
+                                content: "Peso, Deputy Chief of the 6th Legion — 3,000 gold.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215320,
+                                content: "Nomen, personal valet to the Municipal Administrator of Icelake — 15,000 gold.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215321,
+                                content:
+                                    'And every one of those payments was filed under "Station Employee Welfare Improvements"! Well? Want me to keep going? There\'s lots more, and I remember every single one!',
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215322,
+                                content:
+                                    "...I never imagined the missing ledger would end up in your hands. You're even more capable than I gave you credit for.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215323,
+                                content: "Scared now? Then let us go!",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215324,
+                                content:
+                                    "Hm. If you're that confident, I can assume you've hidden the original somewhere beyond my reach. Killing you would change nothing.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215325,
+                                content: "And yet you don't look worried. Or is that just a brave face?",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215326,
+                                content: "Sharp eye. The truth is, you've hit a nerve. I can't afford to let that ledger get out.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215327,
+                                content:
+                                    "Still, you've missed the point. Why would I fear the ledger leaving Icelake? Haven't you figured it out? If the people named in that ledger decide to act together, not even a bird leaves this city.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215328,
+                                content: "Then what are you afraid of? You don't look like you're sparing us out of mercy.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215329,
+                                content: "...I've got it. It's not the ledger getting out. It's <H>who's in it</>.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215330,
+                                content:
+                                    "The Deputy Finance Secretary for Cocytus controls the station's funding. Naturally, Eisenbahn wants to keep him happy. That's why he got twelve thousand gold.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215331,
+                                content:
+                                    "The Deputy Chief of the 6th Legion... Big name. Local heavyweight. But he has nothing to do with the station's day-to-day operations. So he only got three thousand.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215332,
+                                content: "Then why did the Administrator's valet get so much?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215333,
+                                content:
+                                    "That's the key. Some important people use their servants like personal aides. They look insignificant, but they handle the real work. Sometimes a nobody with access is worth more than a dozen big names.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215334,
+                                content:
+                                    "Eisenbahn paid them according to how useful they were to him. Funny thing is, the amounts are almost the opposite of what their ranks would suggest.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215335,
+                                content:
+                                    "So that's what he's really afraid of. If this ledger gets out, every one of them will find out what the others were paid. And when some of them realise they got the smallest cut, they'll come knocking. The Deputy Chief of the 6th Legion, for one.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215336,
+                                content:
+                                    "Eisenbahn may be able to do whatever he likes inside this station, but outside these walls, he can't afford to offend the Legion.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215337,
+                                content: "I see... The world of important people is messier than I thought.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215338,
+                                content: "Did we get that right, Stationmaster Eisenbahn?",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215339,
+                                content:
+                                    "Indeed. The fact that you managed to work that out almost makes me want to hire you. The Steamwhistle Salon may be useless, but losing that many people overnight would still cause complications.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215340,
+                                content: "We'll pass. We've had enough guns pointed at us for one day.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215341,
+                                content:
+                                    "Agreed. For everyone's sake, it would be better if our paths did not cross again. I'm sure people as smart as you know what to do with that ledger.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215342,
+                                content: "We do. But in return, we want one thing from you.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215343,
+                                content:
+                                    "Leave the Screwdriver Union workers out of this. Don't lay a finger on them. Unless you want everyone named in that ledger to have a copy by tomorrow morning.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215344,
+                                content: "Very well. Then I expect the same restraint from you.",
+                                npc: 100416,
+                            },
+                            {
+                                id: 51215345,
+                                content: "No one has made me sweat in all my years as stationmaster. Until now. Take pride in that.",
+                                npc: 100416,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040816,
+                name: "Speak with Snow",
+                desc: "Conversing with such a man is pure torment. Among the few pieces of evidence you have, you find the most crucial one — enough to save your own life. To Eisenbahn, it's nothing short of a bombshell. Be grateful: after this farce ends, you've managed to keep your lives.",
+                nodes: [
+                    {
+                        id: "17823551146851592033",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106001,
+                        pos: [-20930, -590],
+                        dialogues: [
+                            {
+                                id: 51215347,
+                                content:
+                                    "Phew... Looks like that's finally over. It's been a while since I had that many guns pointed at me.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215348,
+                                content: "There's still one thing left to do. Let's head back and check on Maggie.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215349,
+                                content: "Because of the ledger? Yeah. The kid deserves an explanation.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215350,
+                                content:
+                                    "Oh, right! Maggie should be awake by now. She still doesn't know Lorent betrayed the Union, does she? Come on, let's go tell her!",
+                                npc: 100402,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 20040817,
+                name: "Return to the Screwdriver Union",
+                desc: "Surviving isn't enough. You must hand the axe that threatens Eisenbahn to Maggie — hoping that one day, she'll grow strong enough to wield it, and with one clean swing, sever the roots of this parasitic tree and end his reign.",
+                nodes: [
+                    {
+                        id: "17823551146851592039",
+                        type: "TalkNode",
+                        name: "回到螺丝刀协会驻地与玛吉和克罗格对话",
+                        srId: 106301,
+                        pos: [-18460, 11720],
+                        dialogues: [
+                            {
+                                id: 51215352,
+                                content:
+                                    "You go punch Lorent in the face, Kroger! Right now! He's a damn traitor! He let the guards beat me up!",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215353,
+                                content: "What the hell...? I only came back to ask what happened with that play in the concourse.",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215354,
+                                content:
+                                    "Forget the play! Lorent called me a slippery brat in front of a guard, then just stood there while the bastard hit me! I don't care — go find him and punch him, or I'm gonna lose it!",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215355,
+                                content: "Maggie...",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215356,
+                                content: "Who's that!? Oh, it's you. {nickname}, Snow, and the tall bloke.",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215357,
+                                content: "I have a name. It's Outsider...",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215358,
+                                content:
+                                    "{nickname}, you saw it, right? Tell him! Lorent's a traitor! He called me a slippery brat right in front of that guard!",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215359,
+                                content: "You're right. Lorent is a traitor. Just... not exactly the kind you mean.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215360,
+                                content:
+                                    "(You carefully explain what happened: Lorent's betrayal of the Screwdriver Union, and the Steamwhistle Salon's attempt to assassinate Eisenbahn.)",
+                            },
+                            {
+                                id: 51215361,
+                                content:
+                                    "Bloody hell. Picked the wrong day to go out with Hugh, didn't I? Had no idea things were getting this big around the station today.",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215362,
+                                content: "Lorent... how could he do this? That's not like him... Why...?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215363,
+                                content:
+                                    "You didn't see it? I always knew there was something off about him. A worker who never swears? That's not natural. Always acting so bloody respectable, like he was better than the rest of us. I knew the bastard was bad news.",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215364,
+                                content: "But he...",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215365,
+                                content: "People don't always fit neatly into traitors and heroes, you know.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215366,
+                                content:
+                                    "Outsider's right. What Lorent did was betrayal. But I don't think he did it to hurt you. He saw things differently, and in his own way, he was trying to protect the Screwdriver Union.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215367,
+                                content:
+                                    "But he was still tipping Eisenbahn off! Though... if Eisenbahn already knew, I guess it might not have made much difference either way.",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215368,
+                                content: "Then what about that ledger you had me get from the locker...?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215369,
+                                content:
+                                    "We found it by chance. We won't be staying here long, and it wouldn't do much good in our hands. But after today, it's clear it means a great deal to the people who live here.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215370,
+                                content:
+                                    "So when Lorent was so desperate to find the ledger... he wasn't trying to bring Eisenbahn down at all. He was going to give it back to him, wasn't he?",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215371,
+                                content: "I don't know, Maggie. I really don't.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215372,
+                                content: "...",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215373,
+                                content:
+                                    "This is all I can do for now. That ledger may be the only thing that can bring Eisenbahn down. I'm leaving it with you, Maggie.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215374,
+                                content: "It's a heavy burden. But I know you can carry it. So hold your head high, Maggie.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215375,
+                                content:
+                                    "Whoa, whoa! You're making it sound like the whole future of the Screwdriver Union is riding on some kid they shoved into the chairman's chair!",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215376,
+                                content:
+                                    "Don't be afraid, Maggie. I've got your back! With this ledger, it's only a matter of time before we bring Eisenbahn down. And when we do, we'll kick Lorent's arse!",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215377,
+                                content: "...Right! We'll bring down Eisenbahn! And kick Lorent's arse!",
+                                npc: 700581,
+                            },
+                            {
+                                id: 51215378,
+                                content: "Bring down Eisenbahn! Kick Lorent's arse!",
+                                npc: 700591,
+                            },
+                            {
+                                id: 51215379,
+                                content: "Bring down Eisenbahn! Kick Lorent's arse!",
+                                npc: 100402,
+                            },
+                            {
+                                id: 51215380,
+                                content: "Button Mushroom, since when were you part of the Screwdriver Union? Come on, let's get moving.",
+                                npc: 100401,
+                            },
+                            {
+                                id: 51215381,
+                                content:
+                                    "Then I'll leave you with something I learned in a distant land: may we meet again in better days.",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215382,
+                                content:
+                                    "(So much happened at the station today, but we couldn't afford to stay. We still had a mission to finish. The Screwdriver Union. The Steamwhistle Salon. Eisenbahn. To us, they should have been nothing more than stops along the way.)",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215383,
+                                content: "(And yet, I couldn't stop thinking about the people we'd met there.)",
+                                npc: 100001,
+                            },
+                            {
+                                id: 51215384,
+                                content:
+                                    "The iron beast thundered across the wastes of Hyperborea. Its engines roared, and every cog in its body burned red-hot with the souls of those who kept it moving.",
+                            },
+                            {
+                                id: 51215385,
+                                content:
+                                    "But would those souls one day seize the reins and steer that iron beast towards a different future?",
+                            },
+                            {
+                                id: 51215386,
+                                content: "I did not know. But I believed one thing.",
+                            },
+                            {
+                                id: 51215387,
+                                content:
+                                    "Change had already begun. Seaton's rebellion, born of selfish ambition, was little more than a spark. But beneath that spark, the whole station lay dry as kindling.",
+                            },
+                            {
+                                id: 51215388,
+                                content:
+                                    "In the Steamwhistle Salon, there were still young people who had not forgotten why they once looked up at the sun. In the Screwdriver Union, there were ironworkers who still longed for a better life. Handy had died in pursuit of justice and truth. Maggie and Coney, and countless children like them, were still looking towards a future that had yet to be written.",
+                            },
+                            {
+                                id: 51215389,
+                                content: "Let those children be the ones to witness Bloomfield Station's future.",
                             },
                         ],
                     },

@@ -76,6 +76,20 @@ export const monsterTagData: MonsterTag[] = [
         },
     },
     {
+        id: "Mon.Strong.Empower",
+        name: "Mon_Guide_Title_Strong_Empower",
+        desc: "",
+        vars: {
+            BUFF持续: 5,
+            加成: {
+                移动速度: 0.5,
+                DamagedRate: 0.5,
+                DamageRate: 0.5,
+                技能速度: 0.8,
+            },
+        },
+    },
+    {
         id: "Mon.Strong.Fade",
         name: "枯萎 号令者",
         desc: "“号令者”是敌人中拥有号令者能力的强大个体。\n枯萎 号令者每隔一段时间从自身周围发射3条[枯萎射线]：持续10秒，且持续旋转，对命中的敌对目标造成伤害并削减目标神智。",
@@ -88,7 +102,7 @@ export const monsterTagData: MonsterTag[] = [
     {
         id: "Mon.Strong.Frozen",
         name: "凛霜 号令者",
-        desc: "“号令者”是敌人中拥有号令者能力的强大个体。\n凛霜 号令者被远程武器攻击命中时，向攻击来源发射冰锥，命中敌对目标时造成伤害并附加1层[减速]：降低攻击速度和移动速度，持续3秒，最多叠加5层。",
+        desc: "“号令者”是敌人中拥有号令者能力的强大个体。\n凛霜 号令者被远程武器攻击命中时，向攻击来源发射冰锥，命中敌对目标时造成伤害并附加1层减速，持续3秒，最多叠加5层。",
         vars: {
             飞行速度: 1500,
             持续时间: 5,
@@ -252,6 +266,15 @@ export const monsterTagData: MonsterTag[] = [
             持续时间: 9,
             最大召唤数量: 1,
             每次召唤数量: 1,
+        },
+    },
+    {
+        id: "Mon.Strong.Shred",
+        name: "Mon_Guide_Title_Strong_Shred",
+        desc: "",
+        vars: {
+            飞行速度: 0,
+            持续时间: 5,
         },
     },
     {

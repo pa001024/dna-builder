@@ -108,17 +108,14 @@ function readVersions(): ImgsPackVersionEntry[] {
 }
 
 /**
- * 比较两个文件列表是否一致。
- * @param left 左侧列表
- * @param right 右侧列表
- * @returns 是否一致
+ * 筛选所有历史版本中尚未打包的图片。
+ * @param currentFiles 当前图片列表
+ * @param versions 历史版本列表
+ * @returns 待打包的新增图片列表
  */
-function filesEqual(left: string[], right: string[]): boolean {
-    if (left.length !== right.length) {
-        return false
-    }
-
-    return left.every((item, index) => item === right[index])
+export function collectNewFiles(currentFiles: string[], versions: Pick<ImgsPackVersionEntry, "files">[]): string[] {
+    const packedFiles = new Set(versions.flatMap(entry => entry.files))
+    return currentFiles.filter(file => !packedFiles.has(file))
 }
 
 /**
@@ -187,14 +184,14 @@ async function main(): Promise<void> {
     ensureDir(outDir)
     const files = collectCurrentFiles()
     const versions = readVersions()
-    const lastEntry = versions.at(-1)
-    if (lastEntry && filesEqual(lastEntry.files, files)) {
-        console.log("图片无变化，跳过打包")
+    const newFiles = collectNewFiles(files, versions)
+    if (!newFiles.length) {
+        console.log("没有新增图片，跳过打包")
         return
     }
 
     const version = String(versions.length + 1)
-    const entry = buildPack(version, files)
+    const entry = buildPack(version, newFiles)
     const entries: ImgsPackVersionEntry[] = [...versions, entry]
 
     fs.writeFileSync(versionsPath, JSON.stringify(entries, null, 2))
@@ -205,7 +202,9 @@ async function main(): Promise<void> {
     }
 }
 
-main().catch(error => {
-    console.error(error)
-    process.exit(1)
-})
+if (import.meta.main) {
+    main().catch(error => {
+        console.error(error)
+        process.exit(1)
+    })
+}

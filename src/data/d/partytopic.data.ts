@@ -10185,6 +10185,15 @@ export const partyTopicData: PartyTopic[] = [
         ],
     },
     {
+        id: 210201,
+        charId: 2102,
+        name: "",
+        reward: 7050,
+        consume: {
+            "19006": 2,
+        },
+    },
+    {
         id: 230101,
         charId: 2301,
         name: "超级变变",

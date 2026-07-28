@@ -178,9 +178,11 @@ describe("getPreFullPackageInfo", () => {
 
 describe("getHotUpdateVersionList", () => {
     it("热更版本应该继续使用旧 VersionList.json", async () => {
-        vi.mocked(tauriFetch).mockReset().mockResolvedValueOnce({
-            json: async () => ({ versionList: {} }),
-        } as Response)
+        vi.mocked(tauriFetch)
+            .mockReset()
+            .mockResolvedValueOnce({
+                json: async () => ({ versionList: {} }),
+            } as Response)
 
         await getHotUpdateVersionList("https://cdn.example.com", "PC_OBT_CN_Pub")
 

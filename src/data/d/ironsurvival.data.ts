@@ -36,6 +36,7 @@ export const ironSurvivalData: Record<number, IronSurvival> = {
     "91601": {
         DungeonId: 91601,
         LevelThreshold: [120, 160],
+        MiniGameCreatorId: 101,
         MonsterSpawnId: [
             [916021, 916101],
             [916012, 916102],
@@ -57,6 +58,7 @@ export const ironSurvivalData: Record<number, IronSurvival> = {
     "91602": {
         DungeonId: 91602,
         LevelThreshold: [120, 160],
+        MiniGameCreatorId: 101,
         MonsterSpawnId: [
             [916021, 916101],
             [916012, 916102],
@@ -78,6 +80,7 @@ export const ironSurvivalData: Record<number, IronSurvival> = {
     "91603": {
         DungeonId: 91603,
         LevelThreshold: [120, 160],
+        MiniGameCreatorId: 101,
         MonsterSpawnId: [
             [916021, 916101],
             [916012, 916102],
@@ -99,6 +102,7 @@ export const ironSurvivalData: Record<number, IronSurvival> = {
     "91604": {
         DungeonId: 91604,
         LevelThreshold: [120, 160],
+        MiniGameCreatorId: 101,
         MonsterSpawnId: [
             [916021, 916101],
             [916012, 916102],
@@ -120,6 +124,7 @@ export const ironSurvivalData: Record<number, IronSurvival> = {
     "91605": {
         DungeonId: 91605,
         LevelThreshold: [120, 160],
+        MiniGameCreatorId: 101,
         MonsterSpawnId: [
             [916021, 916101],
             [916012, 916102],
@@ -141,6 +146,7 @@ export const ironSurvivalData: Record<number, IronSurvival> = {
     "91606": {
         DungeonId: 91606,
         LevelThreshold: [120, 160],
+        MiniGameCreatorId: 101,
         MonsterSpawnId: [
             [916021, 916101],
             [916012, 916102],
@@ -163,6 +169,7 @@ export const ironSurvivalData: Record<number, IronSurvival> = {
 
 export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
     "91601": {
+        AvaliableTicketLevel: [235],
         DungeonId: 91601,
         IronRoundsReward: {
             "100": 303104,
@@ -184,6 +191,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
         MonsterLevelDrop: [1, 2],
     },
     "91602": {
+        AvaliableTicketLevel: [235],
         DungeonId: 91602,
         IronRoundsReward: {
             "100": 303204,
@@ -205,6 +213,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
         MonsterLevelDrop: [1, 2],
     },
     "91603": {
+        AvaliableTicketLevel: [235],
         DungeonId: 91603,
         IronRoundsReward: {
             "100": 303404,
@@ -226,6 +235,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
         MonsterLevelDrop: [1, 2],
     },
     "91604": {
+        AvaliableTicketLevel: [235],
         DungeonId: 91604,
         IronRoundsReward: {
             "100": 303304,
@@ -247,6 +257,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
         MonsterLevelDrop: [1, 2],
     },
     "91605": {
+        AvaliableTicketLevel: [235],
         DungeonId: 91605,
         IronRoundsReward: {
             "100": 303604,
@@ -268,6 +279,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
         MonsterLevelDrop: [1, 2],
     },
     "91606": {
+        AvaliableTicketLevel: [235],
         DungeonId: 91606,
         IronRoundsReward: {
             "100": 303504,
@@ -287,6 +299,138 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
         },
         IronTicketId: [1001],
         MonsterLevelDrop: [1, 2],
+    },
+    "91701": {
+        AvaliableTicketLevel: [235],
+        DungeonId: 91701,
+        IronRoundsReward: {
+            "100": 313104,
+            "120": 313108,
+            "140": 313112,
+            "160": 313116,
+            "180": 313120,
+            "200": 313124,
+        },
+        IronRoundsRewardView: {
+            "100": 313104,
+            "120": 313108,
+            "140": 313112,
+            "160": 313116,
+            "180": 313120,
+            "200": 313124,
+        },
+        IronTicketId: [1002],
+        MonsterLevelDrop: [13],
+    },
+    "91702": {
+        AvaliableTicketLevel: [235],
+        DungeonId: 91702,
+        IronRoundsReward: {
+            "100": 313204,
+            "120": 313208,
+            "140": 313212,
+            "160": 313216,
+            "180": 313220,
+            "200": 313224,
+        },
+        IronRoundsRewardView: {
+            "100": 313204,
+            "120": 313208,
+            "140": 313212,
+            "160": 313216,
+            "180": 313220,
+            "200": 313224,
+        },
+        IronTicketId: [1002],
+        MonsterLevelDrop: [13],
+    },
+    "91703": {
+        AvaliableTicketLevel: [235],
+        DungeonId: 91703,
+        IronRoundsReward: {
+            "100": 313404,
+            "120": 313408,
+            "140": 313412,
+            "160": 313416,
+            "180": 313420,
+            "200": 313424,
+        },
+        IronRoundsRewardView: {
+            "100": 313404,
+            "120": 313408,
+            "140": 313412,
+            "160": 313416,
+            "180": 313420,
+            "200": 313424,
+        },
+        IronTicketId: [1002],
+        MonsterLevelDrop: [13],
+    },
+    "91704": {
+        AvaliableTicketLevel: [235],
+        DungeonId: 91704,
+        IronRoundsReward: {
+            "100": 313304,
+            "120": 313308,
+            "140": 313312,
+            "160": 313316,
+            "180": 313320,
+            "200": 313324,
+        },
+        IronRoundsRewardView: {
+            "100": 313304,
+            "120": 313308,
+            "140": 313312,
+            "160": 313316,
+            "180": 313320,
+            "200": 313324,
+        },
+        IronTicketId: [1002],
+        MonsterLevelDrop: [13],
+    },
+    "91705": {
+        AvaliableTicketLevel: [235],
+        DungeonId: 91705,
+        IronRoundsReward: {
+            "100": 313604,
+            "120": 313608,
+            "140": 313612,
+            "160": 313616,
+            "180": 313620,
+            "200": 313624,
+        },
+        IronRoundsRewardView: {
+            "100": 313604,
+            "120": 313608,
+            "140": 313612,
+            "160": 313616,
+            "180": 313620,
+            "200": 313624,
+        },
+        IronTicketId: [1002],
+        MonsterLevelDrop: [13],
+    },
+    "91706": {
+        AvaliableTicketLevel: [235],
+        DungeonId: 91706,
+        IronRoundsReward: {
+            "100": 313504,
+            "120": 313508,
+            "140": 313512,
+            "160": 313516,
+            "180": 313520,
+            "200": 313524,
+        },
+        IronRoundsRewardView: {
+            "100": 313504,
+            "120": 313508,
+            "140": 313512,
+            "160": 313516,
+            "180": 313520,
+            "200": 313524,
+        },
+        IronTicketId: [1002],
+        MonsterLevelDrop: [13],
     },
 }
 
