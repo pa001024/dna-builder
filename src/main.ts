@@ -1,6 +1,5 @@
 import { createApp, type VNode } from "vue"
 import "./style.css"
-import { registerSW } from "virtual:pwa-register"
 import * as Sentry from "@sentry/vue"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
@@ -24,10 +23,44 @@ async function registerImgsServiceWorker(): Promise<void> {
         return
     }
 
-    await navigator.serviceWorker.register(new URL("/sw-app.js", window.location.origin).toString(), {
+    const registration = await navigator.serviceWorker.register(new URL("/sw-app.js", window.location.origin).toString(), {
         scope: "/",
         updateViaCache: "none",
     })
+
+    const worker = registration.installing || registration.waiting
+    if (worker && worker.state !== "activated") {
+        await new Promise<void>((resolve, reject) => {
+            worker.addEventListener("statechange", () => {
+                if (worker.state === "activated") {
+                    resolve()
+                } else if (worker.state === "redundant") {
+                    reject(new Error("图片 Service Worker 激活失败"))
+                }
+            })
+        })
+    }
+
+    await navigator.serviceWorker.ready
+}
+
+/**
+ * 初始化数据包、图片缓存与 App 图片 Service Worker。
+ */
+async function bootstrapRuntimeAssets(): Promise<void> {
+    try {
+        await bootstrapDataPack()
+        if (env.isApp) {
+            await mountImgsToVirtualPath({
+                manifest: getLoadedDataPackImgsManifest(),
+            })
+            await registerImgsServiceWorker()
+        }
+    } catch (error) {
+        console.error("运行时资源初始化失败", error)
+    } finally {
+        dataPackBootstrapLoading.value = false
+    }
 }
 
 initI18n(localStorage.getItem("setting_lang") || navigator.language)
@@ -83,29 +116,19 @@ async function bootstrap() {
     dataPackBootstrapLoading.value = true
     app.mount("#app")
     requestAnimationFrame(() => {
-        bootstrapDataPack()
-            .then(() => {
-                if (env.isApp) {
-                    void mountImgsToVirtualPath({
-                        manifest: getLoadedDataPackImgsManifest(),
-                    })
-                        .then(() => registerImgsServiceWorker())
-                        .catch(error => {
-                            console.error("图片缓存预热失败", error)
-                        })
-                }
-
-                return undefined
-            })
-            .finally(() => {
-                dataPackBootstrapLoading.value = false
-            })
+        void bootstrapRuntimeAssets()
     })
     // 仅在非应用环境下注册 Service Worker
     if (!env.isApp) {
-        registerSW({
-            immediate: true,
-        })
+        void import("virtual:pwa-register")
+            .then(({ registerSW }) => {
+                registerSW({
+                    immediate: true,
+                })
+            })
+            .catch(error => {
+                console.error("PWA 注册失败", error)
+            })
     }
 }
 

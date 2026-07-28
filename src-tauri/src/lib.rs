@@ -3289,6 +3289,7 @@ pub fn run() {
         let handle = app.handle();
         let window = app.get_webview_window("main").unwrap();
         // window.set_shadow(true).expect("Unsupported platform!");
+        // window.open_devtools();
 
         #[cfg(target_os = "macos")]
         apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)

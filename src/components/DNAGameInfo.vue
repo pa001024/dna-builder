@@ -645,11 +645,12 @@ async function generateScreenshot() {
                             <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
                                 <div class="text-sm font-medium">成就达成</div>
                                 <div class="text-xl font-bold">
-                                    {{ roleInfo.roleInfo.roleShow.roleAchv.total }}
+                                    {{ roleInfo.roleInfo.roleShow.roleAchv?.total }}
                                 </div>
                             </div>
                         </div>
                         <div
+                            v-if="roleInfo.roleInfo.roleShow.roleAchv"
                             v-for="[k, p] in ['gold', 'silver', 'bronze'].map(v => [
                                 v,
                                 roleInfo.roleInfo.roleShow.roleAchv[v as keyof typeof roleInfo.roleInfo.roleShow.roleAchv],

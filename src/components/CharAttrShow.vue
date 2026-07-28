@@ -12,7 +12,7 @@ const props = withDefaults(
         includeKeys?: string[]
     }>(),
     {
-        excludeKeys: () => ["召唤物攻击速度", "召唤物范围"],
+        excludeKeys: () => ["召唤物攻击速度", "召唤物范围", "召唤物属性继承比例"],
     }
 )
 const nameRef = computed(() => props.charBuild.char.名称)
