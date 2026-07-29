@@ -1,0 +1,503 @@
+const DEFAULT_DSL_WORD_KEYS = Object.freeze([
+    "lctrl",
+    "rctrl",
+    "ctrl",
+    "lshift",
+    "rshift",
+    "shift",
+    "escape",
+    "esc",
+    "backspace",
+    "space",
+    "enter",
+    "left",
+    "right",
+    "up",
+    "down",
+    "tab",
+    "capslock",
+    "numlock",
+    "scrolllock",
+    "printscreen",
+    "insert",
+    "delete",
+    "del",
+    "home",
+    "end",
+    "pageup",
+    "pagedown",
+    "f1",
+    "f2",
+    "f3",
+    "f4",
+    "f5",
+    "f6",
+    "f7",
+    "f8",
+    "f9",
+    "f10",
+    "f11",
+    "f12",
+    "browser_back",
+    "browser_forward",
+    "browser_refresh",
+    "browser_stop",
+    "browser_search",
+    "browser_favorites",
+    "browser_home",
+    "launch_mail",
+    "launch_media_select",
+    "launch_app1",
+    "launch_app2",
+    "media_next_track",
+    "media_prev_track",
+    "media_play_pause",
+    "media_stop",
+    "volume_mute",
+    "volume_down",
+    "volume_up",
+])
+
+export class DslParser {
+    /**
+     * 创建 DSL 解析器。
+     * @param {string} dsl DSL 源码
+     * @param {readonly string[]} [wordKeys] 可识别的多字符按键名
+     */
+    constructor(dsl, wordKeys = DEFAULT_DSL_WORD_KEYS) {
+        if (typeof dsl !== "string") throw new TypeError("dsl must be a string")
+        if (!Array.isArray(wordKeys)) throw new TypeError("wordKeys must be an array")
+        this.src = dsl
+        this.wordKeys = wordKeys
+        this.i = 0
+    }
+
+    /** @returns {boolean} 是否已读取到源码末尾 */
+    eof() {
+        return this.i >= this.src.length
+    }
+
+    /** @returns {string | undefined} 当前字符 */
+    peek() {
+        return this.src[this.i]
+    }
+
+    /** 跳过当前位置后的空白字符。 */
+    skipWs() {
+        while (!this.eof()) {
+            const ch = this.peek()
+            if (ch == null || !/\s/.test(ch)) break
+            this.i++
+        }
+    }
+
+    /**
+     * 抛出包含当前位置的解析错误。
+     * @param {string} message 错误内容
+     * @returns {never}
+     */
+    error(message) {
+        throw new Error(`${message} @${this.i}`)
+    }
+
+    /**
+     * 读取当前位置的非负数字。
+     * @param {{ integer?: boolean }} [options] 数字读取选项
+     * @returns {number | null} 读取结果
+     */
+    readNumber(options) {
+        const integer = options?.integer ?? false
+        this.skipWs()
+        const start = this.i
+        while (!this.eof()) {
+            const ch = this.peek()
+            if (ch == null || !/[0-9]/.test(ch)) break
+            this.i++
+        }
+        if (!integer && !this.eof() && this.peek() === ".") {
+            this.i++
+            while (!this.eof()) {
+                const ch = this.peek()
+                if (ch == null || !/[0-9]/.test(ch)) break
+                this.i++
+            }
+        }
+        if (this.i === start) return null
+        const value = Number(this.src.slice(start, this.i))
+        if (!Number.isFinite(value)) this.error("invalid number")
+        return value
+    }
+
+    /** @returns {Array<object>} 解析后的 DSL 节点 */
+    parse() {
+        const nodes = this.parseSequence()
+        this.skipWs()
+        if (!this.eof()) this.error(`unexpected token: ${this.peek()}`)
+        return nodes
+    }
+
+    /**
+     * 解析连续节点。
+     * @param {string | undefined} [stopChar] 序列结束字符
+     * @returns {Array<object>} 节点列表
+     */
+    parseSequence(stopChar = undefined) {
+        const nodes = []
+        while (!this.eof()) {
+            this.skipWs()
+            if (stopChar && this.peek() === stopChar) {
+                this.i++
+                break
+            }
+            if (this.eof()) break
+            const node = this.parseNode()
+            if (node) nodes.push(node)
+        }
+        return nodes
+    }
+
+    /** @returns {object | null} 下一个 DSL 节点 */
+    parseNode() {
+        this.skipWs()
+        if (this.eof()) return null
+
+        const ch = this.peek()
+        if (ch == null) return null
+        if (ch === "#") return this.parseWait()
+        if (ch === "+") return this.parseLoop()
+        if (ch === "(") return this.parseGroup()
+        if (ch === "L" || ch === "R" || ch === "M") return this.parseMouse()
+        return this.parseKey()
+    }
+
+    /** @returns {{ type: "wait", ms: number }} 等待节点 */
+    parseWait() {
+        this.i++
+        const seconds = this.readNumber()
+        if (seconds == null) this.error("missing wait duration")
+        return { type: "wait", ms: Math.round(seconds * 1000) }
+    }
+
+    /** @returns {{ type: "loop", count: number, body: Array<object> }} 循环节点 */
+    parseLoop() {
+        this.i++
+        const count = this.readNumber({ integer: true })
+        if (count == null) this.error("missing loop count")
+        this.skipWs()
+        if (this.eof()) this.error("missing loop body")
+        const body = this.peek() === "(" ? this.parseGroup().body : [this.parseNode()].filter(Boolean)
+        if (!body.length) this.error("missing loop body")
+        return { type: "loop", count, body }
+    }
+
+    /** @returns {{ type: "group", body: Array<object> }} 分组节点 */
+    parseGroup() {
+        if (this.peek() !== "(") this.error("missing group open")
+        this.i++
+        return { type: "group", body: this.parseSequence(")") }
+    }
+
+    /** @returns {{ type: "mouse", button: string, x: number | undefined, y: number | undefined, waitMs: number }} 鼠标节点 */
+    parseMouse() {
+        const buttonChar = this.peek()
+        if (buttonChar !== "L" && buttonChar !== "R" && buttonChar !== "M") this.error("invalid mouse token")
+        this.i++
+        this.skipWs()
+        let x
+        let y
+        if (this.peek() === "(") {
+            this.i++
+            const parsedX = this.readNumber({ integer: true })
+            if (parsedX == null) this.error("missing mouse x")
+            this.skipWs()
+            if (this.peek() !== ",") this.error("missing mouse separator")
+            this.i++
+            const parsedY = this.readNumber({ integer: true })
+            if (parsedY == null) this.error("missing mouse y")
+            this.skipWs()
+            if (this.peek() !== ")") this.error("missing mouse close")
+            this.i++
+            x = parsedX
+            y = parsedY
+        }
+        const waitMs = this.readNumber()
+        return {
+            type: "mouse",
+            button: buttonChar === "R" ? "right" : buttonChar === "M" ? "middle" : "left",
+            x,
+            y,
+            waitMs: waitMs == null ? 0 : Math.round(waitMs * 1000),
+        }
+    }
+
+    /** @returns {{ type: "key", key: string, duration: number | undefined }} 按键节点 */
+    parseKey() {
+        const key = this.readKeyToken()
+        if (!key) this.error(`unexpected token: ${this.peek() ?? "EOF"}`)
+        const duration = this.readNumber()
+        return {
+            type: "key",
+            key,
+            duration: duration == null ? undefined : Math.round(duration * 1000),
+        }
+    }
+
+    /** @returns {string | null} 按键名称 */
+    readKeyToken() {
+        this.skipWs()
+        if (this.eof()) return null
+
+        const ch = this.peek()
+        if (ch == null) return null
+        if (ch === '"' || ch === "'") {
+            const quote = ch
+            this.i++
+            const end = this.src.indexOf(quote, this.i)
+            if (end < 0) this.error("missing closing quote")
+            const raw = this.src.slice(this.i, end)
+            this.i = end + 1
+            if (raw.length === 1 && /[a-z0-9]/i.test(raw)) return raw.toLowerCase()
+            if (this.wordKeys.includes(raw)) return raw
+            this.error(`unsupported quoted key: ${raw}`)
+        }
+
+        if (ch === "_") {
+            this.i++
+            return "space"
+        }
+        if (ch === ">") {
+            this.i++
+            return "lshift"
+        }
+        if (ch === "C") {
+            this.i++
+            return "lctrl"
+        }
+
+        for (const key of this.wordKeys) {
+            if (this.src.startsWith(key, this.i)) {
+                this.i += key.length
+                return key
+            }
+        }
+
+        if (/[a-z0-9]/i.test(ch)) {
+            this.i++
+            return ch.toLowerCase()
+        }
+
+        return null
+    }
+}
+
+class PlayInterruptedError extends Error {
+    /** 创建 DSL 播放中断错误。 */
+    constructor() {
+        super("play interrupted")
+        this.name = "PlayInterruptedError"
+    }
+}
+
+export class Cap {
+    #playToken = 0
+
+    /**
+     * 创建游戏窗口操作实例。
+     * @param {number} hwnd 游戏窗口句柄
+     * @param {{ frameless?: boolean }} [options] 初始化参数
+     */
+    constructor(hwnd, options = {}) {
+        if (typeof hwnd !== "number" || !Number.isFinite(hwnd) || hwnd === 0) throw new TypeError("Cap hwnd must be a non-zero number")
+        if (options == null || typeof options !== "object") throw new TypeError("Cap options must be an object")
+        if (options.frameless != null && typeof options.frameless !== "boolean") {
+            throw new TypeError("Cap options.frameless must be a boolean")
+        }
+        this.frameless = options.frameless ?? false
+        this.hwnd = hwnd
+        if (!isElevated()) throw new Error("非管理员权限")
+        this.yof = this.frameless ? 0 : 30
+        checkSize(this.hwnd, 1600, 900 + this.yof)
+        this.frame = this.cap()
+    }
+
+    /** @returns {object | undefined} 最新窗口截图 */
+    cap() {
+        this.frame = this.frameless ? captureWindowWGC(this.hwnd) : captureWindowWGC(this.hwnd, 0, 30, 1600, 900)
+        return this.frame
+    }
+
+    /**
+     * 点击客户区坐标。
+     * @param {number | undefined} [x] X 坐标
+     * @param {number | undefined} [y] Y 坐标
+     * @param {"left" | "right" | "middle"} [button] 鼠标按键
+     */
+    mc(x, y, button) {
+        return mc(this.hwnd, x, y == null ? undefined : y + this.yof, button)
+    }
+
+    /**
+     * 按下客户区坐标处的鼠标按键。
+     * @param {number | undefined} [x] X 坐标
+     * @param {number | undefined} [y] Y 坐标
+     * @param {"left" | "right" | "middle"} [button] 鼠标按键
+     */
+    md(x, y, button) {
+        md(this.hwnd, x, y == null ? undefined : y + this.yof, button)
+    }
+
+    /**
+     * 松开客户区坐标处的鼠标按键。
+     * @param {number | undefined} [x] X 坐标
+     * @param {number | undefined} [y] Y 坐标
+     * @param {"left" | "right" | "middle"} [button] 鼠标按键
+     */
+    mu(x, y, button) {
+        mu(this.hwnd, x, y == null ? undefined : y + this.yof, button)
+    }
+
+    /**
+     * 在客户区坐标点击鼠标中键。
+     * @param {number | undefined} [x] X 坐标
+     * @param {number | undefined} [y] Y 坐标
+     */
+    mt(x, y) {
+        mt(this.hwnd, x, y == null ? undefined : y + this.yof)
+    }
+
+    /**
+     * 发送按键。
+     * @param {string} key 按键名称
+     * @param {number | undefined} [duration] 按键持续时间
+     * @returns {Promise<void>}
+     */
+    async kb(key, duration) {
+        await kb(this.hwnd, key, duration)
+    }
+
+    /**
+     * 等待客户区指定坐标达到颜色条件。
+     * @param {number} x X 坐标
+     * @param {number} y Y 坐标
+     * @param {number} color 目标颜色
+     * @param {number} tolerance 颜色容差
+     * @param {number | undefined} [timeout] 超时时间
+     * @returns {Promise<boolean>}
+     */
+    async waitColor(x, y, color, tolerance, timeout) {
+        return await waitColor(this.hwnd, x, y + this.yof, color, tolerance, timeout)
+    }
+
+    /**
+     * 播放 DSL 宏。
+     * @param {string} dsl DSL 源码
+     * @returns {Promise<void> & { stop: () => void }} 可中断 Promise
+     */
+    play(dsl) {
+        const token = this.#beginPlay()
+        const promise = this.#play(dsl, token)
+        Object.defineProperty(promise, "stop", {
+            value: () => this.#stopPlayToken(token),
+            writable: false,
+            enumerable: false,
+            configurable: false,
+        })
+        return promise
+    }
+
+    /**
+     * 执行一次 DSL 播放任务。
+     * @param {string} dsl DSL 源码
+     * @param {number} token 播放令牌
+     * @returns {Promise<void>}
+     */
+    async #play(dsl, token) {
+        try {
+            await this.#runDslNodes(new DslParser(dsl).parse(), token)
+        } catch (error) {
+            if (error instanceof PlayInterruptedError) return
+            throw error
+        } finally {
+            if (this.#playToken === token) this.#playToken = 0
+        }
+    }
+
+    /** 停止当前 DSL 播放。 */
+    stopPlay() {
+        this.#playToken++
+    }
+
+    /**
+     * 仅停止指定令牌对应的播放任务。
+     * @param {number} token 播放令牌
+     */
+    #stopPlayToken(token) {
+        if (this.#playToken === token) this.#playToken++
+    }
+
+    /** @returns {number} 本次播放令牌 */
+    #beginPlay() {
+        this.#playToken++
+        return this.#playToken
+    }
+
+    /**
+     * 检查播放任务是否仍然有效。
+     * @param {number} token 播放令牌
+     */
+    #assertPlayActive(token) {
+        if (token !== this.#playToken) throw new PlayInterruptedError()
+    }
+
+    /**
+     * 顺序执行 DSL 节点。
+     * @param {Array<object>} nodes DSL 节点
+     * @param {number} token 播放令牌
+     * @returns {Promise<void>}
+     */
+    async #runDslNodes(nodes, token) {
+        for (const node of nodes) {
+            this.#assertPlayActive(token)
+            switch (node.type) {
+                case "wait":
+                    await sleep(node.ms)
+                    break
+                case "key":
+                    if (node.duration == null || node.duration <= 0) await this.kb(node.key)
+                    else await this.kb(node.key, node.duration)
+                    break
+                case "mouse":
+                    if (node.button === "middle") {
+                        this.mt(node.x, node.y)
+                        if (node.waitMs > 0) await sleep(node.waitMs)
+                        break
+                    }
+                    this.md(node.x, node.y, node.button === "right" ? "right" : undefined)
+                    try {
+                        if (node.waitMs > 0) await sleep(node.waitMs)
+                    } finally {
+                        this.mu(node.x, node.y, node.button === "right" ? "right" : undefined)
+                    }
+                    break
+                case "group":
+                    await this.#runDslNodes(node.body, token)
+                    break
+                case "loop":
+                    if (node.count === 0) {
+                        while (true) {
+                            this.#assertPlayActive(token)
+                            await this.#runDslNodes(node.body, token)
+                        }
+                    } else {
+                        for (let i = 0; i < node.count; i++) {
+                            this.#assertPlayActive(token)
+                            await this.#runDslNodes(node.body, token)
+                        }
+                    }
+                    break
+                default:
+                    throw new Error("unknown dsl node")
+            }
+        }
+    }
+}
