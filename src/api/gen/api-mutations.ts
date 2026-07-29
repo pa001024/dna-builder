@@ -713,9 +713,9 @@ export const updateRoomMutation = typedMutation<Types.Room, { id: string; data: 
     }
 `)
 
-export const addMissionsIngameMutation = typedMutation<Types.MissionsIngame, { token: string; server: string; missions: string[][] }>(
+export const addMissionsIngameMutation = typedMutation<Types.MissionsIngame, { token?: string; server: string; missions: string[][] }>(
     /* GraphQL */ `
-        mutation ($token: String!, $server: String!, $missions: [[String!]!]!) {
+        mutation ($token: String, $server: String!, $missions: [[String!]!]!) {
             addMissionsIngame(token: $token, server: $server, missions: $missions) {
                 id
             }
@@ -974,9 +974,9 @@ export const deleteActivityMutation = typedMutation<boolean, { server: string; i
 
 export const upsertActivitiesIngameMutation = typedMutation<
     Types.Activity[],
-    { token: string; server: string; activities: Types.ActivityInput[] }
+    { token?: string; server: string; activities: Types.ActivityInput[] }
 >(/* GraphQL */ `
-    mutation ($token: String!, $server: String!, $activities: [ActivityInput!]!) {
+    mutation ($token: String, $server: String!, $activities: [ActivityInput!]!) {
         upsertActivitiesIngame(token: $token, server: $server, activities: $activities) {
             id
             server

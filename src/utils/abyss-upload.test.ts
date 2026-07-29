@@ -104,6 +104,24 @@ describe("buildAbyssUploadPayload", () => {
         expect(payload?.stars).toBe(2653)
     })
 
+    it("应该映射无 Head 前缀的灾厄远程武器图片", async () => {
+        const payload = await buildAbyssUploadPayload({
+            ...mockRoleInfo,
+            roleInfo: {
+                ...mockRoleInfo.roleInfo,
+                abyssInfo: {
+                    ...mockRoleInfo.roleInfo.abyssInfo,
+                    bestTimeVo1: {
+                        ...mockRoleInfo.roleInfo.abyssInfo.bestTimeVo1,
+                        langRangeWeaponIcon: "https://herobox-img.yingxiong.com/role/config/weapon/jicijuexiang.png",
+                    },
+                },
+            },
+        } as DNARoleEntity)
+
+        expect(payload?.rangedId).toBe(20599)
+    })
+
     it("应该拒绝低于 160 的 stars", async () => {
         await expect(
             buildAbyssUploadPayload({

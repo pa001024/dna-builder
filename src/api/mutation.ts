@@ -21,11 +21,18 @@ export function typedMutation<R = { id: string }, V extends AnyVariables = AnyVa
         try {
             const raw = await gqClient.mutation(query, variables, context).toPromise()
             if (raw?.error) {
+                console.error("GraphQL mutation 请求失败:", {
+                    name,
+                    message: raw.error.message,
+                    graphQLErrors: raw.error.graphQLErrors,
+                    networkError: raw.error.networkError,
+                })
                 useUIStore().showErrorMessage("操作失败:", raw?.error?.message || "未知错误")
                 return
             }
             return raw?.data?.[name] as R
         } catch (e) {
+            console.error("GraphQL mutation 执行异常:", { name, error: e })
             useUIStore().showErrorMessage("操作失败:", e instanceof Error ? e.message : "未知错误")
         }
     }

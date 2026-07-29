@@ -3,6 +3,7 @@ import { desc, eq } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
 import { db, schema } from ".."
 import type { Context } from "../yoga"
+import { verifyDataSyncAccess } from "./syncAccess"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -12,7 +13,7 @@ export const typeDefs = /* GraphQL */ `
     }
     type Mutation {
         "添加委托"
-        addMissionsIngame(token: String!, server: String!, missions: [[String!]!]!): MissionsIngame!
+        addMissionsIngame(token: String, server: String!, missions: [[String!]!]!): MissionsIngame!
     }
     type Subscription {
         "订阅委托更新"
@@ -48,8 +49,8 @@ export const resolvers = {
         },
     },
     Mutation: {
-        addMissionsIngame: async (_parent, { token, server, missions }, { pubsub }) => {
-            if (!token || token !== process.env.API_TOKEN) throw createGraphQLError("need api token")
+        addMissionsIngame: async (_parent, { token, server, missions }, context) => {
+            verifyDataSyncAccess(token, context)
             // 同server最后一个值重复校验
             const lastMissionsIngame = await db.query.missionsIngame.findFirst({
                 where: eq(schema.missionsIngame.server, server),
@@ -65,7 +66,7 @@ export const resolvers = {
                     missions,
                 })
                 .returning()
-            pubsub.publish("updateMissionsIngame", server, {
+            context.pubsub.publish("updateMissionsIngame", server, {
                 updateMissionsIngame: missionsIngame[0],
             })
             return missionsIngame[0]

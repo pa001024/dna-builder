@@ -359,8 +359,15 @@ async function uploadAbyssUsage() {
         if (!payload) {
             throw new Error("无法生成深渊上传数据")
         }
+        console.info("深渊数据开始上传:", {
+            ...payload,
+            uidSha256: "[已隐藏]",
+            ownedChars: payload.ownedChars?.length ?? 0,
+            ownedWeapons: payload.ownedWeapons?.length ?? 0,
+        })
         const result = await submitAbyssUsageMutation({ input: payload }, { requestPolicy: "network-only" })
         if (!result) {
+            console.error("深渊数据上传结果为空")
             throw new Error("上传结果为空")
         }
         await user.refreshProfile()
@@ -368,6 +375,7 @@ async function uploadAbyssUsage() {
         const awardedPoints = result.reward?.awardedPoints ?? 0
         ui.showSuccessMessage(awardedExp > 0 ? `深渊数据上传成功，经验+${awardedExp}，积分+${awardedPoints}` : "深渊数据上传成功")
     } catch (error) {
+        console.error("深渊数据上传异常:", error)
         ui.showErrorMessage("深渊数据上传失败", error instanceof Error ? error.message : String(error))
     } finally {
         abyssUploading.value = false

@@ -11,6 +11,7 @@ import { useScriptRuntimeStore } from "./store/scriptRuntime"
 import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
 import { useUserStore } from "./store/user"
+import { startAdminDataSyncCron, stopAdminDataSyncCron } from "./utils/admin-data-sync"
 import { postVisitorCount } from "./vercount"
 
 const setting = useSettingStore()
@@ -146,6 +147,18 @@ watch(
     () => {
         reportVisitorCount()
     }
+)
+
+watch(
+    [() => user.isAdmin, () => setting.dnaUserId],
+    ([isAdmin, dnaUserId]) => {
+        if (env.isApp && isMainWindow && isAdmin && dnaUserId !== 0) {
+            startAdminDataSyncCron()
+            return
+        }
+        stopAdminDataSyncCron()
+    },
+    { immediate: true }
 )
 
 watch(
@@ -301,6 +314,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     stopOnlineExperienceTimer()
+    stopAdminDataSyncCron()
 })
 </script>
 
