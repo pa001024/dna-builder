@@ -50,16 +50,21 @@ async function registerImgsServiceWorker(): Promise<void> {
 async function bootstrapRuntimeAssets(): Promise<void> {
     try {
         await bootstrapDataPack()
-        if (env.isApp) {
+    } catch (error) {
+        console.error("数据包初始化失败", error)
+    } finally {
+        dataPackBootstrapLoading.value = false
+    }
+
+    if (env.isApp) {
+        try {
             await mountImgsToVirtualPath({
                 manifest: getLoadedDataPackImgsManifest(),
             })
             await registerImgsServiceWorker()
+        } catch (error) {
+            console.error("图片资源初始化失败", error)
         }
-    } catch (error) {
-        console.error("运行时资源初始化失败", error)
-    } finally {
-        dataPackBootstrapLoading.value = false
     }
 }
 
