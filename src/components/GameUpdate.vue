@@ -117,6 +117,65 @@ const extractionCurrentSize = ref(0)
 const extractionTotalFiles = ref(0)
 const extractionTotalSize = ref(0)
 const extractionCurrentFile = ref("")
+let extractionProgressTimer: number | null = null
+
+const EXTRACTION_LINEAR_DURATION = 40_000
+const EXTRACTION_LOG_DURATION = 30_000
+
+/**
+ * 计算解压阶段的模拟进度：前 40 秒匀速到 90%，后 30 秒按对数曲线减速到 100%。
+ * @param elapsedMs 解压开始后经过的毫秒数
+ * @returns 0 到 1 之间的模拟进度
+ */
+function calculateExtractionProgress(elapsedMs: number) {
+    if (elapsedMs <= EXTRACTION_LINEAR_DURATION) {
+        return (elapsedMs / EXTRACTION_LINEAR_DURATION) * 0.9
+    }
+    const logPhaseProgress = Math.min(1, (elapsedMs - EXTRACTION_LINEAR_DURATION) / EXTRACTION_LOG_DURATION)
+    return 0.9 + 0.1 * (Math.log1p(9 * logPhaseProgress) / Math.log(10))
+}
+
+/**
+ * 启动解压阶段的模拟进度更新。
+ */
+function startExtractionProgress() {
+    if (extractionProgressTimer !== null) {
+        window.clearInterval(extractionProgressTimer)
+    }
+    const startedAt = performance.now()
+    overallProgress.value = 0
+    extractionProgressTimer = window.setInterval(() => {
+        overallProgress.value = calculateExtractionProgress(performance.now() - startedAt)
+    }, 100)
+}
+
+/**
+ * 停止解压阶段的模拟进度更新。
+ * @param completed 是否已成功完成解压
+ */
+function stopExtractionProgress(completed: boolean) {
+    if (extractionProgressTimer !== null) {
+        window.clearInterval(extractionProgressTimer)
+        extractionProgressTimer = null
+    }
+    if (completed) {
+        overallProgress.value = 1
+    }
+}
+
+/**
+ * 清理解压阶段的展示状态。
+ */
+function resetExtractionState() {
+    stopExtractionProgress(false)
+    isExtracting.value = false
+    overallProgress.value = 0
+    extractionCurrentFileCount.value = 0
+    extractionCurrentSize.value = 0
+    extractionTotalFiles.value = 0
+    extractionTotalSize.value = 0
+    extractionCurrentFile.value = ""
+}
 
 // 下载速度计算相关
 let lastDownloadedBytes = 0
@@ -1463,12 +1522,13 @@ async function downloadAndApplyFullPackage() {
 
         isDownloading.value = false
         isExtracting.value = true
+        startExtractionProgress()
         currentFile.value = packageInfo.fileName
         currentFileUrl.value = packageInfo.downloadUrl
         currentDownloaded.value = packageInfo.size
-        overallProgress.value = 1
         downloadSpeed.value = ""
         await applyGamePatch(fullFilePath, extractDir.value)
+        stopExtractionProgress(true)
         const gameVersion = Number(packageInfo.latestVersion)
         if (!Number.isSafeInteger(gameVersion) || gameVersion <= 0) {
             throw new Error(`Invalid game version: ${packageInfo.latestVersion}`)
@@ -1476,19 +1536,18 @@ async function downloadAndApplyFullPackage() {
         await writeTextFile(gameVersionPath.value, JSON.stringify({ version: gameVersion }, null, 2))
         await deleteFile(fullFilePath, true)
 
-        isExtracting.value = false
         currentFile.value = ""
         currentFileUrl.value = ""
         currentDownloadPath.value = ""
-        overallProgress.value = 0
         await refreshGameInstalled()
         ui.showSuccessMessage(t("game-update.download_complete", { size: formatSize(packageInfo.size) }))
         await checkForUpdates()
+        resetExtractionState()
         if (needHotUpdate.value && hotUpdatePendingVersions.value.length) {
             await downloadHotUpdateAllFiles()
         }
     } catch (err) {
-        isExtracting.value = false
+        resetExtractionState()
         if (isDownloadPausedError(err)) {
             markDownloadPaused()
             return
@@ -1609,13 +1668,17 @@ async function downloadAllFiles() {
         currentFile.value = ""
         currentFileUrl.value = ""
         downloadSpeed.value = ""
-        await extractAllFiles()
+        if (!(await extractAllFiles())) return
         await updateBaseVersionFile()
         await checkForUpdates()
+        resetExtractionState()
         if (needHotUpdate.value && hotUpdatePendingVersions.value.length) {
             await downloadHotUpdateAllFiles()
         }
     } catch (err) {
+        if (isExtracting.value) {
+            resetExtractionState()
+        }
         if (isDownloadPausedError(err)) {
             markDownloadPaused()
             return
@@ -1936,17 +1999,21 @@ async function downloadHotUpdateAllFiles() {
     }
 }
 
+/**
+ * 解压全部游戏资源并保留完成态，供调用方无缝衔接热更检查。
+ * @returns 是否成功完成解压
+ */
 async function extractAllFiles() {
     if (!gamePath.value) {
         ui.showErrorMessage(t("game-update.select_game_dir_first"))
-        return
+        return false
     }
     if (!versionList.value) {
         ui.showErrorMessage(t("game-update.version_list_not_loaded"))
-        return
+        return false
     }
     isExtracting.value = true
-    overallProgress.value = 0
+    startExtractionProgress()
     try {
         const gameVersionList = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
         const files = Object.entries(gameVersionList)
@@ -1967,7 +2034,6 @@ async function extractAllFiles() {
             const [filename] = files[i]
             const zipPath = `${tempDownloadDir.value}/${filename}`
             const targetDir = extractDir.value
-            overallProgress.value = (i + 1) / totalFilesCount
             await writeTextFile(
                 extractProgressPath.value,
                 JSON.stringify(
@@ -1989,20 +2055,16 @@ async function extractAllFiles() {
                 console.error("临时目录清理失败:", err)
             }
         }
-        isExtracting.value = false
-        overallProgress.value = 0
-        extractionCurrentFileCount.value = 0
-        extractionCurrentSize.value = 0
-        extractionTotalFiles.value = 0
-        extractionTotalSize.value = 0
-        extractionCurrentFile.value = ""
+        stopExtractionProgress(true)
         await deleteFile(extractProgressPath.value, true)
         await refreshGameInstalled()
         ui.showSuccessMessage(t("game-update.download_complete", { size: formatSize(totalSize.value) }))
+        return true
     } catch (err) {
         ui.showErrorMessage(t("game-update.extract_failed", { error: err instanceof Error ? err.message : String(err) }))
         console.error("解压缩失败:", err)
-        isExtracting.value = false
+        resetExtractionState()
+        return false
     }
 }
 
@@ -2041,6 +2103,7 @@ onMounted(async () => {
         extractionCurrentFile.value = current_file
     })
     onUnmounted(() => {
+        stopExtractionProgress(false)
         unlistenDownload()
         unlisten()
     })

@@ -484,7 +484,7 @@ defineExpose({
                     class="textarea textarea-bordered w-full"
                     :placeholder="t('输入描述...')"
                     rows="3"
-                    maxlength="200"
+                    maxlength="800"
                 ></textarea>
             </div>
         </div>

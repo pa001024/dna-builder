@@ -161,7 +161,7 @@ useInitialScrollToSelectedItem()
                                         <img :src="`/imgs/res/T_Fish_${fish.icon}.webp`" class="w-full h-full object-cover" />
                                     </div>
                                     <div>
-                                        <div class="font-medium">{{ fish.name }}</div>
+                                        <div class="font-medium">{{ $t(fish.name) }}</div>
                                         <div class="text-xs opacity-70 mt-1">
                                             <span>ID: {{ fish.id }}</span>
                                             <span class="ml-2">Lv.: {{ fish.level }}</span>

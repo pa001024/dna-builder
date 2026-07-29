@@ -19,9 +19,12 @@ export interface LimitedPrizePool {
     LimitedPrizePoolId: number[]
     BigPrizeBPPath?: string
     BigPrizeMobileBPPath?: string
+    BigPrizeSoundEffects?: string
+    BigPrizeVideoPath?: string
     HistoryBPPath?: string
     ProcessBPPath?: string
     ProcessMobileBPPath?: string
+    ProcessSoundEffects?: string
     ResultBPPath?: string
     ResultMobileBPPath?: string
     RoundBPPath?: string

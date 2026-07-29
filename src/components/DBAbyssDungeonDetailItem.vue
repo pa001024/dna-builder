@@ -162,7 +162,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                 </div>
                 <div class="flex justify-between">
                     <span class="text-base-content/70">类型</span>
-                    <span>{{ getAbyssDungeonGroup(dungeon) }}</span>
+                    <span>{{ $t(getAbyssDungeonGroup(dungeon)) }}</span>
                 </div>
                 <div v-if="dungeon.sid" class="flex justify-between">
                     <span class="text-base-content/70">赛季ID</span>
@@ -185,22 +185,22 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                 <div class="flex items-center gap-2">
                     <img :src="LeveledChar.url(char.icon)" alt="角色头像" class="w-8 h-8 rounded-full" />
                     <SRouterLink :to="`/char/${char.id}`" class="font-medium link link-primary">
-                        {{ char.名称 }}
+                        {{ $t(char.名称) }}
                     </SRouterLink>
                     <CopyID :id="char.id" />
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <div class="flex justify-between">
                         <span class="text-base-content/70">元素属性</span>
-                        <span>{{ char.属性 }}</span>
+                        <span>{{ $t(`${char.属性}属性`) }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-base-content/70">精通</span>
-                        <span>{{ char.精通?.join("/") }}</span>
+                        <span>{{ char.精通?.map(item => $t(item)).join("/") }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-base-content/70">标签</span>
-                        <span>{{ char.标签?.join("/") }}</span>
+                        <span>{{ char.标签?.map(item => $t(item)).join("/") }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-base-content/70">版本</span>

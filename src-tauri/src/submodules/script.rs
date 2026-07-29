@@ -13,10 +13,13 @@ use crate::submodules::script_builtin::{
     register_builtin_functions, set_current_script_path, set_script_event_app_handle,
 };
 use crate::submodules::script_console::{Console, ConsoleState, Logger};
+use crate::submodules::script_module::ScriptModuleLoader;
 use boa_engine::builtins::error::Error as BoaErrorObject;
+use boa_engine::builtins::promise::PromiseState;
 use boa_engine::context::ContextBuilder;
 use boa_engine::job::JobExecutor;
-use boa_engine::{JsError, Script, Source};
+use boa_engine::object::builtins::JsPromise;
+use boa_engine::{JsError, JsNativeError, JsResult, JsValue, Module, Script, Source};
 use boa_gc::{Finalize, Trace};
 use mcp_server::{ScriptConsoleEntry, ScriptExecConsoleEntry};
 use std::cell::RefCell;
@@ -211,6 +214,128 @@ fn format_js_error_message(
     format!("{}: {}", prefix, detail)
 }
 
+/// 兼容经典脚本与 ESM 的可执行程序。
+enum ScriptProgram {
+    Script(Script),
+    Module(Module),
+}
+
+/// 优先按经典脚本解析，失败后回退为官方 ESM 模块。
+fn parse_script_program(
+    source_bytes: &[u8],
+    source_path: Option<&Path>,
+    context: &mut boa_engine::Context,
+) -> JsResult<ScriptProgram> {
+    let script_source = Source::from_bytes(source_bytes);
+    let script_source = if let Some(source_path) = source_path {
+        script_source.with_path(source_path)
+    } else {
+        script_source
+    };
+    match Script::parse(script_source, None, context) {
+        Ok(script) => Ok(ScriptProgram::Script(script)),
+        Err(script_error) => {
+            let module_source = Source::from_bytes(source_bytes);
+            let module_source = if let Some(source_path) = source_path {
+                module_source.with_path(source_path)
+            } else {
+                module_source
+            };
+            Module::parse(module_source, None, context)
+                .map(ScriptProgram::Module)
+                .map_err(|module_error| {
+                    JsNativeError::syntax()
+                        .with_message(format!(
+                            "源码无法解析为经典脚本或 ESM，经典脚本错误: {script_error}；ESM 错误: {module_error}"
+                        ))
+                        .with_cause(module_error)
+                        .into()
+                })
+        }
+    }
+}
+
+/// 读取已完成任务队列处理的 Promise 结果。
+fn settled_promise_result(promise: &JsPromise, phase: &str) -> JsResult<JsValue> {
+    match promise.state() {
+        PromiseState::Fulfilled(result) => Ok(result),
+        PromiseState::Rejected(reason) => Err(JsError::from_opaque(reason)),
+        PromiseState::Pending => Err(JsNativeError::error()
+            .with_message(format!("ESM {phase} 结束后仍处于 pending 状态"))
+            .into()),
+    }
+}
+
+/// 执行经典脚本，或依次完成 ESM 的 load、link、evaluate 生命周期。
+fn evaluate_script_program(
+    program: ScriptProgram,
+    job_executor: &std::rc::Rc<TokioJobExecutor>,
+    context: &mut boa_engine::Context,
+) -> JsResult<JsValue> {
+    match program {
+        ScriptProgram::Script(script) => {
+            let result = script.evaluate(context)?;
+            job_executor.clone().run_jobs(context)?;
+            Ok(result)
+        }
+        ScriptProgram::Module(module) => {
+            let load_promise = module.load(context);
+            job_executor.clone().run_jobs(context)?;
+            settled_promise_result(&load_promise, "load")?;
+
+            module.link(context)?;
+            let evaluate_promise = module.evaluate(context);
+            job_executor.clone().run_jobs(context)?;
+            settled_promise_result(&evaluate_promise, "evaluate")
+        }
+    }
+}
+
+#[cfg(test)]
+mod program_tests {
+    use super::*;
+
+    /// 创建与生产入口一致的脚本测试上下文。
+    fn test_context(job_executor: std::rc::Rc<TokioJobExecutor>) -> boa_engine::Context {
+        ContextBuilder::new()
+            .job_executor(job_executor)
+            .module_loader(std::rc::Rc::new(ScriptModuleLoader::default()))
+            .build()
+            .expect("创建脚本测试上下文失败")
+    }
+
+    #[test]
+    fn classic_script_keeps_expression_result() {
+        let job_executor = std::rc::Rc::new(TokioJobExecutor::new());
+        let mut context = test_context(job_executor.clone());
+        let program = parse_script_program(b"1 + 2", None, &mut context).expect("解析经典脚本失败");
+
+        assert!(matches!(program, ScriptProgram::Script(_)));
+        let result = evaluate_script_program(program, &job_executor, &mut context)
+            .expect("执行经典脚本失败");
+
+        assert_eq!(result, JsValue::new(3));
+    }
+
+    #[test]
+    fn esm_root_uses_module_load_with_memory_import() {
+        let job_executor = std::rc::Rc::new(TokioJobExecutor::new());
+        let mut context = test_context(job_executor.clone());
+        let source = br##"
+            import { DslParser } from "cap";
+            if (new DslParser("#1q").parse().length !== 2) throw new Error("unexpected DSL result");
+        "##;
+        let program = parse_script_program(source, Some(Path::new("memory-main.js")), &mut context)
+            .expect("解析 ESM 根脚本失败");
+
+        assert!(matches!(program, ScriptProgram::Module(_)));
+        let result = evaluate_script_program(program, &job_executor, &mut context)
+            .expect("执行 ESM 根脚本失败");
+
+        assert!(result.is_undefined());
+    }
+}
+
 /// 脚本运行状态守卫，确保运行状态在任意退出路径都能复位。
 struct ScriptRunningGuard {
     script_path: String,
@@ -323,6 +448,7 @@ pub async fn run_script_with_tauri_console(
         let logger_app_handle = Arc::new(app_handle.clone());
         let context = &mut ContextBuilder::new()
             .job_executor(job_executor.clone())
+            .module_loader(std::rc::Rc::new(ScriptModuleLoader::default()))
             .build()
             .unwrap();
 
@@ -352,11 +478,11 @@ pub async fn run_script_with_tauri_console(
         set_current_script_path(script_path.clone());
         register_builtin_functions(context).map_err(|e| format!("注册内置函数失败: {:?}", e))?;
         let _running_guard = ScriptRunningGuard::enter(script_path.clone(), app_handle.clone());
-        let source = Source::from_filepath(Path::new(&script_path))
+        let source_bytes = std::fs::read(Path::new(&script_path))
             .map_err(|e| format!("无法读取文件 {:?}: {}", script_path, e))?;
-        let script =
-            Script::parse(source, None, context).map_err(|e| format!("解析脚本失败: {:?}", e))?;
-        match script.evaluate(context) {
+        let program = parse_script_program(&source_bytes, Some(Path::new(&script_path)), context)
+            .map_err(|e| format!("解析脚本失败: {:?}", e))?;
+        match evaluate_script_program(program, &job_executor, context) {
             Ok(result) => {
                 // 某些脚本会“返回 Error 对象”而不是直接 throw，
                 // 这类场景也视为异常退出，避免前端误判为执行成功。
@@ -369,16 +495,6 @@ pub async fn run_script_with_tauri_console(
                         .map(|s| s.to_std_string_escaped())
                         .unwrap_or_else(|_| format!("{:?}", result));
                     let error_message = format!("JavaScript 返回 Error 对象: {}", error_detail);
-                    return Err(emit_script_error(
-                        &app_handle,
-                        script_path.as_str(),
-                        error_message,
-                    ));
-                }
-
-                // 使用同步版本的 run_jobs
-                if let Err(e) = job_executor.run_jobs(context) {
-                    let error_message = format_js_error_message(context, "运行任务失败", &e);
                     return Err(emit_script_error(
                         &app_handle,
                         script_path.as_str(),
@@ -441,6 +557,7 @@ pub async fn exec_script_with_tauri_console(
         let console_collector = Arc::new(Mutex::new(Vec::<ScriptConsoleEntry>::new()));
         let context = &mut ContextBuilder::new()
             .job_executor(job_executor.clone())
+            .module_loader(std::rc::Rc::new(ScriptModuleLoader::default()))
             .build()
             .unwrap();
 
@@ -470,11 +587,12 @@ pub async fn exec_script_with_tauri_console(
         let runtime_scope = script_scope
             .clone()
             .unwrap_or_else(|| "__exec_script__".to_string());
-        let _running_guard = ScriptRunningGuard::enter(runtime_scope, app_handle.clone());
-        let source = Source::from_bytes(script_source.as_bytes());
-        let script = Script::parse(source, None, context)
-            .map_err(|e| format!("解析临时脚本失败: {:?}", e))?;
-        match script.evaluate(context) {
+        let _running_guard = ScriptRunningGuard::enter(runtime_scope.clone(), app_handle.clone());
+        let runtime_source_path = Path::new(runtime_scope.as_str());
+        let program =
+            parse_script_program(script_source.as_bytes(), Some(runtime_source_path), context)
+                .map_err(|e| format!("解析临时脚本失败: {:?}", e))?;
+        match evaluate_script_program(program, &job_executor, context) {
             Ok(result) => {
                 if result
                     .as_object()
@@ -485,11 +603,6 @@ pub async fn exec_script_with_tauri_console(
                         .map(|s| s.to_std_string_escaped())
                         .unwrap_or_else(|_| format!("{:?}", result));
                     let error_message = format!("JavaScript 返回 Error 对象: {}", error_detail);
-                    return Err(error_message);
-                }
-
-                if let Err(e) = job_executor.run_jobs(context) {
-                    let error_message = format_js_error_message(context, "运行任务失败", &e);
                     return Err(error_message);
                 }
 
@@ -548,6 +661,7 @@ pub async fn run_script_with_stdio_console(
         let job_executor = std::rc::Rc::new(TokioJobExecutor::new());
         let context = &mut ContextBuilder::new()
             .job_executor(job_executor.clone())
+            .module_loader(std::rc::Rc::new(ScriptModuleLoader::default()))
             .build()
             .unwrap();
 
@@ -572,11 +686,11 @@ pub async fn run_script_with_stdio_console(
             .map_err(|e| format!("设置 CLI 脚本配置失败: {e}"))?;
         set_current_script_path(script_path.clone());
         register_builtin_functions(context).map_err(|e| format!("注册内置函数失败: {:?}", e))?;
-        let source = Source::from_filepath(Path::new(&script_path))
+        let source_bytes = std::fs::read(Path::new(&script_path))
             .map_err(|e| format!("无法读取文件 {:?}: {}", script_path, e))?;
-        let script =
-            Script::parse(source, None, context).map_err(|e| format!("解析脚本失败: {:?}", e))?;
-        match script.evaluate(context) {
+        let program = parse_script_program(&source_bytes, Some(Path::new(&script_path)), context)
+            .map_err(|e| format!("解析脚本失败: {:?}", e))?;
+        match evaluate_script_program(program, &job_executor, context) {
             Ok(result) => {
                 // 某些脚本会“返回 Error 对象”而不是直接 throw，
                 // 这类场景也视为异常退出，避免 CLI 误判为执行成功。
@@ -589,12 +703,6 @@ pub async fn run_script_with_stdio_console(
                         .map(|s| s.to_std_string_escaped())
                         .unwrap_or_else(|_| format!("{:?}", result));
                     let error_message = format!("JavaScript 返回 Error 对象: {}", error_detail);
-                    return Err(emit_script_error_cli(script_path.as_str(), error_message));
-                }
-
-                // 使用同步版本的 run_jobs
-                if let Err(e) = job_executor.run_jobs(context) {
-                    let error_message = format_js_error_message(context, "运行任务失败", &e);
                     return Err(emit_script_error_cli(script_path.as_str(), error_message));
                 }
 

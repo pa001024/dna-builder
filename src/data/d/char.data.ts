@@ -12268,6 +12268,17 @@ function patchCWeapon() {
 patch(
     [
         {
+            id: 2102,
+            skillName: "庆典开始喽",
+            data: {
+                召唤物: {
+                    名称: "召唤物·审判",
+                    攻击延迟: 0,
+                    攻击间隔: 3,
+                },
+            },
+        },
+        {
             id: 2101,
             skillName: "缠绵之触",
             data: {

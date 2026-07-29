@@ -277,7 +277,7 @@ useInitialScrollToSelectedItem()
                                         <img src="/imgs/webp/T_Head_Empty.webp" :alt="monster.n" class="w-14 h-14 rounded shrink-0" />
                                     </ImageFallback>
                                     <div class="min-w-0 w-full">
-                                        <div class="font-medium truncate">{{ monster.n }}</div>
+                                        <div class="font-medium truncate">{{ $t(monster.n) }}</div>
                                         <div class="text-xs opacity-70 mt-1">{{ $t(getFactionName(monster.f)) }}</div>
                                     </div>
                                 </div>

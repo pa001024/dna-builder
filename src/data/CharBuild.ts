@@ -1190,7 +1190,8 @@ export class CharBuild {
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
         const summonSkill = this.allSkills.find(skill => skill.名称 === baseName)
-        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (summonSkill?.召唤物 ? attrs.召唤物伤害 : 0)
+        const damageIncrease =
+            1 + attrs.增伤 + attrs.技能伤害 + (summonSkill?.召唤物 || summonSkill?.名称.includes("召唤物") ? attrs.召唤物伤害 : 0)
         const independentDamageIncrease = 1 + attrs.独立增伤
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
@@ -2325,7 +2326,7 @@ export class CharBuild {
             charTab = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
         }
         if (charTab === "角色") {
-            return [this.auraMod, ...this.charMods]
+            return [...this.charMods, this.auraMod]
         } else if (charTab === "近战") {
             return this.meleeMods
         } else if (charTab === "远程") {

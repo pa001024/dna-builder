@@ -125,7 +125,7 @@ const productDisplay = computed(() => {
 <template>
     <div class="space-y-3">
         <div class="p-3 flex items-center gap-3">
-            <SRouterLink :to="`/db/draft/${draft.id}`" class="text-lg font-bold link link-primary"> 图纸: {{ draft.n }} </SRouterLink>
+            <SRouterLink :to="`/db/draft/${draft.id}`" class="text-lg font-bold link link-primary"> 图纸: {{ $t(draft.n) }} </SRouterLink>
             <CopyID :id="draft.id" />
         </div>
 

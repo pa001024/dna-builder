@@ -401,7 +401,7 @@ function getRewardTypeColor(index: number): string {
             <div class="text-sm text-base-content/70 flex items-center gap-2">
                 <span class="px-1.5 py-0.5 rounded bg-base-200"> {{ walnut.稀有度 }}星 </span>
                 <div class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
-                    {{ walnut.类型 === 1 ? "角色" : walnut.类型 === 2 ? "武器" : "魔之楔" }}
+                    {{ $t(walnut.类型 === 1 ? "角色" : walnut.类型 === 2 ? "武器" : "魔之楔") }}
                 </div>
             </div>
         </div>

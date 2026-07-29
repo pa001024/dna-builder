@@ -642,7 +642,7 @@ useInitialScrollToSelectedItem({
                             "
                             @click="selectSubRegion(subRegion.value)"
                         >
-                            {{ subRegion.label }}
+                            {{ $t(subRegion.label) }}
                         </button>
                     </div>
 

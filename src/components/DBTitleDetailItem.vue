@@ -1,10 +1,12 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
 import type { Title } from "@/data/d/title.data"
 
 const props = defineProps<{
     title: Title
 }>()
+const { t } = useTranslation()
 
 const titleTypeLabel = computed(() => {
     return props.title.suf ? "后缀" : "前缀"
@@ -12,7 +14,7 @@ const titleTypeLabel = computed(() => {
 
 const titlePreview = computed(() => {
     const playerName = "玩家昵称"
-    return props.title.suf ? `${playerName} · ${props.title.name}` : `${props.title.name} · ${playerName}`
+    return props.title.suf ? `${playerName} · ${t(props.title.name)}` : `${t(props.title.name)} · ${playerName}`
 })
 </script>
 
@@ -21,7 +23,7 @@ const titlePreview = computed(() => {
         <div class="flex items-center gap-3 p-3 rounded-md bg-base-200">
             <img src="/imgs/webp/T_Icon_Random_Title.webp" alt="title-icon" class="w-12 h-12 object-cover rounded" />
             <div>
-                <h2 class="text-lg font-bold">{{ title.name }}</h2>
+                <h2 class="text-lg font-bold">{{ $t(title.name) }}</h2>
                 <CopyID :id="title.id" />
             </div>
             <span class="ml-auto badge badge-primary">{{ titleTypeLabel }}</span>

@@ -2308,7 +2308,14 @@ async fn apply_game_patch(diff_path: String, target_dir: String) -> Result<Strin
         fs::write(&executable_path, HPATCHZ_BYTES)
             .map_err(|e| format!("释放内嵌 hpatchz 失败: {}", e))?;
 
-        let result = std::process::Command::new(&executable_path)
+        let mut command = std::process::Command::new(&executable_path);
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+
+            command.creation_flags(0x08000000);
+        }
+        let result = command
             .arg("-f")
             .arg("")
             .arg(&diff_path)
@@ -3289,6 +3296,7 @@ pub fn run() {
         let handle = app.handle();
         let window = app.get_webview_window("main").unwrap();
         // window.set_shadow(true).expect("Unsupported platform!");
+        // window.open_devtools();
 
         #[cfg(target_os = "macos")]
         apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)

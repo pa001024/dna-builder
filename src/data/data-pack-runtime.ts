@@ -1,5 +1,6 @@
 import {
     bootstrapDataPack,
+    getLoadedDataPackImgsCacheInfo,
     getLoadedDataPackImgsManifest,
     loadDataPackExport,
     loadDataPackModule,
@@ -77,7 +78,7 @@ const DATA_PACK_MODULES = [
     "hardboss.data",
 ] as const
 
-export { bootstrapDataPack, getLoadedDataPackImgsManifest }
+export { bootstrapDataPack, getLoadedDataPackImgsCacheInfo, getLoadedDataPackImgsManifest }
 
 /**
  * 判断模块是否应从数据包读取。
@@ -95,7 +96,7 @@ export function isDataPackModule(moduleKey: string): boolean {
  */
 export async function loadDataPackDefault<T>(moduleKey: string): Promise<T> {
     const value = await loadDataPackExport<T>(moduleKey, "default")
-    syncDataPackModuleBindings(moduleKey)
+    await syncDataPackModuleBindings(moduleKey)
     if (value !== undefined) {
         return value
     }
@@ -112,7 +113,7 @@ export async function loadDataPackDefault<T>(moduleKey: string): Promise<T> {
  */
 export async function loadDataPackNamed<T>(moduleKey: string, exportName: string, fallbackCode?: string): Promise<T> {
     const value = await loadDataPackExport<T>(moduleKey, exportName)
-    syncDataPackModuleBindings(moduleKey)
+    await syncDataPackModuleBindings(moduleKey)
     if (value !== undefined) {
         return value
     }
@@ -139,6 +140,6 @@ export async function loadDataPackNamed<T>(moduleKey: string, exportName: string
  */
 export async function loadDataPackWhole(moduleKey: string) {
     const moduleRecord = await loadDataPackModule(moduleKey)
-    syncDataPackModuleBindings(moduleKey)
+    await syncDataPackModuleBindings(moduleKey)
     return moduleRecord
 }

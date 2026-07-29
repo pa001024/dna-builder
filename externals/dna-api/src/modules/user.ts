@@ -25,6 +25,7 @@ import { rand_str2 } from "./utils"
 
 export enum LoginType {
     EMAIL = 0x1,
+    // biome-ignore lint/suspicious/noDuplicateEnumValues: 后端登录协议要求邮箱与 Facebook 使用相同值
     FACEBOOK = 0x1,
     FACEBOOK_TYPE = 0xb,
     GOOGLE = 0x2,

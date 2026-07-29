@@ -211,10 +211,7 @@ pub(crate) fn check_size(hwnd: HWND, target_width: i32, target_height: i32) -> b
 
             // 调整窗口大小
             if MoveWindow(hwnd, 0, 0, new_window_width, new_window_height, true).is_err() {
-                println!("调整窗口大小失败");
                 return false;
-            } else {
-                println!("已调整窗口大小为: {}x{}", target_width, target_height);
             }
         }
     }

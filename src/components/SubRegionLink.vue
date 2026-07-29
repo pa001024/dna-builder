@@ -50,9 +50,9 @@ const mapLocalLink = computed<RouteLocationRaw | null>(() => {
 <template>
     <span class="inline-flex items-center gap-1 wrap-break-word">
         <SRouterLink v-if="mapLocalLink" :to="mapLocalLink" class="hover:underline">
-            {{ subRegionInfo?.subRegionName || `子区域${subRegionId}` }}
+            {{ $t(subRegionInfo?.subRegionName || `子区域${subRegionId}`) }}
         </SRouterLink>
-        <span v-else>{{ subRegionInfo?.subRegionName || `子区域${subRegionId}` }}</span>
+        <span v-else>{{ $t(subRegionInfo?.subRegionName || `子区域${subRegionId}`) }}</span>
         <CopyID :id="subRegionId" />
     </span>
 </template>

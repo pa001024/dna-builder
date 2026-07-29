@@ -92,7 +92,7 @@ useInitialScrollToSelectedItem()
                                     <img :src="getHardbossIcon(boss)" :alt="boss.name" class="w-full h-full object-cover rounded" />
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-medium">{{ boss.name }}</div>
+                                    <div class="font-medium">{{ $t(boss.name) }}</div>
                                     <div class="text-xs opacity-70 mt-1 line-clamp-2">
                                         {{ boss.desc }}
                                     </div>

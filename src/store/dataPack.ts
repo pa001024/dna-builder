@@ -7,7 +7,6 @@ import {
     getDataPackInstallStatus,
     getDataPackSourceInfo,
     getInstalledDataPackVersions,
-    getMergedDataPackVersions,
     importDataPackFile,
     removeInstalledDataPackVersion,
     setActiveDataPackVersion,
@@ -37,18 +36,14 @@ export const useDataPackStore = defineStore("dataPack", {
     },
     actions: {
         async refreshStatus(forceRefresh = false) {
-            this.status = await getDataPackInstallStatus(forceRefresh)
+            const installedVersions = await getInstalledDataPackVersions()
+            this.status = await getDataPackInstallStatus(forceRefresh, installedVersions)
             this.sourceInfo = await getDataPackSourceInfo()
-            const installedVersions = await getInstalledDataPackVersions(this.status.versions)
-            const versions = await getMergedDataPackVersions(this.status.versions, installedVersions)
             this.installedVersions = installedVersions.map(version => version.version)
-            this.status.versions = versions
             this.versionFiles = {}
             await Promise.all(
                 installedVersions.map(async version => {
-                    const bytes = await exportDataPackVersionFile(version.version)
-                    const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
-                    this.versionFiles[version.version] = new File([buffer], `${version.version}.zip`, { type: "application/zip" })
+                    this.versionFiles[version.version] = await exportDataPackVersionFile(version.version)
                 })
             )
             return this.status

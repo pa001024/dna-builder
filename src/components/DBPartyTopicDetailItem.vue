@@ -921,7 +921,7 @@ onBeforeUnmount(() => {
                 <div class="flex items-start justify-between gap-2">
                     <span class="text-base-content/70">角色</span>
                     <SRouterLink :to="`/db/char/${partyTopic.charId}`" class="text-right link link-primary">
-                        {{ getCharacterName(partyTopic.charId) }}
+                        {{ $t(getCharacterName(partyTopic.charId)) }}
                     </SRouterLink>
                 </div>
 
@@ -930,7 +930,7 @@ onBeforeUnmount(() => {
                     <SRouterLink :to="`/db/questchain/${partyTopic.conditionId}`" class="text-right link link-primary">
                         {{
                             conditionQuestChain
-                                ? `${formatStoryText(conditionQuestChain.name)} (${partyTopic.conditionId})`
+                                ? `${$t(formatStoryText(conditionQuestChain.name))} (${partyTopic.conditionId})`
                                 : partyTopic.conditionId
                         }}
                     </SRouterLink>

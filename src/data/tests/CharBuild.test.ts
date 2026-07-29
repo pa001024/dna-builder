@@ -1252,6 +1252,20 @@ describe("CharBuild类测试", () => {
         })
     })
 
+    describe("自动极化测试", () => {
+        it("容量允许单次极化时应优先选择耐受更高的MOD", () => {
+            const charBuild = createCharBuild()
+            charBuild.char.等级 = 20
+            charBuild.charMods = [new LeveledMod(51411), new LeveledMod(41732)]
+            charBuild.auraMod = undefined
+
+            expect(charBuild.getModCost("角色")).toBe(46)
+            expect(charBuild.getModCap("角色")).toBe(40)
+            expect(charBuild.getModCostTransfer("角色")).toEqual([0])
+            expect(charBuild.getModCostMax("角色")).toBe(32)
+        })
+    })
+
     // 自动构筑测试
     describe("自动构筑测试", () => {
         it("当初始MOD数量已达上限时不应继续超量添加", () => {
@@ -1338,7 +1352,7 @@ describe("CharBuild类测试", () => {
             ).toBe(false)
         })
 
-        it("应该先补齐技能范围条件再纳入对应条件MOD", () => {
+        it("应该先补齐技能效益条件再纳入对应条件MOD", () => {
             const charBuild = createCharBuild()
             charBuild.char = new LeveledChar("丽蓓卡")
             charBuild.baseName = "普通攻击"
@@ -1350,8 +1364,7 @@ describe("CharBuild类测试", () => {
                 new LeveledModWithCount(56122, undefined, undefined, 1),
                 new LeveledModWithCount(56161, undefined, undefined, 1),
                 new LeveledModWithCount(56162, undefined, undefined, 1),
-                new LeveledModWithCount(51713, undefined, undefined, 1),
-                new LeveledModWithCount(51722, undefined, undefined, 1),
+                new LeveledModWithCount(51723, undefined, undefined, 3),
             ]
 
             const result = charBuild.autoBuild({
@@ -1365,7 +1378,7 @@ describe("CharBuild类测试", () => {
 
             expect(conditionalMod).toBeDefined()
             expect(result.newBuild.checkModEffective(conditionalMod!)?.isEffective).toBe(true)
-            expect(result.newBuild.calculateAttributes().技能范围).toBeGreaterThanOrEqual(1.6)
+            expect(result.newBuild.calculateAttributes().技能效益).toBeGreaterThanOrEqual(1.65)
         })
 
         it("替换不应破坏光环条件导致收益误判", () => {

@@ -85,10 +85,20 @@ const calculateRemainingTimeByScore = (baseRaidPoint: number, targetScore: numbe
 }
 
 // 状态管理
-const selectedSeason = useSearchParam<number>("s", 1005)
+const raidDungeons = Object.values(RaidDungeon)
+const defaultSeason = Object.values(RaidSeason)
+    .filter(season => raidDungeons.some(dungeon => dungeon.RaidSeason === season.RaidSeason))
+    .sort((a, b) => a.RaidSeason - b.RaidSeason)
+    .at(-1)?.RaidSeason ?? 0
+const defaultDungeon = raidDungeons
+    .filter(dungeon => dungeon.RaidSeason === defaultSeason)
+    .sort((a, b) => a.DifficultyLevel - b.DifficultyLevel)
+    .at(-1)?.DungeonId ?? 0
+
+const selectedSeason = useSearchParam<number>("s", defaultSeason)
 const scoreInput = ref("")
 const remainingTime = ref(30)
-const selectedDungeon = useSearchParam<number>("d", 21213)
+const selectedDungeon = useSearchParam<number>("d", defaultDungeon)
 const activeInfoTab = useSearchParam<"score" | "dungeon" | "rank">("t", "rank")
 const seasonTabs = computed(() => Object.values(RaidSeason))
 const dungeonTabs = computed(() => {
@@ -482,11 +492,11 @@ function getSeasonName(str: number) {
                         class="w-48 h-12 max-w-full shrink-0"
                         :title-frame-id="getTitleFrameId(item.reward)"
                     >
-                        <p class="text-sm font-bold text-white">{{ item.reward.child?.[0].n }}</p>
+                        <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
                     </TitleFrameRender>
                     <img v-else class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
                     <div v-if="!getTitleFrameId(item.reward)" class="absolute inset-0 flex items-center justify-center">
-                        <p class="text-sm font-bold text-white">{{ item.reward.child?.[0].n }}</p>
+                        <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
                     </div>
                 </div>
                 <div :key="item.reward.id" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">

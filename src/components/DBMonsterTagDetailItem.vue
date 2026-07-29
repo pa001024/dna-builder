@@ -161,7 +161,7 @@ function formatBonusValue(value: number): string {
             <div class="text-xs text-base-content/70 mb-2">{{ $t("monster-tag-detail.params") }}</div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 text-sm">
                 <div v-for="[key, value] in baseVars" :key="key" class="p-2 rounded bg-base-100">
-                    <div class="text-xs text-base-content/70 mb-1">{{ key }}</div>
+                    <div class="text-xs text-base-content/70 mb-1">{{ $t(key) }}</div>
                     <div class="font-medium break-all">{{ formatVarValue(key, value) }}</div>
                 </div>
             </div>
@@ -170,7 +170,7 @@ function formatBonusValue(value: number): string {
                 <div class="text-xs text-base-content/70 mb-2">{{ $t("monster-tag-detail.bonus") }}</div>
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2 text-sm">
                     <div v-for="[name, value] in bonusVars" :key="name" class="p-2 rounded bg-base-100">
-                        <div class="text-xs text-base-content/70 mb-1">{{ name }}</div>
+                        <div class="text-xs text-base-content/70 mb-1">{{ $t(name) }}</div>
                         <div class="font-medium text-success">{{ formatBonusValue(value) }}</div>
                     </div>
                 </div>

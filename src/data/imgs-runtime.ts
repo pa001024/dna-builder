@@ -6,6 +6,7 @@ const IMGS_CACHE_DIR = "dna-builder-imgs"
 const IMGS_REMOTE_BASE_URL = "https://cdn.dna-builder.cn/imgs"
 const IMGS_PACK_REMOTE_BASE_URL = "https://cdn.dna-builder.cn/imgs-pack"
 const IMGS_PACK_VERSIONS_FILE = "versions.json"
+const IMGS_INSTALL_MARKER_FILE = ".installed.json"
 
 export type ImgsManifestEntry = {
     path: string
@@ -39,6 +40,13 @@ export type ImgsDownloadState = {
 type ImgsMountOptions = {
     manifest?: ImgsManifestEntry[]
     baseUrl?: string
+    installedVersion?: string
+    manifestHash?: string
+}
+
+type ImgsInstallMarker = {
+    installedVersion: string
+    manifestHash: string
 }
 
 let mountPromise: Promise<void> | null = null
@@ -179,6 +187,63 @@ async function writeFile(directory: FileSystemDirectoryHandle, fileName: string,
     const writable = await handle.createWritable()
     await writable.write(bytes.slice())
     await writable.close()
+}
+
+/**
+ * 计算图片清单的稳定哈希。
+ * @param manifest 图片清单
+ * @returns 哈希值
+ */
+export function hashImgsManifest(manifest: ImgsManifestEntry[]): string {
+    let hash = 2166136261
+    const value = JSON.stringify(manifest)
+    for (let index = 0; index < value.length; index++) {
+        hash ^= value.charCodeAt(index)
+        hash = Math.imul(hash, 16777619)
+    }
+    return (hash >>> 0).toString(16).padStart(8, "0")
+}
+
+/**
+ * 生成图片缓存安装标识。
+ * @param options 挂载配置
+ * @returns 安装标识
+ */
+function getImgsInstallMarker(options: ImgsMountOptions): ImgsInstallMarker {
+    const manifest = options.manifest ?? []
+    return {
+        installedVersion: options.installedVersion || "unknown",
+        manifestHash: options.manifestHash || hashImgsManifest(manifest),
+    }
+}
+
+/**
+ * 判断当前图片清单是否已经完整安装。
+ * @param directory 图片缓存目录
+ * @param expectedMarker 目标安装标识
+ * @returns 是否已经安装
+ */
+async function isImgsManifestInstalled(directory: FileSystemDirectoryHandle, expectedMarker: ImgsInstallMarker): Promise<boolean> {
+    const bytes = await readFile(directory, IMGS_INSTALL_MARKER_FILE)
+    if (!bytes) {
+        return false
+    }
+
+    try {
+        const marker = JSON.parse(new TextDecoder().decode(bytes)) as Partial<ImgsInstallMarker>
+        return marker.manifestHash === expectedMarker.manifestHash
+    } catch {
+        return false
+    }
+}
+
+/**
+ * 记录已经完整安装的图片清单。
+ * @param directory 图片缓存目录
+ * @param marker 安装标识
+ */
+async function writeImgsInstallMarker(directory: FileSystemDirectoryHandle, marker: ImgsInstallMarker): Promise<void> {
+    await writeFile(directory, IMGS_INSTALL_MARKER_FILE, new TextEncoder().encode(JSON.stringify(marker)))
 }
 
 /**
@@ -339,11 +404,11 @@ async function cacheImg(relPath: string, bytes: Uint8Array, overwrite = false): 
 }
 
 /**
- * 从 OPFS 同步图片到运行时缓存。
+ * 检查 OPFS 中是否已有指定图片。
  * @param relPath 图片相对路径
  * @returns 是否命中
  */
-async function hydrateCacheFromOpfs(relPath: string): Promise<boolean> {
+async function hasCachedImgInOpfs(relPath: string): Promise<boolean> {
     const segments = normalizeImgPath(relPath).split("/").filter(Boolean)
     if (!segments.length) {
         return false
@@ -364,8 +429,9 @@ async function hydrateCacheFromOpfs(relPath: string): Promise<boolean> {
         }
     }
 
-    const cached = await readFile(currentDir, fileName)
-    if (!cached) {
+    try {
+        await currentDir.getFileHandle(fileName, { create: false })
+    } catch {
         return false
     }
 
@@ -380,7 +446,7 @@ async function hydrateCacheFromOpfs(relPath: string): Promise<boolean> {
 async function collectCachedImgPaths(desiredPaths: Set<string>): Promise<Set<string>> {
     const cachedPaths = new Set<string>()
     for (const relPath of desiredPaths) {
-        if (await hydrateCacheFromOpfs(relPath)) {
+        if (await hasCachedImgInOpfs(relPath)) {
             cachedPaths.add(relPath)
         }
     }
@@ -521,52 +587,60 @@ export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Pr
             return
         }
 
+        const imgsDirectory = await getImgsDirectory()
+        const installMarker = getImgsInstallMarker(options)
+        if (await isImgsManifestInstalled(imgsDirectory, installMarker)) {
+            return
+        }
+
         const baseUrl = getImgsBaseUrl(options.baseUrl)
         const desiredPaths = new Set(options.manifest.map(entry => normalizeImgPath(entry.path)))
         const completedPaths = new Set<string>()
         const remainingPaths = await tryMountImgsPacks(options, desiredPaths, completedPaths)
-        if (!remainingPaths.size) {
-            return
-        }
+        if (remainingPaths.size) {
+            patchImgsDownloadState({
+                active: true,
+                stage: "single",
+                version: "",
+                total: remainingPaths.size,
+                completed: 0,
+                packTotal: 0,
+                packCompleted: 0,
+                currentPackFiles: 0,
+                bytesDownloaded: 0,
+                bytesTotal: 0,
+                speedBps: 0,
+            })
+            await Promise.allSettled(
+                options.manifest.map(async entry => {
+                    const relPath = normalizeImgPath(entry.path)
+                    if (completedPaths.has(relPath) || !remainingPaths.has(relPath)) {
+                        return
+                    }
 
-        patchImgsDownloadState({
-            active: true,
-            stage: "single",
-            version: "",
-            total: remainingPaths.size,
-            completed: 0,
-            packTotal: 0,
-            packCompleted: 0,
-            currentPackFiles: 0,
-            bytesDownloaded: 0,
-            bytesTotal: 0,
-            speedBps: 0,
-        })
-        await Promise.allSettled(
-            options.manifest.map(async entry => {
-                const relPath = normalizeImgPath(entry.path)
-                if (completedPaths.has(relPath) || !remainingPaths.has(relPath)) {
-                    return
-                }
+                    const hydrated = await hasCachedImgInOpfs(relPath)
+                    if (hydrated) {
+                        completedPaths.add(relPath)
+                        patchImgsDownloadState({ completed: imgsDownloadState.value.completed + 1 })
+                        return
+                    }
 
-                const hydrated = await hydrateCacheFromOpfs(relPath)
-                if (hydrated) {
+                    const response = await fetch(entry.url || getRemoteImgUrl(relPath, baseUrl), { cache: "no-store" })
+                    if (!response.ok) {
+                        throw new Error(`下载图片失败: ${entry.path}`)
+                    }
+
+                    const bytes = new Uint8Array(await response.arrayBuffer())
+                    await cacheImg(relPath, bytes, true)
                     completedPaths.add(relPath)
                     patchImgsDownloadState({ completed: imgsDownloadState.value.completed + 1 })
-                    return
-                }
+                })
+            )
+        }
 
-                const response = await fetch(entry.url || getRemoteImgUrl(relPath, baseUrl), { cache: "no-store" })
-                if (!response.ok) {
-                    throw new Error(`下载图片失败: ${entry.path}`)
-                }
-
-                const bytes = new Uint8Array(await response.arrayBuffer())
-                await cacheImg(relPath, bytes, true)
-                completedPaths.add(relPath)
-                patchImgsDownloadState({ completed: imgsDownloadState.value.completed + 1 })
-            })
-        )
+        if (completedPaths.size === desiredPaths.size) {
+            await writeImgsInstallMarker(imgsDirectory, installMarker)
+        }
     })()
 
     try {

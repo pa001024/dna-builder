@@ -388,15 +388,15 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
                             loading="lazy"
                         />
                         <SRouterLink :to="`/db/questchain/${questChain.id}`" class="text-lg font-bold link link-primary">
-                            {{ questChain.name }}
+                            {{ $t(questChain.name) }}
                         </SRouterLink>
                         <CopyID :id="questChain.id" />
                     </div>
                     <div class="text-sm text-base-content/70 flex flex-wrap items-center gap-2">
                         <span v-if="questChainVersion">v{{ questChainVersion }}</span>
                         <span>{{ questChainTypeDisplay.name }}</span>
-                        <span>{{ questChain.episode }}</span>
-                        <span>{{ questChain.chapterName }} {{ questChain.chapterNumber || "" }}</span>
+                        <span>{{ $t(questChain.episode) }}</span>
+                        <span>{{ $t(questChain.chapterName) }} {{ $t(questChain.chapterNumber || "") }}</span>
                         <div v-if="questChain.startTime" class="flex justify-between">
                             <span class="text-base-content/70">开始时间</span>
                             <span>{{ new Date(questChain.startTime * 1000).toLocaleString() }}</span>

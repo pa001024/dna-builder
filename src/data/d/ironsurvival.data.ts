@@ -3,11 +3,13 @@ import type { SpawnInfo } from "./dungeon.data"
 export interface IronSurvival {
     DungeonId: number
     LevelThreshold: number[]
+    MiniGameCreatorId: number
     MonsterSpawnId: number[][]
     StrongKillCount: number[]
     StrongLoopSpawnId: number[][]
 }
 export interface IronSurvivalDungeon {
+    AvaliableTicketLevel: number[]
     DungeonId: number
     IronRoundsReward: Record<number, number>
     IronRoundsRewardView: Record<number, number>

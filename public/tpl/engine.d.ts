@@ -316,6 +316,105 @@ declare class Timer {
     elapsed(): number
 }
 
+declare module "cap" {
+    /** Cap 初始化参数 */
+    export interface CapOptions {
+        /** 游戏窗口是否为无边框模式 */
+        frameless?: boolean
+    }
+
+    /** DSL 等待节点 */
+    export interface DslWaitNode {
+        type: "wait"
+        /** 等待时间（毫秒） */
+        ms: number
+    }
+
+    /** DSL 按键节点 */
+    export interface DslKeyNode {
+        type: "key"
+        key: KeyEnum
+        /** 按键持续时间（毫秒） */
+        duration?: number
+    }
+
+    /** DSL 鼠标节点 */
+    export interface DslMouseNode {
+        type: "mouse"
+        button: "left" | "right" | "middle"
+        x?: number
+        y?: number
+        /** 按键保持时间（毫秒） */
+        waitMs: number
+    }
+
+    /** DSL 分组节点 */
+    export interface DslGroupNode {
+        type: "group"
+        body: DslNode[]
+    }
+
+    /** DSL 循环节点，count 为 0 时无限循环 */
+    export interface DslLoopNode {
+        type: "loop"
+        count: number
+        body: DslNode[]
+    }
+
+    /** DSL 解析节点 */
+    export type DslNode = DslWaitNode | DslKeyNode | DslMouseNode | DslGroupNode | DslLoopNode
+
+    /** 可通过 stop() 手动中断的原生 Promise */
+    export interface StoppablePromise<T> extends Promise<T> {
+        /** 中断该 Promise 对应的任务 */
+        stop(): void
+    }
+
+    /** DSL 宏解析器 */
+    export class DslParser {
+        /**
+         * 创建 DSL 解析器
+         * @param dsl DSL 源码
+         * @param wordKeys 可选的多字符按键名，省略时使用引擎默认按键名
+         */
+        constructor(dsl: string, wordKeys?: readonly KeyEnum[])
+        /** 解析完整 DSL 源码 */
+        parse(): DslNode[]
+    }
+
+    /** 游戏窗口截图与输入操作 */
+    export class Cap {
+        /**
+         * 创建游戏窗口操作实例
+         * @param hwnd 游戏窗口句柄
+         * @param options 可选初始化参数，frameless 默认为 false
+         */
+        constructor(hwnd: number, options?: CapOptions)
+        readonly frameless: boolean
+        readonly hwnd: number
+        readonly yof: number
+        frame: Mat
+        /** 捕获最新游戏画面 */
+        cap(): Mat
+        /** 点击客户区坐标 */
+        mc(x?: number, y?: number, button?: "left" | "right" | "middle"): void
+        /** 按下客户区坐标处的鼠标按键 */
+        md(x?: number, y?: number, button?: "left" | "right" | "middle"): void
+        /** 松开客户区坐标处的鼠标按键 */
+        mu(x?: number, y?: number, button?: "left" | "right" | "middle"): void
+        /** 在客户区坐标点击鼠标中键 */
+        mt(x?: number, y?: number): void
+        /** 发送按键 */
+        kb(key: KeyEnum, duration?: number): Promise<void>
+        /** 等待客户区指定坐标达到颜色条件 */
+        waitColor(x: number, y: number, color: number, tolerance: number, timeout?: number): Promise<boolean>
+        /** 播放 DSL 宏并返回可手动中断的 Promise */
+        play(dsl: string): StoppablePromise<void>
+        /** 停止当前 DSL 播放 */
+        stopPlay(): void
+    }
+}
+
 /**
  * 鼠标点击操作
  * @param button 按键类型（重载简写）：left/right/middle/x1/x2
@@ -344,6 +443,30 @@ declare function mc(hwnd?: number, x?: number, y?: number, button?: "left" | "ri
  * @param y Y坐标
  */
 declare function mm(x: number, y: number): void
+
+/**
+ * 获取鼠标当前位置
+ * @param hwnd 可选窗口句柄；提供时返回相对于窗口客户区的坐标
+ * @returns [x, y]
+ */
+declare function getMousePos(hwnd?: number): [number, number]
+
+/**
+ * 获取屏幕坐标点颜色
+ * @param x X坐标
+ * @param y Y坐标
+ * @returns 颜色值（0xRRGGBB）
+ */
+declare function getColor(x: number, y: number): number
+
+/**
+ * 获取窗口客户区坐标点颜色
+ * @param hwnd 窗口句柄；传0时使用屏幕坐标
+ * @param x X坐标
+ * @param y Y坐标
+ * @returns 颜色值（0xRRGGBB）
+ */
+declare function getColor(hwnd: number, x: number, y: number): number
 
 /**
  * 鼠标相对移动（支持显式传窗口句柄）

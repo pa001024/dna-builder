@@ -170,7 +170,7 @@ useInitialScrollToSelectedItem()
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium flex gap-2 items-center">
-                                        {{ draft.n }}
+                                        {{ $t(draft.n) }}
                                         <span class="text-xs px-2 py-0.5 rounded" :class="getRarityColor(draft.r)">
                                             {{ ["", "白", "绿", "蓝", "紫", "金"][draft.r] }}
                                         </span>

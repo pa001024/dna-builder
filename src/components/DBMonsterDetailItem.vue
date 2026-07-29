@@ -429,7 +429,7 @@ function getFactionName(faction: number | undefined): string {
             <CopyID :id="monster.id" />
             <div class="text-sm text-base-content/70 flex items-center gap-2">
                 <span class="px-1.5 py-0.5 rounded bg-base-200 text-xs">
-                    {{ getFactionName(monster.f) }}
+                    {{ $t(getFactionName(monster.f)) }}
                 </span>
             </div>
             <label class="ml-auto flex items-center gap-1 text-xs">
@@ -575,7 +575,7 @@ function getFactionName(faction: number | undefined): string {
                     @click="$router.push(`/db/dungeon/${dungeon.id}`)"
                 >
                     <div class="flex items-center justify-between">
-                        <span class="font-medium">{{ dungeon.n }}</span>
+                        <span class="font-medium">{{ $t(dungeon.n) }}</span>
                         <div class="flex flex-col items-end">
                             <span class="text-xs text-base-content/70">Lv.{{ dungeon.lv }}</span>
                             <CopyID :id="dungeon.id" />

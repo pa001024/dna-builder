@@ -1,20 +1,21 @@
 import { createApp, type VNode } from "vue"
 import "./style.css"
-import { registerSW } from "virtual:pwa-register"
 import * as Sentry from "@sentry/vue"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
 import packageJson from "../package.json"
 import { dataPackBootstrapLoading } from "./data/data-pack-bridge"
-import { bootstrapDataPack, getLoadedDataPackImgsManifest } from "./data/data-pack-runtime"
+import { bootstrapDataPack, getLoadedDataPackImgsCacheInfo, getLoadedDataPackImgsManifest } from "./data/data-pack-runtime"
 import { mountImgsToVirtualPath } from "./data/imgs-runtime"
 import { DNA_SAFE_VERSION_LIMIT, setCurrentVersionLimit } from "./data/versionGate"
 
 import { env } from "./env"
 import { applyLanguageFontClass, initI18n } from "./i18n"
-import { router } from "./router"
 import "@globalhive/vuejs-tour/dist/style.css"
 import { createPinia } from "pinia"
+import type { Router } from "vue-router"
+
+let appRouter: Router | null = null
 
 /**
  * 注册 App 端图片服务工作线程。
@@ -24,10 +25,52 @@ async function registerImgsServiceWorker(): Promise<void> {
         return
     }
 
-    await navigator.serviceWorker.register(new URL("/sw-app.js", window.location.origin).toString(), {
+    const registration = await navigator.serviceWorker.register(new URL("/sw-app.js", window.location.origin).toString(), {
         scope: "/",
         updateViaCache: "none",
     })
+
+    const worker = registration.installing || registration.waiting
+    if (worker && worker.state !== "activated") {
+        await new Promise<void>((resolve, reject) => {
+            worker.addEventListener("statechange", () => {
+                if (worker.state === "activated") {
+                    resolve()
+                } else if (worker.state === "redundant") {
+                    reject(new Error("图片 Service Worker 激活失败"))
+                }
+            })
+        })
+    }
+
+    await navigator.serviceWorker.ready
+}
+
+/**
+ * 初始化数据包、图片缓存与 App 图片 Service Worker。
+ */
+async function bootstrapRuntimeAssets(): Promise<void> {
+    try {
+        await bootstrapDataPack()
+    } catch (error) {
+        console.error("数据包初始化失败", error)
+    } finally {
+        dataPackBootstrapLoading.value = false
+    }
+
+    if (env.isApp) {
+        try {
+            const cacheInfo = getLoadedDataPackImgsCacheInfo()
+            await mountImgsToVirtualPath({
+                manifest: getLoadedDataPackImgsManifest(),
+                installedVersion: cacheInfo?.installedVersion,
+                manifestHash: cacheInfo?.manifestHash,
+            })
+            await registerImgsServiceWorker()
+        } catch (error) {
+            console.error("图片资源初始化失败", error)
+        }
+    }
 }
 
 initI18n(localStorage.getItem("setting_lang") || navigator.language)
@@ -43,6 +86,7 @@ async function bootstrap() {
     applyLanguageFontClass(localStorage.getItem("setting_lang") || navigator.language)
 
     const [{ default: App }, { router }] = await Promise.all([import("./App.vue"), import("./router")])
+    appRouter = router
     const app = createApp(App)
     app.use(createPinia()).use(I18NextVue, { i18next }).use(router)
 
@@ -83,35 +127,29 @@ async function bootstrap() {
     dataPackBootstrapLoading.value = true
     app.mount("#app")
     requestAnimationFrame(() => {
-        bootstrapDataPack()
-            .then(() => {
-                if (env.isApp) {
-                    void mountImgsToVirtualPath({
-                        manifest: getLoadedDataPackImgsManifest(),
-                    })
-                        .then(() => registerImgsServiceWorker())
-                        .catch(error => {
-                            console.error("图片缓存预热失败", error)
-                        })
-                }
-
-                return undefined
-            })
-            .finally(() => {
-                dataPackBootstrapLoading.value = false
-            })
+        void bootstrapRuntimeAssets()
     })
     // 仅在非应用环境下注册 Service Worker
     if (!env.isApp) {
-        registerSW({
-            immediate: true,
-        })
+        void import("virtual:pwa-register")
+            .then(({ registerSW }) => {
+                registerSW({
+                    immediate: true,
+                })
+            })
+            .catch(error => {
+                console.error("PWA 注册失败", error)
+            })
     }
 }
 
 export function renderVueNode(vnode: VNode, container: HTMLElement) {
+    if (!appRouter) {
+        throw new Error("路由尚未初始化")
+    }
+
     const appInstance = createApp(vnode)
-    appInstance.use(createPinia()).use(I18NextVue, { i18next }).use(router)
+    appInstance.use(createPinia()).use(I18NextVue, { i18next }).use(appRouter)
     appInstance.mount(container)
     return appInstance
 }

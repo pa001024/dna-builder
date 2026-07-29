@@ -97,7 +97,7 @@ function handleSelectOption(dialogueId: number, optionId: number) {
     <div class="p-3 space-y-3">
         <div class="flex items-center gap-2">
             <SRouterLink :to="`/db/npc/${npc.id}`" class="text-lg font-bold link link-primary">
-                {{ formatStoryText(npc.name || `NPC ${npc.id}`) }}
+                {{ $t(formatStoryText(npc.name || `NPC ${npc.id}`)) }}
             </SRouterLink>
             <CopyID :id="npc.id" />
         </div>
@@ -111,7 +111,7 @@ function handleSelectOption(dialogueId: number, optionId: number) {
                 </div>
                 <div class="flex justify-between">
                     <span class="text-base-content/70">名称</span>
-                    <span>{{ formatStoryText(npc.name || "未知") }}</span>
+                    <span>{{ $t(formatStoryText(npc.name || "未知")) }}</span>
                 </div>
                 <div v-if="npc.camp" class="flex justify-between">
                     <span class="text-base-content/70">阵营</span>

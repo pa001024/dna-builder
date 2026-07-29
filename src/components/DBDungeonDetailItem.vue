@@ -478,7 +478,7 @@ watch(
             <div class="flex items-center gap-3">
                 <img v-if="dungeon.e" :src="LeveledChar.elementUrl(dungeon.e)" alt="" class="h-8 inline-block" />
                 <SRouterLink :to="`/db/dungeon/${dungeon.id}`" class="text-lg font-bold link link-primary">
-                    {{ dungeon.n }}
+                    {{ $t(dungeon.n) }}
                 </SRouterLink>
                 <CopyID :id="dungeon.id" />
                 <div class="flex-1"></div>

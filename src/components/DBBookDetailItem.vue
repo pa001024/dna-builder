@@ -157,7 +157,7 @@ function parseBookTextSegments(text: string | undefined) {
  */
 const bookTabItems = computed(() =>
     props.book.res.map(resource => ({
-        label: getResourceDisplayName(resource),
+        label: t(getResourceDisplayName(resource)),
         value: resource.id,
     }))
 )
@@ -174,7 +174,7 @@ const bookTabItems = computed(() =>
             />
             <div class="min-w-0">
                 <SRouterLink :to="`/db/book/${book.id}`" class="text-lg font-bold link link-primary wrap-break-word">
-                    {{ book.name }}
+                    {{ $t(book.name) }}
                 </SRouterLink>
                 <div class="text-sm text-base-content/70 mt-1">
                     <CopyID :id="book.id" /> {{ $t("book-detail.countSuffix", { count: book.res.length }) }}
@@ -193,7 +193,7 @@ const bookTabItems = computed(() =>
             <div v-if="selectedResource" class="space-y-3">
                 <div class="flex items-start justify-between gap-2">
                     <div class="flex gap-2">
-                        <div class="text-base font-semibold wrap-break-word">{{ getResourceDisplayName(selectedResource) }}</div>
+                        <div class="text-base font-semibold wrap-break-word">{{ $t(getResourceDisplayName(selectedResource)) }}</div>
                         <CopyID :id="selectedResource.id" />
                     </div>
                     <span class="text-xs px-2 py-0.5 rounded bg-primary text-primary-content shrink-0">

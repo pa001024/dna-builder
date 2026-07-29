@@ -23,7 +23,7 @@ function parseEventText(text?: string): StoryTextSegment[] {
         <div class="rounded-md bg-base-200 p-3">
             <div class="flex items-start justify-between gap-3">
                 <SRouterLink :to="`/db/event/${event.id}`" class="text-lg font-bold link link-primary">
-                    {{ event.name }}
+                    {{ $t(event.name) }}
                 </SRouterLink>
                 <CopyID :id="event.id" />
             </div>

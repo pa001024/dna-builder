@@ -139,7 +139,7 @@ useInitialScrollToSelectedItem()
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
                                     <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
-                                        {{ walnut.类型 === 1 ? "角色" : walnut.类型 === 2 ? "武器" : "魔之楔" }}
+                                        {{ $t(walnut.类型 === 1 ? "角色" : walnut.类型 === 2 ? "武器" : "魔之楔") }}
                                     </span>
                                 </div>
                             </div>

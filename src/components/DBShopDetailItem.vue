@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, watch } from "vue"
 import { useRoute } from "vue-router"
 import { useSearchParam } from "@/composables/useSearchParam"
@@ -7,6 +8,7 @@ import type { Shop, ShopItem as ShopItemType, ShopMainTab, ShopSubTab } from "@/
 const props = defineProps<{
     shop: Shop
 }>()
+const { t } = useTranslation()
 const route = useRoute()
 const nowTimestamp = Math.floor(Date.now() / 1000)
 
@@ -48,7 +50,7 @@ interface FilteredShopMainTab extends Omit<ShopMainTab, "subTabs"> {
 /**
  * 商店主标签展示项。
  */
-const shopTabs = computed(() => props.shop.mainTabs.map(tab => ({ label: tab.name, value: tab.name })))
+const shopTabs = computed(() => props.shop.mainTabs.map(tab => ({ label: t(tab.name), value: tab.name })))
 const selectedShop = useSearchParam("tab", props.shop.mainTabs[0].name || "")
 const timeFilterEnabled = useSearchParam("tf", true)
 const selectedTimePointIndex = useSearchParam("ti", 0)
@@ -566,7 +568,7 @@ function formatShopTimeShort(timestamp: number): string {
                 :class="isRouteSubTab(subTab.id) ? 'border-primary ring-1 ring-primary/30' : 'border-base-200'"
             >
                 <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-                    <h4 class="font-medium">{{ subTab.name }}</h4>
+                    <h4 class="font-medium">{{ $t(subTab.name) }}</h4>
                     <span v-if="timeFilterEnabled" class="text-xs text-base-content/60">
                         <template v-if="diffOnlyEnabled">
                             {{ subTab.changedItemCount }} 件发生变化，另保留

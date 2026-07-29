@@ -294,7 +294,6 @@ async function refreshDataPackVersionsInStages(forceRefresh = false) {
 
 async function downloadDataPack(version: string) {
     await dataPack.downloadVersion(version)
-    await refreshDataPackStatus()
 }
 
 async function importDataPack() {
@@ -309,14 +308,12 @@ async function onImportFileChange(event: Event) {
         return
     }
     await dataPack.importFromFile(file)
-    await refreshDataPackStatus()
 }
 
 async function saveSourceBaseUrl() {
     isApplyingSourceUpdate.value = true
     try {
         await dataPack.setSourceBaseUrl(dataPackSourceBaseUrl.value.trim())
-        await refreshDataPackStatus()
     } finally {
         isApplyingSourceUpdate.value = false
     }
@@ -330,7 +327,6 @@ async function saveSourceKind(kind: "official" | "custom") {
         if (kind === "official") {
             dataPackSourceBaseUrl.value = CDN_DATA_PACK_BASE_URL
         }
-        await refreshDataPackStatus(true)
     } finally {
         isApplyingSourceUpdate.value = false
     }
@@ -403,7 +399,6 @@ async function useDataPackVersion(version: string) {
     }
 
     await dataPack.useVersion(version)
-    await refreshDataPackStatus(true)
 }
 
 async function uninstallDataPackVersion(version: string) {
@@ -416,7 +411,6 @@ async function uninstallDataPackVersion(version: string) {
     }
 
     await dataPack.uninstallVersion(version)
-    await refreshDataPackStatus(true)
 }
 
 async function clearDataPackStorage() {
@@ -437,9 +431,9 @@ async function clearDataPackStorage() {
     }
 }
 onMounted(() => {
-    void dataPack.bootstrap().then(() => {
-        void refreshDataPackVersionsInStages()
-    })
+    if (!dataPack.status) {
+        void dataPack.bootstrap()
+    }
 })
 </script>
 

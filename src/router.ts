@@ -1,22 +1,23 @@
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window"
 import { createRouter, createWebHashHistory, createWebHistory, type RouteRecordRaw } from "vue-router"
 import { env } from "./env"
-import AchievementList from "./views/AchievementList.vue"
-import CharBuildCompare from "./views/CharBuildCompare.vue"
-import CharBuildView from "./views/CharBuildView.vue"
-import CharBuildViewNew from "./views/CharBuildViewNew.vue"
-import CharListView from "./views/CharListView.vue"
-import CounterView from "./views/CounterView.vue"
-import GuideDetailView from "./views/GuideDetailView.vue"
-import GuideEditView from "./views/GuideEditView.vue"
-import GuideListView from "./views/GuideListView.vue"
-import Home from "./views/Home.vue"
-import InventoryEdit from "./views/InventoryEdit.vue"
-import More from "./views/More.vue"
-import NotFound from "./views/NotFound.vue"
-import Setting from "./views/Setting.vue"
-import TimelineEditor from "./views/TimelineEditor.vue"
-import UserManager from "./views/UserManager.vue"
+
+const AchievementList = () => import("./views/AchievementList.vue")
+const CharBuildCompare = () => import("./views/CharBuildCompare.vue")
+const CharBuildView = () => import("./views/CharBuildView.vue")
+const CharBuildViewNew = () => import("./views/CharBuildViewNew.vue")
+const CharListView = () => import("./views/CharListView.vue")
+const CounterView = () => import("./views/CounterView.vue")
+const GuideDetailView = () => import("./views/GuideDetailView.vue")
+const GuideEditView = () => import("./views/GuideEditView.vue")
+const GuideListView = () => import("./views/GuideListView.vue")
+const Home = () => import("./views/Home.vue")
+const InventoryEdit = () => import("./views/InventoryEdit.vue")
+const More = () => import("./views/More.vue")
+const NotFound = () => import("./views/NotFound.vue")
+const Setting = () => import("./views/Setting.vue")
+const TimelineEditor = () => import("./views/TimelineEditor.vue")
+const UserManager = () => import("./views/UserManager.vue")
 
 let setMinSize = async (_w: number, _h: number) => {}
 ;(() => {

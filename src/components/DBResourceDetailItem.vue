@@ -166,7 +166,7 @@ function getResourceIconUrl(icon: string): string {
             <div class="space-y-2 flex-1">
                 <div class="flex items-center gap-3 p-3">
                     <SRouterLink :to="`/db/resource/${resource.id}`" class="text-lg font-bold link link-primary">
-                        {{ resource.name }}
+                        {{ $t(resource.name) }}
                     </SRouterLink>
                     <CopyID :id="resource.id" />
                 </div>
@@ -209,7 +209,7 @@ function getResourceIconUrl(icon: string): string {
             <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.book") }}</div>
             <div class="flex items-center gap-2">
                 <SRouterLink :to="bookLink" class="link link-primary wrap-break-word">
-                    {{ bookTarget.name }}
+                    {{ $t(bookTarget.name) }}
                 </SRouterLink>
                 <CopyID :id="bookTarget.id" />
             </div>
@@ -219,7 +219,7 @@ function getResourceIconUrl(icon: string): string {
             <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.fish") }}</div>
             <div class="flex items-center gap-2">
                 <SRouterLink :to="fishLink" class="link link-primary wrap-break-word">
-                    {{ fishTarget.name }}
+                    {{ $t(fishTarget.name) }}
                 </SRouterLink>
                 <CopyID :id="fishTarget.id" />
             </div>
