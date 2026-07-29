@@ -1,6 +1,6 @@
 import type { DNACommentListResponse, DNARoleEntity } from "dna-api"
 import { describe, expect, it, vi } from "vitest"
-import { scanAbyssPostComments } from "./admin-data-sync"
+import { runScheduledAdminSync, scanAbyssPostComments } from "./admin-data-sync"
 
 /**
  * @description 创建评论分页测试数据。
@@ -62,5 +62,54 @@ describe("scanAbyssPostComments", () => {
 
         expect(summary).toEqual({ total: 1, uploaded: 0, skipped: 0, failed: 1 })
         expect(processed.size).toBe(0)
+    })
+})
+
+describe("runScheduledAdminSync", () => {
+    it("应该在整点后延迟一分钟再同步", async () => {
+        const sync = vi.fn(async () => ({ missionsChanged: true }))
+        const delay = vi.fn(async () => undefined)
+
+        await runScheduledAdminSync(sync, delay)
+
+        expect(delay).toHaveBeenCalledTimes(1)
+        expect(delay).toHaveBeenCalledWith(60_000)
+        expect(sync).toHaveBeenCalledTimes(1)
+    })
+
+    it("应该在数据相同时再次延迟并重试", async () => {
+        const sync = vi
+            .fn<() => Promise<{ missionsChanged: boolean }>>()
+            .mockResolvedValueOnce({ missionsChanged: false })
+            .mockResolvedValueOnce({ missionsChanged: true })
+        const delay = vi.fn(async () => undefined)
+
+        await runScheduledAdminSync(sync, delay)
+
+        expect(delay.mock.calls).toEqual([[60_000], [30_000]])
+        expect(sync).toHaveBeenCalledTimes(2)
+    })
+
+    it("应该在同步失败时延迟重试", async () => {
+        const sync = vi
+            .fn<() => Promise<{ missionsChanged: boolean }>>()
+            .mockRejectedValueOnce(new Error("上游未刷新"))
+            .mockResolvedValueOnce({ missionsChanged: true })
+        const delay = vi.fn(async () => undefined)
+
+        await runScheduledAdminSync(sync, delay)
+
+        expect(delay.mock.calls).toEqual([[60_000], [30_000]])
+        expect(sync).toHaveBeenCalledTimes(2)
+    })
+
+    it("应该在等待期间停止任务后取消同步", async () => {
+        const sync = vi.fn(async () => ({ missionsChanged: true }))
+        const delay = vi.fn(async () => undefined)
+
+        await runScheduledAdminSync(sync, delay, () => false)
+
+        expect(delay).toHaveBeenCalledWith(60_000)
+        expect(sync).not.toHaveBeenCalled()
     })
 })

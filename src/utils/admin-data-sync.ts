@@ -6,6 +6,9 @@ import { useSettingStore } from "@/store/setting"
 import { buildAbyssUploadPayload } from "@/utils/abyss-upload"
 
 const ADMIN_SYNC_INTERVAL_MS = 60 * 60 * 1000
+const ADMIN_SYNC_INITIAL_DELAY_MS = 60 * 1000
+const ADMIN_SYNC_RETRY_DELAY_MS = 30 * 1000
+const ADMIN_SYNC_MAX_ATTEMPTS = 2
 const PROCESSED_COMMENTS_STORAGE_KEY = "admin_abyss_processed_comments"
 
 let adminSyncTimer: ReturnType<typeof setTimeout> | null = null
@@ -18,6 +21,10 @@ export interface AbyssPostUploadSummary {
     uploaded: number
     skipped: number
     failed: number
+}
+
+export interface AdminGameDataSyncResult {
+    missionsChanged: boolean
 }
 
 export interface AbyssCommentScanDependencies {
@@ -40,6 +47,14 @@ function enqueueDNATask<T>(task: () => Promise<T>): Promise<T> {
         () => undefined
     )
     return result
+}
+
+/**
+ * @description 等待指定时长。
+ * @param milliseconds 等待毫秒数。
+ */
+function wait(milliseconds: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
 /**
@@ -219,8 +234,9 @@ function normalizeActivity(activity: DNAActivity): ActivityInput {
 
 /**
  * @description 立即同步当前 DNA 账号的密函与活动数据。
+ * @returns 密函是否发生变化并完成上传。
  */
-export function syncAdminGameData(): Promise<void> {
+export function syncAdminGameData(): Promise<AdminGameDataSyncResult> {
     return enqueueDNATask(async () => {
         const setting = useSettingStore()
         const account = await setting.getCurrentUser()
@@ -242,7 +258,8 @@ export function syncAdminGameData(): Promise<void> {
             const server = account.server || "cn"
             const missions = roleResult.data.instanceInfo.map(item => item.instances.map(instance => instance.name))
             const currentMissions = await missionsIngamesQuery({ server, limit: 1, offset: 0 }, { requestPolicy: "network-only" })
-            if (JSON.stringify(currentMissions?.[0]?.missions) !== JSON.stringify(missions)) {
+            const missionsChanged = JSON.stringify(currentMissions?.[0]?.missions) !== JSON.stringify(missions)
+            if (missionsChanged) {
                 const result = await addMissionsIngameMutation({ server, missions }, { requestPolicy: "network-only" })
                 if (!result) throw new Error("密函上传失败")
             }
@@ -250,10 +267,47 @@ export function syncAdminGameData(): Promise<void> {
             const activities = activityResult.data.activities.filter(activity => activity.cycleDay === -1).map(normalizeActivity)
             const activityResultValue = await upsertActivitiesIngameMutation({ server, activities }, { requestPolicy: "network-only" })
             if (!activityResultValue) throw new Error("活动上传失败")
+            return { missionsChanged }
         } finally {
             await setting.stopHeartbeat()
         }
     })
+}
+
+/**
+ * @description 执行整点同步：先等待上游刷新，数据未变化或请求失败时延迟重试一次。
+ * @param sync 执行一次同步的函数。
+ * @param delay 等待函数。
+ * @param shouldContinue 当前任务是否仍有效。
+ */
+export async function runScheduledAdminSync(
+    sync: () => Promise<AdminGameDataSyncResult> = syncAdminGameData,
+    delay: (milliseconds: number) => Promise<void> = wait,
+    shouldContinue: () => boolean = () => true
+): Promise<void> {
+    await delay(ADMIN_SYNC_INITIAL_DELAY_MS)
+    if (!shouldContinue()) return
+
+    let lastError: unknown
+    for (let attempt = 0; attempt < ADMIN_SYNC_MAX_ATTEMPTS; attempt++) {
+        try {
+            const result = await sync()
+            if (result.missionsChanged) return
+            lastError = undefined
+        } catch (error) {
+            lastError = error
+        }
+
+        if (attempt < ADMIN_SYNC_MAX_ATTEMPTS - 1) {
+            const reason = lastError ? "同步失败" : "数据未变化"
+            console.info(`管理员整点${reason}，${ADMIN_SYNC_RETRY_DELAY_MS / 1000} 秒后重试`)
+            await delay(ADMIN_SYNC_RETRY_DELAY_MS)
+            if (!shouldContinue()) return
+        }
+    }
+
+    if (lastError) throw lastError
+    console.info("管理员整点数据重试后仍未变化")
 }
 
 /**
@@ -265,7 +319,7 @@ function scheduleNextAdminSync(generation: number): void {
     const delay = ADMIN_SYNC_INTERVAL_MS - (Date.now() % ADMIN_SYNC_INTERVAL_MS)
     adminSyncTimer = setTimeout(async () => {
         try {
-            await syncAdminGameData()
+            await runScheduledAdminSync(syncAdminGameData, wait, () => generation === adminSyncGeneration)
         } catch (error) {
             console.error("管理员定时数据同步失败:", error)
         } finally {
