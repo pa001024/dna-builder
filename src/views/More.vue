@@ -115,18 +115,7 @@ const itemsRaw = [
     },
 ] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[]
 
-const items = computed(
-    () =>
-        [
-            ...itemsRaw,
-            {
-                name: "script-list",
-                path: "/scripts",
-                icon: "ri:code-s-slash-line",
-                show: scriptUnlocked.value,
-            },
-        ] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[]
-)
+const items = computed(() => [...itemsRaw] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[])
 // 卡片进入动画延迟
 const getAnimationDelay = (index: number) => {
     return Math.min(index * 50, 500) // 最多延迟500ms
