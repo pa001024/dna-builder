@@ -225,36 +225,39 @@ function handleClickMonsterCard(): void {
         @click="handleClickMonsterCard"
     >
         <div class="flex items-start gap-2.5">
-            <img :src="monsterAvatarUrl" :alt="displayMonster.n" class="size-12 rounded-lg object-cover ring-1 ring-base-300" />
+            <img :src="monsterAvatarUrl" :alt="displayMonster.n" class="size-11 shrink-0 rounded-lg object-cover ring-1 ring-base-300" />
 
             <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
                     <SRouterLink
                         :to="monsterDetailRoute"
-                        class="truncate text-sm font-semibold text-base-content hover:text-primary"
+                        class="min-w-0 truncate text-sm font-semibold text-base-content hover:text-primary"
                         @click.stop
                         :title="`${displayMonster.n} ${displayMonster.id}`"
                     >
                         {{ $t(displayMonster.n) }}
                     </SRouterLink>
+                    <CopyID :id="displayMonster.id" compact class="ml-auto shrink-0" />
                 </div>
 
-                <div class="mt-1 flex flex-wrap items-center gap-1.5">
-                    <span class="rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/80">{{
-                        $t(getFactionName(displayMonster.f))
-                    }}</span>
-                    <span class="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] text-primary">Lv.{{ monsterLevel ?? "--" }}</span>
-                    <span v-if="quantity !== undefined" class="rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/75">
-                        x{{ quantity }}
-                    </span>
+                <div class="mt-1 flex flex-wrap items-center gap-1">
                     <span
                         v-if="displayMonster.t"
-                        class="rounded px-1.5 py-0.5 text-[10px] text-white"
+                        class="rounded px-1.5 py-0.5 text-[10px] font-medium text-white"
                         :class="getMonsterType(displayMonster.t).color"
                     >
                         {{ getMonsterType(displayMonster.t).label }}
                     </span>
-                    <span v-if="soloTreasureRewards.length" class="rounded bg-secondary/20 px-1.5 py-0.5 text-[10px] text-secondary">
+                    <span class="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                        >Lv.{{ monsterLevel ?? "--" }}</span
+                    >
+                    <span class="rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/70">{{
+                        $t(getFactionName(displayMonster.f))
+                    }}</span>
+                    <span v-if="quantity !== undefined" class="rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning">
+                        ×{{ quantity }}
+                    </span>
+                    <span v-if="soloTreasureRewards.length" class="rounded bg-secondary/15 px-1.5 py-0.5 text-[10px] text-secondary">
                         {{ getSoloTreasureRewardText() }}
                     </span>
                 </div>
@@ -262,20 +265,20 @@ function handleClickMonsterCard(): void {
         </div>
 
         <div class="mt-2 grid grid-cols-2 gap-1.5 text-[11px] sm:grid-cols-4">
-            <div class="rounded bg-base-300/90 px-1.5 py-1">
-                <div class="text-[10px] text-base-content/65">{{ $t("生命") }}</div>
+            <div class="rounded bg-base-300/80 px-1.5 py-1" :title="$t('生命')">
+                <div class="text-[10px] text-base-content/60">{{ $t("生命") }}</div>
                 <div class="font-semibold text-error">{{ formatBigNumber(displayMonster.hp) }}</div>
             </div>
-            <div class="rounded bg-base-300/90 px-1.5 py-1">
-                <div class="text-[10px] text-base-content/65">{{ $t("防御") }}</div>
-                <div class="font-semibold text-success">{{ formatBigNumber(displayMonster.def) }}</div>
-            </div>
-            <div class="rounded bg-base-300/90 px-1.5 py-1">
-                <div class="text-[10px] text-base-content/65">{{ $t("护盾") }}</div>
+            <div class="rounded bg-base-300/80 px-1.5 py-1" :title="$t('护盾')">
+                <div class="text-[10px] text-base-content/60">{{ $t("护盾") }}</div>
                 <div class="font-semibold text-info">{{ formatBigNumber(displayMonster.es || 0) }}</div>
             </div>
-            <div class="rounded bg-base-300/90 px-1.5 py-1">
-                <div class="text-[10px] text-base-content/65">{{ $t("有效生命") }}</div>
+            <div class="rounded bg-base-300/80 px-1.5 py-1" :title="$t('防御')">
+                <div class="text-[10px] text-base-content/60">{{ $t("防御") }}</div>
+                <div class="font-semibold text-success">{{ formatBigNumber(displayMonster.def) }}</div>
+            </div>
+            <div class="rounded bg-base-300/80 px-1.5 py-1" :title="$t('有效生命')">
+                <div class="text-[10px] text-base-content/60">{{ $t("有效生命") }}</div>
                 <div class="font-semibold text-accent">{{ formatBigNumber(effectiveHealth) }}</div>
             </div>
         </div>
