@@ -249,7 +249,7 @@ useInitialScrollToSelectedItem()
                             :class="selectedTag === tag ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                             @click="selectedTag = tag"
                         >
-                            {{ tag }}
+                            {{ $t(tag) }}
                         </button>
                     </div>
 
@@ -275,7 +275,7 @@ useInitialScrollToSelectedItem()
                             "
                             @click="selectedProficiency = proficiency"
                         >
-                            {{ proficiency }}
+                            {{ $t(proficiency) }}
                         </button>
                     </div>
 
@@ -297,7 +297,7 @@ useInitialScrollToSelectedItem()
                             "
                             @click="selectedFaction = faction"
                         >
-                            {{ faction }}
+                            {{ $t(faction) }}
                         </button>
                     </div>
                 </div>

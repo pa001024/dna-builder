@@ -8,7 +8,7 @@ export interface Region {
     mapId?: number
     mapImage?: string
     mapCenter?: [number, number]
-    mapScale: [number, number]
+    mapScale?: [number, number]
     isRandom: number[]
     mapRotation?: number
     alertDisable?: boolean

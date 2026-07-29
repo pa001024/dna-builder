@@ -116,7 +116,6 @@ async function downloadLatest() {
     try {
         await router.push({ name: "setting" })
         await dataPack.downloadVersion(version)
-        await dataPack.refreshStatus(true)
         lastApply.value = Date.now()
         showModal.value = false
     } catch (error) {

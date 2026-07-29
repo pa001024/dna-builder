@@ -346,6 +346,30 @@ declare function mc(hwnd?: number, x?: number, y?: number, button?: "left" | "ri
 declare function mm(x: number, y: number): void
 
 /**
+ * 获取鼠标当前位置
+ * @param hwnd 可选窗口句柄；提供时返回相对于窗口客户区的坐标
+ * @returns [x, y]
+ */
+declare function getMousePos(hwnd?: number): [number, number]
+
+/**
+ * 获取屏幕坐标点颜色
+ * @param x X坐标
+ * @param y Y坐标
+ * @returns 颜色值（0xRRGGBB）
+ */
+declare function getColor(x: number, y: number): number
+
+/**
+ * 获取窗口客户区坐标点颜色
+ * @param hwnd 窗口句柄；传0时使用屏幕坐标
+ * @param x X坐标
+ * @param y Y坐标
+ * @returns 颜色值（0xRRGGBB）
+ */
+declare function getColor(hwnd: number, x: number, y: number): number
+
+/**
  * 鼠标相对移动（支持显式传窗口句柄）
  * @param hwnd 窗口句柄（当前实现下主要用于统一后台调用签名）
  * @param x X方向相对位移

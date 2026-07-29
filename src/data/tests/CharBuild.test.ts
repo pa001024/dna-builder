@@ -1338,7 +1338,7 @@ describe("CharBuild类测试", () => {
             ).toBe(false)
         })
 
-        it("应该先补齐技能范围条件再纳入对应条件MOD", () => {
+        it("应该先补齐技能效益条件再纳入对应条件MOD", () => {
             const charBuild = createCharBuild()
             charBuild.char = new LeveledChar("丽蓓卡")
             charBuild.baseName = "普通攻击"
@@ -1350,8 +1350,7 @@ describe("CharBuild类测试", () => {
                 new LeveledModWithCount(56122, undefined, undefined, 1),
                 new LeveledModWithCount(56161, undefined, undefined, 1),
                 new LeveledModWithCount(56162, undefined, undefined, 1),
-                new LeveledModWithCount(51713, undefined, undefined, 1),
-                new LeveledModWithCount(51722, undefined, undefined, 1),
+                new LeveledModWithCount(51723, undefined, undefined, 3),
             ]
 
             const result = charBuild.autoBuild({
@@ -1365,7 +1364,7 @@ describe("CharBuild类测试", () => {
 
             expect(conditionalMod).toBeDefined()
             expect(result.newBuild.checkModEffective(conditionalMod!)?.isEffective).toBe(true)
-            expect(result.newBuild.calculateAttributes().技能范围).toBeGreaterThanOrEqual(1.6)
+            expect(result.newBuild.calculateAttributes().技能效益).toBeGreaterThanOrEqual(1.65)
         })
 
         it("替换不应破坏光环条件导致收益误判", () => {

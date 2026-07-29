@@ -1319,7 +1319,7 @@ onUnmounted(() => {
                             >
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="min-w-0">
-                                        <div class="font-medium truncate">{{ item.name }}</div>
+                                        <div class="font-medium truncate">{{ $t(item.name) }}</div>
                                         <div class="text-xs opacity-70 mt-1">
                                             {{ formatTimeRange(item.startTime, item.endTime) }}
                                             <span v-if="getVersionByTime(item.startTime)" class="ml-2"

@@ -492,11 +492,11 @@ function getSeasonName(str: number) {
                         class="w-48 h-12 max-w-full shrink-0"
                         :title-frame-id="getTitleFrameId(item.reward)"
                     >
-                        <p class="text-sm font-bold text-white">{{ item.reward.child?.[0].n }}</p>
+                        <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
                     </TitleFrameRender>
                     <img v-else class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
                     <div v-if="!getTitleFrameId(item.reward)" class="absolute inset-0 flex items-center justify-center">
-                        <p class="text-sm font-bold text-white">{{ item.reward.child?.[0].n }}</p>
+                        <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
                     </div>
                 </div>
                 <div :key="item.reward.id" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">

@@ -146,7 +146,7 @@ useInitialScrollToSelectedItem()
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-medium">
-                                        {{ map.n }}
+                                        {{ $t(map.n) }}
                                     </div>
                                     <div class="text-xs opacity-70 mt-1">
                                         {{ map.desc }}

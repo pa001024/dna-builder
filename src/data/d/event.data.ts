@@ -11,6 +11,7 @@ export interface EventItem {
         boxPerDay: number
         coinPerBox: number
         eventId: number
+        questId?: number[]
         rewardCount: number[]
         rewardId: number[]
     }

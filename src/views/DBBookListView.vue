@@ -197,7 +197,7 @@ useInitialScrollToSelectedItem()
                                 </ImageFallback>
                             </div>
                             <div class="absolute inset-x-2 bottom-2 text-center">
-                                <div class="font-medium text-sm leading-tight whitespace-normal wrap-break-word">{{ book.name }}</div>
+                                <div class="font-medium text-sm leading-tight whitespace-normal wrap-break-word">{{ $t(book.name) }}</div>
                                 <div class="text-xs opacity-70 mt-1">
                                     <span> ID: {{ book.id }} </span>
                                     <span> x{{ book.res.length }} </span>

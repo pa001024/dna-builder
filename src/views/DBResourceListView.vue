@@ -70,7 +70,7 @@ function closeSelectedResource(): void {
                                     <img src="/imgs/webp/T_Head_Empty.webp" :alt="resource.name" class="w-14 h-14 rounded shrink-0" />
                                 </ImageFallback>
                                 <div class="min-w-0 w-full">
-                                    <div class="font-medium truncate">{{ resource.name }}</div>
+                                    <div class="font-medium truncate">{{ $t(resource.name) }}</div>
                                     <div class="text-xs opacity-70 mt-1">{{ $t("resource.id") }}: {{ resource.id }}</div>
                                 </div>
                             </div>

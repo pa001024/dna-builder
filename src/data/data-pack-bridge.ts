@@ -93,6 +93,18 @@ export function resetRegisteredDataPackBindings(): void {
 }
 
 /**
+ * 使用新数据包完整替换所有已注册导出并触发刷新。
+ * @param moduleRecords 新数据包的模块记录
+ */
+export function replaceRegisteredDataPackBindings(moduleRecords: ReadonlyMap<string, DataPackModuleRecord>): void {
+    resetRegisteredDataPackBindings()
+    for (const [moduleKey, moduleRecord] of moduleRecords) {
+        hydrateRegisteredDataPackBindings(moduleKey, moduleRecord)
+    }
+    markDataPackHydrated()
+}
+
+/**
  * 标记数据包完成一次水合。
  */
 export function markDataPackHydrated(): void {

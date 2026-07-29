@@ -1,7 +1,7 @@
 import { decode } from "@msgpack/msgpack"
 import { unzipSync } from "fflate"
 import { tauriFetch } from "../api/app"
-import { hydrateRegisteredDataPackBindings, markDataPackHydrated, resetRegisteredDataPackBindings } from "./data-pack-bridge"
+import { hydrateRegisteredDataPackBindings, replaceRegisteredDataPackBindings, resetRegisteredDataPackBindings } from "./data-pack-bridge"
 import { mountImgsToVirtualPath } from "./imgs-runtime"
 
 export type DataPackModuleRecord = Record<string, unknown>
@@ -58,6 +58,12 @@ type DataPackState = {
     manifest: DataPackManifest | null
     imgsManifest: { path: string; url?: string }[]
     moduleCache: Map<string, DataPackModuleRecord>
+}
+
+type DecodedDataPack = {
+    manifest: DataPackManifest
+    imgsManifest: { path: string; url?: string }[]
+    modules: Map<string, DataPackModuleRecord>
 }
 
 type RemoteDataPackState = {
@@ -391,16 +397,22 @@ function revivePackedValue(value: unknown): unknown {
 /**
  * 从 zip 中提取 manifest 与模块数据。
  * @param bytes 数据包二进制
- * @returns 清单和模块缓存
+ * @returns 清单、图片清单和模块缓存
  */
-function decodePack(bytes: Uint8Array): { manifest: DataPackManifest; modules: Map<string, DataPackModuleRecord> } {
+function decodePack(bytes: Uint8Array): DecodedDataPack {
     const entries = unzipSync(bytes)
     const manifestBytes = entries[MANIFEST_FILE]
     if (!manifestBytes) {
         throw new Error("数据包缺少 manifest.json")
     }
 
-    const manifest = JSON.parse(new TextDecoder().decode(manifestBytes)) as DataPackManifest
+    const decoder = new TextDecoder()
+    const manifest = JSON.parse(decoder.decode(manifestBytes)) as DataPackManifest
+    const imgsManifestBytes = entries[IMGS_MANIFEST_FILE]
+    const imgsManifestPayload = imgsManifestBytes
+        ? (JSON.parse(decoder.decode(imgsManifestBytes)) as { files?: { path: string; url?: string }[] } | { path: string; url?: string }[])
+        : []
+    const imgsManifest = Array.isArray(imgsManifestPayload) ? imgsManifestPayload : (imgsManifestPayload.files ?? [])
     const modules = new Map<string, DataPackModuleRecord>()
 
     for (const [entryName, entryBytes] of Object.entries(entries)) {
@@ -412,25 +424,7 @@ function decodePack(bytes: Uint8Array): { manifest: DataPackManifest; modules: M
         modules.set(moduleKey, revivePackedValue(decode(entryBytes)) as DataPackModuleRecord)
     }
 
-    return { manifest, modules }
-}
-
-/**
- * 读取包内图片清单。
- * @param bytes 数据包二进制
- * @returns 图片清单
- */
-function decodeImgsManifest(bytes: Uint8Array): { path: string; url?: string }[] {
-    const entries = unzipSync(bytes)
-    const manifestBytes = entries[IMGS_MANIFEST_FILE]
-    if (!manifestBytes) {
-        return []
-    }
-
-    const payload = JSON.parse(new TextDecoder().decode(manifestBytes)) as
-        | { files?: { path: string; url?: string }[] }
-        | { path: string; url?: string }[]
-    return Array.isArray(payload) ? payload : (payload.files ?? [])
+    return { manifest, imgsManifest, modules }
 }
 
 /**
@@ -547,13 +541,13 @@ async function readPackBytes(version: string): Promise<Uint8Array | null> {
  * 写入指定版本的数据包字节。
  * @param version 版本号
  * @param bytes 包字节
+ * @param pack 已解码的数据包
  */
-async function writePackBytes(version: string, bytes: Uint8Array): Promise<void> {
+async function writePackBytes(version: string, bytes: Uint8Array, pack: DecodedDataPack): Promise<void> {
     const versionDir = await getVersionDirectory(version)
     await writeFile(versionDir, PACK_BYTES_FILE, bytes)
-    const { manifest } = decodePack(bytes)
-    await writeFile(versionDir, MANIFEST_FILE, new TextEncoder().encode(JSON.stringify(manifest, null, 2)))
-    await writeFile(versionDir, IMGS_MANIFEST_FILE, new TextEncoder().encode(JSON.stringify(decodeImgsManifest(bytes), null, 2)))
+    await writeFile(versionDir, MANIFEST_FILE, new TextEncoder().encode(JSON.stringify(pack.manifest, null, 2)))
+    await writeFile(versionDir, IMGS_MANIFEST_FILE, new TextEncoder().encode(JSON.stringify(pack.imgsManifest, null, 2)))
 }
 
 /**
@@ -638,13 +632,21 @@ async function loadLocalVersion(version: string): Promise<boolean> {
         return false
     }
 
-    const { manifest, modules } = decodePack(bytes)
-    state.readyVersion = version
-    state.manifest = manifest
-    state.imgsManifest = decodeImgsManifest(bytes)
-    state.moduleCache = modules
-    hydrateLoadedDataPackBindings()
+    activateDecodedPack(version, decodePack(bytes))
     return true
+}
+
+/**
+ * 激活已解码的数据包并回填模块绑定。
+ * @param version 版本号
+ * @param pack 已解码的数据包
+ */
+function activateDecodedPack(version: string, pack: DecodedDataPack): void {
+    state.readyVersion = version
+    state.manifest = pack.manifest
+    state.imgsManifest = pack.imgsManifest
+    state.moduleCache = pack.modules
+    hydrateLoadedDataPackBindings()
 }
 
 /**
@@ -656,11 +658,7 @@ function hydrateLoadedDataPackBindings(): void {
         return
     }
 
-    for (const [moduleKey, moduleRecord] of state.moduleCache) {
-        hydrateRegisteredDataPackBindings(moduleKey, moduleRecord)
-    }
-
-    markDataPackHydrated()
+    replaceRegisteredDataPackBindings(state.moduleCache)
 }
 
 /**
@@ -862,9 +860,10 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
     }
 
     const bytes = await readResponseBytes(response, onProgress)
-    await writePackBytes(remote.version, bytes)
+    const pack = decodePack(bytes)
+    await writePackBytes(remote.version, bytes, pack)
     await writeInstalledInfo(remote)
-    await loadLocalVersion(remote.version)
+    activateDecodedPack(remote.version, pack)
     const localVersions = await getInstalledDataPackVersions()
     const versions = await getMergedDataPackVersions(remoteVersions, localVersions)
     if (state.imgsManifest.length) {
@@ -890,14 +889,15 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
  */
 export async function importDataPackFile(file: File): Promise<DataPackInstallStatus> {
     const bytes = new Uint8Array(await file.arrayBuffer())
-    const { manifest } = decodePack(bytes)
-    await writePackBytes(manifest.version, bytes)
+    const pack = decodePack(bytes)
+    const { manifest } = pack
+    await writePackBytes(manifest.version, bytes, pack)
     await writeInstalledInfo({
         builtAt: manifest.builtAt,
         packageFile: manifest.packageFile,
         version: manifest.version,
     })
-    await loadLocalVersion(manifest.version)
+    activateDecodedPack(manifest.version, pack)
     const remoteVersions = (await fetchRemoteDataPackVersions(true)) ?? []
     const localVersions = await getInstalledDataPackVersions()
     const versions = await getMergedDataPackVersions(remoteVersions, localVersions)
@@ -938,17 +938,22 @@ export async function clearAllDataPackOpfs(): Promise<void> {
 }
 
 /**
- * 读取指定版本的数据包文件字节。
+ * 读取指定版本的数据包文件。
  * @param version 版本号
- * @returns 数据包字节
+ * @returns 可用于导出或拖拽的数据包文件
  */
-export async function exportDataPackVersionFile(version: string): Promise<Uint8Array> {
-    const bytes = await readPackBytes(version)
-    if (!bytes) {
+export async function exportDataPackVersionFile(version: string): Promise<File> {
+    const versionDir = await getVersionDirectory(version)
+    try {
+        const handle = await versionDir.getFileHandle(PACK_BYTES_FILE, { create: false })
+        const file = await handle.getFile()
+        return new File([file], `${version}.zip`, {
+            type: "application/zip",
+            lastModified: file.lastModified,
+        })
+    } catch {
         throw new Error(`当前版本文件缺失: ${version}`)
     }
-
-    return bytes
 }
 
 /**

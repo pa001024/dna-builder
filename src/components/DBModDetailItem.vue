@@ -345,7 +345,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                     :key="key"
                     class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
                 >
-                    <span class="text-base-content/70">{{ key }}</span>
+                    <span class="text-base-content/70">{{ $t(key) }}</span>
                     <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
                 </div>
             </div>
@@ -359,7 +359,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                     :key="key"
                     class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
                 >
-                    <span class="text-base-content/70">{{ key }}</span>
+                    <span class="text-base-content/70">{{ $t(key) }}</span>
                     <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
                 </div>
             </div>

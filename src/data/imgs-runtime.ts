@@ -339,11 +339,11 @@ async function cacheImg(relPath: string, bytes: Uint8Array, overwrite = false): 
 }
 
 /**
- * 从 OPFS 同步图片到运行时缓存。
+ * 检查 OPFS 中是否已有指定图片。
  * @param relPath 图片相对路径
  * @returns 是否命中
  */
-async function hydrateCacheFromOpfs(relPath: string): Promise<boolean> {
+async function hasCachedImgInOpfs(relPath: string): Promise<boolean> {
     const segments = normalizeImgPath(relPath).split("/").filter(Boolean)
     if (!segments.length) {
         return false
@@ -364,8 +364,9 @@ async function hydrateCacheFromOpfs(relPath: string): Promise<boolean> {
         }
     }
 
-    const cached = await readFile(currentDir, fileName)
-    if (!cached) {
+    try {
+        await currentDir.getFileHandle(fileName, { create: false })
+    } catch {
         return false
     }
 
@@ -380,7 +381,7 @@ async function hydrateCacheFromOpfs(relPath: string): Promise<boolean> {
 async function collectCachedImgPaths(desiredPaths: Set<string>): Promise<Set<string>> {
     const cachedPaths = new Set<string>()
     for (const relPath of desiredPaths) {
-        if (await hydrateCacheFromOpfs(relPath)) {
+        if (await hasCachedImgInOpfs(relPath)) {
             cachedPaths.add(relPath)
         }
     }
@@ -549,7 +550,7 @@ export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Pr
                     return
                 }
 
-                const hydrated = await hydrateCacheFromOpfs(relPath)
+                const hydrated = await hasCachedImgInOpfs(relPath)
                 if (hydrated) {
                     completedPaths.add(relPath)
                     patchImgsDownloadState({ completed: imgsDownloadState.value.completed + 1 })

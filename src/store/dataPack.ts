@@ -46,9 +46,7 @@ export const useDataPackStore = defineStore("dataPack", {
             this.versionFiles = {}
             await Promise.all(
                 installedVersions.map(async version => {
-                    const bytes = await exportDataPackVersionFile(version.version)
-                    const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
-                    this.versionFiles[version.version] = new File([buffer], `${version.version}.zip`, { type: "application/zip" })
+                    this.versionFiles[version.version] = await exportDataPackVersionFile(version.version)
                 })
             )
             return this.status

@@ -577,7 +577,7 @@ watch(
                 >
                     <div class="flex items-center gap-2 min-w-0">
                         <SRouterLink :to="`/db/char/${char.id}`" class="hover:underline min-w-0 truncate">
-                            {{ char.名称 }}
+                            {{ $t(char.名称) }}
                         </SRouterLink>
                         <span class="text-xs text-base-content/70 shrink-0">专武</span>
                     </div>

@@ -200,22 +200,23 @@ function ensureDefaultCounters(counters: CounterItem[]): CounterItem[] {
     if (counters.length > 0) {
         return counters
     }
-    return DEFAULT_COUNTERS.map(counter => ({
-        id: createLocalId(),
-        name: i18next.t(counter.name, {
-            defaultValue:
-                counter.name === "counter.defaults.endlessDungeonMoling"
-                    ? "无尽副本魔灵"
-                    : counter.name === "counter.defaults.dungeonMoling"
-                      ? "副本魔灵"
-                      : "钓鱼额外奖励",
-        }),
-        value: counter.value,
-        maxValue: counter.maxValue,
-        resetCron: counter.resetCron,
-        lastResetAt: Date.now(),
-        triggers: [],
-    }))
+    return DEFAULT_COUNTERS.map(counter => {
+        const defaultName =
+            counter.name === "counter.defaults.endlessDungeonMoling"
+                ? "无尽副本魔灵"
+                : counter.name === "counter.defaults.dungeonMoling"
+                  ? "副本魔灵"
+                  : "钓鱼额外奖励"
+        return {
+            id: createLocalId(),
+            name: i18next.t(counter.name, { defaultValue: defaultName }) || defaultName,
+            value: counter.value,
+            maxValue: counter.maxValue,
+            resetCron: counter.resetCron,
+            lastResetAt: Date.now(),
+            triggers: [],
+        }
+    })
 }
 
 /**

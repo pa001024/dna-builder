@@ -59,18 +59,30 @@ export interface CharBuildWorkerSnapshot {
     teamWeaponCategories: string[]
 }
 
-type BuffIncomeRequest = {
+type IncomeRequest = {
     id: number
     build: CharBuildWorkerSnapshot
-    buffs: {
+    buffs?: {
         key: string
         data: Buff
         level: number
         minus: boolean
     }[]
+    mods?: {
+        key: string
+        data: Mod
+        level: number
+        buffLv?: number
+        effect?: Buff
+    }[]
+    equippedMods?: {
+        key: string
+        type: string
+        index: number
+    }[]
 }
 
-type BuffIncomeResponse = {
+type IncomeResponse = {
     id: number
     incomes?: Record<string, number>
     error?: string
@@ -115,15 +127,21 @@ function createBuildFromSnapshot(snapshot: CharBuildWorkerSnapshot) {
     return new CharBuild(options)
 }
 
-self.onmessage = (event: MessageEvent<BuffIncomeRequest>) => {
+self.onmessage = (event: MessageEvent<IncomeRequest>) => {
     try {
         const build = createBuildFromSnapshot(event.data.build)
         const incomes: Record<string, number> = {}
-        event.data.buffs.forEach(buff => {
+        event.data.buffs?.forEach(buff => {
             incomes[buff.key] = build.calcIncome(new LeveledBuff(buff.data, buff.level), buff.minus)
         })
-        self.postMessage({ id: event.data.id, incomes } satisfies BuffIncomeResponse)
+        event.data.mods?.forEach(mod => {
+            incomes[mod.key] = build.calcIncome(new LeveledMod(mod.data, mod.level, mod.buffLv, mod.effect))
+        })
+        event.data.equippedMods?.forEach(mod => {
+            incomes[mod.key] = build.calcEquippedModIncome(mod.type, mod.index)
+        })
+        self.postMessage({ id: event.data.id, incomes } satisfies IncomeResponse)
     } catch (error) {
-        self.postMessage({ id: event.data.id, error: error instanceof Error ? error.message : String(error) } satisfies BuffIncomeResponse)
+        self.postMessage({ id: event.data.id, error: error instanceof Error ? error.message : String(error) } satisfies IncomeResponse)
     }
 }

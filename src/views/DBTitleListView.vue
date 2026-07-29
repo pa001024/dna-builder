@@ -89,7 +89,7 @@ useInitialScrollToSelectedItem()
                         >
                             <div class="flex items-start justify-between gap-2">
                                 <div>
-                                    <div class="font-medium">{{ title.name }}</div>
+                                    <div class="font-medium">{{ $t(title.name) }}</div>
                                     <div class="text-xs opacity-70 mt-1">ID: {{ title.id }}</div>
                                 </div>
                                 <span

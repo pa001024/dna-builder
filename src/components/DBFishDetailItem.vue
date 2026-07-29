@@ -57,7 +57,7 @@ const fishSpots = computed(() => {
     <div class="p-3 space-y-3">
         <div class="flex items-center gap-3">
             <SRouterLink :to="`/db/fish/${fish.id}`" class="text-lg font-bold link link-primary">
-                {{ fish.name }}
+                {{ $t(fish.name) }}
             </SRouterLink>
             <CopyID :id="fish.id" />
             <div class="text-sm text-base-content/70 flex items-center gap-2">
@@ -102,7 +102,7 @@ const fishSpots = computed(() => {
             <div class="flex items-center gap-2">
                 <img :src="`/imgs/res/T_Fish_${s2bFish.icon}.webp`" class="w-10 h-10 object-cover rounded" />
                 <SRouterLink :to="`/db/fish/${s2bFish.id}`" class="text-sm link link-primary">
-                    {{ s2bFish.name }}
+                    {{ $t(s2bFish.name) }}
                 </SRouterLink>
                 <span class="text-xs text-base-content/70">价格: {{ calculateFishPrice(s2bFish).price }}</span>
             </div>

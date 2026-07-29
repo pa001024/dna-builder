@@ -108,7 +108,7 @@ export function getDungeonName(dungeon: Dungeon) {
     if (walnutType) {
         return `${t(dungeon.n)}(${t(["角色", "武器", "魔之楔"][walnutType - 1])}${t("委托密函")})`
     }
-    return dungeon.n
+    return t(dungeon.n)
 }
 
 /**

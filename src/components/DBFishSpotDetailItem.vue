@@ -388,7 +388,7 @@ function clearHistory() {
                                     <img :src="getFishIcon(fish)" class="w-8 h-8 object-cover rounded" />
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
-                                            <span class="font-medium">{{ fish.name }}</span>
+                                            <span class="font-medium">{{ $t(fish.name) }}</span>
                                             <CopyID :id="fish.id" />
                                             <span class="px-1.5 py-0.5 rounded text-xs" :class="getRarityBadgeClass(fish.rarity)">
                                                 {{ getRarityName(fish.rarity) }}
@@ -416,7 +416,7 @@ function clearHistory() {
                                                 异种: {{ +(fish.varProb * 100).toFixed(2) }}%
                                             </div>
                                             <div v-if="fish.s2b" class="badge badge-sm">
-                                                授渔以鱼: {{ fishMap.get(fish.s2b)!.name }}({{
+                                                授渔以鱼: {{ $t(fishMap.get(fish.s2b)!.name) }}({{
                                                     calculateFishPrice(fishMap.get(fish.s2b)!, 10000).price
                                                 }})
                                             </div>
@@ -474,7 +474,7 @@ function clearHistory() {
                                     <img :src="getFishIcon(record.finalFish)" class="w-8 h-8 object-cover rounded" />
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
-                                            <span class="font-medium">{{ record.finalFish.name }}</span>
+                                            <span class="font-medium">{{ $t(record.finalFish.name) }}</span>
                                             <span class="px-1.5 py-0.5 rounded" :class="getRarityBadgeClass(record.finalFish.rarity)">
                                                 {{ getRarityName(record.finalFish.rarity) }}
                                             </span>
@@ -486,7 +486,7 @@ function clearHistory() {
                                             价格: {{ record.originPrice ? `${record.originPrice} -> ${record.price}` : record.price }}
                                             <span v-if="record.mutated" class="text-green-600 ml-1">变异</span>
                                             <span v-if="record.originFish" class="text-blue-600 ml-1"
-                                                >授渔以鱼 ({{ record.originFish.name }})</span
+                                                >授渔以鱼 ({{ $t(record.originFish.name) }})</span
                                             >
                                             <span class="ml-1">{{ +record.length.toFixed(2) }}cm</span>
                                         </div>

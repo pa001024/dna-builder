@@ -210,7 +210,7 @@ export interface TreasureHuntRepeatDungeon {
     levelBackPack: number[]
     trialCharacter: number[]
     trialWeapon: number[]
-    unlockCondition: number
+    unlockCondition?: number
     easyMaxConvertResource?: number
     easyScoreToResource?: Record<string, number>
     hardMaxConvertResource?: number

@@ -856,7 +856,7 @@ useInitialScrollToSelectedItem()
                                 <div class="flex flex-col items-end gap-1">
                                     <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
                                         {{ getRegionName(questResult.quest.regionId) }}·
-                                        <span>{{ getSubRegionName(questResult.quest.subRegionId) }}</span>
+                                        <span>{{ $t(getSubRegionName(questResult.quest.subRegionId)) }}</span>
                                     </span>
                                     <span class="text-xs opacity-70">ID: {{ questResult.quest.id }}</span>
                                 </div>

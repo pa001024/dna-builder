@@ -161,7 +161,7 @@ useInitialScrollToSelectedItem()
                                 :key="characterOption.charId"
                                 :value="characterOption.charId"
                             >
-                                {{ characterOption.charName }}
+                                {{ $t(characterOption.charName) }}
                             </SelectItem>
                         </Select>
                     </div>
@@ -180,7 +180,7 @@ useInitialScrollToSelectedItem()
                                 <div class="min-w-0 flex-1">
                                     <div class="font-medium line-clamp-1">{{ partyTopic.name }}</div>
                                     <div class="text-xs opacity-70 mt-1">
-                                        {{ getCharacterName(partyTopic.charId) }} · 资源 {{ getConsumeCount(partyTopic) }}
+                                        {{ $t(getCharacterName(partyTopic.charId)) }} · 资源 {{ getConsumeCount(partyTopic) }}
                                         项
                                     </div>
                                 </div>
@@ -191,7 +191,7 @@ useInitialScrollToSelectedItem()
                             </div>
 
                             <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>前置: {{ getConditionQuestChainName(partyTopic.conditionId) }}</span>
+                                <span>前置: {{ $t(getConditionQuestChainName(partyTopic.conditionId)) }}</span>
                             </div>
                         </div>
                     </div>

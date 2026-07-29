@@ -30,6 +30,7 @@ use std::{
 };
 use tauri::{Emitter, Manager};
 use windows::Win32::Foundation::HWND;
+use windows::Win32::Graphics::Gdi::{ClientToScreen, GetDC, GetPixel, ReleaseDC, ScreenToClient};
 use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, SetForegroundWindow};
 use zip::ZipArchive;
 
@@ -1350,6 +1351,75 @@ fn _mm(x: Option<JsValue>, y: Option<JsValue>, ctx: &mut Context) -> JsResult<Js
     let y = y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32;
     mouse_move(x, y);
     Ok(JsValue::undefined())
+}
+
+/// 获取鼠标当前位置，返回屏幕坐标或指定窗口客户区坐标。
+fn _get_mouse_pos(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let mut point = windows::Win32::Foundation::POINT::default();
+    if unsafe { GetCursorPos(&mut point) }.is_err() {
+        return Err(JsNativeError::error()
+            .with_message("获取鼠标位置失败")
+            .into());
+    }
+
+    if !hwnd.is_invalid() && !unsafe { ScreenToClient(hwnd, &mut point) }.as_bool() {
+        return Err(JsNativeError::error()
+            .with_message("转换鼠标客户区坐标失败")
+            .into());
+    }
+
+    Ok(js_value!([point.x, point.y], ctx))
+}
+
+/// 获取屏幕或指定窗口客户区坐标处的颜色，返回 0xRRGGBB。
+fn _get_color(
+    hwnd: Option<JsValue>,
+    x: Option<JsValue>,
+    y: Option<JsValue>,
+    ctx: &mut Context,
+) -> JsResult<JsValue> {
+    // 兼容 getColor(x, y) 和 getColor(hwnd, x, y) 两种形式。
+    let (hwnd, x, y) = if y.is_none() {
+        (None, hwnd, x)
+    } else {
+        (hwnd, x, y)
+    };
+    let hwnd = HWND(
+        hwnd.unwrap_or_else(|| JsValue::undefined())
+            .to_number(ctx)? as isize as *mut std::ffi::c_void,
+    );
+    let mut point = windows::Win32::Foundation::POINT {
+        x: x.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32,
+        y: y.unwrap_or_else(|| JsValue::undefined()).to_number(ctx)? as i32,
+    };
+
+    if !hwnd.is_invalid() && !unsafe { ClientToScreen(hwnd, &mut point) }.as_bool() {
+        return Err(JsNativeError::error()
+            .with_message("转换颜色坐标失败")
+            .into());
+    }
+
+    let hdc = unsafe { GetDC(None) };
+    if hdc.0.is_null() {
+        return Err(JsNativeError::error()
+            .with_message("获取屏幕设备上下文失败")
+            .into());
+    }
+    let pixel = unsafe { GetPixel(hdc, point.x, point.y) };
+    unsafe {
+        ReleaseDC(None, hdc);
+    }
+    if pixel.0 == 0xFFFF_FFFF {
+        return Err(JsNativeError::error()
+            .with_message("获取指定坐标颜色失败")
+            .into());
+    }
+
+    Ok(JsValue::new(pixel.0 & 0x00FF_FFFF))
 }
 
 /// 鼠标相对移动函数（可传 hwnd，但后台语义仍为相对视角移动）。
@@ -5430,6 +5500,12 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
 
     let f = _mm.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("mm"), 2, f)?;
+
+    let f = _get_mouse_pos.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("getMousePos"), 1, f)?;
+
+    let f = _get_color.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("getColor"), 3, f)?;
 
     let f = _mmr.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("mmr"), 3, f)?;

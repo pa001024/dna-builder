@@ -286,7 +286,7 @@ const rewardRowDetails = computed(() => {
             <div class="flex items-center gap-2 min-w-0">
                 <img v-if="dungeonBase.e" :src="LeveledChar.elementUrl(dungeonBase.e)" alt="" class="h-8 inline-block" />
                 <SRouterLink :to="`/db/dungeon/${dungeonBase.id}`" class="text-lg font-bold link link-primary">
-                    {{ dungeonBase.n }}
+                    {{ $t(dungeonBase.n) }}
                 </SRouterLink>
                 <CopyID :id="dungeonBase.id" />
                 <div class="flex-1"></div>

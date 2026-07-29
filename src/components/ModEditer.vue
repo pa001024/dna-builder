@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { t } from "i18next"
-import { computed, ref } from "vue"
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
 import { LeveledMod, LeveledModHelper } from "../data"
 import { CharBuild } from "../data/CharBuild"
+import type { CharBuildWorkerSnapshot } from "../data/CharBuild.worker"
 import { useInvStore } from "../store/inv"
 import { copyText, pasteText } from "../util"
 
@@ -33,6 +34,11 @@ const inv = useInvStore()
 
 const sortByIncome = ref(true)
 const selectedProperty = ref("")
+const selectedQuality = ref("金")
+const incomeMap = ref<Record<string, number>>({})
+const workerRef = shallowRef<Worker>()
+let workerRequestId = 0
+const mod_model_show = ref(false)
 const auraModOptions = computed(() => {
     const options = props.modOptions.filter(option => option.ser === "羽蛇")
     /**
@@ -57,7 +63,7 @@ const auraModOptions = computed(() => {
     }
     return options
 })
-const sortedModOptions = computed(() => {
+const filteredModOptions = computed(() => {
     // 获取已装备的互斥系列名称集合和非契约者MOD名称集合
     const equippedExclusiveSeries = new Set<string>()
     const equippedExclusiveNames = new Set<string>()
@@ -98,7 +104,7 @@ const sortedModOptions = computed(() => {
     }
 
     // 过滤选项：如果mod属于已装备的互斥系列或同名非契约者MOD，则不显示
-    const filteredOptions = props.modOptions.filter(option => {
+    return props.modOptions.filter(option => {
         const mod = LeveledModHelper.fromId(option.value, option.lv, option.bufflv)
 
         if (mod.系列 === "羽蛇") return false
@@ -129,6 +135,46 @@ const sortedModOptions = computed(() => {
 
         return true
     })
+})
+
+/**
+ * 获取待选魔之楔的 worker 收益键。
+ * @param option 魔之楔选项
+ * @returns 收益键
+ */
+function getModIncomeKey(option: ModOption) {
+    return `mod:${option.value}:${option.lv ?? ""}:${option.bufflv ?? ""}`
+}
+
+/**
+ * 获取已装备魔之楔的 worker 收益键。
+ * @param index 槽位索引
+ * @returns 收益键
+ */
+function getEquippedModIncomeKey(index: number) {
+    return `equipped:${props.type}:${index}`
+}
+
+/**
+ * 读取待选魔之楔收益。
+ * @param option 魔之楔选项
+ * @returns 收益值
+ */
+function getModIncome(option: ModOption) {
+    return incomeMap.value[getModIncomeKey(option)] ?? 0
+}
+
+/**
+ * 读取已装备魔之楔收益。
+ * @param index 槽位索引
+ * @returns 收益值
+ */
+function getEquippedModIncome(index: number) {
+    return incomeMap.value[getEquippedModIncomeKey(index)] ?? 0
+}
+
+const sortedModOptions = computed(() => {
+    const filteredOptions = filteredModOptions.value
 
     if (!sortByIncome.value) {
         return filteredOptions
@@ -136,17 +182,142 @@ const sortedModOptions = computed(() => {
 
     // 按收益降序排序
     return filteredOptions
-        .map(option => {
-            const mod = LeveledModHelper.fromId(option.value, option.lv, option.bufflv)
-            const income = props.charBuild.calcIncome(mod)
-            return {
-                income,
-                mod,
-                option,
-            }
-        })
+        .map(option => ({ income: getModIncome(option), option }))
         .sort((a, b) => b.income - a.income)
         .map(item => item.option)
+})
+
+const visibleModOptions = computed(() =>
+    sortedModOptions.value.filter(option => selectedQuality.value === "全部" || option.quality === selectedQuality.value)
+)
+
+const workerModOptions = computed(() =>
+    filteredModOptions.value.filter(option => selectedQuality.value === "全部" || option.quality === selectedQuality.value)
+)
+
+/**
+ * 将当前构筑转换为 worker 可结构化克隆的快照。
+ * @param charBuild 当前构筑
+ * @returns worker 构筑快照
+ */
+function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnapshot {
+    const createModSnapshot = (mod: CharBuild["charMods"][number]) =>
+        mod
+            ? {
+                  data: mod.originalModData,
+                  level: mod.等级,
+                  buffLv: mod.buffLv,
+                  effect: mod.buff?._originalBuffData,
+              }
+            : null
+    const createWeaponSnapshot = (weapon: CharBuild["meleeWeapon"]) => ({
+        data: weapon._originalWeaponData,
+        refine: weapon.精炼,
+        level: weapon.等级,
+        effectLv: weapon.effectLv,
+        effect: weapon.buff?._originalBuffData,
+        forgeEffective: weapon.forgeEffective,
+    })
+
+    return {
+        char: {
+            data: charBuild.char._originalCharData,
+            level: charBuild.char.等级,
+        },
+        skillLevel: charBuild.skillLevel,
+        hpPercent: charBuild.hpPercent,
+        resonanceGain: charBuild.resonanceGain,
+        auraMod: createModSnapshot(charBuild.auraMod || null),
+        charMods: charBuild.charMods.map(createModSnapshot),
+        meleeMods: charBuild.meleeMods.map(createModSnapshot),
+        rangedMods: charBuild.rangedMods.map(createModSnapshot),
+        skillMods: charBuild.skillMods.map(createModSnapshot),
+        buffs: [...charBuild.buffs, ...charBuild.dynamicBuffs].map(buff => ({
+            data: buff._originalBuffData,
+            level: buff.等级,
+        })),
+        melee: createWeaponSnapshot(charBuild.meleeWeapon),
+        ranged: createWeaponSnapshot(charBuild.rangedWeapon),
+        baseName: charBuild.baseName,
+        imbalance: charBuild.imbalance,
+        enemy: {
+            data: charBuild.enemy._baseData,
+            level: charBuild.enemy.等级,
+            isRouge: charBuild.enemy.isRouge,
+            hpMultiplier: charBuild.enemy.hpMultiplier,
+        },
+        enemyId: charBuild.enemyId,
+        enemyLevel: charBuild.enemyLevel,
+        enemyResistance: charBuild.enemyResistance,
+        targetFunction: charBuild.targetFunction,
+        customVariables: charBuild.customVariables,
+        timelineDPS: charBuild.timelineDPS,
+        teamWeaponCategories: charBuild.teamWeaponCategories,
+    }
+}
+
+/**
+ * 将 Vue proxy 与类实例快照转为 worker 可克隆的普通 JSON 数据。
+ * @param value 原始数据
+ * @returns 普通数据
+ */
+function cloneForWorker<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value)) as T
+}
+
+/**
+ * 刷新当前魔之楔收益。
+ */
+function refreshIncomes() {
+    const worker = workerRef.value || new Worker(new URL("../data/CharBuild.worker.ts", import.meta.url), { type: "module" })
+    workerRef.value = worker
+    const id = ++workerRequestId
+    worker.onmessage = (event: MessageEvent<{ id: number; incomes?: Record<string, number>; error?: string }>) => {
+        if (event.data.id !== workerRequestId) return
+        if (event.data.error) {
+            console.error("MOD收益worker计算失败", event.data.error)
+            return
+        }
+        incomeMap.value = event.data.incomes || {}
+    }
+    const options = mod_model_show.value ? workerModOptions.value : []
+    worker.postMessage(
+        cloneForWorker({
+            id,
+            build: createWorkerSnapshot(props.charBuild),
+            mods: options.map(option => {
+                const mod = LeveledModHelper.fromId(option.value, option.lv, option.bufflv)
+                return {
+                    key: getModIncomeKey(option),
+                    data: mod.originalModData,
+                    level: mod.等级,
+                    buffLv: mod.buffLv,
+                    effect: mod.buff?._originalBuffData,
+                }
+            }),
+            equippedMods: props.mods.flatMap((mod, index) =>
+                mod
+                    ? [
+                          {
+                              key: getEquippedModIncomeKey(index),
+                              type: props.type,
+                              index,
+                          },
+                      ]
+                    : []
+            ),
+        })
+    )
+}
+
+watch(
+    () => [props.charBuild, props.mods, props.type, mod_model_show.value, mod_model_show.value ? workerModOptions.value : []],
+    () => refreshIncomes(),
+    { immediate: true, deep: true }
+)
+
+onBeforeUnmount(() => {
+    workerRef.value?.terminate()
 })
 
 // 定义组件事件
@@ -261,7 +432,6 @@ async function handleImportCode() {
 const aMod = computed(() => {
     return props.auraMod ? LeveledModHelper.fromId(props.auraMod) : undefined
 })
-const mod_model_show = ref(false)
 </script>
 <template>
     <div>
@@ -282,20 +452,21 @@ const mod_model_show = ref(false)
                     <div class="tabs tabs-box bg-transparent">
                         <template v-for="quality in ['全部', '金', '紫', '蓝', '绿', '白']" :key="quality">
                             <input
+                                v-model="selectedQuality"
                                 type="radio"
                                 :name="`mod_select_${type}`"
+                                :value="quality"
                                 class="tab"
                                 :aria-label="quality === '全部' ? $t('全部') : $t(quality + '色')"
-                                :checked="quality === '全部'"
                             />
-                            <div class="tab-content py-2">
+                            <div v-if="selectedQuality === quality" class="tab-content py-2">
                                 <ScrollArea class="h-[calc(110vh/1.2-10.5rem)] w-full">
                                     <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3">
                                         <ModItem
-                                            v-for="mod in sortedModOptions.filter(m => quality === '全部' || m.quality === quality)"
+                                            v-for="mod in visibleModOptions"
                                             :key="mod.value"
                                             :mod="LeveledModHelper.fromId(mod.value, mod.lv, mod.bufflv)"
-                                            :income="charBuild.calcIncome(LeveledModHelper.fromId(mod.value, mod.lv, mod.bufflv))"
+                                            :income="getModIncome(mod)"
                                             :noremove="true"
                                             :char-build="charBuild"
                                             @click="handleSelectMod(localSelectedSlot, mod.value, mod.lv ?? 10)"
@@ -366,7 +537,7 @@ const mod_model_show = ref(false)
                 v-for="(mod, index) in mods"
                 :key="index"
                 :mod="mod"
-                :income="mod ? charBuild.calcEquippedModIncome(type, index) : 0"
+                :income="mod ? getEquippedModIncome(index) : 0"
                 :index="index"
                 :polset="polset?.includes(index)"
                 control

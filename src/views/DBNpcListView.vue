@@ -461,7 +461,7 @@ useInitialScrollToSelectedItem()
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="flex-1 min-w-0">
-                                            <div class="font-medium truncate">{{ npcResult.npc.name || `NPC ${npcResult.npc.id}` }}</div>
+                                            <div class="font-medium truncate">{{ $t(npcResult.npc.name || `NPC ${npcResult.npc.id}`) }}</div>
 
                                             <div class="text-xs opacity-70 mt-1 flex flex-wrap items-center gap-2">
                                                 <span v-if="npcResult.npc.camp">{{ npcResult.npc.camp }}</span>

@@ -67,8 +67,8 @@ describe("abyss-utils", () => {
         const rows = getAbyssCumulativeRewardRows(dungeon, 12)
 
         expect(rows).toEqual([
-            { lv: 10, r: 48001, a: 10, w: 1, count: 3 },
-            { lv: 35, r: 48002, a: 5, w: 1, count: 6 },
+            { lv: 10, r: 48001, a: 10, w: undefined, count: 3 },
+            { lv: 35, r: 48002, a: 5, w: undefined, count: 6 },
         ])
     })
 

@@ -223,7 +223,7 @@ function rebuildStaticIndexes(): void {
     }
 }
 
-rebuildStaticIndexes()
+registerDataPackHydrationCallback(rebuildStaticIndexes)
 if (!isDataPackHydrated()) {
-    registerDataPackHydrationCallback(rebuildStaticIndexes)
+    rebuildStaticIndexes()
 }

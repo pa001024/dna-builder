@@ -2824,7 +2824,7 @@ onUnmounted(() => {
                                             :alt="option.name"
                                             class="inline-block size-6 shrink-0"
                                         />
-                                        <span>{{ option.name }}</span>
+                                        <span>{{ $t(option.name) }}</span>
                                     </label>
                                 </div>
                             </div>
@@ -2867,7 +2867,7 @@ onUnmounted(() => {
                                 @mouseleave="hoveredSubRegionId = null"
                                 @click="focusSubRegion(point.id)"
                             >
-                                <div class="font-medium text-sm">{{ point.name }}</div>
+                                <div class="font-medium text-sm">{{ $t(point.name) }}</div>
                             </button>
                             <div v-if="projectedSubRegions.length === 0" class="p-3 text-sm opacity-70">
                                 当前区域没有可显示的 subregion 坐标
@@ -2876,7 +2876,7 @@ onUnmounted(() => {
                     </div>
 
                     <div v-if="selectedSubRegion" class="mt-auto rounded-md border border-base-300 bg-base-100/92 p-3 text-sm shadow">
-                        <div class="font-medium">{{ selectedSubRegion.name }}</div>
+                        <div class="font-medium">{{ $t(selectedSubRegion.name) }}</div>
 
                         <div class="mt-2 border-t border-base-300/80 pt-2">
                             <div class="text-xs opacity-70 mb-1">RC 列表（点击可查看详情）</div>

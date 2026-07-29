@@ -64,7 +64,7 @@ export function yogaPlugin() {
             // subscribe: (args) => args.rootValue.subscribe(args),
             onSubscribe: async (ctx, _id, payload) => {
                 // console.log("onSubscribe", ctx, id, payload)
-                const token = ctx.connectionParams?.token || (payload.extensions?.headers as any).token
+                const token = ctx.connectionParams?.token || (payload.extensions?.headers as any)?.token
                 const { schema, execute, subscribe, contextFactory, parse, validate } = yoga.getEnveloped({
                     ...ctx,
                     request: {
