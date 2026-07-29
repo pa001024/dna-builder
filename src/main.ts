@@ -5,15 +5,17 @@ import i18next from "i18next"
 import I18NextVue from "i18next-vue"
 import packageJson from "../package.json"
 import { dataPackBootstrapLoading } from "./data/data-pack-bridge"
-import { bootstrapDataPack, getLoadedDataPackImgsManifest } from "./data/data-pack-runtime"
+import { bootstrapDataPack, getLoadedDataPackImgsCacheInfo, getLoadedDataPackImgsManifest } from "./data/data-pack-runtime"
 import { mountImgsToVirtualPath } from "./data/imgs-runtime"
 import { DNA_SAFE_VERSION_LIMIT, setCurrentVersionLimit } from "./data/versionGate"
 
 import { env } from "./env"
 import { applyLanguageFontClass, initI18n } from "./i18n"
-import { router } from "./router"
 import "@globalhive/vuejs-tour/dist/style.css"
 import { createPinia } from "pinia"
+import type { Router } from "vue-router"
+
+let appRouter: Router | null = null
 
 /**
  * 注册 App 端图片服务工作线程。
@@ -58,8 +60,11 @@ async function bootstrapRuntimeAssets(): Promise<void> {
 
     if (env.isApp) {
         try {
+            const cacheInfo = getLoadedDataPackImgsCacheInfo()
             await mountImgsToVirtualPath({
                 manifest: getLoadedDataPackImgsManifest(),
+                installedVersion: cacheInfo?.installedVersion,
+                manifestHash: cacheInfo?.manifestHash,
             })
             await registerImgsServiceWorker()
         } catch (error) {
@@ -81,6 +86,7 @@ async function bootstrap() {
     applyLanguageFontClass(localStorage.getItem("setting_lang") || navigator.language)
 
     const [{ default: App }, { router }] = await Promise.all([import("./App.vue"), import("./router")])
+    appRouter = router
     const app = createApp(App)
     app.use(createPinia()).use(I18NextVue, { i18next }).use(router)
 
@@ -138,8 +144,12 @@ async function bootstrap() {
 }
 
 export function renderVueNode(vnode: VNode, container: HTMLElement) {
+    if (!appRouter) {
+        throw new Error("路由尚未初始化")
+    }
+
     const appInstance = createApp(vnode)
-    appInstance.use(createPinia()).use(I18NextVue, { i18next }).use(router)
+    appInstance.use(createPinia()).use(I18NextVue, { i18next }).use(appRouter)
     appInstance.mount(container)
     return appInstance
 }

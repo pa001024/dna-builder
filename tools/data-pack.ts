@@ -14,6 +14,7 @@ type PackManifest = {
     builtAt: string
     packageFile: string
     version: string
+    imgsHash: string
     modules: Record<string, { exports: string[]; hasFunctions: boolean; hash: string }>
 }
 
@@ -220,13 +221,14 @@ async function buildDataPack(targetVersion: string): Promise<PackVersionEntry> {
         }
     }
 
+    const imgsManifest = collectImgsManifest()
     const manifest: PackManifest = {
         builtAt: new Date().toISOString(),
         packageFile: `${targetVersion}.zip`,
         version: targetVersion,
+        imgsHash: hashString(JSON.stringify(imgsManifest)),
         modules: manifestModules,
     }
-    const imgsManifest = collectImgsManifest()
 
     const zipEntries: Record<string, Uint8Array> = {
         "manifest.json": new TextEncoder().encode(JSON.stringify(manifest, null, 2)),

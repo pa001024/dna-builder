@@ -197,7 +197,7 @@ function collectExportFallbacks(sourcePath: string): Map<string, ExportFallback>
  * @param sourcePath 源文件路径
  * @returns 重写后的模块代码，未命中时返回 null
  */
-function rewriteDataPackModule(sourcePath: string): string | null {
+export function rewriteDataPackModule(sourcePath: string): string | null {
     const fileName = path.basename(sourcePath)
     if (!DATA_PACK_MODULES.has(fileName)) {
         return null
@@ -235,7 +235,7 @@ function rewriteDataPackModule(sourcePath: string): string | null {
     }
 
     lines.push("")
-    lines.push(`syncDataPackModuleBindings(${JSON.stringify(moduleKey)})`)
+    lines.push(`await syncDataPackModuleBindings(${JSON.stringify(moduleKey)})`)
 
     lines.push("")
     if (exportNames.includes("default")) {

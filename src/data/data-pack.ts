@@ -1,7 +1,12 @@
 import { decode } from "@msgpack/msgpack"
 import { unzipSync } from "fflate"
 import { tauriFetch } from "../api/app"
-import { hydrateRegisteredDataPackBindings, replaceRegisteredDataPackBindings, resetRegisteredDataPackBindings } from "./data-pack-bridge"
+import {
+    getRegisteredDataPackModuleKeys,
+    hydrateRegisteredDataPackBindings,
+    markDataPackHydrated,
+    resetRegisteredDataPackBindings,
+} from "./data-pack-bridge"
 import { mountImgsToVirtualPath } from "./imgs-runtime"
 
 export type DataPackModuleRecord = Record<string, unknown>
@@ -23,6 +28,7 @@ export interface DataPackManifest {
     builtAt: string
     packageFile: string
     version: string
+    imgsHash?: string
     modules: Record<string, DataPackModuleMeta>
 }
 
@@ -44,6 +50,7 @@ const PACK_ROOT_DIR = "dna-builder-data-pack"
 const PACK_BYTES_FILE = "package.zip"
 const MANIFEST_FILE = "manifest.json"
 const IMGS_MANIFEST_FILE = "imgs.json"
+const MODULES_DIR = "modules"
 const INSTALL_INFO_FILE = "installed.json"
 const CONFIG_FILE = "config.json"
 const DEV_BASE_URL = "/mock/data-pack"
@@ -58,12 +65,14 @@ type DataPackState = {
     manifest: DataPackManifest | null
     imgsManifest: { path: string; url?: string }[]
     moduleCache: Map<string, DataPackModuleRecord>
+    modulePromises: Map<string, Promise<DataPackModuleRecord>>
+    migrationPromise: Promise<void> | null
 }
 
 type DecodedDataPack = {
     manifest: DataPackManifest
     imgsManifest: { path: string; url?: string }[]
-    modules: Map<string, DataPackModuleRecord>
+    moduleBytes: Map<string, Uint8Array>
 }
 
 type RemoteDataPackState = {
@@ -74,7 +83,6 @@ type RemoteDataPackState = {
 }
 
 type BootstrapDataPackState = {
-    started: boolean
     promise: Promise<boolean> | null
 }
 
@@ -88,6 +96,8 @@ const state: DataPackState = {
     manifest: null,
     imgsManifest: [],
     moduleCache: new Map(),
+    modulePromises: new Map(),
+    migrationPromise: null,
 }
 
 const remoteState: RemoteDataPackState = {
@@ -98,9 +108,10 @@ const remoteState: RemoteDataPackState = {
 }
 
 const bootstrapState: BootstrapDataPackState = {
-    started: false,
     promise: null,
 }
+
+let installedVersionsCache: DataPackVersionInfo[] | null = null
 
 /**
  * 判断当前环境是否支持 OPFS。
@@ -256,6 +267,17 @@ async function getVersionDirectory(version: string): Promise<FileSystemDirectory
 }
 
 /**
+ * 获取指定版本的模块目录。
+ * @param version 版本号
+ * @param create 目录不存在时是否创建
+ * @returns 模块目录句柄
+ */
+async function getModulesDirectory(version: string, create: boolean): Promise<FileSystemDirectoryHandleLike> {
+    const versionDir = await getVersionDirectory(version)
+    return versionDir.getDirectoryHandle(MODULES_DIR, { create })
+}
+
+/**
  * 读取 OPFS 文件内容。
  * @param directory 目录句柄
  * @param fileName 文件名
@@ -362,13 +384,16 @@ async function writeTextFile(directory: FileSystemDirectoryHandleLike, fileName:
  * @param value 打包后的值
  * @returns 还原后的值
  */
-function revivePackedValue(value: unknown): unknown {
+export function revivePackedValue(value: unknown): unknown {
     if (!value || typeof value !== "object") {
         return value
     }
 
     if (Array.isArray(value)) {
-        return value.map(item => revivePackedValue(item))
+        for (let index = 0; index < value.length; index++) {
+            value[index] = revivePackedValue(value[index])
+        }
+        return value
     }
 
     const record = value as Record<string, unknown>
@@ -386,18 +411,16 @@ function revivePackedValue(value: unknown): unknown {
         )
     }
 
-    const next: Record<string, unknown> = {}
     for (const [key, item] of Object.entries(record)) {
-        if (key === "__dnaPackType") continue
-        next[key] = revivePackedValue(item)
+        record[key] = revivePackedValue(item)
     }
-    return next
+    return record
 }
 
 /**
  * 从 zip 中提取 manifest 与模块数据。
  * @param bytes 数据包二进制
- * @returns 清单、图片清单和模块缓存
+ * @returns 清单、图片清单和模块原始字节
  */
 function decodePack(bytes: Uint8Array): DecodedDataPack {
     const entries = unzipSync(bytes)
@@ -413,7 +436,7 @@ function decodePack(bytes: Uint8Array): DecodedDataPack {
         ? (JSON.parse(decoder.decode(imgsManifestBytes)) as { files?: { path: string; url?: string }[] } | { path: string; url?: string }[])
         : []
     const imgsManifest = Array.isArray(imgsManifestPayload) ? imgsManifestPayload : (imgsManifestPayload.files ?? [])
-    const modules = new Map<string, DataPackModuleRecord>()
+    const moduleBytes = new Map<string, Uint8Array>()
 
     for (const [entryName, entryBytes] of Object.entries(entries)) {
         if (!entryName.startsWith("modules/") || !entryName.endsWith(".msgpack")) {
@@ -421,10 +444,10 @@ function decodePack(bytes: Uint8Array): DecodedDataPack {
         }
 
         const moduleKey = entryName.slice("modules/".length, -".msgpack".length)
-        modules.set(moduleKey, revivePackedValue(decode(entryBytes)) as DataPackModuleRecord)
+        moduleBytes.set(moduleKey, entryBytes)
     }
 
-    return { manifest, imgsManifest, modules }
+    return { manifest, imgsManifest, moduleBytes }
 }
 
 /**
@@ -487,6 +510,10 @@ async function scanInstalledDataPackVersions(): Promise<DataPackVersionInfo[]> {
         return []
     }
 
+    if (installedVersionsCache) {
+        return installedVersionsCache.map(version => ({ ...version }))
+    }
+
     const root = await getPackRootDirectory()
     const installedVersions: DataPackVersionInfo[] = []
 
@@ -515,7 +542,8 @@ async function scanInstalledDataPackVersions(): Promise<DataPackVersionInfo[]> {
     }
 
     installedVersions.sort((a, b) => b.version.localeCompare(a.version, "zh-CN", { numeric: true }))
-    return installedVersions
+    installedVersionsCache = installedVersions
+    return installedVersions.map(version => ({ ...version }))
 }
 
 /**
@@ -538,6 +566,31 @@ async function readPackBytes(version: string): Promise<Uint8Array | null> {
 }
 
 /**
+ * 读取指定版本的单个模块字节。
+ * @param version 版本号
+ * @param moduleKey 模块键
+ * @returns 模块字节；不存在时返回 null
+ */
+async function readModuleBytes(version: string, moduleKey: string): Promise<Uint8Array | null> {
+    try {
+        const modulesDir = await getModulesDirectory(version, false)
+        return readFile(modulesDir, `${moduleKey}.msgpack`)
+    } catch {
+        return null
+    }
+}
+
+/**
+ * 将模块分别写入版本目录，供运行时随机读取。
+ * @param version 版本号
+ * @param modules 模块字节映射
+ */
+async function writeModuleBytes(version: string, modules: ReadonlyMap<string, Uint8Array>): Promise<void> {
+    const modulesDir = await getModulesDirectory(version, true)
+    await Promise.all([...modules].map(([moduleKey, bytes]) => writeFile(modulesDir, `${moduleKey}.msgpack`, bytes)))
+}
+
+/**
  * 写入指定版本的数据包字节。
  * @param version 版本号
  * @param bytes 包字节
@@ -548,6 +601,8 @@ async function writePackBytes(version: string, bytes: Uint8Array, pack: DecodedD
     await writeFile(versionDir, PACK_BYTES_FILE, bytes)
     await writeFile(versionDir, MANIFEST_FILE, new TextEncoder().encode(JSON.stringify(pack.manifest, null, 2)))
     await writeFile(versionDir, IMGS_MANIFEST_FILE, new TextEncoder().encode(JSON.stringify(pack.imgsManifest, null, 2)))
+    await writeModuleBytes(version, pack.moduleBytes)
+    installedVersionsCache = null
 }
 
 /**
@@ -556,7 +611,10 @@ async function writePackBytes(version: string, bytes: Uint8Array, pack: DecodedD
 function resetState(): void {
     state.readyVersion = null
     state.manifest = null
+    state.imgsManifest = []
     state.moduleCache.clear()
+    state.modulePromises.clear()
+    state.migrationPromise = null
 }
 
 /**
@@ -627,55 +685,48 @@ async function fetchDataPackVersions(versionsUrl: string): Promise<DataPackVersi
  * @returns 是否加载成功
  */
 async function loadLocalVersion(version: string): Promise<boolean> {
-    const bytes = await readPackBytes(version)
-    if (!bytes) {
+    const manifest = await readInstalledManifest(version)
+    if (!manifest) {
         return false
     }
 
-    activateDecodedPack(version, decodePack(bytes))
+    const versionDir = await getVersionDirectory(version)
+    const imgsManifestRaw = await readTextFile(versionDir, IMGS_MANIFEST_FILE)
+    const imgsManifestPayload = imgsManifestRaw
+        ? (JSON.parse(imgsManifestRaw) as { files?: { path: string; url?: string }[] } | { path: string; url?: string }[])
+        : []
+    const imgsManifest = Array.isArray(imgsManifestPayload) ? imgsManifestPayload : (imgsManifestPayload.files ?? [])
+    await activateStoredPack(version, manifest, imgsManifest)
     return true
 }
 
 /**
- * 激活已解码的数据包并回填模块绑定。
+ * 激活已存储的数据包并回填当前已经导入的模块。
  * @param version 版本号
- * @param pack 已解码的数据包
+ * @param manifest 数据包清单
+ * @param imgsManifest 图片清单
  */
-function activateDecodedPack(version: string, pack: DecodedDataPack): void {
+async function activateStoredPack(
+    version: string,
+    manifest: DataPackManifest,
+    imgsManifest: { path: string; url?: string }[]
+): Promise<void> {
     state.readyVersion = version
-    state.manifest = pack.manifest
-    state.imgsManifest = pack.imgsManifest
-    state.moduleCache = pack.modules
-    hydrateLoadedDataPackBindings()
-}
-
-/**
- * 回填当前已加载的数据包绑定。
- */
-function hydrateLoadedDataPackBindings(): void {
-    if (!state.readyVersion || !state.manifest) {
-        resetRegisteredDataPackBindings()
-        return
-    }
-
-    replaceRegisteredDataPackBindings(state.moduleCache)
+    state.manifest = manifest
+    state.imgsManifest = imgsManifest
+    state.moduleCache.clear()
+    state.modulePromises.clear()
+    resetRegisteredDataPackBindings()
+    await Promise.all(getRegisteredDataPackModuleKeys().map(moduleKey => loadAndHydrateDataPackModule(moduleKey)))
+    markDataPackHydrated()
 }
 
 /**
  * 同步指定模块的已加载绑定。
  * @param moduleKey 模块键
  */
-export function syncDataPackModuleBindings(moduleKey: string): void {
-    if (!state.readyVersion) {
-        return
-    }
-
-    const moduleRecord = state.moduleCache.get(moduleKey)
-    if (!moduleRecord) {
-        return
-    }
-
-    hydrateRegisteredDataPackBindings(moduleKey, moduleRecord)
+export async function syncDataPackModuleBindings(moduleKey: string): Promise<void> {
+    await loadAndHydrateDataPackModule(moduleKey)
 }
 
 /**
@@ -683,38 +734,50 @@ export function syncDataPackModuleBindings(moduleKey: string): void {
  * @returns 是否准备成功
  */
 export async function ensureDataPackReady(): Promise<boolean> {
-    if (!bootstrapState.started) {
-        return false
-    }
-
     if (!hasOpfs()) {
         return false
     }
 
-    try {
-        const installed = await readInstalledInfo()
-        if (!installed?.version) {
+    if (state.readyVersion && state.manifest) {
+        return true
+    }
+
+    if (bootstrapState.promise) {
+        return bootstrapState.promise
+    }
+
+    bootstrapState.promise = (async () => {
+        try {
+            const installed = await readInstalledInfo()
+            if (!installed?.version) {
+                return false
+            }
+
+            return await loadLocalVersion(installed.version)
+        } catch (error) {
+            console.error("初始化数据包失败:", error)
             return false
         }
+    })()
 
-        if (installed.version === state.readyVersion && state.manifest) {
-            return true
-        }
-
-        return await loadLocalVersion(installed.version)
-    } catch (error) {
-        console.error("初始化数据包失败:", error)
-        return false
+    try {
+        return await bootstrapState.promise
+    } finally {
+        bootstrapState.promise = null
     }
 }
 
 /**
  * 获取当前安装状态。
  * @param forceRefresh 是否强制刷新远程版本列表
+ * @param installedVersions 已读取的本地版本列表
  * @returns 安装状态
  */
-export async function getDataPackInstallStatus(forceRefresh = false): Promise<DataPackInstallStatus> {
-    const localVersions = await getInstalledDataPackVersions()
+export async function getDataPackInstallStatus(
+    forceRefresh = false,
+    installedVersions?: DataPackVersionInfo[]
+): Promise<DataPackInstallStatus> {
+    const localVersions = installedVersions ?? (await getInstalledDataPackVersions())
     const remoteVersions = (await fetchRemoteDataPackVersions(forceRefresh)) ?? []
     const versions = await getMergedDataPackVersions(remoteVersions, localVersions)
     const installed = await readInstalledInfo()
@@ -819,6 +882,7 @@ export async function removeInstalledDataPackVersion(version: string): Promise<v
     try {
         await root.removeEntry(version, { recursive: true })
     } catch {}
+    installedVersionsCache = null
 
     const installed = await readInstalledInfo()
     if (installed?.version === version) {
@@ -863,12 +927,14 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
     const pack = decodePack(bytes)
     await writePackBytes(remote.version, bytes, pack)
     await writeInstalledInfo(remote)
-    activateDecodedPack(remote.version, pack)
+    await activateStoredPack(remote.version, pack.manifest, pack.imgsManifest)
     const localVersions = await getInstalledDataPackVersions()
     const versions = await getMergedDataPackVersions(remoteVersions, localVersions)
     if (state.imgsManifest.length) {
         void mountImgsToVirtualPath({
             manifest: state.imgsManifest,
+            installedVersion: remote.version,
+            manifestHash: state.manifest?.imgsHash,
         }).catch(error => {
             console.error("下载数据包后预热图片失败", error)
         })
@@ -897,7 +963,7 @@ export async function importDataPackFile(file: File): Promise<DataPackInstallSta
         packageFile: manifest.packageFile,
         version: manifest.version,
     })
-    activateDecodedPack(manifest.version, pack)
+    await activateStoredPack(manifest.version, manifest, pack.imgsManifest)
     const remoteVersions = (await fetchRemoteDataPackVersions(true)) ?? []
     const localVersions = await getInstalledDataPackVersions()
     const versions = await getMergedDataPackVersions(remoteVersions, localVersions)
@@ -928,6 +994,7 @@ export async function deleteDataPack(): Promise<void> {
     } catch {}
 
     resetState()
+    installedVersionsCache = null
 }
 
 /**
@@ -973,6 +1040,46 @@ export function getLoadedDataPackImgsManifest(): { path: string; url?: string }[
 }
 
 /**
+ * 获取当前图片清单缓存标识。
+ * @returns 安装版本与图片清单哈希
+ */
+export function getLoadedDataPackImgsCacheInfo(): { installedVersion: string; manifestHash?: string } | null {
+    if (!state.readyVersion) {
+        return null
+    }
+
+    return {
+        installedVersion: state.readyVersion,
+        manifestHash: state.manifest?.imgsHash,
+    }
+}
+
+/**
+ * 将旧版整包存储迁移为可随机读取的模块文件。
+ * @param version 版本号
+ */
+async function migrateLegacyModuleStorage(version: string): Promise<void> {
+    if (state.migrationPromise) {
+        return state.migrationPromise
+    }
+
+    state.migrationPromise = (async () => {
+        const bytes = await readPackBytes(version)
+        if (!bytes) {
+            return
+        }
+        const pack = decodePack(bytes)
+        await writeModuleBytes(version, pack.moduleBytes)
+    })()
+
+    try {
+        await state.migrationPromise
+    } finally {
+        state.migrationPromise = null
+    }
+}
+
+/**
  * 读取指定模块。
  * @param moduleKey 模块键
  * @returns 模块导出记录
@@ -991,18 +1098,43 @@ export async function loadDataPackModule(moduleKey: string): Promise<DataPackMod
         return cached
     }
 
-    const bytes = await readPackBytes(state.readyVersion)
-    if (!bytes) {
-        return {}
+    const pending = state.modulePromises.get(moduleKey)
+    if (pending) {
+        return pending
     }
 
-    const { modules } = decodePack(bytes)
-    const moduleRecord = modules.get(moduleKey)
-    if (!moduleRecord) {
-        return {}
-    }
+    const version = state.readyVersion
+    const promise = (async () => {
+        let bytes = await readModuleBytes(version, moduleKey)
+        if (!bytes) {
+            await migrateLegacyModuleStorage(version)
+            bytes = await readModuleBytes(version, moduleKey)
+        }
+        if (!bytes) {
+            return {}
+        }
 
-    state.moduleCache.set(moduleKey, moduleRecord)
+        const moduleRecord = revivePackedValue(decode(bytes)) as DataPackModuleRecord
+        state.moduleCache.set(moduleKey, moduleRecord)
+        return moduleRecord
+    })()
+    state.modulePromises.set(moduleKey, promise)
+
+    try {
+        return await promise
+    } finally {
+        state.modulePromises.delete(moduleKey)
+    }
+}
+
+/**
+ * 加载指定模块并回填已经注册的导出。
+ * @param moduleKey 模块键
+ * @returns 模块导出记录
+ */
+async function loadAndHydrateDataPackModule(moduleKey: string): Promise<DataPackModuleRecord> {
+    const moduleRecord = await loadDataPackModule(moduleKey)
+    hydrateRegisteredDataPackBindings(moduleKey, moduleRecord)
     return moduleRecord
 }
 
@@ -1022,19 +1154,7 @@ export async function loadDataPackExport<T>(moduleKey: string, exportName: strin
  * @returns 初始化结果
  */
 export async function bootstrapDataPack(): Promise<{ ready: boolean; manifest: DataPackManifest | null }> {
-    bootstrapState.started = true
-
-    if (bootstrapState.promise) {
-        const ready = await bootstrapState.promise
-        return {
-            ready,
-            manifest: getLoadedDataPackManifest(),
-        }
-    }
-
-    bootstrapState.promise = ensureDataPackReady()
-    const ready = await bootstrapState.promise
-    bootstrapState.promise = null
+    const ready = await ensureDataPackReady()
     return {
         ready,
         manifest: getLoadedDataPackManifest(),
