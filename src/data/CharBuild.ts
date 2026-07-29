@@ -2326,7 +2326,7 @@ export class CharBuild {
             charTab = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
         }
         if (charTab === "角色") {
-            return [this.auraMod, ...this.charMods]
+            return [...this.charMods, this.auraMod]
         } else if (charTab === "近战") {
             return this.meleeMods
         } else if (charTab === "远程") {

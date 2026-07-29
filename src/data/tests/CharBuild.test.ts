@@ -1252,6 +1252,20 @@ describe("CharBuild类测试", () => {
         })
     })
 
+    describe("自动极化测试", () => {
+        it("容量允许单次极化时应优先选择耐受更高的MOD", () => {
+            const charBuild = createCharBuild()
+            charBuild.char.等级 = 20
+            charBuild.charMods = [new LeveledMod(51411), new LeveledMod(41732)]
+            charBuild.auraMod = undefined
+
+            expect(charBuild.getModCost("角色")).toBe(46)
+            expect(charBuild.getModCap("角色")).toBe(40)
+            expect(charBuild.getModCostTransfer("角色")).toEqual([0])
+            expect(charBuild.getModCostMax("角色")).toBe(32)
+        })
+    })
+
     // 自动构筑测试
     describe("自动构筑测试", () => {
         it("当初始MOD数量已达上限时不应继续超量添加", () => {
