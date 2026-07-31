@@ -1569,7 +1569,13 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     />
                                     <FullTooltip side="top">
                                         <template #tooltip>
-                                            <span class="font-mono">{{ getCustomVariableResult(variable) }}</span>
+                                            <div class="space-y-1">
+                                                <div class="text-xs text-base-content/80 max-w-60">
+                                                    {{ variable[1] }}
+                                                    <span class="text-primary"> = </span>
+                                                </div>
+                                                <div class="font-mono">{{ getCustomVariableResult(variable) }}</div>
+                                            </div>
                                         </template>
                                         <input
                                             v-model="variable[1]"

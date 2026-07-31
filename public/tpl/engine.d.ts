@@ -398,6 +398,7 @@ declare module "cap" {
         cap(): Mat
         /** 点击客户区坐标 */
         mc(x?: number, y?: number, button?: "left" | "right" | "middle"): void
+        mc(button: "left" | "right" | "middle"): void
         /** 按下客户区坐标处的鼠标按键 */
         md(x?: number, y?: number, button?: "left" | "right" | "middle"): void
         /** 松开客户区坐标处的鼠标按键 */

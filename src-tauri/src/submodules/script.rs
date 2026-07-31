@@ -773,6 +773,14 @@ pub fn is_script_running() -> bool {
     SCRIPT_RUNNING.load(Ordering::Acquire)
 }
 
+/// 判断指定规范化脚本路径是否存在运行实例。
+pub fn is_script_path_running(script_path: &str) -> bool {
+    SCRIPT_RUNNING_PATH_COUNTS
+        .lock()
+        .map(|guard| guard.get(script_path).copied().unwrap_or(0) > 0)
+        .unwrap_or(false)
+}
+
 /// 获取脚本运行信息（运行状态 + 正在执行的脚本路径列表 + 总运行实例数）。
 pub fn get_script_runtime_info() -> (bool, Vec<String>, usize) {
     let running = SCRIPT_RUNNING.load(Ordering::Acquire);
@@ -856,4 +864,28 @@ pub fn stop_script_by_path(script_path: String) -> Result<(), String> {
     let entry = guard.entry(normalized_path).or_insert(0);
     *entry += 1;
     Ok(())
+}
+
+#[cfg(test)]
+mod runtime_state_tests {
+    use super::*;
+
+    #[test]
+    /// 验证脚本运行态仅按完整路径精确匹配。
+    fn detects_running_script_by_exact_path() {
+        let script_path = "runtime-state-test-script.js";
+        assert!(!is_script_path_running(script_path));
+
+        SCRIPT_RUNNING_PATH_COUNTS
+            .lock()
+            .expect("获取脚本运行映射锁失败")
+            .insert(script_path.to_string(), 1);
+        assert!(is_script_path_running(script_path));
+        assert!(!is_script_path_running("other-script.js"));
+
+        SCRIPT_RUNNING_PATH_COUNTS
+            .lock()
+            .expect("获取脚本运行映射锁失败")
+            .remove(script_path);
+    }
 }

@@ -333,6 +333,7 @@ export class Cap {
      * @param {"left" | "right" | "middle"} [button] 鼠标按键
      */
     mc(x, y, button) {
+        if (typeof x === "string") mc(this.hwnd, undefined, undefined, button)
         return mc(this.hwnd, x, y == null ? undefined : y + this.yof, button)
     }
 
