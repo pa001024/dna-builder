@@ -7303,7 +7303,10 @@
         "toggle_status_panel": "ステータスパネルを切り替え",
         "type": "種類",
         "update": "更新",
-        "updated": "更新済み"
+        "updated": "更新済み",
+        "visual_editor": "ビジュアルエディター",
+        "visual_editor_exported": "現在のタブにエクスポートしました",
+        "visual_editor_need_local_tab": "エクスポート前にローカルスクリプトタブを開いてください"
     },
     "script-runtime-floating": {
         "openScriptPage": "スクリプトページへ移動: {{scripts}}",

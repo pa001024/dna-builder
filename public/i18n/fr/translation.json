@@ -7358,7 +7358,10 @@
         "toggle_status_panel": "Basculer le panneau d'etat",
         "type": "Type",
         "update": "Mettre a jour",
-        "updated": "Mis a jour"
+        "updated": "Mis a jour",
+        "visual_editor": "Éditeur visuel",
+        "visual_editor_exported": "Exporté vers l’onglet courant",
+        "visual_editor_need_local_tab": "Ouvrez un onglet de script local avant d’exporter"
     },
     "script-runtime-floating": {
         "openScriptPage": "Aller a la page des scripts : {{scripts}}",

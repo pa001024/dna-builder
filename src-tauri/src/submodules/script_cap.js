@@ -166,7 +166,7 @@ export class DslParser {
         if (ch === "#") return this.parseWait()
         if (ch === "+") return this.parseLoop()
         if (ch === "(") return this.parseGroup()
-        if (ch === "L" || ch === "R" || ch === "M") return this.parseMouse()
+        if (ch === "L" || ch === "R" || ch === "M" || ch === "X") return this.parseMouse()
         return this.parseKey()
     }
 
@@ -197,33 +197,45 @@ export class DslParser {
         return { type: "group", body: this.parseSequence(")") }
     }
 
+    /**
+     * 读取可选的坐标对 `(x, y)`。
+     * @returns {{ x: number | undefined, y: number | undefined }} 坐标；无坐标时均为 undefined
+     */
+    readCoordPair() {
+        this.skipWs()
+        if (this.peek() !== "(") return { x: undefined, y: undefined }
+        this.i++
+        const parsedX = this.readNumber({ integer: true })
+        if (parsedX == null) this.error("missing mouse x")
+        this.skipWs()
+        if (this.peek() !== ",") this.error("missing mouse separator")
+        this.i++
+        const parsedY = this.readNumber({ integer: true })
+        if (parsedY == null) this.error("missing mouse y")
+        this.skipWs()
+        if (this.peek() !== ")") this.error("missing mouse close")
+        this.i++
+        return { x: parsedX, y: parsedY }
+    }
+
     /** @returns {{ type: "mouse", button: string, x: number | undefined, y: number | undefined, waitMs: number }} 鼠标节点 */
     parseMouse() {
         const buttonChar = this.peek()
-        if (buttonChar !== "L" && buttonChar !== "R" && buttonChar !== "M") this.error("invalid mouse token")
+        if (buttonChar !== "L" && buttonChar !== "R" && buttonChar !== "M" && buttonChar !== "X") this.error("invalid mouse token")
         this.i++
-        this.skipWs()
-        let x
-        let y
-        if (this.peek() === "(") {
-            this.i++
-            const parsedX = this.readNumber({ integer: true })
-            if (parsedX == null) this.error("missing mouse x")
-            this.skipWs()
-            if (this.peek() !== ",") this.error("missing mouse separator")
-            this.i++
-            const parsedY = this.readNumber({ integer: true })
-            if (parsedY == null) this.error("missing mouse y")
-            this.skipWs()
-            if (this.peek() !== ")") this.error("missing mouse close")
-            this.i++
-            x = parsedX
-            y = parsedY
+        let button
+        if (buttonChar === "X") {
+            const sideIndex = this.readNumber({ integer: true })
+            if (sideIndex !== 1 && sideIndex !== 2) this.error("invalid x-button index, expect X1 or X2")
+            button = sideIndex === 1 ? "x1" : "x2"
+        } else {
+            button = buttonChar === "R" ? "right" : buttonChar === "M" ? "middle" : "left"
         }
+        const { x, y } = this.readCoordPair()
         const waitMs = this.readNumber()
         return {
             type: "mouse",
-            button: buttonChar === "R" ? "right" : buttonChar === "M" ? "middle" : "left",
+            button,
             x,
             y,
             waitMs: waitMs == null ? 0 : Math.round(waitMs * 1000),
@@ -302,6 +314,19 @@ export class Cap {
     #playToken = 0
 
     /**
+     * 将按键缩写/全称规整为引擎支持的按键名。
+     * @param {string | undefined} button 鼠标按键
+     * @returns {"left" | "right" | "middle" | "x1" | "x2" | undefined}
+     */
+    static #normalizeButton(button) {
+        if (button == null) return undefined
+        const text = button.toLowerCase()
+        const t = { l: "left", r: "right", m: "middle" }
+        if (text in t) button = t[text]
+        return button
+    }
+
+    /**
      * 创建游戏窗口操作实例。
      * @param {number} hwnd 游戏窗口句柄
      * @param {{ frameless?: boolean }} [options] 初始化参数
@@ -327,34 +352,37 @@ export class Cap {
     }
 
     /**
-     * 点击客户区坐标。
-     * @param {number | undefined} [x] X 坐标
+     * 点击客户区坐标，或按按键名点击（c.mc("right")）。
+     * @param {number | string | undefined} [x] X 坐标，或按键名（left/right/middle/x1/x2/l/r/m）
      * @param {number | undefined} [y] Y 坐标
-     * @param {"left" | "right" | "middle"} [button] 鼠标按键
+     * @param {"left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"} [button] 鼠标按键（支持全称与缩写）
      */
     mc(x, y, button) {
-        if (typeof x === "string") mc(this.hwnd, undefined, undefined, button)
-        return mc(this.hwnd, x, y == null ? undefined : y + this.yof, button)
+        if (typeof x === "string") {
+            button = x
+            x = undefined
+        }
+        return mc(this.hwnd, x, y == null ? undefined : y + this.yof, Cap.#normalizeButton(button))
     }
 
     /**
      * 按下客户区坐标处的鼠标按键。
      * @param {number | undefined} [x] X 坐标
      * @param {number | undefined} [y] Y 坐标
-     * @param {"left" | "right" | "middle"} [button] 鼠标按键
+     * @param {"left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"} [button] 鼠标按键（支持全称与缩写）
      */
     md(x, y, button) {
-        md(this.hwnd, x, y == null ? undefined : y + this.yof, button)
+        md(this.hwnd, x, y == null ? undefined : y + this.yof, Cap.#normalizeButton(button))
     }
 
     /**
      * 松开客户区坐标处的鼠标按键。
      * @param {number | undefined} [x] X 坐标
      * @param {number | undefined} [y] Y 坐标
-     * @param {"left" | "right" | "middle"} [button] 鼠标按键
+     * @param {"left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"} [button] 鼠标按键（支持全称与缩写）
      */
     mu(x, y, button) {
-        mu(this.hwnd, x, y == null ? undefined : y + this.yof, button)
+        mu(this.hwnd, x, y == null ? undefined : y + this.yof, Cap.#normalizeButton(button))
     }
 
     /**
@@ -374,6 +402,25 @@ export class Cap {
      */
     async kb(key, duration) {
         await kb(this.hwnd, key, duration)
+    }
+
+    kd(key) {
+        kd(this.hwnd, key)
+    }
+
+    ku(key) {
+        ku(this.hwnd, key)
+    }
+    /**
+     * 检查颜色
+     * @param x X坐标
+     * @param y Y坐标
+     * @param color 颜色值
+     * @param tolerance 容差
+     * @returns 检查结果
+     */
+    cc(x, y, color, tolerance) {
+        return cc(this.frame, x, y + this.yof, color, tolerance)
     }
 
     /**
@@ -473,11 +520,11 @@ export class Cap {
                         if (node.waitMs > 0) await sleep(node.waitMs)
                         break
                     }
-                    this.md(node.x, node.y, node.button === "right" ? "right" : undefined)
+                    this.md(node.x, node.y, node.button)
                     try {
                         if (node.waitMs > 0) await sleep(node.waitMs)
                     } finally {
-                        this.mu(node.x, node.y, node.button === "right" ? "right" : undefined)
+                        this.mu(node.x, node.y, node.button)
                     }
                     break
                 case "group":

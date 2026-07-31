@@ -22,7 +22,7 @@
                 "transparent": true,
                 "minWidth": 330,
                 "minHeight": 430,
-                "dragDropEnabled": true,
+                "dragDropEnabled": false,
                 "devtools": true
             }
         ],

@@ -341,7 +341,7 @@ declare module "cap" {
     /** DSL 鼠标节点 */
     export interface DslMouseNode {
         type: "mouse"
-        button: "left" | "right" | "middle"
+        button: "left" | "right" | "middle" | "x1" | "x2"
         x?: number
         y?: number
         /** 按键保持时间（毫秒） */
@@ -397,16 +397,21 @@ declare module "cap" {
         /** 捕获最新游戏画面 */
         cap(): Mat
         /** 点击客户区坐标 */
-        mc(x?: number, y?: number, button?: "left" | "right" | "middle"): void
-        mc(button: "left" | "right" | "middle"): void
+        mc(x?: number, y?: number, button?: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
+        /** 按按键名点击（支持 left/right/middle/x1/x2 全称与 l/r/m 缩写） */
+        mc(button: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
         /** 按下客户区坐标处的鼠标按键 */
-        md(x?: number, y?: number, button?: "left" | "right" | "middle"): void
+        md(x?: number, y?: number, button?: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
         /** 松开客户区坐标处的鼠标按键 */
-        mu(x?: number, y?: number, button?: "left" | "right" | "middle"): void
+        mu(x?: number, y?: number, button?: "left" | "right" | "middle" | "x1" | "x2" | "l" | "r" | "m"): void
         /** 在客户区坐标点击鼠标中键 */
         mt(x?: number, y?: number): void
         /** 发送按键 */
         kb(key: KeyEnum, duration?: number): Promise<void>
+        kd(key: KeyEnum): void
+        ku(key: KeyEnum): void
+        /** 颜色检测 */
+        cc(x: number, y: number, color: number, tolerance: number): boolean
         /** 等待客户区指定坐标达到颜色条件 */
         waitColor(x: number, y: number, color: number, tolerance: number, timeout?: number): Promise<boolean>
         /** 播放 DSL 宏并返回可手动中断的 Promise */

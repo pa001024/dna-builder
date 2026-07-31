@@ -7325,7 +7325,10 @@
         "toggle_status_panel": "상태 패널 전환",
         "type": "유형",
         "update": "업데이트",
-        "updated": "업데이트됨"
+        "updated": "업데이트됨",
+        "visual_editor": "비주얼 에디터",
+        "visual_editor_exported": "현재 탭으로 낳아냈습니다",
+        "visual_editor_need_local_tab": "낳아내기 전에 로컬 스크립트 탭을 여세요"
     },
     "script-runtime-floating": {
         "openScriptPage": "스크립트 페이지로 이동: {{scripts}}",

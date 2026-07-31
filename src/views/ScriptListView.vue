@@ -28,6 +28,7 @@ import {
 import { createScriptMutation, deleteScriptMutation, updateScriptMutation } from "@/api/gen/api-mutations"
 import { type Script, type ScriptCategory, scriptCategoriesQuery, scriptQuery, scriptsCountQuery, scriptsQuery } from "@/api/graphql"
 import { openSChat } from "@/api/swindow"
+import AutoScript from "@/components/AutoScript.vue"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
 import { env } from "@/env"
 import { useCloudGameStore } from "@/store/cloudgame"
@@ -272,6 +273,7 @@ let unlistenFileChangedFn: UnlistenFn | null = null
 const watchedFiles = ref<Set<string>>(new Set())
 const codeEditor = ref<any>()
 const showSchedulerDialog = ref(false)
+const showAutoScriptDialog = ref(false)
 const showScriptMcpDialog = ref(false)
 const SCRIPT_MCP_PORT_STORAGE_KEY = "script-mcp-port-v1"
 const scriptMcpServerState = ref<ScriptMcpServerState>({
@@ -2305,6 +2307,24 @@ function setActiveTab(tabId: string) {
     }
 }
 
+/**
+ * 将图形化编辑器生成的代码导出到当前脚本标签页。
+ * @param code 生成的脚本代码
+ */
+function exportAutoScriptCode(code: string) {
+    if (!activeTab.value || activeTab.value.type !== "local") {
+        ui.showErrorMessage(t("script-list.visual_editor_need_local_tab"))
+        return
+    }
+    activeTab.value.content = code
+    activeTab.value.modified = true
+    nextTick(() => {
+        codeEditor.value?.safeUpdate(code)
+    })
+    showAutoScriptDialog.value = false
+    ui.showSuccessMessage(t("script-list.visual_editor_exported"))
+}
+
 async function runCurrentTab() {
     if (viewMode.value === "scheduler") {
         if (isSchedulerRunning.value) {
@@ -3328,6 +3348,7 @@ async function restartAsAdmin() {
  * 全局快捷键状态
  */
 const globalShortcutEnabled = ref(localStorage.getItem(SCRIPT_LIST_GLOBAL_SHORTCUT_STORAGE_KEY) === "true")
+let globalShortcutEnabledBeforeAutoScript = false
 
 /**
  * 持久化脚本列表 F10 全局快捷键状态。
@@ -3341,6 +3362,7 @@ function persistGlobalShortcutEnabled(enabled: boolean) {
  * 注册脚本列表 F10 全局快捷键。
  */
 async function registerScriptListGlobalShortcut() {
+    await unregisterScriptListGlobalShortcut()
     await register("F10", e => {
         if (e.state === "Pressed") {
             // 当按下 F10 时，运行当前脚本
@@ -3364,9 +3386,21 @@ async function unregisterScriptListGlobalShortcut() {
  * 按本地持久状态同步脚本列表 F10 全局快捷键。
  */
 async function syncScriptListGlobalShortcut() {
-    await unregisterScriptListGlobalShortcut()
-    if (!globalShortcutEnabled.value) return
-    await registerScriptListGlobalShortcut()
+    if (globalShortcutEnabled.value) await registerScriptListGlobalShortcut()
+    else await unregisterScriptListGlobalShortcut()
+}
+
+/** 编辑器打开时暂停外层脚本 F10 快捷键，但保留用户的启用状态。 */
+async function pauseScriptListGlobalShortcut() {
+    globalShortcutEnabledBeforeAutoScript = globalShortcutEnabled.value
+    if (globalShortcutEnabledBeforeAutoScript) await unregisterScriptListGlobalShortcut()
+}
+
+/** 编辑器关闭后按打开前状态恢复外层脚本 F10 快捷键。 */
+async function restoreScriptListGlobalShortcut() {
+    const shouldRestore = globalShortcutEnabledBeforeAutoScript
+    globalShortcutEnabledBeforeAutoScript = false
+    if (shouldRestore && globalShortcutEnabled.value) await registerScriptListGlobalShortcut()
 }
 
 /**
@@ -3894,6 +3928,9 @@ onUnmounted(async () => {
                                     <Icon icon="ri:more-line" class="w-4 h-4" />
                                 </div>
                                 <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+                                    <li>
+                                        <a @click="showAutoScriptDialog = true">{{ $t("script-list.visual_editor") }}</a>
+                                    </li>
                                     <li>
                                         <a @click="openScriptMcpDialog">MCP Server</a>
                                     </li>
@@ -4537,5 +4574,11 @@ onUnmounted(async () => {
                 </div>
             </div>
         </dialog>
+        <AutoScript
+            v-model:show="showAutoScriptDialog"
+            :pause-external-hotkey="pauseScriptListGlobalShortcut"
+            :restore-external-hotkey="restoreScriptListGlobalShortcut"
+            @export="exportAutoScriptCode"
+        />
     </div>
 </template>

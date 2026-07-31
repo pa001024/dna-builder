@@ -1786,7 +1786,10 @@
         "toggle_status_panel": "切换状态栏",
         "type": "类型",
         "update": "更新",
-        "updated": "已更新"
+        "updated": "已更新",
+        "visual_editor": "图形化编辑器",
+        "visual_editor_exported": "已导出到当前标签页",
+        "visual_editor_need_local_tab": "请先打开一个本地脚本标签页再导出"
     },
     "script-runtime-floating": {
         "openScriptPage": "前往脚本页: {{scripts}}",

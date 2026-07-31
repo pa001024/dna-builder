@@ -7324,7 +7324,10 @@
         "toggle_status_panel": "Toggle status panel",
         "type": "Type",
         "update": "Update",
-        "updated": "Updated"
+        "updated": "Updated",
+        "visual_editor": "Visual editor",
+        "visual_editor_exported": "Exported to the current tab",
+        "visual_editor_need_local_tab": "Open a local script tab before exporting"
     },
     "script-runtime-floating": {
         "openScriptPage": "Go to script page: {{scripts}}",

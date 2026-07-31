@@ -7181,7 +7181,10 @@
         "toggle_status_panel": "切換狀態欄",
         "type": "類型",
         "update": "更新",
-        "updated": "已更新"
+        "updated": "已更新",
+        "visual_editor": "圖形化編輯器",
+        "visual_editor_exported": "已匯出到目前分頁",
+        "visual_editor_need_local_tab": "請先開啟一個本地腳本分頁再匯出"
     },
     "script-runtime-floating": {
         "openScriptPage": "前往腳本頁: {{scripts}}",
