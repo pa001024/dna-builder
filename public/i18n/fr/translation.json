@@ -6498,6 +6498,20 @@
         "tierList": "Tier list",
         "timelineId": "ID de chronologie"
     },
+    "draft-detail": {
+        "acquisition": "Obtention",
+        "basicInfo": "Informations de base",
+        "batchCrafting": "Fabrication en série",
+        "craftDuration": "Durée de fabrication",
+        "dropSources": "Sources de butin",
+        "materials": "Ressources consommées",
+        "product": "Produit",
+        "rarity": "Rareté",
+        "title": "Plan",
+        "type": "Type",
+        "unlimitedCrafting": "Fabrication illimitée",
+        "version": "Version"
+    },
     "draft-list": {
         "title": "Liste de dessins"
     },

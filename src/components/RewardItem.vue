@@ -1,13 +1,14 @@
 <script lang="ts" setup>
 import { t } from "i18next"
+import { draftMap, LeveledChar, LeveledCharHelper, LeveledModHelper, LeveledPetHelper, LeveledWeaponHelper, resourceMap } from "@/data"
+import { charMap, modMap, petMap, skinMap, walnutMap } from "@/data/d"
+import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { headSculptureData } from "@/data/d/headsculpture.data"
+import { iconticketData } from "@/data/d/iconticket.data"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getDropModeText, getRewardTypeText } from "@/utils/i18n-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
-import { draftMap, LeveledChar, LeveledCharHelper, LeveledModHelper, LeveledPetHelper, LeveledWeaponHelper, resourceMap } from "../data"
-import { charMap, modMap, petMap, skinMap, walnutMap } from "../data/d"
-import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData } from "../data/d/accessory.data"
-import { headSculptureData } from "../data/d/headsculpture.data"
-import { iconticketData } from "../data/d/iconticket.data"
-import { getDropModeText, getRewardTypeText, RewardItem as RewardItemType } from "../utils/reward-utils"
+import { RewardItem as RewardItemType } from "@/utils/reward-utils"
 
 // 递归
 defineOptions({
@@ -163,7 +164,7 @@ function getRewardLink(item: RewardItemType) {
         return `/db/walnut/${item.id}`
     }
     if (item.t === "IronTicket") {
-        return ""
+        return `/db/resource/${item.id}`
     }
     if (item.t === "Pet") {
         return `/db/pet/${item.id}`
@@ -437,7 +438,7 @@ function getCharacterFragmentIcon(name?: string): string {
                 class="text-xs px-1.5 py-0.5 rounded"
                 :class="reward.m === 'Independent' ? 'bg-success text-success-content' : 'bg-warning text-warning-content'"
             >
-                {{ getDropModeText(reward.m || "") }}
+                {{ $t(getDropModeText(reward.m || "")) }}
                 <span v-if="reward.totalP">总容量 {{ reward.totalP }}</span>
             </span>
         </div>

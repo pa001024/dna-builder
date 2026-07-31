@@ -939,6 +939,20 @@
         "tierList": "Tier List",
         "timelineId": "时间线ID"
     },
+    "draft-detail": {
+        "acquisition": "获取途径",
+        "basicInfo": "基本信息",
+        "batchCrafting": "批量制造",
+        "craftDuration": "铸造时间",
+        "dropSources": "掉落来源",
+        "materials": "消耗资源",
+        "product": "产物",
+        "rarity": "稀有度",
+        "title": "设计图",
+        "type": "类型",
+        "unlimitedCrafting": "无限制造",
+        "version": "版本"
+    },
     "draft-list": {
         "title": "图纸列表"
     },

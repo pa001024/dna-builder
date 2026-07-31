@@ -2,9 +2,10 @@
 import { computed, ref, watch } from "vue"
 import type { AbyssDungeon, Char } from "@/data"
 import { AbyssMonsterLevelLimit, charMap, LeveledChar, LeveledMonsterHelper } from "@/data"
-import { getAbyssCumulativeRewardItems, getAbyssStarCountByActCount, getImmortalMonsterLevelByActCount } from "../utils/abyss-utils"
-import { ABYSS_DUNGEON_ELEMENT_KEYS, formatAbyssDungeonMbValue, getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
-import { getDropModeText, getRewardDetails, type RewardItem } from "../utils/reward-utils"
+import { getAbyssCumulativeRewardItems, getAbyssStarCountByActCount, getImmortalMonsterLevelByActCount } from "@/utils/abyss-utils"
+import { ABYSS_DUNGEON_ELEMENT_KEYS, formatAbyssDungeonMbValue, getAbyssDungeonGroup, getAbyssDungeonLevel } from "@/utils/dungeon-utils"
+import { getDropModeText } from "@/utils/i18n-utils"
+import { getRewardDetails, type RewardItem } from "@/utils/reward-utils"
 
 const props = defineProps<{
     dungeon: AbyssDungeon

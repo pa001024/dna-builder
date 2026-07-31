@@ -6464,6 +6464,20 @@
         "tierList": "Tier list",
         "timelineId": "Timeline ID"
     },
+    "draft-detail": {
+        "acquisition": "Acquisition",
+        "basicInfo": "Basic Info",
+        "batchCrafting": "Batch Crafting",
+        "craftDuration": "Craft Duration",
+        "dropSources": "Drop Sources",
+        "materials": "Materials",
+        "product": "Product",
+        "rarity": "Rarity",
+        "title": "Blueprint",
+        "type": "Type",
+        "unlimitedCrafting": "Unlimited Crafting",
+        "version": "Version"
+    },
     "draft-list": {
         "title": "Drawing list"
     },

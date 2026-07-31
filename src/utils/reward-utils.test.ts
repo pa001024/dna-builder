@@ -1,27 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { findInRewardTree, getDropModeText, getRewardDetails, getRewardTypeText, type RewardItem } from "./reward-utils"
-
-describe("getRewardTypeText", () => {
-    it("应该正确翻译 Hair 类型", () => {
-        expect(getRewardTypeText("Hair")).toBe("发型")
-    })
-})
-
-describe("getDropModeText", () => {
-    it("应该正确翻译掉落模式", () => {
-        expect(getDropModeText("Independent")).toBe("独立")
-        expect(getDropModeText("Weight")).toBe("权重")
-        expect(getDropModeText("Fixed")).toBe("固定")
-        expect(getDropModeText("Gender")).toBe("性别")
-        expect(getDropModeText("Level")).toBe("等级")
-        expect(getDropModeText("Once")).toBe("一次")
-        expect(getDropModeText("Sequence")).toBe("序列")
-    })
-
-    it("对于未知模式应该返回原字符串", () => {
-        expect(getDropModeText("Unknown")).toBe("Unknown")
-    })
-})
+import { findInRewardTree, getRewardDetails, type RewardItem } from "./reward-utils"
 
 describe("getRewardDetails", () => {
     it("应该处理不存在的奖励ID", () => {

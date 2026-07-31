@@ -6464,6 +6464,20 @@
         "tierList": "티어 리스트",
         "timelineId": "타임라인 ID"
     },
+    "draft-detail": {
+        "acquisition": "획득 방법",
+        "basicInfo": "기본 정보",
+        "batchCrafting": "일괄 제작",
+        "craftDuration": "제작 시간",
+        "dropSources": "드롭 출처",
+        "materials": "소모 자원",
+        "product": "생산물",
+        "rarity": "희귀도",
+        "title": "설계도",
+        "type": "유형",
+        "unlimitedCrafting": "무제한 제작",
+        "version": "버전"
+    },
     "draft-list": {
         "title": "도면 목록"
     },

@@ -6442,6 +6442,20 @@
         "tierList": "ティアリスト",
         "timelineId": "タイムライン ID"
     },
+    "draft-detail": {
+        "acquisition": "入手方法",
+        "basicInfo": "基本情報",
+        "batchCrafting": "一括製造",
+        "craftDuration": "製作時間",
+        "dropSources": "ドロップ元",
+        "materials": "消費素材",
+        "product": "製品",
+        "rarity": "レア度",
+        "title": "設計図",
+        "type": "タイプ",
+        "unlimitedCrafting": "無限製造",
+        "version": "バージョン"
+    },
     "draft-list": {
         "title": "図面リスト"
     },

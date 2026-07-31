@@ -6320,6 +6320,20 @@
         "tierList": "Tier List",
         "timelineId": "時間線 ID"
     },
+    "draft-detail": {
+        "acquisition": "取得途徑",
+        "basicInfo": "基本資訊",
+        "batchCrafting": "批量製造",
+        "craftDuration": "鍛造時間",
+        "dropSources": "掉落來源",
+        "materials": "消耗資源",
+        "product": "產物",
+        "rarity": "稀有度",
+        "title": "設計圖",
+        "type": "類型",
+        "unlimitedCrafting": "無限製造",
+        "version": "版本"
+    },
     "draft-list": {
         "title": "圖紙列表"
     },

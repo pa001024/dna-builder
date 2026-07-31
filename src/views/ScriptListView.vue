@@ -63,21 +63,12 @@ const publishingScript = ref(false)
 const renamingScriptInFlight = ref(false)
 let startEditScriptTimer: ReturnType<typeof setTimeout> | null = null
 
-const DEFAULT_SCRIPT_CONTENT = `const hwnd = getWindowByProcessName("EM-Win64-Shipping.exe")
-if (!hwnd || !isElevated()) throw new Error("未找到窗口或非管理员权限")
-checkSize(hwnd)
+const DEFAULT_SCRIPT_CONTENT = `import { Cap } from "cap"
+const c = new Cap(getWindowByProcessName("EM-Win64-Shipping.exe"))
 async function main() {
-    let i = 0
-    const timer = new Timer()
     while (true) {
-        const img = captureWindowWGC(hwnd)
-        imshow("img", img)
-        i++
-        if (timer.elapsed() > 1000) {
-            setStatus("fps", i)
-            i = 0
-            timer.reset()
-        }
+        c.cap()
+        await sleep(100)
     }
 }
 main()

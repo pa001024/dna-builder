@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { charAccessoryData } from "@/data/d/accessory.data"
+import { iconticketMap } from "@/data/d/iconticket.data"
+import { draftDungeonMap, modMap, weaponMap } from "@/data/d/index"
 import shopData from "@/data/d/shop.data"
+import type { Draft } from "@/data/data-types"
+import { getRewardTypeText } from "@/utils/i18n-utils"
 import { type ResourceDungeonSourceInfo } from "@/utils/resource-source"
 import { getDraftDropInfo } from "@/utils/reward-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
-import { draftDungeonMap, modMap, weaponMap } from "../data/d/index"
-import type { Draft } from "../data/data-types"
 
 const props = defineProps<{
     draft: Draft
@@ -18,23 +21,16 @@ function formatDuration(minutes: number): string {
     return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`
 }
 
-// 获取类型名称
-function getTypeName(type: string): string {
-    const typeMap: Record<string, string> = {
-        Mod: "魔之楔",
-        Resource: "资源",
-        CharAccessory: "角色配件",
-        Weapon: "武器",
-    }
-    return typeMap[type] || type
-}
-
 // 获取产物信息
 const product = computed(() => {
     if (props.draft.t === "Mod") {
         return modMap.get(props.draft.p)
     } else if (props.draft.t === "Weapon") {
         return weaponMap.get(props.draft.p)
+    } else if (props.draft.t === "IronTicket") {
+        return iconticketMap.get(props.draft.p)
+    } else if (props.draft.t === "CharAccessory") {
+        return charAccessoryData.find(item => item.id === props.draft.p)
     }
     return null
 })
@@ -108,15 +104,17 @@ const draftShopSources = computed<ShopSourceInfo[]>(() => collectDraftShopSource
  * @returns 产物名称与值
  */
 const productDisplay = computed(() => {
-    if (props.draft.t === "Mod" || props.draft.t === "Weapon") {
+    const productName = product.value && ("名称" in product.value ? product.value.名称 : product.value.name)
+
+    if (["Mod", "Weapon", "IronTicket", "CharAccessory"].includes(props.draft.t)) {
         return {
-            name: product.value?.名称 || props.draft.n,
-            value: [props.draft.c, props.draft.p, props.draft.t] as [number, number, "Mod" | "Weapon"],
+            name: productName || props.draft.n,
+            value: [props.draft.c, props.draft.p, props.draft.t] as [number, number, "Mod" | "Weapon" | "IronTicket" | "CharAccessory"],
         }
     }
 
     return {
-        name: product.value?.名称 || props.draft.n,
+        name: productName || props.draft.n,
         value: props.draft.c,
     }
 })
@@ -125,47 +123,51 @@ const productDisplay = computed(() => {
 <template>
     <div class="space-y-3">
         <div class="p-3 flex items-center gap-3">
-            <SRouterLink :to="`/db/draft/${draft.id}`" class="text-lg font-bold link link-primary"> 图纸: {{ $t(draft.n) }} </SRouterLink>
+            <SRouterLink :to="`/db/draft/${draft.id}`" class="text-lg font-bold link link-primary"
+                >{{ $t("draft-detail.title") }}: {{ $t(draft.n) }}</SRouterLink
+            >
             <CopyID :id="draft.id" />
         </div>
 
         <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">基本信息</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("draft-detail.basicInfo") }}</div>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
                 <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">稀有度</span>
+                    <span class="text-base-content/70">{{ $t("draft-detail.rarity") }}</span>
                     <span class="font-medium text-primary">
                         <Icon v-for="i in draft.r" :key="i" class="inline-block mr-1" icon="ri:star-fill" />
                     </span>
                 </div>
                 <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">版本</span>
+                    <span class="text-base-content/70">{{ $t("draft-detail.version") }}</span>
                     <span class="font-medium text-primary">
                         {{ draft.v }}
                     </span>
                 </div>
                 <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">类型</span>
+                    <span class="text-base-content/70">{{ $t("draft-detail.type") }}</span>
                     <span class="font-medium text-primary">
-                        {{ getTypeName(draft.t) }}
+                        {{ $t(getRewardTypeText(draft.t)) }}
                     </span>
                 </div>
                 <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">铸造时间</span>
+                    <span class="text-base-content/70">{{ $t("draft-detail.craftDuration") }}</span>
                     <span class="font-medium text-primary">
                         {{ formatDuration(draft.d) }}
                     </span>
                 </div>
                 <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">批量制造</span>
+                    <span class="text-base-content/70">{{ $t("draft-detail.batchCrafting") }}</span>
                     <span class="font-medium text-primary">
-                        {{ draft.b ? "支持" : "不支持" }}
+                        <Icon v-if="draft.b" class="inline-block mr-1" icon="ri:checkbox-circle-fill" />
+                        <Icon v-else class="inline-block mr-1" icon="ri:close-line" />
                     </span>
                 </div>
                 <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">无限制造</span>
+                    <span class="text-base-content/70">{{ $t("draft-detail.unlimitedCrafting") }}</span>
                     <span class="font-medium text-primary">
-                        {{ draft.i ? "支持" : "不支持" }}
+                        <Icon v-if="draft.i" class="inline-block mr-1" icon="ri:checkbox-circle-fill" />
+                        <Icon v-else class="inline-block mr-1" icon="ri:close-line" />
                     </span>
                 </div>
             </div>
@@ -173,13 +175,13 @@ const productDisplay = computed(() => {
 
         <!-- 产物信息 -->
         <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">产物</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("draft-detail.product") }}</div>
             <ResourceCostItem :name="productDisplay.name" :value="productDisplay.value" />
         </div>
 
         <!-- 消耗资源 -->
         <div v-if="draft.x && draft.x.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">消耗资源</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("draft-detail.materials") }}</div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem name="铜币" :value="draft.m" />
                 <template v-for="item in draft.x" :key="item.id">
@@ -190,13 +192,13 @@ const productDisplay = computed(() => {
 
         <!-- 获取途径 -->
         <div v-if="draftShopSources.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">获取途径</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("draft-detail.acquisition") }}</div>
             <ShopSource :shop-sources="draftShopSources" />
         </div>
 
         <!-- 掉落来源 -->
         <div v-if="draftDungeons.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">掉落来源</div>
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("draft-detail.dropSources") }}</div>
             <DungeonSource :dungeon-sources="draftDungeons" />
         </div>
     </div>

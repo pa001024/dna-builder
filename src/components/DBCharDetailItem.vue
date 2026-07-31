@@ -2,8 +2,8 @@
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useSettingStore } from "@/store/setting"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getRewardTypeText } from "@/utils/i18n-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
-import { getRewardTypeText } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 import { LeveledChar, LeveledSkillWeapon } from "../data"
 import { type SkinItem, skinData } from "../data/d/accessory.data"
@@ -796,7 +796,7 @@ onBeforeUnmount(() => {
                             <div class="text-xs text-base-content/70">默认奖励</div>
                             <div class="space-y-2">
                                 <div v-for="groupName in Object.keys(skin.defaultItem)" :key="`${skin.id}-${groupName}`" class="space-y-1">
-                                    <div class="text-xs text-base-content/70">{{ getRewardTypeText(groupName) }}</div>
+                                    <div class="text-xs text-base-content/70">{{ $t(getRewardTypeText(groupName)) }}</div>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <ResourceCostItem
                                             v-for="entry in skinDefaultCostItems.filter(

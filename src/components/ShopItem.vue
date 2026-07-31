@@ -20,8 +20,9 @@ import { headSculptureMap } from "@/data/d/headsculpture.data"
 import { mountData } from "@/data/d/mount.data"
 import type { ShopItem } from "@/data/d/shop.data"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getRewardTypeText } from "@/utils/i18n-utils"
 import { getImprType, getRegionType } from "@/utils/quest-utils"
-import { getRewardDetails, getRewardTypeText } from "@/utils/reward-utils"
+import { getRewardDetails } from "@/utils/reward-utils"
 import { formatDateTime } from "@/utils/time"
 
 // 定义带有子项的商品类型
