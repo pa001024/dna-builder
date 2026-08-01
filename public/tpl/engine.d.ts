@@ -412,6 +412,15 @@ declare module "cap" {
         ku(key: KeyEnum): void
         /** 颜色检测 */
         cc(x: number, y: number, color: number, tolerance: number): boolean
+        /** 检查区域汉明特征 */
+        croi(
+            roi: Mat,
+            hash: string,
+            tolerance: number,
+            useFilter?: number | boolean,
+            filterColor?: number,
+            filterTolerance?: number
+        ): boolean
         /** 等待客户区指定坐标达到颜色条件 */
         waitColor(x: number, y: number, color: number, tolerance: number, timeout?: number): Promise<boolean>
         /** 播放 DSL 宏并返回可手动中断的 Promise */

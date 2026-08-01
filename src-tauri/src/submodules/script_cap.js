@@ -424,6 +424,20 @@ export class Cap {
     }
 
     /**
+     * 检查区域汉明特征
+     * @param {Mat} roi
+     * @param {string} hash
+     * @param {number} [tolerance]
+     * @param {number|boolean} [useFilter]
+     * @param {number} [filterColor]
+     * @param {number} [filterTolerance]
+     */
+    croi(roi, hash, tolerance, useFilter, filterColor, filterTolerance) {
+        if (useFilter) roi = colorFilter(roi, [filterColor], filterTolerance)
+        return !matchHammingHash(perceptualHash(roi), [hash], tolerance)
+    }
+
+    /**
      * 等待客户区指定坐标达到颜色条件。
      * @param {number} x X 坐标
      * @param {number} y Y 坐标
@@ -511,7 +525,8 @@ export class Cap {
                     await sleep(node.ms)
                     break
                 case "key":
-                    if (node.duration == null || node.duration <= 0) await this.kb(node.key)
+                    if (node.duration === 0) this.kd(node.key)
+                    else if (node.duration == null) await this.kb(node.key)
                     else await this.kb(node.key, node.duration)
                     break
                 case "mouse":
