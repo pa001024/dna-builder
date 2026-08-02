@@ -20,6 +20,12 @@ interface FlattenedQuestDialogueItem {
     nodeId: string
 }
 
+interface DialogueSearchTarget {
+    nodeId: string
+    dialogueId: number
+    optionId?: number
+}
+
 const props = defineProps<{
     questId: number
     nodes: QuestNode[]
@@ -28,6 +34,8 @@ const props = defineProps<{
     questChainIcon?: string
     questName?: string
     searchKeyword?: string
+    searchTarget?: DialogueSearchTarget
+    searchTargetRequest?: number
 }>()
 
 const settingStore = useSettingStore()
@@ -157,6 +165,52 @@ function scrollToDialogue(dialogueKey: string): void {
 
     nextTick(() => {
         targetElement.scrollIntoView({ behavior: "smooth", block: "center" })
+    })
+}
+
+/**
+ * 获取搜索命中的对话正文或选项元素。
+ * @param dialogueKey 对话唯一键
+ * @param optionId 选项 ID
+ * @returns 搜索目标元素
+ */
+function getDialogueSearchElement(dialogueKey: string, optionId?: number): HTMLElement | null {
+    const dialogueElement = dialogueElementMap.get(dialogueKey)
+    if (!dialogueElement) {
+        return null
+    }
+
+    if (optionId === undefined) {
+        return dialogueElement.querySelector<HTMLElement>("[data-dialogue-content='true']")
+    }
+
+    return (
+        Array.from(dialogueElement.querySelectorAll<HTMLElement>("[data-dialogue-option-id]")).find(
+            element => element.dataset.dialogueOptionId === String(optionId)
+        ) ?? null
+    )
+}
+
+/**
+ * 滚动到搜索命中的具体对话内容。
+ * @param target 对话搜索目标
+ */
+function scrollToSearchTarget(target: DialogueSearchTarget): void {
+    nextTick(() => {
+        const node = questNodeChains.value.find(item => item.id === target.nodeId)
+        const dialogueItem = node?.chain.find(item => item.dialogue.id === target.dialogueId)
+        if (!dialogueItem) {
+            return
+        }
+
+        const dialogueKey = getQuestDialogueKey(target.nodeId, dialogueItem.dialogue)
+        const targetElement = getDialogueSearchElement(dialogueKey, target.optionId)
+        const scrollElement = targetElement ?? dialogueElementMap.get(dialogueKey)
+        if (!scrollElement) {
+            return
+        }
+
+        scrollElement.scrollIntoView({ behavior: "smooth", block: "center" })
     })
 }
 
@@ -967,6 +1021,15 @@ const nodeDisplayLabelMap = computed(() => {
 
     return labelMap
 })
+
+watch(
+    () => props.searchTargetRequest,
+    () => {
+        if (props.searchTarget) {
+            scrollToSearchTarget(props.searchTarget)
+        }
+    }
+)
 
 watch(
     () => [props.voiceLanguage || settingStore.lang, settingStore.protagonistGender, settingStore.protagonistGender2],

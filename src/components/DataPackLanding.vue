@@ -17,8 +17,8 @@ const lastApply = useLocalStorage("datapack.lastApply", 0)
 
 const latestVersionInfo = computed(() => dataPack.status?.remote || dataPack.status?.versions[0] || null)
 const latestVersion = computed(() => latestVersionInfo.value?.version || "")
+const latestNotes = computed(() => latestVersionInfo.value?.notes?.trim() || "暂无")
 const currentVersion = computed(() => dataPack.status?.version || "未激活")
-const versionCount = computed(() => dataPack.status?.versions.length || 0)
 const isReady = computed(() => Boolean(dataPack.status?.ready))
 const hasNewVersion = computed(() => {
     const latest = latestVersionInfo.value
@@ -176,7 +176,7 @@ watch(
                                 </p>
                             </div>
 
-                            <div class="mt-7 grid gap-3 sm:grid-cols-3">
+                            <div class="mt-7 grid gap-3 sm:grid-cols-2">
                                 <div class="rounded-2xl border border-base-content/10 bg-base-100/60 p-4 shadow-sm">
                                     <div class="text-xs text-base-content/50">当前版本</div>
                                     <div class="mt-2 break-all text-sm font-semibold text-base-content">{{ currentVersion }}</div>
@@ -185,9 +185,9 @@ watch(
                                     <div class="text-xs text-base-content/50">最新版本</div>
                                     <div class="mt-2 break-all text-sm font-semibold text-base-content">{{ latestVersion || "暂无" }}</div>
                                 </div>
-                                <div class="rounded-2xl border border-base-content/10 bg-base-100/60 p-4 shadow-sm">
-                                    <div class="text-xs text-base-content/50">可用版本</div>
-                                    <div class="mt-2 text-sm font-semibold text-base-content">{{ versionCount }}</div>
+                                <div class="rounded-2xl border border-base-content/10 bg-base-100/60 p-4 shadow-sm sm:col-span-2">
+                                    <div class="text-xs text-base-content/50">描述</div>
+                                    <div class="mt-2 whitespace-pre-wrap break-words text-sm font-semibold text-base-content">{{ latestNotes }}</div>
                                 </div>
                             </div>
 
