@@ -70,7 +70,12 @@ export interface WorkerMessage {
 }
 
 // Worker 响应类型
-export interface WorkerResponse {
+export interface WorkerReadyResponse {
+    type: "ready"
+}
+
+export interface WorkerResultResponse {
+    type: "result"
     success: boolean
     result?:
         | LevelUpResult
@@ -79,6 +84,8 @@ export interface WorkerResponse {
     error?: string
     id: number
 }
+
+export type WorkerResponse = WorkerReadyResponse | WorkerResultResponse
 
 // 处理 Worker 消息
 self.onmessage = (event: MessageEvent<WorkerMessage>) => {
@@ -152,9 +159,16 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
                     throw new Error(`Unknown method: ${method}`)
             }
 
-            self.postMessage({ success: true, result, id } as WorkerResponse)
+            self.postMessage({ type: "result", success: true, result, id } as WorkerResultResponse)
         } catch (error) {
-            self.postMessage({ success: false, error: error instanceof Error ? error.message : String(error), id } as WorkerResponse)
+            self.postMessage({
+                type: "result",
+                success: false,
+                error: error instanceof Error ? error.message : String(error),
+                id,
+            } as WorkerResultResponse)
         }
     }
 }
+
+self.postMessage({ type: "ready" } as WorkerReadyResponse)

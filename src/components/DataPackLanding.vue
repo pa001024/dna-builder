@@ -151,7 +151,7 @@ watch(
     <Teleport to="body">
         <dialog class="modal" :class="{ 'modal-open': showModal }">
             <div
-                class="modal-box w-160 max-w-4xl overflow-hidden border border-base-content/10 bg-base-100/95 p-0 shadow-2xl backdrop-blur-xl"
+                class="modal-box w-[calc(100vw-2rem)] max-w-[40rem] max-h-[calc(100vh-2rem)] overflow-x-hidden overflow-y-auto border border-base-content/10 bg-base-100/95 p-0 shadow-2xl backdrop-blur-xl sm:w-[calc(100vw-3rem)] sm:max-h-[calc(100vh-3rem)]"
             >
                 <div class="relative overflow-hidden">
                     <div class="absolute inset-0 bg-linear-to-br from-primary/20 via-base-100 to-secondary/15" />
@@ -159,7 +159,7 @@ watch(
                     <div class="absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-secondary/15 blur-3xl" />
 
                     <div class="relative grid gap-0">
-                        <div class="p-6 sm:p-8 lg:p-10">
+                        <div class="p-4 sm:p-8 lg:p-10">
                             <div
                                 class="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
                             >
@@ -191,17 +191,21 @@ watch(
                                 </div>
                             </div>
 
-                            <div class="mt-8 flex flex-wrap gap-3">
+                            <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                                 <button
-                                    class="btn btn-primary min-w-40"
+                                    class="btn btn-primary w-full min-w-40 sm:w-auto"
                                     :disabled="!latestVersion || isDownloading"
                                     @click="downloadLatest"
                                 >
                                     {{ actionLabel }}
                                     <span class="loading loading-dots" v-if="isDownloading"></span>
                                 </button>
-                                <button class="btn btn-ghost min-w-28" :disabled="isDownloading" @click="goSetting">打开设置</button>
-                                <button class="btn btn-ghost min-w-24" :disabled="isDownloading" @click="closeModal">关闭</button>
+                                <button class="btn btn-ghost w-full min-w-28 sm:w-auto" :disabled="isDownloading" @click="goSetting">
+                                    打开设置
+                                </button>
+                                <button class="btn btn-ghost w-full min-w-24 sm:w-auto" :disabled="isDownloading" @click="closeModal">
+                                    关闭
+                                </button>
                             </div>
                         </div>
                     </div>

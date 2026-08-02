@@ -47,7 +47,7 @@ export function rand_str(length: number = 16): string {
     return result
 }
 export function rand_str2(length: number = 16): string {
-    const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+    const chars = "abcdef0123456789"
     let result = ""
     for (let i = 0; i < length; i++) {
         result += chars.charAt(Math.floor(Math.random() * chars.length))

@@ -129,6 +129,9 @@ export interface TimeEstimateConfig {
 
 export class LevelUpCalculator {
     private worker: Worker | null = null
+    private workerReady: Promise<void> | null = null
+    private resolveWorkerReady: (() => void) | null = null
+    private rejectWorkerReady: ((reason: unknown) => void) | null = null
     private pendingPromises: Map<number, { resolve: (value: any) => void; reject: (reason: any) => void }> = new Map()
     private messageId = 0
 
@@ -138,6 +141,9 @@ export class LevelUpCalculator {
     constructor() {
         // 初始化 Worker 相关状态
         this.worker = null
+        this.workerReady = null
+        this.resolveWorkerReady = null
+        this.rejectWorkerReady = null
         this.pendingPromises = new Map()
         this.messageId = 0
     }
@@ -147,11 +153,22 @@ export class LevelUpCalculator {
      */
     private initWorker(): Worker {
         if (!this.worker) {
+            this.workerReady = new Promise<void>((resolve, reject) => {
+                this.resolveWorkerReady = resolve
+                this.rejectWorkerReady = reject
+            })
             this.worker = new Worker(new URL("./LevelUpCalculator.worker.ts", import.meta.url), {
                 type: "module",
             })
 
             this.worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+                if (event.data.type === "ready") {
+                    this.resolveWorkerReady?.()
+                    this.resolveWorkerReady = null
+                    this.rejectWorkerReady = null
+                    return
+                }
+
                 const { success, result, error, id } = event.data
                 const promise = this.pendingPromises.get(id)
                 if (promise) {
@@ -166,6 +183,9 @@ export class LevelUpCalculator {
 
             this.worker.onerror = error => {
                 console.error("Worker error:", error)
+                this.rejectWorkerReady?.(new Error("Worker error"))
+                this.resolveWorkerReady = null
+                this.rejectWorkerReady = null
                 this.pendingPromises.forEach(promise => {
                     promise.reject(new Error("Worker error"))
                 })
@@ -180,6 +200,11 @@ export class LevelUpCalculator {
      */
     private async sendMessage(method: WorkerMethod, data: WorkerMessageData): Promise<LevelUpResult | TimeEstimateResult> {
         const worker = this.initWorker()
+        const workerReady = this.workerReady
+        if (!workerReady) {
+            throw new Error("Worker initialization failed")
+        }
+        await workerReady
         const id = ++this.messageId
 
         return new Promise((resolve, reject) => {
@@ -536,6 +561,10 @@ export class LevelUpCalculator {
         if (this.worker) {
             this.worker.terminate()
             this.worker = null
+            this.rejectWorkerReady?.(new Error("Worker destroyed"))
+            this.workerReady = null
+            this.resolveWorkerReady = null
+            this.rejectWorkerReady = null
             this.pendingPromises.forEach(promise => promise.reject(new Error("Worker destroyed")))
             this.pendingPromises.clear()
         }

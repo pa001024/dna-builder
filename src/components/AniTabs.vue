@@ -81,7 +81,7 @@ onBeforeUnmount(() => {
                 :class="{ 'text-base-content! font-medium': model === tab.value }"
                 @click="model = tab.value"
             >
-                {{ tab.label }}
+                <slot name="label" :tab="tab">{{ tab.label }}</slot>
             </button>
             <span class="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-base-content/50" />
             <span
