@@ -1,4 +1,14 @@
-import type { AutoScriptDoc, ConfigVar, ExprOperand, FlowExpr, FlowNode, MouseButton, SwitchCase } from "./types"
+import type {
+    AutoScriptDoc,
+    ColorCallExpr,
+    ConfigVar,
+    ExprOperand,
+    FlowExpr,
+    FlowNode,
+    MouseButton,
+    RoiCallExpr,
+    SwitchCase,
+} from "./types"
 
 const INDENT = "    "
 
@@ -42,6 +52,17 @@ function jsOptionalNumber(value: number | undefined): string {
     return value == null || !Number.isFinite(value) ? "undefined" : String(Math.round(value))
 }
 
+/** 生成区域特征识别调用。 */
+function emitRoiCall(expr: RoiCallExpr): string {
+    const filter = expr.useFilter ? `, 1, ${jsColor(expr.filterColor)}, ${Math.round(expr.filterTolerance)}` : ""
+    return `c.croi(c.frame.roi(${Math.round(expr.x)}, ${Math.round(expr.y)}, ${Math.round(expr.width)}, ${Math.round(expr.height)}), ${jsString(expr.hash)}, ${Math.round(expr.tolerance)}${filter})`
+}
+
+/** 生成单点颜色检查调用。 */
+function emitColorCall(expr: ColorCallExpr): string {
+    return `cc(c.frame, ${Math.round(expr.x)}, ${Math.round(expr.y)}, ${jsColor(expr.color)}, ${Math.round(expr.tolerance)})`
+}
+
 /** 编译条件操作数。 */
 function emitOperand(operand: ExprOperand): string {
     if (operand.type === "var") return toIdentifier(operand.name)
@@ -68,7 +89,11 @@ export function emitExpr(expr: FlowExpr | undefined): string {
         case "cmp":
             return `${emitOperand(expr.left)} ${expr.cmp} ${emitOperand(expr.right)}`
         case "call": {
-            const check = `cc(c.frame, ${Math.round(expr.x)}, ${Math.round(expr.y)}, ${jsColor(expr.color)}, ${Math.round(expr.tolerance)})`
+            if (expr.fn === "roiExists" || expr.fn === "roiNotExists") {
+                const check = emitRoiCall(expr)
+                return expr.fn === "roiExists" ? check : `!${check}`
+            }
+            const check = emitColorCall(expr as ColorCallExpr)
             return expr.fn === "colorExists" ? check : `!${check}`
         }
         default:

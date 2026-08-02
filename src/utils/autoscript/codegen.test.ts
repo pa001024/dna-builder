@@ -152,6 +152,53 @@ describe("generateCode", () => {
         expect(code).toContain("const found = await c.waitColor(10, 20, 0xFFFFFF, 5, 3000)")
     })
 
+    it("emits c.croi region feature checks", () => {
+        const { code } = generateCode(
+            doc([
+                {
+                    id: nid("c"),
+                    kind: "if",
+                    condition: {
+                        op: "and",
+                        items: [
+                            {
+                                op: "call",
+                                fn: "roiExists",
+                                x: 10,
+                                y: 20,
+                                width: 80,
+                                height: 40,
+                                hash: "0123456789abcdef",
+                                tolerance: 10,
+                                useFilter: true,
+                                filterColor: 0xffffff,
+                                filterTolerance: 30,
+                            },
+                            {
+                                op: "call",
+                                fn: "roiNotExists",
+                                x: 100,
+                                y: 200,
+                                width: 20,
+                                height: 16,
+                                hash: "fedcba9876543210",
+                                tolerance: 5,
+                                useFilter: false,
+                                filterColor: 0,
+                                filterTolerance: 0,
+                            },
+                        ],
+                    },
+                    thenBody: [],
+                    elseBody: [],
+                },
+            ])
+        )
+        expect(code).toContain(
+            'if ((c.croi(c.frame.roi(10, 20, 80, 40), "0123456789abcdef", 10, 1, 0xFFFFFF, 30)) && (!c.croi(c.frame.roi(100, 200, 20, 16), "fedcba9876543210", 5))) {'
+        )
+    })
+
     it("emits count loop as for", () => {
         const { code } = generateCode(doc([{ id: nid("c"), kind: "loop", loopType: "count", count: 3, body: [] }]))
         expect(code).toContain("for (let i = 0; i < 3; i++) {")

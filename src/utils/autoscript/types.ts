@@ -7,6 +7,43 @@ export type MouseButton = "left" | "right" | "middle" | "x1" | "x2"
 export type ConfigVarKind = "number" | "string" | "boolean" | "select" | "multi-select"
 export type CmpOp = "==" | "!=" | ">" | "<" | ">=" | "<="
 
+export interface RoiSelection {
+    x: number
+    y: number
+    width: number
+    height: number
+    hash: string
+}
+
+export interface RoiPickOptions {
+    useFilter: boolean
+    filterColor: number
+    filterTolerance: number
+}
+
+export type ColorCallExpr = {
+    op: "call"
+    fn: "colorExists" | "colorNotExists"
+    x: number
+    y: number
+    color: number
+    tolerance: number
+}
+
+export type RoiCallExpr = {
+    op: "call"
+    fn: "roiExists" | "roiNotExists"
+    x: number
+    y: number
+    width: number
+    height: number
+    hash: string
+    tolerance: number
+    useFilter: boolean
+    filterColor: number
+    filterTolerance: number
+}
+
 /** 条件操作数：字面量、变量引用、坐标颜色检查 */
 export type ExprOperand =
     | { type: "literal"; value: string | number | boolean }
@@ -18,7 +55,8 @@ export type FlowExpr =
     | { op: "and" | "or"; items: FlowExpr[] }
     | { op: "not"; item: FlowExpr }
     | { op: "cmp"; left: ExprOperand; cmp: CmpOp; right: ExprOperand }
-    | { op: "call"; fn: "colorExists" | "colorNotExists"; x: number; y: number; color: number; tolerance: number }
+    | ColorCallExpr
+    | RoiCallExpr
 
 /** 动作节点（叶子） */
 export type ActionNode =

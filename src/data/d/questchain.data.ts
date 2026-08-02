@@ -75,6 +75,7 @@ export const questChain2VersionRanges: QuestChainVersionRange[] = [
     [100401, 100405, "1.4"],
     [200237, 200240, "1.4"],
     [200401, 200403, "1.4"],
+    [200404, 200408, "1.5"],
 ]
 
 export const questChain2Version: Record<number, string> = buildQuestChainVersionMap(questChain2VersionRanges)

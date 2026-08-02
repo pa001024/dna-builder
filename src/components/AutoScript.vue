@@ -11,7 +11,7 @@ import {
 import { env } from "@/env"
 import { createNodeByKind, useAutoScriptStore } from "@/store/autoScript"
 import { useUIStore } from "@/store/ui"
-import type { FlowExpr, FlowNode, MouseButton } from "@/utils/autoscript/types"
+import type { FlowExpr, FlowNode, MouseButton, RoiPickOptions, RoiSelection } from "@/utils/autoscript/types"
 import { PALETTE } from "./autoscript/palette"
 
 const show = defineModel<boolean>("show", { default: false })
@@ -124,6 +124,46 @@ async function onPickHotkey() {
     } catch (error) {
         console.error("抓取坐标失败", error)
         ui.showErrorMessage(`抓取坐标失败: ${error}`)
+    } finally {
+        grabbing.value = false
+    }
+}
+
+/** 截取目标窗口并通过 selectroi 选择区域，返回用于 c.croi 的感知 hash。 */
+async function pickRegionFeature(apply: (selection: RoiSelection) => void, options: RoiPickOptions) {
+    if (!env.isApp) {
+        ui.showErrorMessage("当前环境不支持 ROI 选择")
+        return
+    }
+    if (grabbing.value) return
+    grabbing.value = true
+    try {
+        const processName = store.doc.processName || "EM-Win64-Shipping.exe"
+        const filterColor = Number.isFinite(options.filterColor) ? Math.max(0, Math.floor(options.filterColor)) : 0xffffff
+        const filterTolerance = Number.isFinite(options.filterTolerance) ? Math.max(0, Math.round(options.filterTolerance)) : 30
+        const filterSource = options.useFilter ? `roi = colorFilter(roi, [${filterColor}], ${filterTolerance})` : ""
+        const script = `import { Cap } from "cap"
+const hwnd = getWindowByProcessName(${JSON.stringify(processName)})
+if (!hwnd) throw new Error("未找到目标窗口")
+const c = new Cap(hwnd${store.doc.frameless ? ', { frameless: true }' : ""})
+const frame = c.cap()
+const selected = await selectroi("AutoScript ROI", frame)
+let output = ""
+if (selected) {
+    const [x, y, width, height] = selected
+    let roi = frame.roi(x, y, width, height)
+    ${filterSource}
+    output = JSON.stringify({ x, y, width, height, hash: perceptualHash(roi) })
+}
+output`
+        const raw = await execScript(script, "__autoscript_roi__", 120000)
+        const selection = raw ? (JSON.parse(raw) as RoiSelection | null) : null
+        if (!selection) return
+        apply(selection)
+        ui.showSuccessMessage(`已选择 ROI (${selection.x}, ${selection.y}, ${selection.width}, ${selection.height})`)
+    } catch (error) {
+        console.error("选择 ROI 失败", error)
+        ui.showErrorMessage(`选择 ROI 失败: ${error}`)
     } finally {
         grabbing.value = false
     }
@@ -699,6 +739,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                         :clearable="false"
                                         @update="selectedNode.condition = $event ?? defaultLoopCondition()"
                                         @pickCoord="armPick"
+                                        @pickRoi="pickRegionFeature"
                                     />
                                 </template>
                             </template>
@@ -720,6 +761,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                         }
                                     "
                                     @pickCoord="armPick"
+                                    @pickRoi="pickRegionFeature"
                                 />
                             </template>
 

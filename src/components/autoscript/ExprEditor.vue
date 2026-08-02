@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ExprOperand, FlowExpr } from "@/utils/autoscript/types"
+import type { ColorCallExpr, ExprOperand, FlowExpr, RoiCallExpr, RoiPickOptions, RoiSelection } from "@/utils/autoscript/types"
 import Icon from "../Icon.vue"
 
 const props = withDefaults(
@@ -14,6 +14,7 @@ const props = withDefaults(
 const emit = defineEmits<{
     (e: "update", expr: FlowExpr | undefined): void
     (e: "pickCoord", apply: (x: number, y: number, color?: number) => void): void
+    (e: "pickRoi", apply: (selection: RoiSelection) => void, options: RoiPickOptions): void
 }>()
 
 const CMP_OPS = ["==", "!=", ">", "<", ">=", "<="] as const
@@ -28,8 +29,35 @@ function toGroup(op: "and" | "or") {
     update({ op, items: current ? [current] : [defaultCall()] })
 }
 
-function defaultCall(): FlowExpr {
+function defaultCall(): ColorCallExpr {
     return { op: "call", fn: "colorExists", x: 0, y: 0, color: 0xffffff, tolerance: 10 }
+}
+
+/** 返回区域特征条件的默认值。 */
+function defaultRoiCall(): RoiCallExpr {
+    return {
+        op: "call",
+        fn: "roiExists",
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        hash: "",
+        tolerance: 10,
+        useFilter: false,
+        filterColor: 0xffffff,
+        filterTolerance: 30,
+    }
+}
+
+/** 判断条件是否为区域特征调用。 */
+function isRoiCall(expr: FlowExpr | undefined): expr is RoiCallExpr {
+    return expr?.op === "call" && (expr.fn === "roiExists" || expr.fn === "roiNotExists")
+}
+
+/** 将模板中的调用条件视为区域特征条件。 */
+function roiExpr(expr: Extract<FlowExpr, { op: "call" }>): RoiCallExpr {
+    return expr as RoiCallExpr
 }
 
 function defaultCmp(): FlowExpr {
@@ -98,6 +126,27 @@ function pickCoordFor(apply: (x: number, y: number, color?: number) => void) {
     emit("pickCoord", apply)
 }
 
+/** 请求截图并选择区域，同时把当前滤色参数传给截图脚本。 */
+function pickRoiFor(apply: (selection: RoiSelection) => void) {
+    const expr = isRoiCall(props.expr) ? props.expr : defaultRoiCall()
+    emit("pickRoi", apply, {
+        useFilter: expr.useFilter,
+        filterColor: expr.filterColor,
+        filterTolerance: expr.filterTolerance,
+    })
+}
+
+/** 将嵌套编辑器的 ROI 选择请求继续传递给根编辑器。 */
+function forwardPickRoi(apply: (selection: RoiSelection) => void, options: RoiPickOptions) {
+    emit("pickRoi", apply, options)
+}
+
+/** 将截图选中的 ROI 与特征 hash 写入区域条件。 */
+function applyPickedRoi(selection: RoiSelection) {
+    if (!isRoiCall(props.expr)) return
+    update({ ...props.expr, ...selection })
+}
+
 function onKindChange(event: Event) {
     const value = (event.target as HTMLSelectElement).value
     if (value === "call") update(defaultCall())
@@ -139,7 +188,11 @@ function onCallColorInput(event: Event) {
 
 function onCallFnChange(event: Event) {
     if (props.expr?.op !== "call") return
-    setCallField(props.expr, "fn", (event.target as HTMLSelectElement).value)
+    const value = (event.target as HTMLSelectElement).value
+    if (value === "roiExists") update({ ...defaultRoiCall(), fn: "roiExists" })
+    else if (value === "roiNotExists") update({ ...defaultRoiCall(), fn: "roiNotExists" })
+    else if (value === "colorExists") update({ ...defaultCall(), fn: "colorExists" })
+    else if (value === "colorNotExists") update({ ...defaultCall(), fn: "colorNotExists" })
 }
 
 function onOperandTypeChange(side: "left" | "right", event: Event) {
@@ -164,7 +217,7 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
         <div class="flex items-center gap-1 flex-wrap">
             <template v-if="!expr || expr.op === 'call' || expr.op === 'cmp'">
                 <select class="select select-xs select-bordered" :value="expr?.op ?? 'call'" @change="onKindChange">
-                    <option value="call">颜色检查</option>
+                    <option value="call">检查</option>
                     <option value="cmp">比较</option>
                     <option value="and">全部满足 (and)</option>
                     <option value="or">任一满足 (or)</option>
@@ -185,34 +238,53 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
             </template>
         </div>
 
-        <!-- 颜色检查 -->
+        <!-- 检查条件 -->
         <div v-if="expr?.op === 'call'" class="flex items-center gap-1 flex-wrap">
             <select class="select select-xs select-bordered" :value="expr.fn" @change="onCallFnChange">
                 <option value="colorExists">颜色存在</option>
                 <option value="colorNotExists">颜色不存在</option>
+                <option value="roiExists">区域特征存在</option>
+                <option value="roiNotExists">区域特征不存在</option>
             </select>
-            <input type="number" class="input input-xs input-bordered w-16" :value="expr.x" placeholder="x" @input="onCallFieldInput('x', $event)" />
-            <input type="number" class="input input-xs input-bordered w-16" :value="expr.y" placeholder="y" @input="onCallFieldInput('y', $event)" />
-            <input
-                type="text"
-                class="input input-xs input-bordered w-20 font-mono"
-                :value="'#' + expr.color.toString(16).toUpperCase().padStart(6, '0')"
-                @input="onCallColorInput"
-            />
-            <input
-                type="number"
-                class="input input-xs input-bordered w-14"
-                :value="expr.tolerance"
-                title="容差"
-                @input="onCallFieldInput('tolerance', $event)"
-            />
-            <button
-                class="btn btn-xs btn-ghost"
-                title="抓取坐标与颜色"
-                @click="pickCoordFor(applyPickedCall)"
-            >
-                <Icon icon="ri:crosshair-2-line" class="w-3 h-3" />
-            </button>
+            <template v-if="expr.fn === 'colorExists' || expr.fn === 'colorNotExists'">
+                <input type="number" class="input input-xs input-bordered w-16" :value="expr.x" placeholder="x" @input="onCallFieldInput('x', $event)" />
+                <input type="number" class="input input-xs input-bordered w-16" :value="expr.y" placeholder="y" @input="onCallFieldInput('y', $event)" />
+                <input
+                    type="text"
+                    class="input input-xs input-bordered w-20 font-mono"
+                    :value="'#' + expr.color.toString(16).toUpperCase().padStart(6, '0')"
+                    @input="onCallColorInput"
+                />
+                <input
+                    type="number"
+                    class="input input-xs input-bordered w-14"
+                    :value="expr.tolerance"
+                    title="容差"
+                    @input="onCallFieldInput('tolerance', $event)"
+                />
+                <button class="btn btn-xs btn-ghost" title="抓取坐标与颜色" @click="pickCoordFor(applyPickedCall)">
+                    <Icon icon="ri:crosshair-2-line" class="w-3 h-3" />
+                </button>
+            </template>
+            <template v-else>
+                <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).x" placeholder="x" @input="setCallField(expr, 'x', Number(($event.target as HTMLInputElement).value))" />
+                <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).y" placeholder="y" @input="setCallField(expr, 'y', Number(($event.target as HTMLInputElement).value))" />
+                <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).width" placeholder="宽" @input="setCallField(expr, 'width', Number(($event.target as HTMLInputElement).value))" />
+                <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).height" placeholder="高" @input="setCallField(expr, 'height', Number(($event.target as HTMLInputElement).value))" />
+                <input type="text" class="input input-xs input-bordered w-28 font-mono" :value="roiExpr(expr).hash" placeholder="phash" @input="setCallField(expr, 'hash', ($event.target as HTMLInputElement).value)" />
+                <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).tolerance" title="汉明容差" @input="setCallField(expr, 'tolerance', Number(($event.target as HTMLInputElement).value))" />
+                <button class="btn btn-xs btn-ghost" title="截图并选择 ROI" @click="pickRoiFor(applyPickedRoi)">
+                    <Icon icon="ri:screenshot-2-line" class="w-3 h-3" />
+                </button>
+                <label class="flex items-center gap-1 text-xs">
+                    <input type="checkbox" class="checkbox checkbox-xs" :checked="roiExpr(expr).useFilter" @change="setCallField(expr, 'useFilter', ($event.target as HTMLInputElement).checked)" />
+                    滤色
+                </label>
+                <template v-if="roiExpr(expr).useFilter">
+                    <input type="text" class="input input-xs input-bordered w-20 font-mono" :value="'#' + roiExpr(expr).filterColor.toString(16).toUpperCase().padStart(6, '0')" @input="setCallField(expr, 'filterColor', parseInt(($event.target as HTMLInputElement).value.replace('#', ''), 16) || 0)" />
+                    <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).filterTolerance" title="滤色容差" @input="setCallField(expr, 'filterTolerance', Number(($event.target as HTMLInputElement).value))" />
+                </template>
+            </template>
         </div>
 
         <!-- 比较 -->
@@ -271,6 +343,7 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
                     class="flex-1"
                     @update="onGroupItemUpdate(index, $event)"
                     @pickCoord="emit('pickCoord', $event)"
+                    @pickRoi="forwardPickRoi"
                 />
                 <button class="btn btn-xs btn-ghost text-error" @click="removeGroupItem(index)"><Icon icon="ri:close-line" class="w-3 h-3" /></button>
             </div>
@@ -284,6 +357,7 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
                 :clearable="clearable"
                 @update="onNotItemUpdate"
                 @pickCoord="emit('pickCoord', $event)"
+                @pickRoi="forwardPickRoi"
             />
         </div>
     </div>
