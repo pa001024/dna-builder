@@ -3,6 +3,7 @@ import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reac
 import { npcMap } from "@/data/d/npc.data"
 import { type DetectiveAnswer, type DetectiveQuestion, type Dialogue, type DialogueOption, type QuestNode } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
+import { getDialogueDisplayContent } from "@/utils/dialogue"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
@@ -614,7 +615,7 @@ function getDialogueVoiceKey(dialogue: Dialogue, nodeId: string): string {
 function getDialogueVoiceUrl(dialogue: Dialogue): string {
     return buildDialogueVoiceUrl({
         voice: dialogue.voice,
-        text: dialogue.content,
+        text: getDialogueDisplayContent(dialogue),
         npcId: dialogue.npc,
         forceGenderNpcIds: nicknameNpcIds,
         language: props.voiceLanguage || settingStore.lang,

@@ -1371,8 +1371,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         </div>
                         <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 shadow-sm">
                             <div class="card-body space-y-2">
-                                <h2 class="card-title">{{ $t("char-build.save_project") }}</h2>
-                                <ul v-if="charProject.projects.length > 0">
+                                <ul v-if="charProject.projects.length > 0" class="max-h-[60vh] overflow-y-auto">
                                     <li
                                         v-for="(project, index) in charProject.projects"
                                         :key="project.name"
@@ -1624,12 +1623,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     :key="index"
                                     class="grid grid-cols-[1fr_1fr_auto] gap-2"
                                 >
-                                    <input
-                                        v-model="variable[0]"
-                                        type="text"
-                                        class="input input-sm input-bordered"
-                                        placeholder="变量名"
-                                    />
+                                    <input v-model="variable[0]" type="text" class="input input-sm input-bordered" placeholder="变量名" />
                                     <FullTooltip side="top">
                                         <template #tooltip>
                                             <div class="space-y-1">

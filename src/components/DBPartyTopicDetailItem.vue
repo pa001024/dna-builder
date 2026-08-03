@@ -8,6 +8,7 @@ import { type Dialogue, type DialogueOption } from "@/data/d/quest.data"
 import { questChainMap } from "@/data/d/questchain.data"
 import { resourceMap } from "@/data/d/resource.data"
 import { useSettingStore } from "@/store/setting"
+import { getDialogueDisplayContent } from "@/utils/dialogue"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
 import { getImprType, getRegionType } from "@/utils/quest-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
@@ -387,7 +388,7 @@ function getDialogueVoiceKey(dialogue: Dialogue): string {
 function getDialogueVoiceUrl(dialogue: Dialogue): string {
     return buildDialogueVoiceUrl({
         voice: dialogue.voice,
-        text: dialogue.content,
+        text: getDialogueDisplayContent(dialogue),
         npcId: dialogue.npc,
         forceGenderNpcIds: nicknameNpcIds,
         language: selectedVoiceLocale.value,
@@ -1025,7 +1026,8 @@ onBeforeUnmount(() => {
                                 </button>
                             </div>
                             <TypewriterText
-                                :text="formatStoryText(item.dialogue.content)"
+                                v-if="getDialogueDisplayContent(item.dialogue)"
+                                :text="formatStoryText(getDialogueDisplayContent(item.dialogue))"
                                 :trigger-key="`${partyTopic.id}-${item.dialogue.id}`"
                             />
                         </div>
