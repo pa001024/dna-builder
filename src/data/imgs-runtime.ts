@@ -1,6 +1,7 @@
 import { unzipSync } from "fflate"
 import { ref } from "vue"
 import { tauriFetch } from "../api/app"
+import { env } from "../env"
 
 const IMGS_CACHE_DIR = "dna-builder-imgs"
 const IMGS_REMOTE_BASE_URL = "https://cdn.dna-builder.cn/imgs"
@@ -577,6 +578,11 @@ async function tryMountImgsPacks(options: ImgsMountOptions, desiredPaths: Set<st
  * @param options 挂载配置
  */
 export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Promise<void> {
+    if (!env.isApp) {
+        resetImgsDownloadState()
+        return
+    }
+
     if (mountPromise) {
         return mountPromise
     }

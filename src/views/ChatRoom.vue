@@ -602,7 +602,8 @@ function cancelReply() {
                                 >
                                     <span
                                         v-if="user.id === item.user?.id && item.user?.currentTitleText"
-                                        :class="item.user?.currentTitleClass || ''"
+                                        :class="item.user.currentTitleClass || ''"
+                                        :data-text="item.user.currentTitleText"
                                     >
                                         {{ item.user.currentTitleText }}
                                     </span>
@@ -617,7 +618,8 @@ function cancelReply() {
                                     </span>
                                     <span
                                         v-if="user.id !== item.user?.id && item.user?.currentTitleText"
-                                        :class="item.user?.currentTitleClass || ''"
+                                        :class="item.user.currentTitleClass || ''"
+                                        :data-text="item.user.currentTitleText"
                                     >
                                         {{ item.user.currentTitleText }}
                                     </span>
