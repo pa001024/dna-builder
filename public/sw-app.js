@@ -37,6 +37,15 @@ function getContentType(relPath) {
 }
 
 /**
+ * 判断响应是否为可缓存的图片。
+ * @param response 网络响应
+ * @returns 是否为图片响应
+ */
+function isImageResponse(response) {
+    return response.ok && response.headers.get("Content-Type")?.toLowerCase().startsWith("image/") === true
+}
+
+/**
  * 获取 OPFS 根目录。
  * @returns 根目录句柄
  */
@@ -136,7 +145,11 @@ self.addEventListener("fetch", event => {
             const cache = await caches.open(IMG_CACHE_NAME)
             const cached = await cache.match(event.request)
             if (cached) {
-                return cached
+                if (isImageResponse(cached)) {
+                    return cached
+                }
+
+                await cache.delete(event.request)
             }
 
             const opfsResponse = await respondFromOpfs(event.request)
@@ -145,7 +158,7 @@ self.addEventListener("fetch", event => {
             }
 
             const networkResponse = await fetch(event.request)
-            if (networkResponse.ok) {
+            if (isImageResponse(networkResponse)) {
                 await cache.put(event.request, networkResponse.clone())
             }
             return networkResponse
