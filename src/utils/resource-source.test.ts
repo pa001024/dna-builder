@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { resourceMap } from "@/data/d"
 import {
+    collectIronTicketShopSources,
     collectModCharBreakthroughSources,
     collectModPackSources,
     collectModQuestSources,
@@ -77,5 +78,12 @@ describe("resource-source", () => {
         expect(matchedSource).toBeTruthy()
         expect(matchedSource?.rewardId).toBe(350000)
         expect(matchedSource?.resourceName).toContain("道具箱")
+    })
+
+    it("应该从商店图纸反查深境罗盘来源", () => {
+        const sources = collectIronTicketShopSources(1002)
+
+        expect(sources.some(source => source.itemId === 10013116)).toBe(true)
+        expect(sources.some(source => source.itemId === 10013117)).toBe(true)
     })
 })

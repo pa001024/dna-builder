@@ -17,6 +17,7 @@ import { skinMap } from "@/data/d"
 import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Cutoff } from "@/data/d/cutoff.data"
 import { headSculptureMap } from "@/data/d/headsculpture.data"
+import { iconticketMap } from "@/data/d/iconticket.data"
 import { mountData } from "@/data/d/mount.data"
 import type { ShopItem } from "@/data/d/shop.data"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
@@ -142,6 +143,17 @@ const itemDetail = computed(() => {
         case "Draft":
             const draft = draftMap.get(props.item.typeId)
             let icon = `/imgs/webp/T_Head_Empty.webp`
+            if (draft?.t === "IronTicket") {
+                const ticket = iconticketMap.get(draft.p)
+                return {
+                    type: "IronTicket" as const,
+                    draft,
+                    ticket,
+                    name: ticket?.name || draft.n,
+                    icon: ticket?.icon ? `/imgs/res/${ticket.icon}.webp` : icon,
+                    link: ticket ? `/db/iron-ticket/${ticket.id}` : `/db/draft/${draft.id}`,
+                }
+            }
             if (draft) {
                 if (draft.t === "Mod" && draft.p) {
                     icon = LeveledMod.url(modMap.get(draft.p)?.icon)
@@ -158,6 +170,7 @@ const itemDetail = computed(() => {
             return {
                 type: "Draft" as const,
                 draft,
+                name: draft?.n,
                 icon,
                 link: `/db/draft/${draft?.id}`,
             }
@@ -302,9 +315,9 @@ function getPriceIcon(name: string) {
                         </span>
                         <div>
                             <SRouterLink v-if="itemDetail?.link" :to="itemDetail?.link" class="hover:underline">
-                                {{ item.typeName }}
+                                {{ itemDetail?.name || item.typeName }}
                             </SRouterLink>
-                            <span v-else>{{ item.typeName }}</span>
+                            <span v-else>{{ itemDetail?.name || item.typeName }}</span>
                             <span class="ml-1 text-xs text-base-content/70">({{ $t(getRewardTypeText(item.itemType)) }})</span>
                             <span class="text-xs px-1.5 py-0.5 rounded bg-base-300">x{{ item.num }}</span>
                         </div>

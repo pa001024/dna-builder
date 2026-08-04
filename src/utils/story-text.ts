@@ -45,6 +45,19 @@ export function replaceStoryPlaceholders(input: string, config: StoryTextConfig)
 }
 
 /**
+ * 移除剧情文本中的样式标签，保留标签内部的纯文本。
+ * @param input 原始文本
+ * @returns 移除样式标签后的文本
+ */
+export function stripStoryTextTags(input: string): string {
+    if (!input) {
+        return ""
+    }
+
+    return input.replace(/<(?:H|W|Highlight|highlight|Title)>|<\/>/g, "")
+}
+
+/**
  * 将文本拆分为普通/高亮/警示片段，供渲染层控制样式。
  * @param input 原始文本
  * @param config 文本替换配置
@@ -56,7 +69,7 @@ export function parseStoryTextSegments(input: string, config: StoryTextConfig): 
         return []
     }
 
-    const segmentRegex = /<(H|W|highlight|Title)>([\s\S]*?)<\/>/g
+    const segmentRegex = /<(H|W|Highlight|highlight|Title)>([\s\S]*?)<\/>/g
     const segments: StoryTextSegment[] = []
     let lastIndex = 0
 
@@ -76,7 +89,12 @@ export function parseStoryTextSegments(input: string, config: StoryTextConfig): 
 
         segments.push({
             text: content,
-            tone: tagName === "Title" ? "title" : tagName === "H" || tagName === "highlight" ? "highlight" : "warning",
+            tone:
+                tagName === "Title"
+                    ? "title"
+                    : tagName === "H" || tagName === "Highlight" || tagName === "highlight"
+                      ? "highlight"
+                      : "warning",
         })
         lastIndex = endIndex
     }

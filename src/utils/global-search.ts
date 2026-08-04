@@ -23,6 +23,22 @@ import questChainData from "@/data/d/questchain.data"
 import { RaidDungeon } from "@/data/d/raid.data"
 import { regionMap } from "@/data/d/region.data"
 import resourceData from "@/data/d/resource.data"
+import {
+    rougeLikeBlessings,
+    rougeLikeContracts,
+    rougeLikeRooms,
+    rougeLikeStoryEvents,
+    rougeLikeTalents,
+    rougeLikeTreasures,
+    rougeProClasses,
+    rougeProContracts,
+    rougeProDifficulties,
+    rougeProEvents,
+    rougeProRooms,
+    rougeProTalents,
+    rougeProTreasureGroups,
+    rougeProTreasures,
+} from "@/data/d/rouge.data"
 import shopData from "@/data/d/shop.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import titleData from "@/data/d/title.data"
@@ -676,6 +692,204 @@ export class GlobalSearchService {
                         path: `/db/event/${event.id}`,
                     },
                     [event.id, event.name, event.desc, event.rule]
+                )
+            )
+        )
+
+        const rougeTypeLabel = t("database.rouge")
+        entries.push(
+            ...rougeLikeBlessings.map(blessing =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-like-blessing:${blessing.id}`,
+                        title: blessing.name,
+                        subtitle: `迷津·其一 ${t("烛芯")} ID: ${blessing.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/like/blessing/${blessing.id}`,
+                    },
+                    [blessing.id, blessing.name, blessing.desc, blessing.simpleDesc]
+                )
+            )
+        )
+        entries.push(
+            ...rougeLikeTalents.map(talent =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-like-talent:${talent.id}`,
+                        title: talent.name,
+                        subtitle: `迷津·其一 ${t("提灯")} ID: ${talent.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/like/talent/${talent.id}`,
+                    },
+                    [talent.id, talent.name, talent.desc]
+                )
+            )
+        )
+        entries.push(
+            ...rougeLikeTreasures.map(treasure =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-like-treasure:${treasure.id}`,
+                        title: treasure.name,
+                        subtitle: `迷津·其一 ${t("遗物")} ID: ${treasure.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/like/treasure/${treasure.id}`,
+                    },
+                    [treasure.id, treasure.name, treasure.desc, treasure.simpleDesc, treasure.ipDesc]
+                )
+            )
+        )
+        entries.push(
+            ...rougeLikeContracts.map(contract =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-like-contract:${contract.id}`,
+                        title: contract.name,
+                        subtitle: `迷津·其一 ${t("深潜")} ID: ${contract.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/like/contract/${contract.id}`,
+                    },
+                    [contract.id, contract.name, contract.desc]
+                )
+            )
+        )
+        entries.push(
+            ...rougeLikeRooms.map(room =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-like-room:${room.id}`,
+                        title: room.name,
+                        subtitle: `迷津·其一 房间 ID: ${room.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/like/room/${room.id}`,
+                    },
+                    [room.id, room.name]
+                )
+            )
+        )
+        entries.push(
+            ...rougeLikeStoryEvents.map(event =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-like-story:${event.id}`,
+                        title: event.name,
+                        subtitle: `迷津·其一 故事事件 ID: ${event.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/like/story/${event.id}`,
+                    },
+                    [event.id, event.name, event.type]
+                )
+            )
+        )
+        entries.push(
+            ...rougeProTreasures.map(treasure =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-pro-treasure:${treasure.id}`,
+                        title: treasure.name,
+                        subtitle: `迷津·合作 ${t("遗物")} ID: ${treasure.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/pro/treasure/${treasure.id}`,
+                    },
+                    [treasure.id, treasure.name, treasure.desc, treasure.simpleDesc, treasure.ipDesc]
+                )
+            )
+        )
+        entries.push(
+            ...rougeProTalents.map(talent =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-pro-talent:${talent.id}`,
+                        title: talent.name,
+                        subtitle: `迷津·合作 ${t("提灯")} ID: ${talent.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/pro/talent/${talent.id}`,
+                    },
+                    [talent.id, talent.name, talent.desc]
+                )
+            )
+        )
+        entries.push(
+            ...rougeProContracts.map(contract =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-pro-contract:${contract.id}`,
+                        title: contract.name,
+                        subtitle: `迷津·合作 ${t("深潜")} ID: ${contract.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/pro/contract/${contract.id}`,
+                    },
+                    [contract.id, contract.name, contract.desc]
+                )
+            )
+        )
+        entries.push(
+            ...rougeProClasses.map(cls =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-pro-class:${cls.id}`,
+                        title: cls.name,
+                        subtitle: `迷津·合作 职业 ID: ${cls.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/pro/class/${cls.id}`,
+                    },
+                    [cls.id, cls.name, cls.desc]
+                )
+            )
+        )
+        entries.push(
+            ...rougeProTreasureGroups.map(group =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-pro-treasure-group:${group.id}`,
+                        title: group.name,
+                        subtitle: `迷津·合作 ${t("烛芯类别")} ID: ${group.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/pro/treasureGroup/${group.id}`,
+                    },
+                    [group.id, group.name, group.groupEffectDesc]
+                )
+            )
+        )
+        entries.push(
+            ...rougeProRooms.map(room =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-pro-room:${room.id}`,
+                        title: `迷津·合作 房间 ${room.id}`,
+                        subtitle: `房间 ID: ${room.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/pro/room/${room.id}`,
+                    },
+                    [room.id]
+                )
+            )
+        )
+        entries.push(
+            ...rougeProEvents.map(event =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-pro-event:${event.id}`,
+                        title: `迷津·合作 事件 ${event.id}`,
+                        subtitle: `事件 ID: ${event.id} | ${event.eventType}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/pro/event/${event.id}`,
+                    },
+                    [event.id, event.eventType]
+                )
+            )
+        )
+        entries.push(
+            ...rougeProDifficulties.map(difficulty =>
+                this.buildSearchEntry(
+                    {
+                        id: `rouge-pro-difficulty:${difficulty.id}`,
+                        title: `迷津·合作 难度 ${difficulty.id}`,
+                        subtitle: `难度 ID: ${difficulty.id}`,
+                        typeLabel: rougeTypeLabel,
+                        path: `/db/rouge/pro/difficulty/${difficulty.id}`,
+                    },
+                    [difficulty.id]
                 )
             )
         )

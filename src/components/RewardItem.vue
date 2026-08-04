@@ -164,7 +164,7 @@ function getRewardLink(item: RewardItemType) {
         return `/db/walnut/${item.id}`
     }
     if (item.t === "IronTicket") {
-        return `/db/resource/${item.id}`
+        return `/db/iron-ticket/${item.id}`
     }
     if (item.t === "Pet") {
         return `/db/pet/${item.id}`

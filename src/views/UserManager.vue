@@ -6,6 +6,7 @@ import { db } from "@/store/db"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
+import { parseDnaUserImportJson } from "@/utils/dna-user-import"
 
 const ui = useUIStore()
 const setting = useSettingStore()
@@ -47,26 +48,32 @@ const addUser = async (data: { dev_code: string; user: import("dna-api").DNAUser
     isAddIframeOpen.value = false
 }
 
+const jsonPlaceholder = `{
+  "uid": "7...",
+  "name": "...",
+  "dev_code": "2...",
+  "token": "ey...",
+  "server": "cn",
+  "kf_token": "",
+  "refreshToken": "ey.....",
+  "pic": "https://herobox-img.yingxiong.com/config/head/268_v2_15.png",
+  "status": 0,
+  "isComplete": 1,
+  "isOfficial": 0,
+  "isRegister": 0
+}`
 // 通过 JSON 添加皎皎角账号
 const addUserByToken = async () => {
-    const rawdata = JSON.parse(jsonInput.value)
-    const userData: UDNAUser = {
-        uid: rawdata.uid || rawdata.userId,
-        name: rawdata.name || rawdata.userName,
-        dev_code: rawdata.dev_code,
-        token: rawdata.token,
-        server: rawdata.server || "cn",
-        kf_token: rawdata.kf_token || "",
-        refreshToken: rawdata.refreshToken,
-        pic: rawdata.pic || rawdata.headUrl,
-        status: rawdata.status,
-        isComplete: rawdata.isComplete,
+    try {
+        const userData = parseDnaUserImportJson(jsonInput.value)
+        await db.dnaUsers.add(userData)
+        await loadUsers()
+        isAddByTokenOpen.value = false
+        ui.showSuccessMessage("添加账号成功")
+    } catch (error) {
+        console.error("导入皎皎角账号失败:", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : "账号 JSON 格式无效")
     }
-    if (rawdata.isOfficial) userData.isOfficial = rawdata.isOfficial
-    if (rawdata.isRegister) userData.isRegister = rawdata.isRegister
-    await db.dnaUsers.add(userData)
-    await loadUsers()
-    isAddByTokenOpen.value = false
 }
 
 // 删除皎皎角账号
@@ -268,14 +275,14 @@ onBeforeUnmount(() => {
         <div class="modal" :class="{ 'modal-open': isAddByTokenOpen }">
             <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-114 h-116">
                 <div class="w-full h-full card bg-base-200 shadow-xl overflow-hidden">
-                    <form class="card-body p-6 gap-4">
+                    <form class="card-body p-6 gap-4" @submit.prevent="addUserByToken">
                         <!-- 手机号输入 -->
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">JSON</legend>
-                            <textarea v-model="jsonInput" required placeholder="请输入JSON字符串" class="input w-full p-2 h-68 text-md" />
+                            <textarea v-model="jsonInput" required :placeholder="jsonPlaceholder" class="input w-full p-2 h-68 text-md" />
                         </fieldset>
                         <!-- 登录按钮 -->
-                        <button class="btn btn-primary btn-block" :disabled="!jsonInput.length" @click="addUserByToken">添加账号</button>
+                        <button type="submit" class="btn btn-primary btn-block" :disabled="!jsonInput.length">添加账号</button>
 
                         <!-- 辅助信息 -->
                         <div class="text-center text-sm text-base-content/70">

@@ -27,21 +27,27 @@ const MULTITHREAD_THRESHOLD: u64 = 10 * 1024 * 1024;
 const PROGRESS_MAGIC: &[u8; 2] = b"PA";
 const PROGRESS_HEADER_SIZE: usize = 6;
 
+/// 创建带系统代理配置的 HTTP 客户端。
+///
+/// `reqwest` 会在构建客户端时读取系统代理配置，因此 tauriFetch 需要在每次请求前重新构建客户端，
+/// 以便应用运行期间开启或关闭系统代理后立即生效。
+fn build_http_client() -> Result<reqwest::Client, reqwest::Error> {
+    reqwest::Client::builder()
+        // 启用keepalive，设置超时为2分钟
+        .tcp_keepalive(Some(Duration::from_secs(120)))
+        // 设置连接超时为10秒
+        .connect_timeout(Duration::from_secs(10))
+        // 设置连接池最大空闲时间为2分钟
+        .pool_idle_timeout(Some(Duration::from_secs(120)))
+        // 允许最大连接数
+        .pool_max_idle_per_host(10)
+        .build()
+}
+
 // 全局HTTP客户端，用于复用连接
 lazy_static! {
-    static ref HTTP_CLIENT: Arc<reqwest::Client> = Arc::new(
-        reqwest::Client::builder()
-            // 启用keepalive，设置超时为2分钟
-            .tcp_keepalive(Some(Duration::from_secs(120)))
-            // 设置连接超时为10秒
-            .connect_timeout(Duration::from_secs(10))
-            // 设置连接池最大空闲时间为2分钟
-            .pool_idle_timeout(Some(Duration::from_secs(120)))
-            // 允许最大连接数
-            .pool_max_idle_per_host(10)
-            .build()
-            .expect("Failed to create HTTP client")
-    );
+    static ref HTTP_CLIENT: Arc<reqwest::Client> =
+        Arc::new(build_http_client().expect("Failed to create HTTP client"));
     static ref DOWNLOAD_PROGRESS_LOCK: Mutex<()> = Mutex::new(());
     static ref PAUSED_DOWNLOADS: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
     static ref ACTIVE_DOWNLOADS: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
@@ -1257,7 +1263,8 @@ async fn fetch(
     headers: Option<Vec<(String, String)>>,
     multipart: Option<Vec<(String, FormDataValue)>>,
 ) -> Result<FetchResponse, String> {
-    let client = HTTP_CLIENT.clone();
+    let client =
+        build_http_client().map_err(|error| format!("Failed to create HTTP client: {error}"))?;
     let mut request_builder = match method.to_uppercase().as_str() {
         "GET" => client.get(&url),
         "POST" => client.post(&url),

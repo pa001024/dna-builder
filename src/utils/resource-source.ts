@@ -1,5 +1,5 @@
 import { dungeonMap, resourceMap, rewardMap } from "@/data"
-import { charMap, modMap } from "@/data/d"
+import { charMap, draftMap, modMap } from "@/data/d"
 import { getHardBossDetail, hardBossMap } from "@/data/d/hardboss.data"
 import { questChainData } from "@/data/d/questchain.data"
 import type { Resource } from "@/data/d/resource.data"
@@ -388,6 +388,176 @@ export function collectResourceShopSources(resource: Resource): ShopSourceInfo[]
                     }
 
                     const key = `shop-${shop.id}-${mainTab.id}-${subTab.id}-${item.id}-${resource.id}`
+                    if (sourceKeySet.has(key)) {
+                        return
+                    }
+
+                    sourceKeySet.add(key)
+                    sources.push({
+                        key,
+                        itemId: item.id,
+                        shopId: shop.id,
+                        subTabId: subTab.id,
+                        detail: `${mainTab.name} -> ${subTab.name}`,
+                        shopName: shop.name,
+                        price: item.price,
+                        priceName: item.priceName,
+                        num: item.num,
+                        limit: item.limit,
+                        timeStart: item.startTime,
+                        timeEnd: item.endTime,
+                    })
+                })
+            })
+        })
+    })
+
+    return sources
+}
+
+/**
+ * 反查深境罗盘对应的副本奖励来源。
+ * @param ticketId 深境罗盘 ID
+ * @returns 副本来源列表
+ */
+export function collectIronTicketDungeonSources(ticketId: number): ResourceDungeonSourceInfo[] {
+    const sources: ResourceDungeonSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    dungeonMap.forEach(dungeon => {
+        const rewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
+        for (const rewardId of rewardIds) {
+            const matched = findInRewardTree(getRewardDetails(rewardId), ticketId, "IronTicket")
+            if (!matched) {
+                continue
+            }
+
+            const key = `dungeon-${dungeon.id}-${rewardId}-${ticketId}`
+            if (sourceKeySet.has(key)) {
+                continue
+            }
+
+            sourceKeySet.add(key)
+            sources.push({
+                key,
+                dungeonId: dungeon.id,
+                dungeonName: dungeon.n,
+                dungeonType: dungeon.t,
+                dungeonLv: dungeon.lv,
+                rewardId,
+                pp: matched.pp,
+                times: matched.times,
+            })
+        }
+    })
+
+    return sources
+}
+
+/**
+ * 反查深境罗盘对应的梦魇残声奖励来源。
+ * @param ticketId 深境罗盘 ID
+ * @returns 梦魇残声来源列表
+ */
+export function collectIronTicketHardbossSources(ticketId: number): WeaponHardbossSourceInfo[] {
+    const sources: WeaponHardbossSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    hardBossMap.forEach(boss => {
+        const bossDetail = getHardBossDetail(boss.id)
+        if (!bossDetail) {
+            return
+        }
+
+        bossDetail.diff.forEach(diff => {
+            diff.dr.forEach(dr => {
+                const matched = findInRewardTree(getRewardDetails(dr.RewardView), ticketId, "IronTicket")
+                if (!matched) {
+                    return
+                }
+
+                const key = `hardboss-${boss.id}-${diff.id}-${dr.DynamicRewardId}-${dr.Index}-${ticketId}`
+                if (sourceKeySet.has(key)) {
+                    return
+                }
+
+                sourceKeySet.add(key)
+                sources.push({
+                    key,
+                    type: "hardboss",
+                    timeStart: dr.StartTime,
+                    timeEnd: dr.EndTime,
+                    hardbossName: boss.name,
+                    hardbossLv: diff.lv,
+                    hardbossId: boss.id,
+                })
+            })
+        })
+    })
+
+    return sources
+}
+
+/**
+ * 反查深境罗盘对应的任务链奖励来源。
+ * @param ticketId 深境罗盘 ID
+ * @returns 任务链来源列表
+ */
+export function collectIronTicketQuestSources(ticketId: number): ResourceQuestSourceInfo[] {
+    const sources: ResourceQuestSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    questChainData.forEach(questChain => {
+        const rewardIds = [...(questChain.reward || []), ...Object.values(questChain.questReward || {})]
+        rewardIds.forEach(rewardId => {
+            const matched = findInRewardTree(getRewardDetails(rewardId), ticketId, "IronTicket")
+            if (!matched) {
+                return
+            }
+
+            const key = `quest-${questChain.id}-${rewardId}-${ticketId}`
+            if (sourceKeySet.has(key)) {
+                return
+            }
+
+            sourceKeySet.add(key)
+            sources.push({
+                key,
+                questChainId: questChain.id,
+                questChainName: questChain.name,
+                chapterName: questChain.chapterName,
+                episode: questChain.episode,
+                rewardId,
+                num: matched.num,
+                d: matched.d,
+                timeStart: questChain.startTime,
+                timeEnd: questChain.endTime,
+            })
+        })
+    })
+
+    return sources
+}
+
+/**
+ * 反查深境罗盘对应的商店来源。
+ * @param ticketId 深境罗盘 ID
+ * @returns 商店来源列表
+ */
+export function collectIronTicketShopSources(ticketId: number): ShopSourceInfo[] {
+    const sources: ShopSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    shopData.forEach(shop => {
+        shop.mainTabs.forEach(mainTab => {
+            mainTab.subTabs.forEach(subTab => {
+                subTab.items.forEach(item => {
+                    const draft = item.itemType === "Draft" ? draftMap.get(item.typeId) : undefined
+                    if (draft?.t !== "IronTicket" || draft.p !== ticketId) {
+                        return
+                    }
+
+                    const key = `shop-${shop.id}-${mainTab.id}-${subTab.id}-${item.id}-${ticketId}`
                     if (sourceKeySet.has(key)) {
                         return
                     }

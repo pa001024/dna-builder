@@ -219,6 +219,120 @@ const MAPPINGS: Mapping[] = [
     { source: "Resource", targetStem: "resource", targetVar: "resourceData", locales: ["cn"] },
     { source: "Reward", targetStem: "reward", targetVar: "t", locales: ["cn"] },
     { source: "RobotEquip", targetStem: "autochess", targetVar: "robotEquips", locales: ["cn"] },
+    {
+        source: "RougeLikeBlessing",
+        targetStem: "rouge",
+        targetVar: "rougeLikeBlessings",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeLikeBlessingGroup",
+        targetStem: "rouge",
+        targetVar: "rougeLikeBlessingGroups",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeLikeTalentBranch",
+        targetStem: "rouge",
+        targetVar: "rougeLikeTalentBranches",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeLikeTreasureGroup",
+        targetStem: "rouge",
+        targetVar: "rougeLikeTreasureGroups",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeLikeContract",
+        targetStem: "rouge",
+        targetVar: "rougeLikeContracts",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeLikeRoom",
+        targetStem: "rouge",
+        targetVar: "rougeLikeRooms",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeLikeStoryEvent",
+        targetStem: "rouge",
+        targetVar: "rougeLikeStoryEvents",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeLikeTalent",
+        targetStem: "rouge",
+        targetVar: "rougeLikeTalents",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeLikeTreasure",
+        targetStem: "rouge",
+        targetVar: "rougeLikeTreasures",
+        locales: ["cn"],
+    },
+    {
+        source: "RougePro_Event",
+        targetStem: "rouge",
+        targetVar: "rougeProEvents",
+        locales: ["cn"],
+    },
+    {
+        source: "RougePro_Room",
+        targetStem: "rouge",
+        targetVar: "rougeProRooms",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeProClass",
+        targetStem: "rouge",
+        targetVar: "rougeProClasses",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeProContract",
+        targetStem: "rouge",
+        targetVar: "rougeProContracts",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeProDifficulty",
+        targetStem: "rouge",
+        targetVar: "rougeProDifficulties",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeProEffect",
+        targetStem: "rouge",
+        targetVar: "rougeProEffects",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeProSeason",
+        targetStem: "rouge",
+        targetVar: "rougeProSeasons",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeProTalent",
+        targetStem: "rouge",
+        targetVar: "rougeProTalents",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeProTreasure",
+        targetStem: "rouge",
+        targetVar: "rougeProTreasures",
+        locales: ["cn"],
+    },
+    {
+        source: "RougeProTreasureGroup",
+        targetStem: "rouge",
+        targetVar: "rougeProTreasureGroups",
+        locales: ["cn"],
+    },
     { source: "ShopItem", targetStem: "shop", targetVar: "shopData_i", locales: ["cn"] },
     { source: "Skin", targetStem: "accessory", targetVar: "skinData", locales: ["cn"] },
     { source: "SubRegion", targetStem: "subregion", targetVar: "subRegionData", locales: ["cn", "en", "fr", "jp", "kr", "tc"] },
@@ -308,6 +422,46 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async () => {
+            const conditionText = await readFile(path.join(OUT_ROOT, "Condition.json"), "utf8")
+            const rows = JSON.parse(conditionText) as Record<string, RougeConditionRow>
+            const conditions = Object.values(rows).map((row): RougeRoomCondition => {
+                const { ConditionId, ConditionLogic, ConditionMap, IsNot, Remark } = row
+                return {
+                    id: ConditionId,
+                    logic: ConditionLogic,
+                    map: ConditionMap,
+                    isNot: IsNot,
+                    remark: Remark,
+                }
+            })
+            conditions.sort((a, b) => a.id - b.id)
+            const record: Record<number, RougeRoomCondition> = {}
+            for (const condition of conditions) {
+                const row: RougeRoomCondition = {
+                    id: condition.id,
+                    logic: condition.logic,
+                    map: condition.map,
+                }
+                if (condition.isNot !== undefined) {
+                    row.isNot = condition.isNot
+                }
+                if (condition.remark !== undefined) {
+                    row.remark = condition.remark
+                }
+                record[condition.id] = row
+            }
+            return [
+                {
+                    targetVar: "rougeConditions",
+                    text: formatTsValue(record, 0),
+                },
+            ]
+        },
+        targetStem: "condition",
+        targetVar: "rougeConditions",
+    },
+    {
+        source: async () => {
             const [ironSurvivalText, ironSurvivalDungeonText] = await Promise.all([
                 readFile(path.join(OUT_ROOT, "IronSurvival.json"), "utf8"),
                 readFile(path.join(OUT_ROOT, "IronSurvivalDungeon.json"), "utf8"),
@@ -329,17 +483,23 @@ const MAPPINGS: Mapping[] = [
     },
 ]
 
-const SKIPPED_SOURCES = [
-    "RegionPoint",
-    "RewardView",
-    "RougeLikeBlessing",
-    "RougeLikeContract",
-    "RougeLikeRoom",
-    "RougeLikeStoryEvent",
-    "RougeLikeTalent",
-    "RougeLikeTreasure",
-    "translation",
-]
+type RougeConditionRow = {
+    ConditionId: number
+    ConditionLogic: "AND" | "OR"
+    ConditionMap: Record<string, unknown>
+    IsNot?: boolean
+    Remark?: string
+}
+
+type RougeRoomCondition = {
+    id: number
+    logic: "AND" | "OR"
+    map: Record<string, unknown>
+    isNot?: boolean
+    remark?: string
+}
+
+const SKIPPED_SOURCES = ["RegionPoint", "RewardView", "translation"]
 
 /**
  * 判断属性名是否可以直接作为标识符输出。
