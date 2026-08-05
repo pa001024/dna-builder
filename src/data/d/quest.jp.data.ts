@@ -1449,6 +1449,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "止まれ。",
                                 voice: "story/1002/101006/194929DA",
                                 npc: 200071,
+                                speakerName: "見張りの兵士",
                                 next: 10100602,
                             },
                             {
@@ -1464,6 +1465,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "お前には質問しちゃいないんだよルーナ族。俺が質問したのは――",
                                 voice: "story/1002/101006/19492A2E",
                                 npc: 200071,
+                                speakerName: "見張りの兵士",
                                 next: 10100604,
                             },
                             {
@@ -1471,6 +1473,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そこの片目、聞こえていないのか？そんなに急いで、保安署の留置所に入りたいのか？",
                                 voice: "story/1002/101006/19492A58",
                                 npc: 200071,
+                                speakerName: "見張りの兵士",
                                 next: 10100605,
                             },
                             {
@@ -1485,6 +1488,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ここの生まれじゃなさそうだが、どこから来たんだ？通行許可証は？",
                                 voice: "story/1002/101006/19492AAC",
                                 npc: 200071,
+                                speakerName: "見張りの兵士",
                                 options: [
                                     {
                                         id: 101006061,
@@ -1511,6 +1515,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "どこの島なのか名前を言え。「南方の島」とか数え切れないほどあるんだよ。",
                                 voice: "story/1002/101006/19492AD6",
                                 npc: 200071,
+                                speakerName: "見張りの兵士",
                                 next: 10100608,
                             },
                             {
@@ -1525,6 +1530,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "まあ通行許可証さえあれば関係ない話だが。",
                                 voice: "story/1002/101006/19492B00",
                                 npc: 200071,
+                                speakerName: "見張りの兵士",
                                 next: 101006110,
                             },
                             {
@@ -1568,6 +1574,7 @@ export const questData_jp: QuestStory[] = [
                                     "{性别:おいおい兄弟、もう大きいんだから、泣かないでくれよ？|おいおい、泣かないでくれよ？女の子が泣いた場合の対処法なんて、上官から聞いてないんだぞ俺は！}",
                                 voice: "story/1002/101006/19492BD2",
                                 npc: 200071,
+                                speakerName: "見張りの兵士",
                                 next: 10100614,
                             },
                             {
@@ -1576,6 +1583,7 @@ export const questData_jp: QuestStory[] = [
                                     "今までだったら問題なかったんだが、参ったな……カミラさんも知ってるだろう？最近は国中が「フォースイクン」だったか？を探し出そうと躍起になっていて、すべての地域で厳しく検問しろって命令が出てるんだ。",
                                 voice: "story/1002/101006/19492BFC",
                                 npc: 200071,
+                                speakerName: "見張りの兵士",
                                 next: 10100615,
                             },
                             {
@@ -1592,6 +1600,7 @@ export const questData_jp: QuestStory[] = [
                                     "……わかった。あんたがそこまで言う関係者ならば仕方ない。ただし絶対にそいつから目を離すなよ。街で騒ぎを起こすのなんざ厳禁だ。もし上官にバレでもしたら、俺もあんたも一大事になるからな。",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200071,
+                                speakerName: "見張りの兵士",
                                 next: 10100617,
                             },
                             {
@@ -1621,6 +1630,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "街で騒ぎは起こすな、覚えとけよ？",
                                 voice: "story/1002/101007/19493A42",
                                 npc: 200004,
+                                speakerName: "見張りの兵士",
                             },
                         ],
                     },
@@ -1824,6 +1834,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "何者かが、お前を苦しみの海からすくいあげ、苦寒の荒野へと導くだろう。その地で、運命がもたらす真の試練の幕が上がるのだ。",
                                 voice: "story/1002/100127/1910D56B",
+                                speakerName: "？？？",
                                 next: 10100815,
                             },
                             {
@@ -2024,6 +2035,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1002/101012/19498C74",
                                 npc: 200005,
+                                speakerName: "陰気な男性",
                                 next: 10101203,
                             },
                             {
@@ -2031,6 +2043,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "通行許可証は？持ってないのか？",
                                 voice: "story/1002/101012/19498C9E",
                                 npc: 200005,
+                                speakerName: "陰気な男性",
                                 next: 10101204,
                             },
                             {
@@ -2043,6 +2056,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……あの女は余計な「お節介」が本当に多い。",
                                 voice: "story/1002/101012/19498CF2",
                                 npc: 200005,
+                                speakerName: "陰気な男性",
                                 next: 10101206,
                             },
                             {
@@ -2050,6 +2064,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "まあいい、出せ。",
                                 voice: "story/1002/101012/19498D1C",
                                 npc: 200005,
+                                speakerName: "陰気な男性",
                                 next: 10101207,
                             },
                             {
@@ -2064,6 +2079,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "宿代だ。お前が払えるだけの分をな。",
                                 voice: "story/1002/101012/19498D70",
                                 npc: 200005,
+                                speakerName: "陰気な男性",
                                 next: 10101209,
                             },
                             {
@@ -2078,6 +2094,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "持ち合わせもないのか？",
                                 voice: "story/1002/101012/19498DC4",
                                 npc: 200005,
+                                speakerName: "陰気な男性",
                                 next: 10101211,
                             },
                             {
@@ -2092,6 +2109,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "出ていけ。",
                                 voice: "story/1002/101012/19498E18",
                                 npc: 200005,
+                                speakerName: "陰気な男性",
                                 next: 10101213,
                             },
                             {
@@ -2130,6 +2148,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "あなた……は……新しいお客さん、ですか？",
                                 voice: "story/1002/101014/1949AD1A",
                                 npc: 200006,
+                                speakerName: "明るい少女",
                                 next: 10101402,
                             },
                             {
@@ -2144,6 +2163,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "旅ガラスさん？それ……追い出したらこの人、行くところなくなっちゃうよね？",
                                 voice: "story/1002/101014/1949AD6E",
                                 npc: 200006,
+                                speakerName: "明るい少女",
                                 next: 10101404,
                             },
                             {
@@ -2159,6 +2179,7 @@ export const questData_jp: QuestStory[] = [
                                     "ねえ……あのお屋敷、買い手もついていないんだし一晩だけ貸してあげよう？  宿代は{性别:彼|彼女}がおカネを用意できてから払ってもらう形にして。そしたら空き家を有効活用できるじゃない？",
                                 voice: "story/1002/101014/1949ADC2",
                                 npc: 200006,
+                                speakerName: "明るい少女",
                                 next: 10101406,
                             },
                             {
@@ -2166,6 +2187,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ずっとこんな調子でおじさんが冷たくしていたら、あのお屋敷いつまでも売れ残っちゃうよ。",
                                 voice: "story/1002/101014/1949ADEC",
                                 npc: 200006,
+                                speakerName: "明るい少女",
                                 next: 10101407,
                             },
                             {
@@ -2220,6 +2242,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ここだよ！",
                                 voice: "story/1002/101015/1949BDAC",
                                 npc: 200006,
+                                speakerName: "明るい少女",
                             },
                         ],
                     },
@@ -2233,6 +2256,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "お屋敷はすぐ南なの！一緒に来て！",
                                 voice: "story/1002/101015/1949BD82",
                                 npc: 200006,
+                                speakerName: "明るい少女",
                             },
                         ],
                     },
@@ -2246,6 +2270,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "今夜はここに泊まってね。掃除したばかりのお部屋だから。",
                                 voice: "story/1002/101016/1949CDEA",
                                 npc: 200006,
+                                speakerName: "明るい少女",
                                 next: 10101602,
                             },
                             {
@@ -2261,6 +2286,7 @@ export const questData_jp: QuestStory[] = [
                                     "どうか怒らないで、くださいね。本当はヘンリックおじさん、おカネにがめつい人じゃないの。\nただ最近の私たち、台所事情が苦しくて……古いお屋敷を売ってまで、家計を支えようとしているぐらいで。",
                                 voice: "story/1002/101016/1949CE3E",
                                 npc: 200006,
+                                speakerName: "明るい少女",
                                 next: 10101604,
                             },
                             {
@@ -2269,6 +2295,7 @@ export const questData_jp: QuestStory[] = [
                                     "ここは何年も放置されてたお屋敷だけど、掃除してみると結構いい感じで！\n少なくとも、外の冷たい風を防いでくれ……ますから！",
                                 voice: "story/1002/101016/1949CE68",
                                 npc: 200006,
+                                speakerName: "明るい少女",
                                 next: 10101605,
                             },
                             {
@@ -2277,6 +2304,7 @@ export const questData_jp: QuestStory[] = [
                                     "あっそうだ、まだ自己紹介してなかった、ですよね。私はサイキっていいます。「ヒュプノスの家」の宿泊客だけど、時々お手伝いをしています。",
                                 voice: "story/1002/101016/1949CE92",
                                 npc: 200006,
+                                speakerName: "明るい少女",
                                 options: [
                                     {
                                         id: 101016051,
@@ -2422,6 +2450,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ただいま。",
                                 voice: "story/1002/101018/1949EEBA",
                                 npc: 200006,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -2436,6 +2465,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "お腹が空いたよね？焼きたてのパンだよ。",
                                 voice: "story/1002/101018/1949EEE4",
                                 npc: 200006,
+                                speakerName: "？？？",
                                 next: 10101803,
                             },
                             {
@@ -2450,6 +2480,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……？",
                                 voice: "story/1002/101018/1949EF38",
                                 npc: 200006,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -2998,6 +3029,7 @@ export const questData_jp: QuestStory[] = [
                                     "…………そしたらあいつ襲いかかってきてさ……私が油断してる隙に売り上げを全部……うう、あんちくしょーめ！ていうかゴミ拾いで生計立ててる私みたいの標的にしますか普通！？あれは私のためだけじゃない、スラムの人たちを支える生活費だったのに！",
                                 voice: "story/1002/101025/194A6192",
                                 npc: 200011,
+                                speakerName: "焦る廃品回収業者",
                                 next: 10102502,
                             },
                             {
@@ -3006,6 +3038,7 @@ export const questData_jp: QuestStory[] = [
                                     "おカネがないとスラムのお年寄りも小さい子も来月には飢え死んじゃうよ。でもコソ泥がどこに行ったかわからずじまいで…助けが必要なの。切実に。",
                                 voice: "story/1002/101025/194A61BC",
                                 npc: 200011,
+                                speakerName: "焦る廃品回収業者",
                                 next: 10102503,
                             },
                             {
@@ -3021,6 +3054,7 @@ export const questData_jp: QuestStory[] = [
                                     "そんないじわる言わないでって！保安署が私たちカロンのために働くわけないじゃん！待ってたら日が暮れるどころか、ダクリ湖の氷すら溶けちゃうもん！",
                                 voice: "story/1002/101025/194A6210",
                                 npc: 200011,
+                                speakerName: "焦る廃品回収業者",
                                 next: 10102505,
                             },
                             {
@@ -3029,6 +3063,7 @@ export const questData_jp: QuestStory[] = [
                                     "ねえねえ、お頼み申します、麗しきカミラお姉さま。ちょっと月狩り人に手伝ってもらえたらなぁーって……あの、本当にちょっとだけ！深い慈愛の心を持つお姉さまなら、悲しくて死んじゃいそうな私を見捨てたりなんてしないよね？",
                                 voice: "story/1002/101025/194A623A",
                                 npc: 200011,
+                                speakerName: "焦る廃品回収業者",
                                 next: 10102506,
                             },
                             {
@@ -3045,6 +3080,7 @@ export const questData_jp: QuestStory[] = [
                                     "じゃあせめて、ほら……少しでいいの、少し安くしてくんないかな？ほかの何かで支払いを埋め合わせるって話でも大丈夫！あれ、あの言葉、なんだったっけか――",
                                 voice: "story/1002/101025/194A628E",
                                 npc: 200011,
+                                speakerName: "焦る廃品回収業者",
                                 next: 10102508,
                             },
                             {
@@ -3053,6 +3089,7 @@ export const questData_jp: QuestStory[] = [
                                     "「時は金なり」？いや「情報は金なり」！アイスレイクの街のゴミ置き場は私の庭みたいなものだし！何かおもしろい情報が見つかったら、必ずまっさきにお姉さまに報告する！以上でどうですおひとつ？",
                                 voice: "story/1002/101025/194A62B8",
                                 npc: 200011,
+                                speakerName: "焦る廃品回収業者",
                             },
                         ],
                     },
@@ -3094,6 +3131,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "月狩り人ちゃんだって！？おおお、ナイスタイミングで来てくれたよ！今まさに依頼を出したところでさ！",
                                 voice: "story/1002/101026/194A72A2",
                                 npc: 200011,
+                                speakerName: "焦る廃品回収業者",
                                 next: 10102606,
                             },
                             {
@@ -3606,6 +3644,7 @@ export const questData_jp: QuestStory[] = [
                                     "お前……普通こんなとこまで追いかけてくるか？あのカネは元々スラムの連中に分けてやるつもりだったんだろ。だったら俺が少しくらい分け前もらったってバチはあたらねぇさ。",
                                 voice: "story/1002/101182/19547184",
                                 npc: 200053,
+                                speakerName: "怪しい青年",
                                 next: 10118203,
                             },
                             {
@@ -5087,6 +5126,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10131004,
                                 content: "ガオウーー",
                                 voice: "story/1002/101310/195BD051",
+                                speakerName: "穢獣（えじゅう）",
                                 next: 10131005,
                             },
                             {
@@ -5137,6 +5177,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10131201,
                                 content: "ガオウーー",
                                 voice: "story/1002/101312/195BD055",
+                                speakerName: "穢獣（えじゅう）",
                                 next: 10131202,
                             },
                             {
@@ -6021,6 +6062,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "アウトサイダー！今日は帰りが遅かったね。ゴホ、ゴホ……またどこかで……冒険していたのかしら？",
                                 voice: "story/1002/101060/194CA048",
                                 npc: 200020,
+                                speakerName: "病弱な少女",
                                 next: 10106005,
                             },
                             {
@@ -6028,6 +6070,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "白いオオカミの現れる森？それとも沼地の魔女の塔？",
                                 voice: "story/1002/101060/194CA072",
                                 npc: 200020,
+                                speakerName: "病弱な少女",
                                 next: 10106006,
                             },
                             {
@@ -8179,6 +8222,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10108311,
                                 content: "@#￥%……",
                                 voice: "story/1002/101135/19516E42",
+                                speakerName: "奇妙な音",
                                 next: 10108312,
                             },
                             {
@@ -8334,6 +8378,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10108311,
                                 content: "@#￥%……",
                                 voice: "story/1002/101135/19516E42",
+                                speakerName: "奇妙な音",
                                 next: 10108312,
                             },
                             {
@@ -8745,12 +8790,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 10108914,
                                 content: "ヘンリックおじさん、おかえりなさい。白湯があるから、体を温めて……",
                                 voice: "story/1002/101089/194E7CE2",
+                                speakerName: "サイキの声",
                                 next: 10108915,
                             },
                             {
                                 id: 10108915,
                                 content: "ああ。",
                                 voice: "story/1002/101089/194E7D0C",
+                                speakerName: "ヘンリックの声",
                                 next: 10108916,
                             },
                             {
@@ -9900,6 +9947,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ぐぅ……やめ、やめろ、降参する！だけど俺はやってない！本当に何もやってないからな！",
                                 voice: "story/1002/101102/194F50DA",
                                 npc: 200004,
+                                speakerName: "怪しい青年",
                                 next: 10110202,
                             },
                             {
@@ -9915,6 +9963,7 @@ export const questData_jp: QuestStory[] = [
                                     "……わかった。あんたがそこまで言う関係者ならば仕方ない。ただし絶対にそいつから目を離すなよ。街で騒ぎを起こすのなんざ厳禁だ。もし長官にバレでもしたら、俺もあんたも一大事になるからな。",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200004,
+                                speakerName: "見張りの兵士",
                                 next: 10110204,
                             },
                             {
@@ -9923,6 +9972,7 @@ export const questData_jp: QuestStory[] = [
                                     "マジか、よりにもよってお前に捕まるとは……なあ頼むよ、{性别:坊ちゃん|嬢ちゃん}。このことは他言無用でお願いできないか？",
                                 voice: "story/1002/101102/194F5158",
                                 npc: 200004,
+                                speakerName: "怪しい青年",
                                 next: 10110205,
                             },
                             {
@@ -9938,6 +9988,7 @@ export const questData_jp: QuestStory[] = [
                                     "わかった！わかったから放してくれ。財布は返す。俺だってもう何日も食ってねぇから一時の気の迷いで……ああ、俺が悪かったよ！",
                                 voice: "story/1002/101032/194AD496",
                                 npc: 200004,
+                                speakerName: "怪しい青年",
                                 next: 10110207,
                             },
                             {
@@ -9953,6 +10004,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "大きな声を出すなって！俺じゃないって言ってるだろ？ただ死体を運び出しただけだ。",
                                 voice: "story/1002/101102/194F5200",
                                 npc: 200004,
+                                speakerName: "怪しい青年",
                                 next: 10110209,
                             },
                             {
@@ -9961,6 +10013,7 @@ export const questData_jp: QuestStory[] = [
                                     "俺の名前はケビン。アイスレイク城の外周警備部隊に所属している……そんでこの不運な野郎はハール。俺の近所に住んでいた幼なじみだ。",
                                 voice: "story/1002/101102/194F522A",
                                 npc: 200004,
+                                speakerName: "怪しい青年",
                                 next: 10110210,
                             },
                             {
@@ -10425,6 +10478,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ぐぅ……やめ、やめろ、降参する！だけど俺はやってない！本当に何もやってないからな！",
                                 voice: "story/1002/101102/194F50DA",
                                 npc: 200004,
+                                speakerName: "怪しい青年",
                                 next: 10110202,
                             },
                             {
@@ -10440,6 +10494,7 @@ export const questData_jp: QuestStory[] = [
                                     "……わかった。あんたがそこまで言う関係者ならば仕方ない。ただし絶対にそいつから目を離すなよ。街で騒ぎを起こすのなんざ厳禁だ。もし長官にバレでもしたら、俺もあんたも一大事になるからな。",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200004,
+                                speakerName: "見張りの兵士",
                                 next: 10110204,
                             },
                             {
@@ -10448,6 +10503,7 @@ export const questData_jp: QuestStory[] = [
                                     "マジか、よりにもよってお前に捕まるとは……なあ頼むよ、{性别:坊ちゃん|嬢ちゃん}。このことは他言無用でお願いできないか？",
                                 voice: "story/1002/101102/194F5158",
                                 npc: 200004,
+                                speakerName: "怪しい青年",
                                 next: 10110205,
                             },
                             {
@@ -10463,6 +10519,7 @@ export const questData_jp: QuestStory[] = [
                                     "わかった！わかったから放してくれ。財布は返す。俺だってもう何日も食ってねぇから一時の気の迷いで……ああ、俺が悪かったよ！",
                                 voice: "story/1002/101032/194AD496",
                                 npc: 200004,
+                                speakerName: "怪しい青年",
                                 next: 10110207,
                             },
                             {
@@ -10478,6 +10535,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "大きな声を出すなって！俺じゃないって言ってるだろ？ただ死体を運び出しただけだ。",
                                 voice: "story/1002/101102/194F5200",
                                 npc: 200004,
+                                speakerName: "怪しい青年",
                                 next: 10110209,
                             },
                             {
@@ -10486,6 +10544,7 @@ export const questData_jp: QuestStory[] = [
                                     "俺の名前はケビン。アイスレイク城の外周警備部隊に所属している……そんでこの不運な野郎はハール。俺の近所に住んでいた幼なじみだ。",
                                 voice: "story/1002/101102/194F522A",
                                 npc: 200004,
+                                speakerName: "怪しい青年",
                                 next: 10110210,
                             },
                             {
@@ -11091,12 +11150,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 10124003,
                                 content: "え？いいえ、違うの。目にムラサキツユクサの花粉が入ったのよ。心配してくれてありがとうね。",
                                 voice: "story/1002/101240/1958293E",
+                                speakerName: "花屋の店主",
                                 next: 10124004,
                             },
                             {
                                 id: 10124004,
                                 content: "さっきの白い服を着た男性なら、たぶん……北東にある湖に行ったと思うわ。",
                                 voice: "story/1002/101240/19582968",
+                                speakerName: "花屋の店主",
                                 next: 10124005,
                             },
                             {
@@ -11110,6 +11171,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10124006,
                                 content: "ちょっと待って。あなたは……",
                                 voice: "story/1002/101240/195829BC",
+                                speakerName: "花屋の店主",
                                 next: 10124007,
                             },
                             {
@@ -11123,6 +11185,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10124008,
                                 content: "……いいえ、人違いだったみたい。ごめんなさいね、よかったらこれを受け取って。",
                                 voice: "story/1002/101240/19582A10",
+                                speakerName: "花屋の店主",
                                 next: 10124101,
                             },
                             {
@@ -11136,6 +11199,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10124102,
                                 content: "ええ。あなたもルビーのような綺麗な目をしているから。きっとこの花が似合うわ。よい一日を。",
                                 voice: "story/1002/101241/1958397C",
+                                speakerName: "花屋の店主",
                                 next: 10124103,
                             },
                             {
@@ -11329,6 +11393,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10110519,
                                 content: "わあああーーー",
                                 voice: "story/1002/101105/194F8489",
+                                speakerName: "遠くからの声",
                                 next: 10110520,
                             },
                             {
@@ -11419,6 +11484,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……お願い、助けて。",
                                 voice: "story/1002/101107/194FA30C",
                                 npc: 200019,
+                                speakerName: "陰気な少年",
                                 next: 10110702,
                             },
                             {
@@ -11426,6 +11492,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ヘンリックさん……このままじゃ……死んでしまう……！",
                                 voice: "story/1002/101107/194FA336",
                                 npc: 200019,
+                                speakerName: "陰気な少年",
                                 next: 10110703,
                             },
                             {
@@ -11453,6 +11520,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "お願い、ついてきて！",
                                 voice: "story/1002/101146/195222BA",
                                 npc: 200019,
+                                speakerName: "陰気な少年",
                             },
                         ],
                     },
@@ -11466,6 +11534,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "こっち、ヘンリックさんの事務室！",
                                 voice: "story/1002/101147/19523322",
                                 npc: 200019,
+                                speakerName: "陰気な少年",
                             },
                         ],
                     },
@@ -11979,30 +12048,35 @@ export const questData_jp: QuestStory[] = [
                                 id: 20002601,
                                 content: "さっきのお姉ちゃん、どうしてあんなに走るの速いの？",
                                 voice: "story/2001/200026/32130CBA",
+                                speakerName: "困惑している子供",
                                 next: 20002602,
                             },
                             {
                                 id: 20002602,
                                 content: "いいから急ぐぞ、早く街に入るんだ。あ、あれは穢蝕者だ！",
                                 voice: "story/2001/200026/32130CE4",
+                                speakerName: "慌てふためく平民",
                                 next: 20002603,
                             },
                             {
                                 id: 20002603,
                                 content: "だ、だだ……大丈夫だ。警備部隊にはもう通報してある。",
                                 voice: "story/2001/200026/32130D0E",
+                                speakerName: "平静を装う兵士",
                                 next: 20002604,
                             },
                             {
                                 id: 20002604,
                                 content: "どさくさに紛れてアイスレイク城に入ろうったってそうはいかないぞ。通行許可証を出せ！",
                                 voice: "story/2001/200026/32130D38",
+                                speakerName: "平静を装う兵士",
                                 next: 20002605,
                             },
                             {
                                 id: 20002605,
                                 content: "お願いします、街に入れてください。通行許可証をうっかりなくしてしまって……本当なんです。",
                                 voice: "story/2001/200026/32130D62",
+                                speakerName: "慌てふためく平民",
                                 next: 20002606,
                             },
                             {
@@ -12010,24 +12084,28 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "こんな時まで通行許可証って……。このまま外にいても死ぬだけなんだから、無理やりにでもなかに入ってやるわ！",
                                 voice: "story/2001/200026/32130D8C",
+                                speakerName: "怒った平民",
                                 next: 20002607,
                             },
                             {
                                 id: 20002607,
                                 content: "と、止まれ！これ以上近づくと撃つぞ！",
                                 voice: "story/2001/200026/32130DB6",
+                                speakerName: "平静を装う兵士",
                                 next: 20002608,
                             },
                             {
                                 id: 20002608,
                                 content: "撃ちたきゃ撃ちなよ！銃声が穢蝕者を引き寄せてみんな一緒にみなごろしさ！",
                                 voice: "story/2001/200026/32130DE0",
+                                speakerName: "怒った平民",
                                 next: 20002609,
                             },
                             {
                                 id: 20002609,
                                 content: "そ、それは……。まあいいだろう。警備部隊が穢蝕者を排除するまで、とりあえずは街に入れ。",
                                 voice: "story/2001/200026/32130E0A",
+                                speakerName: "平静を装う兵士",
                             },
                         ],
                     },
@@ -13319,6 +13397,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……様子が少しおかしいですね。でも大丈夫、少なくとも人質のうち数名は無事です。",
                                 voice: "story/1002/101306/195BD036",
                                 npc: 100304,
+                                speakerName: "女性将校",
                                 next: 10130603,
                             },
                             {
@@ -13385,6 +13464,7 @@ export const questData_jp: QuestStory[] = [
                                     "違いますぜ！上官殿、俺は見ましたよ！遠くからですが、さきほど偵察した時に確かに見ました……このカロンたち……こいつらも<W>魔法</>を使います……",
                                 voice: "story/1002/101130/19511D8A",
                                 npc: 700065,
+                                speakerName: "慌てる帝国兵士",
                                 next: 10113011,
                             },
                             {
@@ -13393,6 +13473,7 @@ export const questData_jp: QuestStory[] = [
                                     "こいつらも、穢蝕者の仲間かもしれません！この卑しい連中は邪悪な魔法使いです！善良な者なんていやしませんよ！こんな連中まとめてさっさと……",
                                 voice: "story/1002/101130/19511DB4",
                                 npc: 700065,
+                                speakerName: "慌てる帝国兵士",
                                 next: 10113012,
                             },
                             {
@@ -13408,6 +13489,7 @@ export const questData_jp: QuestStory[] = [
                                     "……あ、いや……上官殿、お、俺は、彼らの疑いについて、申し上げただけで……カ、カロン族すべてだとは……とにかく、他意はなかったのです！",
                                 voice: "story/1002/101130/19511E08",
                                 npc: 700065,
+                                speakerName: "慌てる帝国兵士",
                                 next: 10113014,
                             },
                             {
@@ -13799,6 +13881,7 @@ export const questData_jp: QuestStory[] = [
                                     "こんにちは、{性别:坊や|お嬢さん}。私は漂泊するニブルヘイムの導き手——名前で呼びたいなら、ニフル夫人と呼んでください。",
                                 voice: "story/1002/101259/19596120",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125905,
                             },
                             {
@@ -13806,6 +13889,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ここで彷徨う魂のささやきを聞いたの。「彼女」をニヴルヘイムに導くために来んですよ。",
                                 voice: "story/1002/101259/1959614A",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125906,
                             },
                             {
@@ -13820,6 +13904,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ええ。あなたも亡き者のためにいらしたのでは？",
                                 voice: "story/1002/101259/1959619E",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125908,
                             },
                             {
@@ -13834,6 +13919,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "私の目は、魂の思いを映し出せますから。",
                                 voice: "story/1002/101259/195961F2",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125910,
                             },
                             {
@@ -13842,6 +13928,7 @@ export const questData_jp: QuestStory[] = [
                                     "さっき、彼女を送り出す時に、彼女が大切に想っていたすべてのものを見ました。そのなかにあなたの姿もありました。",
                                 voice: "story/1002/101259/1959621C",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125911,
                             },
                             {
@@ -13864,6 +13951,7 @@ export const questData_jp: QuestStory[] = [
                                     "いいえ。むしろ逆ですよ。私は、悔しさや怒りを抱いて去っていく魂をたくさん見てきました。彼らの嘆きは濃い霧のように広がっていきます。",
                                 voice: "story/1002/101259/1959629A",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125914,
                             },
                             {
@@ -13871,6 +13959,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "でも、彼女の声はとても優しかった。悲しみも怒りもなく、ただ感謝と…祝福を語っていました。",
                                 voice: "story/1002/101259/195962C4",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125915,
                             },
                             {
@@ -13878,6 +13967,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "それが彼女があなたに残した最後のメッセージかもしれません。",
                                 voice: "story/1002/101259/195962EE",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125916,
                             },
                             {
@@ -13904,6 +13994,7 @@ export const questData_jp: QuestStory[] = [
                                     "{性别:坊や|お嬢さん}、私はこの世界で長い、本当に長い時を生きてきました。無数の魂を見送り、何度もそんな言葉を聞いてきたのです。",
                                 voice: "story/1002/101259/19596342",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125918,
                             },
                             {
@@ -13912,6 +14003,7 @@ export const questData_jp: QuestStory[] = [
                                     "草木は一つの山火事で焦土と化し、虫は一陣の嵐で深い水に溺れる……無常は生命そのものの一部。いつか、死は必ず訪れるものですから。",
                                 voice: "story/1002/101259/1959636C",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125919,
                             },
                             {
@@ -13920,6 +14012,7 @@ export const questData_jp: QuestStory[] = [
                                     "運命の冷酷と残酷を呪うこともできるし、自らの無力を嘆くこともできる。でもね、別の選択もあります……思い出を大切にすること。",
                                 voice: "story/1002/101259/19596396",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125920,
                             },
                             {
@@ -13927,6 +14020,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ですから、死が「必然」なら、生きている毎日は、その必然とすれ違う「奇跡」でしょ？",
                                 voice: "story/1002/101259/195963C0",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125921,
                             },
                             {
@@ -13935,6 +14029,7 @@ export const questData_jp: QuestStory[] = [
                                     "ニブルヘイムへと去った魂は、願うのではないかしら……あなたが彼女と共に過ごした日々を思い出すとき、哀しみや悲しみではなく、ほほ笑みを浮かべてほしいと。",
                                 voice: "story/1002/101259/195963EA",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 options: [
                                     {
                                         id: 101259211,
@@ -13949,6 +14044,7 @@ export const questData_jp: QuestStory[] = [
                                     "ニブルヘイム…それはカロン族の生命の源であり、安らぎの地。亡き人の魂はニブルヘイムに帰り、生きる者の魂はそこから生まれる。命は、こうして果てしなく循環しています。",
                                 voice: "story/1002/101259/19596414",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125923,
                             },
                             {
@@ -13975,6 +14071,7 @@ export const questData_jp: QuestStory[] = [
                                     "もし別の誰かが聞いたら、こう答えるでしょう。「生と死の循環は、逆らえない世界の掟。人間の力では、絶対に変えられない」と。",
                                 voice: "story/1002/101259/19596468",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125925,
                             },
                             {
@@ -13982,6 +14079,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "でも、{性别:坊や|お嬢さん}。あなたの背負っているものは、普通ではないと感じます。",
                                 voice: "story/1002/101259/19596492",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125926,
                             },
                             {
@@ -13990,6 +14088,7 @@ export const questData_jp: QuestStory[] = [
                                     "いつか、あなたが十分な力を手に入れた時——世界の本当の姿に向きあって、その掟さえも変えられるほどの力を得たら……",
                                 voice: "story/1002/101259/195964BC",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125927,
                             },
                             {
@@ -13998,6 +14097,7 @@ export const questData_jp: QuestStory[] = [
                                     "あなたもあの生命の流れに足を踏み入れられるかもしれない。そして、その果てに広がるのはニブルヘイムで——かつての魂たちと再び巡り合えるのかもしれない。",
                                 voice: "story/1002/101259/195964E6",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 options: [
                                     {
                                         id: 101259271,
@@ -14012,6 +14112,7 @@ export const questData_jp: QuestStory[] = [
                                     "ふふっ……私は川べりの、ただの見物人に過ぎない。その答えは、あなた自身で見つけるしかないもでしょう。",
                                 voice: "story/1002/101259/19596510",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125929,
                             },
                             {
@@ -14019,6 +14120,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "本当に望んでいるなら、前に進み続けてください。",
                                 voice: "story/1002/101259/1959653A",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                                 next: 10125930,
                             },
                             {
@@ -14026,6 +14128,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "大切な{性别:坊や|お嬢さん}、良い旅を。",
                                 voice: "story/1002/101259/19596564",
                                 npc: 200076,
+                                speakerName: "ニフル夫人",
                             },
                         ],
                     },
@@ -16548,6 +16651,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "にゃ――にゃ――",
                                 voice: "story/1003/100326/191D95C4",
                                 npc: 100320,
+                                speakerName: "猫",
                             },
                         ],
                     },
@@ -16563,6 +16667,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "にゃー……うにゃ？",
                                 voice: "story/1003/100326/191D95EE",
                                 npc: 100320,
+                                speakerName: "猫",
                                 next: 10032604,
                             },
                             {
@@ -16598,6 +16703,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "にゃあ……にゃにゃあ！",
                                 voice: "story/1003/100326/191D96C0",
                                 npc: 100320,
+                                speakerName: "猫",
                             },
                         ],
                     },
@@ -16639,6 +16745,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "にゃあ……にゃにゃにゃあ！",
                                 voice: "story/1003/100326/191D9714",
                                 npc: 100320,
+                                speakerName: "猫",
                             },
                         ],
                     },
@@ -18010,6 +18117,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10033201,
                                 content: "――ガオォォォ！！",
                                 voice: "story/1003/100332/191DF80A",
+                                speakerName: "？？？",
                                 next: 10033202,
                             },
                             {
@@ -18057,6 +18165,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10033301,
                                 content: "――ガオォォォ！！",
                                 voice: "story/1003/100333/191E0872",
+                                speakerName: "？？？",
                                 next: 10033302,
                             },
                             {
@@ -18147,6 +18256,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "グオォォォ……！",
                                 voice: "story/1003/100333/191E0A16",
                                 npc: 100328,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -18402,6 +18512,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "砕け……ろ……",
                                 voice: "story/1003/100333/191E0ABE",
                                 npc: 100328,
+                                speakerName: "？？？",
                                 next: 10033316,
                             },
                             {
@@ -18437,6 +18548,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "抹消……する……",
                                 voice: "story/1003/100333/191E0B66",
                                 npc: 100328,
+                                speakerName: "？？？",
                                 next: 10033320,
                             },
                             {
@@ -20482,6 +20594,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "アイスレイク城発ディズマニア行きの列車は、1時間後に出発します。第十三軍団が無事に帰還することを願っています。皇帝に栄光あれ！",
                                 voice: "story/1003/100352/191F4906",
+                                speakerName: "放送",
                             },
                         ],
                     },
@@ -20793,6 +20906,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "愚かだな。",
                                 voice: "story/1003/100353/191F5626",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035337,
                             },
                         ],
@@ -20814,6 +20928,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "久しぶりだね、姉さん。",
                                 voice: "story/1003/100354/191F61F6",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035408,
                             },
                             {
@@ -20828,6 +20943,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "いや……今は「リズム長官」と……呼ぶべきか。少しは……落ち着いたか？",
                                 voice: "story/1003/100354/191F624A",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035410,
                             },
                             {
@@ -20842,6 +20958,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ブルース・フィッシャー。君の弟であり……ハーモニカの持ち主さ。",
                                 voice: "story/1003/100354/191F629E",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035412,
                             },
                             {
@@ -20863,6 +20980,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……ふっ。",
                                 voice: "story/1003/100354/191F631C",
                                 npc: 100327,
+                                speakerName: "ブルース？",
                                 next: 10035415,
                             },
                             {
@@ -20885,6 +21003,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "返すよ。帝国軍は……僕を裏切った。もうこんなもの……いらない。",
                                 voice: "story/1003/100354/191F639A",
                                 npc: 100327,
+                                speakerName: "ブルース？",
                                 next: 10035418,
                             },
                             {
@@ -20928,6 +21047,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……君は……鋭いね。だが帝国では……その賢さは……身を滅ぼしかねない……",
                                 voice: "story/1003/100354/191F6496",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10035424,
                             },
                             {
@@ -20935,6 +21055,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……リズム、姉さん……教えてあげるよ。「桂冠カロン族」の真相をね……",
                                 voice: "story/1003/100354/191F64C0",
                                 npc: 100327,
+                                speakerName: "ブルース",
                             },
                         ],
                     },
@@ -20962,6 +21083,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "「犯人」か……",
                                 voice: "story/1003/100354/191F614E",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035404,
                             },
                             {
@@ -20969,6 +21091,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "どうやら……最後まで……真相を……知らされなかったようだな……第十三軍団も……所詮その程度の連中だ。",
                                 voice: "story/1003/100354/191F6178",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035405,
                             },
                             {
@@ -22119,6 +22242,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……フッ。",
                                 voice: "story/1003/100350/191F1F84",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035003,
                             },
                             {
@@ -22126,6 +22250,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "嘘が……まだ……暴かれてないようだね……",
                                 voice: "story/1003/100350/191F1FAE",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035004,
                             },
                             {
@@ -22147,6 +22272,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100350/191F202C",
                                 npc: 100327,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -22402,6 +22528,7 @@ export const questData_jp: QuestStory[] = [
                                     "「桂冠カロン族」――かつて私はそれを、最も輝くダイヤモンドのように思っていた。\n それは夢の果てで煌めき、まるでアイスレイクシティの頂にある、不滅の明かりのようだった。",
                                 voice: "story/1003/100355/191F7162",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10035502,
                             },
                             {
@@ -22410,6 +22537,7 @@ export const questData_jp: QuestStory[] = [
                                     "だが後になって知ったんだ。それは堅固なダイヤモンドなんかじゃなかった。\n それはただのガラス――幻想の光を反射し、美しく、眩しいだけのもの。\n そして、卵石一つ、泥の塊一つで、簡単に砕け散る脆いものだった。",
                                 voice: "story/1003/100355/191F718C",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10035503,
                             },
                             {
@@ -22418,6 +22546,7 @@ export const questData_jp: QuestStory[] = [
                                     "第六軍団の試験を通過したカロン族は、結局のところ、好き放題に扱われる囚われの獣と何ら変わりはしない。\n むしろ、無知で鈍感な獣でいられた方がよかったかもしれない。\n そうすれば、壊れた夢に苦しむことも、果たせない約束に涙することもなかっただろうに……",
                                 voice: "story/1003/100355/191F71B6",
                                 npc: 100327,
+                                speakerName: "ブルース",
                             },
                         ],
                     },
@@ -22433,6 +22562,7 @@ export const questData_jp: QuestStory[] = [
                                     "こんな日々がどれだけ続いたのか、もうわからない。\n ただ一つわかるのは、自分の身体が少しずつ恐ろしい怪物へと変わり果てていくことだけだ。\n 心は次第に冷えきり、涙の湖に吹く冷たい風の中で粉々に砕け散っていく。",
                                 voice: "story/1003/100355/191F742C",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10035519,
                             },
                             {
@@ -22440,6 +22570,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "「人」だった頃の記憶はどんどん薄れていき、ついには名前すら忘れていった。",
                                 voice: "story/1003/100355/191F7456",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10035520,
                             },
                             {
@@ -22447,6 +22578,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "「ブルース・フィッシャー」は死んだ。代わりに<W>No.47</>――という新しい「名」が与えられた。",
                                 voice: "story/1003/100355/191F7480",
                                 npc: 100327,
+                                speakerName: "No. 47",
                                 next: 10035521,
                             },
                             {
@@ -22454,6 +22586,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "それでもなお、この肉体はみじめにもがき続けていた。",
                                 voice: "story/1003/100355/191F74AA",
                                 npc: 100327,
+                                speakerName: "No. 47",
                             },
                         ],
                     },
@@ -22468,6 +22601,7 @@ export const questData_jp: QuestStory[] = [
                                     "先生、拒絶反応が収まり、各数値も安定しました。ただ、β型抑制剤を使いすぎたようで、精神状態が不安定です。",
                                 voice: "story/1003/100355/191F74D4",
                                 npc: 100336,
+                                speakerName: "幼い声",
                                 next: 10035523,
                             },
                             {
@@ -22475,6 +22609,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "精神など生命活動の副産物にすぎん。返事さえできれば十分だ。実験場に連れていけ。",
                                 voice: "story/1003/100355/191F74FE",
                                 npc: 100337,
+                                speakerName: "冷たい声",
                                 next: 10035524,
                             },
                             {
@@ -22482,6 +22617,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "はい、先生。",
                                 voice: "story/1003/100355/191F7528",
                                 npc: 100336,
+                                speakerName: "幼い声",
                             },
                         ],
                     },
@@ -22501,30 +22637,35 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035601,
                                 content: "抑制剤が効いてる限り、<H>命令に背くことすらできない</>。まるで家畜だな。",
                                 voice: "story/1003/100356/191F81CA",
+                                speakerName: "錬金院内の声",
                                 next: 10035602,
                             },
                             {
                                 id: 10035602,
                                 content: "なんて凶暴で野蛮な姿――理性も美しさもまるでない。これがカロン族の本来の姿なのね。",
                                 voice: "story/1003/100356/191F81F4",
+                                speakerName: "錬金院内の声",
                                 next: 10035603,
                             },
                             {
                                 id: 10035603,
                                 content: "おいおい、あまり近づくな。変な病気でもうつされたらどうするんだ。",
                                 voice: "story/1003/100356/191F821E",
+                                speakerName: "錬金院内の声",
                                 next: 10035604,
                             },
                             {
                                 id: 10035604,
                                 content: "ちゃんと戦闘データを記録するのよ。基準を満たさない、もしくは怪しい動きがあれば即刻処分しなさい。",
                                 voice: "story/1003/100356/191F8248",
+                                speakerName: "錬金院内の声",
                                 next: 10035605,
                             },
                             {
                                 id: 10035605,
                                 content: "でも、こんなの……いくらなんでも残酷すぎるんじゃ……",
                                 voice: "story/1003/100356/191F8272",
+                                speakerName: "錬金院内の声",
                                 next: 10035606,
                             },
                             {
@@ -22532,6 +22673,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "残酷？陛下の慈悲深いお心と錬金術の偉大なる力があってこそ、こんなクズにも錬金院に貢献する権利が与えられたのよ。感謝してほしいくらいだわ。",
                                 voice: "story/1003/100356/191F829C",
+                                speakerName: "錬金院内の声",
                                 next: 10035607,
                             },
                             {
@@ -22539,6 +22681,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "逃げようなど考えないことだ。電気ネットと機関銃は俺らみたいに手加減なんてしないぜ。自殺も諦めることだ。その無意味な命を延ばす薬は山ほどあるからな。",
                                 voice: "story/1003/100356/191F82C6",
+                                speakerName: "錬金院内の声",
                             },
                         ],
                     },
@@ -22551,12 +22694,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035608,
                                 content: "テストを開始する。被検体を入れろ。",
                                 voice: "story/1003/100356/191F82F0",
+                                speakerName: "冷たい声",
                                 next: 10035609,
                             },
                             {
                                 id: 10035609,
                                 content: "No.47、全ての敵を排除しろ。",
                                 voice: "story/1003/100356/191F831A",
+                                speakerName: "幼い声",
                                 next: 10035610,
                             },
                             {
@@ -22564,6 +22709,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "はい。",
                                 voice: "story/1003/100356/191F8344",
                                 npc: 100328,
+                                speakerName: "No. 47",
                             },
                         ],
                     },
@@ -22577,6 +22723,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035611,
                                 content: "あっちにも敵がいるよ。ほら、止まってる場合じゃないよー！",
                                 voice: "story/1003/100356/191F836E",
+                                speakerName: "幼い声",
                             },
                         ],
                     },
@@ -22589,6 +22736,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035617,
                                 content: "テストは以上だ。収容所に戻せ。次の被検体に移るぞ。",
                                 voice: "story/1003/100356/191F846A",
+                                speakerName: "冷たい声",
                             },
                         ],
                     },
@@ -22602,6 +22750,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035612,
                                 content: "数値が思ったより低いな。そっちの敵も始末しろ、もたもたするな。",
                                 voice: "story/1003/100356/191F8398",
+                                speakerName: "冷たい声",
                             },
                         ],
                     },
@@ -22615,6 +22764,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035613,
                                 content: "がんばれ！がんばれ！",
                                 voice: "story/1003/100356/191F83C2",
+                                speakerName: "幼い声",
                             },
                         ],
                     },
@@ -22628,6 +22778,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035614,
                                 content: "もう怪我を？まったく脆いな。",
                                 voice: "story/1003/100356/191F83EC",
+                                speakerName: "冷たい声",
                             },
                         ],
                     },
@@ -22641,6 +22792,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035615,
                                 content: "あっちだよあっち！",
                                 voice: "story/1003/100356/191F8416",
+                                speakerName: "幼い声",
                             },
                         ],
                     },
@@ -22653,6 +22805,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035616,
                                 content: "そっちの、まだ息があるではないか。そんな雑魚も仕留められんのか？",
                                 voice: "story/1003/100356/191F8440",
+                                speakerName: "冷たい声",
                             },
                         ],
                     },
@@ -22674,6 +22827,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "おい、聞こえるか？",
                                 voice: "story/1003/100357/191F9232",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035702,
                             },
                             {
@@ -22681,6 +22835,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "僕はNo.36。お前は？",
                                 voice: "story/1003/100357/191F925C",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035703,
                             },
                             {
@@ -22688,6 +22843,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100357/191F9286",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035704,
                             },
                             {
@@ -22695,6 +22851,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "まあ無理に話さなくてもいい。声だけ出してくれ。お前が生きてるってことだけわかればいいからな。",
                                 voice: "story/1003/100357/191F92B0",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035705,
                             },
                             {
@@ -22702,6 +22859,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……No.47。",
                                 voice: "story/1003/100357/191F92DA",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035706,
                             },
                             {
@@ -22709,6 +22867,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "よかった……誰かと話すなんて随分久しぶりだよ。",
                                 voice: "story/1003/100357/191F9304",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035707,
                             },
                             {
@@ -22716,6 +22875,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "君とはそこまで親しくないと思うけど……？",
                                 voice: "story/1003/100357/191F932E",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035708,
                             },
                             {
@@ -22723,6 +22883,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ははは、そのうち親しくなるさ。地獄で生きる<H>人</>なんて、僕たちくらいなんだから。",
                                 voice: "story/1003/100357/191F9358",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035709,
                             },
                             {
@@ -22730,6 +22891,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "はっ……僕たちを「人」だと思えるのなんて、君くらいだよ。",
                                 voice: "story/1003/100357/191F9382",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035710,
                             },
                             {
@@ -22737,6 +22899,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "大事なのは心だ。",
                                 voice: "story/1003/100357/191F93AC",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035711,
                             },
                             {
@@ -22744,6 +22907,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そんなの、とっくの昔に砕け散ったよ。",
                                 voice: "story/1003/100357/191F93D6",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035712,
                             },
                             {
@@ -22751,6 +22915,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "なら、もう一度繋ぎ合わせればいい。そして「人」として、この地獄を抜け出すんだ。",
                                 voice: "story/1003/100357/191F9400",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035713,
                             },
                             {
@@ -22758,6 +22923,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……寝言はよしてよ。",
                                 voice: "story/1003/100357/191F942A",
                                 npc: 100328,
+                                speakerName: "No. 47",
                             },
                         ],
                     },
@@ -22771,12 +22937,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035801,
                                 content: "実験を再開する。今回は珍しい相手を用意した。記録を怠るな。",
                                 voice: "story/1003/100358/191FA29A",
+                                speakerName: "冷たい声",
                                 next: 10035802,
                             },
                             {
                                 id: 10035802,
                                 content: "了解です、先生！",
                                 voice: "story/1003/100358/191FA2C4",
+                                speakerName: "幼い声",
                             },
                         ],
                     },
@@ -22789,12 +22957,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035803,
                                 content: "確かに投降はしたが、まさかノコノコ武器を渡して来るとはな……神の怒りを思い知るがいい！",
                                 voice: "story/1003/100358/191FA2EE",
+                                speakerName: "捕虜となった礼賛会の兵士",
                                 next: 10035804,
                             },
                             {
                                 id: 10035804,
                                 content: "ヒュペリアめ、神を冒涜する堕落者が！こんな化け物を作るなど……万死に値する！",
                                 voice: "story/1003/100358/191FA318",
+                                speakerName: "捕虜となった礼賛会の兵士",
                             },
                         ],
                     },
@@ -22807,6 +22977,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035805,
                                 content: "ま、待て……見逃してくれ。とっくに俺たちは投降してるんだ！",
                                 voice: "story/1003/100358/191FA342",
+                                speakerName: "捕虜となった礼賛会の兵士",
                                 next: 10035806,
                             },
                             {
@@ -22814,12 +22985,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100358/191FA36C",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035807,
                             },
                             {
                                 id: 10035807,
                                 content: "神よ……！どうか……知恵とご加護を……！",
                                 voice: "story/1003/100358/191FA396",
+                                speakerName: "捕虜となった礼賛会の兵士",
                                 next: 10035808,
                             },
                             {
@@ -22827,12 +23000,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "すまない……",
                                 voice: "story/1003/100358/191FA3C0",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035809,
                             },
                             {
                                 id: 10035809,
                                 content: "ああ……お許しを……どうか……",
                                 voice: "story/1003/100358/191FA3EA",
+                                speakerName: "捕虜となった礼賛会の兵士",
                             },
                         ],
                     },
@@ -22845,6 +23020,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035813,
                                 content: "採取も済んだことだし、自分たちで牢に戻りな。ボクは報告書を仕上げないと。",
                                 voice: "story/1003/100358/191FA492",
+                                speakerName: "幼い声",
                             },
                         ],
                     },
@@ -22866,6 +23042,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "（ハミング）",
                                 voice: "story/1003/100359/191FB302",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035902,
                             },
                             {
@@ -22873,6 +23050,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "悪い、起こしちゃったか？",
                                 voice: "story/1003/100359/191FB32C",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035903,
                             },
                             {
@@ -22880,6 +23058,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "酷い歌声だね。『雪国の幼子』のアリアが、ここまで居心地の悪い歌になるなんて驚いたよ。",
                                 voice: "story/1003/100359/191FB356",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035904,
                             },
                             {
@@ -22887,6 +23066,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ははは、楽器さえあれば、少しはマシになるんだけどな。",
                                 voice: "story/1003/100359/191FB380",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035905,
                             },
                             {
@@ -22894,6 +23074,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "辛くないの？",
                                 voice: "story/1003/100359/191FB3AA",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035906,
                             },
                             {
@@ -22901,6 +23082,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "辛いからこそ、歌うんだ。",
                                 voice: "story/1003/100359/191FB3D4",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035907,
                             },
                             {
@@ -22908,6 +23090,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……やめてよ。せっかく実験から生き延びたのに、音痴な歌なんかで死んだら笑えない。",
                                 voice: "story/1003/100359/191FB3FE",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035908,
                             },
                             {
@@ -22916,6 +23099,7 @@ export const questData_jp: QuestStory[] = [
                                     "肉体の痛みなんて大したことじゃない。それよりも、生きてる人をあんな風に……！あれ以上胸くそ悪いことはない……",
                                 voice: "story/1003/100359/191FB428",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035909,
                             },
                             {
@@ -22924,6 +23108,7 @@ export const questData_jp: QuestStory[] = [
                                     "いつまで「人」気分でいるつもり？僕たちは化け物――何も感じず、操られた通りに動くだけだ。そう考えれば少しは楽でしょ。",
                                 voice: "story/1003/100359/191FB452",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035910,
                             },
                             {
@@ -22931,6 +23116,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "いや……そんなの間違ってる。心を捨てたら、それこそ本当の化け物になってしまう。",
                                 voice: "story/1003/100359/191FB47C",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035911,
                             },
                             {
@@ -22939,6 +23125,7 @@ export const questData_jp: QuestStory[] = [
                                     "前に逃走に失敗して、電気椅子に座らされたことを忘れたの？諦めな。君ももう痛い目を見るのはいやだろ？",
                                 voice: "story/1003/100359/191FB4A6",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035912,
                             },
                             {
@@ -22946,6 +23133,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そういうことを気にかけてる時点で、お前は化け物じゃないと断言できる。",
                                 voice: "story/1003/100359/191FB4D0",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035913,
                             },
                             {
@@ -22953,6 +23141,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "屁理屈を言うな。",
                                 voice: "story/1003/100359/191FB4FA",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035914,
                             },
                             {
@@ -22960,6 +23149,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "大丈夫、必ず一緒にここから出よう。",
                                 voice: "story/1003/100359/191FB524",
                                 npc: 100331,
+                                speakerName: "No. 36",
                             },
                         ],
                     },
@@ -22972,18 +23162,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035810,
                                 content: "いいぞ、もっとやれ！どっちが本当の悪魔か見せてよ！あははは。",
                                 voice: "story/1003/100358/191FA414",
+                                speakerName: "幼い声",
                                 next: 10035811,
                             },
                             {
                                 id: 10035811,
                                 content: "悪くない威力だね。最近の抑制剤との相性も悪くない。",
                                 voice: "story/1003/100358/191FA43E",
+                                speakerName: "幼い声",
                                 next: 10035812,
                             },
                             {
                                 id: 10035812,
                                 content: "これなら戦力として使えるようになるのも時間の問題だな。",
                                 voice: "story/1003/100358/191FA468",
+                                speakerName: "冷たい声",
                             },
                         ],
                     },
@@ -22996,24 +23189,28 @@ export const questData_jp: QuestStory[] = [
                                 id: 10035915,
                                 content: "へぇ、これでも死なないんだ？再生能力もますます上がってるね。",
                                 voice: "story/1003/100359/191FB54E",
+                                speakerName: "幼い声",
                                 next: 10035916,
                             },
                             {
                                 id: 10035916,
                                 content: "へへ、何を考えてるかはわかるよ。",
                                 voice: "story/1003/100359/191FB578",
+                                speakerName: "幼い声",
                                 next: 10035917,
                             },
                             {
                                 id: 10035917,
                                 content: "本気を出せばすぐ終わるのにさ。",
                                 voice: "story/1003/100359/191FB5A2",
+                                speakerName: "幼い声",
                                 next: 10035918,
                             },
                             {
                                 id: 10035918,
                                 content: "でもムダだよ。被検体を簡単に死なせるわけないじゃん。",
                                 voice: "story/1003/100359/191FB5CC",
+                                speakerName: "幼い声",
                             },
                         ],
                     },
@@ -23034,6 +23231,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "36……おい、36！",
                                 voice: "story/1003/100360/191FC36A",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036002,
                             },
                             {
@@ -23041,6 +23239,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100360/191FC394",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036003,
                             },
                             {
@@ -23048,6 +23247,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "おい……",
                                 voice: "story/1003/100360/191FC3BE",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036004,
                             },
                             {
@@ -23055,6 +23255,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100360/191FC3E8",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036005,
                             },
                             {
@@ -23062,6 +23263,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ほら……これ、使え……傷の痛みが少しは和らぐぞ……",
                                 voice: "story/1003/100360/191FC412",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036006,
                             },
                             {
@@ -23069,6 +23271,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……この薬のために……わざと任務であんな態度を取って怒りを買ったの……？",
                                 voice: "story/1003/100360/191FC43C",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036007,
                             },
                             {
@@ -23076,6 +23279,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "バレたか……",
                                 voice: "story/1003/100360/191FC466",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036008,
                             },
                             {
@@ -23083,6 +23287,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "生きることを諦めるな。お前を連れてここを出るって約束しただろ。",
                                 voice: "story/1003/100360/191FC490",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036009,
                             },
                             {
@@ -23090,6 +23295,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "どうして？こんな姿で外に出ても、いいことなんてないかもしれないのに。",
                                 voice: "story/1003/100360/191FC4BA",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036010,
                             },
                             {
@@ -23097,6 +23303,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "だが、死んだらそれまでだ。苦痛のまま死ぬなんて、そんなの納得できない。",
                                 voice: "story/1003/100360/191FC4E4",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036011,
                             },
                             {
@@ -23104,6 +23311,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "それに、お前にも叶えてない夢があるはずだ。",
                                 voice: "story/1003/100360/191FC50E",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036012,
                             },
                             {
@@ -23111,6 +23319,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そんなのもう意味ないよ。こんな姿になっちゃったんだから。",
                                 voice: "story/1003/100360/191FC538",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036013,
                             },
                             {
@@ -23118,6 +23327,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "教えてくれよ。繰り返し唱えれば、「人」としての意識を保つことができる。",
                                 voice: "story/1003/100360/191FC562",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036014,
                             },
                             {
@@ -23125,6 +23335,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100360/191FC58C",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036015,
                             },
                             {
@@ -23132,6 +23343,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……俳優……",
                                 voice: "story/1003/100360/191FC5B6",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036016,
                             },
                             {
@@ -23139,6 +23351,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "え？",
                                 voice: "story/1003/100360/191FC5E0",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036017,
                             },
                             {
@@ -23146,6 +23359,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "僕の夢は俳優になることだったんだ。",
                                 voice: "story/1003/100360/191FC60A",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036018,
                             },
                             {
@@ -23154,6 +23368,7 @@ export const questData_jp: QuestStory[] = [
                                     "第六軍団の試験に参加したのも、「桂冠カロン族」になって、裕福な暮らしを手に入れて……広い舞台に立ちたかったから。",
                                 voice: "story/1003/100360/191FC634",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036019,
                             },
                             {
@@ -23162,6 +23377,7 @@ export const questData_jp: QuestStory[] = [
                                     "舞台上で輝く俳優に憧れ、テープで声を聞くだけの生活には――もううんざりだったんだ。角が生えてた「汚らわしい」カロン族は、観客の前に立つことなんて許されないから。",
                                 voice: "story/1003/100360/191FC65E",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036020,
                             },
                             {
@@ -23169,6 +23385,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "はは……そうか。",
                                 voice: "story/1003/100360/191FC688",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036021,
                             },
                             {
@@ -23176,6 +23393,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "可笑しいでしょ。",
                                 voice: "story/1003/100360/191FC6B2",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036022,
                             },
                             {
@@ -23183,6 +23401,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "いや、むしろお前にピッタリだと思う。",
                                 voice: "story/1003/100360/191FC6DC",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036023,
                             },
                             {
@@ -23191,6 +23410,7 @@ export const questData_jp: QuestStory[] = [
                                     "どうりで親近感を感じたわけだ。僕もオペラが好きだからね。ここから出たら、二人で舞台を作ろう。それで、みんなを呼んで僕たちの舞台を見てもらうんだ！",
                                 voice: "story/1003/100360/191FC706",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036024,
                             },
                             {
@@ -23198,6 +23418,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100360/191FC730",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036025,
                             },
                             {
@@ -23205,6 +23426,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "同意、でいいよな？約束したからにはちゃんと守れよ。",
                                 voice: "story/1003/100360/191FC75A",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036026,
                             },
                             {
@@ -23212,6 +23434,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "なんだかうまくいく気がしてきた……",
                                 voice: "story/1003/100360/191FC784",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036027,
                             },
                             {
@@ -23219,6 +23442,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "錯覚だよ。",
                                 voice: "story/1003/100360/191FC7AE",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036028,
                             },
                             {
@@ -23226,6 +23450,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "錯覚なもんか。お前ここ数年、<H>抑制剤の効き目が弱くなってる</>と思わないか？",
                                 voice: "story/1003/100360/191FC7D8",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036029,
                             },
                             {
@@ -23233,6 +23458,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "これも、僕たちが「人」だって証拠だ。身体が「抗え」って言ってくれてるんだよ。",
                                 voice: "story/1003/100360/191FC802",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036030,
                             },
                             {
@@ -23240,6 +23466,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "はぁ……この忌々しい身体が都合よく変異しただけだって。",
                                 voice: "story/1003/100360/191FC82C",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036031,
                             },
                             {
@@ -23247,6 +23474,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "はは、でも錬金術師たちは気付いてないようだし、結果オーライだろ？さて、脱走の合図を決めないとな……",
                                 voice: "story/1003/100360/191FC856",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036032,
                             },
                             {
@@ -23254,6 +23482,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100360/191FC880",
                                 npc: 100328,
+                                speakerName: "No. 47",
                             },
                         ],
                     },
@@ -23273,18 +23502,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 10036113,
                                 content: "す、すみません先生……まさか被検体が抑制剤の制御を脱するなんて……",
                                 voice: "story/1003/100361/191FD5CA",
+                                speakerName: "幼い声",
                                 next: 10036114,
                             },
                             {
                                 id: 10036114,
                                 content: "今までの被検体にはなかった<H>変異</>だ。我々の最高傑作となるやもしれん！",
                                 voice: "story/1003/100361/191FD5F4",
+                                speakerName: "冷たい声",
                                 next: 10036115,
                             },
                             {
                                 id: 10036115,
                                 content: "情報を漏らすな！γ型抑制剤を使い、必ず生け捕りにしろ！",
                                 voice: "story/1003/100361/191FD61E",
+                                speakerName: "冷たい声",
                             },
                         ],
                     },
@@ -23298,6 +23530,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ゴホッゴホッ……やった……のか……？",
                                 voice: "story/1003/100361/191FD648",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036117,
                             },
                             {
@@ -23305,6 +23538,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ああ、僕たちは成功したんだ！",
                                 voice: "story/1003/100361/191FD672",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036118,
                             },
                             {
@@ -23312,12 +23546,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "ああ……よかった……",
                                 voice: "story/1003/100361/191FD69C",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036119,
                             },
                             {
                                 id: 10036119,
                                 content: "どこに逃げるつもりだ？お前ら化け物の居場所など、戦場か実験室だけだ！",
                                 voice: "story/1003/100361/191FD6C6",
+                                speakerName: "冷たい声",
                                 next: 10036120,
                             },
                             {
@@ -23325,6 +23561,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100361/191FD6F0",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036121,
                             },
                             {
@@ -23332,6 +23569,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "僕たちは化け物などではない……僕たちは、「人」だ……！",
                                 voice: "story/1003/100361/191FD71A",
                                 npc: 100331,
+                                speakerName: "No. 36",
                             },
                         ],
                     },
@@ -23352,6 +23590,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "こっちだ！",
                                 voice: "story/1003/100361/191FD744",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036123,
                             },
                             {
@@ -23359,6 +23598,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "これが……風か……自由の……ゴホッ……",
                                 voice: "story/1003/100361/191FD76E",
                                 npc: 100331,
+                                speakerName: "No. 36",
                             },
                         ],
                     },
@@ -23372,6 +23612,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "水の音がする。ここから外に出られるはずだよ！",
                                 voice: "story/1003/100361/191FD798",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036125,
                             },
                             {
@@ -23379,6 +23620,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "よし、ゴホッゴホッ……",
                                 voice: "story/1003/100361/191FD7C2",
                                 npc: 100331,
+                                speakerName: "No. 36",
                             },
                         ],
                     },
@@ -23401,6 +23643,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "やっと出られた！",
                                 voice: "story/1003/100361/191FD7EC",
                                 npc: 100327,
+                                speakerName: "No. 47",
                                 next: 10036127,
                             },
                             {
@@ -23408,6 +23651,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "錬金院の下水道だ……おそらく外へと通じる配管があるはず。",
                                 voice: "story/1003/100361/191FD816",
                                 npc: 100328,
+                                speakerName: "No. 36",
                                 next: 10036128,
                             },
                             {
@@ -23415,6 +23659,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ああ……僕たちは……自由だ……",
                                 voice: "story/1003/100361/191FD840",
                                 npc: 100328,
+                                speakerName: "No. 36",
                                 next: 10036129,
                             },
                             {
@@ -23422,6 +23667,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "――ぐっ！",
                                 voice: "story/1003/100361/191FD86A",
                                 npc: 100328,
+                                speakerName: "No. 36",
                                 next: 10036130,
                             },
                             {
@@ -23429,6 +23675,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "その傷……あとは僕に任せて。",
                                 voice: "story/1003/100361/191FD894",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036131,
                             },
                             {
@@ -23436,6 +23683,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ひとまず隠れられる場所を探さないと……",
                                 voice: "story/1003/100361/191FD8BE",
                                 npc: 100328,
+                                speakerName: "No. 47",
                             },
                         ],
                     },
@@ -23480,6 +23728,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "僕は……大丈夫。",
                                 voice: "story/1003/100362/191FE4B8",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036205,
                             },
                             {
@@ -23488,6 +23737,7 @@ export const questData_jp: QuestStory[] = [
                                     "残念ながら……運命の女神の……微笑みは……ほんの一瞬に……終わった。錬金院からの脱出は……新しい生活の……始まり、ではなく……終わりだったんだ……",
                                 voice: "story/1003/100362/191FE4E2",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036206,
                             },
                             {
@@ -23495,6 +23745,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "逃亡中に……錬金術師の……新型抑制剤をくらい……僕の……喉は潰され……心も……更に、蝕まれていった……",
                                 voice: "story/1003/100362/191FE50C",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036207,
                             },
                             {
@@ -23502,6 +23753,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ときどき……正気を失って……暴走してしまうんだ。そうして……僕の友人、<H>No.36</>は……一足先に……",
                                 voice: "story/1003/100362/191FE536",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036208,
                             },
                             {
@@ -23517,6 +23769,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "姉さん、聞いて。",
                                 voice: "story/1003/100362/191FE58A",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036210,
                             },
                             {
@@ -23524,6 +23777,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "第六軍団は……「桂冠カロン族」の……肩書で……ぼ、僕たちを騙したんだ。",
                                 voice: "story/1003/100362/191FE5B4",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036211,
                             },
                             {
@@ -23531,6 +23785,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "帝国軍から……離れて……",
                                 voice: "story/1003/100362/191FE5DE",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036212,
                             },
                             {
@@ -23538,6 +23793,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "どこか……静かな場所を……見つけて……しっかり――",
                                 voice: "story/1003/100362/191FE608",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036213,
                             },
                             {
@@ -23552,6 +23808,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "僕は……",
                                 voice: "story/1003/100362/191FE65C",
                                 npc: 100327,
+                                speakerName: "ブルース",
                             },
                         ],
                     },
@@ -23613,6 +23870,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "手に届かぬのなら、引きずり下ろすまでだ。",
                                 voice: "story/1003/100362/191FE7AC",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036223,
                             },
                             {
@@ -23627,6 +23885,7 @@ export const questData_jp: QuestStory[] = [
                                     "私にはいくつもの名と顔がある。だが、それらは所詮ただの符号に過ぎない。いくら名を変えようが、神に見捨てられた身であることには変わりはない。",
                                 voice: "story/1003/100362/191FE800",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036225,
                             },
                             {
@@ -23634,6 +23893,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "賢い君たちのことだ。私が誰か、わからぬとは言わせんぞ。",
                                 voice: "story/1003/100362/191FE82A",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036226,
                             },
                             {
@@ -23642,6 +23902,7 @@ export const questData_jp: QuestStory[] = [
                                     "君たちを勧誘したい。頂点に居座るソラを引きずり下ろし、共にカロンの怒りを思い知らせようではないか。",
                                 voice: "story/1003/100362/191FE854",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036227,
                             },
                             {
@@ -23650,6 +23911,7 @@ export const questData_jp: QuestStory[] = [
                                     "すぐに断る必要はない。帝国が君たちに何をしてきたのか、よく考えてみろ。甘い嘘で君たちを欺き、残酷な刑罰で苦しめ、果てしない絶望で覆い尽くした――",
                                 voice: "story/1003/100362/191FE87E",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036228,
                             },
                             {
@@ -23657,6 +23919,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "その末に待っているのはなんだ？「桂冠カロン族」としての裕福な暮らしか？夢の実現か？",
                                 voice: "story/1003/100362/191FE8A8",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036229,
                             },
                             {
@@ -23665,6 +23928,7 @@ export const questData_jp: QuestStory[] = [
                                     "どれも違う！ソラどもに骨までしゃぶられ、同胞の裏切り者に追われ、最期は世の隅っこでドブネズミのようにひっそり死ぬだけだ。",
                                 voice: "story/1003/100362/191FE8D2",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036230,
                             },
                             {
@@ -23672,6 +23936,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "連中は言葉一つで私たちを騙し、希望を抱いたカロンを深淵へと追いやった。",
                                 voice: "story/1003/100362/191FE8FC",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036231,
                             },
                             {
@@ -23680,6 +23945,7 @@ export const questData_jp: QuestStory[] = [
                                     "第六軍団と錬金院の嘘が暴かれない限り、アイスレイク城のカロン族は皆、君たちと同じ道を辿って、悲惨な終わりを迎えるだろう。",
                                 voice: "story/1003/100362/191FE926",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036232,
                             },
                             {
@@ -23694,6 +23960,7 @@ export const questData_jp: QuestStory[] = [
                                     "私たちは帝国に過去を奪われ、地に汗滲む思いで生きている。だが、この先はどうだ？このまま指をくわえながら、連中に大切なものを踏みにじられる運命を受け入れるのか？",
                                 voice: "story/1003/100362/191FE97A",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036234,
                             },
                             {
@@ -23702,6 +23969,7 @@ export const questData_jp: QuestStory[] = [
                                     "私たちの有様を見てみろ。帝国は私たちの力を貪り、獣のように首輪をつけ、私たちを本当の悪魔へと変えた。",
                                 voice: "story/1003/100362/191FE9A4",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036235,
                             },
                             {
@@ -23709,6 +23977,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "枷が取れた今、その牙を連中の首に立てたいとは思わないか！？",
                                 voice: "story/1003/100362/191FE9CE",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036236,
                             },
                             {
@@ -23717,6 +23986,7 @@ export const questData_jp: QuestStory[] = [
                                     "その脳裏に私たちの存在を刻み、私たちの痛みを思い知らせろ！二度と踏みにじられないように！連中に血で償わせ、帝国に私たちの名を轟かせるのだ！",
                                 voice: "story/1003/100362/191FE9F8",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036237,
                             },
                             {
@@ -23731,6 +24001,7 @@ export const questData_jp: QuestStory[] = [
                                     "これは復讐であると同時に、「加護」でもある。私たち「悪魔」にしかできないことだ――内城区の「ゴミ」を掃除するとともに、君たちの家族も安らかな未来が得られる……一挙両得だ。",
                                 voice: "story/1003/100362/191FEA4C",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                             },
                         ],
                     },
@@ -23746,6 +24017,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "（フォーセイクン同盟……）",
                                 voice: "story/1003/100362/191FEA76",
                                 npc: 100328,
+                                speakerName: "ブルース",
                                 next: 10036240,
                             },
                             {
@@ -23753,6 +24025,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "僕には……まだ……や、やらねばならない……ことがあるから。",
                                 voice: "story/1003/100362/191FEAA0",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036241,
                             },
                             {
@@ -23767,6 +24040,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ついて来るな。",
                                 voice: "story/1003/100362/191FEAF4",
                                 npc: 100327,
+                                speakerName: "ブルース",
                             },
                         ],
                     },
@@ -23787,6 +24061,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "（ガレア劇場……懐かしいな。）",
                                 voice: "story/1003/100363/191FF54A",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036306,
                             },
                             {
@@ -23794,6 +24069,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "（この祭りは嫌いだ……こいつらはここを汚してる……）",
                                 voice: "story/1003/100363/191FF574",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036307,
                             },
                             {
@@ -23801,6 +24077,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "（……でも、今はそんなこと考えてる場合じゃない。あいつに会いに行かないと。）",
                                 voice: "story/1003/100363/191FF59E",
                                 npc: 100327,
+                                speakerName: "ブルース",
                             },
                         ],
                     },
@@ -23820,18 +24097,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 10036317,
                                 content: "うおーっ、すげぇ！今年の出し物はダントツだな！",
                                 voice: "story/1003/100363/191FF742",
+                                speakerName: "騒がしい市民",
                                 next: 10036318,
                             },
                             {
                                 id: 10036318,
                                 content: "見て、帝国軍兵士の仮装をしたやつまでいるぞ。銃まで本物そっくりだぜ！",
                                 voice: "story/1003/100363/191FF76C",
+                                speakerName: "騒がしい市民",
                                 next: 10036319,
                             },
                             {
                                 id: 10036319,
                                 content: "戦の真似事か？いいぜ、もっとやれー！",
                                 voice: "story/1003/100363/191FF796",
+                                speakerName: "騒がしい市民",
                                 next: 10036320,
                             },
                             {
@@ -23839,18 +24119,21 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100363/191FF7C0",
                                 npc: 100310,
+                                speakerName: "クレフ",
                                 next: 10036321,
                             },
                             {
                                 id: 10036321,
                                 content: "あれ、今の銃声リアルすぎないか？",
                                 voice: "story/1003/100363/191FF7EA",
+                                speakerName: "騒がしい市民",
                                 next: 10036322,
                             },
                             {
                                 id: 10036322,
                                 content: "すげぇなおい！もう一発頼む！",
                                 voice: "story/1003/100363/191FF814",
+                                speakerName: "騒がしい市民",
                                 next: 10036323,
                             },
                             {
@@ -23858,6 +24141,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "はぁ……",
                                 voice: "story/1003/100363/191FF83E",
                                 npc: 100310,
+                                speakerName: "クレフ",
                                 next: 10036324,
                             },
                             {
@@ -23865,18 +24149,21 @@ export const questData_jp: QuestStory[] = [
                                 content: "第十三軍団の任務中だ！死にたくなけりゃさっさと失せろ！",
                                 voice: "story/1003/100363/191FF868",
                                 npc: 100310,
+                                speakerName: "クレフ",
                                 next: 10036325,
                             },
                             {
                                 id: 10036325,
                                 content: "おい待て……まさか本物？！",
                                 voice: "story/1003/100363/191FF892",
+                                speakerName: "騒がしい市民",
                                 next: 10036326,
                             },
                             {
                                 id: 10036326,
                                 content: "帝国軍だ！本物の帝国軍が来たぞ！！",
                                 voice: "story/1003/100363/191FF8BC",
+                                speakerName: "騒がしい市民",
                                 next: 10036327,
                             },
                             {
@@ -23884,6 +24171,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "アルノード、トーマス、群衆を避難させろ！",
                                 voice: "story/1003/100363/191FF8E6",
                                 npc: 100310,
+                                speakerName: "クレフ",
                                 next: 10036328,
                             },
                             {
@@ -23891,6 +24179,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "他の奴らはこのまま牽制だ！",
                                 voice: "story/1003/100363/191FF910",
                                 npc: 100310,
+                                speakerName: "クレフ",
                             },
                         ],
                     },
@@ -23907,6 +24196,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "こんな場所に呼び出すとは、君もなかなか物好きだな。",
                                 voice: "story/1003/100363/191FF5C8",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036309,
                             },
                             {
@@ -23915,6 +24205,7 @@ export const questData_jp: QuestStory[] = [
                                     "よほどのことがない限り、呼び出すなと言ったはずだ。第十三軍団も退いたことだし、一刻も早く計画を進めるべきだ。",
                                 voice: "story/1003/100363/191FF5F2",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036310,
                             },
                             {
@@ -23922,6 +24213,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そうだな……約束は……果たすよ。",
                                 voice: "story/1003/100363/191FF61C",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036311,
                             },
                             {
@@ -23929,6 +24221,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………？！",
                                 voice: "story/1003/100363/191FF646",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                             },
                         ],
                     },
@@ -23942,6 +24235,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "君、なぜ……ぐっ……がは……！",
                                 voice: "story/1003/100363/191FF670",
                                 npc: 100326,
+                                speakerName: "落ち込む声",
                                 next: 10036313,
                             },
                             {
@@ -23949,6 +24243,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "僕は、初めから……僕の目的は……お前を、利用して……第十三軍団を――おびき出すことだ。",
                                 voice: "story/1003/100363/191FF69A",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036314,
                             },
                             {
@@ -23956,6 +24251,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "もっとも……十三軍団は……し、「真相」を暴く気など……な、なかったようだが。",
                                 voice: "story/1003/100363/191FF6C4",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036315,
                             },
                             {
@@ -23963,6 +24259,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "お前は……もはや……用済みだ……",
                                 voice: "story/1003/100363/191FF6EE",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036316,
                             },
                             {
@@ -23970,6 +24267,7 @@ export const questData_jp: QuestStory[] = [
                                 content: 'フォーセイクン<Default note="text:お前ら">フォーセイクン</>も……また……禍でしかない。',
                                 voice: "story/1003/100363/191FF718",
                                 npc: 100327,
+                                speakerName: "ブルース",
                             },
                         ],
                     },
@@ -24146,6 +24444,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "それは……ダメだ。",
                                 voice: "story/1003/100365/19201812",
                                 npc: 100327,
+                                speakerName: "ブルース",
                             },
                         ],
                     },
@@ -24187,6 +24486,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "君たち……どうして……",
                                 voice: "story/1003/100365/192018E4",
                                 npc: 100327,
+                                speakerName: "ブルース",
                             },
                         ],
                     },
@@ -24208,6 +24508,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "君たち……どうして……？帝国軍を……敵に回したら……",
                                 voice: "story/1003/100365/19201938",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036525,
                             },
                             {
@@ -24302,6 +24603,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……わかった……姉さんも……ひとつ……約束してくれ。",
                                 voice: "story/1003/100365/19201B06",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036536,
                             },
                             {
@@ -24309,6 +24611,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "何があっても……しっかり……生きて。",
                                 voice: "story/1003/100365/19201B30",
                                 npc: 100327,
+                                speakerName: "ブルース",
                             },
                         ],
                     },
@@ -24323,6 +24626,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "帝国軍に……銃を向けた君たちに……待ってるのは……拷問か……死だけだ。",
                                 voice: "story/1003/100365/19201B5A",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036538,
                             },
                             {
@@ -24330,6 +24634,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "僕には……まだ果たせていない約束があるんだ……ごめん……これから先の道は……君ひとりで、進んで……ほしい……",
                                 voice: "story/1003/100365/19201B84",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036539,
                             },
                             {
@@ -24337,6 +24642,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "アイスレイク城の……月狩り人よ……姉さんを……頼む……",
                                 voice: "story/1003/100365/19201BAE",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036540,
                             },
                             {
@@ -24351,6 +24657,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "逃亡に……終わりは……ない。",
                                 voice: "story/1003/100365/19201C02",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036542,
                             },
                             {
@@ -24365,6 +24672,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "行って……君は……いい人……あの人と……同じだ。",
                                 voice: "story/1003/100365/19201C56",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036544,
                             },
                             {
@@ -24393,6 +24701,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "「……語らぬ雪 空の娘……名もなき子に 祈り捧げ……」",
                                 voice: "story/1003/100365/19201CFE",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036548,
                             },
                             {
@@ -24407,6 +24716,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "「凍てつく地に……眠る少年……」",
                                 voice: "story/1003/100365/19201D52",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036582,
                             },
                             {
@@ -24436,6 +24746,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……ふっ……",
                                 voice: "story/1003/100365/19201DFA",
                                 npc: 100328,
+                                speakerName: "ブルース？",
                                 next: 10036554,
                             },
                             {
@@ -24443,6 +24754,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……いつから……気づいてた。",
                                 voice: "story/1003/100365/19201E24",
                                 npc: 100328,
+                                speakerName: "ブルース？",
                                 next: 10036555,
                             },
                             {
@@ -24539,6 +24851,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そこまで……言い当てられるなんて……驚いたよ……",
                                 voice: "story/1003/100365/19202046",
                                 npc: 100328,
+                                speakerName: "ブルース？",
                                 next: 10036568,
                             },
                             {
@@ -24547,6 +24860,7 @@ export const questData_jp: QuestStory[] = [
                                     "お前の想像通り……ブルースはもう……この世にはいない。だが……自分を殺した者の……真相を……姉に知られたくない……彼の最期の……望みだ……",
                                 voice: "story/1003/100365/19202070",
                                 npc: 100328,
+                                speakerName: "ブルース？",
                                 next: 10036569,
                             },
                             {
@@ -24555,6 +24869,7 @@ export const questData_jp: QuestStory[] = [
                                     "お前は本当に……賢いな。あの時……ぼ、僕たちも……お前みたいな……頭脳があれば……まあ……いまさら何を言っても……手遅れか。",
                                 voice: "story/1003/100365/1920209A",
                                 npc: 100328,
+                                speakerName: "ブルース？",
                                 next: 100365691,
                             },
                             {
@@ -24563,6 +24878,7 @@ export const questData_jp: QuestStory[] = [
                                     "僕は、ずっとお前たちを……だ、騙していた。あの昔話の……主人公を……すり替えたんだ。僕は……ブルースに……救われた。彼が僕に……ひ、人として生きる喜びを……お、教えてくれたんだ。",
                                 voice: "story/1003/100365/192020C4",
                                 npc: 100328,
+                                speakerName: "ブルース？",
                                 next: 10036571,
                             },
                             {
@@ -24571,6 +24887,7 @@ export const questData_jp: QuestStory[] = [
                                     "だが、僕は……既にひ、「人」としての資格を……う、奪われた存在だ。僕自身の……人生は……とっくに終わった……<H>ファンタジオ</>と……よ、呼んでくれ。",
                                 voice: "story/1003/100365/192020EE",
                                 npc: 100328,
+                                speakerName: "ブルース？",
                                 next: 10036572,
                             },
                             {
@@ -24578,6 +24895,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "月狩り人……頼む。リズムを連れて……こ、ここを離れろ。彼女を……守ってくれ。",
                                 voice: "story/1003/100365/19202118",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036573,
                             },
                             {
@@ -24585,6 +24903,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そして、永遠に……僕の正体を……言わないでほしい。",
                                 voice: "story/1003/100365/19202142",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036574,
                             },
                             {
@@ -24606,6 +24925,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "あ、ありがとう……",
                                 voice: "story/1003/100365/192021C0",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036577,
                             },
                             {
@@ -24621,6 +24941,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100365/19202214",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                             },
                         ],
                     },
@@ -24635,6 +24956,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "さて、最後に……後片付けを……しておかないと。",
                                 voice: "story/1003/100365/1920223E",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036580,
                             },
                             {
@@ -24642,6 +24964,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "こいつらの……き、傷痕を……偽造すれば……",
                                 voice: "story/1003/100365/19202268",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036586,
                             },
                             {
@@ -24698,6 +25021,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "これで……お前たちがいたことは……だ、誰にも知られない。",
                                 voice: "story/1003/100366/192025DA",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036602,
                             },
                             {
@@ -24705,6 +25029,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "この秘密は……僕が墓場まで……持って行くとしよう……",
                                 voice: "story/1003/100366/19202604",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036603,
                             },
                             {
@@ -24712,6 +25037,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ブルース……約束は果たしたぞ。",
                                 voice: "story/1003/100366/1920262E",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                             },
                         ],
                     },
@@ -24725,6 +25051,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "フォーセイクン同盟のやつ、もう行ったぞ！……ブルース、大丈夫か？ブルース、ブルース！",
                                 voice: "story/1003/100367/19203642",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036702,
                             },
                             {
@@ -24732,6 +25059,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "見た目の割りに……も、脆すぎる……錬金院の技術も……大したことないね。",
                                 voice: "story/1003/100367/1920366C",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036703,
                             },
                             {
@@ -24739,6 +25067,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "姉さん……銃の腕が、また上がった……前よりずっと上手だ……あれなら、ちゃんと……自分を守れる……ゴホッ！",
                                 voice: "story/1003/100367/19203696",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036704,
                             },
                             {
@@ -24746,6 +25075,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そんなこと言ってる場合か！",
                                 voice: "story/1003/100367/192036C0",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036705,
                             },
                             {
@@ -24753,6 +25083,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ハ、ハ……",
                                 voice: "story/1003/100367/192036EA",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036706,
                             },
                             {
@@ -24760,6 +25091,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "待ってろ。医者を捕まえてきてやる！脅してでも手当させるから――",
                                 voice: "story/1003/100367/19203714",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036707,
                             },
                             {
@@ -24767,6 +25099,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……もう……いいんだ……",
                                 voice: "story/1003/100367/1920373E",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036708,
                             },
                             {
@@ -24774,6 +25107,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "君は……何も言わないけど……僕にはわかるんだ……身体にこびりついた血が……何を意味するのかをね……",
                                 voice: "story/1003/100367/19203768",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036709,
                             },
                             {
@@ -24781,6 +25115,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "こうして……死ねば……みんなも……助かる。",
                                 voice: "story/1003/100367/19203792",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036710,
                             },
                             {
@@ -24789,6 +25124,7 @@ export const questData_jp: QuestStory[] = [
                                     "ふざけるな！他人のことばかり言って、自分はどうなんだ！？約束したことを忘れたのか？外へ出たら舞台を作るんだろ！僕が演技を教えてやる！みんなを招待して公演を開くって言ってたじゃないか！",
                                 voice: "story/1003/100367/192037BC",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036711,
                             },
                             {
@@ -24796,6 +25132,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……ごめんね……守れそうにないや……",
                                 voice: "story/1003/100367/192037E6",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036712,
                             },
                             {
@@ -24804,6 +25141,7 @@ export const questData_jp: QuestStory[] = [
                                     "なっ……そうだ、お前の姉さん！お前、姉さんに会いたがってたじゃないか！こんなところでくたばっちゃダメだ！",
                                 voice: "story/1003/100367/19203810",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036713,
                             },
                             {
@@ -24812,6 +25150,7 @@ export const questData_jp: QuestStory[] = [
                                     "……僕は……臆病者なんだ……口では……家族に会うんだとか……偉そうに言っても……いざ目の前にすると……逃げることしか……できなかった……",
                                 voice: "story/1003/100367/1920383A",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036714,
                             },
                             {
@@ -24819,6 +25158,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "お、お願いが……あるんだ。",
                                 voice: "story/1003/100367/19203864",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036715,
                             },
                             {
@@ -24827,6 +25167,7 @@ export const questData_jp: QuestStory[] = [
                                     "この編み紐は……僕の宝物だ。姉さんに……だ、第六軍団の……真相を……伝えてくれ……彼女を……同じ目に……合わせたくないんだ……",
                                 voice: "story/1003/100367/1920388E",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036716,
                             },
                             {
@@ -24835,6 +25176,7 @@ export const questData_jp: QuestStory[] = [
                                     "それから……<H>僕を殺したのが……姉さんだってこと……絶対に……知られちゃダメだ……</>そんなの知ったら……姉さんは……",
                                 voice: "story/1003/100367/192038B8",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036717,
                             },
                             {
@@ -24842,6 +25184,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "たの……む……",
                                 voice: "story/1003/100367/192038E2",
                                 npc: 100327,
+                                speakerName: "ブルース",
                                 next: 10036718,
                             },
                             {
@@ -24849,6 +25192,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ブルース……！！",
                                 voice: "story/1003/100367/1920390C",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036719,
                             },
                             {
@@ -24856,6 +25200,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……わかったよ。",
                                 voice: "story/1003/100367/19203936",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036720,
                             },
                             {
@@ -24863,6 +25208,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "だが、彼女にお前の死を隠した上で、第六軍団の真相を伝えるとなると……",
                                 voice: "story/1003/100367/19203960",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036721,
                             },
                             {
@@ -24870,6 +25216,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……そうか。",
                                 voice: "story/1003/100367/1920398A",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036722,
                             },
                             {
@@ -24877,6 +25224,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "<H>「ブルース」が自ら姉さんに事実を伝えればいい</>……そうすれば……",
                                 voice: "story/1003/100367/192039B4",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                             },
                         ],
                     },
@@ -24903,6 +25251,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ブルース……約束……守ったが……結局は……バレてしまった。",
                                 voice: "story/1003/100368/192046AA",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036802,
                             },
                             {
@@ -24910,6 +25259,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "だが、安心しろ……リズムがお前の死因を……知ることはない。",
                                 voice: "story/1003/100368/192046D4",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036803,
                             },
                             {
@@ -24917,6 +25267,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100368/192046FE",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036804,
                             },
                             {
@@ -24924,6 +25275,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "初めての……共演にしては……なかなか……悪くなかった……そうだろう？",
                                 voice: "story/1003/100368/19204728",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036805,
                             },
                             {
@@ -24931,6 +25283,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "やっと……来たか……",
                                 voice: "story/1003/100368/19204752",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036806,
                             },
                             {
@@ -24938,6 +25291,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "あいつを……捕らえるために……わざと僕を……逃がしたんだろ……まったく賢いな。",
                                 voice: "story/1003/100368/1920477C",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036807,
                             },
                             {
@@ -24945,6 +25299,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "それなら、僕が……残したてがかりも……回収したはず……なぜ……公にしない？",
                                 voice: "story/1003/100368/192047A6",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036808,
                             },
                             {
@@ -24952,6 +25307,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "第六軍団の……真相を……！",
                                 voice: "story/1003/100368/192047D0",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                                 next: 10036809,
                             },
                             {
@@ -24980,6 +25336,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……やるしかない……か。",
                                 voice: "story/1003/100368/19204878",
                                 npc: 100328,
+                                speakerName: "ファンタジオ",
                             },
                         ],
                     },
@@ -25734,37 +26091,44 @@ export const questData_jp: QuestStory[] = [
                                 id: 10040101,
                                 content: "「遠方には、あなただけの書店や酒場が待っているかもしれません。」",
                                 voice: "story/1004/100401/19226412",
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10040102,
                                 content: "「遠方とは、夢と、約束と、少しの不安が混ざり合う場所。」",
                                 voice: "story/1004/100401/1922643C",
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10040103,
                                 content: "「遠方には、あなたを想う誰かが、今日も静かに帰りを待っているかもしれません。」",
                                 voice: "story/1004/100401/19226466",
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10040104,
                                 content: "「未知は尽きません。けれど、今とはまるで違う景色が、きっと広がっています。」",
                                 voice: "story/1004/100401/19226490",
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10040105,
                                 content: "「しかし、遠方は決して遠くない。あなたと未来を隔てるのは、たった一枚の切符だけなのです。」",
                                 voice: "story/1004/100401/192264BA",
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10040106,
                                 content:
                                     "「帝国鉄道・最新特別列車『オーロラ号』へ、ようこそ。装甲列車を改装した堅牢な車体、万一に備えた列車砲。あなたの安全を御守りします。」",
                                 voice: "story/1004/100401/192264E4",
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10040107,
                                 content: "「清潔で、明るく、そしてゴージャス。鳴り響く汽笛とともに――遠方への憧れを、現実へ。」",
                                 voice: "story/1004/100401/1922650E",
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10040108,
@@ -26167,24 +26531,28 @@ export const questData_jp: QuestStory[] = [
                                 id: 10040408,
                                 content: "全員、動くな！",
                                 voice: "story/1004/100404/19229670",
+                                speakerName: "厳格な兵士",
                             },
                             {
                                 id: 10040409,
                                 content: "帝国のために戦い抜いた老兵たちが、この地へ帰られた！",
                                 voice: "story/1004/100404/1922969A",
                                 npc: 100410,
+                                speakerName: "厳格な兵士",
                             },
                             {
                                 id: 10040410,
                                 content: "南方でフォーセイクン同盟の反乱を鎮圧し、勝利をもたらした英雄たちを拍手と歓声で、称えよ！",
                                 voice: "story/1004/100404/192296C4",
                                 npc: 100410,
+                                speakerName: "厳格な兵士",
                             },
                             {
                                 id: 10040411,
                                 content: "父さん！母さん！アイスレイク城……ああ、本当に生きて帰ってこれたんだな……",
                                 voice: "story/1004/100404/192296EE",
                                 npc: 100409,
+                                speakerName: "復員兵",
                             },
                             {
                                 id: 10040412,
@@ -26203,12 +26571,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "……？",
                                 voice: "story/1004/100404/1922976C",
                                 npc: 100409,
+                                speakerName: "復員兵",
                             },
                             {
                                 id: 10040415,
                                 content: "ご婦人、失礼だが……人違いじゃないか？",
                                 voice: "story/1004/100404/19229796",
                                 npc: 100409,
+                                speakerName: "復員兵",
                             },
                             {
                                 id: 10040416,
@@ -26228,6 +26598,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "何を言ってるんだ？この指輪は、レッドバリー城で自分で買ったんだ！",
                                 voice: "story/1004/100404/19229814",
                                 npc: 100409,
+                                speakerName: "復員兵",
                             },
                         ],
                     },
@@ -26251,12 +26622,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "危険人物を確認。混乱の拡大を防ぐため、この場で処刑する――",
                                 voice: "story/1004/100405/1922A5B2",
                                 npc: 100410,
+                                speakerName: "厳格な兵士",
                             },
                             {
                                 id: 10040502,
                                 content: "……アイゼンバーン閣下。",
                                 voice: "story/1004/100405/1922A5DC",
                                 npc: 100410,
+                                speakerName: "厳格な兵士",
                             },
                             {
                                 id: 10040503,
@@ -26282,6 +26655,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "はっ。すぐに解決策を考えます！",
                                 voice: "story/1004/100405/1922A684",
                                 npc: 100410,
+                                speakerName: "厳格な兵士",
                             },
                             {
                                 id: 10040507,
@@ -26313,6 +26687,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……お、おい！ 知らないって言ってるだろ！",
                                 voice: "story/1004/100405/1922A756",
                                 npc: 100409,
+                                speakerName: "復員兵",
                             },
                             {
                                 id: 10040512,
@@ -26329,6 +26704,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "犯人、確保しました。留置場に留置――",
                                 voice: "story/1004/100405/1922A7AA",
                                 npc: 100410,
+                                speakerName: "厳格な兵士",
                             },
                             {
                                 id: 10040514,
@@ -26363,6 +26739,7 @@ export const questData_jp: QuestStory[] = [
                                     "だから言っただろ！レッドバリー城の「シルバーハート」で買ったんだって。疑うなら自分で行って確かめればいい。",
                                 voice: "story/1004/100405/1922A87C",
                                 npc: 100409,
+                                speakerName: "復員兵",
                             },
                             {
                                 id: 10040519,
@@ -26588,12 +26965,14 @@ export const questData_jp: QuestStory[] = [
                                     "ようこそ、アイスレイク城・フラワー駅へ。我らの銃、列車の上に据えられた大砲、そして空を巡る飛空艇――その全てが、皆さまの旅路をお守りいたします。",
                                 voice: "story/1004/100406/1922B61A",
                                 npc: 100420,
+                                speakerName: "真面目な衛兵",
                             },
                             {
                                 id: 10040602,
                                 content: "最新のイコル技術による航路です。どうぞ、安心してお楽しみください。",
                                 voice: "story/1004/100406/1922B644",
                                 npc: 100421,
+                                speakerName: "礼儀正しい衛兵",
                             },
                             {
                                 id: 10040603,
@@ -26601,6 +26980,7 @@ export const questData_jp: QuestStory[] = [
                                     "さて――あなたと他の乗客のため、そして帝国の動脈たる鉄路を守るために。これより、安全確認を行います。",
                                 voice: "story/1004/100406/1922B66E",
                                 npc: 100420,
+                                speakerName: "真面目な衛兵",
                             },
                             {
                                 id: 10040604,
@@ -26615,12 +26995,14 @@ export const questData_jp: QuestStory[] = [
                                     "フォーセイクン同盟のせいさ。アイスレイク城はともかく、他の地域じゃまた騒ぎを起こしている。あちこちで火の手だ爆発だと報告が絶えない。",
                                 voice: "story/1004/100406/1922B6C2",
                                 npc: 100421,
+                                speakerName: "礼儀正しい衛兵",
                             },
                             {
                                 id: 10040606,
                                 content: "鉄路は帝国の血管だ。連中の好きにさせるわけにはいかない。用心に越したことはないだろう。",
                                 voice: "story/1004/100406/1922B6EC",
                                 npc: 100421,
+                                speakerName: "礼儀正しい衛兵",
                             },
                             {
                                 id: 10040607,
@@ -26634,6 +27016,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "いい心意気だ。惜しいな、カロンでなければ……機会があれば桂冠カロン族に志願してみるといい。",
                                 voice: "story/1004/100406/1922B740",
                                 npc: 100421,
+                                speakerName: "礼儀正しい衛兵",
                                 options: [
                                     {
                                         id: 10040609,
@@ -26662,6 +27045,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……適当にあしらってるだけじゃないか。",
                                 voice: "story/1004/100406/1922B7E8",
                                 npc: 100420,
+                                speakerName: "真面目な衛兵",
                             },
                             {
                                 id: 10040613,
@@ -26669,6 +27053,7 @@ export const questData_jp: QuestStory[] = [
                                     "理屈はそうだがここは帝国だ。ソラが本気にしなければ笑い話で済む。だがカロンが本気にすれば――面倒になる。",
                                 voice: "story/1004/100406/1922B812",
                                 npc: 100420,
+                                speakerName: "真面目な衛兵",
                             },
                             {
                                 id: 10040614,
@@ -26676,12 +27061,14 @@ export const questData_jp: QuestStory[] = [
                                     "物騒なことを言うな。噂くらいは耳にしているが、たいていは誰かが作った都市伝説だ。何を信じるかまでは、こちらも強制しないがね。",
                                 voice: "story/1004/100406/1922B83C",
                                 npc: 100420,
+                                speakerName: "真面目な衛兵",
                             },
                             {
                                 id: 10040627,
                                 content: "いずれにせよ――安全確認は不合格だ。出直してもらおう。",
                                 voice: "story/1004/100406/1922B83D",
                                 npc: 100421,
+                                speakerName: "真面目な衛兵",
                             },
                             {
                                 id: 10040615,
@@ -26695,12 +27082,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "口先では通らない。問題はその首のペンダントだ。",
                                 voice: "story/1004/100406/1922B890",
                                 npc: 100421,
+                                speakerName: "礼儀正しい衛兵",
                             },
                             {
                                 id: 10040617,
                                 content: "精巧な細工に高価な素材……ケメト産の宝石だな。",
                                 voice: "story/1004/100406/1922B8BA",
                                 npc: 100421,
+                                speakerName: "礼儀正しい衛兵",
                             },
                             {
                                 id: 10040618,
@@ -26708,6 +27097,7 @@ export const questData_jp: QuestStory[] = [
                                     "その格好と釣り合わん。布を巻いて腹を出しているような身なりで、そんな品を持っているとはな。拾って自分のものにしたか、どこかでくすねたか――疑う理由は十分ある。",
                                 voice: "story/1004/100406/1922B8E4",
                                 npc: 100421,
+                                speakerName: "礼儀正しい衛兵",
                             },
                             {
                                 id: 10040619,
@@ -26720,6 +27110,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "なら、その妹を連れて来い。確認しよう。それまでは――駅で預かる。",
                                 voice: "story/1004/100406/1922B938",
                                 npc: 100421,
+                                speakerName: "礼儀正しい衛兵",
                             },
                             {
                                 id: 10040621,
@@ -26739,6 +27130,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "どうぞ。……ですが、安全確認は受けていただきます。",
                                 voice: "story/1004/100406/1922B9B6",
                                 npc: 100421,
+                                speakerName: "礼儀正しい衛兵",
                             },
                             {
                                 id: 10040624,
@@ -26752,6 +27144,7 @@ export const questData_jp: QuestStory[] = [
                                     "やむを得ません。先ほどロビーで騒ぎがあったでしょう。あれが駅構内で起きたら、どうなるか分かりません。どうかご理解を。",
                                 voice: "story/1004/100406/1922BA0A",
                                 npc: 100420,
+                                speakerName: "真面目な衛兵",
                             },
                             {
                                 id: 10040626,
@@ -26759,6 +27152,7 @@ export const questData_jp: QuestStory[] = [
                                     "あなた方も同じだ。別に品を取り上げて私腹を肥やすつもりはない。だが、駅長から警戒を強めろと命じられている。油断はできん。妹を連れて来い。証言に問題がなければ、すぐに返却する。",
                                 voice: "story/1004/100406/1922BA34",
                                 npc: 100421,
+                                speakerName: "礼儀正しい衛兵",
                             },
                         ],
                     },
@@ -27136,12 +27530,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "おい、そこの君！",
                                 voice: "story/1004/100494/192859DA",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049402,
                                 content: "そう、君だ！少し手を貸してくれないか？実は帝都に少しばかり財産があってね。対価はきちんと払うよ。",
                                 voice: "story/1004/100494/19285A04",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049403,
@@ -27154,12 +27550,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "さっきからこのあたりでずっと忙しくしていたよね。だがその身なり、物腰……とても日雇いには見えない。",
                                 voice: "story/1004/100494/19285A58",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049405,
                                 content: "むしろ――工場労働者の実態を探る記者。あるいは、別の思惑を抱えた人物……といったところか？",
                                 voice: "story/1004/100494/19285A82",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049406,
@@ -27173,6 +27571,7 @@ export const questData_jp: QuestStory[] = [
                                     "はは、構えるな。実は私も似たようなものだ。つい先日「ヒュペリア朝刊」に入ったばかりの記者でね。ディズマニアから来た。",
                                 voice: "story/1004/100494/19285AD6",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049408,
@@ -27180,6 +27579,7 @@ export const questData_jp: QuestStory[] = [
                                     "噂で聞いたのだが、アイスレイク城の第六軍団――口では忠誠を誓いながら、裏では煙のように黒いことばかりしているらしい。民を虐げた例も、数えきれないとか。",
                                 voice: "story/1004/100494/19285B00",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049409,
@@ -27187,12 +27587,14 @@ export const questData_jp: QuestStory[] = [
                                     "実際、駅に着いた瞬間から嫌な空気を感じた。昨日の午後少し探りを入れただけで、どこへ行っても衛兵の視線が刺さる。……明らかに警戒されているよ。",
                                 voice: "story/1004/100494/19285B2A",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049410,
                                 content: "なんという罪深い街だ。たかが駅一つに、これほどの秘密が沈んでいるとは。",
                                 voice: "story/1004/100494/19285B54",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049411,
@@ -27206,6 +27608,7 @@ export const questData_jp: QuestStory[] = [
                                     "何って……「第六軍団に不穏な噂があるそうだね？何か知ってるかい？この土地に巣食う闇を、共に暴こうじゃないか！」って。",
                                 voice: "story/1004/100494/19285BA8",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                                 options: [
                                     {
                                         id: 10049413,
@@ -27234,12 +27637,14 @@ export const questData_jp: QuestStory[] = [
                                     "……妙だな。獣だって打たれれば鳴く。人間も同じだろう？それとも、ここはソラを信じるカロンがいないほど荒れているのか？",
                                 voice: "story/1004/100494/19285C50",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049417,
                                 content: "迷わず賛同したのは君だけだ。ほとんどは、どこか疑いの目を向けてな。",
                                 voice: "story/1004/100494/19285C7A",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049418,
@@ -27247,6 +27652,7 @@ export const questData_jp: QuestStory[] = [
                                     "何を言うんだ。私よりも、駅長の方がよほど危険だよ！駅を私物のように扱っていると聞く。いずれ彼も調べるつもりだ。",
                                 voice: "story/1004/100494/19285CA4",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049419,
@@ -27254,24 +27660,28 @@ export const questData_jp: QuestStory[] = [
                                     "……ともあれ。アイスレイク城に埋もれた邪悪を白日の下にさらすには、協力者が必要だ。しばらく観察していたが――君が最適だ。",
                                 voice: "story/1004/100494/19285CCE",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049420,
                                 content: "第一に、君も何かを探っているように見える。",
                                 voice: "story/1004/100494/19285CF8",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049421,
                                 content: "第二に、さきほどの騒ぎで一番速く動いていたのは君だ。きっと只者ではない。",
                                 voice: "story/1004/100494/19285D22",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049422,
                                 content: "そして何より……直感だ。君は悪人ではない。",
                                 voice: "story/1004/100494/19285D4C",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049423,
@@ -27286,12 +27696,14 @@ export const questData_jp: QuestStory[] = [
                                     "いやいや！父が言っていた――「アイスレイク城のような片田舎に、金貨一枚で解決できない問題はない。もしあるなら、もう一枚足せ」と。",
                                 voice: "story/1004/100494/19285DA0",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049425,
                                 content: "小切手だ。一枚で金貨5枚の価値がある。面倒を吹っかけられたら、そのまま渡せ――父の教えだ。",
                                 voice: "story/1004/100494/19285DCA",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049426,
@@ -27304,6 +27716,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "真相が掴めたら、報酬に十枚やろう。どうだ？",
                                 voice: "story/1004/100494/19285E1E",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049428,
@@ -27317,6 +27730,7 @@ export const questData_jp: QuestStory[] = [
                                     "よし。まずは腕試しだ。この小切手を持って、鍛鉄工場の入口にいる監督官に近づいてくれ。世間話でも何でもいい、懐に入り込むんだ。",
                                 voice: "story/1004/100494/19285E72",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049430,
@@ -27329,6 +27743,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そんなことはない。我が家も湯水のように金があるわけではない。見込みを確かめたいだけだ。",
                                 voice: "story/1004/100494/19285EC6",
                                 npc: 100411,
+                                speakerName: "貴族風の青年",
                             },
                             {
                                 id: 10049432,
@@ -27613,6 +28028,7 @@ export const questData_jp: QuestStory[] = [
                                     "お前ら、どういうつもりだ！ただの調整工程だぞ、それがこの有様か！一昨日は油圧弁の圧不足、昨日はイコル液の噴出！",
                                 voice: "story/1004/100496/19287AAA",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                             },
                             {
                                 id: 10049602,
@@ -27620,6 +28036,7 @@ export const questData_jp: QuestStory[] = [
                                     "今日は何だ？テスト開始と同時に機関車が十数メートルも突っ込んだぞ！飛空艇の打ち上げでもやるつもりか！",
                                 voice: "story/1004/100496/19287AD4",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                             },
                             {
                                 id: 10049603,
@@ -27627,6 +28044,7 @@ export const questData_jp: QuestStory[] = [
                                     "俺がとっさに脇へ飛ばなきゃ、あの鋳塊みたいに鉄板になっていたところだ。カルノー！今回の原因を説明しろ。",
                                 voice: "story/1004/100496/19287AFE",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                             },
                             {
                                 id: 10049604,
@@ -27640,17 +28058,20 @@ export const questData_jp: QuestStory[] = [
                                     "そのとおりだ。これがベテランの目ってやつだ。一言で核心を突く。お前らも見習え。全員がカルノーみたいなら、俺も毎日こんな肝を冷やさずに済むってのに。",
                                 voice: "story/1004/100496/19287B52",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                             },
                             {
                                 id: 10049606,
                                 content: "総点検だ！不具合がゼロになるまで、再調整は一切禁止とする！",
                                 voice: "story/1004/100496/19287B7C",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                             },
                             {
                                 id: 10049607,
                                 content: "はい――！",
                                 voice: "story/1004/100496/19287BA6",
+                                speakerName: "作業員たち",
                             },
                             {
                                 id: 10049608,
@@ -27663,6 +28084,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "だめだ。お前も残って点検に加われ。",
                                 voice: "story/1004/100496/19287BFA",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                             },
                             {
                                 id: 10049610,
@@ -27675,12 +28097,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "関係ない。さっきの話、聞いただろう？新型列車の試運転中に事故が起きて先頭部が暴走したんだ。",
                                 voice: "story/1004/100496/19287C4E",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                             },
                             {
                                 id: 10049612,
                                 content: "よって宣言する。俺の視界にいる者は全員、リスク排除に当たれ。爆発したら、全員まとめて終わりだ！",
                                 voice: "story/1004/100496/19287C78",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                             },
                             {
                                 id: 10049613,
@@ -27693,6 +28117,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "当然だ！死にたくなければ動け！安全は何よりも重要だ！",
                                 voice: "story/1004/100496/19287CCC",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                             },
                             {
                                 id: 10049615,
@@ -27790,6 +28215,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "お、もう終わったのか？やるじゃないか。今日はここまでだ、みんな自分の持ち場に戻れ。",
                                 voice: "story/1004/100499/1928AEAD",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                                 next: 10049701,
                             },
                             {
@@ -27805,6 +28231,7 @@ export const questData_jp: QuestStory[] = [
                                     "ところであんたら手際がいいな。どうだ、肺が粉塵でやられる前に、煙突仕事なんてやめてさ。うちの班で働かないか？",
                                 voice: "story/1004/100497/19288B3C",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                                 next: 10049703,
                             },
                             {
@@ -27819,6 +28246,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そうかい。気が変わったら、いつでも顔を出しな。",
                                 voice: "story/1004/100497/19288B90",
                                 npc: 100407,
+                                speakerName: "威厳のある労働者",
                             },
                         ],
                     },
@@ -27871,6 +28299,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10049921,
                                 content: "危険を検知。危険を検知。直ちに排除する。直ちに排除する。",
                                 voice: "story/1004/100499/1928AF2A",
+                                speakerName: "警戒ロボット",
                             },
                         ],
                     },
@@ -28205,6 +28634,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ほう？ずいぶん賑やかだと思えば……スノウか。",
                                 voice: "story/1004/100402/192276C6",
                                 npc: 100405,
+                                speakerName: "聞き覚えがあるようでない声",
                             },
                             {
                                 id: 10040216,
@@ -28425,32 +28855,38 @@ export const questData_jp: QuestStory[] = [
                                 id: 10049924,
                                 content: "聞いたか？さっき駅前のドームで騒ぎがあったらしいぞ。",
                                 voice: "story/1004/100499/1928AFA8",
+                                speakerName: "お節介な駅員",
                             },
                             {
                                 id: 10049925,
                                 content: "俺も見たよ。頭のおかしい女が戻ってきた兵士に食ってかかってな。息子のものを盗んだとか何とか。",
                                 voice: "story/1004/100499/1928AFD2",
+                                speakerName: "噂好きな駅員",
                             },
                             {
                                 id: 10049926,
                                 content: "うわ……下手したら死人が出る話じゃないか。",
                                 voice: "story/1004/100499/1928AFFC",
+                                speakerName: "お節介な駅員",
                             },
                             {
                                 id: 10049927,
                                 content:
                                     "そこまではいかなかった。駅長がうまく収めたよ。助かったぜ。このあと戻ってくる古参兵もまだいるんだ、帰って早々あんな場面を見せるわけにはいかないな。",
                                 voice: "story/1004/100499/1928B026",
+                                speakerName: "噂好きな駅員",
                             },
                             {
                                 id: 10049928,
                                 content: "今日、あと何本来るんだ？迎えも、いつになったら終わるんだか。",
                                 voice: "story/1004/100499/1928B050",
+                                speakerName: "お節介な駅員",
                             },
                             {
                                 id: 10049929,
                                 content: "あと二本ってところだろ。文句言ってないで、さっさと七番ホームへ行け。",
                                 voice: "story/1004/100499/1928B07A",
+                                speakerName: "噂好きな駅員",
                             },
                             {
                                 id: 10049930,
@@ -28470,6 +28906,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "まもなく、七番ホームに列車が到着いたします。この列車はディズマニア発、アイスレイク城行き——当駅が終点となります。",
                                 voice: "story/1004/100499/1928B0CE",
+                                speakerName: "アナウンス",
                             },
                         ],
                     },
@@ -28483,12 +28920,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 10049932,
                                 content: "列車が来るぞ、準備しろ！停車したら、重傷者から先に医務室へ運べ！",
                                 voice: "story/1004/100499/1928B0F8",
+                                speakerName: "お節介な衛兵",
                             },
                             {
                                 id: 10049933,
                                 content:
                                     "まったく、どういう手配してるんだか。七番ホームから医務室まで、歩道橋をひとつ越えなきゃならないんだぞ。怪我人にこれ以上無理をさせてどうする。",
                                 voice: "story/1004/100499/1928B122",
+                                speakerName: "噂好きな衛兵",
                             },
                             {
                                 id: 10049934,
@@ -28575,12 +29014,14 @@ export const questData_jp: QuestStory[] = [
                                     "第十三軍団専用列車カラス号……ほんと、何度見ても見飽きないな。記録にあった通り、重々しくて、威圧感があって……あんなに苦労して資料を漁った甲斐があったよ。",
                                 voice: "story/1004/100418/19237AFA",
                                 npc: 100415,
+                                speakerName: "列車が好きな子供",
                             },
                             {
                                 id: 10041802,
                                 content: "いつか……僕も乗りたいなぁ。",
                                 voice: "story/1004/100418/19237B24",
                                 npc: 100415,
+                                speakerName: "列車が好きな子供",
                             },
                             {
                                 id: 10041803,
@@ -28593,6 +29034,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そんなに近づいてないよ。隅っこで見てるだけだって……",
                                 voice: "story/1004/100418/19237B78",
                                 npc: 100415,
+                                speakerName: "列車が好きな子供",
                             },
                             {
                                 id: 10041805,
@@ -28605,6 +29047,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "うん、分かった。ありがとう。",
                                 voice: "story/1004/100418/19237BCC",
                                 npc: 100415,
+                                speakerName: "列車が好きな子供",
                             },
                             {
                                 id: 10041807,
@@ -28660,6 +29103,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "まもなく、三番ホームに列車が到着いたします。この列車はレッドバリー発、アイスレイク城行き——当駅が終点となります。",
                                 voice: "story/1004/100418/19237D9A",
+                                speakerName: "アナウンス",
                             },
                         ],
                     },
@@ -28679,12 +29123,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "……さっきは助かったよ。ありがとう。カラス号に見入っちゃってて、まわりが見えてなかった。",
                                 voice: "story/1004/100419/19238B62",
                                 npc: 100415,
+                                speakerName: "列車が好きな子供",
                             },
                             {
                                 id: 10041902,
                                 content: "でも、君たちもカラス号を見に来たんでしょ？やっぱり列車好きに悪い人はいないね！",
                                 voice: "story/1004/100419/19238B8C",
                                 npc: 100415,
+                                speakerName: "列車が好きな子供",
                             },
                             {
                                 id: 10041903,
@@ -28698,12 +29144,14 @@ export const questData_jp: QuestStory[] = [
                                     "もちろん！この「カラス号」は、第十三軍団長シビルの専用列車なんだ。第十三軍団って決まった駐屯地がないから、この列車もどこに現れるか分からないんだよ。",
                                 voice: "story/1004/100419/19238BE0",
                                 npc: 100415,
+                                speakerName: "列車が好きな子供",
                             },
                             {
                                 id: 10041905,
                                 content: "だから鉄道マニアのあいだじゃ、これを見かけるとツイてるって言われてる。",
                                 voice: "story/1004/100419/19238C0A",
                                 npc: 100415,
+                                speakerName: "列車が好きな子供",
                             },
                             {
                                 id: 10041906,
@@ -28717,6 +29165,7 @@ export const questData_jp: QuestStory[] = [
                                     "たぶんいないと思う。僕、シビル様本人は見たことないけど、この列車、もう二十日以上ここに停まってるんだ。なのに、大きな動きは何もなかったし。",
                                 voice: "story/1004/100419/19238C5E",
                                 npc: 100415,
+                                speakerName: "列車が好きな子供",
                             },
                             {
                                 id: 10041908,
@@ -28730,6 +29179,7 @@ export const questData_jp: QuestStory[] = [
                                     "うん。だって僕、ここの天井の骨組みを掃除する仕事をしてるからね。改めて自己紹介しとくよ。僕はステファン。筋金入りの列車マニアさ！",
                                 voice: "story/1004/100419/19238CB2",
                                 npc: 100415,
+                                speakerName: "列車が好きな子供",
                             },
                             {
                                 id: 10041910,
@@ -29068,6 +29518,7 @@ export const questData_jp: QuestStory[] = [
                                     "フラワー駅よりご案内いたします。イーザー行き夜行列車は、本日十九時に発車予定です。ご乗車のお客様は――",
                                 voice: "story/1004/100422/1923BD42",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10042206,
@@ -29080,6 +29531,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "――なんてね～",
                                 voice: "story/1004/100422/1923BD96",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10042208,
@@ -29087,6 +29539,7 @@ export const questData_jp: QuestStory[] = [
                                     "ヒュペリア軍団の犬ども、よーく聞け。フォーセイクン同盟の名において要求する。お前らが移送しようとしてる「例の囚人」を今夜零時までに解放しろ。以後は同盟が保護する。",
                                 voice: "story/1004/100422/1923BDC0",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10042209,
@@ -29094,6 +29547,7 @@ export const questData_jp: QuestStory[] = [
                                     "もちろん、断るなら断ればいい。その時は近いうちに、フラワー駅にとびきり派手な花火を上げてやる。この前の劇場で見たものなど比べものにならないよ～",
                                 voice: "story/1004/100422/1923BDEA",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                         ],
                     },
@@ -29198,6 +29652,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 100499158,
                                 content: "そこのお前たち！こそこそ何をしている！",
                                 voice: "story/1004/100499/100499158",
+                                speakerName: "駅の衛兵",
                             },
                             {
                                 id: 100499159,
@@ -29748,6 +30203,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "やめなさい。",
                                 voice: "story/1004/100426/1923FF36",
                                 npc: 100404,
+                                speakerName: "上品な声",
                             },
                             {
                                 id: 10042608,
@@ -29787,6 +30243,7 @@ export const questData_jp: QuestStory[] = [
                                     "気遣いは感謝いたしますわ。でも、この方たちは爆破を起こしたフォーセイクン同盟の一味ではありません。それは、わたくしが保証いたします。",
                                 voice: "story/1004/100426/19240032",
                                 npc: 100404,
+                                speakerName: "上品な声",
                             },
                             {
                                 id: 10042614,
@@ -29847,6 +30304,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "帝国の役人というのは、そのようにして務めを果たしていらっしゃるのかしら？",
                                 voice: "story/1004/100426/192401AC",
                                 npc: 100404,
+                                speakerName: "上品な声",
                             },
                             {
                                 id: 10042623,
@@ -29860,6 +30318,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "人は、部品ではありません。",
                                 voice: "story/1004/100426/19240200",
                                 npc: 100404,
+                                speakerName: "上品な声",
                             },
                             {
                                 id: 10042625,
@@ -29924,6 +30383,7 @@ export const questData_jp: QuestStory[] = [
                                     "さて、今日が終わる前に、急いで汚名を晴らしてきなさい。でもその前に、車内へ。あなたたちも、聞きたいことがあるのでしょう？",
                                 voice: "story/1004/100426/192403A4",
                                 npc: 100404,
+                                speakerName: "上品な声",
                             },
                         ],
                     },
@@ -29941,6 +30401,7 @@ export const questData_jp: QuestStory[] = [
                                     "この先の車両には、軍団の機密が多く積まれていますの。だから、ここから先には立ち入らないでほしい。でも安心して。少なくとも、わたくしはあなたたちの敵ではありませんわ。",
                                 voice: "story/1004/100427/19240EA2",
                                 npc: 100404,
+                                speakerName: "上品な声",
                             },
                             {
                                 id: 10042702,
@@ -29948,6 +30409,7 @@ export const questData_jp: QuestStory[] = [
                                     "それと、仲間のこともあまり案じすぎなくていいわ。アイゼンバーンは帝国の役人ではあるけれど、むやみに血を好むような人ではありません。",
                                 voice: "story/1004/100427/19240ECC",
                                 npc: 100404,
+                                speakerName: "上品な声",
                             },
                             {
                                 id: 10042703,
@@ -29961,6 +30423,7 @@ export const questData_jp: QuestStory[] = [
                                     "わたくしは第十三軍団の監督官。任務でアイスレイク城に来ていて……ずっと、あなたを観察していましたの。",
                                 voice: "story/1004/100427/19240F20",
                                 npc: 100404,
+                                speakerName: "上品な声",
                             },
                             {
                                 id: 10042706,
@@ -29968,6 +30431,7 @@ export const questData_jp: QuestStory[] = [
                                     "どうしてあなたがここにいるのか、それはまだ分かりません。でも、力のある月狩り人が国の犠牲になるのは見たくないの。だから、少しだけ手を貸してあげたかったのですわ。",
                                 voice: "story/1004/100427/19240F74",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                                 options: [
                                     {
                                         id: 10042707,
@@ -29996,6 +30460,7 @@ export const questData_jp: QuestStory[] = [
                                     "そう受け取ってもらってかまいませんわ。わたくしには、有能な人材が必要なの。そしてあなたは――間違いなく優れた月狩り人ですもの。",
                                 voice: "story/1004/100427/1924101C",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042711,
@@ -30003,12 +30468,14 @@ export const questData_jp: QuestStory[] = [
                                     "話が早くて助かりますわ。ええ、頼みたいことはあります。でもその前に、まずは今の疑いを晴らして、自分の潔白を証明してきて。",
                                 voice: "story/1004/100427/19241046",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042712,
                                 content: "礼には及びませんわ。わたくしはただ、自分の利にかなうときに、必要なことをしただけですもの。",
                                 voice: "story/1004/100427/19241070",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042713,
@@ -30016,6 +30483,7 @@ export const questData_jp: QuestStory[] = [
                                     "……ともかく急ぎなさい。証拠を見つけて、自分の名誉を取り戻してきて。今すぐ彼に危険が及ぶことはないでしょうけれど、アイゼンバーンの気がいつまでも持つとは限りませんもの。",
                                 voice: "story/1004/100427/1924109A",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042714,
@@ -30028,12 +30496,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "……月狩り人。",
                                 voice: "story/1004/100427/192410EE",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042716,
                                 content: "犯人を捕まえたら、もう一度ここへ来なさい。\n  そのとき――改めて話しましょう。",
                                 voice: "story/1004/100427/19241118",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042717,
@@ -30070,6 +30540,7 @@ export const questData_jp: QuestStory[] = [
                                     "ぼんやりしている場合ですか。監・督・官閣下もお急ぎだとおっしゃったでしょう。そろそろ出発なさっては？",
                                 voice: "story/1004/100428/19241F5E",
                                 npc: 100403,
+                                speakerName: "聞き覚えのある声",
                             },
                             {
                                 id: 10042804,
@@ -30109,6 +30580,7 @@ export const questData_jp: QuestStory[] = [
                                     "ええ、その通りですわ。ヒルダはわたくしのメイドよ。あなたたちを少し助けるよう、わたくしが頼んだのです。",
                                 voice: "story/1004/100428/1924205A",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042810,
@@ -30116,6 +30588,7 @@ export const questData_jp: QuestStory[] = [
                                     "あなたたちがカラス号に近づこうとしていたことも、そのあと容疑者扱いされたことも――すべてヒルダから聞いたわ。",
                                 voice: "story/1004/100428/19242084",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042811,
@@ -30123,6 +30596,7 @@ export const questData_jp: QuestStory[] = [
                                     "この子がいれば、フォーセイクン同盟の尻尾もすぐに掴めるはずです。少し言い方がきつく聞こえることがあるかもしれないけれど……昔からの癖のようなものですの。どうか気にしないであげて。",
                                 voice: "story/1004/100428/192420AE",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042812,
@@ -30136,6 +30610,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "心配はいらないわ。本当にわたくしを狙えるだけの力があるなら、わざわざ放送で予告なんてしないもの。",
                                 voice: "story/1004/100428/19242102",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042814,
@@ -30148,6 +30623,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "いいのです。今いちばん大切なのは、真犯人を見つけること。",
                                 voice: "story/1004/100428/19242156",
                                 npc: 100404,
+                                speakerName: "帝国軍監督官",
                             },
                             {
                                 id: 10042816,
@@ -30840,12 +31316,14 @@ export const questData_jp: QuestStory[] = [
                                     "さっきの騒ぎ、やはりあなた方の仕業でしたか。腕が立つうえに、頭も回る。なかなか厄介なお客様ですね。",
                                 voice: "story/1004/100420/19239BCA",
                                 npc: 100403,
+                                speakerName: "謎の女",
                             },
                             {
                                 id: 10042002,
                                 content: "ここは互いに手を引く……それでいかがでしょう？",
                                 voice: "story/1004/100420/19239BF4",
                                 npc: 100403,
+                                speakerName: "謎の女",
                             },
                             {
                                 id: 10042003,
@@ -30865,6 +31343,7 @@ export const questData_jp: QuestStory[] = [
                                     "ご冗談を。それはお互いさまでは？少なくとも今の時点で、私はお二人を傷つけるつもりはございません。正体も分からないままですし。",
                                 voice: "story/1004/100420/19239C72",
                                 npc: 100403,
+                                speakerName: "謎の女",
                             },
                             {
                                 id: 10042006,
@@ -30872,6 +31351,7 @@ export const questData_jp: QuestStory[] = [
                                     "では、ひとつお聞かせください。何のためにこの列車へ？軍団に雇われて、汚れ役でも請け負っているのですか。それとも――フォーセイクン同盟の協力者？",
                                 voice: "story/1004/100420/19239C9C",
                                 npc: 100403,
+                                speakerName: "謎の女",
                             },
                             {
                                 id: 10042007,
@@ -30879,6 +31359,7 @@ export const questData_jp: QuestStory[] = [
                                     "ヒルダと申します。しがないメイドでございます。お答え次第では、なるべく苦しまない形で「おもてなし」して差し上げますよ。",
                                 voice: "story/1004/100420/19239CC6",
                                 npc: 100403,
+                                speakerName: "謎の女",
                             },
                             {
                                 id: 10042008,
@@ -32047,12 +32528,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "内部調査の結果、先ほど確保された月狩り人の嫌疑は、ひとまず外れました。今回の爆発事件については、保管庫管理人スティラーを新たな容疑者と見て捜査を進めています。フォーセイクン同盟と通じ、爆発を手引きした疑いがあるとのことです。",
                                 voice: "story/1004/100439/1924D382",
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10043902,
                                 content:
                                     "なお、容疑者スティラーはすでに身柄を確保しています。どうぞご心配なく。本日の取り調べが終わり次第、乗客の皆さまは順次お帰りいただけます。",
                                 voice: "story/1004/100439/1924D3AC",
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10043903,
@@ -32115,6 +32598,7 @@ export const questData_jp: QuestStory[] = [
                                     "はは、やっぱりなって感じだよ。あいつ、いつも仏頂面でさ。保管庫に行くたび、こっちのことを根掘り葉掘り聞いてきやがる。",
                                 voice: "story/1004/100440/1924E414",
                                 npc: 100422,
+                                speakerName: "嬉しそうな衛兵",
                                 next: 10044003,
                             },
                             {
@@ -32123,6 +32607,7 @@ export const questData_jp: QuestStory[] = [
                                     "他の誰かが内通者だって言われたら首をひねるけど、あいつだって言われたら……まあ、やりかねないよなって思うね。",
                                 voice: "story/1004/100440/1924E43E",
                                 npc: 100422,
+                                speakerName: "嬉しそうな衛兵",
                                 next: 10044004,
                             },
                             {
@@ -32130,6 +32615,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "いやあ、ほんと。前からまともなやつじゃないと思ってたんだよ。",
                                 voice: "story/1004/100440/1924E468",
                                 npc: 100422,
+                                speakerName: "嬉しそうな衛兵",
                                 next: 10044005,
                             },
                             {
@@ -32159,6 +32645,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "待て待て。まずは俺の話を聞いてくれ。そっちの用事も大事なんだろうが、こっちはもっと大ごとなんだ。",
                                 voice: "story/1004/100441/1924F47C",
                                 npc: 100422,
+                                speakerName: "神秘的な衛兵",
                             },
                             {
                                 id: 10044103,
@@ -32172,6 +32659,7 @@ export const questData_jp: QuestStory[] = [
                                     "あの古参ぶってる保管庫の管理人、スティラーがやらかしたらしいぞ。今日の爆発も、あいつが噛んでたって話だ。……まあ、わからなくもないけどな。",
                                 voice: "story/1004/100441/1924F4D0",
                                 npc: 100421,
+                                speakerName: "神秘的な衛兵",
                             },
                             {
                                 id: 10044105,
@@ -32179,12 +32667,14 @@ export const questData_jp: QuestStory[] = [
                                     "聞いた話じゃ、あいつは昔、アイゼンバーン駅長と一緒に軍団を退いて、そのまま駅に入ったらしい。しかも当時は、駅長の上官だったとか。",
                                 voice: "story/1004/100441/1924F4FA",
                                 npc: 100421,
+                                speakerName: "神秘的な衛兵",
                             },
                             {
                                 id: 10044106,
                                 content: "それが今じゃ片や駅長、片や保管庫の見張りだ。そりゃ、面白くないだろ。俺でも腹のひとつは立つ。",
                                 voice: "story/1004/100441/1924F524",
                                 npc: 100421,
+                                speakerName: "神秘的な衛兵",
                             },
                             {
                                 id: 10044107,
@@ -32192,12 +32682,14 @@ export const questData_jp: QuestStory[] = [
                                     "まあ、だからって本当に過激なことまではしないけどさ、俺ならな。でもあいつ、家族もいないって話だろ？そういうやつは、一度こじらせると止まらないんだよ。",
                                 voice: "story/1004/100441/1924F54E",
                                 npc: 100421,
+                                speakerName: "神秘的な衛兵",
                             },
                             {
                                 id: 10044108,
                                 content: "やっぱり人間、支えがないとな。うちなんて娘の顔見るだけで疲れが吹き飛ぶんだ。見るか？写真。",
                                 voice: "story/1004/100441/1924F578",
                                 npc: 100421,
+                                speakerName: "神秘的な衛兵",
                             },
                             {
                                 id: 10044109,
@@ -32210,6 +32702,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ん？お前も何か言いかけてなかったか？もういいのか？",
                                 voice: "story/1004/100441/1924F5CC",
                                 npc: 100421,
+                                speakerName: "神秘的な衛兵",
                             },
                         ],
                     },
@@ -32232,6 +32725,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "うーん……趣味は悪いし、酒癖もよくないな。",
                                 voice: "story/1004/100442/192504E4",
                                 npc: 100443,
+                                speakerName: "酔っぱらいの労働者",
                             },
                             {
                                 id: 10044203,
@@ -32239,6 +32733,7 @@ export const questData_jp: QuestStory[] = [
                                     "こういうのも何だけど、俺、仕事が終わったら一杯やるのが何よりの楽しみでさ。ふっと力が抜ける、あの感じがたまらないんだよ。",
                                 voice: "story/1004/100442/1925050E",
                                 npc: 100443,
+                                speakerName: "酔っぱらいの労働者",
                             },
                             {
                                 id: 10044204,
@@ -32246,6 +32741,7 @@ export const questData_jp: QuestStory[] = [
                                     "だから駅で酒好きな連中とは、だいたい顔なじみだ。何人かでつるんで飲みに行って、順番に奢るのが暗黙の決まりみたいになってる。",
                                 voice: "story/1004/100442/19250538",
                                 npc: 100443,
+                                speakerName: "酔っぱらいの労働者",
                             },
                             {
                                 id: 10044205,
@@ -32253,6 +32749,7 @@ export const questData_jp: QuestStory[] = [
                                     'でもスティラーだけは別だ。一度だって奢ったことがないし、飲むのも軍団時代から飲み慣れてる「<Default note="text:レギオンブラッド">帝国軍の狼血</>」ばっかり。あんなの、ほとんど消毒液みたいなもんだろ。',
                                 voice: "story/1004/100442/19250562",
                                 npc: 100443,
+                                speakerName: "酔っぱらいの労働者",
                             },
                             {
                                 id: 10044206,
@@ -32260,6 +32757,7 @@ export const questData_jp: QuestStory[] = [
                                     "しかも酔うと決まって昔話だ。軍団にいた頃はどうだったとか、自分がどれだけ切れ者だったとか、今の仕事なんて楽すぎるとか、才能の無駄遣いだとか。",
                                 voice: "story/1004/100442/1925058C",
                                 npc: 100443,
+                                speakerName: "酔っぱらいの労働者",
                             },
                             {
                                 id: 10044207,
@@ -32267,6 +32765,7 @@ export const questData_jp: QuestStory[] = [
                                     "そのあとは、あれが駄目だのこれが駄目だの、文句ばっかりだよ。危機感が足りないだの、帝国は上から下まで張りぼてだの、全部腐ってるだのってな。",
                                 voice: "story/1004/100442/192505B6",
                                 npc: 100443,
+                                speakerName: "酔っぱらいの労働者",
                             },
                             {
                                 id: 10044208,
@@ -32274,6 +32773,7 @@ export const questData_jp: QuestStory[] = [
                                     "こっちは毎日に押し潰されそうだから、酒でも飲んで気を晴らしてるんだ。そんな時に説教だの世の中への恨みだの、聞かされたいわけないだろ。",
                                 voice: "story/1004/100442/192505E0",
                                 npc: 100443,
+                                speakerName: "酔っぱらいの労働者",
                             },
                             {
                                 id: 10044209,
@@ -32281,6 +32781,7 @@ export const questData_jp: QuestStory[] = [
                                     "だから、正直あいつは嫌いだよ。……ただまあ、帝国への不満を本当に行動に移したっていうなら、そこだけは妙に軍人らしいというか……少し見直したかもしれないな。",
                                 voice: "story/1004/100442/1925060A",
                                 npc: 100443,
+                                speakerName: "酔っぱらいの労働者",
                             },
                             {
                                 id: 10044210,
@@ -33246,6 +33747,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "口が過ぎるわ。叔父上がどう思われるか――それはあなたが量ることではない。",
                                 voice: "story/1004/100450/192588A2",
                                 npc: 100404,
+                                speakerName: "フロレンティア姫",
                             },
                             {
                                 id: 10045006,
@@ -33253,6 +33755,7 @@ export const questData_jp: QuestStory[] = [
                                     "それに、この者たちは、わたくしがアイスレイク城で束の間の自由を得ていたあいだに出会った友人よ。聞き及んでいるでしょう。東区で新たに動き始めた月狩り人の一行――「ノクトボイジャー」を。",
                                 voice: "story/1004/100450/192588CC",
                                 npc: 100404,
+                                speakerName: "フロレンティア姫",
                             },
                             {
                                 id: 10045007,
@@ -33260,6 +33763,7 @@ export const questData_jp: QuestStory[] = [
                                     "彼らは先日、東区で起きた穢蝕者の件を収め、カロン狩りでも第十三軍団に力を貸した。わたくしたちはその一件で知り合ったの。",
                                 voice: "story/1004/100450/192588F6",
                                 npc: 100404,
+                                speakerName: "フロレンティア姫",
                             },
                             {
                                 id: 10045008,
@@ -33267,6 +33771,7 @@ export const questData_jp: QuestStory[] = [
                                     "わたくしはまもなくディズマニアへ戻される身。ならば今日、彼らが見送りに来ることの、どこが不自然だというの？",
                                 voice: "story/1004/100450/19258920",
                                 npc: 100404,
+                                speakerName: "フロレンティア姫",
                             },
                             {
                                 id: 10045009,
@@ -33274,6 +33779,7 @@ export const questData_jp: QuestStory[] = [
                                     "見てのとおり、わたくしの車両の周りは第十三軍団の兵で固められている。逃げ場など最初からないわ。それでも不安なら、あなたの部下でカラス号をさらに囲めばいい。わたくしたちが別れを済ませるまで、そのまま見張っていればいいでしょう。",
                                 voice: "story/1004/100450/1925894A",
                                 npc: 100404,
+                                speakerName: "フロレンティア姫",
                             },
                             {
                                 id: 10045010,
@@ -33287,6 +33793,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……いいでしょう。済んだら、中へいらっしゃい。",
                                 voice: "story/1004/100450/1925899E",
                                 npc: 100404,
+                                speakerName: "フロレンティア姫",
                             },
                         ],
                     },
@@ -34136,6 +34643,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ご案内いたします。先ほどの爆発事件について、列車衛兵による捜査の結果、一時的に容疑者の男性を確保しました。容疑者は自らを月狩り人と名乗っており、現在、緊急で取り調べを行っております。",
                                 voice: "story/1004/100438/1924C566",
+                                speakerName: "アナウンス",
                                 next: 10043816,
                             },
                             {
@@ -34143,6 +34651,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "どうかご安心ください。列車衛兵は皆さまの安全を守るため、全力を尽くしてまいります。なお、情報提供をされる場合は、ぜひお申し出ください。",
                                 voice: "story/1004/100438/1924C590",
+                                speakerName: "アナウンス",
                                 next: 10043817,
                             },
                             {
@@ -37070,6 +37579,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "「オーロラ号、フォーセイクン同盟の襲撃を受けた！車内の衛兵だけでは手が足りない、飛空艇による援護を要請する！」",
                                 voice: "story/1004/100474/19271334",
+                                speakerName: "車掌の声",
                             },
                             {
                                 id: 10047411,
@@ -37089,6 +37599,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "――はいはい皆さま。少しだけ、よろしいですかな？",
                                 voice: "story/1004/100474/192713B2",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047414,
@@ -37102,6 +37613,7 @@ export const questData_jp: QuestStory[] = [
                                     "私はカーチャ。フォーセイクン同盟の名において、皆さまへとびきりの吉報をお届けいたします。どうぞ慌てず、落ち着いてお聞きくださいね。列車は走行中ですので、安全第一で。",
                                 voice: "story/1004/100474/19271406",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047416,
@@ -37109,6 +37621,7 @@ export const questData_jp: QuestStory[] = [
                                     "この列車は今、我らフォーセイクン同盟の祝福を受けております。すでに爆弾は仕掛けられ、列車は帝都へ向けて全速力で進行中です。",
                                 voice: "story/1004/100474/19271430",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047417,
@@ -37116,6 +37629,7 @@ export const questData_jp: QuestStory[] = [
                                     "そして終着点――帝都ディズマニアに着いたその時。この列車の爆発は、イコルで満ちた工場群に火を移し、夜の都を鮮やかに染め上げることでしょう。眠りこけた貴族どもも、さぞ華々しく目を覚ますはずです。驚きましたか？それとも、まだ実感が湧きませんか？",
                                 voice: "story/1004/100474/1927145A",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047418,
@@ -37123,6 +37637,7 @@ export const questData_jp: QuestStory[] = [
                                     "泣いても結構、喚いても結構。けれど、説教だけはご遠慮くださいませ。帝国は千年にわたり、カロン族を踏みにじってきました。途中、ほんの少し手を差し伸べるふりをしたことはあっても……愚かな我々は、それを信じてしまった。",
                                 voice: "story/1004/100474/19271484",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047419,
@@ -37130,6 +37645,7 @@ export const questData_jp: QuestStory[] = [
                                     "けれど千年前の「ダクリ湖の夜」から、千年後の「血染めの晩餐」に至るまで――諸君らは幾度となく盟約を踏みにじり、我らの兄弟姉妹を傷つけ、牙を剥いてきた。",
                                 voice: "story/1004/100474/192714AE",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047420,
@@ -37137,6 +37653,7 @@ export const questData_jp: QuestStory[] = [
                                     "そのたびに、諸君らは思い上がったのでしょうね。「死ね」と命じれば、カロンは皆、黙って屠られるべきなのだと。",
                                 voice: "story/1004/100474/192714D8",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047421,
@@ -37144,6 +37661,7 @@ export const questData_jp: QuestStory[] = [
                                     "残念でした。その願いは叶いません。そして、諸君らはこれから思い知ることになるでしょう。自分たちが誇る帝国が、どれほど脆いものかを。",
                                 voice: "story/1004/100474/19271502",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047422,
@@ -37151,6 +37669,7 @@ export const questData_jp: QuestStory[] = [
                                     "よく言うではありませんか。ヒュペリアは轟々と進む戦車のようだ、と。ならば、我らフォーセイクン同盟が、直々にお見せしましょう。その戦車がいかにあっけなく砕けるかを――この列車そのものを使って。",
                                 voice: "story/1004/100474/1927152C",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047423,
@@ -37158,6 +37677,7 @@ export const questData_jp: QuestStory[] = [
                                     "さて、脅しはこのくらいにしておこうね～これより皆さまへのお願いです。どうか抵抗はなさらず、運命を静かにお待ちください。",
                                 voice: "story/1004/100474/19271556",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047424,
@@ -37165,6 +37685,7 @@ export const questData_jp: QuestStory[] = [
                                     "なお、列車に残っていた唯一の衛兵も、すでに片づけてあります。\n  今、この旅路で皆さまに寄り添うのは、我ら同盟だけ。どうぞ最後まで、驚きとスリルに満ちた――爆発的な旅を、お楽しみくださいませ。",
                                 voice: "story/1004/100474/19271580",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                         ],
                     },
@@ -37265,6 +37786,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……げほっ……げほっ……",
                                 voice: "story/1004/100475/1927241A",
                                 npc: 100418,
+                                speakerName: "かすかな音",
                             },
                             {
                                 id: 10047514,
@@ -37339,6 +37861,7 @@ export const questData_jp: QuestStory[] = [
                                     "抵抗はおすすめしませんよ。我らフォーセイクン同盟は、いつだって万全を整えてから動くのです。逆らおうとすれば……あまり楽しい結果にはなりませんよ～",
                                 voice: "story/1004/100476/192733DA",
                                 npc: 100413,
+                                speakerName: "アナウンス",
                             },
                             {
                                 id: 10047610,
@@ -37639,11 +38162,13 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "オーロラ号の反逆者に告ぐ。こちらは第六軍団。抵抗をやめ、直ちに計画を中止せよ。お前たちは、すでに帝国飛空艇の照準下にある。",
                                 voice: "story/1004/100482/19279578",
+                                speakerName: "飛空艇指揮官",
                             },
                             {
                                 id: 10048205,
                                 content: "帝国は、如何なる要求も一切受け入れない。この砲火が、答えだ。",
                                 voice: "story/1004/100482/192795A2",
+                                speakerName: "飛空艇指揮官",
                             },
                             {
                                 id: 10048206,
@@ -38474,6 +38999,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "……よく言う。そうやって嘘に嘘を重ねるのが、おまえたちのやり方だ。フォーセイクン同盟の言葉を信じる理由など、こちらにはない。",
                                 voice: "story/1004/100483/1927A5E0",
+                                speakerName: "飛空艇指揮官",
                             },
                             {
                                 id: 10048305,
@@ -38506,17 +39032,20 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "おまえがフロレンティア皇女なら、私は皇帝陛下だっての。殿下はカラス号に乗って、帝都へ向かっていると聞かされている。危うく口車に乗るところだったぜ。",
                                 voice: "story/1004/100483/1927A6B2",
+                                speakerName: "飛空艇指揮官",
                             },
                             {
                                 id: 10048310,
                                 content: "何を根拠におまえを信じろと？その場で名乗っただけで、砲を下ろすとでも思ったのか。",
                                 voice: "story/1004/100483/1927A6DC",
+                                speakerName: "飛空艇指揮官",
                             },
                             {
                                 id: 10048311,
                                 content:
                                     "それに、仮に本当にフロレンティア皇女だとして――カラス号から逃げ出せた人間が、どうして今さら自分から名乗る？そこまでして正体を明かす理由は何だ。",
                                 voice: "story/1004/100483/1927A706",
+                                speakerName: "飛空艇指揮官",
                             },
                             {
                                 id: 10048312,
@@ -38588,6 +39117,7 @@ export const questData_jp: QuestStory[] = [
                                     "おまえみたいな若造が、こんな命知らずの真似をしたんだ。大きくなったら、賭場でも相当いい面ァ張れるぜ。こんな面白い勝負、見逃せるかよ。",
                                 voice: "story/1004/100483/1927A8D4",
                                 npc: 100430,
+                                speakerName: "工場労働者 ディミトリ",
                             },
                             {
                                 id: 10048323,
@@ -38595,6 +39125,7 @@ export const questData_jp: QuestStory[] = [
                                     "ほら、振り返ってみな。俺の新しい賭け仲間が、ちゃんと続いてる。言っただろ。このいとこさん、ただ者じゃないって。――また俺の勝ちだな。",
                                 voice: "story/1004/100483/1927A8FE",
                                 npc: 100430,
+                                speakerName: "工場労働者 ディミトリ",
                             },
                             {
                                 id: 10048324,
@@ -38609,6 +39140,7 @@ export const questData_jp: QuestStory[] = [
                                     "……失礼、本題に入ろう。私はティトゥス・ファストゥス子爵だ。フォーセイクン同盟とは何の関わりもない！聞こえてんなら、今すぐ攻撃をやめろ！",
                                 voice: "story/1004/100483/1927A952",
                                 npc: 100439,
+                                speakerName: "ティトゥス・ファストゥス子爵",
                             },
                             {
                                 id: 10048326,
@@ -38616,6 +39148,7 @@ export const questData_jp: QuestStory[] = [
                                     "わ、私は第二代クプリウス男爵だ……フォーセイクン同盟では、ない……お前らにめ、命じる……攻撃を……やめたまえ……！",
                                 voice: "story/1004/100483/1927A97C",
                                 npc: 100441,
+                                speakerName: "クプリウス男爵",
                             },
                             {
                                 id: 10048327,
@@ -38630,6 +39163,7 @@ export const questData_jp: QuestStory[] = [
                                     "おい、飛空艇の連中！処分されたくなきゃ、とっとと引き返せ！フラワー駅構内のパン屋「純愛酵母」で働いてる、チェダー・ベーコンからの忠告だ！俺だってフォーセイクン同盟とは無関係だぞ！",
                                 voice: "story/1004/100483/1927A9D0",
                                 npc: 100431,
+                                speakerName: "パン屋の店員 チェダー・ベーコン",
                             },
                             {
                                 id: 10048329,
@@ -38643,6 +39177,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "アイスレイク城・霧の街の仕立て屋、スザンナです！私は、フォーセイクン同盟なんかじゃありません！",
                                 voice: "story/1004/100483/1927AA24",
                                 npc: 100433,
+                                speakerName: "仕立て屋 スザンナ",
                             },
                             {
                                 id: 10048331,
@@ -38655,35 +39190,41 @@ export const questData_jp: QuestStory[] = [
                                 content: "アイスレイク城・地下水路修理工、ルボン！フォーセイクン同盟なんかじゃねぇぞ！",
                                 voice: "story/1004/100483/1927AA78",
                                 npc: 100426,
+                                speakerName: "だらしない身なりの男 ルボンおじさん",
                             },
                             {
                                 id: 10048333,
                                 content: "『ヒュペリア朝報』編集長、リヴィア。",
                                 voice: "story/1004/100483/1927AAA2",
                                 npc: 100440,
+                                speakerName: "新聞編集長 リヴィア",
                             },
                             {
                                 id: 10048334,
                                 content: "吟遊詩人、アイリス。",
                                 voice: "story/1004/100483/1927AACC",
                                 npc: 100435,
+                                speakerName: "吟遊詩人 アイリス",
                             },
                             {
                                 id: 10048335,
                                 content: "ディズマニアの司法官、ミランダ。",
                                 voice: "story/1004/100483/1927AAF6",
                                 npc: 100442,
+                                speakerName: "司法官 ミランダ",
                             },
                             {
                                 id: 10048336,
                                 content: "アイスレイク城で洗濯の仕事をしてる、ハンナ。",
                                 voice: "story/1004/100483/1927AB20",
                                 npc: 100434,
+                                speakerName: "洗濯屋 ハンナ",
                             },
                             {
                                 id: 10048337,
                                 content: "私たちは、フォーセイクン同盟ではない！",
                                 voice: "story/1004/100483/1927AB4A",
+                                speakerName: "群衆",
                             },
                             {
                                 id: 10048338,
@@ -38702,6 +39243,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10048340,
                                 content: "……",
                                 voice: "story/1004/100483/1927ABC8",
+                                speakerName: "飛空艇指揮官",
                             },
                             {
                                 id: 10048341,
@@ -38713,12 +39255,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 10048342,
                                 content: "攻撃を中止しろ！ただちにカラス号に、フロレンティア殿下の所在を確認しろ！",
                                 voice: "story/1004/100483/1927AC1C",
+                                speakerName: "飛空艇指揮官",
                             },
                             {
                                 id: 10048343,
                                 content:
                                     "ひとまず安全を確保しよう。帝国の貴族と平民が、こうして同じ場所に立つ姿を見るのは初めてだ。……やはり皇族でなければ、成しえないことなのだろう。",
                                 voice: "story/1004/100483/1927AC46",
+                                speakerName: "飛空艇指揮官",
                             },
                             {
                                 id: 10048344,
@@ -38889,6 +39433,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10048506,
                                 content: "対空戦闘準備。オーロラ号、主砲装填開始。",
                                 voice: "story/1004/100485/1927C704",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10048507,
@@ -38900,11 +39445,13 @@ export const questData_jp: QuestStory[] = [
                                 id: 10048508,
                                 content: "砲弾装填完了。射撃補正開始。",
                                 voice: "story/1004/100485/1927C758",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10048509,
                                 content: "補正完了……発射準備……",
                                 voice: "story/1004/100485/1927C782",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10048510,
@@ -38917,16 +39464,19 @@ export const questData_jp: QuestStory[] = [
                                 id: 10048511,
                                 content: "3……",
                                 voice: "story/1004/100485/1927C7D6",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10048512,
                                 content: "2……",
                                 voice: "story/1004/100485/1927C800",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10048513,
                                 content: "1……",
                                 voice: "story/1004/100485/1927C82A",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -38939,6 +39489,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 10048601,
                                 content: "動力ユニット被弾、操舵不能！飛空艇の制御を失った！総員退避せよ、総員退避せよ！",
                                 voice: "story/1004/100486/1927D69A",
+                                speakerName: "飛空艇指揮官",
                             },
                             {
                                 id: 10048602,
@@ -39340,12 +39891,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "緊急速報。本日、フォーセイクン同盟がコキュートス領南部で「オーロラ号」を襲撃。その後、先頭車両に搭載されていた列車砲を用いて、救援に向かった帝国飛空艇を撃墜しました。",
                                 voice: "story/1004/100490/19281936",
+                                speakerName: "ラジオ",
                             },
                             {
                                 id: 10049008,
                                 content:
                                     "飛空艇は巨大な天上樹の付近で爆発し、その影響で天上樹が炎上。\n  天上樹への放火は、今年に入ってこれで二件目です。第六軍団はすでに救援を増派していますが、現在、オーロラ号の乗客とは全員連絡が取れておらず、生死は不明です。",
                                 voice: "story/1004/100490/19281960",
+                                speakerName: "ラジオ",
                             },
                             {
                                 id: 10049009,
@@ -39358,18 +39911,21 @@ export const questData_jp: QuestStory[] = [
                                 content: "店長、私の「アイスフォルクテイル」、まだ？",
                                 voice: "story/1004/100490/192819B4",
                                 npc: 100414,
+                                speakerName: "待ち続ける吟遊詩人",
                             },
                             {
                                 id: 10049011,
                                 content: "今日、友だちはここを出るの。だから最後に、いちばんアイスレイク城らしい飲み物を飲んでおきたくて。",
                                 voice: "story/1004/100490/192819DE",
                                 npc: 100414,
+                                speakerName: "待ち続ける吟遊詩人",
                             },
                             {
                                 id: 10049012,
                                 content: "……店長？",
                                 voice: "story/1004/100490/19281A08",
                                 npc: 100414,
+                                speakerName: "待ち続ける吟遊詩人",
                             },
                             {
                                 id: 10049013,
@@ -39881,12 +40437,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "あの部下は、死なずに済んだはずだ。",
                                 voice: "story/1004/100493/19284972",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049302,
                                 content: "おまえは昔から、余計な騒ぎを起こしたがる。初めて会った時と変わらないな――獣王。",
                                 voice: "story/1004/100493/1928499C",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049303,
@@ -39908,12 +40466,14 @@ export const questData_jp: QuestStory[] = [
                                     "獣王とは、盲目に従う獣をかき集め、群れのまま喰らいつかせる者のことではない。闇に潜み、爪と牙を研ぎ、もっともふさわしい瞬間を見定めて――一撃で仕留める術を教える者だ。",
                                 voice: "story/1004/100493/19284A1A",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049306,
                                 content: "怒りはいつも、お前を無意味な行いへ走らせる。カーチャ。",
                                 voice: "story/1004/100493/19284A44",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049307,
@@ -39934,12 +40494,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "……",
                                 voice: "story/1004/100493/19284AC2",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049310,
                                 content: "言葉が過ぎるぞ、「獣王」。",
                                 voice: "story/1004/100493/19284AEC",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049311,
@@ -39959,6 +40521,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "カーチャ。",
                                 voice: "story/1004/100493/19284B6A",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049314,
@@ -39966,12 +40529,14 @@ export const questData_jp: QuestStory[] = [
                                     "あの者たちの死に、無意味なものはない。燃え上がる天上樹は、すでに帝国の空を裂いた。そして、この炎はまだ広がっていく。これでもう、空を支配する巨獣どもに、一方的に蹂躙されることはない。",
                                 voice: "story/1004/100493/19284B94",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049315,
                                 content: "代わりに訪れるのは――戦争だ。今度こそ、ためらいも、情けもいらない。",
                                 voice: "story/1004/100493/19284BBE",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049316,
@@ -39979,6 +40544,7 @@ export const questData_jp: QuestStory[] = [
                                     "そうだ。戦いは、終わってなどいなかった。長く耐え続けた時が、ようやく来たのだ。そしてすべてが終わる時――灰になるのは、ヒュペリア帝国か、フォーセイクン同盟か。",
                                 voice: "story/1004/100493/19284BE8",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -40001,6 +40567,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……あ、やっと起きた。",
                                 voice: "story/1004/100498/19289B7A",
                                 npc: 100414,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049802,
@@ -40008,12 +40575,14 @@ export const questData_jp: QuestStory[] = [
                                     "あなたのこと、覚えてるわ。アイスレイク城で会ったよね！ずいぶん長く流されてたみたいで、ほんとうにひどく弱ってたけど……もう大丈夫よ、ここは安全だから。",
                                 voice: "story/1004/100498/19289BA4",
                                 npc: 100414,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049803,
                                 content: "ようこそ、『ファンシーブリーズ号』へ。氷原を渡るユニコーンのようなお方。",
                                 voice: "story/1004/100498/19289BCE",
                                 npc: 100414,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -40128,12 +40697,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 11010102,
                                 content: "<W>……巨獣がお前の行く手を遮っている。お前は喉元を締めつけられている。</>",
                                 voice: "story/1002/110101/1B9008DC",
+                                speakerName: "？？？",
                                 next: 11010103,
                             },
                             {
                                 id: 11010103,
                                 content: "<W>血がざわつき、鋭い痛みが奥底に眠る渇望を呼び覚まそうとしている。</>",
                                 voice: "story/1002/110101/1B900906",
+                                speakerName: "？？？",
                                 next: 11010104,
                             },
                             {
@@ -40153,6 +40724,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11010106,
                                 content: "<W>殺しなさい。その悲鳴と血を一身に浴びながら、甘美なる死を存分に楽しむといい……</>",
                                 voice: "story/1002/110101/1B900984",
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 11010107,
@@ -40388,6 +40960,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     '<Default note="text:エジュウ">穢獣</>の体液なのか、内臓の欠片なのかも分からない粘液が両手にこびりついている……なのに{性别2:お前|あなた}は悦びを感じている。震えるほどに、確かな歓喜を。',
                                 voice: "story/1002/110102/1B901A40",
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 11010209,
@@ -40401,6 +40974,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "<W>抗う必要はない。私は、{性别2:お前|あなた}であり、{性别2:お前|あなた}に宿る死の本能そのもの。いずれ私の導きのままに、古の意志に支配されてしまうのだから……</>",
                                 voice: "story/1002/110102/1B901A94",
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 11010211,
@@ -40719,6 +41293,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "おい？聞こえるか？",
                                 voice: "story/1002/110110/1B909CAE",
                                 npc: 110010,
+                                speakerName: "？？？",
                                 next: 11011004,
                             },
                             {
@@ -40733,6 +41308,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "<H>本日のヒュペリアの空模様は？</>",
                                 voice: "story/1002/110110/1B909D02",
                                 npc: 110010,
+                                speakerName: "？？？",
                                 next: 11011006,
                             },
                             {
@@ -40747,6 +41323,7 @@ export const questData_jp: QuestStory[] = [
                                 content: 'こちらアヴァール·ハードランド。「<Default note="text:グリフィン">鷲獅子</>」隊だよな？現在地は？',
                                 voice: "story/1002/110110/1B909D56",
                                 npc: 110010,
+                                speakerName: "？？？",
                                 next: 11011008,
                             },
                             {
@@ -41097,6 +41674,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "アヴァール長官？自分は……夢でも見てるのか……？",
                                 voice: "story/1002/110110/1B909F78",
                                 npc: 110027,
+                                speakerName: "負傷した「鷲獅子」隊の隊員",
                                 next: 11011021,
                             },
                             {
@@ -41119,6 +41697,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ああ……長官……我らが皇帝に……栄光あれ……",
                                 voice: "story/1002/110110/1B909FCC",
                                 npc: 110028,
+                                speakerName: "負傷した「鷲獅子」隊の隊員",
                                 next: 11011023,
                             },
                             {
@@ -41141,6 +41720,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "隊長、長官、おふたりから見て、本作戦にまだ希望はありますでしょうか？",
                                 voice: "story/1002/110110/1B90A020",
                                 npc: 110026,
+                                speakerName: "負傷した「鷲獅子」隊の隊員",
                                 next: 11011025,
                             },
                             {
@@ -41381,6 +41961,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11017514,
                                 content: "<W>警告。イコル駆動輪の異常停止を検知しました。ただちに再起動を行います。</>",
                                 voice: "story/1002/110175/1B94C8E4",
+                                speakerName: "機械音声",
                                 next: 11017515,
                             },
                             {
@@ -41610,6 +42191,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "<W>警告。イコルキャビンへの過負荷を確認。オーバーロードするリスクがございますので、過剰にイコル駆動輪を起動していないかご確認ください。</>",
                                 voice: "story/1002/110175/1B94C962",
+                                speakerName: "機械音声",
                                 next: 11017518,
                             },
                             {
@@ -41690,6 +42272,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11017611,
                                 content: "<W>警告。イコルキャビンが自壊を始めました。対応者は速やかに出頭してください。</>",
                                 voice: "story/1002/110176/1B94D8CE",
+                                speakerName: "機械音声",
                             },
                         ],
                     },
@@ -41709,6 +42292,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11017613,
                                 content: "<W>警告。イコルキャビンが自壊を始めました。対応者は速やかに出頭してください。</>",
                                 voice: "story/1002/110176/1B94D922",
+                                speakerName: "機械音声",
                             },
                         ],
                     },
@@ -41742,6 +42326,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "<W>警告。イコルキャビンに50%以上の過負荷が発生しております。ただちにイコル駆動輪に関する設備を停止してください。独断で離脱することは許されません。</>",
                                 voice: "story/1002/110176/1B94D7D2",
+                                speakerName: "機械音声",
                                 next: 11017606,
                             },
                             {
@@ -41940,6 +42525,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011317,
                                 content: "応答を？どうか応答を、聞こえますか？<H>本日のヒュペリアの空模様は？</>",
                                 voice: "story/1002/110113/1B90D032",
+                                speakerName: "焦る声",
                                 next: 11011318,
                             },
                             {
@@ -41953,6 +42539,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011319,
                                 content: "アヴァール長官？ですか？俺です！ヴィックです！",
                                 voice: "story/1002/110113/1B90D086",
+                                speakerName: "焦る声",
                                 next: 11011320,
                             },
                             {
@@ -41966,6 +42553,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011321,
                                 content: "長官との連絡が途絶えてからは、モニカとともに外周ルートを侵攻、現在は機関室付近に到着しています。",
                                 voice: "story/1002/110113/1B90D0DA",
+                                speakerName: "ヴィック",
                                 next: 11011322,
                             },
                             {
@@ -41979,6 +42567,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011323,
                                 content: "これから動力装置を切断します。そのご報告を。",
                                 voice: "story/1002/110113/1B90D12E",
+                                speakerName: "ヴィック",
                                 next: 11011324,
                             },
                             {
@@ -41993,6 +42582,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011325,
                                 content: "まずは我々が試します長官！どうか、現状は1分でも長引けば、味方が危険に晒されます。",
                                 voice: "story/1002/110113/1B90D182",
+                                speakerName: "ヴィック",
                                 next: 11011326,
                             },
                             {
@@ -42007,6 +42597,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     '最後に……私事ではありますが、「<Default note="text:グリフィン">鷲獅子</>」隊の状況を教えていただけませんか？{nickname2}隊長が長官とご一緒なのであれば、弟のシーモンに関して……',
                                 voice: "story/1002/110113/1B90D1D6",
+                                speakerName: "ヴィック",
                                 next: 11011328,
                             },
                             {
@@ -42027,6 +42618,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011330,
                                 content: "……えっ……？",
                                 voice: "story/1002/110113/1B90D254",
+                                speakerName: "ヴィック",
                                 next: 11011331,
                             },
                             {
@@ -42041,6 +42633,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011332,
                                 content: "……わかりました、ありがとうございます。",
                                 voice: "story/1002/110113/1B90D2A8",
+                                speakerName: "ヴィック",
                                 next: 11011333,
                             },
                             {
@@ -42125,6 +42718,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011506,
                                 content: "アヴァールよ、今どこにいる？",
                                 voice: "story/1002/110115/1B90EF34",
+                                speakerName: "？？？",
                                 next: 11011507,
                             },
                             {
@@ -42145,6 +42739,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011509,
                                 content: "何を？総司令官の声も忘れたのかね？",
                                 voice: "story/1002/110115/1B90EFB2",
+                                speakerName: "？？？",
                                 next: 11011510,
                             },
                             {
@@ -42371,12 +42966,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011540,
                                 content: "隊長、隊長！",
                                 voice: "story/1002/110115/1B90F4C8",
+                                speakerName: "助けを呼ぶ声",
                                 next: 11011541,
                             },
                             {
                                 id: 11011541,
                                 content: 'こちら<Default note="text:グリフィン">鷲獅子</>隊のシモンです！隊長、聞こえますでしょうか？',
                                 voice: "story/1002/110115/1B90F4F2",
+                                speakerName: "助けを呼ぶ声",
                                 next: 11011542,
                             },
                             {
@@ -42391,12 +42988,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     '線路沿いに<Default note="text:エジュウ">穢獣</>が多数！我々は窮地にあります！余裕あらばどうか……救援を！',
                                 voice: "story/1002/110115/1B90F546",
+                                speakerName: "助けを呼ぶ声",
                                 next: 11011544,
                             },
                             {
                                 id: 11011544,
                                 content: "どうか、お願い……します……！",
                                 voice: "story/1002/110115/1B90F570",
+                                speakerName: "助けを呼ぶ声",
                                 next: 11011545,
                             },
                             {
@@ -42550,18 +43149,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 11011403,
                                 content: "聞こえ……か？……",
                                 voice: "story/1002/110114/1B90DE4E",
+                                speakerName: "ヴィック",
                                 next: 11011404,
                             },
                             {
                                 id: 11011404,
                                 content: "機関室……こちら……ぐはぁ！",
                                 voice: "story/1002/110114/1B90DE78",
+                                speakerName: "ヴィック",
                                 next: 11011405,
                             },
                             {
                                 id: 11011405,
                                 content: "……",
                                 voice: "story/1002/110114/1B90DE79",
+                                speakerName: "ヴィック",
                                 next: 11011406,
                             },
                             {
@@ -42866,6 +43468,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "隊長！あ、あああ——こっち！こっちです！",
                                 voice: "story/1002/110118/1B911F9A",
                                 npc: 110015,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -42955,6 +43558,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "進む道は残されておりまする……兵士様らであればきっと……",
                                 voice: "story/1002/110118/1B912168",
                                 npc: 110017,
+                                speakerName: "年老いたカロン族",
                                 next: 11011813,
                             },
                             {
@@ -43005,6 +43609,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……どうか兵士様……",
                                 voice: "story/1002/110118/1B91228E",
                                 npc: 110034,
+                                speakerName: "懇願するカロン族の少女",
                                 next: 11011820,
                             },
                             {
@@ -43013,6 +43618,7 @@ export const questData_jp: QuestStory[] = [
                                     "もし兵士様の怒りを鎮めるためにカロン族の命が必要であるならば、どうぞ私を撃ってください。ですがその前に何卒、申し開きだけは聞いてくださいませんか……",
                                 voice: "story/1002/110118/1B9122B8",
                                 npc: 110034,
+                                speakerName: "懇願するカロン族の少女",
                                 next: 11011821,
                             },
                             {
@@ -43020,6 +43626,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "カーチャ、戻るのじゃ！馬鹿なことをするでない！",
                                 voice: "story/1002/110118/1B9122E2",
                                 npc: 110017,
+                                speakerName: "年老いたカロン族",
                                 next: 11011822,
                             },
                             {
@@ -44128,6 +44735,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11012731,
                                 content: "了解！",
                                 voice: "story/1002/110127/1B91B82E",
+                                speakerName: "全員",
                                 next: 11012732,
                             },
                             {
@@ -44820,12 +45428,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 11013401,
                                 content: "……権限の上書きが完了しました……",
                                 voice: "story/1002/110134/1B92261A",
+                                speakerName: "機械音声",
                                 next: 11013402,
                             },
                             {
                                 id: 11013402,
                                 content: "……現在の権限の所有者：アヴァール・ハードランド……",
                                 voice: "story/1002/110134/1B922644",
+                                speakerName: "機械音声",
                                 next: 11013403,
                             },
                             {
@@ -44833,6 +45443,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "こんにちは！敬愛なるアヴァール・ハードランド中佐！ヒュペリア帝国軍教訓第16条：敵が自分の射程内にいるならば、自分もまた敵の射程内にいることを忘れるべからず。",
                                 voice: "story/1002/110134/1B92266E",
+                                speakerName: "機械音声",
                                 next: 11013404,
                             },
                             {
@@ -45346,6 +45957,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "敬愛なるアヴァール・ハードランド中佐。コマンドがまだ入力されておりません。ヒュペリア帝国軍教訓第17条：命令には忠誠を、戦友には信頼を、それが戦場で生き延びる力だと知るべし。",
                                 voice: "story/1002/110137/1B925824",
+                                speakerName: "機械音声",
                             },
                         ],
                     },
@@ -45478,6 +46090,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11018702,
                                 content: "防御モード起動中。セーフモードにリセットしてください。",
                                 voice: "story/1002/110187/1B958BCC",
+                                speakerName: "機械音声",
                                 options: [
                                     {
                                         id: 11018801,
@@ -45585,18 +46198,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 11013101,
                                 content: "「暴虐の限りを尽くすヒュペリアに対し、我らカロン族の許容はとうに超えた」",
                                 voice: "story/1002/110131/1B91F4E2",
+                                speakerName: "サインのあるファイル",
                                 next: 11013102,
                             },
                             {
                                 id: 11013102,
                                 content: "「フォーセイクン同盟に我が忠誠を捧げる。これは帝国が受けるべき報いなのだ」",
                                 voice: "story/1002/110131/1B91F50C",
+                                speakerName: "サインのあるファイル",
                                 next: 11013103,
                             },
                             {
                                 id: 11013103,
                                 content: "「——アヴァール・ハードランド」",
                                 voice: "story/1002/110131/1B91F536",
+                                speakerName: "サインのあるファイル",
                                 next: 11013104,
                             },
                             {
@@ -45652,6 +46268,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "「2日以内に第十三軍団の急襲が来るのは確実よ。アンソニー・フルヴィスがシビルに令状を提出したからね。『もし私の銃で要塞を打ち破ることが叶わなければ、自分の頭を撃ち抜いてくれてもよい』と誓いまで立てた様子で。ゆえにシビルは精鋭部隊の指揮権を与えたみたい」",
                                 voice: "story/1002/110130/1B91E47A",
+                                speakerName: "冷静な声",
                                 next: 11013002,
                             },
                             {
@@ -45673,6 +46290,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "「帝国軍はロンザ要塞の奪還に死力を注ぐはず。であれば要塞防衛が私たちの努力目標ではなくなったわ。フォーセイクン同盟における現戦力の損失を防ぐのが最優先。要塞から可及的速やかに撤退しましょう」",
                                 voice: "story/1002/110130/1B91E4A4",
+                                speakerName: "冷静な声",
                                 next: 11013003,
                             },
                             {
@@ -45686,6 +46304,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11013003,
                                 content: "「だからってむざむざ撤退はできん！ヒュペリアの犬どもには色々と思い知らせてやらねば！」",
                                 voice: "story/1002/110130/1B91E4CE",
+                                speakerName: "不満そうな声",
                                 next: 11013004,
                             },
                             {
@@ -45693,6 +46312,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "「単純なこと、アヴァールに任せるのよ。彼は先遣の2部隊を調整できる立場だから。犬を従わせるのは得意なはず」",
                                 voice: "story/1002/110130/1B91E4F8",
+                                speakerName: "冷静な声",
                                 next: 11013005,
                             },
                             {
@@ -45700,12 +46320,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "「あなたは事前に防衛装置を用意しておくだけでいい。アヴァールが先遣隊の進攻速度を遅らせてくれるでしょうし、連中に引導を渡せるわ」",
                                 voice: "story/1002/110130/1B91E522",
+                                speakerName: "冷静な声",
                                 next: 11013006,
                             },
                             {
                                 id: 11013006,
                                 content: "「新聞の一面に飾られるニュースはこう——」",
                                 voice: "story/1002/110130/1B91E54C",
+                                speakerName: "冷静な声",
                                 next: 11013007,
                             },
                             {
@@ -45713,6 +46335,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "「『ロンザ戦役にて第十三軍団の勇敢なる兵士たちが、我ら皇帝の神聖なる領地を守護するべく血潮を流して戦った。結果として先遣隊に属する士官が9割以上戦死』」",
                                 voice: "story/1002/110130/1B91E576",
+                                speakerName: "冷静な声",
                                 next: 11013008,
                             },
                             {
@@ -45720,6 +46343,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "「生還を果たしたアヴァール中佐は彼ら勇敢なる兵士たちの死を悼み、その栄誉ある死に最高の賛辞を贈った」",
                                 voice: "story/1002/110130/1B91E5A0",
+                                speakerName: "冷静な声",
                                 next: 11013009,
                             },
                             {
@@ -45727,6 +46351,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "「アヴァールかなるほど！お前らの言う通りにした方がよさそうだな。ヤツらの死後の誉れを高めてやるのは気に食わんが……」",
                                 voice: "story/1002/110130/1B91E5CA",
+                                speakerName: "不満そうな声",
                                 next: 11013010,
                             },
                             {
@@ -45767,18 +46392,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 11013801,
                                 content: "<W>……永遠の虚無に溺れるな……</>",
                                 voice: "story/1002/110138/1B9267BA",
+                                speakerName: "？？？",
                                 next: 11013802,
                             },
                             {
                                 id: 11013802,
                                 content: "<W>……目を覚ませ……</>",
                                 voice: "story/1002/110138/1B9267E4",
+                                speakerName: "？？？",
                                 next: 11013803,
                             },
                             {
                                 id: 11013803,
                                 content: "<W>……鮮血が奔流となる前だ……全ては終わっていない……</>",
                                 voice: "story/1002/110138/1B92680E",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -45834,12 +46462,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     'ロンザ要塞に残存している第十三軍団の兵士全員に命じます。フォーセイクン同盟のスパイであることが判明した元「<Default note="text:グリフィン">鷲獅子</>」隊医務官ダフネ・セオドールは、現時刻より指名手配犯となりました。',
                                 voice: "story/1002/110140/1B928932",
+                                speakerName: "放送",
                                 next: 11014006,
                             },
                             {
                                 id: 11014006,
                                 content: "総員、ダフネ・セオドールを発見次第、即時処刑せよ。",
                                 voice: "story/1002/110140/1B92895C",
+                                speakerName: "放送",
                                 next: 11014007,
                             },
                             {
@@ -45854,6 +46484,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "<W>警告：自爆モードは20分後に起動します。至急退避してください。繰り返します、至急退避してください。</>",
                                 voice: "story/1002/110188/1B959F28",
+                                speakerName: "機械音声",
                                 next: 11019306,
                             },
                             {
@@ -46003,6 +46634,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "水位が規定値を上回っているため、セキュリティゲートを開放できません。水位を調整してから再度お試しください。",
                                 voice: "story/1002/110147/1B92FB62",
+                                speakerName: "機械音声",
                                 next: 11014702,
                             },
                             {
@@ -46427,6 +47059,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11015150,
                                 content: "更に戦局の悪化からシビル軍団長がロンザ要塞に急行中との情報も入っております。",
                                 voice: "story/1002/110151/1B93450C",
+                                speakerName: "兵士",
                                 next: 11015151,
                             },
                             {
@@ -46759,6 +47392,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11014306,
                                 content: "警告、あなたには通行の権限がありません、あなたには通行の権限がありません。",
                                 voice: "story/1002/110143/1B92BA94",
+                                speakerName: "機械音声",
                                 next: 11014307,
                             },
                             {
@@ -46772,6 +47406,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11014308,
                                 content: "目標を発見！ここだ！",
                                 voice: "story/1002/110143/1B92BAE8",
+                                speakerName: "「角鯨」隊隊員",
                                 next: 11014309,
                             },
                             {
@@ -46929,6 +47564,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11014412,
                                 content: "はい、女性医務官1名、ダフネ・セオドール。先遣隊所属の負傷兵らが彼女を逃がした模様です。",
                                 voice: "story/1002/110144/1B92CBF8",
+                                speakerName: "兵士",
                                 next: 11014413,
                             },
                             {
@@ -46936,6 +47572,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     '現在「<Default note="text:ナーファル">一角鯨</>」隊が続々と要塞内に侵襲を開始。先遣隊の粛清は秘密裏に進めておりますので、ダフネ・セオドールが彼らに接触した場合は事態が複雑化します。',
                                 voice: "story/1002/110144/1B92CC22",
+                                speakerName: "兵士",
                                 next: 11014414,
                             },
                             {
@@ -46943,12 +47580,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "更に戦局の悪化からシビル軍団長がロンザ要塞に急行中との情報も入っております。些か息苦しい状況ではありますが、肝心のアヴァールを始末できているのは幸いかと。",
                                 voice: "story/1002/110144/1B92CC4C",
+                                speakerName: "兵士",
                                 next: 11014415,
                             },
                             {
                                 id: 11014415,
                                 content: "それでダフネ・セオドールに関して、フォルス様のご意志を伺いたく……",
                                 voice: "story/1002/110144/1B92CC76",
+                                speakerName: "兵士",
                                 next: 11014416,
                             },
                             {
@@ -46963,6 +47602,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11014417,
                                 content: "了解です。",
                                 voice: "story/1002/110144/1B92CCCA",
+                                speakerName: "兵士",
                                 next: 11014418,
                             },
                             {
@@ -47298,12 +47938,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 11015404,
                                 content: "帝国の裏切り者め……",
                                 voice: "story/1002/110154/1B936E64",
+                                speakerName: "？？？",
                                 next: 11015405,
                             },
                             {
                                 id: 11015405,
                                 content: "無実を主張するのであれば、お前の正義を私に証明してみせろ。",
                                 voice: "story/1002/110154/1B936E8E",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -47337,6 +47979,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "裁判長のお考えの通りです！僕たちの作戦計画は全て漏れていました……",
                                 voice: "story/1002/110155/1B937ECC",
                                 npc: 110054,
+                                speakerName: "レオン？",
                                 next: 11015503,
                             },
                             {
@@ -47344,6 +47987,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "アヴァール長官は……先遣隊の作戦計画の立案に参加していて……",
                                 voice: "story/1002/110155/1B937EF6",
                                 npc: 110054,
+                                speakerName: "レオン？",
                                 next: 11015504,
                             },
                             {
@@ -47351,6 +47995,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "彼はカロン族だ。フォーセイクン同盟に計画を漏らす可能性が最も高い人物であるかと……",
                                 voice: "story/1002/110155/1B937F20",
                                 npc: 110054,
+                                speakerName: "レオン？",
                                 next: 11015505,
                             },
                             {
@@ -47378,6 +48023,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "フォーセイクン同盟は……進攻ルート全てに罠を仕掛けておりました……",
                                 voice: "story/1002/110156/1B938F34",
                                 npc: 110055,
+                                speakerName: "マルコ？",
                                 next: 11015603,
                             },
                             {
@@ -47385,6 +48031,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "裁判長殿の所見通りです。誰かが……俺たちを裏切った……",
                                 voice: "story/1002/110156/1B938F5E",
                                 npc: 110055,
+                                speakerName: "マルコ？",
                                 next: 11015604,
                             },
                             {
@@ -47406,6 +48053,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "裁判長様のご認識通りです。私はアヴァール・ハードランドの娘、ダフネ・セオドールです……",
                                 voice: "story/1002/110159/1B93C042",
                                 npc: 110005,
+                                speakerName: "ダフネ？",
                                 next: 11015902,
                             },
                             {
@@ -47413,6 +48061,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "私のお父さんは……同盟に情報を売って……それで得た報酬を{nickname2}さんと……分け合うつもりでした……",
                                 voice: "story/1002/110159/1B93C06C",
                                 npc: 110005,
+                                speakerName: "ダフネ？",
                                 next: 11015903,
                             },
                             {
@@ -47420,6 +48069,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "要塞の中心部で……報酬の取り分で揉めて……",
                                 voice: "story/1002/110159/1B93C096",
                                 npc: 110005,
+                                speakerName: "ダフネ？",
                                 next: 11015904,
                             },
                             {
@@ -47427,6 +48077,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "私のお父さん……は……",
                                 voice: "story/1002/110159/1B93C0C0",
                                 npc: 110005,
+                                speakerName: "ダフネ？",
                                 next: 11015905,
                             },
                             {
@@ -47434,6 +48085,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "{nickname2}さんの手によって……殺されました……",
                                 voice: "story/1002/110159/1B93C0EA",
                                 npc: 110005,
+                                speakerName: "ダフネ？",
                                 next: 11015906,
                             },
                             {
@@ -47441,6 +48093,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "それ以降も{性别2:彼|彼女}は私を欺いていたのです……お父さんの死の真相を……",
                                 voice: "story/1002/110159/1B93C114",
                                 npc: 110005,
+                                speakerName: "ダフネ？",
                                 next: 11015907,
                             },
                             {
@@ -47448,6 +48101,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "犯人を裁判長様の前へと出廷させます……どうか公正な判決をお願いいたします……",
                                 voice: "story/1002/110159/1B93C13E",
                                 npc: 110005,
+                                speakerName: "ダフネ？",
                                 next: 11015908,
                             },
                             {
@@ -47475,6 +48129,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "裁判長が存じ上げる通り。俺がロンザ作戦先遣隊の指揮官であるアヴァール・ハードランド……",
                                 voice: "story/1002/110158/1B93B004",
                                 npc: 110010,
+                                speakerName: "アヴァール？",
                                 next: 11015803,
                             },
                             {
@@ -47483,6 +48138,7 @@ export const questData_jp: QuestStory[] = [
                                     'ヒュペリア帝国を裏切り、第十三軍団を裏切った人間だ……先遣隊「<Default note="text:グリフィン">鷲獅子</>」「<Default note="text:スノーウルフ">雪狼</>」を売った……',
                                 voice: "story/1002/110158/1B93B02E",
                                 npc: 110010,
+                                speakerName: "アヴァール？",
                                 next: 11015804,
                             },
                             {
@@ -47491,6 +48147,7 @@ export const questData_jp: QuestStory[] = [
                                     "協力者は元妻である……クラウディア・セオドールとの間にもうけた娘……ダフネ……そして……皇立士官学校にて俺の教鞭を受けた学生……{nickname2}……",
                                 voice: "story/1002/110158/1B93B058",
                                 npc: 110010,
+                                speakerName: "アヴァール？",
                                 next: 11015805,
                             },
                             {
@@ -47518,6 +48175,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11015808,
                                 content: "…………",
                                 voice: "story/1002/110158/1B93B100",
+                                speakerName: "アヴァール？",
                             },
                         ],
                     },
@@ -47565,6 +48223,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "最後の質問だ。アヴァール・ハードランドの死はお前の仕業か？",
                                 voice: "story/1002/110163/1B9401E2",
                                 npc: 110032,
+                                speakerName: "典獄",
                                 next: 11016302,
                             },
                             {
@@ -47573,6 +48232,7 @@ export const questData_jp: QuestStory[] = [
                                     "仮に彼が帝国の反逆者だったとしても、お前のことは信頼していたはずだ。彼が火の海に身を投じていた時、お前は何をしていた？",
                                 voice: "story/1002/110163/1B94020C",
                                 npc: 110032,
+                                speakerName: "典獄",
                                 next: 11016305,
                             },
                             {
@@ -47580,6 +48240,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "仲間の正義に義理を欠くならば、獄炎に焼き尽くされろ！",
                                 voice: "story/1002/110163/1B94028A",
                                 npc: 110032,
+                                speakerName: "典獄",
                                 next: 11019052,
                             },
                             {
@@ -47601,6 +48262,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "無実を訴える者よ──なお心に迷いがないというのなら、その胸の意志を刃へとして鍛え上げてみせよ――",
                                 voice: "story/1002/110190/1B95C58C",
                                 npc: 110032,
+                                speakerName: "典獄",
                                 next: 11019055,
                             },
                             {
@@ -47608,6 +48270,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "その剣をもって──答えろ！",
                                 voice: "story/1002/110190/1B95C5B6",
                                 npc: 110032,
+                                speakerName: "典獄",
                             },
                         ],
                     },
@@ -48142,6 +48805,7 @@ export const questData_jp: QuestStory[] = [
                                     "「どうにかダフネを見つけ出せたら……もしあの子が生きていたなら、なんとか……一緒に逃げてやってくれ。それで無事に安全圏まで到達できた時には、あの子に伝えてくれんか——」",
                                 voice: "story/1002/110168/1B945804",
                                 npc: 110040,
+                                speakerName: "アヴァール&{nickname2}",
                                 next: 11016827,
                             },
                             {
@@ -48294,6 +48958,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ヴァージル親王殿下！ここは罪人を尋問する穢れ多き場所でございます！立ち入るのはお控えいただきたく……！",
                                 voice: "story/1002/110170/1B9474BA",
+                                speakerName: "兵士",
                             },
                         ],
                     },
@@ -48436,6 +49101,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 11016001,
                                 content: "ロンザ要塞中央制御室コンソールより……裁判長の認識を肯定します。",
                                 voice: "story/1002/110160/1B93D0AA",
+                                speakerName: "機械音声",
                                 next: 11019317,
                             },
                             {
@@ -48443,12 +49109,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "要塞が占拠された当日、中央制御室で操作を行ったのは、アヴァール·ハードランドおよび{nickname2}のみです。",
                                 voice: "story/1002/110193/1B95F0B2",
+                                speakerName: "機械音声",
                                 next: 11019318,
                             },
                             {
                                 id: 11019318,
                                 content: "そして最終的に、{nickname2}が自爆モードを起動しました。",
                                 voice: "story/1002/110193/1B95F0DC",
+                                speakerName: "機械音声",
                                 next: 11019320,
                             },
                             {
@@ -48456,12 +49124,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "だが私は、工学錬金院の最新素材で作られた機密記録装置を搭載しています。たとえ制御台が焼き払われても、操作記録は消えません──ハハ、ハハ……",
                                 voice: "story/1002/110193/1B95F130",
+                                speakerName: "機械音声",
                                 next: 11016005,
                             },
                             {
                                 id: 11016005,
                                 content: "ヒュペリア帝国軍教訓第18条：戦況が順風満帆である時こそ、敵の奇襲に備えるべし……",
                                 voice: "story/1002/110160/1B93D152",
+                                speakerName: "機械音声",
                                 next: 11016006,
                             },
                             {
@@ -48516,6 +49186,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "第二の質問だ。ロンザ要塞での戦いにおいて、先遣隊が全滅した件──お前と関係はあるか？",
                                 voice: "story/1002/110190/1B95C0F4",
                                 npc: 110032,
+                                speakerName: "典獄",
                                 next: 11019027,
                             },
                             {
@@ -48523,6 +49194,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "同胞の正義を裏切ったのなら──その血、自らの刃で浴びることになるだろう！",
                                 voice: "story/1002/110190/1B95C11E",
                                 npc: 110032,
+                                speakerName: "典獄",
                                 next: 11019028,
                             },
                             {
@@ -48638,6 +49310,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "無実を訴える者よ、お前は怒りに心を乱すか？",
                                 voice: "story/1002/110190/1B95C298",
                                 npc: 110032,
+                                speakerName: "典獄",
                             },
                         ],
                     },
@@ -48717,6 +49390,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "無実を訴える者よ、お前は戸惑いに心を乱すか？",
                                 voice: "story/1002/110190/1B95C412",
                                 npc: 110032,
+                                speakerName: "典獄",
                                 next: 11019046,
                             },
                             {
@@ -49553,6 +50227,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1200/120007/1E0AE34E",
                                 npc: 220014,
+                                speakerName: "異国情緒あふれる女性",
                                 next: 12000801,
                             },
                             {
@@ -49725,6 +50400,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ずいぶん騒がしいみたいだけど……何かあったの？",
                                 voice: "story/1200/120011/1E0B2446",
                                 npc: 210004,
+                                speakerName: "異国情緒あふれる女性",
                                 next: 12001112,
                             },
                             {
@@ -49755,6 +50431,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ほう、カロンは、何かしら……？",
                                 voice: "story/1200/120011/1E0B24EE",
                                 npc: 210004,
+                                speakerName: "異国情緒あふれる女性",
                                 next: 12001116,
                             },
                             {
@@ -49770,6 +50447,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "気にしなくていいわ。どうせあなたも、深い意味なんてなかったんでしょ？",
                                 voice: "story/1200/120011/1E0B2542",
                                 npc: 210004,
+                                speakerName: "異国情緒あふれる女性",
                                 next: 12001118,
                             },
                             {
@@ -49785,6 +50463,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ふむ……事情はだいたいわかったわ。",
                                 voice: "story/1200/120011/1E0B2596",
                                 npc: 210004,
+                                speakerName: "異国情緒あふれる女性",
                                 next: 12001120,
                             },
                             {
@@ -49793,6 +50472,7 @@ export const questData_jp: QuestStory[] = [
                                     "そうね、どうやらちょっとした誤解があったみたい。このふたりは、たぶんロイヤルルームのお客さんなんじゃないかしら？",
                                 voice: "story/1200/120011/1E0B25C0",
                                 npc: 210004,
+                                speakerName: "異国情緒あふれる女性",
                                 next: 12001121,
                             },
                             {
@@ -49816,6 +50496,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "シリュウ、違うかしら？",
                                 voice: "story/1200/120011/1E0B263E",
                                 npc: 210004,
+                                speakerName: "異国情緒あふれる女性",
                                 next: 12001201,
                             },
                             {
@@ -51320,6 +52001,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "現時点で、目標の特徴に該当する対象は確認されていません、どうぞ。",
                                 voice: "story/1200/120017/1E0B8B24",
                                 npc: 220022,
+                                speakerName: "イングリッド",
                                 next: 12001739,
                             },
                             {
@@ -51334,6 +52016,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "四分前、あるルーナ族がコインを要求してきたため、追い払いました。",
                                 voice: "story/1200/120017/1E0B8B78",
                                 npc: 220022,
+                                speakerName: "イングリッド",
                                 next: 12001741,
                             },
                             {
@@ -51349,6 +52032,7 @@ export const questData_jp: QuestStory[] = [
                                     "……だ、ダメだったでしょうか、長官？目標は外見年齢およそ18歳のカロン族の{性别:少年|少女}であり、ルーナ族に偽装することは考えにくいはずですが……",
                                 voice: "story/1200/120017/1E0B8BCC",
                                 npc: 220022,
+                                speakerName: "イングリッド",
                                 next: 12001743,
                             },
                             {
@@ -51668,6 +52352,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "もしあのマンホールに逃げ込んだら、それこそ彼らの思惑通りよ。",
                                 voice: "story/1200/120017/1E0B8DEE",
                                 npc: 210004,
+                                speakerName: "？？？",
                                 next: 12001756,
                             },
                             {
@@ -52177,6 +52862,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12010020,
                                 content: "シリュウ当主――！",
                                 voice: "story/1201/120100/1E10D9E8",
+                                speakerName: "遠くからの声",
                                 next: 12010021,
                             },
                             {
@@ -52819,6 +53505,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12010235,
                                 content: "すみません、シリュウさん！遅れました！",
                                 voice: "story/1201/120102/1E10FD2E",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -53489,6 +54176,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12010503,
                                 content: "グオォォォ……！",
                                 voice: "story/1201/120105/1E112926",
+                                speakerName: "？？？",
                                 next: 12010504,
                             },
                             {
@@ -53545,6 +54233,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "白龍様……お守りくださり、ありがとうございます。あなたたち、大丈夫だった？",
                                 voice: "story/1201/120105/1E1129F8",
                                 npc: 210033,
+                                speakerName: "通りすがりの行商人",
                                 next: 12010509,
                             },
                             {
@@ -53560,6 +54249,7 @@ export const questData_jp: QuestStory[] = [
                                     "私は平気よ。あの禍々しい目に睨まれて、少し足がすくんじゃっただけ。すぐに回復するわ。それよりあなたたち……外の人でしょう？なおさら放っておけないわ。",
                                 voice: "story/1201/120105/1E112A4C",
                                 npc: 210033,
+                                speakerName: "通りすがりの行商人",
                                 options: [
                                     {
                                         id: 120105101,
@@ -53587,6 +54277,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "あ、そうなの。なら良かったわ……",
                                 voice: "story/1201/120105/1E112AA0",
                                 npc: 210033,
+                                speakerName: "通りすがりの行商人",
                                 next: 12010513,
                             },
                             {
@@ -53617,6 +54308,7 @@ export const questData_jp: QuestStory[] = [
                                     'ふふっ……<Default note="text:えんしんと">煙津渡</>の水域は広いのよ。一日一晩泳いだって、数里も進めないわよ。',
                                 voice: "story/1201/120105/1E112B48",
                                 npc: 210033,
+                                speakerName: "通りすがりの行商人",
                                 next: 12010517,
                             },
                             {
@@ -53625,6 +54317,7 @@ export const questData_jp: QuestStory[] = [
                                     '慌てないで。<Default note="text:ビーアン">狴犴</>と見た目こそ似ているけど、<Default note="text:ゲンビー">玄狴</>は<Default note="text:カショ">華胥</>の<Default note="text:法の番人">執法者</>じゃないの。アレは<W note="text:しょくいん">燭陰</>の禍によって生まれた混沌の落とし子よ。',
                                 voice: "story/1201/120105/1E112B72",
                                 npc: 210033,
+                                speakerName: "通りすがりの行商人",
                                 next: 12010518,
                             },
                             {
@@ -53633,6 +54326,7 @@ export const questData_jp: QuestStory[] = [
                                     '<Default note="text:ゲンビー">玄狴</>は理性を失い、狂気に飲まれてしまった。アレには「大風九章」の制約も及ばない。だから、攻撃しても罰は下らないの。',
                                 voice: "story/1201/120105/1E112B9C",
                                 npc: 210033,
+                                speakerName: "通りすがりの行商人",
                                 next: 12010519,
                             },
                             {
@@ -53641,6 +54335,7 @@ export const questData_jp: QuestStory[] = [
                                     'それにしても、近頃<Default note="text:ゲンビー">玄狴</>が人を襲う事件が増えたわね。さっき補充したばかりのお香も、あっという間にすっからかんよ……',
                                 voice: "story/1201/120105/1E112BC6",
                                 npc: 210033,
+                                speakerName: "通りすがりの行商人",
                                 next: 12010520,
                             },
                             {
@@ -53655,6 +54350,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ニシキ？どうしてここに？",
                                 voice: "story/1201/120105/1E112C1A",
                                 npc: 210033,
+                                speakerName: "通りすがりの行商人",
                                 next: 12010522,
                             },
                             {
@@ -53693,6 +54389,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ええ。",
                                 voice: "story/1201/120105/1E112CEC",
                                 npc: 210033,
+                                speakerName: "通りすがりの行商人",
                                 next: 12010527,
                             },
                             {
@@ -53820,6 +54517,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     '香よ、天へと昇り、<Default note="text:たいこう">太皓</>の御許へ届きますように。その御心に触れ、どうか深き慈しみを。万象に、安らぎと幸せを授け給え。',
                                 voice: "story/1201/120106/1E113964",
+                                speakerName: "信心深い参拝者",
                                 next: 12010603,
                             },
                             {
@@ -54664,6 +55362,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……",
                                 voice: "story/1201/120115/1E11CD0C",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011503,
                             },
                             {
@@ -54679,6 +55378,7 @@ export const questData_jp: QuestStory[] = [
                                     '俺が<Default note="text:おうてんい">応天尉</>として在るのは、ただ民を救い、世を安んずるためだ。報酬や名声に心を動かされることはない。',
                                 voice: "story/1201/120115/1E11CD60",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011505,
                             },
                             {
@@ -54706,6 +55406,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……君たちは無関係の部外者だ。こんな戦いに巻き込まれるべきじゃない。ここは、俺ひとりで十分だ。",
                                 voice: "story/1201/120119/1E120E82",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011902,
                             },
                             {
@@ -54727,6 +55428,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……わかった。",
                                 voice: "story/1201/120119/1E120F00",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                             },
                         ],
                     },
@@ -54749,6 +55451,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……ようやく、この忌まわしき獣どもを一掃できたか。助力、感謝する。",
                                 voice: "story/1201/120120/1E121EEA",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12012002,
                             },
                             {
@@ -55063,6 +55766,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "出口は目前だ。俺の護衛はここまでとしよう。",
                                 voice: "story/1201/120117/1E11EDB2",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011709,
                             },
                         ],
@@ -55093,6 +55797,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "グオオォォ――！！",
                                 voice: "story/1201/120117/1E11EE30",
                                 npc: 100001,
+                                speakerName: "？？？",
                                 next: 12011705,
                             },
                             {
@@ -55151,6 +55856,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "礼には及ばない。これは俺の務めだから。",
                                 voice: "story/1201/120114/1E11BCA4",
                                 npc: 210007,
+                                speakerName: "？？？",
                                 next: 12011403,
                             },
                             {
@@ -55174,6 +55880,7 @@ export const questData_jp: QuestStory[] = [
                                     '……<Default note="text:ゲンビー">玄狴</>の討伐を命じられている。まだ任務の途中だ、悪いが雑談に付き合っている暇はない。',
                                 voice: "story/1201/120114/1E11BD22",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011406,
                             },
                             {
@@ -55188,6 +55895,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "大風九章、天命だ。",
                                 voice: "story/1201/120114/1E11BD76",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011408,
                             },
                             {
@@ -55211,6 +55919,7 @@ export const questData_jp: QuestStory[] = [
                                     "香が切れた今、俺一人ではお前たちを守りきれる保証はない。――用がないのなら、さっさとここを離れて、安全な場所に身を寄せろ。",
                                 voice: "story/1201/120114/1E11BDF4",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011411,
                             },
                             {
@@ -55226,6 +55935,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "洞窟の向こう側……？俺の知る限りじゃ、そこには座礁した難破船の残骸くらいしかないはずだが。",
                                 voice: "story/1201/120114/1E11BE48",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011413,
                             },
                             {
@@ -55240,6 +55950,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "闇市で、商談だと？……ならず者どもとつるむつもりなら、俺から言えることは何もない。",
                                 voice: "story/1201/120114/1E11BE9C",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011415,
                             },
                             {
@@ -55269,6 +55980,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……悪い。俺の早とちりだったようだ。",
                                 voice: "story/1201/120114/1E11BF44",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011419,
                             },
                             {
@@ -55276,6 +55988,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "とはいえ、あの闇市は胡散臭い連中ばっかりだ。騙されないように気をつけろ。",
                                 voice: "story/1201/120114/1E11BF6E",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                                 next: 12011420,
                             },
                             {
@@ -55283,6 +55996,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ここは危険だ。……俺が護衛してやろう。",
                                 voice: "story/1201/120114/1E11BF98",
                                 npc: 210007,
+                                speakerName: "オウテンイ",
                             },
                         ],
                     },
@@ -55501,6 +56215,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "なっ――こんなのあんまりだわ！",
                                 voice: "story/1201/120122/1E123FBA",
                                 npc: 210011,
+                                speakerName: "？？？",
                                 next: 12012202,
                             },
                             {
@@ -55931,6 +56646,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そこまでだ！客人に無礼ではないか。",
                                 voice: "story/1201/120126/1E1282AA",
                                 npc: 210010,
+                                speakerName: "？？？",
                                 next: 12012610,
                             },
                             {
@@ -56818,6 +57534,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12013436,
                                 content: "彷徨いし魂。時の巡りに従いて。還る場所を求め行く。月、満ちては欠け、若木、変わらず青く茂る……",
                                 voice: "story/1201/120134/1E130A58",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -56930,6 +57647,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12013445,
                                 content: "群玄吼え、災い、かくしてこの世に降り立つ。",
                                 voice: "story/1201/120134/1E130BD2",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -56994,12 +57712,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 120134311,
                                 content: "ああ……なんと嘆かわしい……",
                                 voice: "story/1201/120134/1E130CF8",
+                                speakerName: "？？？",
                                 next: 12013432,
                             },
                             {
                                 id: 12013432,
                                 content: "魂よ、彷徨い歩け。時が満ちるそのときまで。山の影に、海の果て。彷徨い、そして還れ。",
                                 voice: "story/1201/120134/1E1309B0",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -57033,6 +57753,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12013436,
                                 content: "彷徨いし魂。時の巡りに従いて。還る場所を求め行く。月、満ちては欠け、若木、変わらず青く茂る……",
                                 voice: "story/1201/120134/1E130A58",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -57045,6 +57766,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12013438,
                                 content: "星より遠く、天の果てに比す。陰の魂は、墓所に静まりぬ。誰ぞめぐり逢い、異郷に留むるか？",
                                 voice: "story/1201/120134/1E130AAC",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -57139,6 +57861,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12022701,
                                 content: "{nickname}！戻ったのね！",
                                 voice: "story/1201/120227/1E18FA62",
+                                speakerName: "？？？",
                                 next: 12022702,
                             },
                             {
@@ -57355,6 +58078,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "いけません！シリュウさん！",
                                 voice: "story/1201/120229/1E191CD6",
                                 npc: 210031,
+                                speakerName: "中年男性",
                                 next: 12022912,
                             },
                             {
@@ -57376,6 +58100,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "<W>人を傷し、物を奪うは、天に背く</>――大風九章に伝わる戒めをお忘れか！？",
                                 voice: "story/1201/120229/1E191D54",
                                 npc: 210031,
+                                speakerName: "中年男性",
                                 next: 12022915,
                             },
                             {
@@ -57383,6 +58108,7 @@ export const questData_jp: QuestStory[] = [
                                 content: '……でも、<Default note="text:ゲンビー">玄狴</>を攻撃しても、罰は下らないんじゃないのか？',
                                 voice: "story/1201/120229/1E191D7E",
                                 npc: 210077,
+                                speakerName: "傍観者",
                                 next: 12022916,
                             },
                             {
@@ -57390,6 +58116,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "大風九章の教えを、そんな浅はかに解釈するとはなんと無礼な！",
                                 voice: "story/1201/120229/1E191DA8",
                                 npc: 210031,
+                                speakerName: "中年男性",
                                 next: 12022917,
                             },
                             {
@@ -57398,6 +58125,7 @@ export const questData_jp: QuestStory[] = [
                                     "兵を念ずれば、行にあらわる。一たび刃を振るえば、人心は濁る。その矛、友に向けようと、敵に向けようと、性は同じくして変わらず。これは天意に背く行為だ！",
                                 voice: "story/1201/120229/1E191DD2",
                                 npc: 210031,
+                                speakerName: "中年男性",
                                 next: 12022918,
                             },
                             {
@@ -57413,6 +58141,7 @@ export const questData_jp: QuestStory[] = [
                                     "白龍様がきっと我々を守り、邪を祓ってくださるだろう！もし争いごとなどして、白龍様に見限られ、加護を失ってしまえば……それこそ本末転倒ではないか！もう一度考え直してくれ！",
                                 voice: "story/1201/120229/1E191E26",
                                 npc: 210031,
+                                speakerName: "中年男性",
                                 next: 12022920,
                             },
                             {
@@ -57420,6 +58149,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "黍離の乱のことを忘れたのか！！",
                                 voice: "story/1201/120229/1E191E50",
                                 npc: 210031,
+                                speakerName: "中年男性",
                                 next: 12022921,
                             },
                             {
@@ -57427,6 +58157,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "たしかに一理あるな……",
                                 voice: "story/1201/120229/1E191E7A",
                                 npc: 210077,
+                                speakerName: "傍観者",
                                 next: 12022922,
                             },
                             {
@@ -57443,6 +58174,7 @@ export const questData_jp: QuestStory[] = [
                                     '<Default note="text:ビーアン">狴犴</>と<Default note="text:おうてんい">応天尉</>がこちらに向かわれている。もう少し耐えれば……',
                                 voice: "story/1201/120229/1E191ECE",
                                 npc: 210031,
+                                speakerName: "中年男性",
                                 next: 12022924,
                             },
                             {
@@ -57457,6 +58189,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そ、それは……",
                                 voice: "story/1201/120229/1E191F22",
                                 npc: 210031,
+                                speakerName: "中年男性",
                                 next: 12022926,
                             },
                             {
@@ -59052,6 +59785,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ギャ！白イオ化ケ！",
                                 voice: "story/1201/120143/1E139842",
                                 npc: 210016,
+                                speakerName: "？？？",
                                 next: 12014302,
                             },
                             {
@@ -59818,6 +60552,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……た……けて……たす……",
                                 voice: "story/1201/120158/1E148EAE",
                                 npc: 210028,
+                                speakerName: "？？？",
                                 next: 12015804,
                             },
                             {
@@ -59839,6 +60574,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "消えたくない……まだ……",
                                 voice: "story/1201/120158/1E148F2C",
                                 npc: 210028,
+                                speakerName: "？？？",
                                 next: 12015807,
                             },
                             {
@@ -59846,6 +60582,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "どうか……会わせて……",
                                 voice: "story/1201/120158/1E148F56",
                                 npc: 210028,
+                                speakerName: "？？？",
                                 next: 12015808,
                             },
                             {
@@ -60587,6 +61324,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12017401,
                                 content: "ああ痛い……傷口が膿んで、夜も眠れない……",
                                 voice: "story/1201/120174/1E1594DA",
+                                speakerName: "患者の幻影",
                             },
                         ],
                     },
@@ -60599,6 +61337,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12017402,
                                 content: "もう私は助からない……どうか、楽にしてくれないか……",
                                 voice: "story/1201/120174/1E159504",
+                                speakerName: "患者の幻影",
                             },
                         ],
                     },
@@ -60612,6 +61351,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "娘は生まれたばかりなの！まだ「母さん」すら聞けてないわ！お願いよ、この子を助けて！お願いよぉぉ！！",
                                 voice: "story/1201/120174/1E15952E",
+                                speakerName: "患者の幻影",
                             },
                         ],
                     },
@@ -60624,6 +61364,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12017404,
                                 content: "フー家は万病を癒すのではなかったのか？まさか嘘だったのか？",
                                 voice: "story/1201/120174/1E159558",
+                                speakerName: "患者の幻影",
                             },
                         ],
                     },
@@ -60701,6 +61442,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "イッ！イッ！",
                                 voice: "story/1201/120182/1E16181A",
                                 npc: 210017,
+                                speakerName: "言葉を持たないムユウセイ",
                             },
                         ],
                     },
@@ -60814,6 +61556,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "イッ、イッ！",
                                 voice: "story/1201/120182/1E161A3C",
                                 npc: 210017,
+                                speakerName: "言葉を持たないムユウセイ",
                                 next: 12018215,
                             },
                             {
@@ -60841,6 +61584,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "イッ、イッ！",
                                 voice: "story/1201/120182/1E161A3C",
                                 npc: 210017,
+                                speakerName: "言葉を持たないムユウセイ",
                                 next: 12018215,
                             },
                             {
@@ -60962,6 +61706,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "イッ、イーヤッ！コレデ、モウゼンゼン平気！サァサァ、急イデ出発ダヨー！",
                                 voice: "story/1201/120182/1E161D06",
                                 npc: 210017,
+                                speakerName: "ムユウセイ",
                             },
                         ],
                     },
@@ -60975,6 +61720,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "イッ、イーヤッ！",
                                 voice: "story/1201/120182/1E161D30",
                                 npc: 210017,
+                                speakerName: "囚われのムユウセイ",
                                 next: 12018233,
                             },
                             {
@@ -61017,12 +61763,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 12018236,
                                 content: "祝由サマ、白髪ノ勇者サマ、アリガトウ！",
                                 voice: "story/1201/120182/1E161DD8",
+                                speakerName: "囚われのムユウセイ",
                                 next: 12018237,
                             },
                             {
                                 id: 12018237,
                                 content: "オレモ、手伝ウ！オレノ鉄頭槌、ドーン！大地モ、バンバン鳴ル！",
                                 voice: "story/1201/120182/1E161E02",
+                                speakerName: "囚われのムユウセイ",
                             },
                         ],
                     },
@@ -61035,6 +61783,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12018238,
                                 content: "最後ノ仲間！最後ノ仲間！",
                                 voice: "story/1201/120182/1E161E2C",
+                                speakerName: "ムユウセイ",
                                 next: 12018239,
                             },
                             {
@@ -61058,12 +61807,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "老いぼれとはいえ、この身、かつてはそれなりに武を心得ていたつもりじゃが……まさか、ここまで手こずるとはな。面目ない、面目ない……",
                                 voice: "story/1201/120182/1E161E80",
+                                speakerName: "老成したムユウセイ",
                                 next: 12018241,
                             },
                             {
                                 id: 12018241,
                                 content: "コレデ全員！ミンナイル？ミンナイル！",
                                 voice: "story/1201/120182/1E161EAA",
+                                speakerName: "ムユウセイ",
                                 next: 12018242,
                             },
                             {
@@ -61071,6 +61822,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "この先に、とんでもねぇ巨大な花の穢獣が出口を塞いでおる。わしを同行させとくれ。この手で直々に根っこを引き抜いてくれよう！",
                                 voice: "story/1201/120182/1E161ED4",
+                                speakerName: "老成したムユウセイ",
                             },
                         ],
                     },
@@ -61091,6 +61843,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "アリガトウ！コノ恩、忘レナイ！先に失礼シマス！",
                                 voice: "story/1201/120183/1E162858",
                                 npc: 210017,
+                                speakerName: "ムユウセイたち",
                                 next: 12018301,
                             },
                             {
@@ -61196,6 +61949,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "イッ！イッ！",
                                 voice: "story/1201/120183/1E162ACE",
                                 npc: 210036,
+                                speakerName: "言葉を持たないムユウセイ",
                                 next: 12018316,
                             },
                             {
@@ -61232,6 +61986,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "イッ！イーヤッ！イッ！",
                                 voice: "story/1201/120183/1E162BA0",
                                 npc: 210036,
+                                speakerName: "言葉を持たないムユウセイ",
                                 next: 12018321,
                             },
                             {
@@ -61254,6 +62009,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "イッ！",
                                 voice: "story/1201/120183/1E162C1E",
                                 npc: 210036,
+                                speakerName: "言葉を持たないムユウセイ",
                                 next: 12018324,
                             },
                             {
@@ -61578,6 +62334,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "お待ちしておりました！",
                                 voice: "story/1201/120186/1E1659BA",
                                 npc: 210010,
+                                speakerName: "闇市の子分",
                                 next: 12018602,
                             },
                             {
@@ -61593,6 +62350,7 @@ export const questData_jp: QuestStory[] = [
                                     "御覧の通り、獲物は負傷し、鴉の孤原まで追い詰めました！あそこは海で囲まれてますし、逃げ場はないでしょう。後は囲って捕まえるだけっす！",
                                 voice: "story/1201/120186/1E165A0E",
                                 npc: 210010,
+                                speakerName: "闇市の子分",
                                 next: 12018604,
                             },
                             {
@@ -62422,6 +63180,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "おっと、こりゃいい！一人で退屈してたとこなんだ。",
                                 voice: "story/1201/120193/1E16CC92",
                                 npc: 210021,
+                                speakerName: "飄々としている男",
                                 next: 12019302,
                             },
                             {
@@ -62866,6 +63625,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ふぅ……なんとか成功しましたな。",
                                 voice: "story/1201/120209/1E17D312",
                                 npc: 210005,
+                                speakerName: "星織人",
                                 next: 12020902,
                             },
                             {
@@ -62958,6 +63718,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "御意のままに、シリュウさん！",
                                 voice: "story/1201/120138/1E134691",
                                 npc: 210004,
+                                speakerName: "ドゥリ",
                             },
                         ],
                     },
@@ -62970,6 +63731,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12021001,
                                 content: "魂よ、遊離せり――北に荒穢を狩り、彼と我、烛陰にて相対し、禍に罹りて千歳を経ん……",
                                 voice: "story/1201/120210/1E17E37A",
+                                speakerName: "？？？",
                                 next: 12021002,
                             },
                             {
@@ -63010,6 +63772,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12021201,
                                 content: "魂散りて、往昔は崩れん……荒寂の果てに時を辿り、なお帰路を求めん……",
                                 voice: "story/1201/120212/1E18044A",
+                                speakerName: "？？？",
                                 next: 12021202,
                             },
                             {
@@ -63123,6 +63886,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12022014,
                                 content: "……誰ぞめぐり逢い、異郷に留むるか？",
                                 voice: "story/1201/120220/1E1889AC",
+                                speakerName: "燭陰（しょくいん）",
                                 next: 12022015,
                             },
                             {
@@ -63138,6 +63902,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "すべては、すでに定まりしこと……もはや引き返す術は無い。この世は、避け得ぬ大いなる禍へと、歩みを進めておる……",
                                 voice: "story/1201/120220/1E188A00",
+                                speakerName: "燭陰（しょくいん）",
                             },
                         ],
                     },
@@ -66157,6 +66922,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "カサンドラ、どこに行くの？",
                                 voice: "story/1201/120114/1E1F83D2",
                                 npc: 211015,
+                                speakerName: "？？？",
                                 next: 12032902,
                             },
                             {
@@ -67259,12 +68025,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 12034101,
                                 content: "動くな！保安署だ！",
                                 voice: "story/1201/120114/1E2048B2",
+                                speakerName: "保安署の兵士",
                                 next: 12034102,
                             },
                             {
                                 id: 12034102,
                                 content: "ん……？なんだ、盗賊たち完全にのびてるじゃないか。",
                                 voice: "story/1201/120114/1E2048DC",
+                                speakerName: "保安署の兵士",
                                 next: 12034103,
                             },
                             {
@@ -67278,6 +68046,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12034104,
                                 content: "……そうなのか？",
                                 voice: "story/1201/120114/1E204930",
+                                speakerName: "保安署の兵士",
                                 next: 12034105,
                             },
                             {
@@ -67291,6 +68060,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12034106,
                                 content: "……わかった。では、こいつらの身柄はこっちで引き取らせてもらう。",
                                 voice: "story/1201/120114/1E204984",
+                                speakerName: "保安署の兵士",
                                 next: 12034107,
                             },
                             {
@@ -67298,6 +68068,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "前に変なカロンの女が署に来て、「ダクリ湖に盗賊がいる」って大騒ぎしてたんだが……まさか本当だったとはな。",
                                 voice: "story/1201/120114/1E2049AE",
+                                speakerName: "保安署の兵士",
                             },
                         ],
                     },
@@ -67655,12 +68426,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 12034101,
                                 content: "動くな！保安署だ！",
                                 voice: "story/1201/120114/1E2048B2",
+                                speakerName: "保安署の兵士",
                                 next: 12034102,
                             },
                             {
                                 id: 12034102,
                                 content: "ん……？なんだ、盗賊たち完全にのびてるじゃないか。",
                                 voice: "story/1201/120114/1E2048DC",
+                                speakerName: "保安署の兵士",
                                 next: 12034103,
                             },
                             {
@@ -67674,6 +68447,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12034104,
                                 content: "……そうなのか？",
                                 voice: "story/1201/120114/1E204930",
+                                speakerName: "保安署の兵士",
                                 next: 12034105,
                             },
                             {
@@ -67687,6 +68461,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12034106,
                                 content: "……わかった。では、こいつらの身柄はこっちで引き取らせてもらう。",
                                 voice: "story/1201/120114/1E204984",
+                                speakerName: "保安署の兵士",
                                 next: 12034107,
                             },
                             {
@@ -67694,6 +68469,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "前に変なカロンの女が署に来て、「ダクリ湖に盗賊がいる」って大騒ぎしてたんだが……まさか本当だったとはな。",
                                 voice: "story/1201/120114/1E2049AE",
+                                speakerName: "保安署の兵士",
                             },
                         ],
                     },
@@ -69827,6 +70603,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12010503,
                                 content: "グオォォォ……！",
                                 voice: "story/1201/120105/1E112926",
+                                speakerName: "？？？",
                                 next: 12010504,
                             },
                             {
@@ -70069,6 +70846,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12041810,
                                 content: "あの人って……！",
                                 voice: "story/1204/120418/1E253974",
+                                speakerName: "{nickname}&スノウ",
                             },
                         ],
                     },
@@ -71078,6 +71856,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12042603,
                                 content: "ビッ――ビッ――",
                                 voice: "story/1204/120426/1E25BB8E",
+                                speakerName: "偃雀",
                                 next: 12042604,
                             },
                             {
@@ -71128,6 +71907,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12021301,
                                 content: "……何者か。",
                                 voice: "story/1201/120213/1E1814B2",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -71471,6 +72251,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12049035,
                                 content: "天も地も、自由自在が一番さ～",
                                 voice: "story/1204/120490/1E29DACE",
+                                speakerName: "？？？",
                                 next: 12049036,
                             },
                             {
@@ -71520,6 +72301,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12049035,
                                 content: "天も地も、自由自在が一番さ～",
                                 voice: "story/1204/120490/1E29DACE",
+                                speakerName: "？？？",
                                 next: 12049036,
                             },
                             {
@@ -72075,6 +72857,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……あっちだ……わかった……",
                                 voice: "story/1204/120429/1E25F3FE",
                                 npc: 100001,
+                                speakerName: "？？？",
                                 next: 12042948,
                             },
                             {
@@ -72396,6 +73179,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……あっちだ……わかった……",
                                 voice: "story/1204/120429/1E25F3FE",
                                 npc: 100001,
+                                speakerName: "？？？",
                                 next: 12042948,
                             },
                             {
@@ -72503,6 +73287,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12043104,
                                 content: "シリュウ！？＆シリュウだと！？",
                                 voice: "story/1204/120431/1E260DC0",
+                                speakerName: "フーシュ&カシュウ",
                                 next: 12043105,
                             },
                             {
@@ -73089,6 +73874,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "お、おばあさんですって！？",
                                 voice: "story/1204/120434/1E263EA4",
                                 npc: 240026,
+                                speakerName: "通りすがりの少女",
                                 next: 12043403,
                             },
                             {
@@ -73096,6 +73882,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "知らないわ！人違いよ。",
                                 voice: "story/1204/120434/1E263ECE",
                                 npc: 240026,
+                                speakerName: "通りすがりの少女",
                                 next: 12043404,
                             },
                             {
@@ -73110,6 +73897,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "人違いだって言ってるでしょ。もう話しかけないで。",
                                 voice: "story/1204/120434/1E263F22",
                                 npc: 240026,
+                                speakerName: "通りすがりの少女",
                                 next: 12043406,
                             },
                             {
@@ -73125,6 +73913,7 @@ export const questData_jp: QuestStory[] = [
                                     "ここは誰かの私有地じゃないわ。私はこういう人気のない場所を歩くのが好きなの。\n 静かな方がアイデアも湧くんだから。文句ある？",
                                 voice: "story/1204/120434/1E263F76",
                                 npc: 240026,
+                                speakerName: "通りすがりの少女",
                                 next: 12043408,
                             },
                             {
@@ -73806,6 +74595,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12043737,
                                 content: "ダメ。（いけません。）",
                                 voice: "story/1204/120437/1E26759A",
+                                speakerName: "フーシュ&スーイー",
                                 next: 12043738,
                             },
                             {
@@ -80035,12 +80825,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 12049130,
                                 content: "シリュウ！天下一の極悪人になるつもりか！",
                                 voice: "story/1204/120491/1E29EA64",
+                                speakerName: "先人",
                                 next: 12049131,
                             },
                             {
                                 id: 12049131,
                                 content: "天地の理、祖先の掟――凡人ごときが逆らえると思うか！",
                                 voice: "story/1204/120491/1E29EA8E",
+                                speakerName: "先人",
                             },
                         ],
                     },
@@ -80228,6 +81020,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12049132,
                                 content: "今ならまだ間に合う！引き下がれ！",
                                 voice: "story/1204/120491/1E29EAB8",
+                                speakerName: "先人",
                             },
                         ],
                     },
@@ -80240,6 +81033,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12049133,
                                 content: "止まれ！それ以上進むな！",
                                 voice: "story/1204/120491/1E29EAE2",
+                                speakerName: "先人",
                             },
                         ],
                     },
@@ -80252,6 +81046,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12049134,
                                 content: "幾千年と積み重ねた偉業……それを終わらせる気か。",
                                 voice: "story/1204/120491/1E29EB0C",
+                                speakerName: "先人",
                             },
                         ],
                     },
@@ -80264,6 +81059,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12049135,
                                 content: "シリュウ……本当にそれでいいのか？",
                                 voice: "story/1204/120491/1E29EB36",
+                                speakerName: "先人",
                             },
                         ],
                     },
@@ -81846,6 +82642,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12049138,
                                 content: "侵入者よ、天の怒りに耐えられるか――！",
                                 voice: "story/1204/120491/1E29EBB4",
+                                speakerName: "太皓＆燭陰",
                             },
                         ],
                     },
@@ -82059,12 +82856,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "心と理が釣り合ってこそ、道は生まれる。聖人はその道に則り、民を治めた。争うことなく応じ、命ずることなく秩序を得る……それが真の統治というものだ。",
                                 voice: "story/1204/120479/1E292116",
+                                speakerName: "ノリ＆ヤン",
                                 next: 12047904,
                             },
                             {
                                 id: 12047904,
                                 content: "君たちは、どう思う？",
                                 voice: "story/1204/120479/1E292140",
+                                speakerName: "ノリ＆ヤン",
                                 next: 12047905,
                             },
                             {
@@ -82116,6 +82915,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12047910,
                                 content: "ならば、その手を、我らに――",
                                 voice: "story/1204/120479/1E29223C",
+                                speakerName: "ノリ＆ヤン",
                             },
                         ],
                     },
@@ -82130,6 +82930,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     '……<Default note="text:ばんぶつ">万物</>は陰を負いて陽を抱き、<Default note="text:ちゅうき">沖気</>以って和を為す……',
                                 voice: "story/1204/120491/1E29EC08",
+                                speakerName: "太皓＆燭陰",
                             },
                         ],
                     },
@@ -82143,6 +82944,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     '……<Default note="text:じ">持</>してこれを盈たすは、その<Default note="text:や">已</>むるに<Default note="text:し">如</>かず。<Default note="text:し">揣</>してこれを鋭くするは、長く保つべからず……',
                                 voice: "story/1204/120491/1E29EC32",
+                                speakerName: "太皓＆燭陰",
                             },
                         ],
                     },
@@ -82172,12 +82974,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "心と理が釣り合ってこそ、道は生まれる。聖人はその道に則り、民を治めた。争うことなく応じ、命ずることなく秩序を得る……それが真の統治というものだ。",
                                 voice: "story/1204/120479/1E292116",
+                                speakerName: "ノリ＆ヤン",
                                 next: 12047904,
                             },
                             {
                                 id: 12047904,
                                 content: "君たちは、どう思う？",
                                 voice: "story/1204/120479/1E292140",
+                                speakerName: "ノリ＆ヤン",
                                 next: 12047905,
                             },
                             {
@@ -82229,6 +83033,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12047910,
                                 content: "ならば、その手を、我らに――",
                                 voice: "story/1204/120479/1E29223C",
+                                speakerName: "ノリ＆ヤン",
                             },
                         ],
                     },
@@ -84711,6 +85516,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "へぇ、時代も変わったもんだね。まさか流れ者を褒めそやす声が、堂々と街中に響く日が来るとは。",
                                 voice: "story/1206/120610/1E31864E",
                                 npc: 250015,
+                                speakerName: "傲慢な男",
                                 next: 12061004,
                             },
                             {
@@ -84725,6 +85531,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "筋違い？あんたがここでデタラメを吹いてるのは筋が通ってるって？",
                                 voice: "story/1206/120610/1E3186A2",
                                 npc: 250015,
+                                speakerName: "傲慢な男",
                                 next: 12061006,
                             },
                             {
@@ -84733,6 +85540,7 @@ export const questData_jp: QuestStory[] = [
                                     "山外山四天王だか何だか知らないけど――川をせき止めて香炉を消し、六つの書庫を焼いたあの事件の犠牲者の気持ち、考えたことあるのか？",
                                 voice: "story/1206/120610/1E3186CC",
                                 npc: 250015,
+                                speakerName: "傲慢な男",
                                 next: 12061007,
                             },
                             {
@@ -84741,6 +85549,7 @@ export const questData_jp: QuestStory[] = [
                                     "人の門に門松を立てて、私刑を執行。仇討ちのつもりだろうが、命を奪っていい理由にはならないだろう。誰が奴らに裁きを下す権利を与えたんだ？",
                                 voice: "story/1206/120610/1E3186F6",
                                 npc: 250015,
+                                speakerName: "傲慢な男",
                                 next: 12061008,
                             },
                             {
@@ -84749,6 +85558,7 @@ export const questData_jp: QuestStory[] = [
                                     "それと――郊外に落ちた巨大なからくり鳥。あれでどれだけの堤が壊され、田畑が水に沈んだか。それを「善意」の造物だと？笑わせるなよ。",
                                 voice: "story/1206/120610/1E318720",
                                 npc: 250015,
+                                speakerName: "傲慢な男",
                                 next: 12061009,
                             },
                             {
@@ -84756,6 +85566,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "何が流れ者だ。所詮、結託した無法者の群れじゃないか！",
                                 voice: "story/1206/120610/1E31874A",
                                 npc: 250015,
+                                speakerName: "傲慢な男",
                                 next: 12061010,
                             },
                             {
@@ -84786,6 +85597,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ふぅん……そんなに必死に庇うってことは、お前も流れ者の一味ってわけだ？",
                                 voice: "story/1206/120610/1E3187F2",
                                 npc: 250015,
+                                speakerName: "傲慢な男",
                                 next: 12061014,
                             },
                             {
@@ -84801,6 +85613,7 @@ export const questData_jp: QuestStory[] = [
                                     "まあまあ、みんなただの噂で喋ってるだけだよ～。こうなったらさ、どっちが本当の話を「うまく」作れるか、話し合い大会でもやろうぜ♪",
                                 voice: "story/1206/120610/1E318846",
                                 npc: 250015,
+                                speakerName: "傲慢な男？",
                                 next: 12061016,
                             },
                             {
@@ -84809,12 +85622,14 @@ export const questData_jp: QuestStory[] = [
                                     "でも、もし話がつまんなかったら……オレ、みんなに嫌われちゃうかもな～？あ～大変大変、練習しとかねぇと～♪",
                                 voice: "story/1206/120610/1E318870",
                                 npc: 250015,
+                                speakerName: "傲慢な男？",
                                 next: 12061017,
                             },
                             {
                                 id: 12061017,
                                 content: "……あれ、何言ってんの？頭おかしいのか？",
                                 voice: "story/1206/120610/1E31889A",
+                                speakerName: "観客",
                                 next: 12061018,
                             },
                             {
@@ -84822,6 +85637,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "だ、誰だ！？俺の真似してんのは……っ！ぶっ飛ばすぞ！",
                                 voice: "story/1206/120610/1E3188C4",
                                 npc: 250015,
+                                speakerName: "傲慢な男",
                                 next: 12061019,
                             },
                             {
@@ -84829,6 +85645,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "キキキ、論破できないからって怒鳴りだすの、ダサすぎだろ？",
                                 voice: "story/1206/120610/1E3188EE",
                                 npc: 250015,
+                                speakerName: "傲慢な男？",
                                 next: 12061020,
                             },
                             {
@@ -84836,12 +85653,14 @@ export const questData_jp: QuestStory[] = [
                                 content: "なっ……！",
                                 voice: "story/1206/120610/1E318918",
                                 npc: 250015,
+                                speakerName: "傲慢な男",
                                 next: 12061021,
                             },
                             {
                                 id: 12061021,
                                 content: "お母さん見てー！このお兄ちゃん、自分で自分とケンカしてるー！",
                                 voice: "story/1206/120610/1E318942",
+                                speakerName: "観客",
                                 next: 12061022,
                             },
                             {
@@ -84856,6 +85675,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……チッ。今は英雄大会が先だ。今日のところは許してやろう。行くぞ！",
                                 voice: "story/1206/120610/1E318996",
                                 npc: 250015,
+                                speakerName: "傲慢な男",
                             },
                         ],
                     },
@@ -85240,6 +86060,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……何やら、騒がしいな。",
                                 voice: "story/1206/120612/1E31A96A",
                                 npc: 250005,
+                                speakerName: "？？？",
                                 next: 12061218,
                             },
                             {
@@ -85869,6 +86690,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "や、やめて！こっちに来ないで……！",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "？？？",
                                 next: 12061446,
                             },
                             {
@@ -85914,6 +86736,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "アン――！どこだ！？",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061505,
                             },
                             {
@@ -85921,6 +86744,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……この子ったら、足に持病があるっていうのに、どうして外なんかに――！",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061506,
                             },
                             {
@@ -86043,6 +86867,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "や、やめて！こっちに来ないで……！",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "？？？",
                                 next: 12061446,
                             },
                             {
@@ -86087,6 +86912,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "アン――！どこだ！？",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061505,
                             },
                             {
@@ -86094,6 +86920,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……この子ったら、足に持病があるっていうのに、どうして外なんかに――！",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061506,
                             },
                             {
@@ -86210,6 +87037,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "や、やめて！こっちに来ないで……！",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "？？？",
                                 next: 12061446,
                             },
                             {
@@ -86255,6 +87083,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "アン――！どこだ！？",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061505,
                             },
                             {
@@ -86262,6 +87091,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……この子ったら、足に持病があるっていうのに、どうして外なんかに――！",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061506,
                             },
                             {
@@ -86624,6 +87454,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12061706,
                                 content: "ねぇねぇ、流れ者が試合に紛れ込んでるって本当？",
                                 voice: "story/1206/120617/1E31F9A4",
+                                speakerName: "群衆のひそひそ話",
                                 next: 12061707,
                             },
                             {
@@ -86631,12 +87462,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "流れ者？あの、顔が青くて牙むいてて、棍棒持ってるって噂の連中？まさかこのタイミングで暴れに来たんじゃ……",
                                 voice: "story/1206/120617/1E31F9CE",
+                                speakerName: "群衆のひそひそ話",
                                 next: 12061708,
                             },
                             {
                                 id: 12061708,
                                 content: "怖っ……本でしか見たことなかったけど、マジでいたんだ……",
                                 voice: "story/1206/120617/1E31F9F8",
+                                speakerName: "群衆のひそひそ話",
                                 next: 12061709,
                             },
                             {
@@ -86644,6 +87477,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "でもさ、流れ者が義を重んじるって話も聞いたことあるよ？とはいえ……やっぱり実際に出くわすのはちょっと……",
                                 voice: "story/1206/120617/1E31FA22",
+                                speakerName: "群衆のひそひそ話",
                                 next: 12061710,
                             },
                             {
@@ -86694,12 +87528,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 12061716,
                                 content: "あの子が……！",
                                 voice: "story/1206/120617/1E31FB48",
+                                speakerName: "群衆のひそひそ話",
                                 next: 12061717,
                             },
                             {
                                 id: 12061717,
                                 content: "えっ、あんな華奢な子が流れ者？……話で聞いてたよりずっと……普通だな……",
                                 voice: "story/1206/120617/1E31FB72",
+                                speakerName: "群衆のひそひそ話",
                                 next: 12061718,
                             },
                             {
@@ -87445,6 +88281,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ちょ、ちょっと待った待った！俺だよ、タンだ！",
                                 voice: "story/1206/120622/1E324ADA",
                                 npc: 250024,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -87460,6 +88297,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ちょ、ちょっと待った待った！俺だよ、タンだ！",
                                 voice: "story/1206/120622/1E324ADA",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062202,
                             },
                             {
@@ -87468,6 +88306,7 @@ export const questData_jp: QuestStory[] = [
                                     "いやぁ……腰が抜けるかと思った。最近の若いもんは、物騒だなぁ。危うく、ぎっくり腰になるところだったぞ。",
                                 voice: "story/1206/120622/1E324B04",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 options: [
                                     {
                                         id: 12062203,
@@ -87495,6 +88334,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "スーが心配でな。",
                                 voice: "story/1206/120622/1E324BAC",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062207,
                             },
                             {
@@ -87503,6 +88343,7 @@ export const questData_jp: QuestStory[] = [
                                     "中に入ったら入ったで、あの子、きっと強がって追い返すだろ？だから外から、こっそり様子を見てたんだ。",
                                 voice: "story/1206/120622/1E324BD6",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062208,
                             },
                             {
@@ -87511,6 +88352,7 @@ export const questData_jp: QuestStory[] = [
                                     '今回の大会だってそうだ。何も言わずに、ふらっと出ていっちまって。<Default note="text:さんがいさん">山外山</>のみんな、あの子の気持ちは分かってるのに、本人はどうも素直じゃなくてね。',
                                 voice: "story/1206/120622/1E324C00",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062209,
                             },
                             {
@@ -87518,6 +88360,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "責任感が強すぎるんだよ。「自分はわがまま言っちゃいけない」って、全部、胸の奥にしまい込んでな。",
                                 voice: "story/1206/120622/1E324C2A",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062210,
                             },
                             {
@@ -87525,6 +88368,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……でもな。お前さんと組んでると聞いて、少し安心した。ところでスー、何か言ってなかったか？",
                                 voice: "story/1206/120622/1E324C54",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 options: [
                                     {
                                         id: 12062211,
@@ -87538,6 +88382,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "「前にないくらい、気分がいい」……か。あちゃあ、それは一番まずい。",
                                 voice: "story/1206/120622/1E324CA8",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062213,
                             },
                             {
@@ -87545,6 +88390,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "あの子、怒ってるときほど、妙に落ち着くんだ。そんな言葉が出るってことは……相当、溜め込んでる。",
                                 voice: "story/1206/120622/1E324CD2",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062214,
                             },
                             {
@@ -87553,6 +88399,7 @@ export const questData_jp: QuestStory[] = [
                                     "普段は大人びてて、頼りになるから、つい忘れちまうが……まだ、半人前の娘なんだ。叔母のことになると、特にな。",
                                 voice: "story/1206/120622/1E324CFC",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062215,
                             },
                             {
@@ -87560,6 +88407,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そうだ、ムーチョの話は……もう聞いたか？",
                                 voice: "story/1206/120622/1E324D26",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062216,
                             },
                             {
@@ -87575,6 +88423,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "そこまで話してたか……それだけ、お前さんを信じてるんだろう。",
                                 voice: "story/1206/120622/1E324D7A",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062218,
                             },
                             {
@@ -87582,6 +88431,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "知らせが届いた時点で、誰の目にも、戻れない道だと分かってた。それでも……止められなかった。",
                                 voice: "story/1206/120622/1E324DA4",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062219,
                             },
                             {
@@ -87590,6 +88440,7 @@ export const questData_jp: QuestStory[] = [
                                     '結局、<Default note="text:あおばきょちょう">青羽巨鳥</>は制御を失って、東郊をめちゃくちゃにした。あの人が信じてきた理想とは、正反対の結果だ。スーにとっては……忘れたくても忘れられないことだ。',
                                 voice: "story/1206/120622/1E324DCE",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062220,
                             },
                             {
@@ -87598,6 +88449,7 @@ export const questData_jp: QuestStory[] = [
                                     "俺たちみたいな年寄りは、若いもんの愛憎に、いつまでも口出しはできん。だがな……いつかあの子が分かってくれるといい。",
                                 voice: "story/1206/120622/1E324DF8",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062221,
                             },
                             {
@@ -87611,6 +88463,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "うわっ！？何だ？",
                                 voice: "story/1206/120622/1E324E4C",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062223,
                             },
                             {
@@ -87626,6 +88479,7 @@ export const questData_jp: QuestStory[] = [
                                     'さすがに、あんな大きな音は立てられんよ。どうやら<Default note="text:さんがいさん">山外山</>の入口の方だな……',
                                 voice: "story/1206/120622/1E324EA0",
                                 npc: 250024,
+                                speakerName: "タンさん",
                                 next: 12062225,
                             },
                             {
@@ -88146,6 +89000,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12062501,
                                 content: "…………",
                                 voice: "story/1206/120625/1E327C12",
+                                speakerName: "群衆",
                                 next: 12062502,
                             },
                             {
@@ -88304,12 +89159,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 12062521,
                                 content: "あんな危ないものを、どうして職事様は許可したんだ……？",
                                 voice: "story/1206/120625/1E327F5A",
+                                speakerName: "群衆のひそひそ話",
                                 next: 12062522,
                             },
                             {
                                 id: 12062522,
                                 content: "もし群衆の中で爆発してたら……考えるだけでゾッとするわ…………",
                                 voice: "story/1206/120625/1E327F84",
+                                speakerName: "群衆のひそひそ話",
                                 next: 12062523,
                             },
                             {
@@ -88317,6 +89174,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "あんなのが流れ者の正体だっていうなら、誰が私たちの安全を守るのよ！？出ていってもらわなきゃ困るわ！",
                                 voice: "story/1206/120625/1E327FAE",
+                                speakerName: "群衆のひそひそ話",
                                 next: 12062524,
                             },
                             {
@@ -88870,6 +89728,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12062721,
                                 content: "ごめんね、スーちゃん。私がここにいれば、あなたとお母さんを危険に巻き込んでしまうわ。",
                                 voice: "story/1206/120627/1E32A02A",
+                                speakerName: "ムーチョ",
                                 next: 12062722,
                             },
                             {
@@ -88883,12 +89742,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 12062723,
                                 content: "……あの人たちは悪人なんかじゃない。",
                                 voice: "story/1206/120627/1E32A07E",
+                                speakerName: "ムーチョ",
                                 next: 12062724,
                             },
                             {
                                 id: 12062724,
                                 content: "ただ、小鳥に黄金の足枷をはめて「そのほうが安全」と信じているだけ。",
                                 voice: "story/1206/120627/1E32A0A8",
+                                speakerName: "ムーチョ",
                                 next: 12062725,
                             },
                             {
@@ -88904,6 +89765,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "もちろん、良いことよ。でもね……鳥が本当に欲しいのは、輝く鎖じゃなくて――果てしない空。自由に羽ばたける未来なの。",
                                 voice: "story/1206/120627/1E32A0FC",
+                                speakerName: "ムーチョ",
                                 next: 12062727,
                             },
                             {
@@ -88911,6 +89773,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     'もしその日が本当に訪れたなら、スーちゃんはもう閉じ込められることなく、人々もまた、<Default note="text:きすう">機枢</>術を思う存分に発展させられるでしょう。',
                                 voice: "story/1206/120627/1E32A126",
+                                speakerName: "ムーチョ",
                                 next: 12062728,
                             },
                             {
@@ -88925,6 +89788,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12062729,
                                 content: "そうね――私もそうしたい。",
                                 voice: "story/1206/120627/1E32A17A",
+                                speakerName: "ムーチョ",
                                 next: 12062730,
                             },
                             {
@@ -88932,12 +89796,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     'でも、残念ながら私はそこまで立派じゃない。私が一番得意な<Default note="text:きすう">機枢</>術ですら、スーちゃんなら、すぐに追い越してしまうわ。',
                                 voice: "story/1206/120627/1E32A1A4",
+                                speakerName: "ムーチョ",
                                 next: 12062731,
                             },
                             {
                                 id: 12062731,
                                 content: "でもそれでいいの。私は、あなたにすべてを託した。「やり残したこと」が、また一つ減ったわね。",
                                 voice: "story/1206/120627/1E32A1CE",
+                                speakerName: "ムーチョ",
                                 next: 12062732,
                             },
                             {
@@ -88952,6 +89818,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     '泣かないで、スーちゃん。私たち、約束したでしょう？もし私が<Default note="text:たいふうきゅうしょう">大風九章</>を変えられたら、スーちゃんとご両親を連れて、東郊で一緒に作ったからくり鳥を飛ばしに行こうって。',
                                 voice: "story/1206/120627/1E32A222",
+                                speakerName: "ムーチョ",
                                 next: 12062734,
                             },
                             {
@@ -88965,6 +89832,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12062735,
                                 content: "そのときは……あなたに託すわ。私が間違っていたなら、その道はあなたが避けてくれればいい。",
                                 voice: "story/1206/120627/1E32A276",
+                                speakerName: "ムーチョ",
                                 next: 12062736,
                             },
                             {
@@ -88979,6 +89847,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "それでも大丈夫。あなたも、いつか弟子を持つ。その子に伝えればいいの、「私はこう間違えた」と。そのまた弟子が、また新たな誰かに伝える。きっと、いつか――変革の果てに辿り着ける者が現れるはず。",
                                 voice: "story/1206/120627/1E32A2CA",
+                                speakerName: "ムーチョ",
                                 next: 12062738,
                             },
                             {
@@ -88992,6 +89861,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12062739,
                                 content: "さあ、どうかしらね……ほんと、困ったわ。",
                                 voice: "story/1206/120627/1E32A31E",
+                                speakerName: "ムーチョ",
                                 next: 12062740,
                             },
                             {
@@ -88999,18 +89869,21 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "だったらもう、私が今ここで成功させるしかないわね。スーちゃん、ちゃんとご飯を食べて、よく眠って、元気に待っていてちょうだい。",
                                 voice: "story/1206/120627/1E32A348",
+                                speakerName: "ムーチョ",
                                 next: 12062741,
                             },
                             {
                                 id: 12062741,
                                 content: "それと、もうひとつだけ。",
                                 voice: "story/1206/120627/1E32A372",
+                                speakerName: "ムーチョ",
                                 next: 12062742,
                             },
                             {
                                 id: 12062742,
                                 content: "変革には、必ず代償がつきもの。もしも――ただの仮定だけど――私が大きな過ちを犯したとしたら……",
                                 voice: "story/1206/120627/1E32A39C",
+                                speakerName: "ムーチョ",
                                 next: 12062743,
                             },
                             {
@@ -89307,6 +90180,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "……誰か……誰かいませんか…………",
                                 voice: "story/1206/120629/1E32BE5A",
                                 npc: 250017,
+                                speakerName: "？？？",
                                 next: 12062906,
                             },
                             {
@@ -89457,6 +90331,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12063801,
                                 content: "スキャン完了……追跡ルートを構築中……",
                                 voice: "story/1206/120638/1E33515A",
+                                speakerName: "青鳳二型",
                                 next: 12063802,
                             },
                             {
@@ -90017,6 +90892,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 12063321,
                                 content: "見て、またあの子だ！{nickname}殿だ！",
                                 voice: "story/1206/120633/1E33029A",
+                                speakerName: "観衆がざわつく",
                                 next: 12063322,
                             },
                             {
@@ -90024,6 +90900,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "それに、あの流れ者の娘もね！だから言ったじゃん、流れ者って別に鬼みたいな連中じゃないって！あのツインテの子、けっこう可愛いし！",
                                 voice: "story/1206/120633/1E3302C4",
+                                speakerName: "観衆がざわつく",
                                 next: 12063323,
                             },
                             {
@@ -90031,6 +90908,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "本物の流れ者を見るのは初めてだけど……たぶん、僕らと同じなんだよ。迷うし、傷つく、それでも前に進もうとしてる。",
                                 voice: "story/1206/120633/1E3302EE",
+                                speakerName: "観衆がざわつく",
                             },
                         ],
                     },
@@ -90917,6 +91795,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "若いの、あたしゃ長いこと根なし草で旅してるもんじゃが。なんなら、しばらく一緒にいてやってもいい。",
                                 voice: "story/2001/200005/3211B7F8",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                                 next: 20000524,
                             },
                             {
@@ -90924,6 +91803,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "こう見えてもヒュペリアからエリュシオンまで鍛えた武器は数知れず！武器の鍛造ならあたしに任せな。",
                                 voice: "story/2001/200005/3211B822",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                                 next: 20000525,
                             },
                             {
@@ -90938,6 +91818,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "値段は外の鍛冶師より断然安くしてやるさ！お前さんがたまにその剣を見せてくれたらね、わっはっはっ！",
                                 voice: "story/2001/200005/3211B876",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                             },
                         ],
                     },
@@ -91035,6 +91916,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "若いの、あたしゃ長いこと根なし草で旅してるもんじゃが。なんなら、しばらく一緒にいてやってもいい。",
                                 voice: "story/2001/200005/3211B7F8",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                                 next: 20000524,
                             },
                             {
@@ -91042,6 +91924,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "こう見えてもヒュペリアからエリュシオンまで鍛えた武器は数知れず！武器の鍛造ならあたしに任せな。",
                                 voice: "story/2001/200005/3211B822",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                                 next: 20000525,
                             },
                             {
@@ -91056,6 +91939,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "値段は外の鍛冶師より断然安くしてやるさ！お前さんがたまにその剣を見せてくれたらね、わっはっはっ！",
                                 voice: "story/2001/200005/3211B876",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                             },
                         ],
                     },
@@ -91069,6 +91953,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "どうやら認めてくれたようだね。よろしい！であれば善は急げじゃ、あんたの家まで連れてっておくれ！",
                                 voice: "story/2001/200005/3211B99C",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                             },
                         ],
                     },
@@ -91082,6 +91967,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ほう……あんたのその顔、疑っとるね？",
                                 voice: "story/2001/200005/3211B8CA",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                                 next: 20000529,
                             },
                             {
@@ -91090,6 +91976,7 @@ export const questData_jp: QuestStory[] = [
                                     "案ずるには及ばんさ。「自ら進んで他人を傷つけるルーナ族はいない」これはアトラシア大陸の誰もが知っておる。",
                                 voice: "story/2001/200005/3211B8F4",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                                 next: 20000530,
                             },
                             {
@@ -91118,6 +92005,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "どうやら認めてくれたようだね。よろしい！であれば善は急げじゃ、あんたの家まで連れてっておくれ！",
                                 voice: "story/2001/200005/3211B99C",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                             },
                         ],
                     },
@@ -91214,6 +92102,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "お前さん、どこの田舎から来たんじゃ？",
                                 voice: "story/2001/200006/3211C4EE",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                                 next: 20000604,
                             },
                             {
@@ -91229,6 +92118,7 @@ export const questData_jp: QuestStory[] = [
                                     "わっはっはっ、そりゃそうじゃろうねぇ。あたしの知る限り、人間がいる場所であれば大抵はルーナ族もいるもんじゃからな。お前さんみたいに我が一族に会ったことのないヤツなど滅多にいないさ。",
                                 voice: "story/2001/200006/3211C542",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                                 options: [
                                     {
                                         id: 200006051,
@@ -91278,6 +92168,7 @@ export const questData_jp: QuestStory[] = [
                                     "あれま本当じゃね。お前さんみたいなルーナ族は、長生きしとるあたしでも初めて見たぞ。<H>カロン族</>にどこか似てるねぇ……",
                                 voice: "story/2001/200006/3211C63E",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                                 next: 20000612,
                             },
                             {
@@ -91293,6 +92184,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ほう……若いのにしては、なかなかの野望じゃな！",
                                 voice: "story/2001/200006/3211C692",
                                 npc: 200024,
+                                speakerName: "ルーナ族の鍛冶師",
                                 next: 20000614,
                             },
                             {
@@ -92261,6 +93153,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 20005301,
                                 content: "ジェネモンをいじめるな！行っけー！ヘーゼルナッツ！",
                                 voice: "story/2001/200053/3214C7B2",
+                                speakerName: "清々しい声",
                                 next: 20005302,
                             },
                             {
@@ -92274,6 +93167,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 20005303,
                                 content: "逃がしませんよ！そこの{性别:お兄さん|お姉さん}とちびっ子さん！手を貸してください！",
                                 voice: "story/2001/200053/3214C806",
+                                speakerName: "清々しい声",
                                 next: 20005304,
                             },
                             {
@@ -92353,6 +93247,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "さっきのは私ですよ。",
                                 voice: "story/2001/200054/3214D916",
                                 npc: 200074,
+                                speakerName: "？？？",
                                 next: 20005408,
                             },
                             {
@@ -92550,6 +93445,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 20005425,
                                 content: "ダダッ……？",
+                                speakerName: "解放されたジェネモン",
                                 next: 20005426,
                             },
                             {
@@ -92563,6 +93459,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 20005427,
                                 content: "ダダッ！ダダダッ！",
+                                speakerName: "解放されたジェネモン",
                                 next: 20005428,
                             },
                             {
@@ -92590,6 +93487,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 20005431,
                                 content: "ダダダダッ！",
+                                speakerName: "解放されたジェネモン",
                                 options: [
                                     {
                                         id: 200054311,
@@ -92606,6 +93504,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 20005432,
                                 content: "ダダー！",
+                                speakerName: "解放されたジェネモン",
                                 next: 20005434,
                             },
                             {
@@ -93134,6 +94033,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "リォー",
                                 voice: "story/2001/200060/32153BB0",
                                 npc: 820000,
+                                speakerName: "解放されたジェネモン",
                                 next: 20006009,
                             },
                             {
@@ -93164,6 +94064,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "リォリォーー",
                                 voice: "story/2001/200060/32153C58",
                                 npc: 820000,
+                                speakerName: "解放されたジェネモン",
                                 next: 20006013,
                             },
                             {
@@ -93277,6 +94178,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "ンンンッ！",
                                 voice: "story/2001/200060/32153E7A",
                                 npc: 700251,
+                                speakerName: "再び罠にハマったジェネモン",
                                 next: 20006026,
                             },
                             {
@@ -93773,6 +94675,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "リリッ！",
                                 voice: "story/2001/200067/3215AE88",
                                 npc: 700251,
+                                speakerName: "パーンジェネモン",
                                 next: 20006709,
                             },
                             {
@@ -93895,6 +94798,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "リォー",
                                 voice: "story/2001/200066/32159D78",
                                 npc: 700251,
+                                speakerName: "パーンジェネモン",
                                 next: 20006605,
                             },
                             {
@@ -93908,18 +94812,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 20006606,
                                 content: "チィー！！",
                                 voice: "story/2001/200066/32159DCC",
+                                speakerName: "？？？",
                                 next: 20006607,
                             },
                             {
                                 id: 20006607,
                                 content: "メェー！",
                                 voice: "story/2001/200066/32159DF6",
+                                speakerName: "？？？",
                                 next: 20006608,
                             },
                             {
                                 id: 20006608,
                                 content: "ポロロンー",
                                 voice: "story/2001/200066/32159E20",
+                                speakerName: "？？？",
                                 next: 20006609,
                             },
                             {
@@ -94237,6 +95144,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "リリッ！",
                                 voice: "story/2001/200067/3215B128",
                                 npc: 700251,
+                                speakerName: "パーンジェネモン",
                                 next: 20006725,
                             },
                             {
@@ -94266,6 +95174,7 @@ export const questData_jp: QuestStory[] = [
                                 content: "リリリッ！",
                                 voice: "story/2001/200067/3215B1D0",
                                 npc: 700251,
+                                speakerName: "パーンジェネモン",
                             },
                         ],
                     },
@@ -95114,6 +96023,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51000894,
                                 content: "アニー……それが私の名前……何かしっくりとこない感じはするけど……",
                                 npc: 700032,
+                                speakerName: "アニー",
                                 next: 51000895,
                             },
                             {
@@ -95127,6 +96037,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ううん、ごめんなさい、すっかり忘れていたみたいです……本当にありがとう！お母さんのところまで案内してくれますか？お母さんもきっとあなたに感謝しているはず！",
                                 npc: 700032,
+                                speakerName: "アニー",
                                 options: [
                                     {
                                         id: 510008141,
@@ -95140,18 +96051,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 51000805,
                                 content: "私の名前はアリス。イーザーで考古学を専攻していた者です……",
                                 npc: 700032,
+                                speakerName: "アリス",
                                 next: 51000806,
                             },
                             {
                                 id: 51000814,
                                 content: "ありがとうございます。お母さんきっと、私のことを心配してるはずだわ。",
                                 npc: 700032,
+                                speakerName: "アニー",
                             },
                             {
                                 id: 51000806,
                                 content:
                                     "ヴィドフニルの雪山で調査をしていたあの日、運悪く何日も収まらない吹雪に襲われて、進むべき方向を見失って……",
                                 npc: 700032,
+                                speakerName: "アリス",
                                 next: 51000807,
                             },
                             {
@@ -95159,6 +96073,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "その後に瀕死の状態だったアニーさんと出会い、数日間をふたりでなんとか耐え抜きました。生きていこうと励まし合いながら「吹雪がやんだらアイスレイク城の家に遊びにいく」なんて約束もしました……",
                                 npc: 700032,
+                                speakerName: "アリス",
                                 next: 51000808,
                             },
                             {
@@ -95166,18 +96081,21 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "でも……あの子、傷がひどすぎて……結局助からなかったの。……最後に、自分の服を私に渡してくれて……「少しでもあったかくして、生きて雪山を出て」って……",
                                 npc: 700032,
+                                speakerName: "アリス",
                                 next: 51000809,
                             },
                             {
                                 id: 51000809,
                                 content: "アニーさん……",
                                 npc: 700032,
+                                speakerName: "アリス",
                                 next: 51000810,
                             },
                             {
                                 id: 51000810,
                                 content: "はい……アニーさんのこと、一生忘れません。",
                                 npc: 700032,
+                                speakerName: "アリス",
                                 next: 51000811,
                             },
                             {
@@ -95185,6 +96103,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "（アリスが優しく服をなでている。これはとある女の子が、見ず知らずの女の子を守った証だ。あなたはアリスに別れを告げ、あの母親に事実を伝えに行くことにした）",
                                 npc: 700032,
+                                speakerName: "アリス",
                             },
                         ],
                     },
@@ -97225,6 +98144,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51004907,
                                 content:
                                     "「お城の外の怪物は、僕らの肉を食べちゃう。お城のなかの怪物は、僕らの毛をむしっちゃう。猟犬はふかふかパンを食ってるけど、哀れな羊の僕たちは、地面の草を食むだけさ。腹出し尾を振り慈悲を乞い、主人の機嫌を取るだけさ」",
+                                speakerName: "乱雑な筆跡",
                                 next: 51004908,
                             },
                             {
@@ -97277,11 +98197,13 @@ export const questData_jp: QuestStory[] = [
                                 id: 51004914,
                                 content:
                                     "「私はかつて吟遊詩人でした。ある日、カロンを憎む者たちに捕まり、嘲られ、殴られ、髪を切られ、肌を裂かれたんです」",
+                                speakerName: "乱雑な筆跡",
                                 next: 510049141,
                             },
                             {
                                 id: 510049141,
                                 content: "「彼らは私に、蓮草から作った毒を飲ませました。命は助かったものの、声を失ってしまいました」",
+                                speakerName: "乱雑な筆跡",
                                 next: 51004915,
                             },
                             {
@@ -97298,6 +98220,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51004917,
                                 content: "「胸に抱えたままでは、あまりにも辛くて」",
+                                speakerName: "乱雑な筆跡",
                                 options: [
                                     {
                                         id: 510049171,
@@ -97324,12 +98247,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51004918,
                                 content:
                                     "「そうですね。何も変わりません。書いた物を人に見せる勇気さえ出せません。しかしそれでも、書きたくてたまらなくなるのです」",
+                                speakerName: "乱雑な筆跡",
                                 next: 51004919,
                             },
                             {
                                 id: 51004923,
                                 content:
                                     "「とんでもありません。私は紙に文句を書き連ねているだけの臆病者です。それを人に見せる勇気さえ出せないのですから」",
+                                speakerName: "乱雑な筆跡",
                                 next: 51004924,
                             },
                             {
@@ -97342,6 +98267,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51004919,
                                 content:
                                     "「私はもう歌えなくなりました。それで書くことさえもやめたらどうなるのでしょうか？最後の大切なモノまで失くしたくないのです。失くせば私は何者でもなく、何物もなくなってしまうのです」",
+                                speakerName: "乱雑な筆跡",
                                 next: 51004920,
                             },
                             {
@@ -97354,6 +98280,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51004928,
                                 content: "「これを全てお渡しします。どうかその紙を返してください」",
+                                speakerName: "乱雑な筆跡",
                                 next: 51004929,
                             },
                             {
@@ -97381,10 +98308,12 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51004926,
                                 content: "「親切な方。返してくれてありがとうございます。これはあなたへのお礼の品です」",
+                                speakerName: "乱雑な筆跡",
                             },
                             {
                                 id: 51004922,
                                 content: "「親切な方。返してくれてありがとうございます。これはあなたへのお礼の品です」",
+                                speakerName: "乱雑な筆跡",
                             },
                         ],
                     },
@@ -97593,11 +98522,13 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51004966,
                                 content: "ルナはうつむき、長い時間、静かに考え込んでいた。",
+                                speakerName: "乱雑な筆跡",
                                 next: 51004967,
                             },
                             {
                                 id: 51004967,
                                 content: "「心の想いを打ち明けるわ──たとえ声を代償にしても」",
+                                speakerName: "乱雑な筆跡",
                                 next: 51004968,
                             },
                             {
@@ -97835,6 +98766,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51004401,
                                 content: "下水道で消えることのないものは？",
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 510044011,
@@ -97856,10 +98788,12 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51004402,
                                 content: "よし、来いよ",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51004403,
                                 content: "ここは何も知らない馬鹿が来る場所じゃないんだ。",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -100146,6 +101080,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51005929,
                                 content: "おやじ！",
+                                speakerName: "帝国三兄弟",
                                 next: 51005930,
                             },
                             {
@@ -100232,6 +101167,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51005941,
                                 content: "おやじたち、あざっした！",
+                                speakerName: "帝国三兄弟",
                                 next: 51005942,
                             },
                             {
@@ -100411,6 +101347,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51005929,
                                 content: "おやじ！",
+                                speakerName: "帝国三兄弟",
                                 next: 51005930,
                             },
                             {
@@ -100497,6 +101434,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51005941,
                                 content: "おやじたち、あざっした！",
+                                speakerName: "帝国三兄弟",
                                 next: 51005942,
                             },
                             {
@@ -100784,16 +101722,19 @@ export const questData_jp: QuestStory[] = [
                                 id: 51007126,
                                 content:
                                     "…分かった、そうだよ、ジェシカだよ。これらのゴミは確かに私が捨てた。これで満足か？回りくどく言って、私を笑いものにしたいだけなんだろう？",
+                                speakerName: "ジェシカ",
                                 next: 51007127,
                             },
                             {
                                 id: 51007127,
                                 content: "そうよ、あたしもほかの貧乏人と同じ。こんなおんぼろ車に乗る余裕なんてないの、わかった？",
+                                speakerName: "ジェシカ",
                                 next: 51007128,
                             },
                             {
                                 id: 51007128,
                                 content: "…何が夢が叶うんだ…笑わせるな。",
+                                speakerName: "ジェシカ",
                                 next: 51007129,
                             },
                             {
@@ -100806,11 +101747,13 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51007130,
                                 content: "ふん、それで？どうすればいいの？優しく慰める？",
+                                speakerName: "ジェシカ",
                                 next: 51007131,
                             },
                             {
                                 id: 51007131,
                                 content: "そして現実離れした幻想を抱かせて、いつか自分も貴族たちの列車に乗れると思わせるの？",
+                                speakerName: "ジェシカ",
                                 next: 51007132,
                             },
                             {
@@ -100823,6 +101766,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51007133,
                                 content:
                                     'お前は星織人なの？！それなら…13年前にアイスレイク城に来た「カゲン」という名前の<Default note="text:カショ">華胥</>の星織人を知っている？',
+                                speakerName: "ジェシカ",
                                 next: 51007134,
                             },
                             {
@@ -100834,6 +101778,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51007135,
                                 content: "…そうか。",
+                                speakerName: "ジェシカ",
                                 next: 51007136,
                             },
                             {
@@ -100845,6 +101790,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51007137,
                                 content: "ふふ、知り合い？違うわよ、あれは私が最も嫌いな人だ。",
+                                speakerName: "ジェシカ",
                                 next: 51007138,
                             },
                             {
@@ -100856,24 +101802,28 @@ export const questData_jp: QuestStory[] = [
                                 id: 51007139,
                                 content:
                                     "彼は多くの国を訪れ、たくさんの面白い人々や出来事に出会ったと言ってた。それに、商品を売るたびに、遠くの地からの物語を話してくれた。",
+                                speakerName: "ジェシカ",
                                 next: 51007140,
                             },
                             {
                                 id: 51007140,
                                 content:
                                     "私は馬鹿みたいに、こうして彼の話を一つ一つ覚えてた。それで彼の言う広い世界に近づけると思ってたんだ。",
+                                speakerName: "ジェシカ",
                                 next: 51007141,
                             },
                             {
                                 id: 51007141,
                                 content:
                                     "「星は願いの種。それが落ちると、願いが実る」、彼はそう言ってた。「愛するものから作られた無数の星が地上で芽生える」って。",
+                                speakerName: "ジェシカ",
                                 next: 51007142,
                             },
                             {
                                 id: 51007142,
                                 content:
                                     "彼と一緒に旅をして、話を聞き続けたかった。でも切符が買えず、最後は彼が遠くへ向かう列車に乗るのを見送るしかなかったのよ。",
+                                speakerName: "ジェシカ",
                                 next: 51007143,
                             },
                             {
@@ -100886,23 +101836,27 @@ export const questData_jp: QuestStory[] = [
                                 id: 51007144,
                                 content:
                                     "ふふ……あった。このチケット、あの人が乗った列車のだ。あの列車はヒュペリアを越えて、ずっと南へ向かうの。",
+                                speakerName: "ジェシカ",
                                 next: 51007145,
                             },
                             {
                                 id: 51007145,
                                 content:
                                     "当時、切符売りが私を哀れんで、売れ残ったチケットを一枚タダでくれたんだ。「向こう行きの列車ならまだいっぱいあるよ」ってね。",
+                                speakerName: "ジェシカ",
                                 next: 51007146,
                             },
                             {
                                 id: 51007146,
                                 content:
                                     "でも、結局私はチケットを買うお金もなくて、ただじっと横で見てるしかなかった。それでも売り方を覚えて、気づいたら自分が売る側になってた。",
+                                speakerName: "ジェシカ",
                                 next: 51006931,
                             },
                             {
                                 id: 51006931,
                                 content: "販売員になって一年と八ヶ月、やっと南のレッドバリー城までの運賃が貯まったよ。",
+                                speakerName: "ジェシカ",
                                 next: 51006932,
                             },
                             {
@@ -100915,6 +101869,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51006933,
                                 content:
                                     "近づく？<H>カロン税</>のこと、忘れたの？チケット代なんか、税金の端数にもならないわ！向こうに行くためには、五年は食べず飲まずで貯めないといけない。……それに、家族だって養わなきゃいけないんだから。",
+                                speakerName: "ジェシカ",
                                 next: 51007147,
                             },
                             {
@@ -100927,6 +101882,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51007148,
                                 content:
                                     "これで分かったでしょ？この紙星はただのゴミだ。わざわざと返してくれてありがとう。次は細かく破って捨てるから。",
+                                speakerName: "ジェシカ",
                                 next: 51007149,
                             },
                             {
@@ -100938,6 +101894,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51007150,
                                 content: "同情なんていらないよ、星織人。",
+                                speakerName: "ジェシカ",
                                 options: [
                                     {
                                         id: 51007151,
@@ -100950,18 +101907,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 51007152,
                                 content:
                                     "「親切」って？星織人やあの切符売りみたいに、「遠く」とか「未来」とか言って人を期待させろってこと？",
+                                speakerName: "ジェシカ",
                                 next: 51007153,
                             },
                             {
                                 id: 51007153,
                                 content:
                                     'カロンなら、私より、この<Default note="text:カショ">華胥</>人よりもアイスレイク城がどんな場所か分かっているはずだろう！',
+                                speakerName: "ジェシカ",
                                 next: 51007154,
                             },
                             {
                                 id: 51007154,
                                 content:
                                     "街を一回りしてみなさい、みんな悲しんでいて、文句を言って、呪いの言葉を吐いているんだよ！こんな場所で、ちゃんと話す意味があるの？",
+                                speakerName: "ジェシカ",
                                 next: 51007155,
                             },
                             {
@@ -100991,6 +101951,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51007159,
                                 content: "…何のつもり？こんなに精巧な箱を買う金なんて持ってないわ…",
+                                speakerName: "ジェシカ",
                                 next: 51007160,
                             },
                             {
@@ -101026,6 +101987,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51007169,
                                 content:
                                     "それを持ってて。なぜ私があの星を捨てたと思う？何年もかけて、私はもう考え尽くして、現実を受け入れたんだよ。",
+                                speakerName: "ジェシカ",
                                 next: 51007170,
                             },
                             {
@@ -101049,32 +102011,38 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51007171,
                                 content: "……",
+                                speakerName: "ジェシカ",
                                 next: 51007172,
                             },
                             {
                                 id: 51007166,
                                 content: "お前…",
+                                speakerName: "ジェシカ",
                                 next: 51007167,
                             },
                             {
                                 id: 51007172,
                                 content:
                                     "…そうだ、同じ目的地でも列車によって料金は違うんだ。安い便もいくつかある。大した節約にはならないけど…",
+                                speakerName: "ジェシカ",
                                 next: 51007173,
                             },
                             {
                                 id: 51007167,
                                 content: "ったく…分かったよ。お前のしつこさには勝てないわ。受け取るよ。ま、ありがとな。",
+                                speakerName: "ジェシカ",
                                 next: 51007172,
                             },
                             {
                                 id: 51007173,
                                 content: "…いつかお前らが本当にお金を出して切符を買えるようになったら…私は一番安い切符を取っておくよ。",
+                                speakerName: "ジェシカ",
                                 next: 51007174,
                             },
                             {
                                 id: 51007174,
                                 content: "その代わり、紙星のことは内緒にしておいてね。",
+                                speakerName: "ジェシカ",
                                 next: 51007175,
                             },
                             {
@@ -101093,6 +102061,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51007177,
                                 content:
                                     "お前の好意には感謝するけど…ま、もし本当にここを離れることができたら、彼を探しに行くことはないと思うわ。雪の降らない場所に行って、外の世界がどんなところか見てみたい。",
+                                speakerName: "ジェシカ",
                                 next: 51007178,
                             },
                             {
@@ -101104,6 +102073,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51007179,
                                 content: "…うん。",
+                                speakerName: "ジェシカ",
                                 next: 51007186,
                             },
                             {
@@ -101241,6 +102211,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51007181,
                                 content:
                                     "私はリアンダー、星織人だ。最近、商売が少しうまくいくなくて、今は城門近くで商売すているんだ。ぜひ立ち寄ってくれ！",
+                                speakerName: "リアンダー",
                             },
                         ],
                     },
@@ -101692,6 +102663,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51006304,
                                 content: "ガルル……ワンワン！",
+                                speakerName: "悪い犬",
                             },
                         ],
                     },
@@ -101999,11 +102971,13 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51006726,
                                 content: "「命は果てしなき夜を航行する孤独な船だ」",
+                                speakerName: "？？？",
                                 next: 51006727,
                             },
                             {
                                 id: 51006727,
                                 content: "「川は涙であふれ、岸には茨が生い茂る」",
+                                speakerName: "？？？",
                                 next: 51006728,
                             },
                             {
@@ -103593,6 +104567,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51007690,
                                 content: "テオ、またどこに行ってたの！ああもう、なんてみっともない格好……服まで泥だらけじゃない！",
                                 npc: 700205,
+                                speakerName: "オシャレなレディー",
                                 next: 51007691,
                             },
                             {
@@ -106016,6 +106991,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51009629,
                                 content: "ゴホッ、ゴホッ……",
                                 npc: 700301,
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 51009630,
@@ -106028,6 +107004,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 510095401,
                                 content: "……こんな場所に若い人が来るなんて珍しいな。まさか、道に迷ったのか？アイスレイク城なら――",
                                 npc: 700301,
+                                speakerName: "？？？",
                                 next: 51009631,
                             },
                             {
@@ -106815,6 +107792,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51009723,
                                 content: "眠れぬ……安らかに眠れぬ……！",
                                 npc: 700309,
+                                speakerName: "？？？",
                                 next: 51009724,
                             },
                             {
@@ -106822,6 +107800,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "哀れな人よ、あなたも私と同じなのでしょう？凍てつく回廊の中、胸を焦がし、愛と希望の星をじっと見上げているのでは……",
                                 npc: 700309,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -106837,6 +107816,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51009726,
                                 content: "ダッ……ダダッ……",
                                 npc: 700309,
+                                speakerName: "？？？",
                                 next: 51009727,
                             },
                             {
@@ -106849,12 +107829,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51009728,
                                 content: "あら、ごめんなさい。驚かせちゃった？私はここよ、あと五歩前に出てみて。そう、こっち。",
                                 npc: 700309,
+                                speakerName: "？？？",
                                 next: 51009729,
                             },
                             {
                                 id: 51009729,
                                 content: "こんばんは、眠れぬ夜を過ごす旅人さん。",
                                 npc: 700309,
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 510096391,
@@ -107128,12 +108110,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51009763,
                                 content: "あの……誰？さっきからうちの周りをウロウロして……",
                                 npc: 700302,
+                                speakerName: "？？？",
                                 next: 51009764,
                             },
                             {
                                 id: 51009764,
                                 content: "もしかして依頼？人探し？それとも素材集め？なんでも受けるけど、ちゃんと合法の範囲でね。",
                                 npc: 700302,
+                                speakerName: "？？？",
                                 next: 51009765,
                             },
                             {
@@ -107146,6 +108130,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51009766,
                                 content: "えっ、違うの？依頼しに来たんじゃないの？",
                                 npc: 700302,
+                                speakerName: "？？？",
                                 next: 51009767,
                             },
                             {
@@ -108338,12 +109323,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51009930,
                                 content: "「愛しき人よ、私のために泣かないで――この眠れぬ夜に、私は旅立つわ」",
                                 npc: 700300,
+                                speakerName: "エノラ",
                                 next: 51009931,
                             },
                             {
                                 id: 51009931,
                                 content: "「風よ、帆をふくらませて！私は櫂をとる――灯台が波間にきらめいて、月光が、ああ……なんて眩しいの！」",
                                 npc: 700300,
+                                speakerName: "エノラ",
                                 next: 51009932,
                             },
                             {
@@ -108351,6 +109338,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ありがとう、エノラ……すごく、すごく素敵だった……ふふ……私が思い描いてた『プティニー』そのものだよ……情熱的で、勇敢で、自由を求めて生きる……まさに、あなたのような子……",
                                 npc: 700300,
+                                speakerName: "ヴェルレッタ",
                                 next: 51009933,
                             },
                             {
@@ -108358,12 +109346,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ありがとう！……いまのは、即興だったけどね。でも、知り合いにすごく腕のいい作曲家がいるの。名前はカヴァラドッシ。彼にお願いすれば、『プティニー』を歌劇にしてもらえるかもしれない！",
                                 npc: 700300,
+                                speakerName: "エノラ",
                                 next: 51009934,
                             },
                             {
                                 id: 51009934,
                                 content: "……でも、私が歌うチャンスは、もうないと思う。",
                                 npc: 700300,
+                                speakerName: "エノラ",
                                 next: 51009935,
                             },
                             {
@@ -108371,6 +109361,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "私は十八歳になったわ。父が決めた結婚相手と二ヶ月後に式を挙げるの。相手は錬金院の若い士官なんですって。",
                                 npc: 700300,
+                                speakerName: "エノラ",
                                 next: 51009936,
                             },
                             {
@@ -108378,6 +109369,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "この先の人生は、小さな部屋で飾り人形のように座って過ごすか、あの忌まわしいイコル液の瓶と一生付き合うかの二択でしょうね。",
                                 npc: 700300,
+                                speakerName: "エノラ",
                                 next: 51009937,
                             },
                             {
@@ -108385,12 +109377,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "……やだよ、それ……そんなの間違ってる……エノラには、ヒバリみたいな歌声があるのに……そんな狭い部屋にいるべきじゃない……あなたは……スポットライトに包まれた……舞台に立つべきよ……",
                                 npc: 700300,
+                                speakerName: "ヴェルレッタ",
                                 next: 51009938,
                             },
                             {
                                 id: 51009938,
                                 content: "歌を愛するすべての人は……誰でも舞台に立つ資格がある……種族も……貧富も……関係ない……",
                                 npc: 700300,
+                                speakerName: "ヴェルレッタ",
                                 next: 51009939,
                             },
                             {
@@ -108398,12 +109392,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "……私、兄さんに頼んでみる。あなたを逃がしてくれるよう……私は……もう、たぶん長くないけど……せめて『プティニー』の最後だけは……",
                                 npc: 700300,
+                                speakerName: "ヴェルレッタ",
                                 next: 51009940,
                             },
                             {
                                 id: 51009940,
                                 content: "でも、エノラ……お願い……どうか舞台に立って……この物語を……私たちの『プティニー』を……世界に響かせて……",
                                 npc: 700300,
+                                speakerName: "ヴェルレッタ",
                                 next: 51009941,
                             },
                             {
@@ -109166,12 +110162,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010052,
                                 content: "きゃっ！？",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010053,
                             },
                             {
                                 id: 51010053,
                                 content: "ご、ごめんなさいっ！……どこかお怪我は？",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010054,
                             },
                             {
@@ -109184,6 +110182,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010055,
                                 content: "うん――ん？",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010056,
                             },
                             {
@@ -109196,6 +110195,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010057,
                                 content: "ふふっ、なんでもないよ。薬草、ありがとね！あっ、遅れちゃう！",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010058,
                             },
                             {
@@ -109208,6 +110208,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010059,
                                 content: "――あげるっ！！",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010060,
                             },
                             {
@@ -109386,6 +110387,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010084,
                                 content: "ジゼル、ちゃんと説明してもらおうか！",
                                 npc: 700304,
+                                speakerName: "？？？",
                                 next: 51010085,
                             },
                             {
@@ -109515,12 +110517,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010105,
                                 content: "きゃっ！？",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010106,
                             },
                             {
                                 id: 51010106,
                                 content: "ご、ごめんなさいっ！……どこかお怪我は？",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010107,
                             },
                             {
@@ -109533,6 +110537,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010108,
                                 content: "うん――ん？",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010109,
                             },
                             {
@@ -109545,18 +110550,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010110,
                                 content: "ううん、ふふ……薬草、ありがとう！",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010111,
                             },
                             {
                                 id: 51010111,
                                 content: "約束の時間に遅れるよ！",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010112,
                             },
                             {
                                 id: 51010112,
                                 content: "あっ、やばっ！行かなきゃ！待って〜！",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010113,
                             },
                             {
@@ -109569,6 +110577,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010114,
                                 content: "――あげるっ！！",
                                 npc: 700305,
+                                speakerName: "元気な少女",
                                 next: 51010115,
                             },
                             {
@@ -109588,6 +110597,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "勇敢な蝶は繭を破って羽ばたき、風に乗って消えていきました――まるで紫のスミレが、花の海へと溶け込むように。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010118,
                             },
                             {
@@ -109595,6 +110605,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "もうしばらく、彼女があなたの前に現れることはないでしょう。だからこそ、これは彼女から大切な友人への最後の贈り物です。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010119,
                             },
                             {
@@ -109625,6 +110636,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010123,
                                 content: "しーっ。真相を暴いてくれたことは感謝してるけど、秘密を守れる子のほうが私は好きよ。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010124,
                             },
                             {
@@ -109638,6 +110650,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "「ヴィオレッタ」はもう舞台に立たない。けど私はしばらくここにいるつもりよ。あなたがまた私を告発しても、恨んだりはしないわ。でも、もうひとりの教え子のこと――どうしても放っておけなくてね。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010126,
                             },
                             {
@@ -109650,12 +110663,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51010127,
                                 content: "……ありがとう。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010128,
                             },
                             {
                                 id: 51010128,
                                 content: "それでは、素敵な休暇を。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010129,
                             },
                             {
@@ -110730,6 +111745,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100067,
                                 content: "……誰だよ、俺の昼寝の邪魔したやつは……",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100068,
                             },
                             {
@@ -110766,6 +111782,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100073,
                                 content: "太皓……？まさか、俺のことか？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100074,
                             },
                             {
@@ -110778,6 +111795,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100075,
                                 content: "ハハ、まぁいいや。そう、そうだぞ。神の名を軽々しく呼ぶなど……無礼にもほどがある。",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100076,
                             },
                             {
@@ -110790,6 +111808,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100077,
                                 content: "気にすんなって。俺は心が広いからな。で、あんたらは何の用でこんな辺鄙なとこに？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100078,
                             },
                             {
@@ -110817,6 +111836,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "あー……思い出した。お前か、頭ぶつけて寝ぼけてたヤツ。俺の袖掴んでなんかぶつぶつ言ってたな。その上危うくゲロ吐きかけて……覚えてないのか？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100082,
                             },
                             {
@@ -110848,12 +111868,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100086,
                                 content: "……？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100087,
                             },
                             {
                                 id: 51100087,
                                 content: "ハハハハハッ……！よくぞ言った！気に入ったぞ！あんた、なかなか見る目があるじゃないか！",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100088,
                             },
                             {
@@ -110872,6 +111894,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100090,
                                 content: "人の性分というのは、無理にねじ曲げられるもんじゃない。笑いたいなら、笑わせておけばいい。",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100091,
                             },
                             {
@@ -110886,6 +111909,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ほう？では問おう、「大風九章」第九条には何とある？——「天の戒を仰ぎ、慎みて従うは敬なり」……そうだろう？あんたはかつて、俺に無礼を働いた。だがあの時は、正気を失っていたと見なし、咎めはしなかった。",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100093,
                             },
                             {
@@ -110893,6 +111917,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "だが今は、正気そのもの。そのうえでこの俺に逆らったとなれば……その罪、いかほどか、わかっておるのか？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100094,
                             },
                             {
@@ -110923,6 +111948,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100067,
                                 content: "……誰だよ、俺の昼寝の邪魔したやつは……",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100068,
                             },
                             {
@@ -110959,6 +111985,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100073,
                                 content: "太皓……？まさか、俺のことか？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100074,
                             },
                             {
@@ -110971,6 +111998,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100075,
                                 content: "ハハ、まぁいいや。そう、そうだぞ。神の名を軽々しく呼ぶなど……無礼にもほどがある。",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100076,
                             },
                             {
@@ -110983,6 +112011,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100077,
                                 content: "気にすんなって。俺は心が広いからな。で、あんたらは何の用でこんな辺鄙なとこに？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100078,
                             },
                             {
@@ -111010,6 +112039,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "あー……思い出した。お前か、頭ぶつけて寝ぼけてたヤツ。俺の袖掴んでなんかぶつぶつ言ってたな。その上危うくゲロ吐きかけて……覚えてないのか？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100082,
                             },
                             {
@@ -111041,12 +112071,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100086,
                                 content: "……？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100087,
                             },
                             {
                                 id: 51100087,
                                 content: "ハハハハハッ……！よくぞ言った！気に入ったぞ！あんた、なかなか見る目があるじゃないか！",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100088,
                             },
                             {
@@ -111065,6 +112097,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51100090,
                                 content: "人の性分というのは、無理にねじ曲げられるもんじゃない。笑いたいなら、笑わせておけばいい。",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100091,
                             },
                             {
@@ -111079,6 +112112,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ほう？では問おう、「大風九章」第九条には何とある？——「天の戒を仰ぎ、慎みて従うは敬なり」……そうだろう？あんたはかつて、俺に無礼を働いた。だがあの時は、正気を失っていたと見なし、咎めはしなかった。",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100093,
                             },
                             {
@@ -111086,6 +112120,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "だが今は、正気そのもの。そのうえでこの俺に逆らったとなれば……その罪、いかほどか、わかっておるのか？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100094,
                             },
                             {
@@ -112352,6 +113387,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51102036,
                                 content: "グオォォォ……！",
                                 npc: 210087,
+                                speakerName: "玄狴（ゲンビー）",
                             },
                         ],
                     },
@@ -112444,6 +113480,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51102046,
                                 content: "待て。",
                                 npc: 700322,
+                                speakerName: "？？？",
                                 next: 51102047,
                             },
                             {
@@ -115319,6 +116356,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51125022,
                                 content: "おうっ！",
+                                speakerName: "エキストラ",
                                 next: 51125023,
                             },
                             {
@@ -115345,6 +116383,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51125026,
                                 content: "今だ、やれ！",
+                                speakerName: "エキストラ",
                             },
                         ],
                     },
@@ -115364,6 +116403,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51125029,
                                 content: "こいつ、縛仙鎖をくらってながら……なおも怯まぬとは！全員退却だ！",
+                                speakerName: "エキストラ",
                                 next: 51125030,
                             },
                             {
@@ -115717,6 +116757,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51125083,
                                 content: "今だ、やれ！",
+                                speakerName: "エキストラ",
                             },
                         ],
                     },
@@ -115736,6 +116777,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51125086,
                                 content: "こいつ、縛仙鎖をくらってながら……なおも怯まぬとは！全員退却だ！",
+                                speakerName: "エキストラ",
                                 next: 51125087,
                             },
                             {
@@ -116870,6 +117912,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51140003,
                                 content: "失礼──お二人にお伺いしたいことが……",
                                 npc: 701074,
+                                speakerName: "見知らぬ声",
                             },
                             {
                                 id: 51140004,
@@ -117707,10 +118750,12 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51152003,
                                 content: "ふぅ……うう……",
+                                speakerName: "中年男性",
                             },
                             {
                                 id: 51152004,
                                 content: "うぅ……来るな！これ以上来たら、私は……私は！",
+                                speakerName: "中年男性",
                             },
                             {
                                 id: 51152005,
@@ -117806,6 +118851,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51152014,
                                 content: "つまり、何もせず、襲い来る敵に食われろ、と？",
+                                speakerName: "シリュウ",
                             },
                             {
                                 id: 51152015,
@@ -118137,6 +119183,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51114022,
                                 content: "……",
+                                speakerName: "ヨウ＆チョウ",
                                 next: 51114023,
                             },
                             {
@@ -121064,6 +122111,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51165501,
                                 content: "ごほっ……ごほ、ごほっ……けがらわしい化け物め……失せろ、失せろ……！",
                                 npc: 700386,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51165502,
@@ -121074,17 +122122,20 @@ export const questData_jp: QuestStory[] = [
                                 id: 51165503,
                                 content: "あなたがたは……ごほっ、ごほっ……助けていただき、かたじけない。わしはミヤだ。",
                                 npc: 700386,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51165504,
                                 content:
                                     "この身はもう長らくひとり暮らしでな。弟子どもは、愚かすぎて追い払った者もおれば、根気がなく自ら去った者もおる。今では、この老いぼれひとりきりよ。",
                                 npc: 700386,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51165505,
                                 content: "礼らしい礼もできぬゆえ……せめて一曲、琴を奏でて恩に報いよう。",
                                 npc: 700386,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51165506,
@@ -121338,6 +122389,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51165553,
                                 content: "待ってください！",
                                 npc: 700387,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -121352,6 +122404,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51165601,
                                 content: "先生、お久しぶりです。",
                                 npc: 700387,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51165602,
@@ -122114,18 +123167,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 51175210,
                                 content:
                                     "あなたが求める陰陽逆転の術は、本来なら得られぬもの。だが、虞泉が燭陰の禍によって裂け目へ通じた今なら……あるいは、道も残されていよう。",
+                                speakerName: "ムユウセイ",
                                 next: 51175211,
                             },
                             {
                                 id: 51175211,
                                 content:
                                     "裂け目が開く刻に三途川へ赴き、そこで枯栄術を使えば、あなたが会いたい故人は必ず現れるだろう。ただし――その魂がまだこの世にあるなら、の話だが。",
+                                speakerName: "ムユウセイ",
                                 next: 51175212,
                             },
                             {
                                 id: 51175212,
                                 content:
                                     "そのうえで、枯栄術の奥義たる陰陽逆転の秘法を行うことになる。だがその秘法は、術者に並外れた資質を求める。祝由であっても、成し遂げられる者はそう多くない。まして、その代償となれば……",
+                                speakerName: "ムユウセイ",
                                 next: 51175213,
                             },
                             {
@@ -122763,6 +123819,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51175403,
                                 content: "祝由様……どうして……",
+                                speakerName: "苦しむ患者",
                             },
                         ],
                     },
@@ -122775,11 +123832,13 @@ export const questData_jp: QuestStory[] = [
                                 id: 51175404,
                                 content:
                                     "ずっと、あなたが助けに来てくれると信じていたのに……どうして突然いなくなってしまったのです！私たちを苦しみと絶望の中に置き去りにして！",
+                                speakerName: "絶望した患者",
                                 next: 51175405,
                             },
                             {
                                 id: 51175405,
                                 content: "期待する相手を間違えた……最初から、祝由なんてものに望みをかけるべきじゃなかった……",
+                                speakerName: "悲観的な患者",
                                 next: 51175406,
                             },
                             {
@@ -122810,16 +123869,19 @@ export const questData_jp: QuestStory[] = [
                                 id: 51175408,
                                 content:
                                     "祝由たる者、天命を戴き、下々の苦しみに寄り添うもの。己を律し、その節を守り、衆生を救わねばならぬ……この身を燭とし、この心を薪として、魂を燃やし世を救うのだ……",
+                                speakerName: "父親の声",
                                 next: 51175409,
                             },
                             {
                                 id: 51175409,
                                 content: "フーシュ、決して家の使命を汚してはならぬ。忘れるでないぞ。",
+                                speakerName: "父親の声",
                                 next: 51175410,
                             },
                             {
                                 id: 51175410,
                                 content: "はい！",
+                                speakerName: "幼いフーシュ",
                                 next: 51175411,
                             },
                             {
@@ -122849,27 +123911,32 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51175413,
                                 content: "姉さま……父上が、亡くなりました……",
+                                speakerName: "幼いフーシュ",
                                 next: 51175414,
                             },
                             {
                                 id: 51175414,
                                 content: "…………",
+                                speakerName: "幼いフーフォン",
                                 next: 51175415,
                             },
                             {
                                 id: 51175415,
                                 content: "フーシュ、それが正しいことだと思ってるの？",
+                                speakerName: "幼いフーフォン",
                                 next: 51175416,
                             },
                             {
                                 id: 51175416,
                                 content: "ですが……枯栄術で人の苦しみを祓い、寂滅に至るまで尽くすことこそ、祝由の務めです……",
+                                speakerName: "幼いフーシュ",
                                 next: 51175417,
                             },
                             {
                                 id: 51175417,
                                 content:
                                     "いいえ、私はそんな理なんて認めない！フーシュ、私は死にたくない……！みんなが死んでいくのを、ただ見ているだけなんてもっと嫌！",
+                                speakerName: "幼いフーフォン",
                             },
                         ],
                     },
@@ -123161,12 +124228,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51175502,
                                 content:
                                     "ご安心ください！軽い骨折です。薬を塗って、添え木で固定しておきました。しばらくは無理に動かず、そこで休んでいてください。",
+                                speakerName: "澤生閣の見習い",
                                 next: 51175503,
                             },
                             {
                                 id: 51175503,
                                 content:
                                     "だめだ、だめだ！兄貴も澤生閣の薬師なんだ。この騒ぎの中、どこかで人を助けてるはずだろ。俺も行って手伝わなきゃ！",
+                                speakerName: "興奮する患者",
                             },
                         ],
                     },
@@ -123192,17 +124261,20 @@ export const questData_jp: QuestStory[] = [
                                 id: 51175505,
                                 content:
                                     "無茶を言わないでください！澤生閣の薬師だけで間に合っています。けが人のあなたが動く必要はありません！",
+                                speakerName: "澤生閣の見習い",
                                 next: 51175506,
                             },
                             {
                                 id: 51175506,
                                 content:
                                     "先生、私はほんのかすり傷です。包帯だけ巻けば大丈夫ですから、どうか他の方のところへ行ってください。",
+                                speakerName: "気丈な患者",
                                 next: 51175507,
                             },
                             {
                                 id: 51175507,
                                 content: "ええ。まだ混乱は収まっていません。くれぐれもお気をつけて。",
+                                speakerName: "澤生閣の見習い",
                             },
                         ],
                     },
@@ -123297,11 +124369,13 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51175520,
                                 content: "あちらにも負傷者がおります！誰か、手を貸してください！",
+                                speakerName: "澤生閣の見習い",
                                 next: 51175521,
                             },
                             {
                                 id: 51175521,
                                 content: "うちに担架がある！取ってくるから少し待っててくれ！",
+                                speakerName: "包帯を巻いた患者",
                                 next: 51175522,
                             },
                             {
@@ -123397,6 +124471,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200003,
                                 content: "父さん……！足が悪いからって、僕を捨てるの？お願い、置いていかないでよ……！",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200004,
                             },
                             {
@@ -123423,12 +124498,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "父さん！僕、ずっとここで待ってたんだよ！毎日、貴族様の施しでもらった銅貨を握りしめて、カビ臭くて固い黒パンで飢えをしのいで……それでも、迎えに来てくれるって信じてたのに！",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200008,
                             },
                             {
                                 id: 51200008,
                                 content: "どうしてそんなこと言うの……？僕はただ……一緒に帰りたいだけなのに……うぅっ……",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200009,
                             },
                             {
@@ -123596,6 +124673,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200034,
                                 content: "……",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200035,
                             },
                             {
@@ -123620,6 +124698,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200038,
                                 content: "別に、助けてなんて頼んでないけど。",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200039,
                             },
                             {
@@ -123646,12 +124725,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200045,
                                 content: "……",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200046,
                             },
                             {
                                 id: 51200046,
                                 content: "あの人たちは、たしかに僕の親じゃない。けど、どうして親になれないって言い切れるの？",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200047,
                             },
                             {
@@ -123664,12 +124745,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200048,
                                 content: "あの人たちじゃなくてもよかったんだよ。僕を連れてってくれるなら、誰でも。",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200049,
                             },
                             {
                                 id: 51200049,
                                 content: "あなたたちだってそうだよ。僕の親になる気があるなら、それでいい。ね、僕、変なこと言ってる？",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200050,
                             },
                             {
@@ -123688,6 +124771,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200052,
                                 content: "……うん。誰でもいい。ここを出られるなら。",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 options: [
                                     {
                                         id: 51200055,
@@ -123707,6 +124791,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200059,
                                 content: "だから、謝りに来たんだよ。パパ。それと……ルーナママ。",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200060,
                             },
                             {
@@ -123725,6 +124810,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200062,
                                 content: "あれ、気に入らなかった？じゃあ逆でもいいよ。あなたがママで、ルーナがパパでもね。",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200063,
                             },
                             {
@@ -123750,6 +124836,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "足はこんなだけど、手を使うことなら何だってできるよ。苦労したって平気だし、毎日黒パンでも文句は言わない。寝る場所だって選ばない。屋根裏でも、階段下の物置でもいい。",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 next: 51200067,
                             },
                             {
@@ -123757,6 +124844,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "家の中の足音なら、列車の轟音よりずっとましだよ……だから、僕を連れてって。ここから出られるなら、僕、何だってする。",
                                 npc: 700402,
+                                speakerName: "足の不自由な子ども",
                                 options: [
                                     {
                                         id: 51200068,
@@ -124005,6 +125093,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "おっ、誰かと思えば、うちの煙突名コンビじゃねえか。……ああ、悪い悪い。今は一人だったな。いや、それも違うか。足を悪くしたんだ、煙突びっこって呼んだほうが似合うか？",
                                 npc: 700405,
+                                speakerName: "無愛想な労働者",
                                 next: 51200095,
                             },
                             {
@@ -124012,6 +125101,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "おい小僧、今日も貴族様に絡んだんだってな。いい加減にしろよ。ゴロツキの巣だと思われたらどうするんだ。",
                                 npc: 700405,
+                                speakerName: "無愛想な労働者",
                                 next: 51200096,
                             },
                             {
@@ -124019,6 +125109,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "せいぜい祈っとけ。相手がアイゼンバーンさんに話を持ち込まないことをな。あいつにこれ幸いと噛みつかれたら、こっちまで迷惑するんだよ。",
                                 npc: 700405,
+                                speakerName: "無愛想な労働者",
                                 next: 51200097,
                             },
                             {
@@ -124031,6 +125122,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200098,
                                 content: "そのへんにしとけって。子ども相手に当たるなよ。",
                                 npc: 700406,
+                                speakerName: "親切な労働者",
                                 next: 51200099,
                             },
                             {
@@ -124038,6 +125130,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "当たってるんじゃねえ。現実を教えてやってるんだ。スヴェアみたいに、攫われたあとも親が何年も探し続けてくれて、ちゃんと見つけてもらえるような幸運が、誰にでも転がってると思うな。",
                                 npc: 700405,
+                                speakerName: "無愛想な労働者",
                                 next: 51200100,
                             },
                             {
@@ -124045,6 +125138,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "お前は捨て子だ。そんなこと、とっくにわかってる頃だろ。誰もお前を迎えになんか来ない。ここを出たって、食っていける仕事ひとつありゃしない。だったら――くだらない夢を見るな。",
                                 npc: 700405,
+                                speakerName: "無愛想な労働者",
                                 next: 51200101,
                             },
                             {
@@ -124070,6 +125164,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200104,
                                 content: "そうそう、最初からそうしてりゃいいんだ。ちょうど窓拭きの仕事が入ってる。手はまだ使えるよな？",
                                 npc: 700405,
+                                speakerName: "無愛想な労働者",
                                 next: 51200105,
                             },
                             {
@@ -124082,18 +125177,21 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200106,
                                 content: "ギルドに返す分を引いても、銅貨十枚は残る。真面目にやれよ。会長の温情、無駄にするなよな。",
                                 npc: 700405,
+                                speakerName: "無愛想な労働者",
                                 next: 51200107,
                             },
                             {
                                 id: 51200107,
                                 content: "クルーガー、そのへんにしとけ。行くぞ。会長に言われた仕事、まだ残ってるんだろ。",
                                 npc: 700406,
+                                speakerName: "親切な労働者",
                                 next: 51200108,
                             },
                             {
                                 id: 51200108,
                                 content: "わーかってるって、ロレント。ほんとお前、こういうときだけやたら口うるさいよな……",
                                 npc: 700405,
+                                speakerName: "無愛想な労働者",
                                 next: 51200109,
                             },
                             {
@@ -124668,6 +125766,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200187,
                                 content: "コニーは運がいいな。あんなに気のいい人たちに出会えるなんて。",
                                 npc: 700406,
+                                speakerName: "親切な労働者",
                                 next: 51200188,
                             },
                             {
@@ -124680,12 +125779,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200189,
                                 content: "クルーガー、そのへんにしとけ。行くぞ。会長に言われた仕事、まだ残ってるんだろ。",
                                 npc: 700406,
+                                speakerName: "親切な労働者",
                                 next: 51200190,
                             },
                             {
                                 id: 51200190,
                                 content: "わーかってるって、ロレント。ほんとお前、こういうときだけやたら口うるさいよな……",
                                 npc: 700405,
+                                speakerName: "無愛想な労働者",
                                 next: 51200191,
                             },
                             {
@@ -125357,6 +126458,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200486,
                                 content: "待ってください！",
                                 npc: 700398,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -125393,6 +126495,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "すみません、少し失礼します。今、そのタバコケースをどうするか話してましたよね。もし手放すつもりなら、僕に譲ってもらえませんか？",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200489,
                             },
                             {
@@ -125405,6 +126508,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200490,
                                 content: "銀貨五十枚。どうです？",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200491,
                             },
                             {
@@ -125418,6 +126522,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "見たところ、保存状態が飛び抜けていいわけでもないですしね。五十は十分いい値です。よほど欲しい品でもなければ、ここまでは出しませんよ。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200493,
                             },
                             {
@@ -125491,6 +126596,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200501,
                                 content: "えっ……あの二人、どうしたんです？",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200502,
                             },
                             {
@@ -125504,6 +126610,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200503,
                                 content: "ずいぶん品がないですね……後でしっかり叱っておかないと。それで、結局いくら払ったんです？",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200504,
                             },
                             {
@@ -125517,6 +126624,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "えっ、それはひどい。これ、十年前の品じゃありませんよ。先週出たやつです。十年前の本物なら、あんな値段じゃ済まない。「ホイッスル・サロン」でも、みんなで金を出し合って銀貨二千五百枚、ようやく一個手に入れたくらいですから。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200506,
                             },
                             {
@@ -125524,6 +126632,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "あれは僕の憧れの品なんです。もし見つけたら、命張ってでも買いますね。枕元に置いて、毎日撫でて、幸運を祈るんです。ああ、駅長……僕の神……どうかこの僕をお救いください……",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200507,
                             },
                             {
@@ -125543,6 +126652,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "もちろんです！今日こうしてここで会えたのも、すべては我らが駅長――アイゼンバーン駅長の赴任十周年を祝うためで……って、あれ？あなた、ホイッスル・サロンの人じゃないんですか？",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200510,
                             },
                             {
@@ -125555,12 +126665,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200511,
                                 content: "外から来たばかりなのに、よくあんな上乗せ価格で買いましたね……てっきり、資金力のある同好の士かと。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200512,
                             },
                             {
                                 id: 51200512,
                                 content: "最近は十周年で相場も上がってますけど、さすがにあそこまでは行きません。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200513,
                             },
                             {
@@ -125568,12 +126680,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "見た目が地味で数も出てるやつなら、だいたい十から三十銀貨くらいですよ。僕が五十出すのは、事情があるからです。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200514,
                             },
                             {
                                 id: 51200514,
                                 content: "こういうの、治安官に言ってもまず相手にされません。まあ……今回は運が悪かったと思うしかないですね。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200515,
                             },
                             {
@@ -125587,12 +126701,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "わかります、わかります。でも、ああいう転売屋って、アイゼンバーン駅長のことだけは妙に詳しいんですよ。でなきゃ、同好相手に商売なんてできませんから。僕も入りたての頃は、しょっちゅう騙されてました。ホイッスル・サロンに入ってから、ようやく見る目がついたんです。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200517,
                             },
                             {
                                 id: 51200517,
                                 content: "そうだ。あなたも入りませんか？ホイッスル・サロンに。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 options: [
                                     {
                                         id: 51200518,
@@ -125616,18 +126732,21 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "名前のことですか？その名の通り、フラワー駅でアイゼンバーン駅長を敬愛する貴族たちが集まって、お茶を飲んだり、本を読んだり、語り合ったりするサロンです。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200520,
                             },
                             {
                                 id: 51200530,
                                 content: "アイゼンバーン駅長のことですか？ああ、それは二晩三晩じゃ語りきれませんね。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200531,
                             },
                             {
                                 id: 51200533,
                                 content: "フラワー駅は、アイゼンバーン駅長のいる場所です。あのフラワー駅は今のフラワー駅じゃなかった。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200534,
                             },
                             {
@@ -125635,6 +126754,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "汽笛って、美しいでしょう？あれは列車だけが鳴らせる芸術なんです。その価値を理解できる、品位も身分もある紳士だけが、ホイッスル・サロンに迎えられるんですよ。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200521,
                             },
                             {
@@ -125642,6 +126762,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "もし本気で知りたいなら、ぜひホイッスル・サロンへ。赴任十周年はもうすぐです。駅長の晴れやかな笑顔のために、僕たちも力を尽くさないと！",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200535,
                             },
                             {
@@ -125649,6 +126770,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "駅長が来る前は、ただの駅でした。でも、あの方が来て、見て、整えて――ここは活気に満ちた場所になった。言ってみれば、僕たちの魂の拠り所です。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200535,
                             },
                             {
@@ -125656,6 +126778,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "会員たちは、それぞれのやり方で駅長への敬意を表します。たとえば……アイゼンバーン駅長のタバコケースやポスターを、太陽の光みたいに放射状に並べるんですよ。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200522,
                             },
                             {
@@ -125668,24 +126791,28 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200522,
                                 content: "部屋じゅう、壁も床も天井も、どこを見ても駅長……ああ、想像しただけで幸せだ……",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200523,
                             },
                             {
                                 id: 51200536,
                                 content: "わかりました。これ、ホイッスル・サロンの名刺です。集まりの場所が書いてあります。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200537,
                             },
                             {
                                 id: 51200523,
                                 content: "そのときは数にもこだわるんです。九十九とか、九百九十九とか。意味のある数字で揃えるんですよ。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200524,
                             },
                             {
                                 id: 51200537,
                                 content: "僕たちは同じ願いでつながった仲間です。ひとたび入れば、みんな家族みたいなものですよ……",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200538,
                             },
                             {
@@ -125693,6 +126820,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "僕があなたのタバコケースを欲しかったのも、そのためです。同じ型を九十八個まで集めていて、あとひとつで揃うんです。だから少し無理をしてでも欲しかった。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200525,
                             },
                             {
@@ -125707,6 +126835,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "もし揃わないままだったら、たぶん死んでも死にきれません。でも、あなたに会えた。これも駅長のお導きです！",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200526,
                             },
                             {
@@ -125733,6 +126862,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "何を言うんです！アイゼンバーン駅長への敬意と崇拝を捧げること以上に、大事なことなんてありませんよ。そんな顔しないでください、全然恥ずかしいことじゃない！",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200528,
                             },
                             {
@@ -125745,6 +126875,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "それに、あの煙草ケースを高値で買った時点で、あなたには見る目がある。ホイッスル・サロンは、そういう人を歓迎します。",
                                 npc: 700398,
+                                speakerName: "旅疲れの男",
                                 next: 51200535,
                             },
                         ],
@@ -127149,6 +128280,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200807,
                                 content: "落ち着いてる――\n  誰がこんなのとケンカするか――",
                                 npc: 700409,
+                                speakerName: "アウトサイダー＆スノウ",
                                 next: 51200808,
                             },
                             {
@@ -127329,6 +128461,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51200836,
                                 content: "何をしてるんだい？",
                                 npc: 700410,
+                                speakerName: "聞き覚えのある声",
                                 next: 51200837,
                             },
                             {
@@ -128492,6 +129625,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ギルド会長に引き合わせる前に、正式に名乗らせてほしい。僕はロレント。もうご存じだろうが、ドライバーギルドの……いわゆるナンバー2、ってところだ。",
                                 npc: 700486,
+                                speakerName: "ロレント",
                                 next: 51206803,
                             },
                             {
@@ -128511,6 +129645,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "いいだろう、どうやら君はストレートな物言いが好きらしい。なら手短に話そう。実は我々のギルドが少々厄介な問題を抱えていてね。君のような腕が立ち、かつ善意のある人間の力を借りたいんだ。",
                                 npc: 700486,
+                                speakerName: "ロレント",
                                 options: [
                                     {
                                         id: 51206806,
@@ -128537,6 +129672,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ははは、君のようなはっきりした人と話すのは好きだよ。頭の回転も早い。だからこそ、最初にちゃんとした自己紹介から始めるべきだと言ったんだ。",
                                 npc: 700486,
+                                speakerName: "ロレント",
                                 next: 51206810,
                             },
                             {
@@ -128544,6 +129680,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "君はまだ僕たちのことをよく知らないんだろう？ドライバーギルドについて君が耳にした話は、コニーから聞いたことだけで、全体像じゃない。だから僕たちがどういう組織か、まだ掴めていないはずだ。",
                                 npc: 700486,
+                                speakerName: "ロレント",
                                 next: 51206811,
                             },
                             {
@@ -128558,6 +129695,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "真逆さ。僕たちは無数のコニーでできた『連盟』だ。この駅のきらびやかな化けの皮の下で、のたくっている哀れな虫けら共の集まりさ。",
                                 npc: 700486,
+                                speakerName: "ロレント",
                                 next: 51206813,
                             },
                             {
@@ -128565,6 +129703,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "そんな僕たちが集まり、互いを助け合う。誰かが仕事でつまずけば手を貸す。コニーにしてやったようにな。僕たちは毎日、こうして汗水垂らして、働く労働者たちを助けているのさ。",
                                 npc: 700486,
+                                speakerName: "ロレント",
                                 next: 51206814,
                             },
                             {
@@ -128578,6 +129717,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "その通り。要するに、フラワー駅の労働者による助け合い組織ってわけだ。ドライバーを手にする者は、みな僕たちの兄弟姉妹だ。もっとも、これはあくまで理想論だがね。",
                                 npc: 700486,
+                                speakerName: "ロレント",
                                 next: 51206816,
                             },
                             {
@@ -128585,6 +129725,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "コニーが借りた金は、同じようにどん底で暮らす他の労働者たちが血と汗を流して納めた会費から捻出されている。君はコニーを救った。じゃあ、残された彼らはどうなる？",
                                 npc: 700486,
+                                speakerName: "ロレント",
                                 next: 51206817,
                             },
                             {
@@ -128597,6 +129738,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51206818,
                                 content: "まずは今のギルド本部へ行こう。詳しい話は着いてからだ。",
                                 npc: 700486,
+                                speakerName: "ロレント",
                             },
                         ],
                     },
@@ -128644,12 +129786,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51207002,
                                 content:
                                     "クソッタレが！誰が貸すかよ！犬畜生にだって貸さねえ……！この前だって、金を貸してやったら速攻でスッカラカンにしやがって！なのにまた借りに来て、また負けたぁ？よくもまあ、のこのこ顔を出せたもんだな……このクズがっ！",
+                                speakerName: "苛立った声",
                                 next: 51207003,
                             },
                             {
                                 id: 51207003,
                                 content:
                                     "頼むよクルーガー、信じてくれ。あれは検証だったんだ！もう必勝法は見つけたんだよ！金を貸してくれれば、今度こそ絶対に返すから！",
+                                speakerName: "卑屈な声",
                                 next: 51207004,
                             },
                             {
@@ -128663,6 +129807,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51207005,
                                 content:
                                     "違う！今回は違うんだ、クルーガー。本当なんだ。今度こそ絶対に勝てる！俺はギルドで唯一の会計士なんだぞ！あの「ゲーム」の仕組みは、もう完全に読み切った。今度こそ、絶対に勝てる！",
+                                speakerName: "卑屈な声",
                                 next: 51207006,
                             },
                             {
@@ -129741,6 +130886,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51207725,
                                 content:
                                     "ちょいと待った！お前、{nickname}なのか？叔父の遠縁の従妹の甥っ子の隣に住んでた、あの……？なんでまた、こんな所にいるんだ？",
+                                speakerName: "場違いな声",
                                 next: 51207726,
                             },
                             {
@@ -132804,6 +133950,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51210401,
                                 content: "何だ、この騒ぎは？酔っ払いか？",
+                                speakerName: "現場監督",
                                 next: 51210402,
                             },
                             {
@@ -132841,6 +133988,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51210504,
                                 content: "いててて……頭が……ケツが……お前ら、一体なに考えてやがる！？",
+                                speakerName: "現場監督",
                                 next: 51210505,
                             },
                             {
@@ -132854,6 +134002,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51210506,
                                 content:
                                     "クルーガー、勤務中に飲酒とはいい度胸だ。今度こそ、給料はきっちり引かせてもらうぞ。ロレントが泣きつこうが、今回は絶対に許さねえからな、覚悟しろ！",
+                                speakerName: "現場監督",
                                 next: 51210507,
                             },
                             {
@@ -132871,6 +134020,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51210509,
                                 content: "やめろ！やめてくれ！なんでお前は、酒が入るたびに人を殴るんだ！",
+                                speakerName: "現場監督",
                                 next: 51210510,
                             },
                             {
@@ -132888,6 +134038,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51210512,
                                 content:
                                     "このクソ虫が！酒浸りのクズが！救いようのねえ大馬鹿野郎め！で、お前は何者だ？さっき俺を殴ったな、知ってたぞ。ここの労働者か？このツラ、絶対に忘れねえからな！",
+                                speakerName: "現場監督",
                                 next: 51210513,
                             },
                             {
@@ -132899,6 +134050,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51210514,
                                 content: "何だその態度は！？絶対に後悔させてやるからな！",
+                                speakerName: "現場監督",
                                 next: 51210515,
                             },
                             {
@@ -132910,6 +134062,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51210516,
                                 content: "一夜禅師？なんだそりゃ、俺は知らねえ！",
+                                speakerName: "現場監督",
                                 next: 51210517,
                             },
                             {
@@ -132933,6 +134086,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51210520,
                                 content: "お、お前ら……グルだったんだな？お前、あのヒューとかいうコソ泥と、グルなんだな！？",
+                                speakerName: "現場監督",
                                 next: 51210521,
                             },
                             {
@@ -132945,6 +134099,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51210522,
                                 content:
                                     "いや……お前ら、ワケもわからずいきなり俺を袋叩きにしといて、今更何も知りませんって顔か？俺は殴られ損かよ！",
+                                speakerName: "現場監督",
                                 next: 51210523,
                             },
                             {
@@ -132958,12 +134113,14 @@ export const questData_jp: QuestStory[] = [
                                 id: 51210524,
                                 content:
                                     "言う、言うからやめてくれ！その、ヒューって労働者なら、少し前に、真夜中に医務室に忍び込んで物を盗もうとして、現行犯で取り押さえられたんだ。",
+                                speakerName: "現場監督",
                                 next: 51210525,
                             },
                             {
                                 id: 51210525,
                                 content:
                                     "結局、何も盗られちゃいなかったんだが、駅長が「誰か引き取りに来るまで出すな」ってきかなくてな。それで、今も医務室に監禁してあるんだよ。行きゃあ会えるさ。",
+                                speakerName: "現場監督",
                                 next: 51210526,
                             },
                             {
@@ -132975,6 +134132,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51210527,
                                 content: "そいつは駅長のご意向だ、俺の知ったことか！全部話したんだ。これでいいだろ、見逃してくれ！",
+                                speakerName: "現場監督",
                                 next: 51210528,
                             },
                             {
@@ -134093,6 +135251,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51211943,
                                 content: "{性别:僕|私}たちは……",
+                                speakerName: "{nickname}&スノウ",
                                 next: 51211944,
                             },
                             {
@@ -134120,16 +135279,19 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51212001,
                                 content: "ロレント、はっきり言って、あんたはただの腰抜けだ！",
+                                speakerName: "マギの声",
                                 next: 51212002,
                             },
                             {
                                 id: 51212002,
                                 content: "マギ、何でもかんでも拳で解決できるわけじゃない。それに、僕たちがあいつに敵うとでも？",
+                                speakerName: "ロレントの声",
                                 next: 51212003,
                             },
                             {
                                 id: 51212003,
                                 content: "そんなの、負け犬の遠吠えだよ！",
+                                speakerName: "マギの声",
                                 next: 51212004,
                             },
                             {
@@ -134488,6 +135650,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51210915,
                                 content: "なにぃ！？",
+                                speakerName: "クルーガー&{nickname}&スノウ",
                                 next: 51210916,
                             },
                             {
@@ -135717,12 +136880,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     'ご覧なさい、一人の敵が熱狂の嵐へと踏み込んだ。<up text="がいか">凱歌</>はさらに遠き彼方より響き渡り、高らかな<up text="きてき">汽笛</>の音が今、呼びかけている――',
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213143,
                             },
                             {
                                 id: 51213143,
                                 content: "雷鳴のような演奏を！",
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                             },
                         ],
                     },
@@ -135737,6 +136902,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51213145,
                                 content: "あら、なかなかやるじゃない。でも、それでも通すわけにはいかないわ。",
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213146,
                             },
                             {
@@ -135744,6 +136910,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "まったく、ファンたちは一体どこから情報を嗅ぎつけてくるのかしら……はい、特別にサインをあげるから、受け取ったら帰ってね。今日は本当に見学不可なの。大事な用事があるから。",
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213147,
                             },
                             {
@@ -135776,12 +136943,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "……これを私に渡してどうするの？あなた別に有名人じゃ――って、えっ！？{nickname}、あ、あなたって、あの有名な月狩り人じゃない！？",
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213150,
                             },
                             {
                                 id: 51213154,
                                 content: "書けたわ。はい、どうぞ！でももうこんなところに来たらだめよ！",
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213155,
                             },
                             {
@@ -135789,6 +136958,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     'はぁ……なるほど、わたくしのファンではなかったのですね。失礼いたしました。最近はわたくし目当てのお客様が多くて、稽古の<up text="さまた">妨げ</>になっているものですから、てっきりそうかと。',
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213161,
                             },
                             {
@@ -135796,6 +136966,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "「まさか、胸に抱いた星が私の窓辺へ落ちてくる日が来るなんて！」ああ、どうしましょう、どうしましょう！まだ心の準備ができていませんわ！わたくしの衣装、乱れておりませんこと？お恥ずかしいところをお見せしました。",
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213151,
                             },
                             {
@@ -135809,6 +136980,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     'はじめまして。わたくしはアルシア・ホール。<up text="マジックフルート">魔笛</>劇団の役者です。現在はホイッスル・サロンから依頼を受け、演劇指導を担当しております。',
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213162,
                             },
                             {
@@ -135816,6 +136988,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "わたくしもずっと月狩り人に憧れていましたの！でも戦いの才能がなくて……ロットバード一羽にすら勝てませんの。いただいたサインは一生の宝物にいたしますわ！",
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213152,
                             },
                             {
@@ -135823,6 +136996,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "アルシアよ！アルシア・ホール！わたくしのことも知らないのに、どうしてここまで追いかけてきたの！？……あれ？もしかして、わたくし目当てじゃないの？",
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213157,
                             },
                             {
@@ -135836,6 +137010,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51213152,
                                 content: "なんて幸運なんでしょう！まさかあなた様までリハーサル見学にいらっしゃるなんて。",
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213161,
                             },
                             {
@@ -135855,6 +137030,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     'ああ、なんてことでしょう……先ほどは失礼な口を利いてしまい申し訳ありません。最近、わたくしを訪ねてくる方が多くて、皆さんの稽古の<up text="さまた">妨げ</>になっているんです。てっきりあなた様もそのお一人かと。',
                                 npc: 700458,
+                                speakerName: "華やかな少女",
                                 next: 51213161,
                             },
                             {
@@ -135910,6 +137086,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "アルシアさん本人が問題ないって言ってるだろ！お前が何をそんなに止めたがってるのか理解できないんだが？こんな時だけ妙なこと言うなよ！普段は騎士気取りなんてしないくせに！",
                                 npc: 700462,
+                                speakerName: "怒る青年",
                                 next: 51213171,
                             },
                             {
@@ -135917,6 +137094,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "アルシアさんのことも心配だけど、それ以上に安全面が心配なんだよ。劇の小道具、本当に実銃を使う必要があるのか？",
                                 npc: 700461,
+                                speakerName: "困り顔の青年",
                                 next: 51213172,
                             },
                             {
@@ -135924,6 +137102,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "大工に追加で金を払って、もっと精巧に塗装してもらえばいいだろ……頼むから小道具の件は考え直してくれないか。",
                                 npc: 700461,
+                                speakerName: "困り顔の青年",
                                 next: 51213173,
                             },
                             {
@@ -135931,6 +137110,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "会長が言っただろ！？本物らしいほどいいって！銃なんて、金さえ積めば手に入るんだよ。そんなことより、なんで今さら演劇指導のことなんか気にしてるんだ！",
                                 npc: 700462,
+                                speakerName: "怒る青年",
                                 next: 51213174,
                             },
                             {
@@ -135938,6 +137118,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "当日客席にいるのは空席じゃない。本物のアイゼンバーン駅長なんだぞ！まさか本当に会長の指示通りに……やっぱりやめないか？下手したら俺たち全員そこで終わりだぞ！",
                                 npc: 700461,
+                                speakerName: "困り顔の青年",
                                 next: 51213175,
                             },
                             {
@@ -135945,6 +137126,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "今さら抜ける気か？逃げられると思ってるのか？甘いな。シートン会長はアイゼンバーンほどじゃないにせよ、俺たちのことをちゃんと見張ってるはずだ。",
                                 npc: 700462,
+                                speakerName: "怒る青年",
                                 next: 51213176,
                             },
                             {
@@ -135958,6 +137140,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51213177,
                                 content: "揉めてない、揉めてない！感情を高めていただけだ！いつでも確認どうぞ！",
                                 npc: 700462,
+                                speakerName: "怒る青年",
                                 next: 51213178,
                             },
                             {
@@ -135965,6 +137148,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ああ――アイゼンバーン！我らが英雄！彼は度量と共にあり、正義と共に輝く！あなたが決して私の理念を認めなかったことは知っている。だが――私はすでにあなたを理解しているのだ。",
                                 npc: 700462,
+                                speakerName: "怒る青年",
                                 next: 51213179,
                             },
                             {
@@ -135972,6 +137156,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "嵐はいずれ過ぎ去り、長き夜もまた終わる。列車は必ずや、太陽が放つ黄金の糸のごとく、アイスレイク城とディズマニアを結びつけるだろう。",
                                 npc: 700462,
+                                speakerName: "怒る青年",
                                 next: 51213180,
                             },
                             {
@@ -135979,12 +137164,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "だから私は呪う。このすべてを停滞させる嵐を呪う。私の憎悪のすべてをこの三発の弾丸へ注ぎ込み、この咆哮する見えざる獣へ向けて引き金を引こう。",
                                 npc: 700462,
+                                speakerName: "怒る青年",
                                 next: 51213181,
                             },
                             {
                                 id: 51213181,
                                 content: "そして最後には、それを打ち払う太陽となるのだ――",
                                 npc: 700462,
+                                speakerName: "怒る青年",
                                 next: 51213182,
                             },
                             {
@@ -136014,6 +137201,7 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "ふん、なかなかの身のこなしだな。俺はケイランより、あんたのほうがこの芝居の相手役に向いてる気がするぜ。",
                                 npc: 700462,
+                                speakerName: "怒る青年",
                                 next: 51213185,
                             },
                             {
@@ -136021,12 +137209,14 @@ export const questData_jp: QuestStory[] = [
                                 content:
                                     "また始まった……申し訳ありません。私たちみたいな芝居好きは、熱が入ると誰彼構わず即興劇を始めてしまうんです。彼が今回演じているのはフラワー駅の元駅長役でして、あなたをその駅長に見立てて演じていたんですよ。",
                                 npc: 700461,
+                                speakerName: "困り顔の青年",
                                 next: 51213186,
                             },
                             {
                                 id: 51213186,
                                 content: "アルシア、紹介してくれるか？さっき、この方はシートン会長から進捗確認に来た人だと言っていたよな？",
                                 npc: 700461,
+                                speakerName: "困り顔の青年",
                                 next: 51213187,
                             },
                             {
@@ -140373,6 +141563,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51105310,
                                 content: "鍛冶だ！ 商売よ！ 冒険だよ！",
+                                speakerName: "ルーナ族の鍛冶師&ルーナ族のバーテンダー&ルーナ族の探検家",
                                 next: 51105311,
                             },
                             {
@@ -140780,6 +141971,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51105503,
                                 content: "たすけてぇぇっ！誰か――！",
+                                speakerName: "近くから聞こえる声",
                                 next: 51105504,
                             },
                             {
@@ -140930,6 +142122,7 @@ export const questData_jp: QuestStory[] = [
                                 id: 51105606,
                                 content: "ごめんなさい。外に出て、穢獣に襲われて……でも、この人たちが助けてくれたんだ！",
                                 npc: 700356,
+                                speakerName: "少年",
                                 next: 51105607,
                             },
                             {
@@ -141160,6 +142353,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 51105725,
                                 content: "おー！",
+                                speakerName: "群衆",
                                 next: 51105726,
                             },
                             {

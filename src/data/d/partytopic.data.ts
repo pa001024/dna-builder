@@ -870,6 +870,47 @@ export const partyTopicData: PartyTopic[] = [
                 npc: 790060,
                 next: 80040423,
             },
+            {
+                id: 80040424,
+                content: "真奇怪……为什么秽兽会突然发狂呢？",
+                voice: "inv/Heitao/004/C85F7010",
+                npc: 790060,
+                next: 80040425,
+            },
+            {
+                id: 80040425,
+                content: "也许你说的没错。是我太天真了，以为留在净界岛就能躲开一切危险。",
+                voice: "inv/Heitao/004/C85F703A",
+                npc: 790060,
+                next: 80040426,
+            },
+            {
+                id: 80040426,
+                content: "……一直躲在这里也不是办法。他们能找来第一次，就有可能找来第二次。",
+                voice: "inv/Heitao/004/C85F7064",
+                npc: 790060,
+                next: 80040427,
+            },
+            {
+                id: 80040427,
+                content: "{nickname}，等明天你醒来，我们就一起离开吧。去自由的、辽阔的远方。像你说的那样——",
+                voice: "inv/Heitao/004/C85F708E",
+                npc: 790060,
+                next: 80040428,
+            },
+            {
+                id: 80040428,
+                content: "“我做你的盾牌，你做我的唇齿。”",
+                voice: "inv/Heitao/004/C85F70B8",
+                npc: 790060,
+                next: 80040429,
+            },
+            {
+                id: 80040429,
+                content: "没什么好怕的——已经没什么好怕的了。",
+                voice: "inv/Heitao/004/C85F70E2",
+                npc: 790060,
+            },
         ],
     },
     {
@@ -1311,7 +1352,13 @@ export const partyTopicData: PartyTopic[] = [
                 content: "…………",
                 voice: "inv/Fuluo/002/C8EC49B8",
                 npc: 790090,
+                speakerName: "？？？",
                 next: 80260205,
+            },
+            {
+                id: 80260205,
+                voice: "inv/Fuluo/002/C8EC49E2",
+                next: 80260206,
             },
             {
                 id: 80260206,
@@ -1325,6 +1372,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "希尔妲，你的速度太慢了。唉，果然女儿还是赢不过母亲，这样下去我会很担心啊。",
                 voice: "inv/Fuluo/002/C8EC4A36",
                 npc: 790090,
+                speakerName: "？？？",
                 next: 80260208,
             },
             {
@@ -1942,6 +1990,11 @@ export const partyTopicData: PartyTopic[] = [
                 next: 80260404,
             },
             {
+                id: 80260404,
+                voice: "inv/Fuluo/004/C8EC6A88",
+                next: 80260405,
+            },
+            {
                 id: 80260405,
                 content: "芙罗拉，去埃斯加特吧。就算是逃跑也无所谓，只要逃得足够远，就一定能得到自由。",
                 voice: "inv/Fuluo/004/C8EC6AB2",
@@ -2194,6 +2247,11 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Fuluo/004/C8EC709A",
                 npc: 790090,
                 next: 80260442,
+            },
+            {
+                id: 80260442,
+                voice: "inv/Fuluo/004/C8EC70C4",
+                next: 80260443,
             },
             {
                 id: 80260443,
@@ -2586,6 +2644,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "卡戎之民也能上台？剧团疯了吧？",
                 voice: "inv/Tuosi/001/C89F5932",
                 npc: 790034,
+                speakerName: "哗然的观众",
                 next: 80140150,
             },
             {
@@ -2614,6 +2673,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "滚下去！滚下去！滚下去！",
                 voice: "inv/Tuosi/001/C89F59DA",
                 npc: 790034,
+                speakerName: "哗然的观众",
                 next: 80140154,
             },
             {
@@ -2642,6 +2702,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "滚下去！滚下去！滚下去！",
                 voice: "inv/Tuosi/001/C89F5A82",
                 npc: 790034,
+                speakerName: "哗然的观众",
                 next: 80140158,
             },
             {
@@ -2649,6 +2710,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "骗子、骗子……<W>恶魔的孩子！</>",
                 voice: "inv/Tuosi/001/C89F5AAC",
                 npc: 790034,
+                speakerName: "哗然的观众",
                 next: 80140159,
             },
             {
@@ -3210,6 +3272,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "嗯？你在说话吗……？你说什么？",
                 voice: "inv/Tuosi/003/C89F7276",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140304,
             },
             {
@@ -3231,6 +3294,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "什么？我听不清。",
                 voice: "inv/Tuosi/003/C89F72F4",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140307,
             },
             {
@@ -3245,6 +3309,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "唔，这里是第六军团的实验室……",
                 voice: "inv/Tuosi/003/C89F7348",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140309,
             },
             {
@@ -3266,6 +3331,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "你……你忘了吗，这是你第三次问这个问题了。你接受了炼金术的改造。",
                 voice: "inv/Tuosi/003/C89F73C6",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140312,
             },
             {
@@ -3302,6 +3368,7 @@ export const partyTopicData: PartyTopic[] = [
                     "其、其实这样也挺好的，毕竟你的身体变得更强了啊。对你们卡戎之民来说，有机会以这种方式报效帝国，是无上的……恩赐……嗯。",
                 voice: "inv/Tuosi/003/C89F7498",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140317,
             },
             {
@@ -3309,6 +3376,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "而且——而且你很幸运，要知道，之前的很多改造体都没有熬过移植的程序……",
                 voice: "inv/Tuosi/003/C89F74C2",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140318,
             },
             {
@@ -3330,6 +3398,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……抱歉。",
                 voice: "inv/Tuosi/003/C89F7540",
                 npc: 100336,
+                speakerName: "少年炼金术师",
             },
             {
                 id: 80140357,
@@ -3359,6 +3428,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "嗯……血液中的镇定剂浓度下降了……要不要再加点呢？",
                 voice: "inv/Tuosi/003/C89F75BE",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140324,
             },
             {
@@ -3373,6 +3443,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "啊……！你又醒了？",
                 voice: "inv/Tuosi/003/C89F7612",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140326,
             },
             {
@@ -3380,6 +3451,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "你在做什么？镇定剂浓度怎么会这么低？",
                 voice: "inv/Tuosi/003/C89F763C",
                 npc: 100337,
+                speakerName: "老年炼金术师",
                 next: 80140327,
             },
             {
@@ -3387,6 +3459,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "抱、抱歉，老师，我这就追加！",
                 voice: "inv/Tuosi/003/C89F7666",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140328,
             },
             {
@@ -3401,6 +3474,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "嗯？这东西在嘀咕什么？",
                 voice: "inv/Tuosi/003/C89F76BA",
                 npc: 100337,
+                speakerName: "老年炼金术师",
                 next: 80140330,
             },
             {
@@ -3415,6 +3489,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "哈哈……哈哈哈哈！做什么白日梦呢？我们也没动你的脑子啊？是它被火焰烧坏了，还是你本来就这么蠢？",
                 voice: "inv/Tuosi/003/C89F770E",
                 npc: 100337,
+                speakerName: "老年炼金术师",
                 next: 80140332,
             },
             {
@@ -3422,6 +3497,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我们要的是一只怪物，一具容器，一把趁手的刀，唯独不是你自己。我们怎么会把你变回去？",
                 voice: "inv/Tuosi/003/C89F7738",
                 npc: 100337,
+                speakerName: "老年炼金术师",
                 next: 80140333,
             },
             {
@@ -3436,6 +3512,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "“为什么”？",
                 voice: "inv/Tuosi/003/C89F778C",
                 npc: 100337,
+                speakerName: "老年炼金术师",
                 next: 80140335,
             },
             {
@@ -3443,6 +3520,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "你会对脚下的蚂蚁解释你为什么要踩扁它吗？你会对嘴里的樱桃解释你为什么要嚼碎它吗？",
                 voice: "inv/Tuosi/003/C89F77B6",
                 npc: 100337,
+                speakerName: "老年炼金术师",
                 next: 80140336,
             },
             {
@@ -3450,6 +3528,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "哦，抱歉，我忘了——像你这样卑贱的东西应该一辈子都没尝过樱桃的味道吧。",
                 voice: "inv/Tuosi/003/C89F77E0",
                 npc: 100337,
+                speakerName: "老年炼金术师",
                 next: 80140337,
             },
             {
@@ -3457,6 +3536,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "还没注射好吗？手脚利索点，别浪费时间。",
                 voice: "inv/Tuosi/003/C89F780A",
                 npc: 100337,
+                speakerName: "老年炼金术师",
                 next: 80140338,
             },
             {
@@ -3464,6 +3544,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "好了，老师。",
                 voice: "inv/Tuosi/003/C89F7834",
                 npc: 100336,
+                speakerName: "少年炼金术师",
             },
             {
                 id: 80140339,
@@ -3477,6 +3558,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "嗯？知道什么？",
                 voice: "inv/Tuosi/003/C89F7888",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140341,
             },
             {
@@ -3528,6 +3610,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……",
                 voice: "inv/Tuosi/003/C89F79AE",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140348,
             },
             {
@@ -3535,6 +3618,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "怎么，有什么异常吗？",
                 voice: "inv/Tuosi/003/C89F79D8",
                 npc: 100337,
+                speakerName: "老年炼金术师",
                 next: 80140349,
             },
             {
@@ -3542,6 +3626,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "没什么，老师。实验体精神状态不太稳定，又在说胡话了。我正准备提高镇定剂的剂量。",
                 voice: "inv/Tuosi/003/C89F7A02",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140350,
             },
             {
@@ -3549,6 +3634,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "嗯，正确的判断。你这些天进步不少。",
                 voice: "inv/Tuosi/003/C89F7A2C",
                 npc: 100337,
+                speakerName: "老年炼金术师",
                 next: 80140351,
             },
             {
@@ -3556,6 +3642,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "谢谢老师！",
                 voice: "inv/Tuosi/003/C89F7A56",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140352,
             },
             {
@@ -3570,6 +3657,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "这就对了，闭嘴吧。",
                 voice: "inv/Tuosi/003/C89F7AAA",
                 npc: 100336,
+                speakerName: "少年炼金术师",
                 next: 80140354,
             },
             {
@@ -3613,6 +3701,285 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80140401,
                 content: "你是谁？",
                 voice: "inv/Tuosi/004/C89F828A",
+            },
+            {
+                id: 80140403,
+                content: "哎，你要去哪里呀？",
+                voice: "inv/Tuosi/004/C89F82DE",
+                npc: 790026,
+                speakerName: "？？？",
+                next: 80140404,
+            },
+            {
+                id: 80140404,
+                content: "——？！",
+                voice: "inv/Tuosi/004/C89F8308",
+                npc: 790025,
+                speakerName: "幻景",
+                next: 80140405,
+            },
+            {
+                id: 80140405,
+                content: "丹尼斯！等等我呀！",
+                voice: "inv/Tuosi/004/C89F8332",
+                npc: 790026,
+                next: 80140406,
+            },
+            {
+                id: 80140406,
+                content: "呃……天太冷了，我想赶快回家睡觉。",
+                voice: "inv/Tuosi/004/C89F835C",
+                npc: 790027,
+                next: 80140407,
+            },
+            {
+                id: 80140407,
+                content: "不是吧，这才几点？别那么急嘛，陪我对一会儿戏！今天老师教的那段我还背得不怎么熟练。",
+                voice: "inv/Tuosi/004/C89F8386",
+                npc: 790026,
+                next: 80140408,
+            },
+            {
+                id: 80140408,
+                content: "又来……？啊——好好好，陪你练就是了，别动手啊！",
+                voice: "inv/Tuosi/004/C89F83B0",
+                npc: 790027,
+                next: 80140409,
+            },
+            {
+                id: 80140409,
+                content: "（他们两个真是一点也没变。）",
+                voice: "inv/Tuosi/004/C89F83DA",
+                npc: 790025,
+                speakerName: "幻景",
+                next: 80140410,
+            },
+            {
+                id: 80140410,
+                content: "说起来，下个月的演出剧目定了吗？",
+                voice: "inv/Tuosi/004/C89F8404",
+                npc: 790026,
+                next: 80140411,
+            },
+            {
+                id: 80140411,
+                content: "团长说是《雨日》。",
+                voice: "inv/Tuosi/004/C89F842E",
+                npc: 790027,
+                next: 80140412,
+            },
+            {
+                id: 80140412,
+                content: "《雨日》的人气也就一般般吧？靠它出人头地可不容易。唉，要是能再演《雪国的孩子》就好了。那部剧在冰湖城可受欢迎了……",
+                voice: "inv/Tuosi/004/C89F8458",
+                npc: 790026,
+                next: 80140413,
+            },
+            {
+                id: 80140413,
+                content: "就是啊！我也好想再演一次无名的妖精，那可是我最得意的角色，虽然唱段又多又难，但完整演下来的感觉真是太棒了。",
+                voice: "inv/Tuosi/004/C89F8482",
+                npc: 790027,
+                next: 80140414,
+            },
+            {
+                id: 80140414,
+                content: "诶——真的吗？我觉得我们这一届里还是费恩演得最好啊。",
+                voice: "inv/Tuosi/004/C89F84AC",
+                npc: 790026,
+                next: 80140415,
+            },
+            {
+                id: 80140415,
+                content: "你瞎说，终幕的那几段明明是我唱得更好！",
+                voice: "inv/Tuosi/004/C89F84D6",
+                npc: 790027,
+                next: 80140416,
+            },
+            {
+                id: 80140416,
+                content: "……",
+                voice: "inv/Tuosi/004/C89F8500",
+                npc: 790025,
+                speakerName: "幻景",
+                next: 80140417,
+            },
+            {
+                id: 80140417,
+                content: "……其实我和费恩都不是演得最好的。",
+                voice: "inv/Tuosi/004/C89F852A",
+                npc: 790027,
+                next: 80140418,
+            },
+            {
+                id: 80140418,
+                content: "……",
+                voice: "inv/Tuosi/004/C89F8554",
+                npc: 790026,
+                next: 80140419,
+            },
+            {
+                id: 80140419,
+                content: "嗯，是啊。要说《雪国的孩子》，没有人能唱得比帕西法尔更好。也不知道他现在到底去哪里了……",
+                voice: "inv/Tuosi/004/C89F857E",
+                npc: 790026,
+                next: 80140420,
+            },
+            {
+                id: 80140420,
+                content: "（我在这里。）",
+                voice: "inv/Tuosi/004/C89F85A8",
+                npc: 790025,
+                speakerName: "幻景",
+                next: 80140421,
+            },
+            {
+                id: 80140421,
+                content: "（我在这里啊……）",
+                voice: "inv/Tuosi/004/C89F85D2",
+                npc: 790025,
+                speakerName: "幻景",
+                next: 80140422,
+            },
+            {
+                id: 80140422,
+                content: "（我……）",
+                voice: "inv/Tuosi/004/C89F85FC",
+                npc: 790025,
+                speakerName: "幻景",
+                next: 80140423,
+            },
+            {
+                id: 80140423,
+                content: "帕西法尔……",
+                voice: "inv/Tuosi/004/C89F8626",
+                npc: 790027,
+                next: 80140424,
+            },
+            {
+                id: 80140424,
+                content: "哦，忘了不该在你面前提他。上次团长说起他的时候，你还在破口大骂，差点把道具都砸了。",
+                voice: "inv/Tuosi/004/C89F8650",
+                npc: 790026,
+                next: 80140425,
+            },
+            {
+                id: 80140425,
+                content: "……那时我确实很生气。如果不是他和老师欺骗观众，《雪国的孩子》就不会停演，我们那么久的排练也不会付诸东流。可是……",
+                voice: "inv/Tuosi/004/C89F867A",
+                npc: 790027,
+                next: 80140426,
+            },
+            {
+                id: 80140426,
+                content:
+                    "可是后来很多次我问自己——他真的不该上台吗？错的到底是违反了“卡戎之民不能上台演出”这一规则的帕西法尔，还是这条规则本身？",
+                voice: "inv/Tuosi/004/C89F86A4",
+                npc: 790027,
+                next: 80140427,
+            },
+            {
+                id: 80140427,
+                content: "我们之所以站在舞台上是为了什么——是<H>至高无上的艺术</>……",
+                voice: "inv/Tuosi/004/C89F86CE",
+                npc: 790027,
+                next: 80140428,
+            },
+            {
+                id: 80140428,
+                content:
+                    "可是为什么人们不去看演出本身，而是死死盯着那个表演的人有没有长角？如果我们大家一起站在帷幕后面，那帕西法尔与我们又有什么区别？",
+                voice: "inv/Tuosi/004/C89F86F8",
+                npc: 790027,
+                next: 80140429,
+            },
+            {
+                id: 80140429,
+                content: "哦，还是有区别的。他比我唱得更好。",
+                voice: "inv/Tuosi/004/C89F8722",
+                npc: 790027,
+                next: 80140430,
+            },
+            {
+                id: 80140430,
+                content: "真是难得，竟然能从你嘴里听到这种话。看来我们莽撞的丹尼斯终于长大啦。",
+                voice: "inv/Tuosi/004/C89F874C",
+                npc: 790026,
+                next: 80140431,
+            },
+            {
+                id: 80140431,
+                content: "喂，不要突然摆出团长的样子教训我啊。",
+                voice: "inv/Tuosi/004/C89F8776",
+                npc: 790027,
+                next: 80140432,
+            },
+            {
+                id: 80140432,
+                content:
+                    "这是夸奖，才不是教训！如果帕西法尔那家伙突然跑回来，我才要狠狠教训他，谁叫他连封信都没留就不知道跑哪儿去了，我是真的很想他呀。",
+                voice: "inv/Tuosi/004/C89F87A0",
+                npc: 790026,
+                next: 80140433,
+            },
+            {
+                id: 80140433,
+                content: "（苏珊娜，丹尼斯……）",
+                voice: "inv/Tuosi/004/C89F87CA",
+                npc: 790025,
+                speakerName: "帕西法尔",
+                next: 80140434,
+            },
+            {
+                id: 80140434,
+                content:
+                    "话说回来，你还记得老师说过的吗？“虽然不是现在，但未来的某一天，我们的艺术一定会迎来一个更加纯粹的时代，那时将不再有索拉和卡戎之别。”",
+                voice: "inv/Tuosi/004/C89F87F4",
+                npc: 790026,
+                next: 80140435,
+            },
+            {
+                id: 80140435,
+                content: "我想，虽然老师和帕西法尔一时间被人们唾骂，让剧团蒙受耻辱……但是正因为有他们这样的人存在，那个新时代才会到来。",
+                voice: "inv/Tuosi/004/C89F881E",
+                npc: 790026,
+                next: 80140436,
+            },
+            {
+                id: 80140436,
+                content: "到那时他们就不再是“耻辱”，而是比大家更早醒来的“英雄”。",
+                voice: "inv/Tuosi/004/C89F8848",
+                npc: 790026,
+                next: 80140437,
+            },
+            {
+                id: 80140437,
+                content: "…………",
+                voice: "inv/Tuosi/004/C89F8872",
+                npc: 790025,
+                speakerName: "帕西法尔",
+                next: 80140438,
+            },
+            {
+                id: 80140438,
+                content: "让我们祝福他吧！也许他已经去了卡戎之民也能上台表演的地方，比如卢卡或者伊瑟尔。",
+                voice: "inv/Tuosi/004/C89F889C",
+                npc: 790026,
+                next: 80140439,
+            },
+            {
+                id: 80140439,
+                content: "说不定下次我们去这些国家巡演的时候，就会发现他已经摇身一变，成了老师那样的大明星呢！",
+                voice: "inv/Tuosi/004/C89F88C6",
+                npc: 790026,
+                next: 80140440,
+            },
+            {
+                id: 80140440,
+                content: "嗯。希望我们还有机会和他站上同一个舞台。",
+                voice: "inv/Tuosi/004/C89F88F0",
+                npc: 790027,
+                next: 80140454,
             },
             {
                 id: 80140402,
@@ -7191,6 +7558,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80240204,
                 content: "喵~",
                 voice: "inv/Suyi/002/C8DF7878",
+                speakerName: "小黑",
                 next: 80240205,
             },
             {
@@ -7482,6 +7850,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80240304,
                 content: "喵~",
                 voice: "inv/Suyi/003/C8DF88E0",
+                speakerName: "小黑",
                 next: 80240305,
             },
             {
@@ -8023,6 +8392,218 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Feina/001/C865A5AA",
                 npc: 790017,
                 next: 80050114,
+            },
+            {
+                id: 80050115,
+                content: "……呼，好难拼……不过总算大功告成啦！",
+                voice: "inv/Feina/001/C865A5FE",
+                npc: 790017,
+                next: 80050116,
+            },
+            {
+                id: 80050116,
+                content: "弹壳居然还能这么玩，让我看看……",
+                voice: "inv/Feina/001/C865A628",
+                npc: 100001,
+                next: 80050117,
+            },
+            {
+                id: 80050118,
+                content: "呃！塌了……",
+                voice: "inv/Feina/001/C865A67C",
+                npc: 100001,
+                next: 80050119,
+            },
+            {
+                id: 80050119,
+                content: "……啊……",
+                voice: "inv/Feina/001/C865A6A6",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050120,
+                        content: "你别哭！我送个别的礼物给你作为赔礼吧。",
+                        next: 80050121,
+                    },
+                ],
+            },
+            {
+                id: 80050121,
+                content: "嗯……让我想想……",
+                voice: "inv/Feina/001/C865A6FA",
+                npc: 790017,
+                next: 80050122,
+            },
+            {
+                id: 80050122,
+                content:
+                    "独角兽{性别：先生|小姐}，你可以帮菲娜实现四个愿望吗？传说中长有一只角的独角兽可以实现人的任何心愿，所以你也一定可以的！",
+                voice: "inv/Feina/001/C865A724",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050123,
+                        content: "当然，只要我能办到。",
+                        next: 80050126,
+                    },
+                    {
+                        id: 80050124,
+                        content: "总感觉自己被讹了……",
+                        next: 80050126,
+                    },
+                    {
+                        id: 80050125,
+                        content: "人家不都是三个愿望吗！你怎么还多了一个啊！",
+                        next: 80050126,
+                    },
+                ],
+            },
+            {
+                id: 80050126,
+                content: "嘿嘿……",
+                voice: "inv/Feina/001/C865A7CC",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050127,
+                        content: "好吧，那第一个愿望是什么？",
+                        next: 80050128,
+                    },
+                ],
+            },
+            {
+                id: 80050128,
+                content: "菲娜想练习魔法！我虽然会一丁点魔法，但是总也不知道到底怎么用……独角兽{性别：先生|小姐}，你能不能教教我？",
+                voice: "inv/Feina/001/C865A820",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050129,
+                        content: "为什么不让奥特赛德教你？",
+                        next: 80050130,
+                    },
+                    {
+                        id: 80050132,
+                        content: "我要收费的。",
+                        next: 80050133,
+                    },
+                ],
+            },
+            {
+                id: 80050130,
+                content: "他不肯教我，也不给我看那些魔法学书本，他把那些书都放在了很高很高的柜子上，我使劲踮起脚尖也够不到。",
+                voice: "inv/Feina/001/C865A874",
+                npc: 790017,
+                next: 80050131,
+            },
+            {
+                id: 80050133,
+                content: "咦……？我、我想想……一大罐棉花糖够吗？",
+                voice: "inv/Feina/001/C865A8F2",
+                npc: 790017,
+                next: 80050134,
+            },
+            {
+                id: 80050131,
+                content: "我就只能趁他不在的时候，把凳子堆起来，偷偷去拿——对了对了，这个你千万别和其他人说！",
+                voice: "inv/Feina/001/C865A89E",
+                npc: 790017,
+                next: 80050138,
+            },
+            {
+                id: 80050134,
+                content: "但既然是帮菲娜实现愿望，就免费吧。",
+                voice: "inv/Feina/001/C865A91C",
+                npc: 100001,
+                next: 80050135,
+            },
+            {
+                id: 80050138,
+                content: "他总说，学魔法的人得走出安稳的房间，离开暖和的火炉，去一片荒原——荒芜的、严酷的荒原……",
+                voice: "inv/Feina/001/C865A9C4",
+                npc: 790017,
+                next: 80050139,
+            },
+            {
+                id: 80050135,
+                content: "好耶！",
+                voice: "inv/Feina/001/C865A946",
+                npc: 790017,
+                next: 80050136,
+            },
+            {
+                id: 80050139,
+                content: "那里有很多很多雪狼，眼睛放着可怕的绿光，还有骑着扫把、浑身上下涂满毒药的沼泽女巫。",
+                voice: "inv/Feina/001/C865A9EE",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050140,
+                        content: "没那么夸张，他是吓唬你的。",
+                        next: 80050141,
+                    },
+                    {
+                        id: 80050143,
+                        content: "有比雪狼和沼泽女巫更可怕的东西。",
+                        next: 80050144,
+                    },
+                ],
+            },
+            {
+                id: 80050136,
+                content:
+                    "谢谢你愿意教我。奥特赛德就不肯教我，也不给我看那些魔法学书本，他把那些书都放在了很高很高的柜子上，我使劲踮起脚尖也够不到。",
+                voice: "inv/Feina/001/C865A970",
+                npc: 790017,
+                next: 80050137,
+            },
+            {
+                id: 80050141,
+                content:
+                    "啊……我就知道！他只是害怕我会生病、会受伤。但是，如果我的身体一直不能好起来……我也不想就这样一直一直躺在家里，当小拖油瓶。",
+                voice: "inv/Feina/001/C865AA42",
+                npc: 790017,
+                next: 80050142,
+            },
+            {
+                id: 80050144,
+                content: "可是这样的话……我就更不能让你们自己去那里了。我得好好学魔法，帮上你们的忙才行。",
+                voice: "inv/Feina/001/C865AAC0",
+                npc: 790017,
+                next: 80050145,
+            },
+            {
+                id: 80050137,
+                content: "我就只能趁他不在的时候，把凳子堆起来，偷偷去拿——对了对了，这个你千万别和其他人说！",
+                voice: "inv/Feina/001/C865A99A",
+                npc: 790017,
+                next: 80050138,
+            },
+            {
+                id: 80050142,
+                content: "……我想变成一个有用的孩子，我不想再被讨厌了。",
+                voice: "inv/Feina/001/C865AA6C",
+                npc: 790017,
+                next: 80050145,
+            },
+            {
+                id: 80050145,
+                content: "所以——拜托了，教教我吧！我一定会好好保密的。",
+                voice: "inv/Feina/001/C865AAEA",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050146,
+                        content: "好吧，那我们现在就开始练习吧。",
+                        next: 80050147,
+                    },
+                ],
+            },
+            {
+                id: 80050147,
+                content: "太好了——你是全天下最好最好的独角兽{性别：先生|小姐}！",
+                voice: "inv/Feina/001/C865AB3E",
+                npc: 790017,
             },
         ],
     },
@@ -10295,12 +10876,14 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80090115,
                 content: "我会提出一个你无法拒绝的条件，你最好深思熟虑之后再回答我。",
                 npc: 790052,
+                speakerName: "？？？",
                 next: 80090116,
             },
             {
                 id: 80090116,
                 content: "叫醒我的是生意，叫醒你的是什么？",
                 npc: 790052,
+                speakerName: "？？？",
                 options: [
                     {
                         id: 80090117,
@@ -10318,12 +10901,14 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80090118,
                 content: "嘻嘻，嘴真甜，比你调的饮料还甜！",
                 npc: 790052,
+                speakerName: "？？？",
                 next: 80090144,
             },
             {
                 id: 80090120,
                 content: "我才不怕她嘞！没人能抓到恶魔大盗！",
                 npc: 790052,
+                speakerName: "？？？",
                 next: 80090144,
             },
             {
@@ -11075,24 +11660,28 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80090416,
                 content: "还有气。只是睡过去了，两个都没事。",
                 npc: 92301,
+                speakerName: "？？？",
                 next: 80090417,
             },
             {
                 id: 80090417,
                 content: "呜呜……吓死我了……早就和塔比瑟说了不要什么都往里放，出事了可怎么办……呜呜……",
                 npc: 92301,
+                speakerName: "？？？",
                 next: 80090418,
             },
             {
                 id: 80090418,
                 content: "嘻嘻嘻嘻，说不定会把脑袋喝坏，再出现奇奇怪怪的后遗症！",
                 npc: 92301,
+                speakerName: "？？？",
                 next: 80090419,
             },
             {
                 id: 80090419,
                 content: "乌鸦嘴，少说两句吧！",
                 npc: 92301,
+                speakerName: "？？？",
                 options: [
                     {
                         id: 80090420,
@@ -11110,18 +11699,21 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80090422,
                 content: "你们听到了吗？……{nickname}在和我们说话。",
                 npc: 92301,
+                speakerName: "？？？",
                 next: 80090423,
             },
             {
                 id: 80090423,
                 content: "据鄙人所知，只有塔比瑟才能听见我们说话吧？",
                 npc: 92301,
+                speakerName: "？？？",
                 next: 80090424,
             },
             {
                 id: 80090424,
                 content: "……糟了糟了糟了，好像真的喝出毛病了！我就知道……每次5号说什么不好就应什么！算我求求你了，下次可千万别再张嘴了！",
                 npc: 92301,
+                speakerName: "？？？",
                 options: [
                     {
                         id: 80090425,
@@ -11134,6 +11726,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80090426,
                 content: "呃……你好？我们确实是塔比瑟的腕足，没想到会在这种情况下说上话！人生还真是猝不及防呀~哈、哈……",
                 npc: 92301,
+                speakerName: "腕足6号",
                 next: 80090427,
             },
             {
@@ -11141,6 +11734,7 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "那个……好像是那杯饮料的原因，你才会听到我们说话呜呜……给你喝到奇怪的东西真的很抱歉，但是塔比瑟和我们都不是故意的呜呜……",
                 npc: 92301,
+                speakerName: "腕足2号",
                 options: [
                     {
                         id: 80090428,
@@ -11158,6 +11752,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80090430,
                 content: "据鄙人观察，你们现在的反应只是因为一些——特别的食材。睡一觉就没事了！",
                 npc: 92301,
+                speakerName: "腕足3号",
                 next: 80090431,
             },
             {
@@ -11165,30 +11760,35 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "不过呢，咳咳——在本人的带领下，全体腕足同仁共同调制了大盗的这杯饮料，目的就是为了促成今日与阁下这场别开生面的会晤！",
                 npc: 92301,
+                speakerName: "腕足3号",
                 next: 80090432,
             },
             {
                 id: 80090432,
                 content: "啊？难道不是塔比瑟根本不懂调饮料，把漂亮蘑菇切成片泡进去导致的吗？",
                 npc: 92301,
+                speakerName: "腕足6号",
                 next: 80090433,
             },
             {
                 id: 80090433,
                 content: "嘻嘻嘻，3号再摆架子你也会出现在这杯饮料里，嘻嘻嘻嘻……",
                 npc: 92301,
+                speakerName: "腕足5号",
                 next: 80090434,
             },
             {
                 id: 80090434,
                 content: "呜呜好可怕呀！",
                 npc: 92301,
+                speakerName: "腕足2号",
                 next: 80090435,
             },
             {
                 id: 80090435,
                 content: "别嚷了……你们不累吗……还有，别吓着人家{nickname}……",
                 npc: 92301,
+                speakerName: "腕足4号",
                 options: [
                     {
                         id: 80090436,
@@ -11202,12 +11802,14 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "当成梦倒是也可以，只是不知道饮料的效果会持续到什么时候……不过我们其实有很多话想和你说！不如趁此机会……1号，你先来！",
                 npc: 92301,
+                speakerName: "腕足6号",
                 next: 80090438,
             },
             {
                 id: 80090438,
                 content: "……我的意识诞生在大海上，海难刚刚发生，我和塔比瑟在海里漂流，随时可能死去。她靠和我说话，渡过了那段时间。",
                 npc: 92301,
+                speakerName: "腕足1号",
                 next: 80090439,
             },
             {
@@ -11215,6 +11817,7 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "我我我苏醒在孤儿院里，那段时间塔比瑟刚到了新地方，大人都对她很不好，她又害怕又要强，不愿在任何人面前示弱，到了晚上才会抱着我一直发抖……",
                 npc: 92301,
+                speakerName: "腕足2号",
                 next: 80090440,
             },
             {
@@ -11222,12 +11825,14 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "鄙人是在孤儿院的厨房加入这个团队的，危急关头，正是在鄙人的及时指挥下，我们得以躲开巡逻的守卫，获得了半块面包的战果！",
                 npc: 92301,
+                speakerName: "腕足3号",
                 next: 80090441,
             },
             {
                 id: 80090441,
                 content: "至于鄙人的说话方式，正是孤儿院长的完美复现。",
                 npc: 92301,
+                speakerName: "腕足3号",
                 next: 80090442,
             },
             {
@@ -11235,18 +11840,21 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "哈欠……好困……我是在逃出孤儿院的晚上醒来的，劫后余生的感觉好重……好重……重到一到安全的地方，我就和她一起在草地上睡着了……",
                 npc: 92301,
+                speakerName: "腕足4号",
                 next: 80090443,
             },
             {
                 id: 80090443,
                 content: "嘻嘻嘻，然后就是我了！我是塔比瑟最好的战友！一起打家劫舍的感觉真是爽飞啦！呜呼！",
                 npc: 92301,
+                speakerName: "腕足5号",
                 next: 80090444,
             },
             {
                 id: 80090444,
                 content: "你给我适可而止！不好意思啊这孩子还是不太懂事！咳咳，接下来就是我啦！我是大家中最小的那个，有意识还是最近的事。",
                 npc: 92301,
+                speakerName: "腕足6号",
                 next: 80090445,
             },
             {
@@ -11254,18 +11862,21 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "其实很早之前我醒过一次，但因为那个卖鱼的小姑娘最终和塔比瑟分开了，她嘴上不说，其实非常伤心，连带我也沉湎着那段时光，睡过去了，不愿苏醒。",
                 npc: 92301,
+                speakerName: "腕足6号",
                 next: 80090446,
             },
             {
                 id: 80090446,
                 content: "直到她又一次遇见了真心以待的人——是的，我是因为你而醒来的。",
                 npc: 92301,
+                speakerName: "腕足6号",
                 next: 80090447,
             },
             {
                 id: 80090447,
                 content: "感谢你对塔比瑟的照顾，那股暖洋洋的善意让我不再做梦，也是在我的建议下，她才决定做一杯饮料感谢你的。",
                 npc: 92301,
+                speakerName: "腕足6号",
                 next: 80090448,
             },
             {
@@ -11273,12 +11884,14 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "但没想到那孩子下手一点儿轻重都没有啊啊啊！她根本不懂调饮料，就在那儿逮着什么放什么——还有你们，3号和5号，你们也在那撺掇她！",
                 npc: 92301,
+                speakerName: "腕足6号",
                 next: 80090449,
             },
             {
                 id: 80090449,
                 content: "不好意思哈，不好意思……",
                 npc: 92301,
+                speakerName: "腕足6号",
                 options: [
                     {
                         id: 80090450,
@@ -11291,18 +11904,21 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80090451,
                 content: "……",
                 npc: 92301,
+                speakerName: "腕足1号",
                 next: 80090452,
             },
             {
                 id: 80090452,
                 content: "塔比瑟要醒了，你呢？",
                 npc: 92301,
+                speakerName: "腕足1号",
                 next: 80090453,
             },
             {
                 id: 80090453,
                 content: "这么快！鄙人还没来得及结束此次发言……",
                 npc: 92301,
+                speakerName: "腕足3号",
                 options: [
                     {
                         id: 80090454,
@@ -12272,6 +12888,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "麻烦。麻烦。麻烦。麻烦！",
                 voice: "inv/Fushu/003/C8C5D208",
                 npc: 790054,
+                speakerName: "？？？",
                 next: 80200219,
             },
             {
@@ -12279,6 +12896,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "唉，早上起来的时候，还再三告诫自己别去惹她别去惹她，怎么早饭还没吃完，就破戒了！",
                 voice: "inv/Fushu/003/C8C5D232",
                 npc: 790054,
+                speakerName: "？？？",
                 next: 80200220,
             },
             {
@@ -12286,6 +12904,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "扶风啊扶风！你怎能如此沉不住气呢！那小妮子脾气再臭，也是你亲妹子！你又不可能扔下她不管，干嘛总是气她呢！",
                 voice: "inv/Fushu/003/C8C5D25C",
                 npc: 790054,
+                speakerName: "？？？",
                 next: 80200221,
             },
             {
@@ -13047,6 +13666,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80110111,
                 content: "你误会了，只是看见了你，顺带请你坐坐，喝杯酒而已。",
                 voice: "inv/Linen/001/C88C1916",
+                speakerName: "{nickname}",
                 next: 80110112,
             },
             {
@@ -13142,6 +13762,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80110127,
                 content: "这样说长官算不算说错话？会不会被“电死”？",
                 voice: "inv/Linen/001/C88C1BB6",
+                speakerName: "{nickname}",
                 next: 80110128,
             },
             {
@@ -13176,12 +13797,14 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80110131,
                 content: "不过，你倒是让我觉得有些……意外。",
                 voice: "inv/Linen/001/C88C1C5E",
+                speakerName: "{nickname}",
                 next: 80110132,
             },
             {
                 id: 80110132,
                 content: "我本以为琳恩作为海伯利亚的军官会更有一些——“信念感”？就是“荣耀”啦，“忠诚”啦……",
                 voice: "inv/Linen/001/C88C1C88",
+                speakerName: "{nickname}",
                 next: 80110133,
             },
             {
@@ -13465,6 +14088,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80110223,
                 content: "…………",
                 voice: "inv/Linen/002/C88C2B76",
+                speakerName: "{nickname}",
                 next: 80110224,
             },
             {
@@ -13621,6 +14245,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80110111,
                 content: "你误会了，只是看见了你，顺带请你坐坐，喝杯酒而已。",
                 voice: "inv/Linen/001/C88C1916",
+                speakerName: "{nickname}",
                 next: 80110112,
             },
             {
@@ -13716,6 +14341,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80110127,
                 content: "这样说长官算不算说错话？会不会被“电死”？",
                 voice: "inv/Linen/001/C88C1BB6",
+                speakerName: "{nickname}",
                 next: 80110128,
             },
             {
@@ -13750,12 +14376,14 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80110131,
                 content: "不过，你倒是让我觉得有些……意外。",
                 voice: "inv/Linen/001/C88C1C5E",
+                speakerName: "{nickname}",
                 next: 80110132,
             },
             {
                 id: 80110132,
                 content: "我本以为琳恩作为海伯利亚的军官会更有一些——“信念感”？就是“荣耀”啦，“忠诚”啦……",
                 voice: "inv/Linen/001/C88C1C88",
+                speakerName: "{nickname}",
                 next: 80110133,
             },
             {
@@ -14146,6 +14774,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80110331,
                 content: "这本应该是一个你想回家就回家的世界……或者说，我们这代人应该让它变成一个你想回家就回家的世界。",
                 voice: "inv/Linen/003/C88C3D2E",
+                speakerName: "{nickname}",
                 next: 80110332,
             },
             {
@@ -14167,12 +14796,14 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80110334,
                 content: "说不定呢？",
                 voice: "inv/Linen/003/C88C3DAC",
+                speakerName: "{nickname}",
                 next: 80110335,
             },
             {
                 id: 80110335,
                 content: "而且，就算你没法让冰湖城不下雪，但把雪铲走，堆个雪人，总做得到的。",
                 voice: "inv/Linen/003/C88C3DD6",
+                speakerName: "{nickname}",
                 next: 80110336,
             },
             {
@@ -14180,6 +14811,7 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "至少，你可以走到你的朋友面前，告诉她，你还记得当年的梦想，即使那梦破碎了；你可以敲开家人的门，告诉他们，无论你是什么身份，你都牵挂着他们，这点永远不会改变。",
                 voice: "inv/Linen/003/C88C3E00",
+                speakerName: "{nickname}",
                 next: 80110337,
             },
             {
@@ -15022,6 +15654,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "啊，算了，还是我来吧，来之前还说一定不会害怕，一定要把“噼里啪啦”的小玩具卖到冰湖城来。",
                 voice: "inv/Yeer/001/C898E9D8",
                 npc: 93103,
+                speakerName: "？？？",
                 next: 80130109,
             },
             {
@@ -15029,6 +15662,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "结果就这幅样子，看来还得是我来救场才行。",
                 voice: "inv/Yeer/001/C898EA02",
                 npc: 93103,
+                speakerName: "？？？",
                 next: 80130110,
             },
             {
@@ -15043,6 +15677,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "怕什么，你看{性别：他|她}又不吃人，像正常对待小朋友那样说话就好了。",
                 voice: "inv/Yeer/001/C898EA56",
                 npc: 93103,
+                speakerName: "？？？",
                 options: [
                     {
                         id: 801301111,
@@ -15096,6 +15731,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "不过实际上很多时候耶尔会说到一半会卡住，所以我也会代劳向客人介绍——就和今天一样。",
                 voice: "inv/Yeer/001/C898EB52",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130118,
             },
             {
@@ -15104,6 +15740,7 @@ export const partyTopicData: PartyTopic[] = [
                     "刚刚耶尔说了，“噼里啪啦”会售卖会爆炸的小玩具，具体而言呢，上个月我们的热销前三分别是爆炸小飞艇、飞高高烟花和炸裂陀螺。",
                 voice: "inv/Yeer/001/C898EB7C",
                 npc: 93103,
+                speakerName: "奥利弗",
                 options: [
                     {
                         id: 801301181,
@@ -15122,6 +15759,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "别心急别心急，更爆炸性的货物马上就说。",
                 voice: "inv/Yeer/001/C898EBA6",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130121,
             },
             {
@@ -15129,6 +15767,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "唔……你对这些感兴趣吗？这些其实只是铺垫，我们真正想卖给你的是这个：",
                 voice: "inv/Yeer/001/C898EBD0",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130121,
             },
             {
@@ -15136,6 +15775,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "看起来是无害的闹钟，但实际上威力惊人，只需要一发能够炸平所有你看不惯的东西的超高能炸弹——群星破碎。",
                 voice: "inv/Yeer/001/C898EBFA",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130122,
             },
             {
@@ -15143,6 +15783,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我在丹流城就听说你是这里崭露头角的狩月人，想必你需要这些。",
                 voice: "inv/Yeer/001/C898EC24",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130123,
             },
             {
@@ -15164,6 +15805,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "唉，我之前都和你说过很多次了，愿意买炸弹的主顾，那都是想要看它们炸开的时候，这样的主顾是不会在意炸弹表面图案的。",
                 voice: "inv/Yeer/001/C898ECA2",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130126,
             },
             {
@@ -15179,6 +15821,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "那……那是因为既然画了，那就要画好一点，要是画得太难看了就卖不出去了！",
                 voice: "inv/Yeer/001/C898ECF6",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130128,
             },
             {
@@ -15186,6 +15829,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "咳咳，总之，该说的我们都已经说完了，如果你有需要的话，就给我们来信，说想买群星破碎就行。",
                 voice: "inv/Yeer/001/C898ED20",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130129,
             },
             {
@@ -15193,6 +15837,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "不过记得信上要写“小可爱”，否则会被发现的。",
                 voice: "inv/Yeer/001/C898ED4A",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130130,
             },
             {
@@ -15538,6 +16183,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "呵，我不是那个傻子。",
                 voice: "inv/Yeer/003/C89909D6",
                 npc: 93103,
+                speakerName: "耶尔（？）",
                 next: 80130305,
             },
             {
@@ -15545,6 +16191,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我当然不是他，我已经演腻了炸弹游戏了。",
                 voice: "inv/Yeer/003/C8990A00",
                 npc: 93103,
+                speakerName: "耶尔（？）",
                 next: 80130305,
             },
             {
@@ -15552,6 +16199,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我是奥利弗，奥利弗·库兹卡，不是什么被关在炸弹里的奇妙小畜生。",
                 voice: "inv/Yeer/003/C8990A2A",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130306,
             },
             {
@@ -15560,6 +16208,7 @@ export const partyTopicData: PartyTopic[] = [
                     "也许这个名字你没听过，不过没关系，记好，等哪一天你去皇都迪斯玛尼亚的时候留心，在北门外十五公里有一处荒废的堡垒，是我炸塌的。",
                 voice: "inv/Yeer/003/C8990A54",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130307,
             },
             {
@@ -15567,6 +16216,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "至于我来这里是干什么的，那要取决于你的态度：告诉我，耶尔上次来和你聊了什么。",
                 voice: "inv/Yeer/003/C8990A7E",
                 npc: 93103,
+                speakerName: "奥利弗",
                 options: [
                     {
                         id: 801303071,
@@ -15585,6 +16235,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "比看上去要强硬啊，有意思。看来你也是吃软不吃硬的家伙。",
                 voice: "inv/Yeer/003/C8990AA8",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130310,
             },
             {
@@ -15592,6 +16243,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "也行，我喜欢你这样说话直来直去的。",
                 voice: "inv/Yeer/003/C8990AD2",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130310,
             },
             {
@@ -15599,6 +16251,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "那我就实话实说吧，从最开始讲起。",
                 voice: "inv/Yeer/003/C8990AFC",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130311,
             },
             {
@@ -15606,6 +16259,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "刚刚我也和你说了，这副身体，本是我一个人的，炸弹天才，奥利弗·库兹卡。",
                 voice: "inv/Yeer/003/C8990B26",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130312,
             },
             {
@@ -15614,6 +16268,7 @@ export const partyTopicData: PartyTopic[] = [
                     "那时候我年纪也不大，以为能一个人靠着自己搓的小玩意儿把整个海伯利亚炸翻。没想过被抓了后会怎么样，或者说根本没想会被抓。",
                 voice: "inv/Yeer/003/C8990B50",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130313,
             },
             {
@@ -15621,6 +16276,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "所以等落到军团的手里的时候，我根本不知道我会面临什么。",
                 voice: "inv/Yeer/003/C8990B7A",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130314,
             },
             {
@@ -15628,6 +16284,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我被带到佩剑炼金院的一个研究室里，一个叫琼斯的慈眉善目的老头面前。",
                 voice: "inv/Yeer/003/C8990BA4",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130315,
             },
             {
@@ -15635,6 +16292,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "他说话和和气气，总和我说什么犯罪只是心理问题，吃药就会好起来之类的鬼话。",
                 voice: "inv/Yeer/003/C8990BCE",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130316,
             },
             {
@@ -15643,6 +16301,7 @@ export const partyTopicData: PartyTopic[] = [
                     "每天也给我正常吃喝，只是还强迫我喝药和做身体检查。药倒是不苦，但每次喝完，我都会觉得脑袋的转速越来越慢……逐渐忘记许多事情。",
                 voice: "inv/Yeer/003/C8990BF8",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130317,
             },
             {
@@ -15650,6 +16309,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "一开始我还能用脏话骂这个一看就不安好心的老头，但他的药喝着喝着，我逐渐记不清该怎么骂人了。",
                 voice: "inv/Yeer/003/C8990C22",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130318,
             },
             {
@@ -15657,6 +16317,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "忘记是谁说过的了，如果一个人不会说脏话，那他一定不会说话。",
                 voice: "inv/Yeer/003/C8990C4C",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130319,
             },
             {
@@ -15664,6 +16325,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "但这对我来说只是一个开始，渐渐地，我发现我忘记怎么走路……怎么让手动起来，就连怎么呼吸都忘了。",
                 voice: "inv/Yeer/003/C8990C76",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130320,
             },
             {
@@ -15672,6 +16334,7 @@ export const partyTopicData: PartyTopic[] = [
                     "我知道他给我喝的药有问题，可是在喝药的时候却记不起来怎么把它们吐出来，只能等着自己的记忆慢慢融化——我宁愿被炸个粉碎。",
                 voice: "inv/Yeer/003/C8990CA0",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130321,
             },
             {
@@ -15679,6 +16342,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "到最后，我就像一个旁观者一样，在镜子里看着奥利弗·库兹卡的身体，却不知道这是谁。",
                 voice: "inv/Yeer/003/C8990CCA",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130322,
             },
             {
@@ -15686,6 +16350,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "直到有一天，琼斯这个老头进门的时候，他对着这副身体说：你的名字叫做耶尔。",
                 voice: "inv/Yeer/003/C8990CF4",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130323,
             },
             {
@@ -15693,6 +16358,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……原来，他是耶尔啊，那我是谁？",
                 voice: "inv/Yeer/003/C8990D1E",
                 npc: 93103,
+                speakerName: "奥利弗",
                 options: [
                     {
                         id: 801303231,
@@ -15711,6 +16377,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "你听不明白也是正常的，我也是过了好一段时间才明白过来，琼斯……培育出了一个新的人格。",
                 voice: "inv/Yeer/003/C8990D48",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130326,
             },
             {
@@ -15718,6 +16385,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "是的，他培育了一个新的人格，好彻底取代奥利弗这个卡戎罪犯。",
                 voice: "inv/Yeer/003/C8990D72",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130326,
             },
             {
@@ -15725,6 +16393,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "不过耶尔的出现对我来说倒是好事。在那之前，我已经完全失去了这具身体，怎么想让它动起来都没用。",
                 voice: "inv/Yeer/003/C8990D9C",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130327,
             },
             {
@@ -15733,6 +16402,7 @@ export const partyTopicData: PartyTopic[] = [
                     "但是我的想法，却能直接传达给耶尔。只要我想：”你是一个假货“的时候，他就会如同受到惊吓的鹌鹑一般，左右张望，缩起脑袋。",
                 voice: "inv/Yeer/003/C8990DC6",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130328,
             },
             {
@@ -15740,6 +16410,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "你应该能够想象，我那时候有多厌恶他，日复一日用还能回忆起来的恶毒句子去咒骂他。",
                 voice: "inv/Yeer/003/C8990DF0",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130329,
             },
             {
@@ -15747,6 +16418,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "在他看来，我大概就是脑袋里凭空出现的奇怪声音吧。",
                 voice: "inv/Yeer/003/C8990E1A",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130330,
             },
             {
@@ -15754,6 +16426,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "他也曾经想要把我赶出脑袋过，但是我又怎么会输给他呢，我本来就是这副躯体的主人。",
                 voice: "inv/Yeer/003/C8990E44",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130331,
             },
             {
@@ -15761,6 +16434,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "可恨的是，琼斯这个老东西发现了他的异常，问耶尔认不认识奥利弗。",
                 voice: "inv/Yeer/003/C8990E6E",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130332,
             },
             {
@@ -15768,6 +16442,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "耶尔嘴上说着不认识，但是琼斯的眼神却一直一直死死盯着他的眼睛，好像能看到我一样。",
                 voice: "inv/Yeer/003/C8990E98",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130333,
             },
             {
@@ -15776,6 +16451,7 @@ export const partyTopicData: PartyTopic[] = [
                     "在那过后，琼斯就给耶尔带来了一台唱片机。而一旦那台唱片机开始播放音乐，我就会彻底失去知觉，像在黑暗中的烛火被人吹灭一样。",
                 voice: "inv/Yeer/003/C8990EC2",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130334,
             },
             {
@@ -15783,6 +16459,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我知道，这台唱片机和音乐就是琼斯对付我的新药，他想要让耶尔彻底代替我。",
                 voice: "inv/Yeer/003/C8990EEC",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130335,
             },
             {
@@ -15790,6 +16467,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我本以为我会在这样的沉睡和清醒交替之间彻底失去一切记忆，但突然有一天，耶尔告诉我，他不愿意再听那些音乐了。",
                 voice: "inv/Yeer/003/C8990F16",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130336,
             },
             {
@@ -15798,6 +16476,7 @@ export const partyTopicData: PartyTopic[] = [
                     "那一刻开始，我突然意识到，这个一直以来我称之为“假货”的家伙，确实是一个单独的个体。于是我和他一起想了一个计划，成功从琼斯老头身边脱逃。",
                 voice: "inv/Yeer/003/C8990F40",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130337,
             },
             {
@@ -15806,6 +16485,7 @@ export const partyTopicData: PartyTopic[] = [
                     "最后，我们到了丹流城，一起开了一家玩具店，耶尔给它起了“噼里啪啦”这个没品位的名字。我们都没有再提起过研究所里的一切。",
                 voice: "inv/Yeer/003/C8990F6A",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130338,
             },
             {
@@ -15814,6 +16494,7 @@ export const partyTopicData: PartyTopic[] = [
                     "直到前几天，我又经历了一次熟悉的失去意识的感觉，猜到是他又喝了药，但是不知道他去了哪里……问来问去，才知道他来了一次冰湖城。",
                 voice: "inv/Yeer/003/C8990F94",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130339,
             },
             {
@@ -15821,6 +16502,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "老实说，我应该是最了解他的人，他虽然胆小，怕生，但是也足够善良，他……应该不会有什么事情想要瞒着我才是。",
                 voice: "inv/Yeer/003/C8990FBE",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130340,
             },
             {
@@ -15828,6 +16510,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "所以，我也吞下了能够让另外的人格沉睡药剂，到这里来搞明白，他到底说了些什么。",
                 voice: "inv/Yeer/003/C8990FE8",
                 npc: 93103,
+                speakerName: "奥利弗",
                 options: [
                     {
                         id: 801303401,
@@ -15847,6 +16530,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "所以说……他其实是吃了让我沉睡的药，到这边下定了决心想要把身体还给我？",
                 voice: "inv/Yeer/003/C899103C",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130343,
             },
             {
@@ -15854,6 +16538,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "这个……这个……无可救药的傻东西！",
                 voice: "inv/Yeer/003/C8991066",
                 npc: 93103,
+                speakerName: "奥利弗",
                 options: [
                     {
                         id: 801303431,
@@ -15872,6 +16557,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……别说风凉话，现在我要做的是在这里等他醒来，和他把过去的事都说清楚。",
                 voice: "inv/Yeer/003/C8991090",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130346,
             },
             {
@@ -15879,6 +16565,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我不知道，我需要在这里等他醒来，和他把过去的事都说清楚。",
                 voice: "inv/Yeer/003/C89910BA",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130346,
             },
             {
@@ -15886,6 +16573,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "也谢谢你了，能够愿意听我说这么些过去的事情，等到待会儿耶尔醒过来，怕是还得麻烦你在边上劝他几句了。",
                 voice: "inv/Yeer/003/C89910E4",
                 npc: 93103,
+                speakerName: "奥利弗",
                 next: 80130347,
             },
             {
@@ -15948,6 +16636,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "笨蛋啊……到现在还想装傻掩饰过去，我已经都告诉{性别：他|她}了。",
                 voice: "inv/Yeer/004/C8991ABC",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130407,
             },
             {
@@ -15962,6 +16651,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "是的，我一直在。",
                 voice: "inv/Yeer/004/C8991B10",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130409,
             },
             {
@@ -15976,6 +16666,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……",
                 voice: "inv/Yeer/004/C8991B64",
                 npc: 790024,
+                speakerName: "奥利弗",
                 options: [
                     {
                         id: 801304101,
@@ -16001,6 +16692,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我没有什么憋在心里的，但是我觉得耶尔有。",
                 voice: "inv/Yeer/004/C8991C0C",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130415,
             },
             {
@@ -16008,6 +16700,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "说什么蠢话！",
                 voice: "inv/Yeer/004/C8991BB8",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130413,
             },
             {
@@ -16022,6 +16715,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "只是在等人道歉罢了。",
                 voice: "inv/Yeer/004/C8991BE2",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130415,
             },
             {
@@ -16092,6 +16786,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "好了你不要再说了。",
                 voice: "inv/Yeer/004/C8991DDA",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130426,
             },
             {
@@ -16099,6 +16794,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "真是想不到有一天有人能顶着我的脸能说出这些话来，我都开始敬佩老琼斯的研究了。",
                 voice: "inv/Yeer/004/C8991E04",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130427,
             },
             {
@@ -16106,6 +16802,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我能理解你，我也不想欠着人什么东西，所以当你让琼斯拿走那台聒噪的唱片机的时候，在心里就觉得你已经还了我半条命。",
                 voice: "inv/Yeer/004/C8991E2E",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130428,
             },
             {
@@ -16113,6 +16810,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "等到后来，我们一起挣扎着逃出来的时候，就已经互不相欠了。",
                 voice: "inv/Yeer/004/C8991E58",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130429,
             },
             {
@@ -16120,6 +16818,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "但现在你又开始欠我东西了：就在你失去意识的几天里，我勉强应付了几个来“噼里啪啦”嚷嚷着买玩具的小孩子。",
                 voice: "inv/Yeer/004/C8991E82",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130430,
             },
             {
@@ -16127,6 +16826,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "他们可都是找你的，我应付不来他们。还得假扮成你的性格，忍住不骂人，好声好气把他们哄走。",
                 voice: "inv/Yeer/004/C8991EAC",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130431,
             },
             {
@@ -16134,6 +16834,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "然后到了冰湖城，又是费口舌，又是费心地回忆之前的惨痛记忆，和{nickname}讲明白来龙去脉。",
                 voice: "inv/Yeer/004/C8991ED6",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130432,
             },
             {
@@ -16141,6 +16842,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "这些，可不是你把身体还给我就能轻易了结的。",
                 voice: "inv/Yeer/004/C8991F00",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130433,
             },
             {
@@ -16148,6 +16850,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "并且最关键的是，你也从来没有问过我的意见：",
                 voice: "inv/Yeer/004/C8991F2A",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130434,
             },
             {
@@ -16155,6 +16858,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "对于奥利弗来说，耶尔既是恩人，也是欠着我人情的人，还是不可代替的朋友，一样都是”噼里啪啦“的主人。",
                 voice: "inv/Yeer/004/C8991F54",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130435,
             },
             {
@@ -16162,6 +16866,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "所以，不要再说对不起了，真觉得对不起的话，就一起把店开下去，有的是你偿还的机会。",
                 voice: "inv/Yeer/004/C8991F7E",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130436,
             },
             {
@@ -16190,6 +16895,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "行啊，我们一起去看。不过要答应我，可别再和这次一样，看完后又冒出把身体还给我之类的笨蛋想法了。",
                 voice: "inv/Yeer/004/C8992026",
                 npc: 790024,
+                speakerName: "奥利弗",
                 next: 80130440,
             },
             {
@@ -19137,6 +19843,164 @@ export const partyTopicData: PartyTopic[] = [
                 next: 80120290,
             },
             {
+                id: 80120210,
+                content: "……怎么还是乐谱？他不是说过，珍贵的乐谱他都带走了。但如果不珍贵的话，他又为什么要特意藏起来？",
+                voice: "inv/Maer/002/C89291F4",
+                npc: 790019,
+                next: 80120211,
+            },
+            {
+                id: 80120211,
+                content: "让我看看到底写了什么……《恶魔挣脱了锁链》？从来没听说过的曲子……",
+                voice: "inv/Maer/002/C892921E",
+                npc: 790019,
+                options: [
+                    {
+                        id: 801202111,
+                        content: "这一页夹了张纸条，上面写了些什么？",
+                        next: 80120212,
+                    },
+                ],
+            },
+            {
+                id: 80120212,
+                content: "“你好啊，很久以后的可萨克，你现在开心吗？还是不太高兴？我要和你说，我即将做一件很冒险的事情：",
+                voice: "inv/Maer/002/C8929248",
+                npc: 790019,
+                next: 80120213,
+            },
+            {
+                id: 80120213,
+                content: "我要以我们的国土上最为人熟视无睹的群体——卡戎作为创作题材。怎么样，听起来是不是一个好主意？",
+                voice: "inv/Maer/002/C8929272",
+                npc: 790019,
+                next: 80120214,
+            },
+            {
+                id: 80120214,
+                content:
+                    "我不知道它发表后会给我带来什么，最好是名声啦，以及让大家开始同情卡戎们。但更可能是会被那些老前辈训斥说玷污了艺术吧。",
+                voice: "inv/Maer/002/C892929C",
+                npc: 790019,
+                next: 80120215,
+            },
+            {
+                id: 80120215,
+                content: "或许不久后我会后悔自己的冲动，但至少此时此刻的我，明确地坚信着，我在做一件正确的事情。",
+                voice: "inv/Maer/002/C89292C6",
+                npc: 790019,
+                next: 80120216,
+            },
+            {
+                id: 80120216,
+                content: "所以，我留了一份副本在这里，以防遭受了冷遇的你或是古板的老前辈们彻底销毁我的心血。",
+                voice: "inv/Maer/002/C89292F0",
+                npc: 790019,
+                next: 80120217,
+            },
+            {
+                id: 80120217,
+                content: "真希望你再次看到这封信的时候，窗外能传来卡戎们唱着这首歌的声音。也希望你能和现在的我一样，能够笑着面对一切。”",
+                voice: "inv/Maer/002/C892931A",
+                npc: 790019,
+                next: 80120218,
+            },
+            {
+                id: 80120218,
+                content: "…………",
+                voice: "inv/Maer/002/C8929344",
+                npc: 790019,
+                options: [
+                    {
+                        id: 801202181,
+                        content: "他终究还是被时间改变了。",
+                        next: 80120219,
+                    },
+                    {
+                        id: 801202182,
+                        content: "也许他从未改变，所以他故意留下了这份乐谱。",
+                        next: 80120220,
+                    },
+                ],
+            },
+            {
+                id: 80120219,
+                content: "哎，这个很久以前的可萨克，其实还是一个好人嘛。",
+                voice: "inv/Maer/002/C892936E",
+                npc: 790019,
+                next: 80120222,
+            },
+            {
+                id: 80120220,
+                content: "唔……确实有可能，他对所有乐谱都不屑一顾，却偏偏很确定最重要的宝贝“早就放在了它该放的位置”……",
+                voice: "inv/Maer/002/C8929398",
+                npc: 790019,
+                next: 80120221,
+            },
+            {
+                id: 80120222,
+                content: "歌词写得真好……哎，也不知道这首歌唱出来到底是什么样的。",
+                voice: "inv/Maer/002/C89293EC",
+                npc: 790019,
+                next: 80120223,
+            },
+            {
+                id: 80120221,
+                content:
+                    "也就是说，也许他心中最珍贵的乐谱，就是这一张……而“该放的位置”指的是，把它交到一个卡戎之民手里，因为那本来就是一首为卡戎而写的歌。",
+                voice: "inv/Maer/002/C89293C2",
+                npc: 790019,
+                next: 80120222,
+            },
+            {
+                id: 80120223,
+                content: "好——我决定了！",
+                voice: "inv/Maer/002/C8929416",
+                npc: 790019,
+                next: 80120224,
+            },
+            {
+                id: 80120224,
+                content: "不管这首歌是可萨克先生是忘记了还是故意留下来的，但他既然让我来处理他余下的东西，我就要认真对待。",
+                voice: "inv/Maer/002/C8929440",
+                npc: 790019,
+                next: 80120225,
+            },
+            {
+                id: 80120225,
+                content: "来，{nickname}，和一起去卡米拉姐那边，她好像是认识乐谱的，我要让她教我怎么唱。",
+                voice: "inv/Maer/002/C892946A",
+                npc: 790019,
+                next: 80120226,
+            },
+            {
+                id: 80120226,
+                content: "等我学会了，就教给冰湖城里的卡戎们，和他们说，这是一位值得尊敬的音乐家专门为我们卡戎之民写的曲子。",
+                voice: "inv/Maer/002/C8929494",
+                npc: 790019,
+                next: 80120227,
+            },
+            {
+                id: 80120227,
+                content: "这样一来，这首歌就不会像他的废稿一样，被扔进烤火的炉子，烧个一干二净了。",
+                voice: "inv/Maer/002/C89294BE",
+                npc: 790019,
+                next: 80120228,
+            },
+            {
+                id: 80120228,
+                content: "说不定有一天这首歌会传到皇都去，让他真的听到卡戎们在唱这首歌，不过听不到无所谓，反正，我做了我应该做的——",
+                voice: "inv/Maer/002/C89294E8",
+                npc: 790019,
+                next: 80120229,
+            },
+            {
+                id: 80120229,
+                content: "让那些不应该被视为垃圾的事物重见天日，变废为宝，就是我的责任！",
+                voice: "inv/Maer/002/C8929512",
+                npc: 790019,
+            },
+            {
                 id: 80120230,
                 content: "后来，据卡米拉说，这首《恶魔挣脱了锁链》确实是非常精妙的曲目，并且难度很高。",
                 voice: "inv/Maer/002/C892953C",
@@ -21091,6 +21955,11 @@ export const partyTopicData: PartyTopic[] = [
                 next: 80230102,
             },
             {
+                id: 80230102,
+                voice: "inv/Zhiliu/001/C8D8FF1C",
+                next: 80230103,
+            },
+            {
                 id: 80230103,
                 content: "我乃现任龙渊上卿，目前协理天礼司。今日代行太皓旨意，特来考教诸君气量、心智与觉悟。",
                 voice: "inv/Zhiliu/001/C8D8FF46",
@@ -21210,6 +22079,11 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Zhiliu/001/C8D901E6",
                 npc: 240071,
                 next: 80230120,
+            },
+            {
+                id: 80230120,
+                voice: "inv/Zhiliu/001/C8D90210",
+                next: 80230121,
             },
             {
                 id: 80230121,
@@ -21365,6 +22239,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "大风九章出错了——有冤情！我要伸冤！",
                 voice: "inv/Zhiliu/002/C8D90F5A",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230202,
             },
             {
@@ -21372,6 +22247,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "这位大人，求您了，听听我要说的话吧，只需要耽误您一点时间——",
                 voice: "inv/Zhiliu/002/C8D90F84",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230203,
             },
             {
@@ -21379,7 +22255,13 @@ export const partyTopicData: PartyTopic[] = [
                 content: "请您稍留片刻——",
                 voice: "inv/Zhiliu/002/C8D90FAE",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230204,
+            },
+            {
+                id: 80230204,
+                voice: "inv/Zhiliu/002/C8D90FD8",
+                next: 80230205,
             },
             {
                 id: 80230205,
@@ -21393,6 +22275,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "——！",
                 voice: "inv/Zhiliu/002/C8D9102C",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230207,
             },
             {
@@ -21400,6 +22283,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我先前身患重病，被一位泽生阁的医师所救。治好我的那位医师，她甚至未收分文，却被狴犴惩处身亡了！",
                 voice: "inv/Zhiliu/002/C8D91056",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230208,
             },
             {
@@ -21407,6 +22291,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "求求你们，至少——至少把清誉还给她吧！她是个一心救人的医师啊，大风九章判她的药害了我，但那只是暂时的药效变化而已。",
                 voice: "inv/Zhiliu/002/C8D91080",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230209,
             },
             {
@@ -21414,6 +22299,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我病情复杂，当时看了很多医师都只是摆摆手表示无能为力，只有她提出用以毒攻毒的险方一试。",
                 voice: "inv/Zhiliu/002/C8D910AA",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230210,
             },
             {
@@ -21421,6 +22307,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "服药后可能出现惊厥，甚至短暂的呼吸停止，这些后果她都与我详细说过。我甘愿承担这风险，却没想到最终反倒牵连了她。",
                 voice: "inv/Zhiliu/002/C8D910D4",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230211,
             },
             {
@@ -21435,6 +22322,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "就是这样！我还好端端地站在这里呢，不然还有死人诈尸的道理吗？",
                 voice: "inv/Zhiliu/002/C8D91128",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230213,
             },
             {
@@ -21442,6 +22330,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我还活着，救我的人却因此去世了。我……我没有办法接受这种事。",
                 voice: "inv/Zhiliu/002/C8D91152",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230214,
             },
             {
@@ -21456,6 +22345,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "——谢谢您！谢谢！",
                 voice: "inv/Zhiliu/002/C8D911A6",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230216,
             },
             {
@@ -21463,6 +22353,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……其实我知道这件事情非常难，您可能也没办法做到什么。我在这里站了好几天了，只有您一个人愿意停下来听我说话……",
                 voice: "inv/Zhiliu/002/C8D911D0",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230217,
             },
             {
@@ -21470,6 +22361,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "哪怕是为了这点善意，我也要感谢您……",
                 voice: "inv/Zhiliu/002/C8D911FA",
                 npc: 790077,
+                speakerName: "伸冤的少女",
                 next: 80230218,
             },
             {
@@ -21478,6 +22370,11 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Zhiliu/002/C8D91224",
                 npc: 790076,
                 next: 80230219,
+            },
+            {
+                id: 80230219,
+                voice: "inv/Zhiliu/002/C8D9124E",
+                next: 80230220,
             },
             {
                 id: 80230220,
@@ -21569,6 +22466,11 @@ export const partyTopicData: PartyTopic[] = [
                 next: 80230233,
             },
             {
+                id: 80230233,
+                voice: "inv/Zhiliu/002/C8D9149A",
+                next: 80230234,
+            },
+            {
                 id: 80230234,
                 content: "好心的姐姐，是您……您来见我了！",
                 voice: "inv/Zhiliu/002/C8D914C4",
@@ -21653,6 +22555,11 @@ export const partyTopicData: PartyTopic[] = [
                 next: 80230246,
             },
             {
+                id: 80230246,
+                voice: "inv/Zhiliu/002/C8D916BC",
+                next: 80230247,
+            },
+            {
                 id: 80230247,
                 content: "止流少卿，未想到你三言两语就摆平了那少女，使她签下了放弃伸冤的契书。有什么诀窍呀？也教教我们吧！",
                 voice: "inv/Zhiliu/002/C8D916E6",
@@ -21674,10 +22581,16 @@ export const partyTopicData: PartyTopic[] = [
                 next: 80230250,
             },
             {
+                id: 80230250,
+                voice: "inv/Zhiliu/002/C8D91764",
+                next: 80230251,
+            },
+            {
                 id: 80230251,
                 content: "你们知道吗？听说那个止流啊，从前也受过大风九章的冤屈。",
                 voice: "inv/Zhiliu/002/C8D9178E",
                 npc: 790080,
+                speakerName: "群众的窃窃私语",
                 next: 80230252,
             },
             {
@@ -21685,6 +22598,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "曾经她也在执律阁下那个位置四处奔走，甚至是这附近居民茶余饭后的谈资呢。",
                 voice: "inv/Zhiliu/002/C8D917B8",
                 npc: 790080,
+                speakerName: "群众的窃窃私语",
                 next: 80230253,
             },
             {
@@ -21692,6 +22606,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "没想到今天她能眼都不眨地摆平和曾经的自己一样的人。这就是成大事者吗？",
                 voice: "inv/Zhiliu/002/C8D917E2",
                 npc: 790080,
+                speakerName: "群众的窃窃私语",
                 next: 80230254,
             },
             {
@@ -21700,6 +22615,7 @@ export const partyTopicData: PartyTopic[] = [
                     "唉……恐怕她就是下一位龙渊上卿了，我们也羡慕不来，毕竟学不了她的心狠手辣。恐怕只有修罗心肠的人，才能站在那个位置吧。",
                 voice: "inv/Zhiliu/002/C8D9180C",
                 npc: 790080,
+                speakerName: "群众的窃窃私语",
                 next: 80230255,
             },
             {
@@ -21800,9 +22716,15 @@ export const partyTopicData: PartyTopic[] = [
                 next: 80230313,
             },
             {
+                id: 80230313,
+                voice: "inv/Zhiliu/003/C8D921BA",
+                next: 80230314,
+            },
+            {
                 id: 80230314,
                 content: "呜……呜呜……为什么……",
                 voice: "inv/Zhiliu/003/C8D921E4",
+                speakerName: "幼年止流",
                 next: 80230315,
             },
             {
@@ -21816,12 +22738,14 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80230316,
                 content: "你已经忘记了吗……<H>我们</>那些夜不能寐的晚上？",
                 voice: "inv/Zhiliu/003/C8D92238",
+                speakerName: "幼年止流",
                 next: 80230317,
             },
             {
                 id: 80230317,
                 content: "你忘记了吗……在山洞里饥饿如蛆附骨的感觉，身体上下的每一处，每一根发丝都在叫嚣着好饿、好饿……",
                 voice: "inv/Zhiliu/003/C8D92262",
+                speakerName: "幼年止流",
                 next: 80230318,
             },
             {
@@ -21829,30 +22753,35 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "你忘记了吗……那个歹徒，他满是茧子的手紧紧钳住<H>我们</>脖子的那一刻，无论我们怎么挣扎，怎么奋力踢腿，都阻止不了分毫……",
                 voice: "inv/Zhiliu/003/C8D9228C",
+                speakerName: "幼年止流",
                 next: 80230319,
             },
             {
                 id: 80230319,
                 content: "空气逐渐消失，一切闪着光的画面都变得稀薄，冰冷的死亡即将把我们拽入雾中……",
                 voice: "inv/Zhiliu/003/C8D922B6",
+                speakerName: "幼年止流",
                 next: 80230320,
             },
             {
                 id: 80230320,
                 content: "以及……你忘了吗，<H>他</>冲上来，撞开歹徒，让空气一下子全部涌回来的那个时刻。",
                 voice: "inv/Zhiliu/003/C8D922E0",
+                speakerName: "幼年止流",
                 next: 80230321,
             },
             {
                 id: 80230321,
                 content: "他曾经那样对你，不计回报地去救你，却只落得了身死名灭的下场。",
                 voice: "inv/Zhiliu/003/C8D9230A",
+                speakerName: "幼年止流",
                 next: 80230322,
             },
             {
                 id: 80230322,
                 content: "现在，你要背叛他，背叛我们曾经发下的誓言，投向<H>他们</>那边吗？",
                 voice: "inv/Zhiliu/003/C8D92334",
+                speakerName: "幼年止流",
                 next: 80230323,
             },
             {
@@ -21866,6 +22795,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80230324,
                 content: "（是的……是的……你不需要去铭记。因为遗忘明显更加甜美。）",
                 voice: "inv/Zhiliu/003/C8D92388",
+                speakerName: "心魔",
                 next: 80230325,
             },
             {
@@ -21873,6 +22803,7 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "（你即将成为万人之上的止流大人！这些过去的纷扰无法撼动你，和你即将获得的地位相比，他们显得那么不起眼，那么无足轻重，甚至不如一根轻飘飘的鸿毛。）",
                 voice: "inv/Zhiliu/003/C8D923B2",
+                speakerName: "心魔",
                 next: 80230326,
             },
             {
@@ -21880,6 +22811,7 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "（倒不如说，铭记只是软弱的证明。软弱者用无谓的良心将自己束缚住，于是他们屈服了。他们的膝盖承受不住大地的重力，永远匍匐在尘埃之中。）",
                 voice: "inv/Zhiliu/003/C8D923DC",
+                speakerName: "心魔",
                 next: 80230327,
             },
             {
@@ -21887,31 +22819,46 @@ export const partyTopicData: PartyTopic[] = [
                 content:
                     "（那些软弱者沉浸在自己的梦中，同时世界毫无变化。而你，你显然更加坚毅，更加勇敢——你懂得取舍，于是你能成大器。有几人能有成为修罗的大毅力呢？）",
                 voice: "inv/Zhiliu/003/C8D92406",
+                speakerName: "心魔",
                 next: 80230328,
             },
             {
                 id: 80230328,
                 content: "（不要听他的！！止流，你与那些冷眼旁观的人有何区别？）",
                 voice: "inv/Zhiliu/003/C8D92430",
+                speakerName: "心魔",
                 next: 80230329,
             },
             {
                 id: 80230329,
                 content: "（止流，你想好了，你也要成为他们的帮凶吗？！）",
                 voice: "inv/Zhiliu/003/C8D9245A",
+                speakerName: "心魔",
                 next: 80230330,
             },
             {
                 id: 80230330,
                 content: "（若是踏出这一步，你还是昨日之你吗？）",
                 voice: "inv/Zhiliu/003/C8D92484",
+                speakerName: "心魔",
                 next: 80230331,
+            },
+            {
+                id: 80230331,
+                voice: "inv/Zhiliu/003/C8D924AE",
+                next: 80230332,
             },
             {
                 id: 80230332,
                 content: "救命，谁来救救我……这里好黑……我好害怕……我，我不能待在这个地方！",
                 voice: "inv/Zhiliu/003/C8D924D8",
+                speakerName: "幼年止流",
                 next: 80230333,
+            },
+            {
+                id: 80230333,
+                voice: "inv/Zhiliu/003/C8D92502",
+                next: 80230334,
             },
             {
                 id: 80230334,
@@ -21954,6 +22901,11 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Zhiliu/003/C8D925FE",
                 npc: 790076,
                 next: 80230340,
+            },
+            {
+                id: 80230340,
+                voice: "inv/Zhiliu/003/C8D92628",
+                next: 80230341,
             },
             {
                 id: 80230341,
@@ -22109,6 +23061,11 @@ export const partyTopicData: PartyTopic[] = [
                 next: 80230419,
             },
             {
+                id: 80230419,
+                voice: "inv/Zhiliu/004/C8D9331E",
+                next: 80230420,
+            },
+            {
                 id: 80230420,
                 content: "止流大当家，百年春那里有些举棋不定的事，需要您去拿一下主意。",
                 voice: "inv/Zhiliu/004/C8D93348",
@@ -22207,6 +23164,11 @@ export const partyTopicData: PartyTopic[] = [
                 content: "大风九章宣告终结的一天将会来临。我会不惜代价使这错置颠倒的一切重新归位……你愿意相信我吗？",
                 voice: "inv/Zhiliu/004/C8D93594",
                 next: 80230435,
+            },
+            {
+                id: 80230435,
+                voice: "inv/Zhiliu/004/C8D935BE",
+                next: 80230436,
             },
             {
                 id: 80230436,
@@ -22721,24 +23683,28 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220202,
                 content: "这是什么？不夏她……变成了妖物？！",
                 voice: "inv/Yuming/002/C8D2A6E4",
+                speakerName: "飘零人",
                 next: 80220203,
             },
             {
                 id: 80220203,
                 content: "……不要……别过来，我不想死！",
                 voice: "inv/Yuming/002/C8D2A70E",
+                speakerName: "飘零人",
                 next: 80220204,
             },
             {
                 id: 80220204,
                 content: "莫非这便是……神君的惩罚……因为我们背弃了祂的恩泽？！",
                 voice: "inv/Yuming/002/C8D2A738",
+                speakerName: "飘零人",
                 next: 80220205,
             },
             {
                 id: 80220205,
                 content: "爹爹、爹爹！呜呜……求你醒醒，求你说句话啊……",
                 voice: "inv/Yuming/002/C8D2A762",
+                speakerName: "飘零人",
                 next: 80220206,
             },
             {
@@ -22766,6 +23732,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220209,
                 content: "非吾所为。吾无意窥伺凡人心神。",
                 voice: "inv/Yuming/002/C8D2A80A",
+                speakerName: "太皓",
                 next: 80220210,
             },
             {
@@ -22779,6 +23746,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220211,
                 content: "汝心怀渴盼，欲吾解其惑。吾观汝非池中物，故应此愿。",
                 voice: "inv/Yuming/002/C8D2A85E",
+                speakerName: "太皓",
                 next: 80220212,
             },
             {
@@ -22792,6 +23760,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220213,
                 content: "汝眼前种种，乃旧魇缚身，不得解脱。",
                 voice: "inv/Yuming/002/C8D2A8B2",
+                speakerName: "太皓",
                 next: 80220214,
             },
             {
@@ -22805,6 +23774,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220215,
                 content: "此其墓乎？",
                 voice: "inv/Yuming/002/C8D2A906",
+                speakerName: "太皓",
                 next: 80220216,
             },
             {
@@ -22832,18 +23802,21 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220219,
                 content: "祖师扶风教诲过，医者对一切病患都应一视同仁，纵是飘零人也一样。但凡有一线生机，我又怎会不救她！",
                 voice: "inv/Yuming/002/C8D2A9AE",
+                speakerName: "药师",
                 next: 80220220,
             },
             {
                 id: 80220220,
                 content: "但那是秽蚀，是绝症，一旦开始发作，便再无半分转圜余地！她快要变成妖物了，你们还是趁这个机会赶紧逃命吧！",
                 voice: "inv/Yuming/002/C8D2A9D8",
+                speakerName: "药师",
                 next: 80220221,
             },
             {
                 id: 80220221,
                 content: "唉，若非你们飘零人执意脱离大风九章庇佑，又何至于此！",
                 voice: "inv/Yuming/002/C8D2AA02",
+                speakerName: "药师",
                 next: 80220222,
             },
             {
@@ -22871,18 +23844,21 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220225,
                 content: "汝等飘零人渴求无拘，却不知鸢无线而坠，川无堤不海。",
                 voice: "inv/Yuming/002/C8D2AAAA",
+                speakerName: "太皓",
                 next: 80220226,
             },
             {
                 id: 80220226,
                 content: "往事已矣，来日可期。迷途知返，犹未晚也。",
                 voice: "inv/Yuming/002/C8D2AAD4",
+                speakerName: "太皓",
                 next: 80220227,
             },
             {
                 id: 80220227,
                 content: "言尽于此，汝其慎思。",
                 voice: "inv/Yuming/002/C8D2AAFE",
+                speakerName: "太皓",
                 next: 80220228,
             },
             {
@@ -22895,6 +23871,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220229,
                 content: "呜……",
                 voice: "inv/Yuming/002/C8D2AB52",
+                speakerName: "小橙子",
                 next: 80220230,
             },
             {
@@ -22908,6 +23885,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220231,
                 content: "呜……呜呜……",
                 voice: "inv/Yuming/002/C8D2ABA6",
+                speakerName: "小橙子",
                 next: 80220232,
             },
             {
@@ -22928,6 +23906,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220234,
                 content: "呜呜……",
                 voice: "inv/Yuming/002/C8D2AC24",
+                speakerName: "小橙子",
                 next: 80220235,
             },
             {
@@ -22941,6 +23920,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220236,
                 content: "呜呜！",
                 voice: "inv/Yuming/002/C8D2AC78",
+                speakerName: "小橙子",
                 next: 80220237,
             },
             {
@@ -23657,6 +24637,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220436,
                 content: "呜嗷——",
                 voice: "inv/Yuming/004/C8D2CD48",
+                speakerName: "小橙子",
                 next: 80220437,
             },
             {
@@ -23677,6 +24658,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220439,
                 content: "嗷嗷——嗷呜！",
                 voice: "inv/Yuming/004/C8D2CDC6",
+                speakerName: "小橙子",
                 next: 80220440,
             },
             {
@@ -23690,6 +24672,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220441,
                 content: "嗷呜！",
                 voice: "inv/Yuming/004/C8D2CE1A",
+                speakerName: "小橙子",
                 next: 80220442,
             },
             {
@@ -23710,6 +24693,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220444,
                 content: "嗷呜！嗷呜！",
                 voice: "inv/Yuming/004/C8D2CE98",
+                speakerName: "小橙子",
                 next: 80220445,
             },
             {
@@ -23723,6 +24707,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80220446,
                 content: "嗷呜！",
                 voice: "inv/Yuming/004/C8D2CEEC",
+                speakerName: "小橙子",
                 next: 80220447,
             },
             {
@@ -26869,6 +27854,155 @@ export const partyTopicData: PartyTopic[] = [
             "19001": 2,
             "19008": 2,
         },
+        dialogues: [
+            {
+                id: 80190102,
+                content: "你一个人住这么大宅子？看着还有模有样，居然还整理出了一个调酒台。",
+                npc: 95102,
+                next: 80190103,
+            },
+            {
+                id: 80190103,
+                content: "挺好的，多请一些朋友来吧，这样一来，你也能在冰湖城拥有自己的人脉。",
+                npc: 95102,
+                next: 80190104,
+            },
+            {
+                id: 80190104,
+                content: "那么，说吧，又有啥事要我帮忙。太麻烦就算了啊，我这几天手上还有个大活呢。",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901041,
+                        content: "单纯想见见你而已。",
+                        next: 80190105,
+                    },
+                    {
+                        id: 801901042,
+                        content: "单纯想请你喝一杯而已。",
+                        next: 80190106,
+                    },
+                ],
+            },
+            {
+                id: 80190105,
+                content: "噫……我鸡皮疙瘩都起来了。这话我勉强能受得了，要是你请其他人来喝酒也是这个说辞，人家不一定吃得消啊。",
+                npc: 95102,
+                next: 80190107,
+            },
+            {
+                id: 80190106,
+                content: "行，那么我就不客气了，让我来尝一尝你的手艺怎么样。",
+                npc: 95102,
+                next: 80190107,
+            },
+            {
+                id: 80190108,
+                content: "啧啧，嗯，甜中带酸，特意做成了温酒，和“水仙平原”的水准差不多，但是也有自己的风格。",
+                npc: 95102,
+                next: 80190109,
+            },
+            {
+                id: 80190109,
+                content: "这一杯挺麻烦的吧。说实话水准超过我的预期了，实话说煮杯热水我都能乐呵地喝下去，没必要费这么大劲。",
+                npc: 95102,
+                next: 80190110,
+            },
+            {
+                id: 80190110,
+                content:
+                    "不过，看你这么兴致勃勃，啊……我懂了，攒了点钱就得挥霍一下，请客喝酒，添置新物。用最近流行的话说，就叫“花钱买乐子”？",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901101,
+                        content: "你是所有被请的人里废话最多的。",
+                        next: 80190111,
+                    },
+                    {
+                        id: 801901102,
+                        content: "好心请你喝酒你还说怪话，我要生气了。",
+                        next: 80190112,
+                    },
+                ],
+            },
+            {
+                id: 80190111,
+                content: "你请人来喝上一杯不就是为了说话？这说明我比其他人都要了解你在想什么，比其他人都要赏脸。",
+                npc: 95102,
+                next: 80190113,
+            },
+            {
+                id: 80190112,
+                content: "别别别，我错了我错了，你花钱你是老大，要不你打我一拳消消气。",
+                npc: 95102,
+                next: 80190113,
+            },
+            {
+                id: 80190113,
+                content: "不过说笑归说笑，作为半个过来人，我也得提醒你一下，并不是每个人都值得你视为“朋友”请客喝酒的。",
+                npc: 95102,
+                next: 80190114,
+            },
+            {
+                id: 80190114,
+                content: "尤其在冰湖城这个地界，总有那么些心术不正的人，会盯上你现在拥有的东西，主动来做你的酒肉之交。",
+                npc: 95102,
+                next: 80190115,
+            },
+            {
+                id: 80190115,
+                content: "他们表面上挂着笑，变着法哄你开心，恨不得把你捧到天上去。但真遇到事儿的时候啊，指望他们还不如指望路边的一条狗。",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901151,
+                        content: "你说的这个人不会就是你自己吧？",
+                        next: 80190116,
+                    },
+                ],
+            },
+            {
+                id: 80190116,
+                content: "啊对的对的对的，我奥特赛德就是你身边最大的那一号狐朋狗友，有好处的时候不管多远我闻着味儿都能找过来。",
+                npc: 95102,
+                next: 80190117,
+            },
+            {
+                id: 80190117,
+                content: "其他人要跟我抢这个名号，也得先掂量掂量自己的斤两。他们要想从你这吃到好处，那也得等本大爷“吃饱喝足”先。",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901171,
+                        content: "慢走不送。",
+                        next: 80190118,
+                    },
+                    {
+                        id: 801901172,
+                        content: "原来是你帮我赶走了那些小麻烦。",
+                        next: 80190119,
+                    },
+                ],
+            },
+            {
+                id: 80190118,
+                content: "哎，别啊，我还没待够呢。",
+                npc: 95102,
+                next: 80190120,
+            },
+            {
+                id: 80190119,
+                content: "哦？是怎么回事呢？我可不知道呀。",
+                npc: 95102,
+                next: 80190120,
+            },
+            {
+                id: 80190120,
+                content: "酒味道不错，再给我来一杯。喝完这口我就去接着忙活了。",
+                npc: 95102,
+            },
+        ],
     },
     {
         id: 510202,
@@ -27013,6 +28147,35 @@ export const partyTopicData: PartyTopic[] = [
                 content: "两码事两码事，酒肉朋友就是这样，有酒喝，那躺在棺材里也要爬出来喝一口。",
                 npc: 95102,
                 next: 80190218,
+            },
+            {
+                id: 80190219,
+                content: "但我现在确实得回去睡觉了。不过临走之前还是得和你说一句：为了你和关心你的人着想，少跟现在的神弃者同盟接触。",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801902191,
+                        content: "听起来你很讨厌他们。",
+                        next: 80190220,
+                    },
+                ],
+            },
+            {
+                id: 80190220,
+                content: "……就跟大多数人一样，看到危险，离远一点，仅此而已。",
+                npc: 95102,
+                next: 80190221,
+            },
+            {
+                id: 80190221,
+                content: "这是我挣扎在暴力机器相互撕咬的夹缝中这么久，总结出的宝贵经验——绝对，绝对，绝对不要靠近神弃者同盟。",
+                npc: 95102,
+                next: 80190222,
+            },
+            {
+                id: 80190222,
+                content: "这不是酒局上的胡话……而是关乎性命的建议。",
+                npc: 95102,
             },
         ],
     },
@@ -27314,6 +28477,212 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……",
                 npc: 95102,
                 next: 80190411,
+            },
+            {
+                id: 80190412,
+                content: "好吧，也该告诉你一些的。不然你走在路上莫名其妙被神弃者同盟的疯子捅了一刀，都不知道该怨谁了。",
+                npc: 95102,
+                next: 80190413,
+            },
+            {
+                id: 80190413,
+                content: "我以前跟神弃者同盟有点……小过节，所以他们一直在找我。然后前几天那个委托<H>可能</>暴露了我的行踪。",
+                npc: 95102,
+                next: 80190414,
+            },
+            {
+                id: 80190414,
+                content: "所以我得费点功夫，消掉在冰湖城的一些痕迹，免得他们真的顺着线索找到我。",
+                npc: 95102,
+                next: 80190415,
+            },
+            {
+                id: 80190415,
+                content: "真要被他们找到了啊，我的朋友们都得遭殃，挨个拷打，不吐出我的下落不罢休。连你也跑不掉。",
+                npc: 95102,
+                next: 80190416,
+            },
+            {
+                id: 80190416,
+                content: "不过嘛，你也大可以说，我是你的酒肉朋友，和我相关的事情一概不知——",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801904161,
+                        content: "明白了，你快走吧。",
+                        next: 80190417,
+                    },
+                    {
+                        id: 801904162,
+                        content: "但你不是酒肉朋友。",
+                        next: 80190417,
+                    },
+                ],
+            },
+            {
+                id: 80190417,
+                content: "哎，别着急打断我，这不还没发生嘛。不过……万一真的有那么一天……",
+                npc: 95102,
+                next: 80190418,
+            },
+            {
+                id: 80190418,
+                content: "到时候我得离开你们，离开这座城市。菲娜就拜托你照顾了。",
+                npc: 95102,
+                next: 80190419,
+            },
+            {
+                id: 80190419,
+                content: "她要是问起来你就说我接了个大活。我这里写了些信，你到时候每个月给她一封，应该能稳住她一段时间。",
+                npc: 95102,
+                next: 80190420,
+            },
+            {
+                id: 80190420,
+                content: "对了还有，我家暖炉右手第三块砖后面藏了一笔钱，你直接拿去用吧。我想想还有什么……",
+                npc: 95102,
+                next: 80190421,
+            },
+            {
+                id: 80190421,
+                content: "奥特赛德你先冷静点。",
+                npc: 790008,
+                next: 80190422,
+            },
+            {
+                id: 80190422,
+                content: "我很冷静。你跟我复述一遍我刚才说的，我到时候不在了一切都得靠你了。",
+                npc: 95102,
+                next: 80190423,
+            },
+            {
+                id: 80190423,
+                content: "这可不是你平时的样子，就因为神弃者同盟吗？",
+                npc: 790008,
+                next: 80190424,
+            },
+            {
+                id: 80190424,
+                content: "平时？平时可应付不了毫无底线的疯子。",
+                npc: 95102,
+                next: 80190425,
+            },
+            {
+                id: 80190425,
+                content: "举个例子，为了一条情报，他们会一枚一枚地拔掉你的指甲。",
+                npc: 95102,
+                next: 80190426,
+            },
+            {
+                id: 80190426,
+                content: "而这一切只是那群疯子折磨的开始罢了……我不想看到这种事……发生在朋友身上……",
+                npc: 95102,
+                next: 80190427,
+            },
+            {
+                id: 80190427,
+                content: "但这些都还没发生，而且你也说了自己的行踪只是<H>可能</>暴露了而已，不是吗？",
+                npc: 790008,
+                next: 80190428,
+            },
+            {
+                id: 80190428,
+                content: "即使是“可能”，也得做好万全准备。",
+                npc: 95102,
+                next: 80190429,
+            },
+            {
+                id: 80190429,
+                content: "过去没有类似的“可能”吗？现在比过去更危险吗？",
+                npc: 790008,
+                next: 80190430,
+            },
+            {
+                id: 80190430,
+                content: "要说最危险的时候，这次好像还真不算什么……",
+                npc: 95102,
+                next: 80190431,
+            },
+            {
+                id: 80190431,
+                content: "这不就对了，过去你是怎么解决的。",
+                npc: 790008,
+                next: 80190432,
+            },
+            {
+                id: 80190432,
+                content: "……有些只是虚惊一场，有些被我用恐吓、欺骗，把军团引来，或者在其他城市抛头露面之类的把戏解决掉了。",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801904321,
+                        content: "要说毫无底线，你也不差。",
+                        next: 80190433,
+                    },
+                    {
+                        id: 801904322,
+                        content: "那就说明还没到你必须离开的时候。",
+                        next: 80190433,
+                    },
+                ],
+            },
+            {
+                id: 80190434,
+                content: "是啊……你说的对。刚才我好像是有点……不太对劲。更危险的时候我都挺过来了，这次却早早把“后事”交代给了你。",
+                npc: 95102,
+                next: 80190435,
+            },
+            {
+                id: 80190435,
+                content: "是最近跟你聊得太多还是我下意识地想要依赖你这个队长了，亦或是我变软弱了吗……",
+                npc: 95102,
+                next: 80190436,
+            },
+            {
+                id: 80190436,
+                content: "不对不对，怎么可能嘛！肯定是今天的酒有问题！刚才我说过什么很恶心的话吗？没有吧，绝对没有，对吧！",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801904361,
+                        content: "没有，想喝点什么吗？",
+                        next: 80190437,
+                    },
+                    {
+                        id: 801904362,
+                        content: "恶心到我了，你得赔钱。",
+                        next: 80190437,
+                    },
+                ],
+            },
+            {
+                id: 80190437,
+                content: "所以说回来，比起担心还未发生的“可能”，不如还是等一切发生的时候再来拜托我吧，也许那时候我们还能找到更好的办法。",
+                npc: 790008,
+                next: 80190438,
+            },
+            {
+                id: 80190438,
+                content: "咳咳，说得好。拜托了，未来的我！来来喝酒喝酒，敬未来的我们。",
+                npc: 95102,
+                next: 80190439,
+            },
+            {
+                id: 80190440,
+                content: "哦，但我还得道个歉，关于未来的担心是解决了，但关于我的过去，还是没办法全部告诉你。",
+                npc: 95102,
+                next: 80190441,
+            },
+            {
+                id: 80190441,
+                content: "不过我向你保证，一定会有一天，我会带你看我来到冰湖城之前的路。虽然它会让我痛苦，也可能让你对我有所怀疑。",
+                npc: 95102,
+                next: 80190442,
+            },
+            {
+                id: 80190442,
+                content: "但我相信，到那时候，你依旧不会介意为我调上一杯和今日一样的酒的，我的朋友。",
+                npc: 95102,
             },
         ],
     },
@@ -29102,6 +30471,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "达芙涅，我的小腿已经断了，走不动路了。",
                 voice: "inv/Dafu/003/C8B91718",
                 npc: 110029,
+                speakerName: "受伤的士兵",
                 next: 80180317,
             },
             {
@@ -29109,6 +30479,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "快，不要管我了，去救……其他人……",
                 voice: "inv/Dafu/003/C8B91742",
                 npc: 110029,
+                speakerName: "受伤的士兵",
                 next: 80180318,
             },
             {
@@ -29136,6 +30507,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "炮火的声音……秽兽的声音……都听不见了……",
                 voice: "inv/Dafu/003/C8B917EA",
                 npc: 110028,
+                speakerName: "半昏迷的士兵",
                 next: 80180322,
             },
             {
@@ -29143,6 +30515,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "医务员小姐，我们这是……回家了吗……",
                 voice: "inv/Dafu/003/C8B91814",
                 npc: 110028,
+                speakerName: "半昏迷的士兵",
                 next: 80180323,
             },
             {
@@ -29157,6 +30530,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "不，不，你在说谎……回不去了。",
                 voice: "inv/Dafu/003/C8B91868",
                 npc: 110028,
+                speakerName: "半昏迷的士兵",
                 next: 80180325,
             },
             {
@@ -29164,6 +30538,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "迪斯玛尼亚太远了，雨那么急，路上满是泥泞，回不去了……",
                 voice: "inv/Dafu/003/C8B91892",
                 npc: 110028,
+                speakerName: "半昏迷的士兵",
                 next: 80180326,
             },
             {
@@ -29171,6 +30546,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "医务员小姐，请你带个话给我的妈妈……",
                 voice: "inv/Dafu/003/C8B918BC",
                 npc: 110028,
+                speakerName: "半昏迷的士兵",
                 next: 80180327,
             },
             {
@@ -29191,6 +30567,7 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80180329,
                 content: "小心！！是敌人的磁暴机！",
                 voice: "inv/Dafu/003/C8B9193A",
+                speakerName: "远处的士兵",
                 next: 80180330,
             },
             {
@@ -29204,6 +30581,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "好一点了吧。",
                 voice: "inv/Dafu/003/C8B9198E",
                 npc: 110025,
+                speakerName: "严肃的士兵",
                 next: 80180332,
             },
             {
@@ -29218,6 +30596,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "你是傻子吗？就那样直接扑在伤员身上！他一看就活不成了，你自己也想没命？要是连你都死了，其他伤员怎么办？",
                 voice: "inv/Dafu/003/C8B919E2",
                 npc: 110025,
+                speakerName: "严肃的士兵",
                 next: 80180334,
             },
             {
@@ -29239,6 +30618,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "你笑什么？",
                 voice: "inv/Dafu/003/C8B91A60",
                 npc: 110025,
+                speakerName: "严肃的士兵",
                 next: 80180337,
             },
             {
@@ -29282,6 +30662,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "什么乱七八糟的……",
                 voice: "inv/Dafu/003/C8B91B5C",
                 npc: 110025,
+                speakerName: "严肃的士兵",
                 next: 80180343,
             },
             {
@@ -29296,6 +30677,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……那你也记住，别把自己的生命看得那么轻。活下去的人，能做的事远比死去的多。",
                 voice: "inv/Dafu/003/C8B91BB0",
                 npc: 110025,
+                speakerName: "严肃的士兵",
                 next: 80180345,
             },
             {
@@ -29303,6 +30685,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "“背负着战友的意志活下去是和牺牲同样伟大的事”——这是阿瓦尔长官告诉过我们的。",
                 voice: "inv/Dafu/003/C8B91BDA",
                 npc: 110025,
+                speakerName: "严肃的士兵",
                 next: 80180346,
             },
             {
@@ -29331,6 +30714,7 @@ export const partyTopicData: PartyTopic[] = [
                 content: "去哪儿？",
                 voice: "inv/Dafu/003/C8B91C82",
                 npc: 110025,
+                speakerName: "严肃的士兵",
                 next: 80180350,
             },
             {

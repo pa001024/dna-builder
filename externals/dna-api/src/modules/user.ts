@@ -276,6 +276,10 @@ export class UserAPI extends DNASubModule {
         return await this._dna_request<DNAGameConfigResponse[]>("config/getGameConfig")
     }
 
+    async bulletin() {
+        return await this._dna_request<{}>("config/bulletin/get")
+    }
+
     async getGameHeadCode() {
         return await this._dna_request<DNAGameNewHeadBean[]>("user/getGameHeadCode")
     }

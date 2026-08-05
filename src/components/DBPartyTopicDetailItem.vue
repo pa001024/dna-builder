@@ -328,16 +328,20 @@ function getCharacterName(charId: number): string {
 }
 
 /**
- * 获取说话 NPC 名称。
- * @param npcId NPC ID
- * @returns NPC 名称
+ * 获取说话人名称，优先使用导出器提供的 speakerName，无则回退为 NPC 查表。
+ * @param dialogue 对话数据
+ * @returns 说话人名称
  */
-function getSpeakerName(npcId: number | undefined): string {
-    if (npcId === undefined) {
-        return "旁白"
+function getSpeakerName(dialogue: Dialogue): string {
+    if (dialogue.speakerName) {
+        return dialogue.speakerName
     }
 
-    const rawName = npcMap.get(npcId)?.name || `${npcId}`
+    if (dialogue.npc === undefined) {
+        return ""
+    }
+
+    const rawName = npcMap.get(dialogue.npc)?.name || `${dialogue.npc}`
     return formatStoryText(rawName)
 }
 
@@ -998,7 +1002,7 @@ onBeforeUnmount(() => {
                 >
                     <div class="flex items-start gap-2">
                         <img
-                            v-if="item.dialogue.npc"
+                            v-if="item.dialogue.npc !== undefined || item.dialogue.speakerName"
                             :src="getSpeakerAvatar(item.dialogue.npc)"
                             :alt="`${item.dialogue.npc}`"
                             class="size-8 rounded object-cover bg-base-100"
@@ -1007,8 +1011,11 @@ onBeforeUnmount(() => {
 
                         <div class="min-w-0 flex-1 text-xs">
                             <div class="mb-1 flex items-center gap-2">
-                                <div class="font-medium text-primary min-w-0 truncate" v-if="item.dialogue.npc">
-                                    {{ $t(getSpeakerName(item.dialogue.npc)) }}
+                                <div
+                                    class="font-medium text-primary min-w-0 truncate"
+                                    v-if="item.dialogue.npc !== undefined || item.dialogue.speakerName"
+                                >
+                                    {{ $t(getSpeakerName(item.dialogue)) }}
                                 </div>
                                 <button
                                     v-if="item.dialogue.voice"

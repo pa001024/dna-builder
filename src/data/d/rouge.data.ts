@@ -9939,6 +9939,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 3,
         minRoom: 0,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000101,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -10032,6 +10033,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 2,
         minRoom: 1,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000201,
         cutOffEvent: true,
         eventStoryline: [
             {
@@ -10113,6 +10115,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 1,
         minRoom: 8,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000301,
         cutOffEvent: true,
         eventStoryline: [
             {
@@ -10248,6 +10251,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: -1,
         minRoom: 0,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000401,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -10331,6 +10335,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: -1,
         minRoom: 0,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000402,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -10405,6 +10410,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: -1,
         minRoom: 0,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000403,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -10481,6 +10487,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: -1,
         minRoom: 0,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000404,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -10580,6 +10587,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: -1,
         minRoom: 0,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000405,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -10636,6 +10644,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: -1,
         minRoom: 0,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000406,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -10737,6 +10746,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: -1,
         minRoom: 0,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000407,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -10893,6 +10903,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 0,
         minRoom: 2,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000501,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -11095,6 +11106,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 0,
         minRoom: 6,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000601,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -11240,6 +11252,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 0,
         minRoom: 10,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000602,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -11332,6 +11345,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 0,
         minRoom: 2,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000502,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -11534,6 +11548,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 0,
         minRoom: 8,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000701,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -11723,6 +11738,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 0,
         minRoom: 14,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000702,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -11931,6 +11947,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 0,
         minRoom: 2,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000503,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -12089,6 +12106,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 0,
         minRoom: 11,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000801,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -12241,6 +12259,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 0,
         minRoom: 20,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000802,
         cutOffEvent: false,
         eventStoryline: [
             {
@@ -12391,6 +12410,7 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
         moment: 1,
         minRoom: 20,
         probability: [1, 0.1],
+        rlArchiveSubId: 20000901,
         cutOffEvent: true,
         eventStoryline: [
             {
@@ -12725,7 +12745,7 @@ export const rougeProClasses: RougeProClass[] = [
 export const rougeProContracts: RougeProContract[] = [
     {
         id: 101,
-        desc: "自身受到的治疗降低<Highlight>20.0%</>。",
+        desc: "自身受到的治疗降低<Highlight>10.0%</>。",
         globalPassiveId: 30101001,
         heatValue: 1,
         icon: "T_Rou_Contract_Char_HealDown",
@@ -12735,7 +12755,7 @@ export const rougeProContracts: RougeProContract[] = [
     },
     {
         id: 102,
-        desc: "自身攻击降低<Highlight>20.0%</>。",
+        desc: "自身攻击降低<Highlight>10.0%</>。",
         globalPassiveId: 30101002,
         heatValue: 2,
         icon: "T_Rou_Contract_Char_SpDown",
@@ -12745,7 +12765,7 @@ export const rougeProContracts: RougeProContract[] = [
     },
     {
         id: 103,
-        desc: "敌人最大生命提高<Highlight>40.0%</>。",
+        desc: "敌人最大生命提高<Highlight>20.0%</>。",
         globalPassiveId: 30102001,
         heatValue: 2,
         icon: "T_Rou_Contract_Mon_HpUp",
@@ -12755,7 +12775,7 @@ export const rougeProContracts: RougeProContract[] = [
     },
     {
         id: 104,
-        desc: "敌人攻击提高<Highlight>20.0%</>。",
+        desc: "敌人攻击提高<Highlight>10.0%</>。",
         globalPassiveId: 30102002,
         heatValue: 2,
         icon: "T_Rou_Contract_Mon__AtkUp",
@@ -12765,7 +12785,7 @@ export const rougeProContracts: RougeProContract[] = [
     },
     {
         id: 105,
-        desc: "敌人受到的伤害降低<Highlight>20.0%</>。",
+        desc: "敌人受到的伤害降低<Highlight>10.0%</>。",
         globalPassiveId: 30102003,
         heatValue: 2,
         icon: "T_Rou_Contract_Mon_HpUp",

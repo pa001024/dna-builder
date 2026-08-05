@@ -584,16 +584,20 @@ function getQuestionAnswers(node: QuestNodeWithChain, question: DetectiveQuestio
 }
 
 /**
- * 获取 NPC 名称。
- * @param npcId NPC ID
- * @returns NPC 名称
+ * 获取说话人名称，优先使用导出器提供的 speakerName，无则回退为 NPC 查表。
+ * @param dialogue 对话数据
+ * @returns 说话人名称
  */
-function getNPCName(npcId: number | undefined): string {
-    if (npcId === undefined) {
+function getSpeakerName(dialogue: Dialogue): string {
+    if (dialogue.speakerName) {
+        return dialogue.speakerName
+    }
+
+    if (dialogue.npc === undefined) {
         return ""
     }
 
-    const rawName = npcMap.get(npcId)?.name || `${npcId}`
+    const rawName = npcMap.get(dialogue.npc)?.name || `${dialogue.npc}`
     return formatStoryText(rawName)
 }
 
@@ -1099,7 +1103,9 @@ watch(flattenedDialogueChain, () => {
                     :dialogue="item.dialogue"
                     :selected-option="item.selectedOption"
                     :trigger-key="`${questId}-${node.id}-${item.dialogue.id}`"
-                    :speaker-name="item.dialogue.npc ? `${$t(getNPCName(item.dialogue.npc))}:` : undefined"
+                    :speaker-name="
+                        item.dialogue.npc !== undefined || item.dialogue.speakerName ? `${$t(getSpeakerName(item.dialogue))}:` : undefined
+                    "
                     :show-voice-button="!!item.dialogue.voice"
                     :voice-playing="currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id) && isVoicePlaying"
                     :playing="isVoicePlaying && currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id)"

@@ -1438,6 +1438,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "멈춰라.",
                                 voice: "story/1002/101006/194929DA",
                                 npc: 200071,
+                                speakerName: "보초를 서는 병사",
                                 next: 10100602,
                             },
                             {
@@ -1453,6 +1454,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "루나, 누가 너한테 물었어? 난...",
                                 voice: "story/1002/101006/19492A2E",
                                 npc: 200071,
+                                speakerName: "보초를 서는 병사",
                                 next: 10100604,
                             },
                             {
@@ -1460,6 +1462,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "애꾸눈, 내 말 안 들려? 치안서에 가고 싶어서 안달이라도 난 거야?",
                                 voice: "story/1002/101006/19492A58",
                                 npc: 200071,
+                                speakerName: "보초를 서는 병사",
                                 next: 10100605,
                             },
                             {
@@ -1474,6 +1477,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "여기 사람이 아니군. 어디서 왔지? 통행증은?",
                                 voice: "story/1002/101006/19492AAC",
                                 npc: 200071,
+                                speakerName: "보초를 서는 병사",
                                 options: [
                                     {
                                         id: 101006061,
@@ -1500,6 +1504,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "어느 섬? 확실히 말해, 남쪽이라고 말하면 어떻게 알아.",
                                 voice: "story/1002/101006/19492AD6",
                                 npc: 200071,
+                                speakerName: "보초를 서는 병사",
                                 next: 10100608,
                             },
                             {
@@ -1514,6 +1519,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "됐고, 통행증.",
                                 voice: "story/1002/101006/19492B00",
                                 npc: 200071,
+                                speakerName: "보초를 서는 병사",
                                 next: 101006110,
                             },
                             {
@@ -1557,6 +1563,7 @@ export const questData_kr: QuestStory[] = [
                                     "{性别:뭐, 뭐야... 꼬맹이도 아닌데 뭘 울고 그래!|뭐야, 왜 우는 거야? 미치겠네, 윗분들이 눈물 흘리는 아가씨 대하는 법은 안 알려주셨단 말이야!}",
                                 voice: "story/1002/101006/19492BD2",
                                 npc: 200071,
+                                speakerName: "보초를 서는 병사",
                                 next: 10100614,
                             },
                             {
@@ -1565,6 +1572,7 @@ export const questData_kr: QuestStory[] = [
                                     "예전 같으면 안 될 것도 없지만... 하아, 카밀라 씨, 아시겠지만 '포세이돈 동맹'? 요즘 전국적으로 그 수배령이 떨어졌어요. 모든 도시를 샅샅이 뒤지라고 윗분들이 특별히 지시했을 정도라고요.",
                                 voice: "story/1002/101006/19492BFC",
                                 npc: 200071,
+                                speakerName: "보초를 서는 병사",
                                 next: 10100615,
                             },
                             {
@@ -1581,6 +1589,7 @@ export const questData_kr: QuestStory[] = [
                                     "좋습니다. 당신 사람이면 문제없겠죠. 하지만 명심해요, 절대 시티 내에서 사고 치지 않게 잘 단속해요. 윗분들이 알면 우리 둘 다 골치 아파진다고요.",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200071,
+                                speakerName: "보초를 서는 병사",
                                 next: 10100617,
                             },
                             {
@@ -1610,6 +1619,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "사고 치면 안 돼. 알겠어?",
                                 voice: "story/1002/101007/19493A42",
                                 npc: 200004,
+                                speakerName: "보초를 서는 병사",
                             },
                         ],
                     },
@@ -1812,6 +1822,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "누군가 널 짜디짠 바닷물에서 건져 척박한 황무지로 데려갈 거야. 그리고 넌 진정한 운명의 시련을 마주하게 되겠지.",
                                 voice: "story/1002/100127/1910D56B",
+                                speakerName: "???",
                                 next: 10100815,
                             },
                             {
@@ -2002,6 +2013,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1002/101012/19498C74",
                                 npc: 200005,
+                                speakerName: "음침한 남자",
                                 next: 10101203,
                             },
                             {
@@ -2009,6 +2021,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "통행증이 없는 건가?",
                                 voice: "story/1002/101012/19498C9E",
                                 npc: 200005,
+                                speakerName: "음침한 남자",
                                 next: 10101204,
                             },
                             {
@@ -2021,6 +2034,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...그 여자는 쓸데없이 '친절'하다니까.",
                                 voice: "story/1002/101012/19498CF2",
                                 npc: 200005,
+                                speakerName: "음침한 남자",
                                 next: 10101206,
                             },
                             {
@@ -2028,6 +2042,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "됐고, 꺼내봐.",
                                 voice: "story/1002/101012/19498D1C",
                                 npc: 200005,
+                                speakerName: "음침한 남자",
                                 next: 10101207,
                             },
                             {
@@ -2042,6 +2057,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "얼마나 줄 수 있는데?",
                                 voice: "story/1002/101012/19498D70",
                                 npc: 200005,
+                                speakerName: "음침한 남자",
                                 next: 10101209,
                             },
                             {
@@ -2056,6 +2072,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "돈도 없는 건가?",
                                 voice: "story/1002/101012/19498DC4",
                                 npc: 200005,
+                                speakerName: "음침한 남자",
                                 next: 10101211,
                             },
                             {
@@ -2070,6 +2087,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그럼 꺼져.",
                                 voice: "story/1002/101012/19498E18",
                                 npc: 200005,
+                                speakerName: "음침한 남자",
                                 next: 10101213,
                             },
                             {
@@ -2108,6 +2126,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "넌... 음... 새로 온 투숙객이야?",
                                 voice: "story/1002/101014/1949AD1A",
                                 npc: 200006,
+                                speakerName: "밝은 소녀",
                                 next: 10101402,
                             },
                             {
@@ -2122,6 +2141,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "외지인? 그럼... 쫓아내면 저 사람들은 돌아갈 집도 없는 거 아니에요?",
                                 voice: "story/1002/101014/1949AD6E",
                                 npc: 200006,
+                                speakerName: "밝은 소녀",
                                 next: 10101404,
                             },
                             {
@@ -2137,6 +2157,7 @@ export const questData_kr: QuestStory[] = [
                                     "그렇지만... 어차피 저택이 아직 안 팔렸으니, 이 사람이 하룻밤 묵는 건 괜찮지 않아요? 나중에 여비가 생기면 갚으라고 해요. 공실로 두는 것보다는 낫잖아요.",
                                 voice: "story/1002/101014/1949ADC2",
                                 npc: 200006,
+                                speakerName: "밝은 소녀",
                                 next: 10101406,
                             },
                             {
@@ -2144,6 +2165,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "자꾸 그렇게 차갑게 굴면, 저택도 안 팔릴 거라고요.",
                                 voice: "story/1002/101014/1949ADEC",
                                 npc: 200006,
+                                speakerName: "밝은 소녀",
                                 next: 10101407,
                             },
                             {
@@ -2198,6 +2220,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "바로 여기야.",
                                 voice: "story/1002/101015/1949BDAC",
                                 npc: 200006,
+                                speakerName: "밝은 소녀",
                             },
                         ],
                     },
@@ -2211,6 +2234,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그 저택은 남쪽에 있으니까 날 따라와!",
                                 voice: "story/1002/101015/1949BD82",
                                 npc: 200006,
+                                speakerName: "밝은 소녀",
                             },
                         ],
                     },
@@ -2224,6 +2248,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "방금 청소한 방이니까, 오늘 밤은 여기에서 묵으면 될 거야.",
                                 voice: "story/1002/101016/1949CDEA",
                                 npc: 200006,
+                                speakerName: "밝은 소녀",
                                 next: 10101602,
                             },
                             {
@@ -2239,6 +2264,7 @@ export const questData_kr: QuestStory[] = [
                                     "화 풀어. 헨릭 아저씨도 사실 돈 욕심이 있어서 그러는 건 아냐. 그냥 요즘 우리가 형편이 좀 어려워서 그래. 안 그러면 저택을 팔아 생활비에 보탤 생각도 안 했을 거야.",
                                 voice: "story/1002/101016/1949CE3E",
                                 npc: 200006,
+                                speakerName: "밝은 소녀",
                                 next: 10101604,
                             },
                             {
@@ -2247,6 +2273,7 @@ export const questData_kr: QuestStory[] = [
                                     "여긴 몇 년 동안 버려져 있었지만, 청소하고 나니 그런대로 괜찮은 것 같아. 적어도 바깥의 찬바람은 막을 수 있잖아, 안 그래?",
                                 voice: "story/1002/101016/1949CE68",
                                 npc: 200006,
+                                speakerName: "밝은 소녀",
                                 next: 10101605,
                             },
                             {
@@ -2254,6 +2281,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "참, 내 이름도 안 알려줬네. 난 프시케라고 해. '히프노스의 집' 투숙객이야. 가끔 허드렛일을 돕지.",
                                 voice: "story/1002/101016/1949CE92",
                                 npc: 200006,
+                                speakerName: "밝은 소녀",
                                 options: [
                                     {
                                         id: 101016051,
@@ -2396,6 +2424,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "나 왔어.",
                                 voice: "story/1002/101018/1949EEBA",
                                 npc: 200006,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -2410,6 +2439,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "배고프지? 방금 구워 따끈따끈한 빵을 좀 가져왔어.",
                                 voice: "story/1002/101018/1949EEE4",
                                 npc: 200006,
+                                speakerName: "???",
                                 next: 10101803,
                             },
                             {
@@ -2424,6 +2454,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......?",
                                 voice: "story/1002/101018/1949EF38",
                                 npc: 200006,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -2968,6 +2999,7 @@ export const questData_kr: QuestStory[] = [
                                     "...그러더니 무방비 상태인 날 습격해서 막 받은 돈을 빼앗아 갔어요. 빌어먹을 자식, 폐품 팔아 모은 돈까지 뺏어가다니! 그건 빈민가 사람들을 위해 마련한 생활비였다고요!",
                                 voice: "story/1002/101025/194A6192",
                                 npc: 200011,
+                                speakerName: "초조해 하는 넝마주이",
                                 next: 10102502,
                             },
                             {
@@ -2976,6 +3008,7 @@ export const questData_kr: QuestStory[] = [
                                     "그 돈이 없으면... 다음 달에는 노인과 아이들 모두 손가락만 빨고 있어야 하는데. 하아, 그 도둑놈이 대체 어디로 간 건지, 같이 그놈을 잡을 사람이 필요해요.",
                                 voice: "story/1002/101025/194A61BC",
                                 npc: 200011,
+                                speakerName: "초조해 하는 넝마주이",
                                 next: 10102503,
                             },
                             {
@@ -2990,6 +3023,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하아, 치안서가 우리 카론 일에 나서줬으면, 눈물의 호수 얼음도 진작에 깨끗해졌을 거예요!",
                                 voice: "story/1002/101025/194A6210",
                                 npc: 200011,
+                                speakerName: "초조해 하는 넝마주이",
                                 next: 10102505,
                             },
                             {
@@ -2998,6 +3032,7 @@ export const questData_kr: QuestStory[] = [
                                     "그러니까 우리 착하고 아름다운 카밀라 언니가 여기 월석 사냥꾼에게 조금만 도와달라고 부탁 좀 해주면 안될까요... 언니는 좋은 사람이잖아요, 그러니까 조금만 어떻게 안될까요?",
                                 voice: "story/1002/101025/194A623A",
                                 npc: 200011,
+                                speakerName: "초조해 하는 넝마주이",
                                 next: 10102506,
                             },
                             {
@@ -3012,6 +3047,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그럼 조금만... 음, 싸게... 아니면 다른 물건으로 교환하는 건 어때요? 그러니까...",
                                 voice: "story/1002/101025/194A628E",
                                 npc: 200011,
+                                speakerName: "초조해 하는 넝마주이",
                                 next: 10102508,
                             },
                             {
@@ -3020,6 +3056,7 @@ export const questData_kr: QuestStory[] = [
                                     "'정보가 곧 돈이다!'라는 말도 있잖아요! 그래요, 그래. 아이스레이크 시티의 쓰레기통은 다 제가 손 안에 있으니 뭔가 재미있는 정보라도 발견하면 제일 먼저 알려드릴 수 있지 않겠어요?",
                                 voice: "story/1002/101025/194A62B8",
                                 npc: 200011,
+                                speakerName: "초조해 하는 넝마주이",
                             },
                         ],
                     },
@@ -3061,6 +3098,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "월석 사냥꾼이라고요? 그럼 제대로 찾아왔어요. 마침 의뢰가 하나 있거든요!",
                                 voice: "story/1002/101026/194A72A2",
                                 npc: 200011,
+                                speakerName: "초조해 하는 넝마주이",
                                 next: 10102606,
                             },
                             {
@@ -3571,6 +3609,7 @@ export const questData_kr: QuestStory[] = [
                                     "뭐, 뭐야... 굳이 여기까지 쫓아와야 했던 거야? 그 돈은 사람들한테 나눠주는 거라며, 그럼 나한테 조금 나눠준 셈 치면 되는 거잖아?",
                                 voice: "story/1002/101182/19547184",
                                 npc: 200053,
+                                speakerName: "수상한 청년",
                                 next: 10118203,
                             },
                             {
@@ -5047,6 +5086,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10131004,
                                 content: "크르르르——",
                                 voice: "story/1002/101310/195BD051",
+                                speakerName: "필토이드",
                                 next: 10131005,
                             },
                             {
@@ -5098,6 +5138,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10131201,
                                 content: "크르르르——",
                                 voice: "story/1002/101312/195BD055",
+                                speakerName: "필토이드",
                                 next: 10131202,
                             },
                             {
@@ -5971,6 +6012,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아웃사이더! 오늘은 엄청 늦게 왔네. 콜록, 콜록... 또 어디로... 모험을 다녀온 거야?",
                                 voice: "story/1002/101060/194CA048",
                                 npc: 200020,
+                                speakerName: "병약한 소녀",
                                 next: 10106005,
                             },
                             {
@@ -5978,6 +6020,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "스노우 울프가 출몰하는 밀림? 아니면 늪지 마녀의 탑?",
                                 voice: "story/1002/101060/194CA072",
                                 npc: 200020,
+                                speakerName: "병약한 소녀",
                                 next: 10106006,
                             },
                             {
@@ -8099,6 +8142,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10108311,
                                 content: "@#￥%...",
                                 voice: "story/1002/101135/19516E42",
+                                speakerName: "이상한 소리",
                                 next: 10108312,
                             },
                             {
@@ -8255,6 +8299,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10108311,
                                 content: "@#￥%...",
                                 voice: "story/1002/101135/19516E42",
+                                speakerName: "이상한 소리",
                                 next: 10108312,
                             },
                             {
@@ -8663,12 +8708,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 10108914,
                                 content: "헨릭 아저씨, 돌아오셨네요. 따뜻한 물을 좀 준비했어요. 드시고 몸 좀 녹이세요...",
                                 voice: "story/1002/101089/194E7CE2",
+                                speakerName: "프시케 목소리",
                                 next: 10108915,
                             },
                             {
                                 id: 10108915,
                                 content: "그래.",
                                 voice: "story/1002/101089/194E7D0C",
+                                speakerName: "헨릭의 목소리",
                                 next: 10108916,
                             },
                             {
@@ -9814,6 +9861,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아앗... 그만 때려. 항복할게! 하지만 진짜 내가 한 게 아니야!!",
                                 voice: "story/1002/101102/194F50DA",
                                 npc: 200004,
+                                speakerName: "수상한 청년",
                                 next: 10110202,
                             },
                             {
@@ -9829,6 +9877,7 @@ export const questData_kr: QuestStory[] = [
                                     "좋습니다. 당신 사람이면 문제없겠죠. 하지만 명심해요, 절대 시티 내에서 사고 치지 않게 잘 단속해요. 윗분들이 알면 우리 둘 다 골치 아파진다고요.",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200004,
+                                speakerName: "보초를 서는 병사",
                                 next: 10110204,
                             },
                             {
@@ -9836,6 +9885,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하필이면 걸려도 왜 너한테... 하, 제발 말하지 마, 알겠지?",
                                 voice: "story/1002/101102/194F5158",
                                 npc: 200004,
+                                speakerName: "수상한 청년",
                                 next: 10110205,
                             },
                             {
@@ -9851,6 +9901,7 @@ export const questData_kr: QuestStory[] = [
                                     "잠깐만, 잠깐만! 지갑 돌려줄게! 나도 며칠째 굶어서 정신이 나가서 그랬던 거야... 아, 내가 잘못했어!",
                                 voice: "story/1002/101032/194AD496",
                                 npc: 200004,
+                                speakerName: "수상한 청년",
                                 next: 10110207,
                             },
                             {
@@ -9865,6 +9916,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "조용히 해! 내가 한 게 아니라니까, 난 그냥 시신을 몰래 옮기는 것뿐이야.",
                                 voice: "story/1002/101102/194F5200",
                                 npc: 200004,
+                                speakerName: "수상한 청년",
                                 next: 10110209,
                             },
                             {
@@ -9873,6 +9925,7 @@ export const questData_kr: QuestStory[] = [
                                     "난 케빈이라고 해. 전에 본 적 있지? 아이스레이크 시티 외곽 방위대... 이 재수 없는 놈은 하알인데 내 이웃이었어. 어릴 때부터 알던 사이지.",
                                 voice: "story/1002/101102/194F522A",
                                 npc: 200004,
+                                speakerName: "수상한 청년",
                                 next: 10110210,
                             },
                             {
@@ -10336,6 +10389,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아앗... 그만 때려. 항복할게! 하지만 진짜 내가 한 게 아니야!!",
                                 voice: "story/1002/101102/194F50DA",
                                 npc: 200004,
+                                speakerName: "수상한 청년",
                                 next: 10110202,
                             },
                             {
@@ -10351,6 +10405,7 @@ export const questData_kr: QuestStory[] = [
                                     "좋습니다. 당신 사람이면 문제없겠죠. 하지만 명심해요, 절대 시티 내에서 사고 치지 않게 잘 단속해요. 윗분들이 알면 우리 둘 다 골치 아파진다고요.",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200004,
+                                speakerName: "보초를 서는 병사",
                                 next: 10110204,
                             },
                             {
@@ -10358,6 +10413,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하필이면 걸려도 왜 너한테... 하, 제발 말하지 마, 알겠지?",
                                 voice: "story/1002/101102/194F5158",
                                 npc: 200004,
+                                speakerName: "수상한 청년",
                                 next: 10110205,
                             },
                             {
@@ -10373,6 +10429,7 @@ export const questData_kr: QuestStory[] = [
                                     "잠깐만, 잠깐만! 지갑 돌려줄게! 나도 며칠째 굶어서 정신이 나가서 그랬던 거야... 아, 내가 잘못했어!",
                                 voice: "story/1002/101032/194AD496",
                                 npc: 200004,
+                                speakerName: "수상한 청년",
                                 next: 10110207,
                             },
                             {
@@ -10387,6 +10444,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "조용히 해! 내가 한 게 아니라니까, 난 그냥 시신을 몰래 옮기는 것뿐이야.",
                                 voice: "story/1002/101102/194F5200",
                                 npc: 200004,
+                                speakerName: "수상한 청년",
                                 next: 10110209,
                             },
                             {
@@ -10395,6 +10453,7 @@ export const questData_kr: QuestStory[] = [
                                     "난 케빈이라고 해. 전에 본 적 있지? 아이스레이크 시티 외곽 방위대... 이 재수 없는 놈은 하알인데 내 이웃이었어. 어릴 때부터 알던 사이지.",
                                 voice: "story/1002/101102/194F522A",
                                 npc: 200004,
+                                speakerName: "수상한 청년",
                                 next: 10110210,
                             },
                             {
@@ -11000,12 +11059,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 10124003,
                                 content: "아... 아니에요, 그냥 보라색 이슬 꽃가루가 눈에 들어갔을 뿐이에요. 고마워요.",
                                 voice: "story/1002/101240/1958293E",
+                                speakerName: "꽃집 주인",
                                 next: 10124004,
                             },
                             {
                                 id: 10124004,
                                 content: "그 하얀 옷을 입은 분을 말씀하시는 거라면, 그분은 지금... 아마 북동쪽 연못에 계실 거예요.",
                                 voice: "story/1002/101240/19582968",
+                                speakerName: "꽃집 주인",
                                 next: 10124005,
                             },
                             {
@@ -11019,6 +11080,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10124006,
                                 content: "잠시만요, 당신은...",
                                 voice: "story/1002/101240/195829BC",
+                                speakerName: "꽃집 주인",
                                 next: 10124007,
                             },
                             {
@@ -11032,6 +11094,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10124008,
                                 content: "...아니에요, 사람을 잘못 본 것 같네요. 죄송해요... 이거 받아요.",
                                 voice: "story/1002/101240/19582A10",
+                                speakerName: "꽃집 주인",
                                 next: 10124101,
                             },
                             {
@@ -11046,6 +11109,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "네, 당신도 루비처럼 아름다운 눈을 가지고 계시네요. 이 보라색 이슬 꽃과 정말 잘 어울리세요... 행복한 하루 되시길 바랍니다.",
                                 voice: "story/1002/101241/1958397C",
+                                speakerName: "꽃집 주인",
                                 next: 10124103,
                             },
                             {
@@ -11240,6 +11304,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10110519,
                                 content: "으아아...",
                                 voice: "story/1002/101105/194F8489",
+                                speakerName: "먼 곳의 목소리",
                                 next: 10110520,
                             },
                             {
@@ -11330,6 +11395,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...도, 도와줘.",
                                 voice: "story/1002/101107/194FA30C",
                                 npc: 200019,
+                                speakerName: "우울한 소년",
                                 next: 10110702,
                             },
                             {
@@ -11337,6 +11403,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "헨릭 씨가... 위험해...!",
                                 voice: "story/1002/101107/194FA336",
                                 npc: 200019,
+                                speakerName: "우울한 소년",
                                 next: 10110703,
                             },
                             {
@@ -11364,6 +11431,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "부탁이야. 같이 좀 가줘!",
                                 voice: "story/1002/101146/195222BA",
                                 npc: 200019,
+                                speakerName: "우울한 소년",
                             },
                         ],
                     },
@@ -11377,6 +11445,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "여기, 헨릭 씨의 사무실이야!",
                                 voice: "story/1002/101147/19523322",
                                 npc: 200019,
+                                speakerName: "우울한 소년",
                             },
                         ],
                     },
@@ -11887,54 +11956,63 @@ export const questData_kr: QuestStory[] = [
                                 id: 20002601,
                                 content: "방금 그 언니는 왜 그렇게 빨리 뛰어간 거예요?",
                                 voice: "story/2001/200026/32130CBA",
+                                speakerName: "곤란에 빠진 아이",
                                 next: 20002602,
                             },
                             {
                                 id: 20002602,
                                 content: "쉿! 빨리 가자. 성 안으로 들어가. 저건 침식자야!",
                                 voice: "story/2001/200026/32130CE4",
+                                speakerName: "당황한 평민",
                                 next: 20002603,
                             },
                             {
                                 id: 20002603,
                                 content: "당... 당황하지 마... 이미 누군가 수비대를 부르러 갔어!",
                                 voice: "story/2001/200026/32130D0E",
+                                speakerName: "침착한 척하는 병사",
                                 next: 20002604,
                             },
                             {
                                 id: 20002604,
                                 content: "이런 식으로 몰래 들어가려는 건 아니겠지. 통행증, 통행증을 보여줘!",
                                 voice: "story/2001/200026/32130D38",
+                                speakerName: "침착한 척하는 병사",
                                 next: 20002605,
                             },
                             {
                                 id: 20002605,
                                 content: "제발 들여보내 주세요. 통행증은 정말 실수로 잃어버렸을 뿐이에요!",
                                 voice: "story/2001/200026/32130D62",
+                                speakerName: "당황한 평민",
                                 next: 20002606,
                             },
                             {
                                 id: 20002606,
                                 content: "이런 때에 무슨 통행증이야. 어차피 밖에 있어도 죽을 텐데 그냥 들어가버리자고!",
                                 voice: "story/2001/200026/32130D8C",
+                                speakerName: "분노한 평민",
                                 next: 20002607,
                             },
                             {
                                 id: 20002607,
                                 content: "멈춰, 멈추라고! 더 가까이 오면 쏘겠어!",
                                 voice: "story/2001/200026/32130DB6",
+                                speakerName: "침착한 척하는 병사",
                                 next: 20002608,
                             },
                             {
                                 id: 20002608,
                                 content: "쏴봐! 쏴서 침식자를 이리로 불러와 우리 다 같이 죽자고!",
                                 voice: "story/2001/200026/32130DE0",
+                                speakerName: "분노한 평민",
                                 next: 20002609,
                             },
                             {
                                 id: 20002609,
                                 content: "정말... 독하구나. 좋아, 일단 들어와. 수비대가 침식자를 처리하면 그때 다시 얘기하자.",
                                 voice: "story/2001/200026/32130E0A",
+                                speakerName: "침착한 척하는 병사",
                             },
                         ],
                     },
@@ -13223,6 +13301,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...상황이 좀 이상한데. 어쨌든 다행히, 인질들은 모두 무사하군.",
                                 voice: "story/1002/101306/195BD036",
                                 npc: 100304,
+                                speakerName: "여장교",
                                 next: 10130603,
                             },
                             {
@@ -13288,6 +13367,7 @@ export const questData_kr: QuestStory[] = [
                                     "아닙니다! 제가 봤습니다! 좀 멀긴 했지만 미리 길을 살필 때 똑똑히 봤습니다. 이 카론들... <W>마법</>도 사용할 수 있습니다...",
                                 voice: "story/1002/101130/19511D8A",
                                 npc: 700065,
+                                speakerName: "허둥대는 제국 병사",
                                 next: 10113011,
                             },
                             {
@@ -13296,6 +13376,7 @@ export const questData_kr: QuestStory[] = [
                                     "저, 저것들도 침식자와 한 패거리일지 모릅니다! 이 천한 것들, 하나같이 사악한 마법사에 좋은 놈은 하나도 없지! 저라면 죄다...",
                                 voice: "story/1002/101130/19511DB4",
                                 npc: 700065,
+                                speakerName: "허둥대는 제국 병사",
                                 next: 10113012,
                             },
                             {
@@ -13311,6 +13392,7 @@ export const questData_kr: QuestStory[] = [
                                     "...어, 아니... 저, 저는 저것들을 말한 겁니다. 모, 모든 카론 사람들이... 아무튼 제 말뜻은 그게 아닙니다!",
                                 voice: "story/1002/101130/19511E08",
                                 npc: 700065,
+                                speakerName: "허둥대는 제국 병사",
                                 next: 10113014,
                             },
                             {
@@ -13701,6 +13783,7 @@ export const questData_kr: QuestStory[] = [
                                     "아이야, 안녕. 난 안개의 바다를 떠도는 인도자란다. 이름으로 부르고 싶다면 나이플 부인이라고 부르렴.",
                                 voice: "story/1002/101259/19596120",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125905,
                             },
                             {
@@ -13708,6 +13791,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "난 여행 중인데, 방황하는 영혼의 속삭임이 들려서 '그 아이'를 안개의 바다로 인도하러 왔단다.",
                                 voice: "story/1002/101259/1959614A",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125906,
                             },
                             {
@@ -13722,6 +13806,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그래. 너도 그 떠난 아이를 그리워해서 보러 온 거지?",
                                 voice: "story/1002/101259/1959619E",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125908,
                             },
                             {
@@ -13736,6 +13821,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "내 눈은 영혼이 품은 생각을 볼 수 있단다.",
                                 voice: "story/1002/101259/195961F2",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125910,
                             },
                             {
@@ -13743,6 +13829,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "방금 영혼을 인도할 때, 그 아이가 걱정하는 게 무엇인지 보였는데 그중에 너도 있었거든.",
                                 voice: "story/1002/101259/1959621C",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125911,
                             },
                             {
@@ -13765,6 +13852,7 @@ export const questData_kr: QuestStory[] = [
                                     "아니란다, 오히려 그 반대였지. 난 후회와 원망으로 가득 찬 수많은 영혼을 보아왔단다. 그들의 통곡 소리는 강변의 안개처럼 짙었지.",
                                 voice: "story/1002/101259/1959629A",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125914,
                             },
                             {
@@ -13773,6 +13861,7 @@ export const questData_kr: QuestStory[] = [
                                     "하지만 그 아이가 가진 영혼의 목소리는 정말 따뜻했어. 한탄도, 분노도, 미련도 없이, 오히려 고마워하며... 축복을 빌더구나.",
                                 voice: "story/1002/101259/195962C4",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125915,
                             },
                             {
@@ -13780,6 +13869,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아마 널 향한 축복이었을 거야.",
                                 voice: "story/1002/101259/195962EE",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125916,
                             },
                             {
@@ -13805,6 +13895,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아이야, 난 이 세상에서 아주아주 오래 살면서 무수한 영혼을 떠나보냈고 그런 말을 무수히 들었단다.",
                                 voice: "story/1002/101259/19596342",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125918,
                             },
                             {
@@ -13813,6 +13904,7 @@ export const questData_kr: QuestStory[] = [
                                     "초목은 산불에 잿더미가 되고, 작은 곤충은 광풍에 깊은 물속으로 스러지지... 죽음은 본디 생명의 일부란다. 이르든 늦든 찾아오기 마련이지.",
                                 voice: "story/1002/101259/1959636C",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125919,
                             },
                             {
@@ -13821,6 +13913,7 @@ export const questData_kr: QuestStory[] = [
                                     "운명의 차가움과 잔혹함을 저주하거나 자신의 나약함을 한탄할 수도 있겠지만, 우린... 추억을 소중히 여기는 길을 선택할 수도 있어.",
                                 voice: "story/1002/101259/19596396",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125920,
                             },
                             {
@@ -13828,6 +13921,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "죽음이 필연적인 거라면, 살아가는 매 순간은 죽음을 비켜간 '기적'이 아니겠니?",
                                 voice: "story/1002/101259/195963C0",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125921,
                             },
                             {
@@ -13836,6 +13930,7 @@ export const questData_kr: QuestStory[] = [
                                     "안개의 바다로 떠난 그 영혼도... 네가 눈물이 아닌 미소를 띠며 함께했던 날들을 기억하길 바랄 거란다.",
                                 voice: "story/1002/101259/195963EA",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 options: [
                                     {
                                         id: 101259211,
@@ -13850,6 +13945,7 @@ export const questData_kr: QuestStory[] = [
                                     "안개의 바다는... 카론의 생명이 시작되는 곳이자 안식의 땅이란다. 떠난 이의 영혼은 그곳으로 돌아가고 새 생명의 영혼은 그곳에서 태어나지. 생명은 그렇게 끊없이 이어진단다.",
                                 voice: "story/1002/101259/19596414",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125923,
                             },
                             {
@@ -13876,6 +13972,7 @@ export const questData_kr: QuestStory[] = [
                                     "다른 이가 그런 질문을 한다면, 난 이렇게 답할 거란다. 삶과 죽음의 순환은 거스를 수 없는 세상의 이치라 인간의 힘으로는 결코 맞설 수 없다고.",
                                 voice: "story/1002/101259/19596468",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125925,
                             },
                             {
@@ -13883,6 +13980,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하지만 느껴져... 넌 특별한 운명을 짊어지고 있구나.",
                                 voice: "story/1002/101259/19596492",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125926,
                             },
                             {
@@ -13890,6 +13988,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "언젠가 네가 충분한 힘을 얻어 세상의 진실을 마주하고, 나아가 그 법칙마저 바꿀 수 있게 된다면...",
                                 voice: "story/1002/101259/195964BC",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125927,
                             },
                             {
@@ -13898,6 +13997,7 @@ export const questData_kr: QuestStory[] = [
                                     "어쩌면 네가 그 생명의 강을 건너, 그 끝인 안개의 바다에서, 떠난 영혼들과 다시 만날 수 있을지도 몰라.",
                                 voice: "story/1002/101259/195964E6",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 options: [
                                     {
                                         id: 101259271,
@@ -13911,6 +14011,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "후훗... 난 강가에 머무는 한낱 방관자에 불과하단다. 그 질문의 답은 네가 직접 찾아야만 하지.",
                                 voice: "story/1002/101259/19596510",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125929,
                             },
                             {
@@ -13918,6 +14019,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "마음 속에 갈망을 품고 있다면 계속 앞으로 나아가 보렴.",
                                 voice: "story/1002/101259/1959653A",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                                 next: 10125930,
                             },
                             {
@@ -13925,6 +14027,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "행운이 너와 함께하길 빈단다, 아이야.",
                                 voice: "story/1002/101259/19596564",
                                 npc: 200076,
+                                speakerName: "나이플 부인",
                             },
                         ],
                     },
@@ -16455,6 +16558,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야옹~ 야옹~",
                                 voice: "story/1003/100326/191D95C4",
                                 npc: 100320,
+                                speakerName: "고양이",
                             },
                         ],
                     },
@@ -16470,6 +16574,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야옹... 냥?",
                                 voice: "story/1003/100326/191D95EE",
                                 npc: 100320,
+                                speakerName: "고양이",
                                 next: 10032604,
                             },
                             {
@@ -16505,6 +16610,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "냥... 냥냥!",
                                 voice: "story/1003/100326/191D96C0",
                                 npc: 100320,
+                                speakerName: "고양이",
                             },
                         ],
                     },
@@ -16546,6 +16652,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야옹~ 냥냥냥냥!",
                                 voice: "story/1003/100326/191D9714",
                                 npc: 100320,
+                                speakerName: "고양이",
                             },
                         ],
                     },
@@ -17923,6 +18030,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10033201,
                                 content: "크아!!",
                                 voice: "story/1003/100332/191DF80A",
+                                speakerName: "???",
                                 next: 10033202,
                             },
                             {
@@ -17971,6 +18079,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10033301,
                                 content: "크아!!",
                                 voice: "story/1003/100333/191E0872",
+                                speakerName: "???",
                                 next: 10033302,
                             },
                             {
@@ -18062,6 +18171,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "크르르르...!",
                                 voice: "story/1003/100333/191E0A16",
                                 npc: 100328,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -18317,6 +18427,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "부... 숴...",
                                 voice: "story/1003/100333/191E0ABE",
                                 npc: 100328,
+                                speakerName: "???",
                                 next: 10033316,
                             },
                             {
@@ -18352,6 +18463,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "소... 멸...",
                                 voice: "story/1003/100333/191E0B66",
                                 npc: 100328,
+                                speakerName: "???",
                                 next: 10033320,
                             },
                             {
@@ -20402,6 +20514,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "아이스레이크 시티에서 디즈마니아로 향하는 열차가 한 시간 후 출발합니다. 제13군단의 귀환이 순조롭기를 바랍니다, 황제 폐하께 영광을!",
                                 voice: "story/1003/100352/191F4906",
+                                speakerName: "방송",
                             },
                         ],
                     },
@@ -20718,6 +20831,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "멍청하군.",
                                 voice: "story/1003/100353/191F5626",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035337,
                             },
                         ],
@@ -20739,6 +20853,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "잘 지냈어? 누나.",
                                 voice: "story/1003/100354/191F61F6",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035408,
                             },
                             {
@@ -20753,6 +20868,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아니다... 난 이젠, 널, 리듬 장교, 라고 불러야겠군. 진정은, 좀, 됐나.",
                                 voice: "story/1003/100354/191F624A",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035410,
                             },
                             {
@@ -20767,6 +20883,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "블루스 페실. 당신의, 동생. 그 하모니카의, 주인.",
                                 voice: "story/1003/100354/191F629E",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035412,
                             },
                             {
@@ -20788,6 +20905,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "허...",
                                 voice: "story/1003/100354/191F631C",
                                 npc: 100327,
+                                speakerName: "'블루스'",
                                 next: 10035415,
                             },
                             {
@@ -20810,6 +20928,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "돌려줄게. 군단은, 날 배신했어. 이젠, 그건, 더 이상 필요 없어.",
                                 voice: "story/1003/100354/191F639A",
                                 npc: 100327,
+                                speakerName: "'블루스'",
                                 next: 10035418,
                             },
                             {
@@ -20855,6 +20974,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...너의, 직감, 꽤 날카로워. 하지만 제국에서, 그건 꼭 좋은 일만은, 아니지...",
                                 voice: "story/1003/100354/191F6496",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10035424,
                             },
                             {
@@ -20862,6 +20982,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...리듬, 내 누나... 내가 알려줄게. '계관카론'의, 진실을...",
                                 voice: "story/1003/100354/191F64C0",
                                 npc: 100327,
+                                speakerName: "블루스",
                             },
                         ],
                     },
@@ -20889,6 +21010,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "'범인'이라...",
                                 voice: "story/1003/100354/191F614E",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035404,
                             },
                             {
@@ -20896,6 +21018,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "보아하니, 그들은, 결국, 너에게 진실을, 밝히지 않았군. 역시 13군단도, 한통속이었을 뿐이야.",
                                 voice: "story/1003/100354/191F6178",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035405,
                             },
                             {
@@ -22050,6 +22173,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...허.",
                                 voice: "story/1003/100350/191F1F84",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035003,
                             },
                             {
@@ -22057,6 +22181,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "진실은 아직 드러나지 않았다.",
                                 voice: "story/1003/100350/191F1FAE",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035004,
                             },
                             {
@@ -22078,6 +22203,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100350/191F202C",
                                 npc: 100327,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -22332,6 +22458,7 @@ export const questData_kr: QuestStory[] = [
                                     "'계관카론', 난 한때 그걸 가장 빛나는 다이아몬드로 여겼어.\n꿈의 끝에서 반짝이며, 마치 아이스레이크 시티 가장 높은 곳에 있는 꺼지지 않는 등불처럼 말이야.",
                                 voice: "story/1003/100355/191F7162",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10035502,
                             },
                             {
@@ -22340,6 +22467,7 @@ export const questData_kr: QuestStory[] = [
                                     "나중에야 알게 됐어, 그건 단단한 다이아몬드가 아니었어.\n그건 유리야. 허상의 빛을 반사하며 아름답고 눈부셨지만,\n조약돌 하나, 진흙 벽돌 한 조각에도 쉽게 산산조각이 났어.",
                                 voice: "story/1003/100355/191F718C",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10035503,
                             },
                             {
@@ -22348,6 +22476,7 @@ export const questData_kr: QuestStory[] = [
                                     "제6군단의 시험을 통과한 카론은 도살당할 운명의 가엾은 짐승과 다를 바가 없었어.\n오히려 무지하고 무감각한 짐승이 되는 편이 나았을지도 몰라.\n그랬다면 무너진 꿈에 고통받지도, 이루지 못한 약속에 통곡하지도 않았을 테니까.",
                                 voice: "story/1003/100355/191F71B6",
                                 npc: 100327,
+                                speakerName: "블루스",
                             },
                         ],
                     },
@@ -22363,6 +22492,7 @@ export const questData_kr: QuestStory[] = [
                                     "우린 이런 날들이 얼마나 흘렀는지도 알 수 없었어...\n그저 우리 몸이 점점 흉측한 괴물로 변해가고 있다는 것만 느껴졌지.\n마음도 점점 얼어붙었고, 눈물의 호수 위로 불어오는 차가운 바람 속에서 산산조각이 나버렸어...",
                                 voice: "story/1003/100355/191F742C",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10035519,
                             },
                             {
@@ -22370,6 +22500,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "사람으로 태어났던 옛 기억은 점점 멀어져 갔어. 결국, 이름조차 잊히고 말았지.",
                                 voice: "story/1003/100355/191F7456",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10035520,
                             },
                             {
@@ -22377,6 +22508,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "블루스 페실은 죽었어. 이제 남은 건 <W>47번</>이라는 새 '호칭'뿐이야.",
                                 voice: "story/1003/100355/191F7480",
                                 npc: 100327,
+                                speakerName: "No. 47",
                                 next: 10035521,
                             },
                             {
@@ -22384,6 +22516,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하지만 그런데도, 우리의 육체는 여전히 비참하게 발버둥 치며 버티고 있었어.",
                                 voice: "story/1003/100355/191F74AA",
                                 npc: 100327,
+                                speakerName: "No. 47",
                             },
                         ],
                     },
@@ -22398,6 +22531,7 @@ export const questData_kr: QuestStory[] = [
                                     "보고드립니다, 선생님. 배척 반응은 멈췄고, 각종 지표도 안정 상태로 접어들었습니다. 다만 β형 억제제를 너무 많이 사용한 탓인지 정신 상태가 불안정합니다.",
                                 voice: "story/1003/100355/191F74D4",
                                 npc: 100336,
+                                speakerName: "앳된 목소리",
                                 next: 10035523,
                             },
                             {
@@ -22406,6 +22540,7 @@ export const questData_kr: QuestStory[] = [
                                     "정신 따위는 생명 대사의 부산물일 뿐이야. 개조체가 '예'라고 대답할 수 있으면 그걸로 충분하다. 실험장으로 데리고 가라.",
                                 voice: "story/1003/100355/191F74FE",
                                 npc: 100337,
+                                speakerName: "싸늘한 목소리",
                                 next: 10035524,
                             },
                             {
@@ -22413,6 +22548,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "네, 선생님.",
                                 voice: "story/1003/100355/191F7528",
                                 npc: 100336,
+                                speakerName: "앳된 목소리",
                             },
                         ],
                     },
@@ -22432,6 +22568,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035601,
                                 content: "억제제가 있으면, <H>우리 명령에 거역하는 것조차 할 수 없어</>. 완전히 가축이나 다름없군.",
                                 voice: "story/1003/100356/191F81CA",
+                                speakerName: "연금원 안의 소리",
                                 next: 10035602,
                             },
                             {
@@ -22439,24 +22576,28 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "잔인하고 야만적이며, 이성도 없고 아름다움도 전혀 느껴지지 않는군. 하지만, 그게 바로 카론의 원초적인 모습이지.",
                                 voice: "story/1003/100356/191F81F4",
+                                speakerName: "연금원 안의 소리",
                                 next: 10035603,
                             },
                             {
                                 id: 10035603,
                                 content: "이봐, 놈에게서 떨어지라고. 혹시 몸에 뭔가 더러운 게 묻어 있을지도 모르잖아.",
                                 voice: "story/1003/100356/191F821E",
+                                speakerName: "연금원 안의 소리",
                                 next: 10035604,
                             },
                             {
                                 id: 10035604,
                                 content: "이따가 놈의 전투 데이터를 잘 기록해 둬. 기준에 못 미치거나 수상한 행동이라도 보이면 바로 처리해.",
                                 voice: "story/1003/100356/191F8248",
+                                speakerName: "연금원 안의 소리",
                                 next: 10035605,
                             },
                             {
                                 id: 10035605,
                                 content: "정말 이렇게 해도 되는 건가? 너무 잔인한 거 아닐까?",
                                 voice: "story/1003/100356/191F8272",
+                                speakerName: "연금원 안의 소리",
                                 next: 10035606,
                             },
                             {
@@ -22464,6 +22605,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "아니, 오히려 이렇게 말해야지. 폐하의 자비와 연금술의 위대함이 이런 쓰레기들에게조차 연금원에 헌신할 가치를 부여한 거라고.",
                                 voice: "story/1003/100356/191F829C",
+                                speakerName: "연금원 안의 소리",
                                 next: 10035607,
                             },
                             {
@@ -22471,6 +22613,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "도망칠 생각은 하지 마라. 전기 울타리와 기관포는 우리처럼 자비롭지 않으니까. 자해할 생각도 하지 마라. 네 하찮은 목숨을 유지할 약품은 아직도 차고 넘치니까.",
                                 voice: "story/1003/100356/191F82C6",
+                                speakerName: "연금원 안의 소리",
                             },
                         ],
                     },
@@ -22483,12 +22626,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035608,
                                 content: "테스트를 시작한다, 개조체를 투입해.",
                                 voice: "story/1003/100356/191F82F0",
+                                speakerName: "싸늘한 목소리",
                                 next: 10035609,
                             },
                             {
                                 id: 10035609,
                                 content: "47번, 모든 방해자를 제거해라.",
                                 voice: "story/1003/100356/191F831A",
+                                speakerName: "앳된 목소리",
                                 next: 10035610,
                             },
                             {
@@ -22496,6 +22641,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "네.",
                                 voice: "story/1003/100356/191F8344",
                                 npc: 100328,
+                                speakerName: "No. 47",
                             },
                         ],
                     },
@@ -22509,6 +22655,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035611,
                                 content: "저쪽에 아직 적이 있어, 멈추지 말고 계속하거라.",
                                 voice: "story/1003/100356/191F836E",
+                                speakerName: "앳된 목소리",
                             },
                         ],
                     },
@@ -22521,6 +22668,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035617,
                                 content: "테스트 통과. 수용소로 데려가. 우리는 다음 개조체를 맞이할 준비를 한다.",
                                 voice: "story/1003/100356/191F846A",
+                                speakerName: "싸늘한 목소리",
                             },
                         ],
                     },
@@ -22534,6 +22682,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035612,
                                 content: "데이터가 예상보다 뒤처지고 있어. 저쪽 적들도 처리해, 빨리.",
                                 voice: "story/1003/100356/191F8398",
+                                speakerName: "싸늘한 목소리",
                             },
                         ],
                     },
@@ -22547,6 +22696,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035613,
                                 content: "힘내! 힘내라고!",
                                 voice: "story/1003/100356/191F83C2",
+                                speakerName: "앳된 목소리",
                             },
                         ],
                     },
@@ -22560,6 +22710,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035614,
                                 content: "부상인가? 너무 약한 거 아니야?",
                                 voice: "story/1003/100356/191F83EC",
+                                speakerName: "싸늘한 목소리",
                             },
                         ],
                     },
@@ -22573,6 +22724,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035615,
                                 content: "저쪽으로~",
                                 voice: "story/1003/100356/191F8416",
+                                speakerName: "앳된 목소리",
                             },
                         ],
                     },
@@ -22585,6 +22737,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035616,
                                 content: "저쪽 적이 아직 숨이 붙어 있잖아. 이런 적도 제대로 처리 못 하는 거야?",
                                 voice: "story/1003/100356/191F8440",
+                                speakerName: "싸늘한 목소리",
                             },
                         ],
                     },
@@ -22606,6 +22759,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "일어나, 일어나.",
                                 voice: "story/1003/100357/191F9232",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035702,
                             },
                             {
@@ -22613,6 +22767,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "난 36번이야, 넌 누구야?",
                                 voice: "story/1003/100357/191F925C",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035703,
                             },
                             {
@@ -22620,6 +22775,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100357/191F9286",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035704,
                             },
                             {
@@ -22627,6 +22783,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "말하기 싫어도 괜찮아. 그냥 아무 소리나 내봐. 네가 살아 있다는 것만 알면 돼.",
                                 voice: "story/1003/100357/191F92B0",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035705,
                             },
                             {
@@ -22634,6 +22791,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...47번.",
                                 voice: "story/1003/100357/191F92DA",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035706,
                             },
                             {
@@ -22641,6 +22799,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "다행이다. 다시는 얘기 나눌 사람을 못 만날 줄 알았어.",
                                 voice: "story/1003/100357/191F9304",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035707,
                             },
                             {
@@ -22648,6 +22807,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "우리 친해?",
                                 voice: "story/1003/100357/191F932E",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035708,
                             },
                             {
@@ -22655,6 +22815,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하하, 곧 친해지겠지. 우린 이 끔찍한 곳에 남은 유일한 <H>사람</>이잖아.",
                                 voice: "story/1003/100357/191F9358",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035709,
                             },
                             {
@@ -22662,6 +22823,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하, 우리를 아직 사람이라고 생각하는 건 너뿐이야.",
                                 voice: "story/1003/100357/191F9382",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035710,
                             },
                             {
@@ -22669,6 +22831,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "중요한 건 마음이야.",
                                 voice: "story/1003/100357/191F93AC",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035711,
                             },
                             {
@@ -22676,6 +22839,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그런 건 이미 오래전에 실험대에서 산산조각 났어.",
                                 voice: "story/1003/100357/191F93D6",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035712,
                             },
                             {
@@ -22683,6 +22847,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그럼, 우리가 그걸 다시 맞춰보자. 그리고 함께 사람으로 이곳에서 탈출하는 거야.",
                                 voice: "story/1003/100357/191F9400",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035713,
                             },
                             {
@@ -22690,6 +22855,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...꿈 깨.",
                                 voice: "story/1003/100357/191F942A",
                                 npc: 100328,
+                                speakerName: "No. 47",
                             },
                         ],
                     },
@@ -22703,12 +22869,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035801,
                                 content: "테스트 시작. 이번 적은 비교적 드문 유형이니 데이터 기록을 철저하게 해.",
                                 voice: "story/1003/100358/191FA29A",
+                                speakerName: "싸늘한 목소리",
                                 next: 10035802,
                             },
                             {
                                 id: 10035802,
                                 content: "네, 선생님!",
                                 voice: "story/1003/100358/191FA2C4",
+                                speakerName: "앳된 목소리",
                             },
                         ],
                     },
@@ -22721,12 +22889,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035803,
                                 content: "우리가 사로잡히긴 했지만, 감히 우리에게 무기를 주다니, 신의 분노를 맛보게 해주겠다!",
                                 voice: "story/1003/100358/191FA2EE",
+                                speakerName: "사로잡힌 교회 병사",
                                 next: 10035804,
                             },
                             {
                                 id: 10035804,
                                 content: "휘페르보레아인, 타락한 신성 모독자들, 이런 괴물을 만들어내다니! 죽여라!",
                                 voice: "story/1003/100358/191FA318",
+                                speakerName: "사로잡힌 교회 병사",
                             },
                         ],
                     },
@@ -22739,6 +22909,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035805,
                                 content: "살, 살려줘! 이미 항복했잖아!",
                                 voice: "story/1003/100358/191FA342",
+                                speakerName: "사로잡힌 교회 병사",
                                 next: 10035806,
                             },
                             {
@@ -22746,6 +22917,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100358/191FA36C",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035807,
                             },
                             {
@@ -22753,6 +22925,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "아홉 신이시여...! 제발 저를 불쌍히 여기소서. 지혜를 주소서, 힘을 주소서, 그리고 가호를 내려 주소서...!",
                                 voice: "story/1003/100358/191FA396",
+                                speakerName: "사로잡힌 교회 병사",
                                 next: 10035808,
                             },
                             {
@@ -22760,12 +22933,14 @@ export const questData_kr: QuestStory[] = [
                                 content: "죄송합니다.",
                                 voice: "story/1003/100358/191FA3C0",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035809,
                             },
                             {
                                 id: 10035809,
                                 content: "아아... 용서해 주소서, 용서해 주소서...",
                                 voice: "story/1003/100358/191FA3EA",
+                                speakerName: "사로잡힌 교회 병사",
                             },
                         ],
                     },
@@ -22778,6 +22953,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035813,
                                 content: "실험 데이터 수집 완료. 너희는 알아서 돌아가, 나는 선생님께 보고서를 제출하러 가야 되니까.",
                                 voice: "story/1003/100358/191FA492",
+                                speakerName: "앳된 목소리",
                             },
                         ],
                     },
@@ -22799,6 +22975,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "(흥얼거림)",
                                 voice: "story/1003/100359/191FB302",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035902,
                             },
                             {
@@ -22806,6 +22983,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "미안해, 너무 시끄럽게 했나?",
                                 voice: "story/1003/100359/191FB32C",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035903,
                             },
                             {
@@ -22813,6 +22991,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "너무 못 불러서 잠이 안 오네. 누가 〈설국의 아이〉를 이렇게 끔찍하게 부르는 건 처음이야.",
                                 voice: "story/1003/100359/191FB356",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035904,
                             },
                             {
@@ -22820,6 +22999,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하하, 악기가 있어서 연주할 수 있으면 이렇게 형편없진 않았을 텐데.",
                                 voice: "story/1003/100359/191FB380",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035905,
                             },
                             {
@@ -22827,6 +23007,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "넌 아프지 않아?",
                                 voice: "story/1003/100359/191FB3AA",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035906,
                             },
                             {
@@ -22834,6 +23015,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아플수록 노래를 불러야지.",
                                 voice: "story/1003/100359/191FB3D4",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035907,
                             },
                             {
@@ -22841,6 +23023,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그만둬. 실험도 겨우 버텼는데, 노래 부르다 죽지나 마.",
                                 voice: "story/1003/100359/191FB3FE",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035908,
                             },
                             {
@@ -22848,6 +23031,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "육체의 고통은 아무것도 아니야. 살아 있는 사람을...! 그게 진짜 고통스러운 거지...",
                                 voice: "story/1003/100359/191FB428",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035909,
                             },
                             {
@@ -22856,6 +23040,7 @@ export const questData_kr: QuestStory[] = [
                                     "이렇게 오래 지나도 아직도 자기를 사람이라고 생각하나 보네. 우린 괴물이야. 무지하고, 무감각하고, 남이 부리는 대로 움직이는 괴물. 기억해, 그러면 덜 고통스러울 거야.",
                                 voice: "story/1003/100359/191FB452",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035910,
                             },
                             {
@@ -22863,6 +23048,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "안 돼... 괴물이 될 순 없어... 마음마저 항복해버리면, 그땐 정말로 괴물이 돼버리는 거야.",
                                 voice: "story/1003/100359/191FB47C",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035911,
                             },
                             {
@@ -22870,6 +23056,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "지난번에 탈출에 실패하고 전기의자에 앉은 거 잊었어? 그만둬. 아니면, 또 한 번 앉아보고 싶은 건가?",
                                 voice: "story/1003/100359/191FB4A6",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035912,
                             },
                             {
@@ -22877,6 +23064,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "거봐, 넌 아직 이런 것들을 신경 쓰고 있잖아. 그게 네가 아직 괴물이 아니라는 증거야.",
                                 voice: "story/1003/100359/191FB4D0",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10035913,
                             },
                             {
@@ -22884,6 +23072,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "궤변이야.",
                                 voice: "story/1003/100359/191FB4FA",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10035914,
                             },
                             {
@@ -22891,6 +23080,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "걱정하지 마, 내가 널 데리고 이곳에서 탈출할게.",
                                 voice: "story/1003/100359/191FB524",
                                 npc: 100331,
+                                speakerName: "No. 36",
                             },
                         ],
                     },
@@ -22903,18 +23093,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035810,
                                 content: "가라! 너희 중 누가 진짜 악마인지 한번 보자고, 하하하!",
                                 voice: "story/1003/100358/191FA414",
+                                speakerName: "앳된 목소리",
                                 next: 10035811,
                             },
                             {
                                 id: 10035811,
                                 content: "정말 쓸 만하군. 그동안 주사했던 억제제와 함께 안정성도 꽤 높아졌어.",
                                 voice: "story/1003/100358/191FA43E",
+                                speakerName: "앳된 목소리",
                                 next: 10035812,
                             },
                             {
                                 id: 10035812,
                                 content: "이대로라면 개조 실험을 다른 군단에도 확산시키는 건 시간문제겠어.",
                                 voice: "story/1003/100358/191FA468",
+                                speakerName: "싸늘한 목소리",
                             },
                         ],
                     },
@@ -22927,24 +23120,28 @@ export const questData_kr: QuestStory[] = [
                                 id: 10035915,
                                 content: "와, 이걸로도 안 죽다니. 재생 능력이 잘 적응된 모양이네.",
                                 voice: "story/1003/100359/191FB54E",
+                                speakerName: "앳된 목소리",
                                 next: 10035916,
                             },
                             {
                                 id: 10035916,
                                 content: "야, 네가 무슨 생각하는지 내가 모를 거로 생각하지 마.",
                                 voice: "story/1003/100359/191FB578",
+                                speakerName: "앳된 목소리",
                                 next: 10035917,
                             },
                             {
                                 id: 10035917,
                                 content: "분명 쉽게 이길 수 있었을 텐데, 일부러 빈틈을 보여서 이렇게 다친 거잖아.",
                                 voice: "story/1003/100359/191FB5A2",
+                                speakerName: "앳된 목소리",
                                 next: 10035918,
                             },
                             {
                                 id: 10035918,
                                 content: "우리가 너희같이 소중한 개조체를 그냥 죽게 놔둘 리 없잖아!",
                                 voice: "story/1003/100359/191FB5CC",
+                                speakerName: "앳된 목소리",
                             },
                         ],
                     },
@@ -22965,6 +23162,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "36번, 야, 36번!",
                                 voice: "story/1003/100360/191FC36A",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036002,
                             },
                             {
@@ -22972,6 +23170,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100360/191FC394",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036003,
                             },
                             {
@@ -22979,6 +23178,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이봐...",
                                 voice: "story/1003/100360/191FC3BE",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036004,
                             },
                             {
@@ -22986,6 +23186,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100360/191FC3E8",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036005,
                             },
                             {
@@ -22993,6 +23194,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "저기, 이거... 가져가... 이걸로 낮에 입은 상처를 조금이나마 치료할 수 있을 거야.",
                                 voice: "story/1003/100360/191FC412",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036006,
                             },
                             {
@@ -23000,6 +23202,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...그래서 낮에 임무를 그렇게 늦게 끝내고, 심지어 맞기까지 한 게 이 몇 병의 약 때문이었어?",
                                 voice: "story/1003/100360/191FC43C",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036007,
                             },
                             {
@@ -23007,6 +23210,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "들켰네...",
                                 voice: "story/1003/100360/191FC466",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036008,
                             },
                             {
@@ -23014,6 +23218,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "절대 살아갈 희망을 버리지 마. 내가 말했잖아, 널 데리고 살아서 탈출할 거라고.",
                                 voice: "story/1003/100360/191FC490",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036009,
                             },
                             {
@@ -23021,6 +23226,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "왜 살고 싶어 하는 거야? 이렇게까지 됐는데, 나가 봐야 좋은 일이 뭐가 있겠어?",
                                 voice: "story/1003/100360/191FC4BA",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036010,
                             },
                             {
@@ -23028,6 +23234,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하지만, 이대로 죽으면 좋은 일은 영원히 일어나지 않을 거잖아. 난 그게 너무 억울해.",
                                 voice: "story/1003/100360/191FC4E4",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036011,
                             },
                             {
@@ -23035,6 +23242,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "우리 아직 이루지 못한 꿈이 있잖아.",
                                 voice: "story/1003/100360/191FC50E",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036012,
                             },
                             {
@@ -23042,6 +23250,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이젠 중요하지 않아, 어차피 이렇게 돼버렸으니까.",
                                 voice: "story/1003/100360/191FC538",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036013,
                             },
                             {
@@ -23049,6 +23258,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "말해봐. 자꾸 얘기하다 보면, 우리가 아직 사람이라는 걸 기억할 수 있을 거야.",
                                 voice: "story/1003/100360/191FC562",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036014,
                             },
                             {
@@ -23056,6 +23266,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100360/191FC58C",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036015,
                             },
                             {
@@ -23063,6 +23274,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...배우...",
                                 voice: "story/1003/100360/191FC5B6",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036016,
                             },
                             {
@@ -23070,6 +23282,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "뭐라고?",
                                 voice: "story/1003/100360/191FC5E0",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036017,
                             },
                             {
@@ -23077,6 +23290,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "내 꿈은 배우가 되는 거였어.",
                                 voice: "story/1003/100360/191FC60A",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036018,
                             },
                             {
@@ -23085,6 +23299,7 @@ export const questData_kr: QuestStory[] = [
                                     "제6군단 시험에 참여한 것도 언젠가 '계관카론'이 되기 위해서였어. 더 나은 삶을 살 수만 있다면, 더 넓은 무대에 설 기회가 생길 테니까...",
                                 voice: "story/1003/100360/191FC634",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036019,
                             },
                             {
@@ -23093,6 +23308,7 @@ export const questData_kr: QuestStory[] = [
                                     "단지 카론이라는 이유만으로 무대 위 배우들을 우두커니 바라보거나, 방 가득한 녹음테이프를 보며 침묵하진 않았을 거야. 머리 위 뿔이 관객들의 눈을 더럽힌다고 공연에 설 자격조차 없었던 그때처럼은 아니겠지.",
                                 voice: "story/1003/100360/191FC65E",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036020,
                             },
                             {
@@ -23100,6 +23316,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하, 하하.",
                                 voice: "story/1003/100360/191FC688",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036021,
                             },
                             {
@@ -23107,6 +23324,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "진짜 웃기지.",
                                 voice: "story/1003/100360/191FC6B2",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036022,
                             },
                             {
@@ -23114,6 +23332,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "난 잘 어울린다고 생각해.",
                                 voice: "story/1003/100360/191FC6DC",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036023,
                             },
                             {
@@ -23122,6 +23341,7 @@ export const questData_kr: QuestStory[] = [
                                     "나도 오페라를 좋아해, 어쩐지 너랑 처음부터 잘 통한다고 했어. 우리 나중에 탈출하면 무대를 하나 만들어서, 가족들이랑 친구들을 초대해 우리 공연을 보여주자.",
                                 voice: "story/1003/100360/191FC706",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036024,
                             },
                             {
@@ -23129,6 +23349,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100360/191FC730",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036025,
                             },
                             {
@@ -23136,6 +23357,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "말 안 하면 동의한 걸로 친다? 약속한 건 반드시 지켜야 하는 거야.",
                                 voice: "story/1003/100360/191FC75A",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036026,
                             },
                             {
@@ -23143,6 +23365,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "왠지 탈출할 기회가 곧 올 것 같은 예감이 들어.",
                                 voice: "story/1003/100360/191FC784",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036027,
                             },
                             {
@@ -23150,6 +23373,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "착각일 뿐이야.",
                                 voice: "story/1003/100360/191FC7AE",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036028,
                             },
                             {
@@ -23158,6 +23382,7 @@ export const questData_kr: QuestStory[] = [
                                     "이건 착각이 아니야. 너도 느껴지지 않아? 이 몇 년 사이에 <H>억제제의 효과가 점점 약해지고 있다</>는걸?",
                                 voice: "story/1003/100360/191FC7D8",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036029,
                             },
                             {
@@ -23165,6 +23390,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이게 우리가 아직 인간이라는 증거야. 우리 몸조차도 이제 반항할 때라고 알려주고 있잖아!",
                                 voice: "story/1003/100360/191FC802",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036030,
                             },
                             {
@@ -23172,6 +23398,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "반대로 말하자면, 이 빌어먹을 괴물 같은 몸이 너무 완벽하게 변이됐다는 거지.",
                                 voice: "story/1003/100360/191FC82C",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036031,
                             },
                             {
@@ -23180,6 +23407,7 @@ export const questData_kr: QuestStory[] = [
                                     "하하, 연금술사들이 이런 변이를 아직 눈치채지 못했어. 결과적으로는 우리한테 좋은 일이잖아! 잠깐만, 작전 암호를 하나 정해야겠어...",
                                 voice: "story/1003/100360/191FC856",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036032,
                             },
                             {
@@ -23187,6 +23415,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100360/191FC880",
                                 npc: 100328,
+                                speakerName: "No. 47",
                             },
                         ],
                     },
@@ -23206,6 +23435,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10036113,
                                 content: "죄, 죄송합니다, 선생님... 개조체가 억제제의 통제를 벗어날 줄은 정말 몰랐습니다...",
                                 voice: "story/1003/100361/191FD5CA",
+                                speakerName: "앳된 목소리",
                                 next: 10036114,
                             },
                             {
@@ -23213,12 +23443,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "이건 지금까지 모든 개조체에게서 한 번도 나타난 적 없는 <H>변이</>야. 어쩌면 이게 우리 최고의 걸작일지도 모른다고!",
                                 voice: "story/1003/100361/191FD5F4",
+                                speakerName: "싸늘한 목소리",
                                 next: 10036115,
                             },
                             {
                                 id: 10036115,
                                 content: "소식을 봉쇄하라! 최신 γ형 억제제를 사용해! 반드시 개조체를 사로잡아야 한다!",
                                 voice: "story/1003/100361/191FD61E",
+                                speakerName: "싸늘한 목소리",
                             },
                         ],
                     },
@@ -23232,6 +23464,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "쿨럭, 쿨럭... 내가 해낸 건가...",
                                 voice: "story/1003/100361/191FD648",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036117,
                             },
                             {
@@ -23239,6 +23472,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "해냈어, 네가 해냈다고!",
                                 voice: "story/1003/100361/191FD672",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036118,
                             },
                             {
@@ -23246,12 +23480,14 @@ export const questData_kr: QuestStory[] = [
                                 content: "그럼, 다행이네...",
                                 voice: "story/1003/100361/191FD69C",
                                 npc: 100331,
+                                speakerName: "No. 36",
                                 next: 10036119,
                             },
                             {
                                 id: 10036119,
                                 content: "도망쳐? 이 세상에 전장과 실험실 말고 너희 같은 괴물이 머물 곳이 어디 있다고!",
                                 voice: "story/1003/100361/191FD6C6",
+                                speakerName: "싸늘한 목소리",
                                 next: 10036120,
                             },
                             {
@@ -23259,6 +23495,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100361/191FD6F0",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036121,
                             },
                             {
@@ -23266,6 +23503,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "우린 괴물이 아니야. 우린, 사람이야...!",
                                 voice: "story/1003/100361/191FD71A",
                                 npc: 100331,
+                                speakerName: "No. 36",
                             },
                         ],
                     },
@@ -23286,6 +23524,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이쪽!",
                                 voice: "story/1003/100361/191FD744",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036123,
                             },
                             {
@@ -23293,6 +23532,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이건... 바람인가? 자유의... 쿨럭, 쿨럭...",
                                 voice: "story/1003/100361/191FD76E",
                                 npc: 100331,
+                                speakerName: "No. 36",
                             },
                         ],
                     },
@@ -23306,6 +23546,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "여기 물소리가 들려. 분명 밖으로 통할 거야.",
                                 voice: "story/1003/100361/191FD798",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036125,
                             },
                             {
@@ -23313,6 +23554,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "정말, 다행이다, 쿨럭...",
                                 voice: "story/1003/100361/191FD7C2",
                                 npc: 100331,
+                                speakerName: "No. 36",
                             },
                         ],
                     },
@@ -23335,6 +23577,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "나왔다!",
                                 voice: "story/1003/100361/191FD7EC",
                                 npc: 100327,
+                                speakerName: "No. 47",
                                 next: 10036127,
                             },
                             {
@@ -23342,6 +23585,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "여긴 연금원의 하수도야... 아마도 밖으로 통하는 배수구가 있을 거야.",
                                 voice: "story/1003/100361/191FD816",
                                 npc: 100328,
+                                speakerName: "No. 36",
                                 next: 10036128,
                             },
                             {
@@ -23349,6 +23593,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "정말 다행이다... 우린... 자유야...",
                                 voice: "story/1003/100361/191FD840",
                                 npc: 100328,
+                                speakerName: "No. 36",
                                 next: 10036129,
                             },
                             {
@@ -23356,6 +23601,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "윽!",
                                 voice: "story/1003/100361/191FD86A",
                                 npc: 100328,
+                                speakerName: "No. 36",
                                 next: 10036130,
                             },
                             {
@@ -23363,6 +23609,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "상처가... 나머진 나한테 맡겨.",
                                 voice: "story/1003/100361/191FD894",
                                 npc: 100328,
+                                speakerName: "No. 47",
                                 next: 10036131,
                             },
                             {
@@ -23370,6 +23617,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "우선, 숨을 곳을 찾아야 해...",
                                 voice: "story/1003/100361/191FD8BE",
                                 npc: 100328,
+                                speakerName: "No. 47",
                             },
                         ],
                     },
@@ -23414,6 +23662,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "난... 괜찮아.",
                                 voice: "story/1003/100362/191FE4B8",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036205,
                             },
                             {
@@ -23422,6 +23671,7 @@ export const questData_kr: QuestStory[] = [
                                     "안타깝게도, 운명은 그저, 잠시 우리를, 가엾게 여겼을 뿐이었어. 연금원을 탈출한 건, 새로운 삶의 시작, 아니라, 끝이었어...",
                                 voice: "story/1003/100362/191FE4E2",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036206,
                             },
                             {
@@ -23429,6 +23679,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...도망칠 때, 연금술사, 신형 억제제... 내 목소리, 망가뜨렸고, 내 정신마저... 파괴했어...",
                                 voice: "story/1003/100362/191FE50C",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036207,
                             },
                             {
@@ -23436,6 +23687,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "우린 종종 미쳐가고, 통제를 잃어버려... 내 친구, <H>36번</>, 이미 나보다 한발 앞서...",
                                 voice: "story/1003/100362/191FE536",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036208,
                             },
                             {
@@ -23451,6 +23703,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "누나, 잘 들어.",
                                 voice: "story/1003/100362/191FE58A",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036210,
                             },
                             {
@@ -23458,6 +23711,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "제6군단은, 계관카론으로, 우릴 속였어.",
                                 voice: "story/1003/100362/191FE5B4",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036211,
                             },
                             {
@@ -23465,6 +23719,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "군단을, 떠나.",
                                 voice: "story/1003/100362/191FE5DE",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036212,
                             },
                             {
@@ -23472,6 +23727,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "조용한 곳, 찾아서, 잘...",
                                 voice: "story/1003/100362/191FE608",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036213,
                             },
                             {
@@ -23486,6 +23742,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "난...",
                                 voice: "story/1003/100362/191FE65C",
                                 npc: 100327,
+                                speakerName: "블루스",
                             },
                         ],
                     },
@@ -23547,6 +23804,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "닿을 수 없는 것이라면, 땅으로 떨어뜨리면 되는 거 아닌가?",
                                 voice: "story/1003/100362/191FE7AC",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036223,
                             },
                             {
@@ -23561,6 +23819,7 @@ export const questData_kr: QuestStory[] = [
                                     "내겐 많은 이름이 있고, 많은 신분이 있다. 하지만 그것들은 결국 호칭일 뿐이야. 호칭이 어떻게 바뀌든, 신에게 버림받은 우리의 본질은 달라지지 않아.",
                                 voice: "story/1003/100362/191FE800",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036225,
                             },
                             {
@@ -23568,6 +23827,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이쯤 말했으면, 똑똑한 너희라면 내가 누군지 알겠지?",
                                 voice: "story/1003/100362/191FE82A",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036226,
                             },
                             {
@@ -23576,6 +23836,7 @@ export const questData_kr: QuestStory[] = [
                                     "나는 너희에게 초대장을 주러 왔다. 우리와 같이, 저 닿을 수 없는 솔라를 땅으로 끌어 내리고, 카론의 분노를 느끼게 해주자.",
                                 voice: "story/1003/100362/191FE854",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036227,
                             },
                             {
@@ -23584,6 +23845,7 @@ export const questData_kr: QuestStory[] = [
                                     "서둘러 거절할 필요 없어. 제국이 너희에게 저지른 짓들을 잘 생각해 봐라! 그들은 아름다운 거짓말로 너희를 속이고, 잔혹한 형벌로 너희를 고문하며, 끝없는 절망으로 너희를 짓눌렀어.",
                                 voice: "story/1003/100362/191FE87E",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036228,
                             },
                             {
@@ -23592,6 +23854,7 @@ export const questData_kr: QuestStory[] = [
                                     "이 길의 끝에서 너희를 기다리는 건 뭐였지? '계관카론'이 되어 더 나은 삶을 살고, 더 멀리 있는 꿈을 이루는 거?",
                                 voice: "story/1003/100362/191FE8A8",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036229,
                             },
                             {
@@ -23600,6 +23863,7 @@ export const questData_kr: QuestStory[] = [
                                     "아니! 솔라들에게 뼛속까지 착취당하고, 동족의 배신자들에게 쫓기며, 결국 이름 모를 어느 구석에서 죽음을 맞이하는 거야.",
                                 voice: "story/1003/100362/191FE8D2",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036230,
                             },
                             {
@@ -23608,6 +23872,7 @@ export const questData_kr: QuestStory[] = [
                                     "그들은 그저 간단한 약속 하나로 너처럼, 나처럼, 그리고 출세를 갈망하는 모든 카론을 깊은 나락으로 몰아넣었지.",
                                 voice: "story/1003/100362/191FE8FC",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036231,
                             },
                             {
@@ -23616,6 +23881,7 @@ export const questData_kr: QuestStory[] = [
                                     "제6군단과 연금원의 거짓말이 폭로되지 않는 한, 아이스레이크 시티의 카론은 끊임없이 군단의 길을 따라 걸어갈 거야. 한 명, 또 한 명, 너희와 똑같은 비극을 반복하면서.",
                                 voice: "story/1003/100362/191FE926",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036232,
                             },
                             {
@@ -23630,6 +23896,7 @@ export const questData_kr: QuestStory[] = [
                                     "우리는 제국에게 과거를 빼앗기고, 지금도 간신히 목숨을 부지하고 있어. 미래에도 이렇게 아무것도 하지 않은 채, 그 짐승들이 우리가 소중히 여기는 모든 것을 짓밟게 내버려둬야만 하는 거야?",
                                 voice: "story/1003/100362/191FE97A",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036234,
                             },
                             {
@@ -23638,6 +23905,7 @@ export const questData_kr: QuestStory[] = [
                                     "봐, 지금의 너와 나를 봐. 제국은 우리의 힘을 탐하며 우리에게 족쇄를 채우고, 우리를 짐승으로 만들어 진정한 악마로 전락시켰어.",
                                 voice: "story/1003/100362/191FE9A4",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036235,
                             },
                             {
@@ -23646,6 +23914,7 @@ export const questData_kr: QuestStory[] = [
                                     "이제 우리는 간신히 족쇄를 벗어났어. 지금이야말로 제국이 우리에게 준 이 송곳니로 그들의 목덜미를 단단히 물어뜯을 때가 아니겠나!",
                                 voice: "story/1003/100362/191FE9CE",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036236,
                             },
                             {
@@ -23654,6 +23923,7 @@ export const questData_kr: QuestStory[] = [
                                     "그들에게 우리의 존재를 각인시키고, 우리의 고통을 느끼게 하며, 다시는 우리가 소중히 여기는 것을 넘보지 못하게 하자! 그들이 피로써 참회하고, 우리의 존재를 기억하게 만들고, 제국 전체가 우리의 이름을 외치게 하자!",
                                 voice: "story/1003/100362/191FE9F8",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036237,
                             },
                             {
@@ -23668,6 +23938,7 @@ export const questData_kr: QuestStory[] = [
                                     "너희는 이걸 복수라고 이해할 수도 있겠지. 하지만 나는 너희가 이걸 보호라고 이해하기를 바란다. 이것은 오직 우리 '악마'만이 해낼 수 있는 책임이야. 내성을 뒤덮은 '쓰레기'를 청소하고, 너희 가족들에게 깨끗한 미래를 돌려주는 일 말이야.",
                                 voice: "story/1003/100362/191FEA4C",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                             },
                         ],
                     },
@@ -23683,6 +23954,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "(포세이큰 동맹...)",
                                 voice: "story/1003/100362/191FEA76",
                                 npc: 100328,
+                                speakerName: "블루스",
                                 next: 10036240,
                             },
                             {
@@ -23690,6 +23962,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "난 아직, 해야할 일이 있어.",
                                 voice: "story/1003/100362/191FEAA0",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036241,
                             },
                             {
@@ -23704,6 +23977,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "따라오지 마.",
                                 voice: "story/1003/100362/191FEAF4",
                                 npc: 100327,
+                                speakerName: "블루스",
                             },
                         ],
                     },
@@ -23724,6 +23998,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "(갈레아 극장, 내가 돌아왔다.)",
                                 voice: "story/1003/100363/191FF54A",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036306,
                             },
                             {
@@ -23731,6 +24006,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "(안타깝게도 이 멍청한 축제 날이라니... 이 미친 녀석들은 이곳을 더럽히고 있을 뿐이야.)",
                                 voice: "story/1003/100363/191FF574",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036307,
                             },
                             {
@@ -23738,6 +24014,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "(...지금은 이런 걸 생각할 때가 아니야. 동맹의 그 녀석과 만나러 가자.)",
                                 voice: "story/1003/100363/191FF59E",
                                 npc: 100327,
+                                speakerName: "블루스",
                             },
                         ],
                     },
@@ -23757,18 +24034,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 10036317,
                                 content: "멋지다! 이번 공연은 예전보다 더 리얼하네!",
                                 voice: "story/1003/100363/191FF742",
+                                speakerName: "떠들썩한 사람들",
                                 next: 10036318,
                             },
                             {
                                 id: 10036318,
                                 content: "야, 저기 봐, 누가 군단 병사처럼 분장했네? 손에 든 저거 봐, 진짜 같잖아!",
                                 voice: "story/1003/100363/191FF76C",
+                                speakerName: "떠들썩한 사람들",
                                 next: 10036319,
                             },
                             {
                                 id: 10036319,
                                 content: "저 사람들 무슨 전쟁극이라도 하는 건가? 싸워라, 싸워!",
                                 voice: "story/1003/100363/191FF796",
+                                speakerName: "떠들썩한 사람들",
                                 next: 10036320,
                             },
                             {
@@ -23776,18 +24056,21 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100363/191FF7C0",
                                 npc: 100310,
+                                speakerName: "클레이프",
                                 next: 10036321,
                             },
                             {
                                 id: 10036321,
                                 content: "우왓 씨*, 저 총소리 너무 리얼하잖아!",
                                 voice: "story/1003/100363/191FF7EA",
+                                speakerName: "떠들썩한 사람들",
                                 next: 10036322,
                             },
                             {
                                 id: 10036322,
                                 content: "잘한다! 한번 더 해줘!",
                                 voice: "story/1003/100363/191FF814",
+                                speakerName: "떠들썩한 사람들",
                                 next: 10036323,
                             },
                             {
@@ -23795,6 +24078,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하아...",
                                 voice: "story/1003/100363/191FF83E",
                                 npc: 100310,
+                                speakerName: "클레이프",
                                 next: 10036324,
                             },
                             {
@@ -23802,18 +24086,21 @@ export const questData_kr: QuestStory[] = [
                                 content: "제13군단에서 공무 집행 중이다! 총알에는 눈이 없어, 당장 꺼지지 않으면 죽는다!",
                                 voice: "story/1003/100363/191FF868",
                                 npc: 100310,
+                                speakerName: "클레이프",
                                 next: 10036325,
                             },
                             {
                                 id: 10036325,
                                 content: "잠, 잠깐... 저거 진짜였어?!",
                                 voice: "story/1003/100363/191FF892",
+                                speakerName: "떠들썩한 사람들",
                                 next: 10036326,
                             },
                             {
                                 id: 10036326,
                                 content: "군단이야, 진짜 군단이야!!",
                                 voice: "story/1003/100363/191FF8BC",
+                                speakerName: "떠들썩한 사람들",
                                 next: 10036327,
                             },
                             {
@@ -23821,6 +24108,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아널드, 토마스, 사람들을 대피시켜!",
                                 voice: "story/1003/100363/191FF8E6",
                                 npc: 100310,
+                                speakerName: "클레이프",
                                 next: 10036328,
                             },
                             {
@@ -23828,6 +24116,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "다른 사람들은 계속해서 압박한다.",
                                 voice: "story/1003/100363/191FF910",
                                 npc: 100310,
+                                speakerName: "클레이프",
                             },
                         ],
                     },
@@ -23844,6 +24133,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이런 곳으로 부르다니, 아직도 흥이 남아 있나 보군.",
                                 voice: "story/1003/100363/191FF5C8",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036309,
                             },
                             {
@@ -23852,6 +24142,7 @@ export const questData_kr: QuestStory[] = [
                                     "내가 불필요한 접촉을 줄이자고 말하지 않았나? 지금은 13군단도 철수했으니, 서둘러 전에 했던 약속을 지켜야 할 때야.",
                                 voice: "story/1003/100363/191FF5F2",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036310,
                             },
                             {
@@ -23859,6 +24150,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그래, 약속, 이젠 지킬 수 있어.",
                                 voice: "story/1003/100363/191FF61C",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036311,
                             },
                             {
@@ -23866,6 +24158,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......?!",
                                 voice: "story/1003/100363/191FF646",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                             },
                         ],
                     },
@@ -23879,6 +24172,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "너... 왜... 윽... 아악~!",
                                 voice: "story/1003/100363/191FF670",
                                 npc: 100326,
+                                speakerName: "묵직한 목소리",
                                 next: 10036313,
                             },
                             {
@@ -23886,6 +24180,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "너에게 협력하여, 13군단을 끌어들이는, 목적, 달성.",
                                 voice: "story/1003/100363/191FF69A",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036314,
                             },
                             {
@@ -23893,6 +24188,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하지만 13군단은, 진실을 밝히는 것을, 거절했다.",
                                 voice: "story/1003/100363/191FF6C4",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036315,
                             },
                             {
@@ -23900,6 +24196,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그럼, 너도, 이용 가치가, 없어.",
                                 voice: "story/1003/100363/191FF6EE",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036316,
                             },
                             {
@@ -23907,6 +24204,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "포세이큰도, 후환이야.",
                                 voice: "story/1003/100363/191FF718",
                                 npc: 100327,
+                                speakerName: "블루스",
                             },
                         ],
                     },
@@ -24082,6 +24380,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그건, 안 되지.",
                                 voice: "story/1003/100365/19201812",
                                 npc: 100327,
+                                speakerName: "블루스",
                             },
                         ],
                     },
@@ -24123,6 +24422,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "너희, 왜...",
                                 voice: "story/1003/100365/192018E4",
                                 npc: 100327,
+                                speakerName: "블루스",
                             },
                         ],
                     },
@@ -24144,6 +24444,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "너희들은, 왜 온 거지? 군단에 맞서면, 그 결말은...",
                                 voice: "story/1003/100365/19201938",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036525,
                             },
                             {
@@ -24238,6 +24539,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...그래, 그럴게. 하지만 누나도, 한가지 약속해 줘.",
                                 voice: "story/1003/100365/19201B06",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036536,
                             },
                             {
@@ -24245,6 +24547,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "무슨 일이 있어도, 잘, 살아.",
                                 voice: "story/1003/100365/19201B30",
                                 npc: 100327,
+                                speakerName: "블루스",
                             },
                         ],
                     },
@@ -24259,6 +24562,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "군단을, 공격했으니, 앞에서 기다리는 건, 끝없는 고통이나, 죽음뿐이야.",
                                 voice: "story/1003/100365/19201B5A",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036538,
                             },
                             {
@@ -24266,6 +24570,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "나도 아직, 이루지 못한 소원이, 있어. 미안하지만, 남은 길은 누나 혼자 가줘야 할 것 같아.",
                                 voice: "story/1003/100365/19201B84",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036539,
                             },
                             {
@@ -24273,6 +24578,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아이스레이크 시티의, 월석 사냥꾼. 부탁 하나 해도 될까. 그녀를...",
                                 voice: "story/1003/100365/19201BAE",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036540,
                             },
                             {
@@ -24287,6 +24593,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "도망은, 끝이 없어.",
                                 voice: "story/1003/100365/19201C02",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036542,
                             },
                             {
@@ -24301,6 +24608,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "가, 라. 너도, 좋은 사람이야, 그 녀석, 처럼.",
                                 voice: "story/1003/100365/19201C56",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036544,
                             },
                             {
@@ -24329,6 +24637,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "“무언의 눈송이... 하늘의 딸이여... 이름 없는 아이를 위해... 기도해 줘요...”",
                                 voice: "story/1003/100365/19201CFE",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036548,
                             },
                             {
@@ -24343,6 +24652,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "“얼음 땅 아래... 깊이 잠들었네...”",
                                 voice: "story/1003/100365/19201D52",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036582,
                             },
                             {
@@ -24371,6 +24681,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...허...",
                                 voice: "story/1003/100365/19201DFA",
                                 npc: 100328,
+                                speakerName: "'블루스'",
                                 next: 10036554,
                             },
                             {
@@ -24378,6 +24689,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...언제, 눈치챈 거지?",
                                 voice: "story/1003/100365/19201E24",
                                 npc: 100328,
+                                speakerName: "'블루스'",
                                 next: 10036555,
                             },
                             {
@@ -24476,6 +24788,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그것까지, 맞추다니...",
                                 voice: "story/1003/100365/19202046",
                                 npc: 100328,
+                                speakerName: "'블루스'",
                                 next: 10036568,
                             },
                             {
@@ -24483,6 +24796,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그래, 블루스는 이제 없어. 하지만 그는 누나가 자신을 죽였다는 사실을 알게 되길 원하지 않았어...",
                                 voice: "story/1003/100365/19202070",
                                 npc: 100328,
+                                speakerName: "'블루스'",
                                 next: 10036569,
                             },
                             {
@@ -24490,6 +24804,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "넌, 정말 똑똑해. 만약 그때 우리도 너처럼... 됐어, 세상에 '만약' 같은 건 없으니까.",
                                 voice: "story/1003/100365/1920209A",
                                 npc: 100328,
+                                speakerName: "'블루스'",
                                 next: 100365691,
                             },
                             {
@@ -24498,6 +24813,7 @@ export const questData_kr: QuestStory[] = [
                                     "난, 너희를 속였어. 그 이야기에서, 두 사람의 이름을, 바꿔 말했어. 날 구한 건... 블루스야. 그는 다시 한번 나에게 인간으로 태어난다는 게 어떤 느낌인지 알려줬어.",
                                 voice: "story/1003/100365/192020C4",
                                 npc: 100328,
+                                speakerName: "'블루스'",
                                 next: 10036571,
                             },
                             {
@@ -24506,6 +24822,7 @@ export const questData_kr: QuestStory[] = [
                                     "하지만 난 이미, 인간으로서의 자격을 빼앗겼어. 이름이란 건, 그저, 죽어버린 허상일 뿐... 날 그냥 <H>환상</>이라고 불러줘.",
                                 voice: "story/1003/100365/192020EE",
                                 npc: 100328,
+                                speakerName: "'블루스'",
                                 next: 10036572,
                             },
                             {
@@ -24513,6 +24830,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "월석 사냥꾼, 의뢰다. 리듬을 데리고, 이곳을 벗어나, 그녀를 잘 지켜줘.",
                                 voice: "story/1003/100365/19202118",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036573,
                             },
                             {
@@ -24520,6 +24838,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그리고, 영원히, 그녀에게, 나라는 사람에 대해, 얘기하지 말아줘.",
                                 voice: "story/1003/100365/19202142",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036574,
                             },
                             {
@@ -24541,6 +24860,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "고, 맙다.",
                                 voice: "story/1003/100365/192021C0",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036577,
                             },
                             {
@@ -24555,6 +24875,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100365/19202214",
                                 npc: 100328,
+                                speakerName: "환상",
                             },
                         ],
                     },
@@ -24569,6 +24890,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이제 마지막으로 해야 할 일이 하나 남았군.",
                                 voice: "story/1003/100365/1920223E",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036580,
                             },
                             {
@@ -24576,6 +24898,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그들, 몸에 남은 상처만, 위조하면...",
                                 voice: "story/1003/100365/19202268",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036586,
                             },
                             {
@@ -24632,6 +24955,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이렇게 하면, 아무도 너희가 여기에 왔었다는 걸, 알지 못할 거야.",
                                 voice: "story/1003/100366/192025DA",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036602,
                             },
                             {
@@ -24639,6 +24963,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이 비밀은, 내가... 무덤까지 가져가겠다.",
                                 voice: "story/1003/100366/19202604",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036603,
                             },
                             {
@@ -24646,6 +24971,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "블루스, 난 약속을 지켰어.",
                                 voice: "story/1003/100366/1920262E",
                                 npc: 100328,
+                                speakerName: "환상",
                             },
                         ],
                     },
@@ -24659,6 +24985,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "포세이큰 동맹의 사람들이 떠났어. 블루스, 상처는 좀 어때... 블루스, 블루스!",
                                 voice: "story/1003/100367/19203642",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036702,
                             },
                             {
@@ -24666,6 +24993,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이 몸도, 강철 같은 건 아니네... 제국 연금원, 기술도, 별거 아니군.",
                                 voice: "story/1003/100367/1920366C",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036703,
                             },
                             {
@@ -24674,6 +25002,7 @@ export const questData_kr: QuestStory[] = [
                                     "누나의... 사격 실력이 꽤 정확하네. 예전보다 훨씬... 좋아졌어. 이제 스스로를 잘... 지킬 수 있겠어... 컥!",
                                 voice: "story/1003/100367/19203696",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036704,
                             },
                             {
@@ -24681,6 +25010,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "지금 그런 말을 할 때야?!",
                                 voice: "story/1003/100367/192036C0",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036705,
                             },
                             {
@@ -24688,6 +25018,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하, 하.",
                                 voice: "story/1003/100367/192036EA",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036706,
                             },
                             {
@@ -24695,6 +25026,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "버텨, 지금 의사에게 데려갈게! 강제로 치료시키면, 우리 같은 괴물이라도...!",
                                 voice: "story/1003/100367/19203714",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036707,
                             },
                             {
@@ -24702,6 +25034,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...그럴 필요, 없어.",
                                 voice: "story/1003/100367/1920373E",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036708,
                             },
                             {
@@ -24710,6 +25043,7 @@ export const questData_kr: QuestStory[] = [
                                     "너는 줄곧, 나에게 말해주지 않았지만... 나는 짐작할 수 있어. 몸에, 지울 수 없는 피는... 어디서 온 건지...",
                                 voice: "story/1003/100367/19203768",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036709,
                             },
                             {
@@ -24717,6 +25051,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이렇게, 죽는 게, 모두에게, 좋아...",
                                 voice: "story/1003/100367/19203792",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036710,
                             },
                             {
@@ -24725,6 +25060,7 @@ export const questData_kr: QuestStory[] = [
                                     "이 멍청아, 뭐가 모두에게 좋다는 거야? 너 자신은 어쩌고? 네가 뭐라고 했는지 잊었어? 탈출하면 우리가 무대를 만들 거라고, 내가 너에게 공연하는 법을 가르쳐주고, 모든 친구와 가족들을 불러 우리의 공연을 보여줄 거라고 했잖아!",
                                 voice: "story/1003/100367/192037BC",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036711,
                             },
                             {
@@ -24732,6 +25068,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "미안해... 약속은 못 지킬 것 같다...",
                                 voice: "story/1003/100367/192037E6",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036712,
                             },
                             {
@@ -24739,6 +25076,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아니... 맞다, 누나, 네 누나! 네가 가장 그리워했던 누나, 아직 누나랑 다시 인사하지도 못했잖아!",
                                 voice: "story/1003/100367/19203810",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036713,
                             },
                             {
@@ -24747,6 +25085,7 @@ export const questData_kr: QuestStory[] = [
                                     "...나는 겁쟁이야... 가족과 다시 만나고 싶다고 멋들어지게 말했지만, 막상 누나를 정말로 마주했을 땐... 도망치기 바빴을 뿐... 아무것도, 할 수 없었어...",
                                 voice: "story/1003/100367/1920383A",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036714,
                             },
                             {
@@ -24754,6 +25093,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "나, 나 부탁이... 하나 있어.",
                                 voice: "story/1003/100367/19203864",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036715,
                             },
                             {
@@ -24761,6 +25101,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이 체인은... 증표야. 누나를 찾아서, 전해줘... 제6군단의... 진실을... 누나가... 속지 않도록...",
                                 voice: "story/1003/100367/1920388E",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036716,
                             },
                             {
@@ -24768,6 +25109,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그리고, 절대로, <H>내가 그녀 손에 죽었다는 걸... 알게 하지 마.</> 누난, 견디지 못할 거야...",
                                 voice: "story/1003/100367/192038B8",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036717,
                             },
                             {
@@ -24775,6 +25117,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "부탁... 할게.",
                                 voice: "story/1003/100367/192038E2",
                                 npc: 100327,
+                                speakerName: "블루스",
                                 next: 10036718,
                             },
                             {
@@ -24782,6 +25125,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "블루스...!!",
                                 voice: "story/1003/100367/1920390C",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036719,
                             },
                             {
@@ -24789,6 +25133,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "약속할게.",
                                 voice: "story/1003/100367/19203936",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036720,
                             },
                             {
@@ -24797,6 +25142,7 @@ export const questData_kr: QuestStory[] = [
                                     "하지만... 어떻게 해야 네 죽음의 원인을 숨기면서도, 그녀가 제6군단의 진실을 믿게 만들 수 있을까...",
                                 voice: "story/1003/100367/19203960",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036721,
                             },
                             {
@@ -24804,6 +25150,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...그래, 그 방법밖에.",
                                 voice: "story/1003/100367/1920398A",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036722,
                             },
                             {
@@ -24812,6 +25159,7 @@ export const questData_kr: QuestStory[] = [
                                     "<H>'블루스'가 아직 살아 있다고 믿게 하고, '블루스'가 그녀에게 모든 것을 말하게 하면 돼</>... 그렇게 하면 돼...",
                                 voice: "story/1003/100367/192039B4",
                                 npc: 100328,
+                                speakerName: "환상",
                             },
                         ],
                     },
@@ -24838,6 +25186,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "블루스, 내가, 해냈어. 거짓은, 들통 났어.",
                                 voice: "story/1003/100368/192046AA",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036802,
                             },
                             {
@@ -24845,6 +25194,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "리듬은 모를 거야, 너의 죽음에 대해.",
                                 voice: "story/1003/100368/192046D4",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036803,
                             },
                             {
@@ -24852,6 +25202,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1003/100368/192046FE",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036804,
                             },
                             {
@@ -24859,6 +25210,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "우리, 첫 번째, 합동 공연... 나쁘지, 않았네.",
                                 voice: "story/1003/100368/19204728",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036805,
                             },
                             {
@@ -24866,6 +25218,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "너희들... 드디어 왔군.",
                                 voice: "story/1003/100368/19204752",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036806,
                             },
                             {
@@ -24873,6 +25226,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "너희들, 이 녀석을, 잡으려고, 날 놔줬어... 영리해, 정말 영리하군.",
                                 voice: "story/1003/100368/1920477C",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036807,
                             },
                             {
@@ -24880,6 +25234,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그렇게 똑똑한 넌, 분명히, 내가 남긴 단서를, 찾았을 텐데... 그런데, 왜, 말하지 않는 거지?",
                                 voice: "story/1003/100368/192047A6",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036808,
                             },
                             {
@@ -24887,6 +25242,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "제6군단의, 진실을...!",
                                 voice: "story/1003/100368/192047D0",
                                 npc: 100328,
+                                speakerName: "환상",
                                 next: 10036809,
                             },
                             {
@@ -24915,6 +25271,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...반드시 해야만 하는 일이란 건, 가.",
                                 voice: "story/1003/100368/19204878",
                                 npc: 100328,
+                                speakerName: "환상",
                             },
                         ],
                     },
@@ -25674,38 +26031,45 @@ export const questData_kr: QuestStory[] = [
                                 id: 10040101,
                                 content: '"머나먼 곳 어딘가엔 오직 당신만을 위한 서점이나 술집이 있을지도 모릅니다."',
                                 voice: "story/1004/100401/19226412",
+                                speakerName: "방송",
                             },
                             {
                                 id: 10040102,
                                 content: '"머나먼 곳이란, 수많은 꿈과 기다림, 그리고 알 수 없는 내일로 이루어진 단어입니다."',
                                 voice: "story/1004/100401/1922643C",
+                                speakerName: "방송",
                             },
                             {
                                 id: 10040103,
                                 content: '"머나먼 곳에 당신의 깜짝방문을 밤낮으로 기다리는 누군가가 있을지도 모릅니다."',
                                 voice: "story/1004/100401/19226466",
+                                speakerName: "방송",
                             },
                             {
                                 id: 10040104,
                                 content: '"머나먼 그곳에서 어떤 내일이 펼쳐질지는 알 수 없지만, 분명히 오늘과는 전혀 다를 겁니다."',
                                 voice: "story/1004/100401/19226490",
+                                speakerName: "방송",
                             },
                             {
                                 id: 10040105,
                                 content: '"하지만 머나먼 그곳은 멀리 있지 않습니다. 얇은 티켓 한 장이면 닿을 수 있는 거리입니다!"',
                                 voice: "story/1004/100401/192264BA",
+                                speakerName: "방송",
                             },
                             {
                                 id: 10040106,
                                 content:
                                     "\"제국 철도의 최신 특별 열차 '오로라호'에 오신 여러분을 환영합니다! 장갑열차 기반의 안전한 차체와 강력한 열차포는 모든 위협에 완벽히 대응합니다.\"",
                                 voice: "story/1004/100401/192264E4",
+                                speakerName: "방송",
                             },
                             {
                                 id: 10040107,
                                 content:
                                     '"티끌 하나 없이 깨끗하고 눈부시게 화려한 공간! 힘찬 기적 소리와 함께, 머나먼 곳을 향한 환상을 현실로 만드세요!"',
                                 voice: "story/1004/100401/1922650E",
+                                speakerName: "방송",
                             },
                             {
                                 id: 10040108,
@@ -26113,12 +26477,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 10040408,
                                 content: "여러분, 잠시 주목해 주십시오!",
                                 voice: "story/1004/100404/19229670",
+                                speakerName: "진지한 병사",
                             },
                             {
                                 id: 10040409,
                                 content: "지금부터, 제국을 위해 헌신하고 무사히 복귀한 우리 용사들을 환영해 주십시오!",
                                 voice: "story/1004/100404/1922969A",
                                 npc: 100410,
+                                speakerName: "진지한 병사",
                             },
                             {
                                 id: 10040410,
@@ -26126,12 +26492,14 @@ export const questData_kr: QuestStory[] = [
                                     "남부에서 일어난 포세이큰 동맹의 반란을 완벽히 진압하고 돌아온 우리 군의 자랑들입니다! 큰 박수와 환호로 맞이해 주십시오!",
                                 voice: "story/1004/100404/192296C4",
                                 npc: 100410,
+                                speakerName: "진지한 병사",
                             },
                             {
                                 id: 10040411,
                                 content: "아버지! 어머니! 제가 드디어 아이스레이크 시티로 돌아왔어요!",
                                 voice: "story/1004/100404/192296EE",
                                 npc: 100409,
+                                speakerName: "귀환한 병사",
                             },
                             {
                                 id: 10040412,
@@ -26150,12 +26518,14 @@ export const questData_kr: QuestStory[] = [
                                 content: "......?",
                                 voice: "story/1004/100404/1922976C",
                                 npc: 100409,
+                                speakerName: "귀환한 병사",
                             },
                             {
                                 id: 10040415,
                                 content: "할머니, 사람을... 잘못 보신 것 같은데요?",
                                 voice: "story/1004/100404/19229796",
                                 npc: 100409,
+                                speakerName: "귀환한 병사",
                             },
                             {
                                 id: 10040416,
@@ -26176,6 +26546,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "네? 아드님을 왜 저한테서 찾으세요? 이 반지는 제가 스칼렛에서 산 거라고요!",
                                 voice: "story/1004/100404/19229814",
                                 npc: 100409,
+                                speakerName: "귀환한 병사",
                             },
                         ],
                     },
@@ -26199,12 +26570,14 @@ export const questData_kr: QuestStory[] = [
                                 content: "위험인물이 포착되었습니다. 현장 혼란을 막기 위해, 즉시 제압 절차를...",
                                 voice: "story/1004/100405/1922A5B2",
                                 npc: 100410,
+                                speakerName: "진지한 병사",
                             },
                             {
                                 id: 10040502,
                                 content: "앗, 아이젠반 님...",
                                 voice: "story/1004/100405/1922A5DC",
                                 npc: 100410,
+                                speakerName: "진지한 병사",
                             },
                             {
                                 id: 10040503,
@@ -26230,6 +26603,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "네, 역장님! 지금 당장 머리를 써보겠습니다!",
                                 voice: "story/1004/100405/1922A684",
                                 npc: 100410,
+                                speakerName: "진지한 병사",
                             },
                             {
                                 id: 10040507,
@@ -26261,6 +26635,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...아니, 할머니! 대체 누구신데 이러세요! 이상한 할머니네!",
                                 voice: "story/1004/100405/1922A756",
                                 npc: 100409,
+                                speakerName: "귀환한 병사",
                             },
                             {
                                 id: 10040512,
@@ -26277,6 +26652,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "신병 확보 완료. 즉시 구금실로 압송하겠습니다.",
                                 voice: "story/1004/100405/1922A7AA",
                                 npc: 100410,
+                                speakerName: "진지한 병사",
                             },
                             {
                                 id: 10040514,
@@ -26311,6 +26687,7 @@ export const questData_kr: QuestStory[] = [
                                     "말씀드렸잖아요, 스칼렛에 있는 '실버 하트'라는 장신구 가게에서 샀다니까요. 직접 확인해 보시든가요.",
                                 voice: "story/1004/100405/1922A87C",
                                 npc: 100409,
+                                speakerName: "귀환한 병사",
                             },
                             {
                                 id: 10040519,
@@ -26541,18 +26918,21 @@ export const questData_kr: QuestStory[] = [
                                     "안녕하세요, 아이스레이크 시티 블룸필드역에 오신 걸 환영합니다. 저희 경비병들의 총과 열차 위의 대포, 그리고 하늘 위의 비행선이 승객 여러분의 안전한 여행을 위해 최선을 다할 겁니다.",
                                 voice: "story/1004/100406/1922B61A",
                                 npc: 100420,
+                                speakerName: "진지한 경비병",
                             },
                             {
                                 id: 10040602,
                                 content: "최신 폭시코르 기술이 집약된 여정을 만끽하시길 바랍니다.",
                                 voice: "story/1004/100406/1922B644",
                                 npc: 100421,
+                                speakerName: "예의 바른 경비병",
                             },
                             {
                                 id: 10040603,
                                 content: "자, 그러면 승객 여러분과 제국 핵심 철로의 안전을 위해, 잠시 보안 검색을 진행하겠습니다.",
                                 voice: "story/1004/100406/1922B66E",
                                 npc: 100420,
+                                speakerName: "진지한 경비병",
                             },
                             {
                                 id: 10040604,
@@ -26567,6 +26947,7 @@ export const questData_kr: QuestStory[] = [
                                     "포세이큰 동맹 때문에 어쩔 수 없습니다. 아이스레이크 시티에만 계셔서 잘 모르시겠지만, 지금 다른 지역은 그 녀석들이 또 난리를 치고 있거든요.",
                                 voice: "story/1004/100406/1922B6C2",
                                 npc: 100421,
+                                speakerName: "예의 바른 경비병",
                             },
                             {
                                 id: 10040606,
@@ -26574,6 +26955,7 @@ export const questData_kr: QuestStory[] = [
                                     "여기저기서 폭발에 화재 소식까지 끊이질 않으니 철저히 대비해야죠. 그 미치광이들이, 철도라는 우리 제국의 대동맥을 짓밟게 내버려둘 순 없으니까요.",
                                 voice: "story/1004/100406/1922B6EC",
                                 npc: 100421,
+                                speakerName: "예의 바른 경비병",
                             },
                             {
                                 id: 10040607,
@@ -26588,6 +26970,7 @@ export const questData_kr: QuestStory[] = [
                                     "훌륭하군요. 카론이라는 게 아쉬울 정도로, 멋진 자신감입니다. 기회가 되면, 계관카론에 지원해 보세요.",
                                 voice: "story/1004/100406/1922B740",
                                 npc: 100421,
+                                speakerName: "예의 바른 경비병",
                                 options: [
                                     {
                                         id: 10040609,
@@ -26616,6 +26999,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...평소에 친구들한테도 대충 그렇게 건성으로 대답하나 보죠?",
                                 voice: "story/1004/100406/1922B7E8",
                                 npc: 100420,
+                                speakerName: "진지한 경비병",
                             },
                             {
                                 id: 10040613,
@@ -26623,6 +27007,7 @@ export const questData_kr: QuestStory[] = [
                                     "말이야 그렇죠. 하지만 여긴 제국입니다. 솔라야 뭐라고 믿든 상관없어도, 카론이 저런 말을 곧이곧대로 받아들이면 상황이 곤란해지죠. 그쪽도 잘 아시잖아요.",
                                 voice: "story/1004/100406/1922B812",
                                 npc: 100420,
+                                speakerName: "진지한 경비병",
                             },
                             {
                                 id: 10040614,
@@ -26630,12 +27015,14 @@ export const questData_kr: QuestStory[] = [
                                     "비약이 심하시네요. 저도 그런 소문은 들었습니다만, 대부분은 할 일 없는 사람들이 퍼뜨린 헛소문일 겁니다. 물론 어느 쪽을 믿으실지는 그쪽 선택이고요.",
                                 voice: "story/1004/100406/1922B83C",
                                 npc: 100420,
+                                speakerName: "진지한 경비병",
                             },
                             {
                                 id: 10040627,
                                 content: "어쨌든, 보안 검색에 통과하지 못하셨습니다. 다음에 다시 오세요.",
                                 voice: "story/1004/100406/1922B83D",
                                 npc: 100421,
+                                speakerName: "진지한 경비병",
                             },
                             {
                                 id: 10040615,
@@ -26649,6 +27036,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "음, 능청 떨어도 소용없습니다. 딴소리 말고 솔직히 대답하세요.",
                                 voice: "story/1004/100406/1922B890",
                                 npc: 100421,
+                                speakerName: "예의 바른 경비병",
                             },
                             {
                                 id: 10040617,
@@ -26656,6 +27044,7 @@ export const questData_kr: QuestStory[] = [
                                     "당신이 목에 걸고 있는 그 펜던트, 만듦새도 정교하고 재료도 상당히 고급이네요. 제가 알기로 그건, 케메트에서나 나는 귀한 보석이에요.",
                                 voice: "story/1004/100406/1922B8BA",
                                 npc: 100421,
+                                speakerName: "예의 바른 경비병",
                             },
                             {
                                 id: 10040618,
@@ -26663,6 +27052,7 @@ export const questData_kr: QuestStory[] = [
                                     "그런데 당신은, 옷 같지도 않은 천 쪼가리를 두르고, 배꼽을 다 내놓고 다니고 있고요. 그러니 당연히 의심이 가지 않겠습니까? 그 펜던트는 분명히 당신 게 아니라, 어디서 주웠거나, 슬쩍한 거겠죠!",
                                 voice: "story/1004/100406/1922B8E4",
                                 npc: 100421,
+                                speakerName: "예의 바른 경비병",
                             },
                             {
                                 id: 10040619,
@@ -26676,6 +27066,7 @@ export const questData_kr: QuestStory[] = [
                                     "좋습니다. 그렇다면 사실 여부를 확인하기 위해, 그 여동생분을 이쪽으로 모셔 오시죠. 그때까지 펜던트는 이쪽에서 보관하고 있겠습니다.",
                                 voice: "story/1004/100406/1922B938",
                                 npc: 100421,
+                                speakerName: "예의 바른 경비병",
                             },
                             {
                                 id: 10040621,
@@ -26695,6 +27086,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "네, 먼저 들여보내 드릴 수는 있지만, 보안 검색부터 마치셔야 합니다.",
                                 voice: "story/1004/100406/1922B9B6",
                                 npc: 100421,
+                                speakerName: "예의 바른 경비병",
                             },
                             {
                                 id: 10040624,
@@ -26708,6 +27100,7 @@ export const questData_kr: QuestStory[] = [
                                     "어쩔 수 없습니다. 방금 대합실에서 어떤 노부인께서 소란을 피운 걸 보셨을 텐데요. 역 내부에서 그런 일이 벌어졌다간, 무슨 사고로 이어질지 모릅니다. 그러니 양해 부탁드립니다.",
                                 voice: "story/1004/100406/1922BA0A",
                                 npc: 100420,
+                                speakerName: "진지한 경비병",
                             },
                             {
                                 id: 10040626,
@@ -26715,6 +27108,7 @@ export const questData_kr: QuestStory[] = [
                                     "당신들도 마찬가지입니다. 물건을 가로채려는 게 아니라, 역장님께서 각별히 주의를 주셨기 때문에, 저희도 어쩔 수 없습니다. 여동생분을 통해 사실 여부가 확인되면, 바로 돌려드리겠습니다.",
                                 voice: "story/1004/100406/1922BA34",
                                 npc: 100421,
+                                speakerName: "예의 바른 경비병",
                             },
                         ],
                     },
@@ -27096,6 +27490,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "저기! 거기 너!",
                                 voice: "story/1004/100494/192859DA",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049402,
@@ -27103,6 +27498,7 @@ export const questData_kr: QuestStory[] = [
                                     "그래, 너 말이야! 내 부탁 하나만 들어주지 않을래? 우리 집은 황성에서 꽤 알아주는 부자니까, 보수는 섭섭하지 않게 챙겨 줄게!",
                                 voice: "story/1004/100494/19285A04",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049403,
@@ -27116,12 +27512,14 @@ export const questData_kr: QuestStory[] = [
                                     "아까부터 계속 이 근처를 왔다갔다 하던데, 멀끔한 옷차림에 당당한 태도를 보면, 하루 벌어 하루 먹고사는 그런 타입은 아닌 것 같단 말이지.",
                                 voice: "story/1004/100494/19285A58",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049405,
                                 content: "제철소 안 노동자들의 상황을 취재하러 온 기자거나... 뭔가 다른 꿍꿍이가 있는 거겠지!",
                                 voice: "story/1004/100494/19285A82",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049406,
@@ -27135,6 +27533,7 @@ export const questData_kr: QuestStory[] = [
                                     "당황하지 마, 사실 나도 너랑 사정이 비슷하거든! 사실 난 디즈마니아에서 온 〈휘페르보레아 제국 조간신문〉의 신입 기자야!",
                                 voice: "story/1004/100494/19285AD6",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049408,
@@ -27142,6 +27541,7 @@ export const questData_kr: QuestStory[] = [
                                     "여기 아이스레이크 시티의 제6군단이 겉으로만 충성하네 어쩌네 하고, 뒤로는 온갖 못된 짓들을 하면서 평민들을 괴롭히고 다닌다는 얘길 들었거든.",
                                 voice: "story/1004/100494/19285B00",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049409,
@@ -27149,12 +27549,14 @@ export const questData_kr: QuestStory[] = [
                                     "아니나 다를까, 어제 딱 이 기차역에 도착했는데, 분위기가 영 마음에 안 들더라고. 어제 오후에 정보 좀 캐고 다녔다고, 가는 곳마다 경비병들이 빤히 쳐다보더라니까. 날 감시하는 게 분명해...",
                                 voice: "story/1004/100494/19285B2A",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049410,
                                 content: "이 조그만 기차역에 그렇게나 많은 추악한 비밀이 숨겨져 있다니. 여긴 죄악의 도시가 틀림없어!",
                                 voice: "story/1004/100494/19285B54",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049411,
@@ -27168,6 +27570,7 @@ export const questData_kr: QuestStory[] = [
                                     '"제6군단에선 차마 말 못 할 짓들을 수도 없이 저지른다던데, 아는 대로 다 털어놔 보세요! 함께 이 도시의 추악한 실상을 세상에 알리는 거예요"라고 했지.',
                                 voice: "story/1004/100494/19285BA8",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                                 options: [
                                     {
                                         id: 10049413,
@@ -27195,12 +27598,14 @@ export const questData_kr: QuestStory[] = [
                                     "참 이상해. 지렁이도 밟으면 꿈틀하는 게 정상 아니야? 아니면 여기 상황이 정말 최악이라, 카론이 솔라를 전혀 못 믿는 지경이 된 건가?",
                                 voice: "story/1004/100494/19285C50",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049417,
                                 content: "하지만 이렇게 내 편을 들어주는 건 너밖에 없어. 다른 사람들은 몸 사리느라 바쁘더라고.",
                                 voice: "story/1004/100494/19285C7A",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049418,
@@ -27208,6 +27613,7 @@ export const questData_kr: QuestStory[] = [
                                     "내가? 위험인물이라고? 내가 위험인물이면, 여기 역장은 위험 대마왕이야! 안 그래도 그 역장이 이 역을 자기 집 안방처럼 주무른다는 소문이 파다해서, 뒤를 좀 캐보려던 참이었어.",
                                 voice: "story/1004/100494/19285CA4",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049419,
@@ -27215,12 +27621,14 @@ export const questData_kr: QuestStory[] = [
                                     "...어쨌든, 아이스레이크 시티에 숨겨진 추악한 진실을 낱낱이 밝히려면 도와줄 사람이 하나 필요해. 아까부터 쭉 지켜봤는데, 네가 가장 적임자야.",
                                 voice: "story/1004/100494/19285CCE",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049420,
                                 content: "첫 번째 이유는, 아까도 말했지만, 너도 나름의 목적을 가지고 뭔가를 조사 중이란 점이야.",
                                 voice: "story/1004/100494/19285CF8",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049421,
@@ -27228,12 +27636,14 @@ export const questData_kr: QuestStory[] = [
                                     "두 번째 이유는, 네가 이 대합실에 있는 사람 중에서 발이 제일 빠르더라고. 몸놀림도 뭔가 예사롭지 않은 게, 믿고 맡겨도 될 것 같아.",
                                 voice: "story/1004/100494/19285D22",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049422,
                                 content: "굳이 이유를 하나 더 보태자면, 직감이야... 넌 나쁜 사람이 아닐 거란 느낌이 들거든.",
                                 voice: "story/1004/100494/19285D4C",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049423,
@@ -27247,6 +27657,7 @@ export const questData_kr: QuestStory[] = [
                                     '그건 걱정 마! 우리 아빠가 "아이스레이크 시티 같은 촌구석에선 골드 한 닢이면 안 되는 일이 없다. 만일 정말 안 된다면, 한 닢 더 얹어주면 그만이야."라고 했거든.',
                                 voice: "story/1004/100494/19285DA0",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049425,
@@ -27254,6 +27665,7 @@ export const questData_kr: QuestStory[] = [
                                     "이건 내 수표 뭉치인데, 한 장당 골드 다섯 닢짜리야. 누가 트집 잡고 귀찮게 굴면, 그냥 이걸 쥐여줘. 그럼 해결된다고, 우리 아빠가 그랬어.",
                                 voice: "story/1004/100494/19285DCA",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049426,
@@ -27266,6 +27678,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "진실을 밝혀내 주면, 보수로 이 수표 10장 줄게! 어때?",
                                 voice: "story/1004/100494/19285E1E",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049428,
@@ -27279,6 +27692,7 @@ export const questData_kr: QuestStory[] = [
                                     "좋아, 그럼 네 정보 수집력을 확인할 겸 일단 테스트부터 해 보자. 자, 이 수표 뭉치를 가지고, 제철소 입구에 있는 현장 감독한테 가서 슬쩍 꼬드겨 봐.",
                                 voice: "story/1004/100494/19285E72",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049430,
@@ -27291,6 +27705,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아니야. 우리 집 돈도 땅 파서 나오는 게 아니니까, 실력은 확인해 봐야지.",
                                 voice: "story/1004/100494/19285EC6",
                                 npc: 100411,
+                                speakerName: "귀족 차림의 청년",
                             },
                             {
                                 id: 10049432,
@@ -27579,6 +27994,7 @@ export const questData_kr: QuestStory[] = [
                                     "대체 일을 어떻게들 하길래, 시운전 절차가 이렇게 엉망진창이야! 엊그제는 유압 밸브 압력이 떨어지더니, 어제는 액체 폭시코르가 뿜어져 나왔잖아!",
                                 voice: "story/1004/100496/19287AAA",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                             },
                             {
                                 id: 10049602,
@@ -27586,6 +28002,7 @@ export const questData_kr: QuestStory[] = [
                                     "오늘은 한술 더 떠서 테스트 시작하자마자, 열차가 10m도 넘게 앞으로 치고 나갔다고! 이게 열차 테스트야? 비행선 테스트지!",
                                 voice: "story/1004/100496/19287AD4",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                             },
                             {
                                 id: 10049603,
@@ -27593,6 +28010,7 @@ export const questData_kr: QuestStory[] = [
                                     "재빨리 옆으로 피해서 다행이지, 아니었으면 나도 저 쇳덩이들처럼 찌그러질 뻔했어! 카르노, 이번엔 대체 어디서 문제가 터진 건지 말해 봐.",
                                 voice: "story/1004/100496/19287AFE",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                             },
                             {
                                 id: 10049604,
@@ -27606,17 +28024,20 @@ export const questData_kr: QuestStory[] = [
                                     "그래, 이게 바로 베테랑이라는 거야. 딱 한 마디로 핵심을 짚어내잖아. 너희도 좀 보고 배워. 다들 카르노처럼만 일해 주면, 내가 지금처럼 매일 불안에 떨면서 출근할 일도 없을 거 아니야.",
                                 voice: "story/1004/100496/19287B52",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                             },
                             {
                                 id: 10049606,
                                 content: "문제점들 싹 다 다시 점검해! 결함을 전부 잡아내기 전까지, 시운전은 절대 없을 줄 알아!",
                                 voice: "story/1004/100496/19287B7C",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                             },
                             {
                                 id: 10049607,
                                 content: "네!",
                                 voice: "story/1004/100496/19287BA6",
+                                speakerName: "일꾼들",
                             },
                             {
                                 id: 10049608,
@@ -27629,6 +28050,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "안 돼, 너희도 남아. 저 녀석들이랑 같이 점검해.",
                                 voice: "story/1004/100496/19287BFA",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                             },
                             {
                                 id: 10049610,
@@ -27642,6 +28064,7 @@ export const questData_kr: QuestStory[] = [
                                     "청소부고 나발이고 알 게 뭐야. 너희도 방금 들었지? 우리가 여기서 신형 열차 테스트를 하다가 대형 사고가 터져서, 열차가 갑자기 앞으로 돌진해 버렸다고.",
                                 voice: "story/1004/100496/19287C4E",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                             },
                             {
                                 id: 10049612,
@@ -27649,6 +28072,7 @@ export const questData_kr: QuestStory[] = [
                                     "그러니까, 내 눈에 띄는 놈들은 모조리 일손을 보태야 해. 아니면 열차가 터져서 다 같이 골로 갈 판이니까!",
                                 voice: "story/1004/100496/19287C78",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                             },
                             {
                                 id: 10049613,
@@ -27661,6 +28085,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그래, 그러니까 죽기 싫으면 빨리빨리 움직여! 첫째도 안전, 둘째도 안전이야!",
                                 voice: "story/1004/100496/19287CCC",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                             },
                             {
                                 id: 10049615,
@@ -27757,6 +28182,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "다 복구했어? 솜씨는 제법이군. 오늘 테스트는 일단 여기까지다. 다들 다시 하던 일 하러 돌아가!",
                                 voice: "story/1004/100499/1928AEAD",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                                 next: 10049701,
                             },
                             {
@@ -27772,6 +28198,7 @@ export const questData_kr: QuestStory[] = [
                                     "너희 말이야, 일머리가 꽤 좋던데, 폐에 시커먼 먼지 들어차기 전에, 굴뚝 청소부는 때려치우고, 여기 와서 일하는 건 어때?",
                                 voice: "story/1004/100497/19288B3C",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                                 next: 10049703,
                             },
                             {
@@ -27786,6 +28213,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그래, 마음 바뀌면 언제든지 찾아와.",
                                 voice: "story/1004/100497/19288B90",
                                 npc: 100407,
+                                speakerName: "위엄 있는 일꾼",
                             },
                         ],
                     },
@@ -27839,6 +28267,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10049921,
                                 content: "위험 감지, 위험 감지. 즉시 제거 요망, 즉시 제거 요망.",
                                 voice: "story/1004/100499/1928AF2A",
+                                speakerName: "경비 로봇",
                             },
                         ],
                     },
@@ -28178,6 +28607,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "어? 뭔가 시끌시끌하다 했는데, 스노우였구나?",
                                 voice: "story/1004/100402/192276C6",
                                 npc: 100405,
+                                speakerName: "낯설지만 낯설지 않은 목소리",
                             },
                             {
                                 id: 10040216,
@@ -28402,33 +28832,39 @@ export const questData_kr: QuestStory[] = [
                                 id: 10049924,
                                 content: "얘기 들었어? 아까 역전 아트리움 쪽에서 누가 난동을 피웠다던데.",
                                 voice: "story/1004/100499/1928AFA8",
+                                speakerName: "오지랖 넓은 역 일꾼",
                             },
                             {
                                 id: 10049925,
                                 content:
                                     "어휴, 내가 아까 그 현장에 있었다는 거 아니야. 웬 정신 나간 여자가 튀어나와선, 귀환병이 자기 아들 물건을 훔쳤다고 어거지를 부리더라고.",
                                 voice: "story/1004/100499/1928AFD2",
+                                speakerName: "수다쟁이 역 일꾼",
                             },
                             {
                                 id: 10049926,
                                 content: "이야, 누구 하나 다쳤겠는데.",
                                 voice: "story/1004/100499/1928AFFC",
+                                speakerName: "오지랖 넓은 역 일꾼",
                             },
                             {
                                 id: 10049927,
                                 content:
                                     "그러진 않았어. 역장님이 깔끔하게 해결해 주셨거든. 앞으로도 귀환할 병사들이 줄을 섰는데, 돌아오자마자 그런 꼴을 보게 할 순 없잖아.",
                                 voice: "story/1004/100499/1928B026",
+                                speakerName: "수다쟁이 역 일꾼",
                             },
                             {
                                 id: 10049928,
                                 content: "오늘 열차 몇 대 더 들어와야 하지? 환영식은 대체 언제쯤 끝나는 거야.",
                                 voice: "story/1004/100499/1928B050",
+                                speakerName: "오지랖 넓은 역 일꾼",
                             },
                             {
                                 id: 10049929,
                                 content: "두 대 남았을 거야. 그만 툴툴대고, 빨리 7번 승강장으로 가서 준비나 해.",
                                 voice: "story/1004/100499/1928B07A",
+                                speakerName: "수다쟁이 역 일꾼",
                             },
                             {
                                 id: 10049930,
@@ -28447,6 +28883,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10049931,
                                 content: "잠시 후, 디즈마니아를 출발한 열차가 종점 아이스레이크 시티, 7번 승강장에 도착합니다.",
                                 voice: "story/1004/100499/1928B0CE",
+                                speakerName: "방송",
                             },
                         ],
                     },
@@ -28460,12 +28897,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 10049932,
                                 content: "7번 승강장에 열차가 도착한다! 전원 대기! 정차하면 중상자부터 의무실로 이송한다!",
                                 voice: "story/1004/100499/1928B0F8",
+                                speakerName: "오지랖 넓은 역 경비병",
                             },
                             {
                                 id: 10049933,
                                 content:
                                     "승강장 배정을 왜 이따위로 한 거야. 7번 승강장에서 의무실까지 가려면 육교를 건너야 하는데, 부상자들더러 마지막까지 한번 죽어 보라는 거야?",
                                 voice: "story/1004/100499/1928B122",
+                                speakerName: "수다쟁이 역 경비병",
                             },
                             {
                                 id: 10049934,
@@ -28552,12 +28991,14 @@ export const questData_kr: QuestStory[] = [
                                     "제13군단 전용 열차 갈까마귀호는 진짜 봐도 봐도 질리지가 않는다니까. 책에 적혀 있던 것처럼 진짜 박력 넘치고 위엄이 느껴져... 기록 보관실에서 열심히 뒤져본 보람이 있네.",
                                 voice: "story/1004/100418/19237AFA",
                                 npc: 100415,
+                                speakerName: "기차를 좋아하는 아이",
                             },
                             {
                                 id: 10041802,
                                 content: "나도 한 번 타 볼 수 있었으면 좋겠다...",
                                 voice: "story/1004/100418/19237B24",
                                 npc: 100415,
+                                speakerName: "기차를 좋아하는 아이",
                             },
                             {
                                 id: 10041803,
@@ -28570,6 +29011,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "가까이 안 갔어요. 그냥 옆에서 구경만 한 거예요...",
                                 voice: "story/1004/100418/19237B78",
                                 npc: 100415,
+                                speakerName: "기차를 좋아하는 아이",
                             },
                             {
                                 id: 10041805,
@@ -28582,6 +29024,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "네! 고맙습니다, 진짜 고마워요!",
                                 voice: "story/1004/100418/19237BCC",
                                 npc: 100415,
+                                speakerName: "기차를 좋아하는 아이",
                             },
                             {
                                 id: 10041807,
@@ -28637,6 +29080,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10041817,
                                 content: "잠시 후, 스칼렛을 출발한 열차가 종점 아이스레이크 시티, 3번 승강장에 도착합니다.",
                                 voice: "story/1004/100418/19237D9A",
+                                speakerName: "방송",
                             },
                         ],
                     },
@@ -28656,12 +29100,14 @@ export const questData_kr: QuestStory[] = [
                                 content: "...고마워요. 갈까마귀호 구경에 푹 빠져 있어서, 사람들이 오는 줄도 몰랐거든요.",
                                 voice: "story/1004/100419/19238B62",
                                 npc: 100415,
+                                speakerName: "기차를 좋아하는 아이",
                             },
                             {
                                 id: 10041902,
                                 content: "그런데, 갈까마귀호 구경하러 온 거 맞죠? 역시 기차 좋아하는 사람들은 다 착한 사람들이에요!",
                                 voice: "story/1004/100419/19238B8C",
                                 npc: 100415,
+                                speakerName: "기차를 좋아하는 아이",
                             },
                             {
                                 id: 10041903,
@@ -28675,12 +29121,14 @@ export const questData_kr: QuestStory[] = [
                                     "당연하죠! 이 갈까마귀호는 제13군단 군단장 시빌라 님의 전용 열차예요. 제13군단은 정해진 주둔지가 없어서, 이 열차는 언제 어디서 나타날지 아무도 몰라요.",
                                 voice: "story/1004/100419/19238BE0",
                                 npc: 100415,
+                                speakerName: "기차를 좋아하는 아이",
                             },
                             {
                                 id: 10041905,
                                 content: "그래서 기차 마니아들 사이에선, 이 열차를 보면 엄청난 행운이 찾아온다는 얘기도 있어요.",
                                 voice: "story/1004/100419/19238C0A",
                                 npc: 100415,
+                                speakerName: "기차를 좋아하는 아이",
                             },
                             {
                                 id: 10041906,
@@ -28694,6 +29142,7 @@ export const questData_kr: QuestStory[] = [
                                     "아닐 걸요? 시빌라 님 얼굴을 아는 건 아니지만, 이 열차가 여기 정차한 지 벌써 20일이 넘었는데, 딱히 아무 일도 없었거든요.",
                                 voice: "story/1004/100419/19238C5E",
                                 npc: 100415,
+                                speakerName: "기차를 좋아하는 아이",
                             },
                             {
                                 id: 10041908,
@@ -28706,6 +29155,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "네, 전 여기서 지붕의 철골 청소를 담당하는 청소부거든요! 전 열혈 기차 마니아, 스테판이라고 해요!",
                                 voice: "story/1004/100419/19238CB2",
                                 npc: 100415,
+                                speakerName: "기차를 좋아하는 아이",
                             },
                             {
                                 id: 10041910,
@@ -29045,6 +29495,7 @@ export const questData_kr: QuestStory[] = [
                                     "블룸필드역에 계신 이용객 여러분께 안내 말씀드립니다. 이스엘행 야간열차가 저녁 7시에 발차할 예정이오니, 승객 여러분께서는...",
                                 voice: "story/1004/100422/1923BD42",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10042206,
@@ -29057,6 +29508,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "서둘러 탑승을 준비해 주시길 바랍니다... 라고 할 줄 알았지?",
                                 voice: "story/1004/100422/1923BD96",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10042208,
@@ -29064,6 +29516,7 @@ export const questData_kr: QuestStory[] = [
                                     "휘페르보레아 군단의 앞잡이들아, 잘 들어. 우리 포세이큰 동맹의 이름으로 너희가 호송하려는 특별 죄수의 석방을 요구한다. 죄수는 반드시 자정까지 석방해야 한다. 죄수의 신병은 우리가 맡겠다.",
                                 voice: "story/1004/100422/1923BDC0",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10042209,
@@ -29071,6 +29524,7 @@ export const questData_kr: QuestStory[] = [
                                     "물론, 거절해도 좋아. 그렇게 되면 조만간 블룸필드역에서 아주 멋진 불꽃놀이를 감상하게 되겠지만. 며칠 전에 오페라 극장에서 본 것보다, 훨씬 멋진 장관이 펼쳐질 거야.",
                                 voice: "story/1004/100422/1923BDEA",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                         ],
                     },
@@ -29176,6 +29630,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 100499158,
                                 content: "너희들! 거기서 수상하게 무슨 짓을 하는 거지?",
                                 voice: "story/1004/100499/100499158",
+                                speakerName: "역 경비병",
                             },
                             {
                                 id: 100499159,
@@ -29729,6 +30184,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "멈추세요.",
                                 voice: "story/1004/100426/1923FF36",
                                 npc: 100404,
+                                speakerName: "우아한 목소리",
                             },
                             {
                                 id: 10042608,
@@ -29768,6 +30224,7 @@ export const questData_kr: QuestStory[] = [
                                     "배려는 고맙지만, 이 사람들이 폭발을 일으킨 포세이큰 동맹의 조직원이 아니라는 점은 제가 보증하겠습니다.",
                                 voice: "story/1004/100426/19240032",
                                 npc: 100404,
+                                speakerName: "우아한 목소리",
                             },
                             {
                                 id: 10042614,
@@ -29827,6 +30284,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "제국 관료들은 다들 이런 식으로 일처리를 하나요?",
                                 voice: "story/1004/100426/192401AC",
                                 npc: 100404,
+                                speakerName: "우아한 목소리",
                             },
                             {
                                 id: 10042623,
@@ -29840,6 +30298,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "사람은 부품이 아니에요.",
                                 voice: "story/1004/100426/19240200",
                                 npc: 100404,
+                                speakerName: "우아한 목소리",
                             },
                             {
                                 id: 10042625,
@@ -29904,6 +30363,7 @@ export const questData_kr: QuestStory[] = [
                                     "역장 일행은 이제 갔어요. 어떻게든 오늘 안에 누명을 벗으셔야 해요. 하지만 그 전에, 일단 객차 안으로 들어오세요. 묻고 싶은 게 많을 테니까요.",
                                 voice: "story/1004/100426/192403A4",
                                 npc: 100404,
+                                speakerName: "우아한 목소리",
                             },
                         ],
                     },
@@ -29921,12 +30381,14 @@ export const questData_kr: QuestStory[] = [
                                     "더 안쪽 객차는 군단의 여러 기밀과 관련돼 있어서, 이 문 앞까지만 모실게요. 하지만, 제가 여러분의 적이 아니라는 건 믿으셔도 돼요.",
                                 voice: "story/1004/100427/19240EA2",
                                 npc: 100404,
+                                speakerName: "우아한 목소리",
                             },
                             {
                                 id: 10042702,
                                 content: "동료분의 안전도 너무 걱정하지 않으셔도 돼요. 아이젠반은 제국의 관료일 뿐, 살인광은 아니니까요.",
                                 voice: "story/1004/100427/19240ECC",
                                 npc: 100404,
+                                speakerName: "우아한 목소리",
                             },
                             {
                                 id: 10042703,
@@ -29940,6 +30402,7 @@ export const questData_kr: QuestStory[] = [
                                     "저는 제13군단의 감찰실장이에요. 아이스레이크 시티에는 공무차 방문한 거예요. 그동안 여러분의 활약을 어느 정도는 지켜보고 있었어요.",
                                 voice: "story/1004/100427/19240F20",
                                 npc: 100404,
+                                speakerName: "우아한 목소리",
                             },
                             {
                                 id: 10042706,
@@ -29947,6 +30410,7 @@ export const questData_kr: QuestStory[] = [
                                     "어쩌다 여기 오게 되신 건지는 몰라도, 전 실력 있는 월석 사냥꾼이 제국 관료제의 희생양이 되는 건 보고 싶지 않아요. 그래서 재능 있는 당신께 손을 내민 거예요.",
                                 voice: "story/1004/100427/19240F74",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                                 options: [
                                     {
                                         id: 10042707,
@@ -29975,6 +30439,7 @@ export const questData_kr: QuestStory[] = [
                                     "그렇게 생각하셔도 좋아요. 절 위해 일해 줄 유능한 사람이 필요한 건 사실이고, 당신은 의심할 여지 없이 훌륭한 월석 사냥꾼이니까요.",
                                 voice: "story/1004/100427/1924101C",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042711,
@@ -29982,12 +30447,14 @@ export const questData_kr: QuestStory[] = [
                                     "영리하시네요. 맞아요, 부탁할 일이 하나 있어요. 하지만 우선 눈앞의 위기에서 벗어나, 스스로의 결백을 증명하는 게 우선이에요.",
                                 voice: "story/1004/100427/19241046",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042712,
                                 content: "천만에요. 저도 제 이득을 위해, 적당한 타이밍에 해야 할 일을 했을 뿐인걸요.",
                                 voice: "story/1004/100427/19241070",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042713,
@@ -29995,6 +30462,7 @@ export const questData_kr: QuestStory[] = [
                                     "아무튼, 서둘러 증거를 찾아 누명부터 벗으세요. 아이젠반이 당장 아웃사이더 씨를 어떻게 하진 않겠지만, 그 사람의 인내심이 언제 바닥날지는 아무도 모르는 일이니까요.",
                                 voice: "story/1004/100427/1924109A",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042714,
@@ -30007,12 +30475,14 @@ export const questData_kr: QuestStory[] = [
                                 content: "...월석 사냥꾼님.",
                                 voice: "story/1004/100427/192410EE",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042716,
                                 content: "진범을 붙잡게 되면, 여기로 돌아와 저한테도 알려 주세요.",
                                 voice: "story/1004/100427/19241118",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042717,
@@ -30048,6 +30518,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "왜 멍하니 계신가요? 감찰실장님 말씀대로 시간의 여유가 없습니다. 서두르세요.",
                                 voice: "story/1004/100428/19241F5E",
                                 npc: 100403,
+                                speakerName: "익숙한 목소리",
                             },
                             {
                                 id: 10042804,
@@ -30089,12 +30560,14 @@ export const questData_kr: QuestStory[] = [
                                     "네, 힐다는 제 전속 메이드예요. 최대한 빨리 아웃사이더 씨를 구출할 수 있도록, 여러분을 도울 거예요.",
                                 voice: "story/1004/100428/1924205A",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042810,
                                 content: "여러분이 갈까마귀호에 접근하려다가 용의자로 몰렸다는 사실을 제게 전해 준 것도 힐다였어요.",
                                 voice: "story/1004/100428/19242084",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042811,
@@ -30102,6 +30575,7 @@ export const questData_kr: QuestStory[] = [
                                     "아마, 힐다가 여러분을 돕는다면, 포세이큰 동맹을 훨씬 빨리 발견하실 수 있을 거예요. 가끔 말투가 조금 쌀쌀맞을 수도 있지만, 원래 성격이 그런 거니까, 너무 신경 쓰지 마세요.",
                                 voice: "story/1004/100428/192420AE",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042812,
@@ -30116,6 +30590,7 @@ export const questData_kr: QuestStory[] = [
                                     "난 걱정 안 해도 돼. 나한테 해를 끼칠 능력이 있었다면, 방송으로 자기들 계획을 떠벌리진 않았을 테니까.",
                                 voice: "story/1004/100428/19242102",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042814,
@@ -30128,6 +30603,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "내 말에 토 그만 달아. 이분들이 범인을 찾도록 돕는 게, 지금 나한테 가장 도움이 되는 일이야.",
                                 voice: "story/1004/100428/19242156",
                                 npc: 100404,
+                                speakerName: "군단 감찰실장",
                             },
                             {
                                 id: 10042816,
@@ -30821,12 +31297,14 @@ export const questData_kr: QuestStory[] = [
                                 content: "조금 전의 그 소동은, 두 분 솜씨였던 모양이네요. 실력도 좋으시고, 상황 판단도 빠르시더군요.",
                                 voice: "story/1004/100420/19239BCA",
                                 npc: 100403,
+                                speakerName: "수수께끼의 여자",
                             },
                             {
                                 id: 10042002,
                                 content: "그래서, 제안을 드리죠. 서로 동시에 무기를 거두는 겁니다, 어떠신가요?",
                                 voice: "story/1004/100420/19239BF4",
                                 npc: 100403,
+                                speakerName: "수수께끼의 여자",
                             },
                             {
                                 id: 10042003,
@@ -30847,6 +31325,7 @@ export const questData_kr: QuestStory[] = [
                                     "과찬이세요. 여력을 남겨 둔 건, 서로 마찬가지 아닌가요? 전 두 분을 해칠 생각이 없어요. 특히 이렇게 두 분의 정체를 확인하지 못한 상태에선요.",
                                 voice: "story/1004/100420/19239C72",
                                 npc: 100403,
+                                speakerName: "수수께끼의 여자",
                             },
                             {
                                 id: 10042006,
@@ -30854,6 +31333,7 @@ export const questData_kr: QuestStory[] = [
                                     "그러면, 두 분은 무슨 목적으로 이 열차에 접근하신 거죠? 군단의 사주를 받고 궂은일을 처리하러 오신 건가요? 아니면... 포세이큰 동맹의 조력자라도 되시나요?",
                                 voice: "story/1004/100420/19239C9C",
                                 npc: 100403,
+                                speakerName: "수수께끼의 여자",
                             },
                             {
                                 id: 10042007,
@@ -30861,6 +31341,7 @@ export const questData_kr: QuestStory[] = [
                                     "제 이름은 힐다. 평범한 메이드입니다만, 두 분의 대답에 따라 최대한, 고통 없이 편안한 방식으로 보내드리겠습니다.",
                                 voice: "story/1004/100420/19239CC6",
                                 npc: 100403,
+                                speakerName: "수수께끼의 여자",
                             },
                             {
                                 id: 10042008,
@@ -32038,12 +32519,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "내부 조사에 따라, 앞서 체포된 월석 사냥꾼은 혐의 사항이 없어 풀려났습니다. 이번 폭발 사건의 유력 용의자는 창고 관리자 스틸러이며, 포세이큰 동맹과 공모하여 사건을 꾸민 혐의를 받고 있습니다.",
                                 voice: "story/1004/100439/1924D382",
+                                speakerName: "방송",
                             },
                             {
                                 id: 10043902,
                                 content:
                                     "현재, 용의자 스틸러의 신병은 확보된 상태입니다. 신문이 끝나는 대로 출입 통제가 해제될 예정이니, 승객 여러분께서는 안심하시기 바랍니다.",
                                 voice: "story/1004/100439/1924D3AC",
+                                speakerName: "방송",
                             },
                             {
                                 id: 10043903,
@@ -32107,6 +32590,7 @@ export const questData_kr: QuestStory[] = [
                                     "하하! 그 인간이 언제 한 번 사고칠 줄 알았어. 매번 뭐가 불만인지 얼굴은 잔뜩 구겨져선, 창고에 뭐 좀 하러 갔다 하면 붙잡고 온 동네 얘기를 다 캐물었거든.",
                                 voice: "story/1004/100440/1924E414",
                                 npc: 100422,
+                                speakerName: "신난 경비병",
                                 next: 10044003,
                             },
                             {
@@ -32114,6 +32598,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "다른 사람이 동맹과 내통한 범인이라면 못 믿겠지만, 스틸러는 충분히 그러고도 남을 인간이야.",
                                 voice: "story/1004/100440/1924E43E",
                                 npc: 100422,
+                                speakerName: "신난 경비병",
                                 next: 10044004,
                             },
                             {
@@ -32121,6 +32606,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하하! 난 애저녁에 그 인간 인성을 알아봤다니까!",
                                 voice: "story/1004/100440/1924E468",
                                 npc: 100422,
+                                speakerName: "신난 경비병",
                                 next: 10044005,
                             },
                             {
@@ -32150,6 +32636,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "잠깐만, 일단 내 얘기부터 들어 봐. 이렇게 재미있는 얘기가 또 없거든.",
                                 voice: "story/1004/100441/1924F47C",
                                 npc: 100422,
+                                speakerName: "비밀스러운 경비원",
                             },
                             {
                                 id: 10044103,
@@ -32163,6 +32650,7 @@ export const questData_kr: QuestStory[] = [
                                     '뻑하면 "나 때는"만 읊어대던 그 스틸러가 드디어 사고를 쳤대! 이번 폭발 사건이 그 인간 짓이었다는 거야. 하기야 스틸러 입장에선, 속이 안 뒤틀렸겠어?',
                                 voice: "story/1004/100441/1924F4D0",
                                 npc: 100421,
+                                speakerName: "비밀스러운 경비원",
                             },
                             {
                                 id: 10044105,
@@ -32170,6 +32658,7 @@ export const questData_kr: QuestStory[] = [
                                     "아이젠반 역장님이랑 같은 군단 소속이었다가, 퇴역하고 이리로 오게 된 거래. 현역 때는 스틸러 쪽이 오히려 상관이었다더라고.",
                                 voice: "story/1004/100441/1924F4FA",
                                 npc: 100421,
+                                speakerName: "비밀스러운 경비원",
                             },
                             {
                                 id: 10044106,
@@ -32177,6 +32666,7 @@ export const questData_kr: QuestStory[] = [
                                     "그런 인간이 쭉 미끄러져서, 자기 밑에 있던 아이젠반 님은 역장이 되고, 자기는 저 모양 저 꼴이 됐으니 배가 안 아프고 배기겠냐는 거지.",
                                 voice: "story/1004/100441/1924F524",
                                 npc: 100421,
+                                speakerName: "비밀스러운 경비원",
                             },
                             {
                                 id: 10044107,
@@ -32184,6 +32674,7 @@ export const questData_kr: QuestStory[] = [
                                     "입장 바꿔서 나였어도, 그런 기분이 들긴 했겠지. 그렇지만 난 그 인간이랑 다르게 딸린 식구가 있어서, 그런 극단적인 짓을 저질러야겠단 생각까진 안 해.",
                                 voice: "story/1004/100441/1924F54E",
                                 npc: 100421,
+                                speakerName: "비밀스러운 경비원",
                             },
                             {
                                 id: 10044108,
@@ -32191,6 +32682,7 @@ export const questData_kr: QuestStory[] = [
                                     "그래서 사람은 가족이 있어야 하는 거야. 우리 딸 웃는 얼굴만 보면 매일 힘이 나거든. 어때, 사진 좀 보여 줄까?",
                                 voice: "story/1004/100441/1924F578",
                                 npc: 100421,
+                                speakerName: "비밀스러운 경비원",
                             },
                             {
                                 id: 10044109,
@@ -32203,6 +32695,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "참, 아까 무슨 얘기 하려고 했더라? 안 해도 돼?",
                                 voice: "story/1004/100441/1924F5CC",
                                 npc: 100421,
+                                speakerName: "비밀스러운 경비원",
                             },
                         ],
                     },
@@ -32225,6 +32718,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "음... 인간성은 별로고, 술버릇은 더 가관이야.",
                                 voice: "story/1004/100442/192504E4",
                                 npc: 100443,
+                                speakerName: "술 취한 일꾼",
                             },
                             {
                                 id: 10044203,
@@ -32232,6 +32726,7 @@ export const questData_kr: QuestStory[] = [
                                     "솔직히 자랑은 아닌데, 난 다른 취미는 없고, 매일 퇴근하고 나서 알딸딸하게 술 한잔 걸치는 게 삶의 낙이거든.",
                                 voice: "story/1004/100442/1925050E",
                                 npc: 100443,
+                                speakerName: "술 취한 일꾼",
                             },
                             {
                                 id: 10044204,
@@ -32239,6 +32734,7 @@ export const questData_kr: QuestStory[] = [
                                     "그래서 이 역에서 술 좀 마신다는 녀석들은 대충 다 꿰고 있어. 가끔 여럿이 모여서 마시면, 술값도 돌아가면서 내곤 해.",
                                 voice: "story/1004/100442/19250538",
                                 npc: 100443,
+                                speakerName: "술 취한 일꾼",
                             },
                             {
                                 id: 10044205,
@@ -32246,6 +32742,7 @@ export const questData_kr: QuestStory[] = [
                                     "스틸러 그 인간만 빼고 말이야. 그 인간은 지갑을 연 적이 없어. 술도 매번 '군단용 울프 블러드'만 달고 사는데, 그건 술이 아니라 거의 소독약 수준이고.",
                                 voice: "story/1004/100442/19250562",
                                 npc: 100443,
+                                speakerName: "술 취한 일꾼",
                             },
                             {
                                 id: 10044206,
@@ -32253,6 +32750,7 @@ export const questData_kr: QuestStory[] = [
                                     "그리고 술만 좀 들어갔다 하면, 자기가 군단에 있었을 때는 어쩌고저쩌고 하면서, 창고 일은 자기 급에 안 맞는다면서 투덜거린다니까.",
                                 voice: "story/1004/100442/1925058C",
                                 npc: 100443,
+                                speakerName: "술 취한 일꾼",
                             },
                             {
                                 id: 10044207,
@@ -32260,6 +32758,7 @@ export const questData_kr: QuestStory[] = [
                                     "그러곤 다들 위기의식이 없다느니, 제국은 위나 아래나 싹 다 구멍가게 수준이라느니 하면서 온갖 불평을 쏟아내는 거야.",
                                 voice: "story/1004/100442/192505B6",
                                 npc: 100443,
+                                speakerName: "술 취한 일꾼",
                             },
                             {
                                 id: 10044208,
@@ -32267,6 +32766,7 @@ export const questData_kr: QuestStory[] = [
                                     "솔직히, 다들 먹고살기 팍팍하니까, 술이나 한잔하면서 기분이나 풀려는 건데, 누가 그런 소리를 듣고 싶겠어.",
                                 voice: "story/1004/100442/192505E0",
                                 npc: 100443,
+                                speakerName: "술 취한 일꾼",
                             },
                             {
                                 id: 10044209,
@@ -32274,6 +32774,7 @@ export const questData_kr: QuestStory[] = [
                                     "어쨌든, 난 그 인간 싫어. 그런데 제국에 불만이 있다고, 그걸 행동으로 옮겨 버린 걸 보면, 아직 군인 기질이 죽진 않았나 봐. 의외로 사람 다시 봤어.",
                                 voice: "story/1004/100442/1925060A",
                                 npc: 100443,
+                                speakerName: "술 취한 일꾼",
                             },
                             {
                                 id: 10044210,
@@ -33241,6 +33742,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "염려가 과하시군요. 제가 숙부님께 심려를 끼쳐드릴지는 당신이 함부로 왈가왈부할 사안이 아닙니다.",
                                 voice: "story/1004/100450/192588A2",
                                 npc: 100404,
+                                speakerName: "플로렌티아 공주",
                             },
                             {
                                 id: 10045006,
@@ -33248,6 +33750,7 @@ export const questData_kr: QuestStory[] = [
                                     "그리고 이분들은, 제가 아이스레이크 시티에서 잠시나마 자유를 누리며 사귄 벗들입니다. 아마, 이 도시 동부에서 얼마 전 새로 결성됐다는 월석 사냥꾼 모임 '녹토 보이저'에 대해 모르진 않으시겠죠.",
                                 voice: "story/1004/100450/192588CC",
                                 npc: 100404,
+                                speakerName: "플로렌티아 공주",
                             },
                             {
                                 id: 10045007,
@@ -33255,12 +33758,14 @@ export const questData_kr: QuestStory[] = [
                                     "얼마 전 동부에서 급작스럽게 발생한 침식자 사건과 카론 사냥을 해결하고, 제13군단에 힘을 보태 준 협력자들이 바로 이분들입니다. 저 역시 그때 이분들과 인연이 생겼죠.",
                                 voice: "story/1004/100450/192588F6",
                                 npc: 100404,
+                                speakerName: "플로렌티아 공주",
                             },
                             {
                                 id: 10045008,
                                 content: "벗들이 곧 디즈마니아로 돌아가게 될 저를 배웅해 주러 오는 건, 지극히 당연한 일입니다.",
                                 voice: "story/1004/100450/19258920",
                                 npc: 100404,
+                                speakerName: "플로렌티아 공주",
                             },
                             {
                                 id: 10045009,
@@ -33268,6 +33773,7 @@ export const questData_kr: QuestStory[] = [
                                     "보시다시피, 제 객차 밖은 제13군단의 병사들이 경호 중입니다. 도망칠 방법은 없어요. 정 불안하시다면, 저희가 작별 인사를 마칠 때까지, 사람을 더 배치해 갈까마귀호를 포위하시면 됩니다.",
                                 voice: "story/1004/100450/1925894A",
                                 npc: 100404,
+                                speakerName: "플로렌티아 공주",
                             },
                             {
                                 id: 10045010,
@@ -33281,6 +33787,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...좋습니다. 수색이 끝나면 같이 안으로 들어가시죠.",
                                 voice: "story/1004/100450/1925899E",
                                 npc: 100404,
+                                speakerName: "플로렌티아 공주",
                             },
                         ],
                     },
@@ -34134,6 +34641,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "안내 말씀드립니다. 열차 경비대는 조사 끝에 금일 발생한 폭발 사건의 1차 용의자 한 명을 확보했습니다. 해당 용의자는 남성으로, 자신을 월석 사냥꾼이라 주장하고 있으며, 현재 긴급 신문이 진행 중입니다.",
                                 voice: "story/1004/100438/1924C566",
+                                speakerName: "방송",
                                 next: 10043816,
                             },
                             {
@@ -34141,6 +34649,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "승객 여러분께서는 안심하시기를 바라며, 사건과 관련한 다른 단서를 알고 계신 분은 즉시 제보해 주시기 바랍니다. 열차 경비대는 승객 여러분의 안전을 위해, 최선을 다하겠습니다.",
                                 voice: "story/1004/100438/1924C590",
+                                speakerName: "방송",
                                 next: 10043817,
                             },
                             {
@@ -37081,6 +37590,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10047410,
                                 content: '"오로라호가 포세이큰 동맹의 습격을 받았다! 열차 내 경비병 정원 미달로, 비행선 지원을 요청한다!"',
                                 voice: "story/1004/100474/19271334",
+                                speakerName: "차장의 목소리",
                             },
                             {
                                 id: 10047411,
@@ -37100,6 +37610,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "크흠... 미안하지만, 여러분 시간을 잠깐 좀 빌릴게.",
                                 voice: "story/1004/100474/192713B2",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047414,
@@ -37113,6 +37624,7 @@ export const questData_kr: QuestStory[] = [
                                     "나, 카지아가 포세이큰 동맹의 이름으로 엄청난 희소식을 전해줄 건데, 흥분은 조금만 자제해 줘. 열차가 운행 중이니까 안전에 주의해야지.",
                                 voice: "story/1004/100474/19271406",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047416,
@@ -37120,6 +37632,7 @@ export const questData_kr: QuestStory[] = [
                                     "이 열차는 우리 포세이큰 동맹의 은총을 받아 폭탄이 설치됐고, 지금 전속력으로 황성을 향해 달리고 있어.",
                                 voice: "story/1004/100474/19271430",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047417,
@@ -37127,6 +37640,7 @@ export const questData_kr: QuestStory[] = [
                                     "여정의 종착지, 황성 디즈마니아에서 열차는 폭발과 함께 폭시코르로 가득한 공장들을 불태우고, 어둠 속 황성을 화려하게 물들여, 귀족들의 단잠을 깨워줄 거야! 어때? 깜짝 놀랐지?",
                                 voice: "story/1004/100474/1927145A",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047418,
@@ -37134,6 +37648,7 @@ export const questData_kr: QuestStory[] = [
                                     "울지 마, 사랑스러운 제국 백성 여러분. 거창한 대의를 늘어놓을 생각도 집어치워. 제국은 카론을 천 년 동안 억압해 왔어. 물론 중간에 잠깐 유화책을 쓴 적도 있고, 어리석게도 우린 그걸 믿었었지.",
                                 voice: "story/1004/100474/19271484",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047419,
@@ -37141,6 +37656,7 @@ export const questData_kr: QuestStory[] = [
                                     "하지만 천 년 전 '눈물의 호수의 밤'에서도, 천 년 후 '핏빛 만찬'에서도, 너흰 수없이 맹약을 찢어발기고, 우리 형제자매들을 학살하며 잔혹한 송곳니를 드러냈어.",
                                 voice: "story/1004/100474/192714AE",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047420,
@@ -37148,6 +37664,7 @@ export const questData_kr: QuestStory[] = [
                                     "덕분에 너희들이 착각을 했나 봐. 마치 '얌전히 죽어'라고 한마디만 하면, 모든 카론이 죽기만 기다릴 거라고 말이야.",
                                 voice: "story/1004/100474/192714D8",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047421,
@@ -37155,6 +37672,7 @@ export const questData_kr: QuestStory[] = [
                                     "유감이지만, 너희 바람은 빗나갔어. 그리고 조금씩 깨닫게 될 거야, 너희가 말하는 그 제국이 얼마나 허약한지 말이야.",
                                 voice: "story/1004/100474/19271502",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047422,
@@ -37162,6 +37680,7 @@ export const questData_kr: QuestStory[] = [
                                     "흔히 휘페르보레아를 우렁찬 전차에 비유하곤 하잖아? 그렇다면 우리 포세이큰 동맹이 그 전차가 얼마나 허약한지 직접 보여줄게. 바로 이 열차처럼 말이야!",
                                 voice: "story/1004/100474/1927152C",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047423,
@@ -37169,6 +37688,7 @@ export const questData_kr: QuestStory[] = [
                                     "자, 겁주는 건 이쯤 해두고, 지금부턴 너희들한테 내리는 지시야. 모두 저항을 포기하고, 조용히 운명이 찾아오길 기다려.",
                                 voice: "story/1004/100474/19271556",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047424,
@@ -37176,6 +37696,7 @@ export const questData_kr: QuestStory[] = [
                                     "열차의 유일한 경비병은 이미 내가 처리했어. 이제 너희 곁에 있는 건 우리 포세이큰 동맹뿐이야. 놀라움과 스릴이 가득한 이 폭발적인 여정을 마음껏 즐기길 바랄게.",
                                 voice: "story/1004/100474/19271580",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                         ],
                     },
@@ -37275,6 +37796,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "콜록... 콜록콜록...",
                                 voice: "story/1004/100475/1927241A",
                                 npc: 100418,
+                                speakerName: "희미한 소리",
                             },
                             {
                                 id: 10047514,
@@ -37348,6 +37870,7 @@ export const questData_kr: QuestStory[] = [
                                     "저항하려 들지 마. 우리 포세이큰 동맹은 언제나 완벽하게 준비를 갖춘 다음 움직이거든. 우리한테 맞선다면, 결과는 썩 좋지 않을 거야.",
                                 voice: "story/1004/100476/192733DA",
                                 npc: 100413,
+                                speakerName: "방송",
                             },
                             {
                                 id: 10047610,
@@ -37649,11 +38172,13 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "오로라호의 위험 분자들은 들어라. 우리는 제6군단이다. 지금 즉시 저항을 멈추고, 계획을 중단하라! 제국 비행선은 지금 너희를 조준하고 있다.",
                                 voice: "story/1004/100482/19279578",
+                                speakerName: "비행선 지휘관",
                             },
                             {
                                 id: 10048205,
                                 content: "제국은 어떤 요구도 수용하지 않는다. 비행선의 반격이 우리의 대답이다!",
                                 voice: "story/1004/100482/192795A2",
+                                speakerName: "비행선 지휘관",
                             },
                             {
                                 id: 10048206,
@@ -38485,6 +39010,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "포세이큰 동맹의 사기꾼들, 너흰 언제나 그럴듯한 거짓말 뒤에 몸을 숨기고 있지. 우리 제국은 너흴 털끝만큼도 신뢰하지 않는다.",
                                 voice: "story/1004/100483/1927A5E0",
+                                speakerName: "비행선 지휘관",
                             },
                             {
                                 id: 10048305,
@@ -38517,17 +39043,20 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "네가 플로렌티아 공주라고? 그럼 난 율리우스 황제야. 공주가 지금 갈까마귀호를 타고 곧 황성에 도착한다는 걸 뻔히 아는데, 너 같은 애의 헛소리를 믿으라고?",
                                 voice: "story/1004/100483/1927A6B2",
+                                speakerName: "비행선 지휘관",
                             },
                             {
                                 id: 10048310,
                                 content: "내가 뭘 보고 네 말을 믿지? 너 혼자 입으로만 떠들어대는 말을 믿으라고?",
                                 voice: "story/1004/100483/1927A6DC",
+                                speakerName: "비행선 지휘관",
                             },
                             {
                                 id: 10048311,
                                 content:
                                     "설령 네가 정말 플로렌티아 공주라 해도, 겨우 갈까마귀호에서 탈출한 공주가 여기서 자신의 신분을 밝힐 이유가 있나?",
                                 voice: "story/1004/100483/1927A706",
+                                speakerName: "비행선 지휘관",
                             },
                             {
                                 id: 10048312,
@@ -38600,6 +39129,7 @@ export const questData_kr: QuestStory[] = [
                                     "너 이 녀석, 이 위험한 열차 지붕까지 올라올 배짱이 있다니, 크면 도박판에서도 한가락 하겠는데? 이런 스릴 있는 이 아저씨가 놓칠 순 없지.",
                                 voice: "story/1004/100483/1927A8D4",
                                 npc: 100430,
+                                speakerName: "철근공 디미트리",
                             },
                             {
                                 id: 10048323,
@@ -38607,6 +39137,7 @@ export const questData_kr: QuestStory[] = [
                                     "뒤에도 또 오고 있다고. 내가 새로 사귄 도박 친구인데, 어때? 내가 저 아가씨 예사롭지 않다고 했지? 거봐, 내가 또 이겼잖아.",
                                 voice: "story/1004/100483/1927A8FE",
                                 npc: 100430,
+                                speakerName: "철근공 디미트리",
                             },
                             {
                                 id: 10048324,
@@ -38621,6 +39152,7 @@ export const questData_kr: QuestStory[] = [
                                     "됐으니까 본론이나 얘기해! 나는 티투스 파스투스 자작이고, 포세이큰 동맹과는 관계없다! 눈치가 있다면 당장 멈춰라!",
                                 voice: "story/1004/100483/1927A952",
                                 npc: 100439,
+                                speakerName: "티투스 파스투스 자작",
                             },
                             {
                                 id: 10048326,
@@ -38628,6 +39160,7 @@ export const questData_kr: QuestStory[] = [
                                     "어... 비행선 지휘관, 나... 나는 제2대 쿠프리우스 남작이고, 포세이큰 동맹이 아니다... 며...명령이니까... 당장 공격을 멈추도록 해.",
                                 voice: "story/1004/100483/1927A97C",
                                 npc: 100441,
+                                speakerName: "쿠프리우스 남작",
                             },
                             {
                                 id: 10048327,
@@ -38642,6 +39175,7 @@ export const questData_kr: QuestStory[] = [
                                     "거기, 비행선 모는 놈들아! 블룸필드역 빵집 '순수한 사랑의 효모'의 직원, 체다 베이컨이 충고하는데, 된통 벌 받기 싫으면 얌전히 돌아가! 나도 포세이큰 동맹이랑 아무 상관없어!",
                                 voice: "story/1004/100483/1927A9D0",
                                 npc: 100431,
+                                speakerName: "빵집 직원 체다 베이컨",
                             },
                             {
                                 id: 10048329,
@@ -38655,6 +39189,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "난 아이스레이크 시티 안개 구역의 재봉사 수잔나야. 포세이큰 동맹 같은 게 아니야!",
                                 voice: "story/1004/100483/1927AA24",
                                 npc: 100433,
+                                speakerName: "재봉사 수잔나",
                             },
                             {
                                 id: 10048331,
@@ -38668,35 +39203,41 @@ export const questData_kr: QuestStory[] = [
                                 content: "난 아이스레이크 시티 하수도 수리공 르펜이다. 포세이큰 동맹이 아니야!",
                                 voice: "story/1004/100483/1927AA78",
                                 npc: 100426,
+                                speakerName: "지저분한 르펜 아저씨",
                             },
                             {
                                 id: 10048333,
                                 content: "난 〈휘페르보레아 제국 조간신문〉의 편집장 리비아예요.",
                                 voice: "story/1004/100483/1927AAA2",
                                 npc: 100440,
+                                speakerName: "편집장 리비아",
                             },
                             {
                                 id: 10048334,
                                 content: "음유시인 아이리스입니다.",
                                 voice: "story/1004/100483/1927AACC",
                                 npc: 100435,
+                                speakerName: "음유시인 아이리스",
                             },
                             {
                                 id: 10048335,
                                 content: "디즈마니아의 판사, 미란다예요.",
                                 voice: "story/1004/100483/1927AAF6",
                                 npc: 100442,
+                                speakerName: "판사 미란다",
                             },
                             {
                                 id: 10048336,
                                 content: "아이스레이크 시티의 세탁소 점원, 한나예요.",
                                 voice: "story/1004/100483/1927AB20",
                                 npc: 100434,
+                                speakerName: "세탁소 점원 한나",
                             },
                             {
                                 id: 10048337,
                                 content: "우린 모두 포세이큰 동맹이 아니에요!",
                                 voice: "story/1004/100483/1927AB4A",
+                                speakerName: "사람들",
                             },
                             {
                                 id: 10048338,
@@ -38715,6 +39256,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10048340,
                                 content: "......",
                                 voice: "story/1004/100483/1927ABC8",
+                                speakerName: "비행선 지휘관",
                             },
                             {
                                 id: 10048341,
@@ -38726,12 +39268,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 10048342,
                                 content: "사격 중지! 갈까마귀호 쪽에 플로렌티아 전하의 행방을 확인해 봐!",
                                 voice: "story/1004/100483/1927AC1C",
+                                speakerName: "비행선 지휘관",
                             },
                             {
                                 id: 10048343,
                                 content:
                                     "확인될 때까지 일단 공격을 멈추겠다. 제국의 귀족과 평민들이 함께 손을 잡는 모습은 솔직히 말해 처음 보는군. 황족이 아니라면 이런 일을 해낼 수 없겠지.",
                                 voice: "story/1004/100483/1927AC46",
+                                speakerName: "비행선 지휘관",
                             },
                             {
                                 id: 10048344,
@@ -38901,6 +39445,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 10048506,
                                 content: "대공 전투 준비, 오로라호 메인 포대에 장전을 시작합니다.",
                                 voice: "story/1004/100485/1927C704",
+                                speakerName: "???",
                             },
                             {
                                 id: 10048507,
@@ -38912,11 +39457,13 @@ export const questData_kr: QuestStory[] = [
                                 id: 10048508,
                                 content: "포탄 장전 완료, 사격 데이터를 보정 중입니다.",
                                 voice: "story/1004/100485/1927C758",
+                                speakerName: "???",
                             },
                             {
                                 id: 10048509,
                                 content: "보정 완료... 발사 준비...",
                                 voice: "story/1004/100485/1927C782",
+                                speakerName: "???",
                             },
                             {
                                 id: 10048510,
@@ -38928,16 +39475,19 @@ export const questData_kr: QuestStory[] = [
                                 id: 10048511,
                                 content: "3...",
                                 voice: "story/1004/100485/1927C7D6",
+                                speakerName: "???",
                             },
                             {
                                 id: 10048512,
                                 content: "2...",
                                 voice: "story/1004/100485/1927C800",
+                                speakerName: "???",
                             },
                             {
                                 id: 10048513,
                                 content: "1...",
                                 voice: "story/1004/100485/1927C82A",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -38951,6 +39501,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "동력 유닛이 피격되어, 스티어링 엔진이 고장 났다. 비행선은 현재 제어 불능 상태다. 모든 병력은 지금 즉시 탈출하라!",
                                 voice: "story/1004/100486/1927D69A",
+                                speakerName: "비행선 지휘관",
                             },
                             {
                                 id: 10048602,
@@ -39353,12 +39904,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "긴급 뉴스입니다. 오늘, 포세이큰 동맹이 코퀴투스 성 남쪽 경계에서 열차 '오로라호'를 납치하고, 구조를 위해 출동한 제국 비행선을 열차포로 격추했습니다.",
                                 voice: "story/1004/100490/19281936",
+                                speakerName: "라디오",
                             },
                             {
                                 id: 10049008,
                                 content:
                                     "비행선은 거대한 천국의 나무 근처에서 폭발했고, 이로 인해 천국의 나무에 불이 붙었습니다. 이는 올해 발생한 두 번째 천국의 나무 화재 사건입니다. 제6군단은 추가 구조대를 파견했으며, 현재 오로라호 승객은 전원 연락 두절 상태로, 생존이 확인되지 않은 상황입니다.",
                                 voice: "story/1004/100490/19281960",
+                                speakerName: "라디오",
                             },
                             {
                                 id: 10049009,
@@ -39371,6 +39924,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "저기요, 방금 주문한 '아이스레이크의 이야기' 다 됐나요?",
                                 voice: "story/1004/100490/192819B4",
                                 npc: 100414,
+                                speakerName: "기다리는 음유시인",
                             },
                             {
                                 id: 10049011,
@@ -39378,12 +39932,14 @@ export const questData_kr: QuestStory[] = [
                                     "저랑 친구가 오늘 여길 떠나거든요. 그래서 기념으로 아이스레이크 시티에서 가장 특색 있는 음료를 마시고 싶어서요!",
                                 voice: "story/1004/100490/192819DE",
                                 npc: 100414,
+                                speakerName: "기다리는 음유시인",
                             },
                             {
                                 id: 10049012,
                                 content: "...사장님?",
                                 voice: "story/1004/100490/19281A08",
                                 npc: 100414,
+                                speakerName: "기다리는 음유시인",
                             },
                             {
                                 id: 10049013,
@@ -39888,12 +40444,14 @@ export const questData_kr: QuestStory[] = [
                                 content: "그 부하는 죽을 필요가 없었다.",
                                 voice: "story/1004/100493/19284972",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049302,
                                 content: "넌 여전히 쓸데없는 일을 벌이는 걸 좋아하는군. 처음 널 만났을 때처럼 말이야, '야수왕'.",
                                 voice: "story/1004/100493/1928499C",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049303,
@@ -39915,12 +40473,14 @@ export const questData_kr: QuestStory[] = [
                                     "'야수왕'의 의미는 야수떼를 한데 모아 맹목적인 군중처럼 물어뜯게 하는 게 아니다. 그들에게 어둠 속에 잠복하며 발톱과 이빨을 날카롭게 갈고닦아, 가장 적절한 순간을 노려 일격에 목숨을 끊는 법을 알려주는 것이야.",
                                 voice: "story/1004/100493/19284A1A",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049306,
                                 content: "넌 늘 분노에 못 이겨 무의미한 짓을 하는군, 카지아.",
                                 voice: "story/1004/100493/19284A44",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049307,
@@ -39941,12 +40501,14 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1004/100493/19284AC2",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049310,
                                 content: "선을 넘는군, '야수왕'.",
                                 voice: "story/1004/100493/19284AEC",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049311,
@@ -39965,6 +40527,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "카지아.",
                                 voice: "story/1004/100493/19284B6A",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049314,
@@ -39972,12 +40535,14 @@ export const questData_kr: QuestStory[] = [
                                     "그들의 죽음은 의미가 있었다. 불타는 천국의 나무가 이미 제국의 하늘을 갈라놓았고, 그 불길은 계속될 거다. 이제 우린 공중을 날아다니는 괴물들의 일방적인 학살을 걱정할 필요가 없다.",
                                 voice: "story/1004/100493/19284B94",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049315,
                                 content: "그 대신, 전쟁이 시작될 거다. 이번만큼은 망설임도, 자비도 없을 거다.",
                                 voice: "story/1004/100493/19284BBE",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049316,
@@ -39985,6 +40550,7 @@ export const questData_kr: QuestStory[] = [
                                     "그래, 전쟁은 결코 끝나지 않았다. 그토록 오랜 세월을 참고 견뎌, 드디어 그 순간이 온 거다. 그리고 이 전쟁이 끝날 때는, 휘페르보레아 제국이든, 포세이큰 동맹이든, 둘 중 하나는 반드시 재가 되어 사라질 것이다.",
                                 voice: "story/1004/100493/19284BE8",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -40007,6 +40573,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...드디어 깨어났구나.",
                                 voice: "story/1004/100498/19289B7A",
                                 npc: 100414,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049802,
@@ -40014,12 +40581,14 @@ export const questData_kr: QuestStory[] = [
                                     "나, 너 기억나! 우리 아이스레이크 시티에서 만났었잖아! 네가 아마 오랫동안 표류했었는지, 심하게 탈진했더라... 근데 이젠 괜찮아! 여긴 안전해.",
                                 voice: "story/1004/100498/19289BA4",
                                 npc: 100414,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049803,
                                 content: "'브리즈호'에 온 걸 환영할게, 설원의 유니콘처럼 고귀한 {性别:신사|숙녀}분.",
                                 voice: "story/1004/100498/19289BCE",
                                 npc: 100414,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -40133,6 +40702,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11010102,
                                 content: "<W>... 지금 괴수가 널 가로막고, 네 숨통을 조이고 있다.</>",
                                 voice: "story/1002/110101/1B9008DC",
+                                speakerName: "???",
                                 next: 11010103,
                             },
                             {
@@ -40140,6 +40710,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "<W>너의 그 몸뚱이는 질식으로 부들부들 떨리고, 고통이 너의 가장 깊숙한 곳에 숨겨진 욕망을 두드리고 있지.</>",
                                 voice: "story/1002/110101/1B900906",
+                                speakerName: "???",
                                 next: 11010104,
                             },
                             {
@@ -40160,6 +40731,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "<W>녀석을 죽여. 녀석의 울부짖음을 듣고, 녀석의 피로 널 적시며, 그 달콤한 죽음을 받아들이는 거다.</>",
                                 voice: "story/1002/110101/1B900984",
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 11010107,
@@ -40395,6 +40967,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "<W>네 두 손의 그 축축하고 끈적이는 것들이 과연 필토이드의 점액일까? 아니면 내장? 넌 모르겠지. 하지만 그것들이 네 영혼마저 떨리게 할 만큼 기쁘게 한다는 것만은 알고 있어.</>",
                                 voice: "story/1002/110102/1B901A40",
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 11010209,
@@ -40408,6 +40981,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "<W>저항할 필요 없어. 나야말로 진정한 너이자, 네가 가진 죽음의 본능이니. 언젠가 넌 나의 인도와 태초의 의지를 따르게 될 테니까...</>",
                                 voice: "story/1002/110102/1B901A94",
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 11010211,
@@ -40725,6 +41299,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "통신보안, 통신보안!",
                                 voice: "story/1002/110110/1B909CAE",
                                 npc: 110010,
+                                speakerName: "???",
                                 next: 11011004,
                             },
                             {
@@ -40739,6 +41314,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "<Highlight>휘페르보레아의 오늘 날씨는 어떤가?</>",
                                 voice: "story/1002/110110/1B909D02",
                                 npc: 110010,
+                                speakerName: "???",
                                 next: 11011006,
                             },
                             {
@@ -40753,6 +41329,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아바르 헤데란 중령이다. 연결된 자는 '그리핀 소대'의 누구인가?",
                                 voice: "story/1002/110110/1B909D56",
                                 npc: 110010,
+                                speakerName: "???",
                                 next: 11011008,
                             },
                             {
@@ -41101,6 +41678,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아바르 중령님? 제가... 꿈을 꾸는...",
                                 voice: "story/1002/110110/1B909F78",
                                 npc: 110027,
+                                speakerName: "부상당한 '그리핀' 소대원",
                                 next: 11011021,
                             },
                             {
@@ -41123,6 +41701,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "중령님, 부디... 황제 폐하께... 영광을...",
                                 voice: "story/1002/110110/1B909FCC",
                                 npc: 110028,
+                                speakerName: "부상당한 '그리핀' 소대원",
                                 next: 11011023,
                             },
                             {
@@ -41145,6 +41724,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "대장님, 그리고 중령님... 이번 작전에 아직 희망이 있겠습니까?",
                                 voice: "story/1002/110110/1B90A020",
                                 npc: 110026,
+                                speakerName: "부상당한 '그리핀' 소대원",
                                 next: 11011025,
                             },
                             {
@@ -41385,6 +41965,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11017514,
                                 content: "<W>경고: 회전체의 비정상적인 종료가 감지되었습니다. 곧 재시작됩니다.</>",
                                 voice: "story/1002/110175/1B94C8E4",
+                                speakerName: "기계음",
                                 next: 11017515,
                             },
                             {
@@ -41614,6 +42195,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "<W>경고: 현재 폭시코르의 작업량이 너무 많습니다. 과부하 위험이 있으니 가동 중인 회전체를 확인해 주세요.</>",
                                 voice: "story/1002/110175/1B94C962",
+                                speakerName: "기계음",
                                 next: 11017518,
                             },
                             {
@@ -41694,6 +42276,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11017611,
                                 content: "<W>경고: 폭시코르가 곧 폭파됩니다. 자수하십시오.</>",
                                 voice: "story/1002/110176/1B94D8CE",
+                                speakerName: "기계음",
                             },
                         ],
                     },
@@ -41713,6 +42296,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11017613,
                                 content: "<W>경고: 폭시코르가 곧 폭파됩니다. 자수하십시오.</>",
                                 voice: "story/1002/110176/1B94D922",
+                                speakerName: "기계음",
                             },
                         ],
                     },
@@ -41746,6 +42330,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "<W>경고: 폭시코르의 작업량이 너무 많습니다. 남은 작업 가능량이 50% 미만입니다. 스페어 회전체의 사용을 즉시 중단하고 무단으로 자리를 이탈하지 마십시오.</>",
                                 voice: "story/1002/110176/1B94D7D2",
+                                speakerName: "기계음",
                                 next: 11017606,
                             },
                             {
@@ -41942,6 +42527,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011317,
                                 content: "통신보안? 통신보안? 들리십니까? <Highlight>휘페르보레아의 오늘 날씨는 어떤가?</>",
                                 voice: "story/1002/110113/1B90D032",
+                                speakerName: "초조한 목소리",
                                 next: 11011318,
                             },
                             {
@@ -41955,6 +42541,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011319,
                                 content: "아바르 중령님? 맞으십니까? 빅입니다!",
                                 voice: "story/1002/110113/1B90D086",
+                                speakerName: "초조한 목소리",
                                 next: 11011320,
                             },
                             {
@@ -41968,6 +42555,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011321,
                                 content: "중령님과 연락이 끊긴 후, 저와 모니카는 외곽 노선을 따라 동력실 가까이 접근했습니다.",
                                 voice: "story/1002/110113/1B90D0DA",
+                                speakerName: "빅",
                                 next: 11011322,
                             },
                             {
@@ -41981,6 +42569,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011323,
                                 content: "예, 이제 동력 장치의 전원을 끊으려고 하는데, 시도 전 보고 드리려고 연락드렸습니다.",
                                 voice: "story/1002/110113/1B90D12E",
+                                speakerName: "빅",
                                 next: 11011324,
                             },
                             {
@@ -41995,6 +42584,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011325,
                                 content: "저희가 우선 시도해 보겠습니다, 중령님! 1분이 지체될수록 다른 사람들이 더 위험해질 겁니다.",
                                 voice: "story/1002/110113/1B90D182",
+                                speakerName: "빅",
                                 next: 11011326,
                             },
                             {
@@ -42009,6 +42599,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그리고 마지막으로... {nickname2}이(가) 중령님과 함께 있다면, 혹시 '그리핀'의 상황을 물어봐 주실 수 있습니까? 제 동생 시몬은 지금...",
                                 voice: "story/1002/110113/1B90D1D6",
+                                speakerName: "빅",
                                 next: 11011328,
                             },
                             {
@@ -42029,6 +42620,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011330,
                                 content: "...바, 방금 무슨...?",
                                 voice: "story/1002/110113/1B90D254",
+                                speakerName: "빅",
                                 next: 11011331,
                             },
                             {
@@ -42043,6 +42635,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011332,
                                 content: "...알겠습니다. 감사합니다.",
                                 voice: "story/1002/110113/1B90D2A8",
+                                speakerName: "빅",
                                 next: 11011333,
                             },
                             {
@@ -42127,6 +42720,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011506,
                                 content: "아바르, 지금 어디인가?",
                                 voice: "story/1002/110115/1B90EF34",
+                                speakerName: "???",
                                 next: 11011507,
                             },
                             {
@@ -42147,6 +42741,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011509,
                                 content: "뭐? 지휘관 목소리도 못 알아듣는 건가?",
                                 voice: "story/1002/110115/1B90EFB2",
+                                speakerName: "???",
                                 next: 11011510,
                             },
                             {
@@ -42371,12 +42966,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011540,
                                 content: "대장님, 대장님!",
                                 voice: "story/1002/110115/1B90F4C8",
+                                speakerName: "구조 요청 음성",
                                 next: 11011541,
                             },
                             {
                                 id: 11011541,
                                 content: "'그리핀' 소대의 시몬입니다. 대장님, 들리십니까?",
                                 voice: "story/1002/110115/1B90F4F2",
+                                speakerName: "구조 요청 음성",
                                 next: 11011542,
                             },
                             {
@@ -42391,12 +42988,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "선로에 엄청난 규모의 필토이드가 몰려있고, 저희 병사들이 안에 갇혀 있습니다. 지원이 필요한 상황입니다!",
                                 voice: "story/1002/110115/1B90F546",
+                                speakerName: "구조 요청 음성",
                                 next: 11011544,
                             },
                             {
                                 id: 11011544,
                                 content: "제발... 부탁드립니다!",
                                 voice: "story/1002/110115/1B90F570",
+                                speakerName: "구조 요청 음성",
                                 next: 11011545,
                             },
                             {
@@ -42550,18 +43149,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 11011403,
                                 content: "모니카, 들... 려...?",
                                 voice: "story/1002/110114/1B90DE4E",
+                                speakerName: "빅",
                                 next: 11011404,
                             },
                             {
                                 id: 11011404,
                                 content: "동력실... 빨리 나가... 아악!",
                                 voice: "story/1002/110114/1B90DE78",
+                                speakerName: "빅",
                                 next: 11011405,
                             },
                             {
                                 id: 11011405,
                                 content: "......",
                                 voice: "story/1002/110114/1B90DE79",
+                                speakerName: "빅",
                                 next: 11011406,
                             },
                             {
@@ -42863,6 +43465,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "대장님! 이쪽입니다!",
                                 voice: "story/1002/110118/1B911F9A",
                                 npc: 110015,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -42952,6 +43555,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "갈 수 있는 길이 하나 더 있습니다...",
                                 voice: "story/1002/110118/1B912168",
                                 npc: 110017,
+                                speakerName: "나이 든 카론",
                                 next: 11011813,
                             },
                             {
@@ -43001,6 +43605,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...나리...",
                                 voice: "story/1002/110118/1B91228E",
                                 npc: 110034,
+                                speakerName: "간절한 카론 소녀",
                                 next: 11011820,
                             },
                             {
@@ -43009,6 +43614,7 @@ export const questData_kr: QuestStory[] = [
                                     "카론 하나의 목숨으로 분노를 잠재울 수 있다면 저에게 총을 쏘세요. 하지만 그 전에... 제 얘기를 들어주시면 안될까요...",
                                 voice: "story/1002/110118/1B9122B8",
                                 npc: 110034,
+                                speakerName: "간절한 카론 소녀",
                                 next: 11011821,
                             },
                             {
@@ -43016,6 +43622,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "카지아, 허튼짓 말고 이리 와!",
                                 voice: "story/1002/110118/1B9122E2",
                                 npc: 110017,
+                                speakerName: "나이 든 카론",
                                 next: 11011822,
                             },
                             {
@@ -44120,6 +44727,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11012731,
                                 content: "예!",
                                 voice: "story/1002/110127/1B91B82E",
+                                speakerName: "전원",
                                 next: 11012732,
                             },
                             {
@@ -44802,12 +45410,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 11013401,
                                 content: "...권한 재설정 완료...",
                                 voice: "story/1002/110134/1B92261A",
+                                speakerName: "기계음",
                                 next: 11013402,
                             },
                             {
                                 id: 11013402,
                                 content: "...현재 권한: 아바르 헤데란...",
                                 voice: "story/1002/110134/1B922644",
+                                speakerName: "기계음",
                                 next: 11013403,
                             },
                             {
@@ -44815,6 +45425,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "아바르 헤데란 중령님, 안녕하십니까! 휘페르보레아 군단 격언 제16조, 적이 사정거리에 있다면 자신도 적의 사정거리에 있다는 것을 잊지 마십시오.",
                                 voice: "story/1002/110134/1B92266E",
+                                speakerName: "기계음",
                                 next: 11013404,
                             },
                             {
@@ -45326,6 +45937,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "아바르 헤데란 중령님, 아직 명령을 입력하지 않으셨습니다. 휘페르보레아 군단 격언 제17조: 명령에 복종하고 전우를 신뢰해야 전장에서 더 오래 살아남을 수 있습니다.",
                                 voice: "story/1002/110137/1B925824",
+                                speakerName: "기계음",
                             },
                         ],
                     },
@@ -45457,6 +46069,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11018702,
                                 content: "방어 모드가 활성화되었습니다. 먼저 안전 모드로 재설정하세요.",
                                 voice: "story/1002/110187/1B958BCC",
+                                speakerName: "기계음",
                                 options: [
                                     {
                                         id: 11018801,
@@ -45564,18 +46177,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 11013101,
                                 content: '"우리 카론은 더 이상 휘페르보레아 제국의 횡포를 견딜 수 없습니다."',
                                 voice: "story/1002/110131/1B91F4E2",
+                                speakerName: "서명한 문서",
                                 next: 11013102,
                             },
                             {
                                 id: 11013102,
                                 content: '"포세이큰 동맹에 충성을 바치겠습니다. 이는 제국이 치러야 할 죗값입니다."',
                                 voice: "story/1002/110131/1B91F50C",
+                                speakerName: "서명한 문서",
                                 next: 11013103,
                             },
                             {
                                 id: 11013103,
                                 content: '"아바르 헤데란"',
                                 voice: "story/1002/110131/1B91F536",
+                                speakerName: "서명한 문서",
                                 next: 11013104,
                             },
                             {
@@ -45631,6 +46247,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     '"13군단이 며칠 내로 기습 공격을 감행할 거다. 안토니 풀비스가 시빌라에게 자신의 총구가 요새의 방어벽을 뚫지 못하면 자기 머리를 쏘겠다며 각서까지 썼다네. 그래서 시빌라가 정예병들을 내준 거야."',
                                 voice: "story/1002/110130/1B91E47A",
+                                speakerName: "침착한 목소리",
                                 next: 11013002,
                             },
                             {
@@ -45652,6 +46269,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     '"군단은 어떻게든 론샤 요새를 되찾으려고 할 테니, 요새를 지킬 생각은 말고 당장 요새에서 철수해서 우리 포세이큰 동맹의 전력을 아끼도록 해."',
                                 voice: "story/1002/110130/1B91E4A4",
+                                speakerName: "침착한 목소리",
                                 next: 11013003,
                             },
                             {
@@ -45665,6 +46283,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11013003,
                                 content: '"그냥 철수하긴 아까운데... 휘페르보레아의 개들에게 뭐라도 한방 먹일 방법은 없나?"',
                                 voice: "story/1002/110130/1B91E4CE",
+                                speakerName: "불만스러운 목소리",
                                 next: 11013004,
                             },
                             {
@@ -45672,6 +46291,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     '"그건 쉽지. 아바르에게 맡겨. 아바르가 이번에 나오는 2개의 선발대의 지휘를 맡았는데, 그 얼뜨기들이 아바르 말을 아주 잘 듣는다더군."',
                                 voice: "story/1002/110130/1B91E4F8",
+                                speakerName: "침착한 목소리",
                                 next: 11013005,
                             },
                             {
@@ -45679,12 +46299,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     '"너희는 장치 준비나 잘해 둬. 아바르가 알아서 그들의 공격 속도를 늦춰서 여길 놈들의 무덤으로 만들어줄 테니까."',
                                 voice: "story/1002/110130/1B91E522",
+                                speakerName: "침착한 목소리",
                                 next: 11013006,
                             },
                             {
                                 id: 11013006,
                                 content: '"그리고 우린 신문에서 이런 기사를 보게 되겠지."',
                                 voice: "story/1002/110130/1B91E54C",
+                                speakerName: "침착한 목소리",
                                 next: 11013007,
                             },
                             {
@@ -45692,6 +46314,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "\"'론샤 전투에서 황제 폐하의 신성한 땅을 지키기 위해 혈전을 치르던 제13군단 선발대의 부사관 90%가 전사했습니다.'\"",
                                 voice: "story/1002/110130/1B91E576",
+                                speakerName: "침착한 목소리",
                                 next: 11013008,
                             },
                             {
@@ -45699,6 +46322,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     '"살아남은 아바르 중령은 전사들의 죽음에 애도를 표하며 최고 영예 표창을 수여했습니다."라든가 말이야.',
                                 voice: "story/1002/110130/1B91E5A0",
+                                speakerName: "침착한 목소리",
                                 next: 11013009,
                             },
                             {
@@ -45706,6 +46330,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     '"역시 아바르라니까! 그러면 그대로 진행하지. 휘페르보레아의 개들이 죽어서 명예를 얻는다는 게 마음에 안 들긴 하지만."',
                                 voice: "story/1002/110130/1B91E5CA",
+                                speakerName: "불만스러운 목소리",
                                 next: 11013010,
                             },
                             {
@@ -45746,18 +46371,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 11013801,
                                 content: "<W>...영원한 허무에 빠지지 마라...</>",
                                 voice: "story/1002/110138/1B9267BA",
+                                speakerName: "???",
                                 next: 11013802,
                             },
                             {
                                 id: 11013802,
                                 content: "<W>...깨어나라...</>",
                                 voice: "story/1002/110138/1B9267E4",
+                                speakerName: "???",
                                 next: 11013803,
                             },
                             {
                                 id: 11013803,
                                 content: "<W>...피가 흘러 강을 이루기 전에... 아직 끝나지 않았다...</>",
                                 voice: "story/1002/110138/1B92680E",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -45813,12 +46441,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "론샤 요새에 있는 13군단 병사들은 모두 명령에 따르라. '그리핀' 소대 의무원 다프네 세오도어가 포세이큰 동맹 스파이로 확인되어 수배령이 내려졌다.",
                                 voice: "story/1002/110140/1B928932",
+                                speakerName: "방송",
                                 next: 11014006,
                             },
                             {
                                 id: 11014006,
                                 content: "누구든지 다프네 세오도어를 발견하는 즉시 처형하라.",
                                 voice: "story/1002/110140/1B92895C",
+                                speakerName: "방송",
                                 next: 11014007,
                             },
                             {
@@ -45832,6 +46462,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11018820,
                                 content: "<W>경고: 20분 후 자폭 모드가 활성화됩니다. 즉시 대피하십시오. 즉시 대피하십시오.</>",
                                 voice: "story/1002/110188/1B959F28",
+                                speakerName: "기계음",
                                 next: 11019306,
                             },
                             {
@@ -45979,6 +46610,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11014701,
                                 content: "현재 수위가 기준치보다 높아 안전문을 가동할 수 없습니다. 수위를 조절한 후 다시 시도하세요.",
                                 voice: "story/1002/110147/1B92FB62",
+                                speakerName: "기계음",
                                 next: 11014702,
                             },
                             {
@@ -46400,6 +47032,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11015150,
                                 content: "게다가 전황이 좋지 않아 시빌라 군단장님도 론샤 요새로 오고 계십니다.",
                                 voice: "story/1002/110151/1B93450C",
+                                speakerName: "병사",
                                 next: 11015151,
                             },
                             {
@@ -46729,6 +47362,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11014306,
                                 content: "경고, 통행 권한이 없습니다.",
                                 voice: "story/1002/110143/1B92BA94",
+                                speakerName: "기계음",
                                 next: 11014307,
                             },
                             {
@@ -46742,6 +47376,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11014308,
                                 content: "목표를 발견했다! 이쪽이다!!",
                                 voice: "story/1002/110143/1B92BAE8",
+                                speakerName: "'나르왈' 소대원",
                                 next: 11014309,
                             },
                             {
@@ -46900,6 +47535,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "예, 여자 의무관 다프네 세오도어를 놓쳤습니다. 선발대 부상병들이 목숨을 걸고 시간을 끄는 바람에 그 여자가 도망쳤습니다.",
                                 voice: "story/1002/110144/1B92CBF8",
+                                speakerName: "병사",
                                 next: 11014413,
                             },
                             {
@@ -46907,6 +47543,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "지금 '나르왈' 분대가 요새로 들어오고 있는데, 선발대 소탕에 대해선 우리 외의 누구도 알아선 안 됩니다. 만약 다프네가 그들에게 도움을 요청한다면, 일이 복잡해질 겁니다.",
                                 voice: "story/1002/110144/1B92CC22",
+                                speakerName: "병사",
                                 next: 11014414,
                             },
                             {
@@ -46914,12 +47551,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "게다가 전황이 좋지 않아 시빌라 군단장님도 론샤 요새로 오고 계십니다. 상황이 좀 복잡해지긴 했지만, 그래도 중요한 아바르는 처리했습니다.",
                                 voice: "story/1002/110144/1B92CC4C",
+                                speakerName: "병사",
                                 next: 11014415,
                             },
                             {
                                 id: 11014415,
                                 content: "그럼 다프네 그 여자는 어떻게 해야...",
                                 voice: "story/1002/110144/1B92CC76",
+                                speakerName: "병사",
                                 next: 11014416,
                             },
                             {
@@ -46934,6 +47573,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11014417,
                                 content: "알겠습니다.",
                                 voice: "story/1002/110144/1B92CCCA",
+                                speakerName: "병사",
                                 next: 11014418,
                             },
                             {
@@ -47268,12 +47908,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 11015404,
                                 content: "제국의 반역자여...",
                                 voice: "story/1002/110154/1B936E64",
+                                speakerName: "???",
                                 next: 11015405,
                             },
                             {
                                 id: 11015405,
                                 content: "네가 정말 무죄라면, 너의 정의를 내게 증명해 보아라.",
                                 voice: "story/1002/110154/1B936E8E",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -47307,6 +47949,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "재판장님도 아시다시피 우리 작전 계획이 전부 노출됐습니다...",
                                 voice: "story/1002/110155/1B937ECC",
                                 npc: 110054,
+                                speakerName: "'레온'",
                                 next: 11015503,
                             },
                             {
@@ -47314,6 +47957,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...아바르 중령님은 선발대 작전 계획 수립에 참여하셨습니다...",
                                 voice: "story/1002/110155/1B937EF6",
                                 npc: 110054,
+                                speakerName: "'레온'",
                                 next: 11015504,
                             },
                             {
@@ -47321,6 +47965,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...제 생각에는 카론인 중령님이 포세이큰 동맹에 계획을 누설했을 가능성이 큽니다...",
                                 voice: "story/1002/110155/1B937F20",
                                 npc: 110054,
+                                speakerName: "'레온'",
                                 next: 11015505,
                             },
                             {
@@ -47348,6 +47993,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...포세이큰 동맹이 길마다 함정을 설치해 뒀습니다...",
                                 voice: "story/1002/110156/1B938F34",
                                 npc: 110055,
+                                speakerName: "'마르코'",
                                 next: 11015603,
                             },
                             {
@@ -47355,6 +48001,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "재판장님도 아시다시피 누군가... 우리를 배신했습니다...",
                                 voice: "story/1002/110156/1B938F5E",
                                 npc: 110055,
+                                speakerName: "'마르코'",
                                 next: 11015604,
                             },
                             {
@@ -47376,6 +48023,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "재판장님도 아시다시피 저는 아바르 헤데란의 딸, 다프네 세오도어입니다...",
                                 voice: "story/1002/110159/1B93C042",
                                 npc: 110005,
+                                speakerName: "'다프네'",
                                 next: 11015902,
                             },
                             {
@@ -47384,6 +48032,7 @@ export const questData_kr: QuestStory[] = [
                                     "제 아버지...와 {nickname2}... 이 둘은 처음에 포세이큰 동맹에 정보를 팔아넘긴 대가를 똑같이 나눌 계획이었습니다...",
                                 voice: "story/1002/110159/1B93C06C",
                                 npc: 110005,
+                                speakerName: "'다프네'",
                                 next: 11015903,
                             },
                             {
@@ -47391,6 +48040,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...요새 핵심 구역에서... 이익 분배 문제로...",
                                 voice: "story/1002/110159/1B93C096",
                                 npc: 110005,
+                                speakerName: "'다프네'",
                                 next: 11015904,
                             },
                             {
@@ -47398,6 +48048,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "제 아버지는...",
                                 voice: "story/1002/110159/1B93C0C0",
                                 npc: 110005,
+                                speakerName: "'다프네'",
                                 next: 11015905,
                             },
                             {
@@ -47405,6 +48056,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "{nickname2}의 손에... 계획적으로 살해당했습니다...",
                                 voice: "story/1002/110159/1B93C0EA",
                                 npc: 110005,
+                                speakerName: "'다프네'",
                                 next: 11015906,
                             },
                             {
@@ -47412,6 +48064,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그 후, 그 사람은 저에게 제 아버지 죽음의 진실을 숨겼습니다...",
                                 voice: "story/1002/110159/1B93C114",
                                 npc: 110005,
+                                speakerName: "'다프네'",
                                 next: 11015907,
                             },
                             {
@@ -47419,6 +48072,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "범인을 재판장님 앞에 데려갈 테니... 공정한 판결을 내려 주세요...",
                                 voice: "story/1002/110159/1B93C13E",
                                 npc: 110005,
+                                speakerName: "'다프네'",
                                 next: 11015908,
                             },
                             {
@@ -47446,6 +48100,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "재판장님도 아시다시피 저는 론샤 전투의 선발대 지휘관 아바르 헤데란입니다...",
                                 voice: "story/1002/110158/1B93B004",
                                 npc: 110010,
+                                speakerName: "'아바르'",
                                 next: 11015803,
                             },
                             {
@@ -47454,6 +48109,7 @@ export const questData_kr: QuestStory[] = [
                                     "저는 휘페르보레아 제국을 배신했고, 13군단을 배신했고... '그리핀'과 '스노우 울프' 두 선발대를 팔아넘겼습니다...",
                                 voice: "story/1002/110158/1B93B02E",
                                 npc: 110010,
+                                speakerName: "'아바르'",
                                 next: 11015804,
                             },
                             {
@@ -47462,6 +48118,7 @@ export const questData_kr: QuestStory[] = [
                                     "저와 협조한 자는... 전 부인 클로디아 세오도어 사이에서 낳은 딸... 다프네... 그리고... 황립 사관학교에서 가르쳤던 제자... {nickname2}입니다...",
                                 voice: "story/1002/110158/1B93B058",
                                 npc: 110010,
+                                speakerName: "'아바르'",
                                 next: 11015805,
                             },
                             {
@@ -47489,6 +48146,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11015808,
                                 content: "......",
                                 voice: "story/1002/110158/1B93B100",
+                                speakerName: "'아바르'",
                             },
                         ],
                     },
@@ -47536,6 +48194,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "마지막 질문이다. 아바르 헤데란을 네 손으로 죽였나?",
                                 voice: "story/1002/110163/1B9401E2",
                                 npc: 110032,
+                                speakerName: "교도소장",
                                 next: 11016302,
                             },
                             {
@@ -47544,6 +48203,7 @@ export const questData_kr: QuestStory[] = [
                                     "아바르가 제국을 배반했다 하더라도 그는 항상 널 믿었다. 아바르가 불바다에서 목숨을 잃어갈 때 넌 뭘 하고 있었지?",
                                 voice: "story/1002/110163/1B94020C",
                                 npc: 110032,
+                                speakerName: "교도소장",
                                 next: 11016305,
                             },
                             {
@@ -47551,6 +48211,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "동료의 정의를 저버렸다면 이 지옥 불에 타 죽게 될 것이다!",
                                 voice: "story/1002/110163/1B94028A",
                                 npc: 110032,
+                                speakerName: "교도소장",
                                 next: 11019052,
                             },
                             {
@@ -47572,6 +48233,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "무죄를 주장하는 자여, 네가 여전히 흔들리지 않았다면, 가슴속 의지를 단련하여 칼날로 만들어라...",
                                 voice: "story/1002/110190/1B95C58C",
                                 npc: 110032,
+                                speakerName: "교도소장",
                                 next: 11019055,
                             },
                             {
@@ -47579,6 +48241,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "네 손에 든 검으로 나에게 답하라!",
                                 voice: "story/1002/110190/1B95C5B6",
                                 npc: 110032,
+                                speakerName: "교도소장",
                             },
                         ],
                     },
@@ -48111,6 +48774,7 @@ export const questData_kr: QuestStory[] = [
                                     '"가능하다면 다프네를 찾아 줘. 그 아이가 살아 있거든 그 아이를 데리고... 도망쳐라. 안전해지면, 다프네한테 전해 줘..."',
                                 voice: "story/1002/110168/1B945804",
                                 npc: 110040,
+                                speakerName: "아바르&{nickname2}",
                                 next: 11016827,
                             },
                             {
@@ -48260,6 +48924,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 11017001,
                                 content: "베르길리우스 전하! 여긴 죄수를 심문하는 불결한 곳입니다. 들어가시면 안 됩니다!",
                                 voice: "story/1002/110170/1B9474BA",
+                                speakerName: "병사",
                             },
                         ],
                     },
@@ -48403,18 +49068,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 11016001,
                                 content: "재판장님도 아시다시피 저는 론샤 요새 중앙 관제실의 콘솔입니다...",
                                 voice: "story/1002/110160/1B93D0AA",
+                                speakerName: "기계음",
                                 next: 11019317,
                             },
                             {
                                 id: 11019317,
                                 content: "요새가 함락된 날, 중앙 관제실에서 조작을 수행한 건 아바르 헤데란과 {nickname2}뿐이었습니다.",
                                 voice: "story/1002/110193/1B95F0B2",
+                                speakerName: "기계음",
                                 next: 11019318,
                             },
                             {
                                 id: 11019318,
                                 content: "결국, {nickname2}이(가) 자폭 모드를 작동시켰습니다.",
                                 voice: "story/1002/110193/1B95F0DC",
+                                speakerName: "기계음",
                                 next: 11019320,
                             },
                             {
@@ -48422,12 +49090,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "하지만 저는 공학 연금원의 신소재로 제작한 기밀 기록 장치를 탑재하고 있습니다. 콘솔이 불타 파손되어도 조작 기록은 사라지지 않습니다. 하하, 하하.",
                                 voice: "story/1002/110193/1B95F130",
+                                speakerName: "기계음",
                                 next: 11016005,
                             },
                             {
                                 id: 11016005,
                                 content: "휘페르보레아 군단 격언 제18조, 과하게 순조로운 전황 뒤에는 적이 매복하고 있을 가능성이 높다...",
                                 voice: "story/1002/110160/1B93D152",
+                                speakerName: "기계음",
                                 next: 11016006,
                             },
                             {
@@ -48482,6 +49152,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "두 번째 질문이다. 론샤 요새 전투에서 선발대가 전멸한 것이 너와 관련되어 있나?",
                                 voice: "story/1002/110190/1B95C0F4",
                                 npc: 110032,
+                                speakerName: "교도소장",
                                 next: 11019027,
                             },
                             {
@@ -48489,6 +49160,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "만약 네가 동포의 정의를 저버렸다면, 너의 칼날이 네 피로 물들게 될 것이다!",
                                 voice: "story/1002/110190/1B95C11E",
                                 npc: 110032,
+                                speakerName: "교도소장",
                                 next: 11019028,
                             },
                             {
@@ -48604,6 +49276,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "무죄를 주장하는 자여, 분노로 인해 흔들릴 것인가?",
                                 voice: "story/1002/110190/1B95C298",
                                 npc: 110032,
+                                speakerName: "교도소장",
                             },
                         ],
                     },
@@ -48683,6 +49356,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "무죄를 주장하는 자여, 혼란으로 인해 흔들릴 것인가?",
                                 voice: "story/1002/110190/1B95C412",
                                 npc: 110032,
+                                speakerName: "교도소장",
                                 next: 11019046,
                             },
                             {
@@ -49510,6 +50184,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1200/120007/1E0AE34E",
                                 npc: 220014,
+                                speakerName: "이국적인 여성",
                                 next: 12000801,
                             },
                             {
@@ -49681,6 +50356,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "여기에 시끄러운 소리가 들리던데... 무슨 일이라도 생긴 건가요?",
                                 voice: "story/1200/120011/1E0B2446",
                                 npc: 210004,
+                                speakerName: "이국적인 여성",
                                 next: 12001112,
                             },
                             {
@@ -49711,6 +50387,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "오? 당해도 당연한가요...?",
                                 voice: "story/1200/120011/1E0B24EE",
                                 npc: 210004,
+                                speakerName: "이국적인 여성",
                                 next: 12001116,
                             },
                             {
@@ -49726,6 +50403,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "괜찮아요. 애초에 의도한 말은 아니었겠죠.",
                                 voice: "story/1200/120011/1E0B2542",
                                 npc: 210004,
+                                speakerName: "이국적인 여성",
                                 next: 12001118,
                             },
                             {
@@ -49741,6 +50419,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "흠... 상황은 이해했어요.",
                                 voice: "story/1200/120011/1E0B2596",
                                 npc: 210004,
+                                speakerName: "이국적인 여성",
                                 next: 12001120,
                             },
                             {
@@ -49748,6 +50427,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아마도 여기에 오해가 있는 것 같네요. 이 두 어린 친구는 일등석 객실 손님들인걸요.",
                                 voice: "story/1200/120011/1E0B25C0",
                                 npc: 210004,
+                                speakerName: "이국적인 여성",
                                 next: 12001121,
                             },
                             {
@@ -49771,6 +50451,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...지류, 맞습니까?",
                                 voice: "story/1200/120011/1E0B263E",
                                 npc: 210004,
+                                speakerName: "이국적인 여성",
                                 next: 12001201,
                             },
                             {
@@ -51271,6 +51952,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "현재까지 목표 특성에 부합하는 인물은 발견되지 않았습니다. 보고 끝.",
                                 voice: "story/1200/120017/1E0B8B24",
                                 npc: 220022,
+                                speakerName: "잉그리드",
                                 next: 12001739,
                             },
                             {
@@ -51285,6 +51967,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "4분 전에 한 루나가 와서 동전을 달라고 했는데, 제가 쫓아냈습니다.",
                                 voice: "story/1200/120017/1E0B8B78",
                                 npc: 220022,
+                                speakerName: "잉그리드",
                                 next: 12001741,
                             },
                             {
@@ -51300,6 +51983,7 @@ export const questData_kr: QuestStory[] = [
                                     "...문,문제가 있나요, 장관님? 목표는 겉보기에 18세 정도의 카론 {性别:소년|소녀}일 텐데, 루나로 변장했을 리는 없잖아요...",
                                 voice: "story/1200/120017/1E0B8BCC",
                                 npc: 220022,
+                                speakerName: "잉그리드",
                                 next: 12001743,
                             },
                             {
@@ -51622,6 +52306,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "만약 그 맨홀로 도망친다면, 그건 그들의 의도대로 움직이는 거야.",
                                 voice: "story/1200/120017/1E0B8DEE",
                                 npc: 210004,
+                                speakerName: "???",
                                 next: 12001756,
                             },
                             {
@@ -52132,6 +52817,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12010020,
                                 content: "지류 대방님!",
                                 voice: "story/1201/120100/1E10D9E8",
+                                speakerName: "먼 곳의 목소리",
                                 next: 12010021,
                             },
                             {
@@ -52769,6 +53455,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12010235,
                                 content: "대방님, 죄송합니다. 제가 늦었습니다...",
                                 voice: "story/1201/120102/1E10FD2E",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -53435,6 +54122,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12010503,
                                 content: "크르르르릉!",
                                 voice: "story/1201/120105/1E112926",
+                                speakerName: "???",
                                 next: 12010504,
                             },
                             {
@@ -53491,6 +54179,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하늘이시여, 백룡신군이시여! 다들 괜찮으세요?",
                                 voice: "story/1201/120105/1E1129F8",
                                 npc: 210033,
+                                speakerName: "지나가는 행상인",
                                 next: 12010509,
                             },
                             {
@@ -53506,6 +54195,7 @@ export const questData_kr: QuestStory[] = [
                                     "전 괜찮아요. 저 무시무시한 두 눈을 보는 바람에 다리가 살짝 저린 것뿐이니까, 조금 쉬면 나아질 거예요. 두 분이 이곳에 처음 오신 외지인 같아 보여서, 모른 체 할 수 없었어요.",
                                 voice: "story/1201/120105/1E112A4C",
                                 npc: 210033,
+                                speakerName: "지나가는 행상인",
                                 options: [
                                     {
                                         id: 120105101,
@@ -53533,6 +54223,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그런가요? 그렇다면 다행이네요...",
                                 voice: "story/1201/120105/1E112AA0",
                                 npc: 210033,
+                                speakerName: "지나가는 행상인",
                                 next: 12010513,
                             },
                             {
@@ -53563,6 +54254,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "푸흡... 연진 나루터 주변은 넓은 바다라서, 하루 종일 헤엄쳐도 멀리 못 가요.",
                                 voice: "story/1201/120105/1E112B48",
                                 npc: 210033,
+                                speakerName: "지나가는 행상인",
                                 next: 12010517,
                             },
                             {
@@ -53571,6 +54263,7 @@ export const questData_kr: QuestStory[] = [
                                     "그렇게 놀라실 필요는 없어요. 검은 폐안은 폐안과 비슷하게 생겼지만, 법의 집행자가 아니라 <H>촉룡의 재앙</> 때문에 혼란에 빠진 존재들이니까요.",
                                 voice: "story/1201/120105/1E112B72",
                                 npc: 210033,
+                                speakerName: "지나가는 행상인",
                                 next: 12010518,
                             },
                             {
@@ -53579,6 +54272,7 @@ export const questData_kr: QuestStory[] = [
                                     "검은 폐안들은 의식이 혼탁하고 매우 포악해요. 대풍구장의 통제를 받지도 않고요. 그래서 검은 폐안을 공격해도 처벌받는 일은 없어요.",
                                 voice: "story/1201/120105/1E112B9C",
                                 npc: 210033,
+                                speakerName: "지나가는 행상인",
                                 next: 12010519,
                             },
                             {
@@ -53587,6 +54281,7 @@ export const questData_kr: QuestStory[] = [
                                     "다만, 요즘 들어 검은 폐안이 사람을 습격하는 일이 늘어나고 있어요. 향을 피운 지 얼마 되지도 않았는데, 벌써 다 써 버렸네요...",
                                 voice: "story/1201/120105/1E112BC6",
                                 npc: 210033,
+                                speakerName: "지나가는 행상인",
                                 next: 12010520,
                             },
                             {
@@ -53601,6 +54296,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "네가 여긴 어쩐 일이야?",
                                 voice: "story/1201/120105/1E112C1A",
                                 npc: 210033,
+                                speakerName: "지나가는 행상인",
                                 next: 12010522,
                             },
                             {
@@ -53638,6 +54334,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "맞아요.",
                                 voice: "story/1201/120105/1E112CEC",
                                 npc: 210033,
+                                speakerName: "지나가는 행상인",
                                 next: 12010527,
                             },
                             {
@@ -53764,6 +54461,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "이 향기로운 꽃구름이 태호께 이르기를 바라나이다. 부디 자비로운 마음으로, 모든 중생에게 즐거움을 베푸시옵소서.",
                                 voice: "story/1201/120106/1E113964",
+                                speakerName: "경건한 참배객",
                                 next: 12010603,
                             },
                             {
@@ -54609,6 +55307,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "......",
                                 voice: "story/1201/120115/1E11CD0C",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011503,
                             },
                             {
@@ -54623,6 +55322,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "난 그런 세속적인 물질은 바라지 않아. 응천위로서, 만백성을 구하고 천하를 평안케 할 뿐이야.",
                                 voice: "story/1201/120115/1E11CD60",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011505,
                             },
                             {
@@ -54650,6 +55350,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "관계없는 외부인을 이런 험한 싸움에 휘말리게 만들 수는 없어. 이곳은 나 혼자 감당해도 충분해.",
                                 voice: "story/1201/120119/1E120E82",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011902,
                             },
                             {
@@ -54671,6 +55372,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...알았어.",
                                 voice: "story/1201/120119/1E120F00",
                                 npc: 210007,
+                                speakerName: "응천위",
                             },
                         ],
                     },
@@ -54693,6 +55395,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "드디어 이 망할 짐승들을 전부 처치했군. 두 사람이 도와준 덕분이야.",
                                 voice: "story/1201/120120/1E121EEA",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12012002,
                             },
                             {
@@ -55008,6 +55711,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "출구는 저 앞이야. 나는 여기까지만 호위할게.",
                                 voice: "story/1201/120117/1E11EDB2",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011709,
                             },
                         ],
@@ -55038,6 +55742,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "크르르릉!!",
                                 voice: "story/1201/120117/1E11EE30",
                                 npc: 100001,
+                                speakerName: "???",
                                 next: 12011705,
                             },
                             {
@@ -55095,6 +55800,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아니, 할 일을 했을 뿐이야.",
                                 voice: "story/1201/120114/1E11BCA4",
                                 npc: 210007,
+                                speakerName: "???",
                                 next: 12011403,
                             },
                             {
@@ -55117,6 +55823,7 @@ export const questData_kr: QuestStory[] = [
                                     "...나는 명을 받고 이곳에 와 검은 폐안을 숙청하고 있어. 아직 수많은 적이 사방에서 노리고 있고, 소임을 다하지 못했으니, 미안하지만 한가하게 이야기 나눌 겨를이 없어.",
                                 voice: "story/1201/120114/1E11BD22",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011406,
                             },
                             {
@@ -55131,6 +55838,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "대풍구장, 하늘의 명이지.",
                                 voice: "story/1201/120114/1E11BD76",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011408,
                             },
                             {
@@ -55154,6 +55862,7 @@ export const questData_kr: QuestStory[] = [
                                     "향의 기운이 다한 상태라면, 나 혼자 힘으로는 두 사람을 무사히 지키기 어려워. 중요한 일이 없다면, 서둘러 이곳을 떠나 안전한 곳을 찾도록 해.",
                                 voice: "story/1201/120114/1E11BDF4",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011411,
                             },
                             {
@@ -55169,6 +55878,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "동굴 반대편이라고? 거긴 해안에 좌초된 침몰선의 잔해 외에는 아무것도 없는 것으로 알고 있는데.",
                                 voice: "story/1201/120114/1E11BE48",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011413,
                             },
                             {
@@ -55183,6 +55893,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "암시장에서 거래를? 굳이 협잡꾼들과 어울리겠다면, 나도 더는 할 말이 없군.",
                                 voice: "story/1201/120114/1E11BE9C",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011415,
                             },
                             {
@@ -55212,6 +55923,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...미안. 내가 성급했군.",
                                 voice: "story/1201/120114/1E11BF44",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011419,
                             },
                             {
@@ -55220,6 +55932,7 @@ export const questData_kr: QuestStory[] = [
                                     "그렇다 해도, 암시장은 온갖 인간 군상이 모이는 곳이니, 속거나 이용당하는 일이 없도록 사람을 잘 가려야 해.",
                                 voice: "story/1201/120114/1E11BF6E",
                                 npc: 210007,
+                                speakerName: "응천위",
                                 next: 12011420,
                             },
                             {
@@ -55227,6 +55940,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이곳은 안전하지 않으니, 내가 저곳까지 호위할게.",
                                 voice: "story/1201/120114/1E11BF98",
                                 npc: 210007,
+                                speakerName: "응천위",
                             },
                         ],
                     },
@@ -55440,6 +56154,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "너—— 사람을 뭐로 보는 거야!",
                                 voice: "story/1201/120122/1E123FBA",
                                 npc: 210011,
+                                speakerName: "???",
                                 next: 12012202,
                             },
                             {
@@ -55870,6 +56585,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그만, 귀한 손님께 무례하게 굴지 마라!",
                                 voice: "story/1201/120126/1E1282AA",
                                 npc: 210010,
+                                speakerName: "???",
                                 next: 12012610,
                             },
                             {
@@ -56752,6 +57468,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "정처 없이 떠돌던 혼은, 때가 되면 돌아갈 곳을 찾으려 하네. 차고 이지러지는 달 아래, 신성한 나무처럼 늘 푸르구나...",
                                 voice: "story/1201/120134/1E130A58",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -56863,6 +57580,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12013445,
                                 content: "검은 무리가 울부짖으니, 재앙과 허물이 세상에 내리는구나...",
                                 voice: "story/1201/120134/1E130BD2",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -56927,6 +57645,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 120134311,
                                 content: "아아, 슬프도다...",
                                 voice: "story/1201/120134/1E130CF8",
+                                speakerName: "???",
                                 next: 12013432,
                             },
                             {
@@ -56934,6 +57653,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "정처 없이 떠돌던 혼은, 때가 되면 돌아갈 곳을 찾으려 하네. 산그림자 드리운 곳이든, 아득한 바다 끝이든...",
                                 voice: "story/1201/120134/1E1309B0",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -56968,6 +57688,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "정처 없이 떠돌던 혼은, 때가 되면 돌아갈 곳을 찾으려 하네. 차고 이지러지는 달 아래, 신성한 나무처럼 늘 푸르구나...",
                                 voice: "story/1201/120134/1E130A58",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -56981,6 +57702,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "별빛보다 높은 하늘 궁전과 죽은 자의 넋이 깃든 무덤이여. 영원히 이지러지지 않았으면 좋으련만, 그 누가 만남과 헤어짐을 뜻대로 할 수 있으리오.",
                                 voice: "story/1201/120134/1E130AAC",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -57075,6 +57797,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12022701,
                                 content: "{nickname} 씨, 오셨군요!",
                                 voice: "story/1201/120227/1E18FA62",
+                                speakerName: "???",
                                 next: 12022702,
                             },
                             {
@@ -57288,6 +58011,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "지류 대방님, 아니 될 말입니다!",
                                 voice: "story/1201/120229/1E191CD6",
                                 npc: 210031,
+                                speakerName: "중년 남성",
                                 next: 12022912,
                             },
                             {
@@ -57309,6 +58033,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "<W>남을 해치거나 도둑질하는 자는 하늘이 벌을 내린다</>는 것은 대풍구장의 오랜 가르침입니다!",
                                 voice: "story/1201/120229/1E191D54",
                                 npc: 210031,
+                                speakerName: "중년 남성",
                                 next: 12022915,
                             },
                             {
@@ -57316,6 +58041,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...하지만 검은 폐안은 공격해도 벌을 받지 않잖습니까?",
                                 voice: "story/1201/120229/1E191D7E",
                                 npc: 210077,
+                                speakerName: "구경꾼",
                                 next: 12022916,
                             },
                             {
@@ -57323,6 +58049,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "대풍구장을, 어찌 그리 단순하게만 해석하십니까?!",
                                 voice: "story/1201/120229/1E191DA8",
                                 npc: 210031,
+                                speakerName: "중년 남성",
                                 next: 12022917,
                             },
                             {
@@ -57331,6 +58058,7 @@ export const questData_kr: QuestStory[] = [
                                     "마음에서 비롯된 것은 행동으로 드러나는 법입니다. 일단 무기를 들면, 사람의 마음은 변질되기 마련이지요. 그 칼끝이 이웃을 향하든, 악한 적을 향하든 본질은 같습니다! 결국 하늘의 뜻을 거역하는 일입니다!",
                                 voice: "story/1201/120229/1E191DD2",
                                 npc: 210031,
+                                speakerName: "중년 남성",
                                 next: 12022918,
                             },
                             {
@@ -57346,6 +58074,7 @@ export const questData_kr: QuestStory[] = [
                                     "백룡신군께서 저희를 위해 사악한 기운을 물리쳐 주실 겁니다! 만약 백룡신군의 노여움을 사서 그분의 가호를 잃게 된다면, 그것이야말로 소탐대실입니다. 부디 다시 생각해 주십시오!",
                                 voice: "story/1201/120229/1E191E26",
                                 npc: 210031,
+                                speakerName: "중년 남성",
                                 next: 12022920,
                             },
                             {
@@ -57353,6 +58082,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "탄식의 전투라는 전철만으론 부족하다는 말씀이십니까?!",
                                 voice: "story/1201/120229/1E191E50",
                                 npc: 210031,
+                                speakerName: "중년 남성",
                                 next: 12022921,
                             },
                             {
@@ -57360,6 +58090,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "일리 있는 말 같기도 하고...",
                                 voice: "story/1201/120229/1E191E7A",
                                 npc: 210077,
+                                speakerName: "구경꾼",
                                 next: 12022922,
                             },
                             {
@@ -57375,6 +58106,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "폐안과 응천위가 곧 당도할 것이니, 잠시만 기다리면...",
                                 voice: "story/1201/120229/1E191ECE",
                                 npc: 210031,
+                                speakerName: "중년 남성",
                                 next: 12022924,
                             },
                             {
@@ -57389,6 +58121,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그건...",
                                 voice: "story/1201/120229/1E191F22",
                                 npc: 210031,
+                                speakerName: "중년 남성",
                                 next: 12022926,
                             },
                             {
@@ -58979,6 +59712,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "앗, 하얀 요괴다!",
                                 voice: "story/1201/120143/1E139842",
                                 npc: 210016,
+                                speakerName: "???",
                                 next: 12014302,
                             },
                             {
@@ -59747,6 +60481,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "누가... 나... 살... 누... 나...",
                                 voice: "story/1201/120158/1E148EAE",
                                 npc: 210028,
+                                speakerName: "???",
                                 next: 12015804,
                             },
                             {
@@ -59768,6 +60503,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "사라지면 안 돼... 나 아직...",
                                 voice: "story/1201/120158/1E148F2C",
                                 npc: 210028,
+                                speakerName: "???",
                                 next: 12015807,
                             },
                             {
@@ -59775,6 +60511,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...전에... 제발...",
                                 voice: "story/1201/120158/1E148F56",
                                 npc: 210028,
+                                speakerName: "???",
                                 next: 12015808,
                             },
                             {
@@ -60514,6 +61251,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12017401,
                                 content: "너무 아파요... 상처에서 고름이 흘러나와, 아파서 밤새 잠을 이룰 수가 없어요...",
                                 voice: "story/1201/120174/1E1594DA",
+                                speakerName: "환자의 환영",
                             },
                         ],
                     },
@@ -60526,6 +61264,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12017402,
                                 content: "전... 이제 가망이 없는 거죠? 축유 어르신, 차라리 절 끝내주세요...",
                                 voice: "story/1201/120174/1E159504",
+                                speakerName: "환자의 환영",
                             },
                         ],
                     },
@@ -60539,6 +61278,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "갓 태어난 우리 애는, 아직 엄마도 한번 불러보지 못했단 말이에요! 제발, 우리 애를 살려주세요, 살려주세요!",
                                 voice: "story/1201/120174/1E15952E",
+                                speakerName: "환자의 환영",
                             },
                         ],
                     },
@@ -60551,6 +61291,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12017404,
                                 content: "소문에 부씨 가문은 손만 대면 병이 낫는다면서요? 어서 고쳐 줘요. 혹시 힘을 쓰기 싫어서 그래요?",
                                 voice: "story/1201/120174/1E159558",
+                                speakerName: "환자의 환영",
                             },
                         ],
                     },
@@ -60628,6 +61369,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야하! 야하하!",
                                 voice: "story/1201/120182/1E16181A",
                                 npc: 210017,
+                                speakerName: "말 못하는 무유생",
                             },
                         ],
                     },
@@ -60741,6 +61483,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야히, 야!",
                                 voice: "story/1201/120182/1E161A3C",
                                 npc: 210017,
+                                speakerName: "말 못하는 무유생",
                                 next: 12018215,
                             },
                             {
@@ -60768,6 +61511,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야히, 야!",
                                 voice: "story/1201/120182/1E161A3C",
                                 npc: 210017,
+                                speakerName: "말 못하는 무유생",
                                 next: 12018215,
                             },
                             {
@@ -60890,6 +61634,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야하, 야하하! 이제 문제없어, 어서 출발하자!",
                                 voice: "story/1201/120182/1E161D06",
                                 npc: 210017,
+                                speakerName: "무유생",
                             },
                         ],
                     },
@@ -60903,6 +61648,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야하하, 야하!",
                                 voice: "story/1201/120182/1E161D30",
                                 npc: 210017,
+                                speakerName: "갇힌 무유생",
                                 next: 12018233,
                             },
                             {
@@ -60945,12 +61691,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 12018236,
                                 content: "축유 대인, 그리고 처음 보는 백발의 용사님, 고마워!",
                                 voice: "story/1201/120182/1E161DD8",
+                                speakerName: "갇힌 무유생",
                                 next: 12018237,
                             },
                             {
                                 id: 12018237,
                                 content: "나도 너희들한테 힘을 보태줄게! 내 쇠망치는 땅도 쿵쿵 울리게 할 수 있다고!",
                                 voice: "story/1201/120182/1E161E02",
+                                speakerName: "갇힌 무유생",
                             },
                         ],
                     },
@@ -60963,6 +61711,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12018238,
                                 content: "마지막 동료다, 마지막 동료!",
                                 voice: "story/1201/120182/1E161E2C",
+                                speakerName: "무유생",
                                 next: 12018239,
                             },
                             {
@@ -60986,12 +61735,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "이 늙은이, 평생 무예를 갈고닦고도 하마터면 이곳에서 세상과 하직할 뻔했구려. 부끄럽고 또 부끄럽소이다...",
                                 voice: "story/1201/120182/1E161E80",
+                                speakerName: "나이가 지긋한 무유생",
                                 next: 12018241,
                             },
                             {
                                 id: 12018241,
                                 content: "이로써 동료들이 모두 모였어! 한 명도 빠짐없이 말이야!",
                                 voice: "story/1201/120182/1E161EAA",
+                                speakerName: "무유생",
                                 next: 12018242,
                             },
                             {
@@ -60999,6 +61750,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "앞에는 거대한 꽃 요괴가 이승으로 가는 길목을 떡하니 가로막고 있소이다. 이 늙은이가 자네들과 함께 가 요괴를 물리치고, 모든 것을 제자리로 돌려놓겠소!",
                                 voice: "story/1201/120182/1E161ED4",
+                                speakerName: "나이가 지긋한 무유생",
                             },
                         ],
                     },
@@ -61019,6 +61771,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "목숨을 구해 줘서 고마워. 나중에 꼭 보답할게. 그럼 우리 먼저 갈게!",
                                 voice: "story/1201/120183/1E162858",
                                 npc: 210017,
+                                speakerName: "무유생들",
                                 next: 12018301,
                             },
                             {
@@ -61125,6 +61878,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야하! 야하하!",
                                 voice: "story/1201/120183/1E162ACE",
                                 npc: 210036,
+                                speakerName: "말 못하는 무유생",
                                 next: 12018316,
                             },
                             {
@@ -61160,6 +61914,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야하하! 야하!",
                                 voice: "story/1201/120183/1E162BA0",
                                 npc: 210036,
+                                speakerName: "말 못하는 무유생",
                                 next: 12018321,
                             },
                             {
@@ -61182,6 +61937,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "야하!",
                                 voice: "story/1201/120183/1E162C1E",
                                 npc: 210036,
+                                speakerName: "말 못하는 무유생",
                                 next: 12018324,
                             },
                             {
@@ -61502,6 +62258,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "두목, 오셨습니까!",
                                 voice: "story/1201/120186/1E1659BA",
                                 npc: 210010,
+                                speakerName: "암시장 막내",
                                 next: 12018602,
                             },
                             {
@@ -61517,6 +62274,7 @@ export const questData_kr: QuestStory[] = [
                                     "예상하신 대로, 사냥감은 부상을 입고 이미 청아원으로 몰렸습니다. 여긴 사방이 바다로 둘러싸인 외딴섬이라 도망칠 수 없을 겁니다. 이제 독 안에 든 쥐나 다름없습니다!",
                                 voice: "story/1201/120186/1E165A0E",
                                 npc: 210010,
+                                speakerName: "암시장 막내",
                                 next: 12018604,
                             },
                             {
@@ -62353,6 +63111,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "잘 됐군, 사람이 왔어! 이제 나 혼자만 여기 갇힌 게 아니게 됐구나.",
                                 voice: "story/1201/120193/1E16CC92",
                                 npc: 210021,
+                                speakerName: "자유분방한 남자",
                                 next: 12019302,
                             },
                             {
@@ -62800,6 +63559,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "휴... 아슬아슬한 순간에, 간신히 성공했군요.",
                                 voice: "story/1201/120209/1E17D312",
                                 npc: 210005,
+                                speakerName: "별을 잇는 자",
                                 next: 12020902,
                             },
                             {
@@ -62893,6 +63653,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "네, 대방님!",
                                 voice: "story/1201/120138/1E134691",
                                 npc: 210004,
+                                speakerName: "두립",
                             },
                         ],
                     },
@@ -62905,6 +63666,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12021001,
                                 content: "혼이여 떠돌며, 북녘 황무지를 헤매는구나... 그대와 나 촉룡이여, 천년의 재앙을 입었도다...",
                                 voice: "story/1201/120210/1E17E37A",
+                                speakerName: "???",
                                 next: 12021002,
                             },
                             {
@@ -62945,6 +63707,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12021201,
                                 content: "혼백은 흩어지고, 지난날은 무너졌네... 아득한 그 끝에서, 때를 따라 돌아갈 곳을 찾는구나...",
                                 voice: "story/1201/120212/1E18044A",
+                                speakerName: "???",
                                 next: 12021202,
                             },
                             {
@@ -63054,6 +63817,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12022014,
                                 content: "...영원히 이지러지지 않았으면 좋으련만, 그 누가 만남과 헤어짐을 뜻대로 할 수 있으리오.",
                                 voice: "story/1201/120220/1E1889AC",
+                                speakerName: "촉룡",
                                 next: 12022015,
                             },
                             {
@@ -63067,6 +63831,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12022016,
                                 content: "모든 것은 이미 되돌릴 수 없게 되었구나. 천하가 피할 수 없는 큰 재앙으로 치닫게 될 것이야...",
                                 voice: "story/1201/120220/1E188A00",
+                                speakerName: "촉룡",
                             },
                         ],
                     },
@@ -66085,6 +66850,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "카산드라, 우리 어디 가는 거야?",
                                 voice: "story/1201/120114/1E1F83D2",
                                 npc: 211015,
+                                speakerName: "???",
                                 next: 12032902,
                             },
                             {
@@ -67189,12 +67955,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 12034101,
                                 content: "치안서다! 다들 꼼짝 마!",
                                 voice: "story/1201/120114/1E2048B2",
+                                speakerName: "치안서 병사",
                                 next: 12034102,
                             },
                             {
                                 id: 12034102,
                                 content: "음...? 이 강도들... 이미 제압됐잖아?",
                                 voice: "story/1201/120114/1E2048DC",
+                                speakerName: "치안서 병사",
                                 next: 12034103,
                             },
                             {
@@ -67208,6 +67976,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12034104,
                                 content: "그래?",
                                 voice: "story/1201/120114/1E204930",
+                                speakerName: "치안서 병사",
                                 next: 12034105,
                             },
                             {
@@ -67221,6 +67990,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12034106,
                                 content: "...알겠다. 그렇다면 이 강도들은 우리가 데려가지.",
                                 voice: "story/1201/120114/1E204984",
+                                speakerName: "치안서 병사",
                                 next: 12034107,
                             },
                             {
@@ -67228,6 +67998,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "구질구질한 카론 하나가 찾아와서 눈물의 호수에 강도가 있다고 앵앵대길래 뭔 헛소릴 하나 했더니만, 그 여자 말이 진짜였을 줄이야...",
                                 voice: "story/1201/120114/1E2049AE",
+                                speakerName: "치안서 병사",
                             },
                         ],
                     },
@@ -67586,12 +68357,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 12034101,
                                 content: "치안서다! 다들 꼼짝 마!",
                                 voice: "story/1201/120114/1E2048B2",
+                                speakerName: "치안서 병사",
                                 next: 12034102,
                             },
                             {
                                 id: 12034102,
                                 content: "음...? 이 강도들... 이미 제압됐잖아?",
                                 voice: "story/1201/120114/1E2048DC",
+                                speakerName: "치안서 병사",
                                 next: 12034103,
                             },
                             {
@@ -67605,6 +68378,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12034104,
                                 content: "그래?",
                                 voice: "story/1201/120114/1E204930",
+                                speakerName: "치안서 병사",
                                 next: 12034105,
                             },
                             {
@@ -67618,6 +68392,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12034106,
                                 content: "...알겠다. 그렇다면 이 강도들은 우리가 데려가지.",
                                 voice: "story/1201/120114/1E204984",
+                                speakerName: "치안서 병사",
                                 next: 12034107,
                             },
                             {
@@ -67625,6 +68400,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "구질구질한 카론 하나가 찾아와서 눈물의 호수에 강도가 있다고 앵앵대길래 뭔 헛소릴 하나 했더니만, 그 여자 말이 진짜였을 줄이야...",
                                 voice: "story/1201/120114/1E2049AE",
+                                speakerName: "치안서 병사",
                             },
                         ],
                     },
@@ -69775,6 +70551,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12010503,
                                 content: "크르르르릉!",
                                 voice: "story/1201/120105/1E112926",
+                                speakerName: "???",
                                 next: 12010504,
                             },
                             {
@@ -70018,6 +70795,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12041810,
                                 content: "저 사람이 왜?!",
                                 voice: "story/1204/120418/1E253974",
+                                speakerName: "{nickname}&스노우",
                             },
                         ],
                     },
@@ -71036,6 +71814,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12042603,
                                 content: "삐익—— 삐익——",
                                 voice: "story/1204/120426/1E25BB8E",
+                                speakerName: "언작",
                                 next: 12042604,
                             },
                             {
@@ -71085,6 +71864,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12021301,
                                 content: "...그대는 누구인가?",
                                 voice: "story/1201/120213/1E1814B2",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -71424,6 +72204,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12049035,
                                 content: "하늘과 땅을 자유로이 오가니, 이것이 풍류로다~",
                                 voice: "story/1204/120490/1E29DACE",
+                                speakerName: "???",
                                 next: 12049036,
                             },
                             {
@@ -71473,6 +72254,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12049035,
                                 content: "하늘과 땅을 자유로이 오가니, 이것이 풍류로다~",
                                 voice: "story/1204/120490/1E29DACE",
+                                speakerName: "???",
                                 next: 12049036,
                             },
                             {
@@ -72030,6 +72812,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...저쪽으로 ...알겠어요...",
                                 voice: "story/1204/120429/1E25F3FE",
                                 npc: 100001,
+                                speakerName: "???",
                                 next: 12042948,
                             },
                             {
@@ -72353,6 +73136,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...저쪽으로 ...알겠어요...",
                                 voice: "story/1204/120429/1E25F3FE",
                                 npc: 100001,
+                                speakerName: "???",
                                 next: 12042948,
                             },
                             {
@@ -72461,6 +73245,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12043104,
                                 content: "지류 대방님이요? & 그 여자?!",
                                 voice: "story/1204/120431/1E260DC0",
+                                speakerName: "부소&각주",
                                 next: 12043105,
                             },
                             {
@@ -73049,6 +73834,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "하, 할머니?!",
                                 voice: "story/1204/120434/1E263EA4",
                                 npc: 240026,
+                                speakerName: "길 가는 소녀",
                                 next: 12043403,
                             },
                             {
@@ -73056,6 +73842,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "몰라, 사람 잘못 봤어.",
                                 voice: "story/1204/120434/1E263ECE",
                                 npc: 240026,
+                                speakerName: "길 가는 소녀",
                                 next: 12043404,
                             },
                             {
@@ -73070,6 +73857,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "사람 잘못 봤다니까. 나한테 말 걸지 마.",
                                 voice: "story/1204/120434/1E263F22",
                                 npc: 240026,
+                                speakerName: "길 가는 소녀",
                                 next: 12043406,
                             },
                             {
@@ -73085,6 +73873,7 @@ export const questData_kr: QuestStory[] = [
                                     "누가 여길 전세 낸 것도 아니고, 어차피 주인 없는 땅 아니야? 난 여기 산책하는 거 좋아해. 외딴곳일수록 영감이 잘 떠오르거든. 왜, 불만 있어?",
                                 voice: "story/1204/120434/1E263F76",
                                 npc: 240026,
+                                speakerName: "길 가는 소녀",
                                 next: 12043408,
                             },
                             {
@@ -73769,6 +74558,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12043737,
                                 content: "안 돼. & 안 돼요.",
                                 voice: "story/1204/120437/1E26759A",
+                                speakerName: "소을&부소",
                                 next: 12043738,
                             },
                             {
@@ -80049,12 +80839,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 12049130,
                                 content: "지류! 기어이 역사의 죄인이 되려는 것이냐!",
                                 voice: "story/1204/120491/1E29EA64",
+                                speakerName: "선조",
                                 next: 12049131,
                             },
                             {
                                 id: 12049131,
                                 content: "하늘의 섭리와 조상들의 법도를, 어찌 한낱 인간이 거스르려 하느냐!",
                                 voice: "story/1204/120491/1E29EA8E",
+                                speakerName: "선조",
                             },
                         ],
                     },
@@ -80244,6 +81036,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12049132,
                                 content: "지금이라도 그만두거라, 늦지 않았다!",
                                 voice: "story/1204/120491/1E29EAB8",
+                                speakerName: "선조",
                             },
                         ],
                     },
@@ -80256,6 +81049,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12049133,
                                 content: "멈춰라! 그 이상 나아가지 마라!",
                                 voice: "story/1204/120491/1E29EAE2",
+                                speakerName: "선조",
                             },
                         ],
                     },
@@ -80268,6 +81062,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12049134,
                                 content: "천 년의 위업이 네 손에 무너지려 하는구나!",
                                 voice: "story/1204/120491/1E29EB0C",
+                                speakerName: "선조",
                             },
                         ],
                     },
@@ -80280,6 +81075,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12049135,
                                 content: "지류, 정녕 모든 각오가 된 것이냐!",
                                 voice: "story/1204/120491/1E29EB36",
+                                speakerName: "선조",
                             },
                         ],
                     },
@@ -81869,6 +82665,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12049138,
                                 content: "침입자여, 하늘의 진노를 감당할 준비는 되었느냐?",
                                 voice: "story/1204/120491/1E29EBB4",
+                                speakerName: "태호&촉룡",
                             },
                         ],
                     },
@@ -82080,12 +82877,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "마음과 이치가 조화를 이룰 때, 비로소 도가 태어난다. 성인은 도로써 천하를 다스리니, 이는 물과 같아, 다투지 않아도 따르고, 명하지 않아도 스스로를 바로잡는 법...",
                                 voice: "story/1204/120479/1E292116",
+                                speakerName: "구&양",
                                 next: 12047904,
                             },
                             {
                                 id: 12047904,
                                 content: "이 이치에 대해, 그대들은 어찌 생각하는가?",
                                 voice: "story/1204/120479/1E292140",
+                                speakerName: "구&양",
                                 next: 12047905,
                             },
                             {
@@ -82136,6 +82935,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12047910,
                                 content: "좋네, 두 사람은 손을 내밀어 주게.",
                                 voice: "story/1204/120479/1E29223C",
+                                speakerName: "구&양",
                             },
                         ],
                     },
@@ -82149,6 +82949,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12049140,
                                 content: "...만물은 음을 등지고 양을 가슴에 안으니, 두 기운이 서로 부딪쳐 조화를 이루느니라...",
                                 voice: "story/1204/120491/1E29EC08",
+                                speakerName: "태호&촉룡",
                             },
                         ],
                     },
@@ -82161,6 +82962,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12049141,
                                 content: "...가득 채움은 멈춤만 못하고, 날카롭게 벼린 것은 오래가지 못하는 법...",
                                 voice: "story/1204/120491/1E29EC32",
+                                speakerName: "태호&촉룡",
                             },
                         ],
                     },
@@ -82190,12 +82992,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "마음과 이치가 조화를 이룰 때, 비로소 도가 태어난다. 성인은 도로써 천하를 다스리니, 이는 물과 같아, 다투지 않아도 따르고, 명하지 않아도 스스로를 바로잡는 법...",
                                 voice: "story/1204/120479/1E292116",
+                                speakerName: "구&양",
                                 next: 12047904,
                             },
                             {
                                 id: 12047904,
                                 content: "이 이치에 대해, 그대들은 어찌 생각하는가?",
                                 voice: "story/1204/120479/1E292140",
+                                speakerName: "구&양",
                                 next: 12047905,
                             },
                             {
@@ -82246,6 +83050,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12047910,
                                 content: "좋네, 두 사람은 손을 내밀어 주게.",
                                 voice: "story/1204/120479/1E29223C",
+                                speakerName: "구&양",
                             },
                         ],
                     },
@@ -84715,6 +85520,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "말세로구먼, 아직도 나그네 편을 드는 작자가 있다니! '나그네 협객 사인방'은 무슨, 얼어 죽을!",
                                 voice: "story/1206/120610/1E31864E",
                                 npc: 250015,
+                                speakerName: "오만한 남자",
                                 next: 12061004,
                             },
                             {
@@ -84729,6 +85535,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "도리? 그럼 댁이 여기서 헛소리로 사람들을 홀리는 건 도리에 맞아?",
                                 voice: "story/1206/120610/1E3186A2",
                                 npc: 250015,
+                                speakerName: "오만한 남자",
                                 next: 12061006,
                             },
                             {
@@ -84737,6 +85544,7 @@ export const questData_kr: QuestStory[] = [
                                     "그 잘난 사인방이 강물을 끌어다 멀쩡한 향로의 불을 꺼뜨리고, 장서각 여섯 채를 잿더미로 만들었어. 그런 소동을 벌였는데, 과연 정말로 다친 사람이 없었을까?",
                                 voice: "story/1206/120610/1E3186CC",
                                 npc: 250015,
+                                speakerName: "오만한 남자",
                                 next: 12061007,
                             },
                             {
@@ -84745,6 +85553,7 @@ export const questData_kr: QuestStory[] = [
                                     "남의 집 대문에 대나무 경고장을 걸어 놓고, 폭력을 휘두른 놈들이야. 복수라고? 그 사람들이 정말 죽을 죄를 지었을까? 그리고, 자기들이 뭔데 심판을 해?",
                                 voice: "story/1206/120610/1E3186F6",
                                 npc: 250015,
+                                speakerName: "오만한 남자",
                                 next: 12061008,
                             },
                             {
@@ -84753,6 +85562,7 @@ export const questData_kr: QuestStory[] = [
                                     "그리고 교외에 추락한 커다란 기계 새, 당신도 봤을 거 아냐. 그 쇳덩이 때문에 강둑이랑 밭이 얼마나 많이 망가졌는데. 잘못한 놈한테 잘못했다고 하는 게, 뭐가 문제란 거야.",
                                 voice: "story/1206/120610/1E318720",
                                 npc: 250015,
+                                speakerName: "오만한 남자",
                                 next: 12061009,
                             },
                             {
@@ -84760,6 +85570,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "나그네 좋아하네, 그냥 우르르 몰려다니는 악당 패거리 주제에!",
                                 voice: "story/1206/120610/1E31874A",
                                 npc: 250015,
+                                speakerName: "오만한 남자",
                                 next: 12061010,
                             },
                             {
@@ -84789,6 +85600,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "오호라... 나는 모르는 사정을, 그쪽은 잘 아신다? 설마 너도 나그네 패거리 아냐?",
                                 voice: "story/1206/120610/1E3187F2",
                                 npc: 250015,
+                                speakerName: "오만한 남자",
                                 next: 12061014,
                             },
                             {
@@ -84804,6 +85616,7 @@ export const questData_kr: QuestStory[] = [
                                     "하긴, 다들 주워들은 이야기를 늘어놓는 거니까, 누가 더 그럴싸하게 지어내느냐가 중요한 거겠지. 이렇게 된 거, 아예 이야기 대회를 열어야겠어!",
                                 voice: "story/1206/120610/1E318846",
                                 npc: 250015,
+                                speakerName: "'오만한 남자'",
                                 next: 12061016,
                             },
                             {
@@ -84812,12 +85625,14 @@ export const questData_kr: QuestStory[] = [
                                     "이런, 그랬다가 내가 지어낸 얘기가 재미없으면, 다들 날 미워하려나? 안 돼, 안 돼, 얼른 거울 보고 연습하자.",
                                 voice: "story/1206/120610/1E318870",
                                 npc: 250015,
+                                speakerName: "'오만한 남자'",
                                 next: 12061017,
                             },
                             {
                                 id: 12061017,
                                 content: "...저 사람 왜 혼자 횡설수설하지? 머리가 좀 이상한가?",
                                 voice: "story/1206/120610/1E31889A",
+                                speakerName: "관객",
                                 next: 12061018,
                             },
                             {
@@ -84825,6 +85640,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "누구냐?! 감히 내 목소리를 흉내 내다니! 당장 나와!",
                                 voice: "story/1206/120610/1E3188C4",
                                 npc: 250015,
+                                speakerName: "오만한 남자",
                                 next: 12061019,
                             },
                             {
@@ -84832,6 +85648,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "히힛... 할 말 없으니까 버럭하는 거 봐~ 아이고 웃겨라!",
                                 voice: "story/1206/120610/1E3188EE",
                                 npc: 250015,
+                                speakerName: "'오만한 남자'",
                                 next: 12061020,
                             },
                             {
@@ -84839,12 +85656,14 @@ export const questData_kr: QuestStory[] = [
                                 content: "이게...!",
                                 voice: "story/1206/120610/1E318918",
                                 npc: 250015,
+                                speakerName: "오만한 남자",
                                 next: 12061021,
                             },
                             {
                                 id: 12061021,
                                 content: "엄마, 저거 보세요! 저 형 자기랑 싸워요!",
                                 voice: "story/1206/120610/1E318942",
+                                speakerName: "관객",
                                 next: 12061022,
                             },
                             {
@@ -84860,6 +85679,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "됐다, 대회가 코앞이라 봐주는 줄 알아. 얘들아, 가자!",
                                 voice: "story/1206/120610/1E318996",
                                 npc: 250015,
+                                speakerName: "오만한 남자",
                             },
                         ],
                     },
@@ -85248,6 +86068,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "무슨 소란이지?",
                                 voice: "story/1206/120612/1E31A96A",
                                 npc: 250005,
+                                speakerName: "???",
                                 next: 12061218,
                             },
                             {
@@ -85875,6 +86696,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "저, 저리 가!",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "???",
                                 next: 12061446,
                             },
                             {
@@ -85920,6 +86742,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "재안아! 재안아! 너 거기 있니?!",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061505,
                             },
                             {
@@ -85927,6 +86750,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "얘도 참, 다리도 불편한 애가 왜 자꾸 밖에서 돌아다니는 거야...",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061506,
                             },
                             {
@@ -86048,6 +86872,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "저, 저리 가!",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "???",
                                 next: 12061446,
                             },
                             {
@@ -86092,6 +86917,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "재안아! 재안아! 너 거기 있니?!",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061505,
                             },
                             {
@@ -86099,6 +86925,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "얘도 참, 다리도 불편한 애가 왜 자꾸 밖에서 돌아다니는 거야...",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061506,
                             },
                             {
@@ -86214,6 +87041,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "저, 저리 가!",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "???",
                                 next: 12061446,
                             },
                             {
@@ -86259,6 +87087,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "재안아! 재안아! 너 거기 있니?!",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061505,
                             },
                             {
@@ -86266,6 +87095,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "얘도 참, 다리도 불편한 애가 왜 자꾸 밖에서 돌아다니는 거야...",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061506,
                             },
                             {
@@ -86626,6 +87456,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12061706,
                                 content: "이봐, 참가자 중에 나그네가 끼어 있다는 게 사실이야...?",
                                 voice: "story/1206/120617/1E31F9A4",
+                                speakerName: "관중들이 수군대는 소리",
                                 next: 12061707,
                             },
                             {
@@ -86633,12 +87464,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "나그네? 험상궂게 생겨서, 맨날 몽둥이 들고 설친다는 그 녀석들? 지금 나라 꼴 어수선하다고, 다 때려 부수고 다니진 않겠지?",
                                 voice: "story/1206/120617/1E31F9CE",
+                                speakerName: "관중들이 수군대는 소리",
                                 next: 12061708,
                             },
                             {
                                 id: 12061708,
                                 content: "나그네가 그렇게 무시무시해? 소설에서나 봤지, 실제론 본 적이 없어서...",
                                 voice: "story/1206/120617/1E31F9F8",
+                                speakerName: "관중들이 수군대는 소리",
                                 next: 12061709,
                             },
                             {
@@ -86646,6 +87479,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "의로운 나그네 이야기를 들어본 적은 있지만... 이야기는 이야기일 뿐이니까, 실제로 마주치긴 좀 그렇지.",
                                 voice: "story/1206/120617/1E31FA22",
+                                speakerName: "관중들이 수군대는 소리",
                                 next: 12061710,
                             },
                             {
@@ -86696,12 +87530,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 12061716,
                                 content: "저 여자였네!",
                                 voice: "story/1206/120617/1E31FB48",
+                                speakerName: "관중들이 수군대는 소리",
                                 next: 12061717,
                             },
                             {
                                 id: 12061717,
                                 content: "저렇게 여리여리해 보이는 아가씨가 나그네라고...? 소문처럼 무시무시하게 생기진 않았는데?",
                                 voice: "story/1206/120617/1E31FB72",
+                                speakerName: "관중들이 수군대는 소리",
                                 next: 12061718,
                             },
                             {
@@ -87446,6 +88282,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "으악, 그, 그만 때리렴! 아저씨야, 아저씨!",
                                 voice: "story/1206/120622/1E324ADA",
                                 npc: 250024,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -87461,6 +88298,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "으악, 그, 그만 때리렴! 아저씨야, 아저씨!",
                                 voice: "story/1206/120622/1E324ADA",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062202,
                             },
                             {
@@ -87468,6 +88306,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "아이고, 허리야. 요즘 애들은 말보다 주먹이 먼저 나간다니까. 허리 나갈 뻔했네.",
                                 voice: "story/1206/120622/1E324B04",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 options: [
                                     {
                                         id: 12062203,
@@ -87495,6 +88334,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "당연히 우리 소을이가 걱정돼서 그러지!",
                                 voice: "story/1206/120622/1E324BAC",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062207,
                             },
                             {
@@ -87503,6 +88343,7 @@ export const questData_kr: QuestStory[] = [
                                     "휴, 품 안의 자식이라잖아. 내가 들어가면 괜찮은 척 틱틱거리면서 날 쫓아낼 게 뻔해. 그러니까 하는 수 없이 몰래 보고 있던 거야.",
                                 voice: "story/1206/120622/1E324BD6",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062208,
                             },
                             {
@@ -87511,6 +88352,7 @@ export const questData_kr: QuestStory[] = [
                                     "이번 대회에 참가한 것도 그래. 말 한마디 없이 훌쩍 가 버리고 말이야. 산외산 식구들이 걔 마음을 왜 모르겠어. 소을이 혼자 미안한 마음에 저러지.",
                                 voice: "story/1206/120622/1E324C00",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062209,
                             },
                             {
@@ -87519,6 +88361,7 @@ export const questData_kr: QuestStory[] = [
                                     "소을이는 너무 많은 걸 짊어지려고 해. 자긴 제멋대로 굴면 안 된다고 생각하니까, 우리한테도 비밀로 한 걸 테고.",
                                 voice: "story/1206/120622/1E324C2A",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062210,
                             },
                             {
@@ -87527,6 +88370,7 @@ export const questData_kr: QuestStory[] = [
                                     "그래도 소을이가 널 만나서 참 다행이야. 둘이 같은 팀이라고 해서, 아저씨가 한시름 놨어. 참, 아까 소을이가 뭐라고 하든?",
                                 voice: "story/1206/120622/1E324C54",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 options: [
                                     {
                                         id: 12062211,
@@ -87540,6 +88384,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "소을이가 '살면서 최고로 기분 좋다'고 했다고? 아이고, 일 났네.",
                                 voice: "story/1206/120622/1E324CA8",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062213,
                             },
                             {
@@ -87548,6 +88393,7 @@ export const questData_kr: QuestStory[] = [
                                     "내가 걜 업어 키운 거나 마찬가지라 속을 뻔히 아는데, 소을이는 화가 날수록 차분해 보여. '최고'란 소리가 나올 정도면, 속이 다 뒤집어졌단 거야.",
                                 voice: "story/1206/120622/1E324CD2",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062214,
                             },
                             {
@@ -87556,6 +88402,7 @@ export const questData_kr: QuestStory[] = [
                                     "평소엔 워낙 의젓하니까, 아직 어린애란 걸 깜빡깜빡하는데. 고모 얘기만 나왔다 하면, 애가 이성을 잃는단 말이지.",
                                 voice: "story/1206/120622/1E324CFC",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062215,
                             },
                             {
@@ -87563,6 +88410,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "참, 소을이한테서 고모 얘기는 들었어? 어디까지 알고 있나 해서.",
                                 voice: "story/1206/120622/1E324D26",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062216,
                             },
                             {
@@ -87578,6 +88426,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "그 얘기까지 해 줬다고? 소을이가 널 많이 믿나 보네.",
                                 voice: "story/1206/120622/1E324D7A",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062218,
                             },
                             {
@@ -87586,6 +88435,7 @@ export const questData_kr: QuestStory[] = [
                                     "처음 그 소식을 들었을 때, 우린 다들 지금 가면 죽는다고 뜯어말렸어. 그래도 고집을 못 버리고, 기어이 가더라고.",
                                 voice: "story/1206/120622/1E324DA4",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062219,
                             },
                             {
@@ -87594,6 +88444,7 @@ export const questData_kr: QuestStory[] = [
                                     "결국 멸몽조를 제어하지 못해 동쪽 교외는 쑥대밭이 돼 버렸지. 평생의 꿈과는 정반대의 최후였어. 소을이는 그 일을 여태 마음에 담아두고 있는 거야.",
                                 voice: "story/1206/120622/1E324DCE",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062220,
                             },
                             {
@@ -87602,6 +88453,7 @@ export const questData_kr: QuestStory[] = [
                                     "다 늙은 우리가 젊은 애들 일에 이래라저래라 할 힘이 어디 있겠냐마는, 소을이가 나중에라도, 사람은 과거가 아니라 앞을 보고 살아가야 한단 걸 깨달았으면 좋겠어...",
                                 voice: "story/1206/120622/1E324DF8",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062221,
                             },
                             {
@@ -87615,6 +88467,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "어이쿠! 이게 대체 무슨 소리야?!",
                                 voice: "story/1206/120622/1E324E4C",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062223,
                             },
                             {
@@ -87630,6 +88483,7 @@ export const questData_kr: QuestStory[] = [
                                     "내가 아무리 칠칠찮아도 이렇게 요란하게 뭘 떨어뜨리진 않아. 소리가 뭔가 심상치 않군. 산외산 입구 쪽 같아.",
                                 voice: "story/1206/120622/1E324EA0",
                                 npc: 250024,
+                                speakerName: "당씨 아저씨",
                                 next: 12062225,
                             },
                             {
@@ -88146,6 +89000,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12062501,
                                 content: "......",
                                 voice: "story/1206/120625/1E327C12",
+                                speakerName: "사람들",
                                 next: 12062502,
                             },
                             {
@@ -88303,18 +89158,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 12062521,
                                 content: "진행 위원회는 어쩌자고 저런 위험한 물건을 쓰도록 허락한 거야?",
                                 voice: "story/1206/120625/1E327F5A",
+                                speakerName: "관중들이 수군대는 소리",
                                 next: 12062522,
                             },
                             {
                                 id: 12062522,
                                 content: "사람들 많은 데서 터졌으면 어쩔 뻔했어. 상상도 하기 싫다...",
                                 voice: "story/1206/120625/1E327F84",
+                                speakerName: "관중들이 수군대는 소리",
                                 next: 12062523,
                             },
                             {
                                 id: 12062523,
                                 content: "나그네들이 다 저런 식이면, 불안해서 어떻게 살아?! 싹 다 쫓아내야지!",
                                 voice: "story/1206/120625/1E327FAE",
+                                speakerName: "관중들이 수군대는 소리",
                                 next: 12062524,
                             },
                             {
@@ -88868,6 +89726,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12062721,
                                 content: "미안해. 고모가 계속 여기 있으면, 너랑 네 엄마한테 짐만 될 거야.",
                                 voice: "story/1206/120627/1E32A02A",
+                                speakerName: "소한자",
                                 next: 12062722,
                             },
                             {
@@ -88881,12 +89740,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 12062723,
                                 content: "아니, 그 사람들은 나쁜 사람 아니야.",
                                 voice: "story/1206/120627/1E32A07E",
+                                speakerName: "소한자",
                                 next: 12062724,
                             },
                             {
                                 id: 12062724,
                                 content: "새의 발목에 황금 족쇄를 채우는 것도, 마음속으론 새를 위한다고 그러는 거니까.",
                                 voice: "story/1206/120627/1E32A0A8",
+                                speakerName: "소한자",
                                 next: 12062725,
                             },
                             {
@@ -88901,6 +89762,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그렇지. 그렇지만 새는 알아. 자기가 원하는 건 황금 족쇄가 아니라, 드넓은 하늘을 자유롭게 날아다닐 수 있는 미래라는 걸.",
                                 voice: "story/1206/120627/1E32A0FC",
+                                speakerName: "소한자",
                                 next: 12062727,
                             },
                             {
@@ -88908,6 +89770,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그날이 오면, 너도 마음껏 집 밖을 돌아다니고, 사람들도 마음껏 기술을 개발해서, 모두를 행복하게 만들 기추 장치들을 연구해 낼 수 있을 거야.",
                                 voice: "story/1206/120627/1E32A126",
+                                speakerName: "소한자",
                                 next: 12062728,
                             },
                             {
@@ -88922,6 +89785,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12062729,
                                 content: "물론이지... 그럴 수만 있었다면 말이야.",
                                 voice: "story/1206/120627/1E32A17A",
+                                speakerName: "소한자",
                                 next: 12062730,
                             },
                             {
@@ -88929,12 +89793,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그런데, 고모는 그렇게까지 대단한 사람은 아니야. 내가 제일 잘 하는 기추 제작도, 이제 곧 네가 나보다 더 잘 만들게 될 거고.",
                                 voice: "story/1206/120627/1E32A1A4",
+                                speakerName: "소한자",
                                 next: 12062731,
                             },
                             {
                                 id: 12062731,
                                 content: "그래도 내가 아는 건 다 너한테 가르쳐 줘서 다행이야.",
                                 voice: "story/1206/120627/1E32A1CE",
+                                speakerName: "소한자",
                                 next: 12062732,
                             },
                             {
@@ -88949,6 +89815,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "괜찮아, 뚝. 고모가 약속할게. 대풍구장을 바꾸는 데 성공하면, 너랑, 너희 엄마 아빠랑, 고모랑 다 같이 동쪽 교외에서, 우리가 같이 만든 기계 새를 날리면서 노는 거야.",
                                 voice: "story/1206/120627/1E32A222",
+                                speakerName: "소한자",
                                 next: 12062734,
                             },
                             {
@@ -88963,6 +89830,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "실패해도, 고모한테는 네가 있으니까 괜찮아. 적어도 넌 내가 잘못된 길을 갔단 걸 알 수 있을 테니까, 그 길은 피할 수 있잖아.",
                                 voice: "story/1206/120627/1E32A276",
+                                speakerName: "소한자",
                                 next: 12062736,
                             },
                             {
@@ -88977,6 +89845,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "괜찮아. 너한테도 제자가 생길 거고, 그 애들한텐 같은 실수를 하지 말라고 가르쳐 주면 돼. 그렇게 쭉 이어 나가다 보면, 언젠가 한 명쯤은 이 세상이 바뀌는 걸 볼 수 있지 않을까?",
                                 voice: "story/1206/120627/1E32A2CA",
+                                speakerName: "소한자",
                                 next: 12062738,
                             },
                             {
@@ -88990,6 +89859,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12062739,
                                 content: "그건, 잘 모르겠네. ...아이고, 머리야.",
                                 voice: "story/1206/120627/1E32A31E",
+                                speakerName: "소한자",
                                 next: 12062740,
                             },
                             {
@@ -88997,12 +89867,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "고모가 그날을 보려면, 이번에 무조건 성공하는 수밖에 없겠다. 고모가 좋은 소식 가지고 올 테니까, 꼭 밥 잘 먹고 씩씩하게 기다려야 해.",
                                 voice: "story/1206/120627/1E32A348",
+                                speakerName: "소한자",
                                 next: 12062741,
                             },
                             {
                                 id: 12062741,
                                 content: "...그리고 마지막으로 하나만 더.",
                                 voice: "story/1206/120627/1E32A372",
+                                speakerName: "소한자",
                                 next: 12062742,
                             },
                             {
@@ -89010,6 +89882,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "변화에는 대가가 따르는 법이야. 혹시라도... 만약에, 괜한 소리 하려는 건 아니지만... 만에 하나 고모가 아주 큰 잘못을 저지르게 되면...",
                                 voice: "story/1206/120627/1E32A39C",
+                                speakerName: "소한자",
                                 next: 12062743,
                             },
                             {
@@ -89304,6 +90177,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "...사람 살려...아무도 없어요...?",
                                 voice: "story/1206/120629/1E32BE5A",
                                 npc: 250017,
+                                speakerName: "???",
                                 next: 12062906,
                             },
                             {
@@ -89453,6 +90327,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12063801,
                                 content: "스캔 완료... 추적 경로를 생성 중입니다...",
                                 voice: "story/1206/120638/1E33515A",
+                                speakerName: "난새 2호",
                                 next: 12063802,
                             },
                             {
@@ -90013,6 +90888,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 12063321,
                                 content: "이번에도 그 영웅이야! {nickname}!",
                                 voice: "story/1206/120633/1E33029A",
+                                speakerName: "(사람들이 수군대는 소리)",
                                 next: 12063322,
                             },
                             {
@@ -90020,6 +90896,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "저 나그네도 있네! 내가 뭐랬어. 나그네는 험상궂은 사람들 아니라고 했잖아! 저 양갈래 머리 아가씨 좀 봐, 엄청 귀엽네!",
                                 voice: "story/1206/120633/1E3302C4",
+                                speakerName: "(사람들이 수군대는 소리)",
                                 next: 12063323,
                             },
                             {
@@ -90027,6 +90904,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "나그네는 생전 처음 봐. 근데 저 사람들도 우리처럼 방황도 하고, 그러다 또 용기도 내는 평범한 사람들인 것 같네.",
                                 voice: "story/1206/120633/1E3302EE",
+                                speakerName: "(사람들이 수군대는 소리)",
                             },
                         ],
                     },
@@ -90904,6 +91782,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "젊은이, 나는 오랫동안 떠돌아다니며 정착할 곳이 없었네. 한동안 자네를 따라다녀도 괜찮겠는가?",
                                 voice: "story/2001/200005/3211B7F8",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                                 next: 20000524,
                             },
                             {
@@ -90912,6 +91791,7 @@ export const questData_kr: QuestStory[] = [
                                     "휘페르보레아에서 엘리시안까지, 못 본 무기가 없고 안 만든 무기가 없지! 무기를 만들고 싶다면, 나에게 맡기게.",
                                 voice: "story/2001/200005/3211B822",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                                 next: 20000525,
                             },
                             {
@@ -90926,6 +91806,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "가격은 다른 대장장이들보다 저렴할 걸세. 하지만 내게 그 검을 연구할 시간을 좀 주게나. 하하.",
                                 voice: "story/2001/200005/3211B876",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                             },
                         ],
                     },
@@ -91023,6 +91904,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "젊은이, 나는 오랫동안 떠돌아다니며 정착할 곳이 없었네. 한동안 자네를 따라다녀도 괜찮겠는가?",
                                 voice: "story/2001/200005/3211B7F8",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                                 next: 20000524,
                             },
                             {
@@ -91031,6 +91913,7 @@ export const questData_kr: QuestStory[] = [
                                     "휘페르보레아에서 엘리시안까지, 못 본 무기가 없고 안 만든 무기가 없지! 무기를 만들고 싶다면, 나에게 맡기게.",
                                 voice: "story/2001/200005/3211B822",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                                 next: 20000525,
                             },
                             {
@@ -91045,6 +91928,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "가격은 다른 대장장이들보다 저렴할 걸세. 하지만 내게 그 검을 연구할 시간을 좀 주게나. 하하.",
                                 voice: "story/2001/200005/3211B876",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                             },
                         ],
                     },
@@ -91058,6 +91942,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "젊은이가 동의한 모양이군. 좋아, 좋아! 어서 자네들이 사는 곳으로 가자고!",
                                 voice: "story/2001/200005/3211B99C",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                             },
                         ],
                     },
@@ -91071,6 +91956,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "허... 젊은이 표정을 보아하니, 이 늙은이를 의심하는구나.",
                                 voice: "story/2001/200005/3211B8CA",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                                 next: 20000529,
                             },
                             {
@@ -91079,6 +91965,7 @@ export const questData_kr: QuestStory[] = [
                                     "걱정하지 말게. '루나는 결코 먼저 다른 이를 해치지 않는다'. 이건 아트라시아 대륙의 모두가 알고 있는 사실이지.",
                                 voice: "story/2001/200005/3211B8F4",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                                 next: 20000530,
                             },
                             {
@@ -91107,6 +91994,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "젊은이가 동의한 모양이군. 좋아, 좋아! 어서 자네들이 사는 곳으로 가자고!",
                                 voice: "story/2001/200005/3211B99C",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                             },
                         ],
                     },
@@ -91203,6 +92091,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "젊은이, 어디 외진 곳에서 왔나?",
                                 voice: "story/2001/200006/3211C4EE",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                                 next: 20000604,
                             },
                             {
@@ -91218,6 +92107,7 @@ export const questData_kr: QuestStory[] = [
                                     "하하, 어쩐지, 어쩐지. 이 늙은이가 머물렀던 곳은 말이야, 사람이 있는 곳엔 항상 루나가 있었지. 자네처럼 우리 일족을 본 적이 없는 아이는 많지 않아.",
                                 voice: "story/2001/200006/3211C542",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                                 options: [
                                     {
                                         id: 200006051,
@@ -91267,6 +92157,7 @@ export const questData_kr: QuestStory[] = [
                                     "확실히, 이 늙은이가 이렇게 나이를 먹었지만, 너처럼 생긴 루나는 처음 보는 것 같군. 네 모습은, <H>카론</>이랑 비슷하게 생겼어...",
                                 voice: "story/2001/200006/3211C63E",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                                 next: 20000612,
                             },
                             {
@@ -91282,6 +92173,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "허... 젊은이가 야망이 크군!",
                                 voice: "story/2001/200006/3211C692",
                                 npc: 200024,
+                                speakerName: "대장장이 루나",
                                 next: 20000614,
                             },
                             {
@@ -92247,6 +93139,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 20005301,
                                 content: "마령을 괴롭히면 안 돼! 헤이즐넛, 녀석들을 날려버려!",
                                 voice: "story/2001/200053/3214C7B2",
+                                speakerName: "경쾌한 소리",
                                 next: 20005302,
                             },
                             {
@@ -92261,6 +93154,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 20005303,
                                 content: "녀석들이 도망치려고 해! 저기요, 그쪽의 {性别:오빠|언니}, 그리고 꼬마 친구, 저 좀 도와주세요!",
                                 voice: "story/2001/200053/3214C806",
+                                speakerName: "경쾌한 소리",
                                 next: 20005304,
                             },
                             {
@@ -92342,6 +93236,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "방금 건 내가 부른 거야.",
                                 voice: "story/2001/200054/3214D916",
                                 npc: 200074,
+                                speakerName: "???",
                                 next: 20005408,
                             },
                             {
@@ -92540,6 +93435,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 20005425,
                                 content: "끽끽...?",
+                                speakerName: "탈출한 마령",
                                 next: 20005426,
                             },
                             {
@@ -92553,6 +93449,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 20005427,
                                 content: "끽끽! 끽끽끽!",
+                                speakerName: "탈출한 마령",
                                 next: 20005428,
                             },
                             {
@@ -92580,6 +93477,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 20005431,
                                 content: "끽끽끽끽!",
+                                speakerName: "탈출한 마령",
                                 options: [
                                     {
                                         id: 200054311,
@@ -92596,6 +93494,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 20005432,
                                 content: "끽끽!",
+                                speakerName: "탈출한 마령",
                                 next: 20005434,
                             },
                             {
@@ -93125,6 +94024,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이이야~",
                                 voice: "story/2001/200060/32153BB0",
                                 npc: 820000,
+                                speakerName: "탈출한 마령",
                                 next: 20006009,
                             },
                             {
@@ -93155,6 +94055,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이이이야——",
                                 voice: "story/2001/200060/32153C58",
                                 npc: 820000,
+                                speakerName: "탈출한 마령",
                                 next: 20006013,
                             },
                             {
@@ -93269,6 +94170,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "응응응!",
                                 voice: "story/2001/200060/32153E7A",
                                 npc: 700251,
+                                speakerName: "다시 갇힌 마령",
                                 next: 20006026,
                             },
                             {
@@ -93764,6 +94666,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이이.",
                                 voice: "story/2001/200067/3215AE88",
                                 npc: 700251,
+                                speakerName: "마령 판신",
                                 next: 20006709,
                             },
                             {
@@ -93886,6 +94789,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이이야~",
                                 voice: "story/2001/200066/32159D78",
                                 npc: 700251,
+                                speakerName: "마령 판신",
                                 next: 20006605,
                             },
                             {
@@ -93899,18 +94803,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 20006606,
                                 content: "쮸~",
                                 voice: "story/2001/200066/32159DCC",
+                                speakerName: "???",
                                 next: 20006607,
                             },
                             {
                                 id: 20006607,
                                 content: "메에~",
                                 voice: "story/2001/200066/32159DF6",
+                                speakerName: "???",
                                 next: 20006608,
                             },
                             {
                                 id: 20006608,
                                 content: "딩동~",
                                 voice: "story/2001/200066/32159E20",
+                                speakerName: "???",
                                 next: 20006609,
                             },
                             {
@@ -94225,6 +95132,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이이.",
                                 voice: "story/2001/200067/3215B128",
                                 npc: 700251,
+                                speakerName: "마령 판신",
                                 next: 20006725,
                             },
                             {
@@ -94254,6 +95162,7 @@ export const questData_kr: QuestStory[] = [
                                 content: "이이이.",
                                 voice: "story/2001/200067/3215B1D0",
                                 npc: 700251,
+                                speakerName: "마령 판신",
                             },
                         ],
                     },
@@ -95093,6 +96002,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51000894,
                                 content: "애니... 그게 제 이름이군요. 왠지 좀 낯설어요...",
                                 npc: 700032,
+                                speakerName: "애니",
                                 next: 51000895,
                             },
                             {
@@ -95106,6 +96016,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "죄송해요, 제가 다 잊어서... 고마워요, 정말 고마워요! 절 엄마한테 데려다주세요. 엄마가 분명 사례할 거예요!",
                                 npc: 700032,
+                                speakerName: "애니",
                                 options: [
                                     {
                                         id: 510008141,
@@ -95118,18 +96029,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 51000805,
                                 content: "전 앨리스라고 해요. 이스엘에서 온 고고학과 학생이죠.",
                                 npc: 700032,
+                                speakerName: "앨리스",
                                 next: 51000806,
                             },
                             {
                                 id: 51000814,
                                 content: "감사합니다! 어머니께서 분명 저를 걱정하고 계실 거예요.",
                                 npc: 700032,
+                                speakerName: "애니",
                             },
                             {
                                 id: 51000806,
                                 content:
                                     "당시 전 베드르폴니르 설산을 탐사하고 있었는데 공교롭게도 며칠 동안 이어진 눈보라에 방향을 잃었어요...",
                                 npc: 700032,
+                                speakerName: "앨리스",
                                 next: 51000807,
                             },
                             {
@@ -95137,6 +96051,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "나중에 다 죽어가는 애니를 만나 힘겨운 며칠을 보냈어요. 우린 서로를 격려하며 살아남았죠. 눈보라가 그치면 저는 그 애가 사는 아이스레이크 시티 집에 가서 묵기로 했어요...",
                                 npc: 700032,
+                                speakerName: "앨리스",
                                 next: 51000808,
                             },
                             {
@@ -95144,18 +96059,21 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그런데 애니는 너무 심하게 다쳐서, 버텨내지 못했고... 마지막엔 저한테 자기 옷을 줬어요. 조금이라도 더 따뜻하게 입고, 살아서 설산을 벗어나라고요...",
                                 npc: 700032,
+                                speakerName: "앨리스",
                                 next: 51000809,
                             },
                             {
                                 id: 51000809,
                                 content: "애니... ",
                                 npc: 700032,
+                                speakerName: "앨리스",
                                 next: 51000810,
                             },
                             {
                                 id: 51000810,
                                 content: "고마워요... 저는 영원히 애니를 기억할 거예요.",
                                 npc: 700032,
+                                speakerName: "앨리스",
                                 next: 51000811,
                             },
                             {
@@ -95163,6 +96081,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "(앨리스는 부드럽게 옷을 쓰다듬었다. 이건 한 여자아이가 다른 여자아이를 지켰다는 증표이다. 앨리스와 작별하고 사실을 엘사에게 사실을 알리기로 한다.)",
                                 npc: 700032,
+                                speakerName: "앨리스",
                             },
                         ],
                     },
@@ -97199,6 +98118,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51004907,
                                 content:
                                     "'성 밖의 필토이드는 우리의 살을 먹고, 성안의 농장주는 우리의 털을 깎는다. 사냥개는 흰 빵을 먹지만, 우리 카론은 양처럼 풀만 뜯어 먹는다네. 뒹굴고 꼬리를 흔들며 주인의 환심만 살 뿐이다.'",
+                                speakerName: "갈겨쓴 필체",
                                 next: 51004908,
                             },
                             {
@@ -97251,12 +98171,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51004914,
                                 content:
                                     "'전 원래 음유시인이었어요. 그런데 카론인을 증오하는 사람들이 절 납치해서 조롱과 구타를 가했고, 머리카락과 피부엔 칼질까지 했죠.'",
+                                speakerName: "갈겨쓴 필체",
                                 next: 510049141,
                             },
                             {
                                 id: 510049141,
                                 content:
                                     "'나중엔 로터스로 만든 독약까지 먹였어요. 목숨은 건졌지만, 두 번 다시 말을 할 수 없게 되어 버렸죠.'",
+                                speakerName: "갈겨쓴 필체",
                                 next: 51004915,
                             },
                             {
@@ -97273,6 +98195,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51004917,
                                 content: "'마음에 담아놓고 있기엔 너무 고통스러워요.'",
+                                speakerName: "갈겨쓴 필체",
                                 options: [
                                     {
                                         id: 510049171,
@@ -97298,11 +98221,13 @@ export const questData_kr: QuestStory[] = [
                                 id: 51004918,
                                 content:
                                     "'맞아요. 변하는 것도 없고, 제가 쓴 이 글을 남에게 보여줄 용기도 없죠. 그렇지만 그래도 참을 수 없어요.'",
+                                speakerName: "갈겨쓴 필체",
                                 next: 51004919,
                             },
                             {
                                 id: 51004923,
                                 content: "'과찬이세요. 저는 종이에만 불평을 쏟아놓는 겁쟁이인걸요. 남에게 보여줄 용기도 없어요.'",
+                                speakerName: "갈겨쓴 필체",
                                 next: 51004924,
                             },
                             {
@@ -97315,6 +98240,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51004919,
                                 content:
                                     "'전 이제 노래도 할 수 없답니다. 글조차 쓰지 못한다면 마지막 남은 소중한 것을 잃는 거라 그때는 정말 아무것도 안 남을 거예요.'",
+                                speakerName: "갈겨쓴 필체",
                                 next: 51004920,
                             },
                             {
@@ -97327,6 +98253,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51004928,
                                 content: "'이걸 다 드릴 테니까 그 종이는 제발 돌려주세요.'",
+                                speakerName: "갈겨쓴 필체",
                                 next: 51004929,
                             },
                             {
@@ -97354,10 +98281,12 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51004926,
                                 content: "'돌려주셔서 정말 고마워요. 이건 제 보답이에요.'",
+                                speakerName: "갈겨쓴 필체",
                             },
                             {
                                 id: 51004922,
                                 content: "'돌려주셔서 정말 고마워요. 이건 제 보답이에요.'",
+                                speakerName: "갈겨쓴 필체",
                             },
                         ],
                     },
@@ -97568,11 +98497,13 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51004966,
                                 content: "(루나가 깊은 생각에 빠진 듯 고개를 숙인다.)",
+                                speakerName: "갈겨쓴 필체",
                                 next: 51004967,
                             },
                             {
                                 id: 51004967,
                                 content: "'설령 목소리를 대가로 치러야 한데도, 제 진심을 노래하고 싶어요.'",
+                                speakerName: "갈겨쓴 필체",
                                 next: 51004968,
                             },
                             {
@@ -97810,6 +98741,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51004401,
                                 content: "하수도에서 영원히 사라지지 않는 게 뭔지 알아?",
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 510044011,
@@ -97831,10 +98763,12 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51004402,
                                 content: "들어와.",
+                                speakerName: "???",
                             },
                             {
                                 id: 51004403,
                                 content: "여긴 아무것도 모르는 멍청이가 올 곳이 아니야.",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -100075,6 +101009,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51005929,
                                 content: "왕형님들 최고!",
+                                speakerName: "제국 삼 형제",
                                 next: 51005930,
                             },
                             {
@@ -100161,6 +101096,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51005941,
                                 content: "왕형님들, 고맙습니다!",
+                                speakerName: "제국 삼 형제",
                                 next: 51005942,
                             },
                             {
@@ -100337,6 +101273,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51005929,
                                 content: "왕형님들 최고!",
+                                speakerName: "제국 삼 형제",
                                 next: 51005930,
                             },
                             {
@@ -100423,6 +101360,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51005941,
                                 content: "왕형님들, 고맙습니다!",
+                                speakerName: "제국 삼 형제",
                                 next: 51005942,
                             },
                             {
@@ -100707,16 +101645,19 @@ export const questData_kr: QuestStory[] = [
                                 id: 51007126,
                                 content:
                                     "...그래요, 맞아요. 내가 제시카예요. 이 쓰레기는 내가 버린 게 맞고요. 됐어요? 날 웃음거리로 만들려고 주절주절 늘어놓은 거죠?",
+                                speakerName: "제시카",
                                 next: 51007127,
                             },
                             {
                                 id: 51007127,
                                 content: "그래요, 나도 다른 가난뱅이들처럼 이 고물 기차 탈 형편이 안 돼요. 이제 속이 시원해요?!",
+                                speakerName: "제시카",
                                 next: 51007128,
                             },
                             {
                                 id: 51007128,
                                 content: "...꿈이 이뤄지긴 개뿔... 전부 거짓말이에요.",
+                                speakerName: "제시카",
                                 next: 51007129,
                             },
                             {
@@ -100728,12 +101669,14 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51007130,
                                 content: "하, 그럼 내가 따뜻하게 위로라도 해 줘야 해요?",
+                                speakerName: "제시카",
                                 next: 51007131,
                             },
                             {
                                 id: 51007131,
                                 content:
                                     "또, 대단하신 나리들만 타는 열차를 당신도 언젠가는 탈 수 있을 거라고 헛된 망상이라도 심어 줄까요?!",
+                                speakerName: "제시카",
                                 next: 51007132,
                             },
                             {
@@ -100746,6 +101689,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51007133,
                                 content:
                                     "별을 잇는 자라고요?! 그럼... 별을 잇는 자 중에 '명언'이라는 화서인을 알아요? 13년 전에 아이스레이크 시티에 왔었는데...",
+                                speakerName: "제시카",
                                 next: 51007134,
                             },
                             {
@@ -100757,6 +101701,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51007135,
                                 content: "...그렇군요.",
+                                speakerName: "제시카",
                                 next: 51007136,
                             },
                             {
@@ -100768,6 +101713,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51007137,
                                 content: "하하, 친구? 아뇨, 내가 제일 미워하는 사람이에요.",
+                                speakerName: "제시카",
                                 next: 51007138,
                             },
                             {
@@ -100780,24 +101726,28 @@ export const questData_kr: QuestStory[] = [
                                 id: 51007139,
                                 content:
                                     "그 애는 여러 나라를 다니며 재밌는 사람과 일을 많이 경험했다고 했어요. 물건을 하나 팔 때마다 먼 곳의 이야기를 하나씩 들려줬죠.",
+                                speakerName: "제시카",
                                 next: 51007140,
                             },
                             {
                                 id: 51007140,
                                 content:
                                     "난 바보처럼 그 애가 하는 말을 전부 적어서 외웠어요. 그러면 그 애가 말하는 그 넓은 세상과 가까워질 줄 알았거든요.",
+                                speakerName: "제시카",
                                 next: 51007141,
                             },
                             {
                                 id: 51007141,
                                 content:
                                     "별은 소원의 씨앗이라 별이 떨어져 과실이 맺히면 바라던 게 모두 이뤄질 거라고 했어요. 소중한 것들로 이뤄진 무수한 별이 땅에서 싹틀 거라고요.",
+                                speakerName: "제시카",
                                 next: 51007142,
                             },
                             {
                                 id: 51007142,
                                 content:
                                     "나도 같이 떠나서 마르지 않는 그 애의 이야기를 계속 듣고 싶었어요. 그런데 차표를 사지 못해서 그 애를 태우고 멀어지는 열차를 바라볼 수밖에 없었죠.",
+                                speakerName: "제시카",
                                 next: 51007143,
                             },
                             {
@@ -100810,24 +101760,28 @@ export const questData_kr: QuestStory[] = [
                                 id: 51007144,
                                 content:
                                     "하하... 여기 있었네요. 이게 그 애가 탔던 열차의 승차권이에요. 그 열차는 휘페르보레아 대평원을 가로질러, 저 멀리 남쪽으로 향했죠.",
+                                speakerName: "제시카",
                                 next: 51007145,
                             },
                             {
                                 id: 51007145,
                                 content:
                                     "기차는 떠났고, 매표원은 내가 딱해 보였는지 팔다가 남아서 폐기된 표를 하나 줬어요. 그쪽으로 가는 열차는 아직 많이 있다고 위로해 주면서요.",
+                                speakerName: "제시카",
                                 next: 51007146,
                             },
                             {
                                 id: 51007146,
                                 content:
                                     "그런데 내 형편은 끝까지 좋아지지 않아서, 표를 사기는커녕 옆에서 하염없이 바라볼 수밖에 없었어요. 하도 보다 보니까 어깨너머로 표 파는 과정을 익혔고, 그러다 후임 매표원이 된 거예요.",
+                                speakerName: "제시카",
                                 next: 51006931,
                             },
                             {
                                 id: 51006931,
                                 content:
                                     "매표원이 되고 1년하고도 8개월이 지나서야, 난 간신히 아이스레이크 시티에서 스칼렛까지 가는 푯값을 모을 수 있었어요.",
+                                speakerName: "제시카",
                                 next: 51006932,
                             },
                             {
@@ -100840,6 +101794,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51006933,
                                 content:
                                     "꿈에 다가서요? <H>카론 보호비</> 잊었어요? 푯값은 그 보호비에 비하면 새 발의 피라고요! 내가 5년은 쫄쫄 굶어야 그 애가 있는 곳으로 갈 표를 살 수 있단 거예요! 그런데 나한테는 먹여 살려야 할 가족도 있으니까...",
+                                speakerName: "제시카",
                                 next: 51007147,
                             },
                             {
@@ -100851,6 +101806,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51007148,
                                 content:
                                     "이제 알겠어요? 이 별들은 그저 쓰레기일 뿐이에요. 그래도 일부러 가져다줬으니 고마워요. 다음엔 찢어서 버려야겠네요.",
+                                speakerName: "제시카",
                                 next: 51007149,
                             },
                             {
@@ -100862,6 +101818,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51007150,
                                 content: "별을 잇는 자, 당신의 동정은 필요 없어요.",
+                                speakerName: "제시카",
                                 options: [
                                     {
                                         id: 51007151,
@@ -100874,17 +101831,20 @@ export const questData_kr: QuestStory[] = [
                                 id: 51007152,
                                 content:
                                     "'곱게'? 그 별을 잇는 자나 그때 매표원처럼 예쁜 헛소리나 하라고요? '먼 곳'이 어쩌니, '미래'가 어쩌니 하면서 기대나 심어 주도록요?",
+                                speakerName: "제시카",
                                 next: 51007153,
                             },
                             {
                                 id: 51007153,
                                 content: "당신은 카론이니까, 나 같은 화서인보다 아이스레이크 시티가 어떤 곳인지 더 잘 알잖아요!",
+                                speakerName: "제시카",
                                 next: 51007154,
                             },
                             {
                                 id: 51007154,
                                 content:
                                     "성안을 한 바퀴 돌아 봐요. 모두가 한탄 아니면 원망에 욕만 해요! 이런 곳에서 곱게 말하는 게 의미가 있냐고요!",
+                                speakerName: "제시카",
                                 next: 51007155,
                             },
                             {
@@ -100913,6 +101873,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51007159,
                                 content: "뭐 어쩌라고요...? 이렇게 좋은 상자를 살 돈이 나한테 어디 있다고...",
+                                speakerName: "제시카",
                                 next: 51007160,
                             },
                             {
@@ -100948,6 +101909,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51007169,
                                 content:
                                     "가져가요. 내가 왜 별을 버리려는 것 같아요? 오랫동안 생각할 만큼 했고 덕분에 현실도 똑똑히 알게 됐거든요.",
+                                speakerName: "제시카",
                                 next: 51007170,
                             },
                             {
@@ -100970,32 +101932,38 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51007171,
                                 content: "......",
+                                speakerName: "제시카",
                                 next: 51007172,
                             },
                             {
                                 id: 51007166,
                                 content: "어떻게...",
+                                speakerName: "제시카",
                                 next: 51007167,
                             },
                             {
                                 id: 51007172,
                                 content:
                                     "...참, 행선지가 같더라도 차편에 따라서 가격이 달라요. 그중에 싼 것도 좀 있죠. 뭐 얼마 차이는 아니지만, 그래도...",
+                                speakerName: "제시카",
                                 next: 51007173,
                             },
                             {
                                 id: 51007167,
                                 content: "아... 알았어요. 정말 성가시네요. 받으면 되잖아요. 고... 고마워요.",
+                                speakerName: "제시카",
                                 next: 51007172,
                             },
                             {
                                 id: 51007173,
                                 content: "언젠가 정말 차표를 사게 될 날이 오면... 어느 표가 제일 저렴한지 미리 알아보고 내가 빼놓을게요.",
+                                speakerName: "제시카",
                                 next: 51007174,
                             },
                             {
                                 id: 51007174,
                                 content: "대신 별 얘기는 비밀이에요.",
+                                speakerName: "제시카",
                                 next: 51007175,
                             },
                             {
@@ -101014,6 +101982,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51007177,
                                 content:
                                     "마음은 고맙지만... 됐어요. 언젠가 여길 떠나더라도 그 애를 찾아가진 않을 거예요. 눈이 내리지 않는 곳으로 가서 바깥의 사람들은 아이스레이크 시티 사람들과 다른지 확인하고 싶어요.",
+                                speakerName: "제시카",
                                 next: 51007178,
                             },
                             {
@@ -101025,6 +101994,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51007179,
                                 content: "...그래요.",
+                                speakerName: "제시카",
                                 next: 51007186,
                             },
                             {
@@ -101162,6 +102132,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51007181,
                                 content:
                                     "내 이름은 리앤더, 별을 잇는 자예요. 얼마 전, 장사를 하다 손해를 좀 봤어요. 지금 성문 근처에서 열심히 노점을 하고 있어요. 와서 구경하세요!",
+                                speakerName: "리앤더",
                             },
                         ],
                     },
@@ -101614,6 +102585,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51006304,
                                 content: "멍멍——",
+                                speakerName: "악마견",
                             },
                         ],
                     },
@@ -101922,11 +102894,13 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51006726,
                                 content: '"생명은 끝없이 긴 밤 속을 항해하는 외딴 배."',
+                                speakerName: "???",
                                 next: 51006727,
                             },
                             {
                                 id: 51006727,
                                 content: '"강물에는 눈물이 가득하며, 강가에는 가시덤불이 무성하니."',
+                                speakerName: "???",
                                 next: 51006728,
                             },
                             {
@@ -103531,6 +104505,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51007690,
                                 content: "테오! 너 또 어디 갔었니? 세상에, 꼴이 이게 뭐야. 옷이 왜 이렇게 더러워졌어!",
                                 npc: 700205,
+                                speakerName: "옷차림 단정한 여인",
                                 next: 51007691,
                             },
                             {
@@ -105957,6 +106932,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51009629,
                                 content: "콜록, 콜록...",
                                 npc: 700301,
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 51009630,
@@ -105969,6 +106945,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 510095401,
                                 content: "젊은 친구가 뭐 때문에 이런 곳에... 설원에서 길을 잃었나? 아이스레이크 시티로 가려면 저쪽인데...",
                                 npc: 700301,
+                                speakerName: "???",
                                 next: 51009631,
                             },
                             {
@@ -106760,6 +107737,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51009723,
                                 content: "잠 못 이루네... 잠 못 이루네!",
                                 npc: 700309,
+                                speakerName: "???",
                                 next: 51009724,
                             },
                             {
@@ -106767,6 +107745,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "가엾은 이여, 그대도 나와 같나요? 차가운 복도에서, 사랑과 희망으로 빛나는 저 별을 애타게 바라보나요...",
                                 npc: 700309,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -106782,6 +107761,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51009726,
                                 content: "끽... 끽끽...",
                                 npc: 700309,
+                                speakerName: "???",
                                 next: 51009727,
                             },
                             {
@@ -106795,12 +107775,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "어머, 미안해요. 저 때문에 놀랐군요? 전 여기 있어요. 앞으로 다섯 걸음만 더요. 그래요, 바로 여기예요.",
                                 npc: 700309,
+                                speakerName: "???",
                                 next: 51009729,
                             },
                             {
                                 id: 51009729,
                                 content: "좋은 밤이에요, 잠 못 이루는 친구.",
                                 npc: 700309,
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 510096391,
@@ -107073,12 +108055,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51009763,
                                 content: "실례지만... 누구지? 아까부터 계속 우리 집 근처를 어슬렁거리던데.",
                                 npc: 700302,
+                                speakerName: "???",
                                 next: 51009764,
                             },
                             {
                                 id: 51009764,
                                 content: "의뢰할 거라도 있어? 사람 찾기? 재료 수집? 다른 의뢰라고 안 받는 건 아니지만, 합법적인 거라야 해.",
                                 npc: 700302,
+                                speakerName: "???",
                                 next: 51009765,
                             },
                             {
@@ -107091,6 +108075,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51009766,
                                 content: "응? 의뢰하러 온 게 아니었어?",
                                 npc: 700302,
+                                speakerName: "???",
                                 next: 51009767,
                             },
                             {
@@ -108298,12 +109283,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51009930,
                                 content: '"사랑하는 이여, 날 위해 슬퍼하지 말아요! 잠 못 드는 이 밤, 난 머나먼 항해를 떠날 거예요..."',
                                 npc: 700300,
+                                speakerName: "엘로라",
                                 next: 51009931,
                             },
                             {
                                 id: 51009931,
                                 content: '"바람이 돛을 밀어 올리면, 나는 노를 잡네... 바다엔 등대 그림자 드리우고, 달빛은 휘영청 밝아라!"',
                                 npc: 700300,
+                                speakerName: "엘로라",
                                 next: 51009932,
                             },
                             {
@@ -108311,6 +109298,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "고마워, 엘로라... 정말 멋진 연기야. 후후... 넌 내가 생각했던 푸치니 그대로야... 열정, 용기, 늘 자유를 바라는 마음까지...",
                                 npc: 700300,
+                                speakerName: "바이올렛",
                                 next: 51009933,
                             },
                             {
@@ -108318,12 +109306,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "고마워! 그냥 내 마음대로 불러 본 거야... 그런데 나 진짜 훌륭한 작곡가를 한 명 알아! 카바라도시라는 사람인데, 그 사람한테 부탁해서 〈푸치니〉를 오페라로 만들어 달라고 할 수 있어...",
                                 npc: 700300,
+                                speakerName: "엘로라",
                                 next: 51009934,
                             },
                             {
                                 id: 51009934,
                                 content: "...난 이제 노래할 기회가 없겠지만.",
                                 npc: 700300,
+                                speakerName: "엘로라",
                                 next: 51009935,
                             },
                             {
@@ -108331,6 +109321,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "18살이 돼 버렸거든. 아버지가 벌써 결혼 상대를 정해 뒀는데, 식은 두 달 뒤고, 상대는 아버지처럼 연금원에서 일하는 젊은 간부래.",
                                 npc: 700300,
+                                speakerName: "엘로라",
                                 next: 51009936,
                             },
                             {
@@ -108338,6 +109329,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "난 남은 인생을 작은 방에 전시된 예쁜 도자기 인형처럼 살거나, 그 지긋지긋한 폭시코르 캔이랑 씨름하면서 살게 될 거야.",
                                 npc: 700300,
+                                speakerName: "엘로라",
                                 next: 51009937,
                             },
                             {
@@ -108345,6 +109337,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "아냐, 그러면 안 돼... 엘로라. 넌 종달새 같은 목소리를 가졌잖아... 넌 작은 방이 아니라... 더 크고, 넓은 무대에 서야 해...",
                                 npc: 700300,
+                                speakerName: "바이올렛",
                                 next: 51009938,
                             },
                             {
@@ -108352,6 +109345,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "노래를 사랑하는 사람은... 누구든 무대 위에서 빛날 자격이 있어... 그게 솔라든 카론이든, 부자든 가난하든 말이야...",
                                 npc: 700300,
+                                speakerName: "바이올렛",
                                 next: 51009939,
                             },
                             {
@@ -108359,12 +109353,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "내가 어떻게든 오빠를 설득해서 널 풀어 달라고 할게. 난 이제 가망이 없어. 〈푸치니〉의 마지막 막을 다 쓸 수 있을지도 모르겠고...",
                                 npc: 700300,
+                                speakerName: "바이올렛",
                                 next: 51009940,
                             },
                             {
                                 id: 51009940,
                                 content: "그렇지만 엘로라, 약속해 줘. 꼭 무대에 올라서, 우리 둘의 〈푸치니〉를 모두에게 불러 주겠다고...",
                                 npc: 700300,
+                                speakerName: "바이올렛",
                                 next: 51009941,
                             },
                             {
@@ -109129,12 +110125,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010052,
                                 content: "...아야!",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010053,
                             },
                             {
                                 id: 51010053,
                                 content: "죄, 죄송해요! 앞을 못 봤어요! 혹시 다치신 덴 없으세요? 어디 불편한 덴 없으시고요?",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010054,
                             },
                             {
@@ -109147,6 +110145,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010055,
                                 content: "으음...",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010056,
                             },
                             {
@@ -109159,6 +110158,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010057,
                                 content: "아무것도 아니에요. 헤헤... 약초, 고마웠어요. 아! 약속 시간에 늦겠다!",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010058,
                             },
                             {
@@ -109171,6 +110171,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010059,
                                 content: "그거, 선물이니까 받아 줘요!",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010060,
                             },
                             {
@@ -109352,6 +110353,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010084,
                                 content: "지젤, 어떻게 된 건지 설명해 보게!",
                                 npc: 700304,
+                                speakerName: "???",
                                 next: 51010085,
                             },
                             {
@@ -109481,12 +110483,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010105,
                                 content: "...아야!",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010106,
                             },
                             {
                                 id: 51010106,
                                 content: "죄, 죄송해요! 앞을 못 봤어요! 혹시 다치신 덴 없으세요? 어디 불편한 덴 없으시고요?",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010107,
                             },
                             {
@@ -109499,6 +110503,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010108,
                                 content: "으음...",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010109,
                             },
                             {
@@ -109511,18 +110516,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010110,
                                 content: "아무것도 아니에요. 헤헤... 약초, 고마웠어요.",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010111,
                             },
                             {
                                 id: 51010111,
                                 content: "약속 시간에 늦겠다!",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010112,
                             },
                             {
                                 id: 51010112,
                                 content: "앗, 죄송해요, 저 먼저 가 볼게요! ...잠깐만요, 지금 가요!",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010113,
                             },
                             {
@@ -109535,6 +110543,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010114,
                                 content: "그거, 선물이니까 받아 줘요!",
                                 npc: 700305,
+                                speakerName: "발랄한 소녀",
                                 next: 51010115,
                             },
                             {
@@ -109554,6 +110563,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "용감한 나비가 고치를 벗고 하늘로 날갯짓하다, 마치 스토크 한 송이가 꽃밭에 스며들 듯 바람과 함께 자취를 감추는군요.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010118,
                             },
                             {
@@ -109561,6 +110571,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "한동안 다시 만나지 못할지도 몰라요... 그러니 그녀가 소중한 친구에게 남기는 이 작별 선물을 받아 주세요.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010119,
                             },
                             {
@@ -109590,6 +110601,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010123,
                                 content: "쉿, 진실을 밝힌 건 인정해 줄게. 하지만 비밀을 지킬 줄 아는 아이가 더 사랑스러운 법이란다.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010124,
                             },
                             {
@@ -109603,6 +110615,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "'비올레타'는 이제 무대에 서지 않겠지만, 난 당분간 여길 떠날 생각이 없어요. 내 학생과 관련된 일만큼은 외면할 수 없거든요. 당신이 날 또 고발하더라도 원망하지 않을게요.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010126,
                             },
                             {
@@ -109615,12 +110628,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51010127,
                                 content: "...모른 척 넘어가 줘서 고마워요.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010128,
                             },
                             {
                                 id: 51010128,
                                 content: "그러면 이만 실례할게요. 두 사람 모두 근사한 휴일을 즐기길 바랄게요.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010129,
                             },
                             {
@@ -110714,6 +111729,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51100067,
                                 content: "나의 단잠을 깨우다니, 누구냐?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100068,
                             },
                             {
@@ -110750,6 +111766,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51100073,
                                 content: "태호? 나를 태호라 부른 것이냐?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100074,
                             },
                             {
@@ -110762,6 +111779,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51100075,
                                 content: "하핫, 네 말이 맞구나. 나... 이 몸의 뜻은, 한낱 인간이 어찌 감히 신의 이름을 입에 올린단 말이냐?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100076,
                             },
                             {
@@ -110775,6 +111793,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "되었다. 이 몸은 아량이 넓으니, 이번만은 눈 감아 주겠다! 인간이여, 묻노니, 어째...어인 연유로 이 외딴곳까지 찾아와 이 몸의 잠을 방해한 것이냐?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100078,
                             },
                             {
@@ -110803,6 +111822,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "오호! 바로 너... 그대였구나! 아직 기억하느니라! 머리를 찧고 정신이 나가서는, 온갖 헛소리를 늘어놓다가 하마터면 이 몸의 옷에 속엣것을 게워 낼 뻔했었지. 기억나느냐?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100082,
                             },
                             {
@@ -110834,12 +111854,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51100086,
                                 content: "???",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100087,
                             },
                             {
                                 id: 51100087,
                                 content: "푸하하하하하하... 그래! 말 한번 잘했다! 보는 눈이 있구나!",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100088,
                             },
                             {
@@ -110858,6 +111880,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51100090,
                                 content: "본디 타고난 성품은 막을 수 없는 것이다. 웃음이 나온다면, 마음껏 웃게 두어라.",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100091,
                             },
                             {
@@ -110872,12 +111895,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     '오호라? 그렇다면 대풍구장 9조, "하늘의 법도에 경청하여 엄숙히 대하는 것이 경이라"는 규율은 어찌하겠느냐? 일전에 그대가 무례를 범했으나, 그대의 정신이 온전치 못함을 가엾이 여겨 벌하지 않았다.',
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100093,
                             },
                             {
                                 id: 51100093,
                                 content: "하나, 지금은 멀쩡한 정신으로 감히 이 몸에게 말대꾸를 하고 있으니, 이 죄를 어찌 벌해야 하겠느냐!",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100094,
                             },
                             {
@@ -110908,6 +111933,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51100067,
                                 content: "나의 단잠을 깨우다니, 누구냐?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100068,
                             },
                             {
@@ -110944,6 +111970,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51100073,
                                 content: "태호? 나를 태호라 부른 것이냐?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100074,
                             },
                             {
@@ -110956,6 +111983,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51100075,
                                 content: "하핫, 네 말이 맞구나. 나... 이 몸의 뜻은, 한낱 인간이 어찌 감히 신의 이름을 입에 올린단 말이냐?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100076,
                             },
                             {
@@ -110969,6 +111997,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "되었다. 이 몸은 아량이 넓으니, 이번만은 눈 감아 주겠다! 인간이여, 묻노니, 어째...어인 연유로 이 외딴곳까지 찾아와 이 몸의 잠을 방해한 것이냐?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100078,
                             },
                             {
@@ -110997,6 +112026,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "오호! 바로 너... 그대였구나! 아직 기억하느니라! 머리를 찧고 정신이 나가서는, 온갖 헛소리를 늘어놓다가 하마터면 이 몸의 옷에 속엣것을 게워 낼 뻔했었지. 기억나느냐?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100082,
                             },
                             {
@@ -111028,12 +112058,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51100086,
                                 content: "???",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100087,
                             },
                             {
                                 id: 51100087,
                                 content: "푸하하하하하하... 그래! 말 한번 잘했다! 보는 눈이 있구나!",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100088,
                             },
                             {
@@ -111052,6 +112084,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51100090,
                                 content: "본디 타고난 성품은 막을 수 없는 것이다. 웃음이 나온다면, 마음껏 웃게 두어라.",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100091,
                             },
                             {
@@ -111066,12 +112099,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     '오호라? 그렇다면 대풍구장 9조, "하늘의 법도에 경청하여 엄숙히 대하는 것이 경이라"는 규율은 어찌하겠느냐? 일전에 그대가 무례를 범했으나, 그대의 정신이 온전치 못함을 가엾이 여겨 벌하지 않았다.',
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100093,
                             },
                             {
                                 id: 51100093,
                                 content: "하나, 지금은 멀쩡한 정신으로 감히 이 몸에게 말대꾸를 하고 있으니, 이 죄를 어찌 벌해야 하겠느냐!",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100094,
                             },
                             {
@@ -112358,6 +113393,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51102036,
                                 content: "크르릉!",
                                 npc: 210087,
+                                speakerName: "검은 폐안",
                             },
                         ],
                     },
@@ -112450,6 +113486,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51102046,
                                 content: "잠시 멈추시지요.",
                                 npc: 700322,
+                                speakerName: "???",
                                 next: 51102047,
                             },
                             {
@@ -115352,6 +116389,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51125022,
                                 content: "네!",
+                                speakerName: "엑스트라",
                                 next: 51125023,
                             },
                             {
@@ -115378,6 +116416,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51125026,
                                 content: "얘들아, 쳐라!",
+                                speakerName: "엑스트라",
                             },
                         ],
                     },
@@ -115397,6 +116436,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51125029,
                                 content: "속박의 올가미에 묶이고도 밀리는 기색 하나 없다니! 다들 어서 도망쳐!",
+                                speakerName: "엑스트라",
                                 next: 51125030,
                             },
                             {
@@ -115751,6 +116791,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51125083,
                                 content: "얘들아, 쳐라!",
+                                speakerName: "엑스트라",
                             },
                         ],
                     },
@@ -115770,6 +116811,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51125086,
                                 content: "속박의 올가미에 묶이고도 밀리는 기색 하나 없다니! 다들 어서 도망쳐!",
+                                speakerName: "엑스트라",
                                 next: 51125087,
                             },
                             {
@@ -116897,6 +117939,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51140003,
                                 content: "실례합니다...",
                                 npc: 701074,
+                                speakerName: "낯선 목소리",
                             },
                             {
                                 id: 51140004,
@@ -117727,10 +118770,12 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51152003,
                                 content: "우우우... 우흐흑...",
+                                speakerName: "중년 남성",
                             },
                             {
                                 id: 51152004,
                                 content: "우흐흑... 다가오지 마. 난... 난 이러기 싫어!",
+                                speakerName: "중년 남성",
                             },
                             {
                                 id: 51152005,
@@ -117827,6 +118872,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51152014,
                                 content: "그렇다면, 가만히 서서 아무것도 하지 말고 속수무책으로 당하라는 말씀이십니까...?",
+                                speakerName: "지류",
                             },
                             {
                                 id: 51152015,
@@ -118158,6 +119204,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51114022,
                                 content: "......",
+                                speakerName: "양씨 아들&장씨 아들",
                                 next: 51114023,
                             },
                             {
@@ -121081,6 +122128,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51165501,
                                 content: "콜록콜록... 콜록콜록콜록... 더러운 요물들, 썩... 꺼지지 못할까!",
                                 npc: 700386,
+                                speakerName: "???",
                             },
                             {
                                 id: 51165502,
@@ -121091,17 +122139,20 @@ export const questData_kr: QuestStory[] = [
                                 id: 51165503,
                                 content: "자... 자네들... 콜록콜록... 협객들의 도움에 감사하오.",
                                 npc: 700386,
+                                speakerName: "???",
                             },
                             {
                                 id: 51165504,
                                 content:
                                     "노부는 이미 오랫동안 홀로 지내왔소. 제자들 중 어떤 이는 어리석고 둔해 내가 쫓아냈고, 어떤 이는 응석받이라 스스로 떠났소. 결국 이 늙은이만 홀로 이곳에 남았지.",
                                 npc: 700386,
+                                speakerName: "???",
                             },
                             {
                                 id: 51165505,
                                 content: "은혜를 갚을 길이 없으니, 칠현금 한 곡으로나마 목숨을 구해준 은혜에 보답하겠소.",
                                 npc: 700386,
+                                speakerName: "???",
                             },
                             {
                                 id: 51165506,
@@ -121356,6 +122407,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51165553,
                                 content: "스승님, 잠시만요!",
                                 npc: 700387,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -121370,6 +122422,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51165601,
                                 content: "스승님, 오랜만입니다.",
                                 npc: 700387,
+                                speakerName: "???",
                             },
                             {
                                 id: 51165602,
@@ -122131,18 +123184,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 51175210,
                                 content:
                                     "음양의 기운을 뒤집는 건 원래 불가능하지만, 촉룡의 재앙으로 우천과 과거의 틈이 연결됐으니, 방법이 있을지도 모르오.",
+                                speakerName: "무유생",
                                 next: 51175211,
                             },
                             {
                                 id: 51175211,
                                 content:
                                     "과거의 틈이 열릴 때 망각의 강에서 고영법을 사용하면 고인을 불러낼 수 있소. 단, 영혼이 아직 이 세계에 존재해야 하오.",
+                                speakerName: "무유생",
                                 next: 51175212,
                             },
                             {
                                 id: 51175212,
                                 content:
                                     "그러고 나면 고영법의 궁극의 단계, 음양역전의 비술을 쓸 수 있다오. 단, 아시다시피 시술자의 자질이 아주 뛰어나야 해서 축유조차 성공하기 어렵소. 게다가 그 대가도...",
+                                speakerName: "무유생",
                                 next: 51175213,
                             },
                             {
@@ -122773,6 +123829,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51175403,
                                 content: "축유님, 어째서...",
+                                speakerName: "고통에 빠진 환자",
                             },
                         ],
                     },
@@ -122785,11 +123842,13 @@ export const questData_kr: QuestStory[] = [
                                 id: 51175404,
                                 content:
                                     "구하러 오실 거라 믿었는데... 왜 사라지신 거죠?! 왜 우릴 절망 속에 버려두고... 죽게 만드신 건가요?!",
+                                speakerName: "절망하는 환자",
                                 next: 51175405,
                             },
                             {
                                 id: 51175405,
                                 content: "사람을 잘못 믿었어... 처음부터 축유 따위한테 기댈 게 아니었어.",
+                                speakerName: "비관적인 환자",
                                 next: 51175406,
                             },
                             {
@@ -122820,16 +123879,19 @@ export const questData_kr: QuestStory[] = [
                                 id: 51175408,
                                 content:
                                     "축유는 하늘의 명을 받들어 창생을 긍휼히 여기며, 스스로를 절제해 중생을 구제해야 한다... 몸은 촛불이요 마음은 장작이니, 혼을 불살라 세상을 구하라...",
+                                speakerName: "아버지의 목소리",
                                 next: 51175409,
                             },
                             {
                                 id: 51175409,
                                 content: "부소야, 가문의 사명을 욕되게 해서는 안 된다. 알겠느냐?",
+                                speakerName: "아버지의 목소리",
                                 next: 51175410,
                             },
                             {
                                 id: 51175410,
                                 content: "명심하겠습니다!",
+                                speakerName: "어린 부소",
                                 next: 51175411,
                             },
                             {
@@ -122859,27 +123921,32 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51175413,
                                 content: "언니... 아버지께서 돌아가셨어...",
+                                speakerName: "어린 부소",
                                 next: 51175414,
                             },
                             {
                                 id: 51175414,
                                 content: "......",
+                                speakerName: "어린 부풍",
                                 next: 51175415,
                             },
                             {
                                 id: 51175415,
                                 content: "부소, 넌 이게 옳다고 생각하니?",
+                                speakerName: "어린 부풍",
                                 next: 51175416,
                             },
                             {
                                 id: 51175416,
                                 content: "하지만 고영법으로 사람들을 고통에서 구하다 죽음을 맞이하는 게 축유의 사명인걸...",
+                                speakerName: "어린 부소",
                                 next: 51175417,
                             },
                             {
                                 id: 51175417,
                                 content:
                                     "아니, 난 그런 운명 안 믿어! 난 죽지 않을 거야. 그리고 모두가 죽어가는 걸 보고만 있지도 않을 거야!",
+                                speakerName: "어린 부풍",
                             },
                         ],
                     },
@@ -123168,11 +124235,13 @@ export const questData_kr: QuestStory[] = [
                                 id: 51175502,
                                 content:
                                     "걱정 마세요! 가벼운 골절이니까 약을 바르고 부목만 고정하면 됩니다. 무리하게 움직이지 말고 여기서 쉬세요.",
+                                speakerName: "택생각 학생",
                                 next: 51175503,
                             },
                             {
                                 id: 51175503,
                                 content: "안 돼요. 저희 형도 택생각 약사라 지금 성안에서 사람을 구하고 있을 겁니다. 제가 가서 도와야 해요!",
+                                speakerName: "흥분한 환자",
                             },
                         ],
                     },
@@ -123197,16 +124266,19 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51175505,
                                 content: "안 됩니다! 택생각 쪽 인력은 충분하니까 부상자는 쉬고 계세요!",
+                                speakerName: "택생각 학생",
                                 next: 51175506,
                             },
                             {
                                 id: 51175506,
                                 content: "선생님, 전 찰과상일 뿐이에요. 붕대는 직접 감을 테니 다른 분을 도와주세요.",
+                                speakerName: "굳센 환자",
                                 next: 51175507,
                             },
                             {
                                 id: 51175507,
                                 content: "알겠습니다. 상황이 아직 위험하니까 조심하세요.",
+                                speakerName: "택생각 학생",
                             },
                         ],
                     },
@@ -123299,11 +124371,13 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51175520,
                                 content: "저쪽에 부상자가 있습니다. 도와주세요!",
+                                speakerName: "택생각 학생",
                                 next: 51175521,
                             },
                             {
                                 id: 51175521,
                                 content: "저희 집에 들것이 있어요! 지금 바로 가져올게요!",
+                                speakerName: "붕대를 감은 환자",
                                 next: 51175522,
                             },
                             {
@@ -123398,6 +124472,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200003,
                                 content: "아빠, 저 다리 안 부러졌어요! 그냥 조금 절뚝거리는 거예요! 제발 저 버리지 마세요!",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200004,
                             },
                             {
@@ -123424,12 +124499,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "아빠! 진짜 저 버리실 거예요? 여기서 엄청 오래 기다렸어요. 맨날 귀족 나리들이 주시는 쿠퍼로 퀴퀴하고 딱딱한 검은 빵으로 배 채우면서, 두 분이 저를 데리러 오실 날만 기다렸단 말이에요!",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200008,
                             },
                             {
                                 id: 51200008,
                                 content: "어떻게 이러실 수 있어요? 저는 그냥... 같이 집에 가고 싶었던 건데... 흑흑흑...",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200009,
                             },
                             {
@@ -123597,6 +124674,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200034,
                                 content: "......",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200035,
                             },
                             {
@@ -123621,6 +124699,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200038,
                                 content: "도와달라는 얘기는 한 적 없는 것 같은데요.",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200039,
                             },
                             {
@@ -123647,12 +124726,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200045,
                                 content: "......",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200046,
                             },
                             {
                                 id: 51200046,
                                 content: "그 사람들이 제 부모님은 아니지만, 제 부모님이 못 된다는 법도 없잖아요?",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200047,
                             },
                             {
@@ -123666,12 +124747,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그러니까, 아까 그 두 사람은 제 부모님일 수도, 아닐 수도 있다는 거예요. 그쪽도 마찬가지예요. 제 부모님일 수도, 아닐 수도 있죠.",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200049,
                             },
                             {
                                 id: 51200049,
                                 content: "결국은 그쪽만 원한다면 가능한 거잖아요. 제 말이 틀려요?",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200050,
                             },
                             {
@@ -123691,6 +124774,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200052,
                                 content: "맞아요. 다른 건 다 상관없고, 사람만 둘 있으면 돼요.",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 options: [
                                     {
                                         id: 51200055,
@@ -123710,6 +124794,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200059,
                                 content: "그래서 이렇게 사과하러 왔잖아요. 제 아빠가 되어 줄 분이랑, 제 엄마가 되어줄 루나한테.",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200060,
                             },
                             {
@@ -123728,6 +124813,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200062,
                                 content: "왜요, 호칭이 마음에 안 드세요? 그러면 바꿔도 돼요. 그쪽이 우리 엄마 하고, 루나는 아빠하면 돼요.",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200063,
                             },
                             {
@@ -123753,6 +124839,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "다리는 좀 절지만, 손으로 하는 일은 다 할 수 있고, 고생하는 것도 괜찮아요. 매일 검은 빵만 먹어도 좋고, 자는 곳도 안 가려요. 다락방이든, 계단 밑 창고든 다 상관없어요.",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 next: 51200067,
                             },
                             {
@@ -123760,6 +124847,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "어쨌든 기차 굴러가는 소리보단, 가족들 발소리가 훨씬 나을 거 아니에요... 그러니까, 두 분이 제 부모님이 돼서 저 좀 데려가 주세요! 데려가 주기만 하면, 뭐든 다 할게요!",
                                 npc: 700402,
+                                speakerName: "다리를 저는 아이",
                                 options: [
                                     {
                                         id: 51200068,
@@ -124008,6 +125096,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "이야! 이거 우리 드라이버 협회의 굴뚝 2인조 아니야? 어이쿠, 아니지! 이젠 굴뚝 1인조였던가...? 아니, 아니지, 이젠 다리까지 절게 됐으니까... 굴뚝 절뚝이라고 불러야겠네!",
                                 npc: 700405,
+                                speakerName: "냉담한 일꾼",
                                 next: 51200095,
                             },
                             {
@@ -124015,6 +125104,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "꼬맹이, 너 오늘 또 웬 귀족을 성가시게 만들었다면서? 사고 치지 말고 적당히 해라. 사람들이 우리 협회를 건달 소굴로 오해하게 만들지 말고.",
                                 npc: 700405,
+                                speakerName: "냉담한 일꾼",
                                 next: 51200096,
                             },
                             {
@@ -124022,6 +125112,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "네가 들쑤신 양반들이 아이젠반을 찾아가서 일러바치지 않기만 빌어. 그 인간이 그걸 빌미로 우리한테 트집이라도 잡는 날엔, 다 같이 끝장이니까.",
                                 npc: 700405,
+                                speakerName: "냉담한 일꾼",
                                 next: 51200097,
                             },
                             {
@@ -124034,6 +125125,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200098,
                                 content: "괜히 애한테 화풀이하지 말고 그만해.",
                                 npc: 700406,
+                                speakerName: "친절한 일꾼",
                                 next: 51200099,
                             },
                             {
@@ -124041,6 +125133,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "난 현실을 가르쳐 주려는 거야! 모든 사람이 스베야처럼 운 좋은 건 아니라고! 유괴된 자식을 부모가 몇 년이나 찾아다니다가, 결국 다시 만나게 되는 게 어디 흔한 일이야?",
                                 npc: 700405,
+                                speakerName: "냉담한 일꾼",
                                 next: 51200100,
                             },
                             {
@@ -124048,6 +125141,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "게다가 넌 그냥 버려진 애라고. 아직도 상황 파악이 안 되냐? 아무도 너 안 데리러 와. 이 기차역을 떠나면, 넌 그나마 입에 풀칠도 못 해. 그러니까... 현실성 없는 꿈에서 깨어나라고.",
                                 npc: 700405,
+                                speakerName: "냉담한 일꾼",
                                 next: 51200101,
                             },
                             {
@@ -124073,6 +125167,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그래... 진작 그랬어야지! 좋아, 마침 유리창 닦는 일이 들어왔는데, 할 수 있지? 다리는 절어도 손까지 부러진 건 아니니까.",
                                 npc: 700405,
+                                speakerName: "냉담한 일꾼",
                                 next: 51200105,
                             },
                             {
@@ -124085,18 +125180,21 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200106,
                                 content: "협회에 갚을 돈 빼고도 10쿠퍼는 남을 거야. 회장님 호의를 생각해서, 일 똑바로 해.",
                                 npc: 700405,
+                                speakerName: "냉담한 일꾼",
                                 next: 51200107,
                             },
                             {
                                 id: 51200107,
                                 content: "크로거, 이제 그만하고 가. 회장님이 시킨 일도 아직 다 못 끝냈잖아!",
                                 npc: 700406,
+                                speakerName: "친절한 일꾼",
                                 next: 51200108,
                             },
                             {
                                 id: 51200108,
                                 content: "알—았—어, 로렌트. 저번에 술 마시는데, 다들 네가 우리 드라이버 협회 최고의 잔소리꾼이라더라...",
                                 npc: 700405,
+                                speakerName: "냉담한 일꾼",
                                 next: 51200109,
                             },
                             {
@@ -124669,6 +125767,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200187,
                                 content: "이렇게 마음씨 좋은 분들을 만나다니, 코니 녀석은 운도 좋네.",
                                 npc: 700406,
+                                speakerName: "친절한 일꾼",
                                 next: 51200188,
                             },
                             {
@@ -124681,12 +125780,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200189,
                                 content: "크로거, 이제 그만하고 가. 회장님이 시킨 일도 아직 다 못 끝냈잖아!",
                                 npc: 700406,
+                                speakerName: "친절한 일꾼",
                                 next: 51200190,
                             },
                             {
                                 id: 51200190,
                                 content: "알—았—어, 로렌트. 저번에 술 마시는데, 다들 네가 우리 드라이버 협회 최고의 잔소리꾼이라더라...",
                                 npc: 700405,
+                                speakerName: "냉담한 일꾼",
                                 next: 51200191,
                             },
                             {
@@ -125364,6 +126465,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200486,
                                 content: "잠깐... 안 돼요...!",
                                 npc: 700398,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -125400,6 +126502,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "죄송하지만, 잠깐만요. 지나가다가 우연히 그 담뱃갑을 어떻게 할지 얘기하시는 걸 들었어요. 혹시 필요 없으시면, 저한테 파시면 안 될까요?",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200489,
                             },
                             {
@@ -125412,6 +126515,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200490,
                                 content: "50실버요. 어떠세요?",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200491,
                             },
                             {
@@ -125425,6 +126529,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "새것처럼 깨끗한 것도 아니고, 귀한 물건도 아니잖아요. 50실버면 꽤 후하게 드리는 거예요. 급하게 필요하지만 않았으면, 절대 이 정도까진 안 드려요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200493,
                             },
                             {
@@ -125499,6 +126604,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200501,
                                 content: "저기... 저 두 사람 왜 저러는 거예요?",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200502,
                             },
                             {
@@ -125512,6 +126618,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200503,
                                 content: "저렇게 품격이 없어서야. 시종들 단속을 좀 하셔야겠어요... 그건 그렇고, 대체 얼마를 주신 거예요?",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200504,
                             },
                             {
@@ -125525,6 +126632,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "이건 10년 전에 나온 한정판이 아니라, 지난주에 나온 거예요. 진짜 그때 나온 한정판이었으면, 그 돈으론 어림없죠. 기적 소리 살롱에서도 회원들이 돈을 다 끌어모아서 2500실버 주고 겨우 하나 구했는걸요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200506,
                             },
                             {
@@ -125532,6 +126640,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그건 저한테 꿈의 물건이나 다름없어요. 기회만 되면, 무슨 수를 써서라도 꼭 살 거예요. 그러곤 침대 머리맡에 모셔 두고, 아침저녁으로 쓰다듬으면서 행운을 빌겠죠. 역장님, 나의 신, 나의 구원자시여...",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200507,
                             },
                             {
@@ -125551,6 +126660,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "당연하죠! 오늘 저희가 여기 모인 건, 아이젠반 역장님의 부임 10주년 행사 때문이거든요... 잠깐, 혹시 기적 소리 살롱 회원이 아니세요?",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200510,
                             },
                             {
@@ -125563,6 +126673,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200511,
                                 content: "다른 지역에서 오셨는데도 웃돈까지 주고 물건을 사셨다기에, 저는 자금력이 상당한 팬이신가 했어요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200512,
                             },
                             {
@@ -125570,6 +126681,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "되팔이 녀석을 만나신 거네요... 요즘은 10주년 기간이라 물건들 값이 좀 오르긴 했어도, 그 정도까진 아니거든요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200513,
                             },
                             {
@@ -125577,6 +126689,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "이런 건 디자인도 평범하고, 물량도 꽤 많이 풀려서, 기껏해야 10~30실버 정도예요. 저는 사정이 있어서 값을 조금 더 주더라도 하나 구하려던 거고요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200514,
                             },
                             {
@@ -125584,6 +126697,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "이런 일은 치안서에 신고해 봤자 아무도 안 도와줄 거예요. 에휴, 그냥 운이 없었다고 생각하시는 수밖에 없어요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200515,
                             },
                             {
@@ -125597,12 +126711,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그럼요, 이해해요. 음, 되팔이 녀석들도 아이젠반 역장님에 대해선 저희 못지않게 잘 알고 있거든요. 그래야 팬들한테 물건을 팔 수 있으니까요. 저도 처음 입덕했을 땐 맨날 속았는데, 기적 소리 살롱에 들어가고 나선 그런 일이 줄었어요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200517,
                             },
                             {
                                 id: 51200517,
                                 content: "말이 나온 김에, 혹시 저희 모임에 들어오시는 건 어떠세요? 저희... 기적 소리 살롱에요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 options: [
                                     {
                                         id: 51200518,
@@ -125626,12 +126742,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "살롱의 이름이요? 말 그대로, 아이젠반 역장님을 지지하는 귀족들이, 이 블룸필드역에 모여서 차도 마시고 책도 읽는 사교 모임이에요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200520,
                             },
                             {
                                 id: 51200530,
                                 content: "아이젠반 역장님 이야기를 하려면, 이틀 밤낮을 꼬박 새워도 모자랄 거예요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200531,
                             },
                             {
@@ -125639,6 +126757,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "블룸필드역은 아이젠반 역장님이 계신 곳이죠. 역장님이 안 계셨다면, 지금의 블룸필드역도 없었을 거예요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200534,
                             },
                             {
@@ -125646,6 +126765,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "아름다운 기적소리는 오직 기차만이 만들어낼 수 있는 예술이에요. 진정한 품위와 지위를 갖춘 분들만이 기적 소리 살롱의 회원이 될 수 있죠.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200521,
                             },
                             {
@@ -125653,6 +126773,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "혹시 관심 있으시면 저희 기적 소리 살롱에 들어오세요. 역장님 부임 10주년이 코앞으로 다가왔으니까, 다 함께 그분이 기뻐하실 수 있게 힘써 보자고요!",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200535,
                             },
                             {
@@ -125660,6 +126781,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "역장님이 부임하시기 전까지만 해도, 블룸필드역은 그냥 평범한 기차역이었어요. 역장님께서 오셔서 관리해 주셨기 때문에... 이 역이 활기찬... 우리 영혼의 안식처로 거듭날 수 있었던 거예요!",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200535,
                             },
                             {
@@ -125667,6 +126789,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "회원들은 저마다의 방식으로 아이젠반 역장님을 향한 존경을 표현해요. 예를 들면... '진열' 같은 방식으로요. 역장님이 인쇄된 담뱃갑이나 포스터를 쭉 늘어놓는 거죠.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200522,
                             },
                             {
@@ -125680,12 +126803,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "방 하나가 역장님으로 가득 찬 모습을 상상해 보세요. 벽도, 바닥도, 천장도 전부요~ 아, 생각만 해도 행복하네요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200523,
                             },
                             {
                                 id: 51200536,
                                 content: "네, 이건 저희 살롱 명함이에요. 뒤에는 저희 모임 장소가 적혀 있어요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200537,
                             },
                             {
@@ -125693,6 +126818,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "진열을 할 때는 보통 99나 999처럼 특별한 의미가 있는 숫자에 맞춰서 담뱃갑이나 포스터 개수를 맞춰요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200524,
                             },
                             {
@@ -125700,6 +126826,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "저희 살롱은 같은 뜻을 품은 사람들이 모인 곳이에요. 모임에 들어오시면, 모두와 한 식구가 될 수 있어요...",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200538,
                             },
                             {
@@ -125707,6 +126834,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "제가 선생님 담뱃갑을 사려던 것도 그래서였어요. 똑같은 게 벌써 98개 모여서, 이제 하나만 더 있으면 되거든요. 그래서 웃돈을 주더라도 빨리 모아서 소원을 이루려던 거예요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200525,
                             },
                             {
@@ -125720,6 +126848,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "컬렉션을 완성하지 못하면, 억울해서 눈을 감지 못할 거예요. 선생님을 만나게 돼서 얼마나 다행인지! 결국 아이젠반 역장님이 우리의 만남을 주선하신 거예요!",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200526,
                             },
                             {
@@ -125746,6 +126875,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그게 무슨 말씀이세요?! 아이젠반 역장님을 향한 존경과 숭배를 표현하는 게 인생에서 얼마나 중요한 일인데요. 왜 그런 표정을 지으세요? 이건 전혀 부끄러운 게 아니에요!",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200528,
                             },
                             {
@@ -125758,6 +126888,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "비싼 값을 주고 아이젠반 역장님이 인쇄된 담뱃갑을 사신 걸 보면, 취향과 안목이 아주 뛰어난 분일 거예요. 기적 소리 살롱은 선생님 같은 분들을 환영해요.",
                                 npc: 700398,
+                                speakerName: "지쳐 보이는 남자",
                                 next: 51200535,
                             },
                         ],
@@ -127171,6 +128302,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200807,
                                 content: "안 싸웠거든!\n  누가 얘랑 싸운다고 그래!",
                                 npc: 700409,
+                                speakerName: "아웃사이더&스노우",
                                 next: 51200808,
                             },
                             {
@@ -127350,6 +128482,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51200836,
                                 content: "지금 뭣들 하는 거야?",
                                 npc: 700410,
+                                speakerName: "낯익은 목소리",
                                 next: 51200837,
                             },
                             {
@@ -128512,6 +129645,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "너희를 회장님께 소개하기 전에, 먼저 정식으로 자기소개를 할게. 내 이름은 로렌트야. 이미 알고 있겠지만, 드라이버 협회의... 2인자라고 할까?",
                                 npc: 700486,
+                                speakerName: "로렌트",
                                 next: 51206803,
                             },
                             {
@@ -128531,6 +129665,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "좋아, 본론만 듣고 싶은 모양인데, 간단히 말할게. 우리 협회가 좀 골치 아픈 일을 겪고 있어서, 너처럼 능력 있고 선한 마음을 가진 사람의 도움이 필요해.",
                                 npc: 700486,
+                                speakerName: "로렌트",
                                 options: [
                                     {
                                         id: 51206806,
@@ -128557,6 +129692,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "하하~ 난 너처럼 직설적인 사람이 좋더라. 머리 회전도 빠르고 말이야. 그러니까 우리가 처음부터 제대로 인사부터 했어야 된다고 한 거라고.",
                                 npc: 700486,
+                                speakerName: "로렌트",
                                 next: 51206810,
                             },
                             {
@@ -128564,6 +129700,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "넌 우리에 대해 잘 모르지? 드라이버 협회에 대해 들은 건 코니 그 아이가 말한 게 다잖아. 그래서 우리가 어떤 조직인지 제대로 알지 못하는 거야.",
                                 npc: 700486,
+                                speakerName: "로렌트",
                                 next: 51206811,
                             },
                             {
@@ -128577,6 +129714,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "정반대야. 우린 수많은 코니들로 이루어진 연합이지. 전부 이 역의 화려한 겉모습 아래에서 꿈틀거리는 불쌍한 벌레들이라고.",
                                 npc: 700486,
+                                speakerName: "로렌트",
                                 next: 51206813,
                             },
                             {
@@ -128584,6 +129722,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "우린 함께 모여 서로 의지하며 지내. 누군가 일에서 실수를 하면 우리가 손을 내밀어주지. 코니 그 아이한테 했던 것처럼, 우린 매일 이렇게 열심히 일하는 일꾼들을 돕고 있어.",
                                 npc: 700486,
+                                speakerName: "로렌트",
                                 next: 51206814,
                             },
                             {
@@ -128597,6 +129736,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "맞아. 그러니까, 우린 블룸필드역 일꾼들의 상호부조 조직이야. 드라이버를 든 사람들은 모두 우리의 형제자매지. 물론 이건 이상적인 경우에 한해서지만.",
                                 npc: 700486,
+                                speakerName: "로렌트",
                                 next: 51206816,
                             },
                             {
@@ -128604,6 +129744,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "코니가 우리한테 빚진 돈은 똑같이 힘들게 살아가는 다른 일꾼들이 회비로 낸 돈이야. 넌 코니는 구했지만, 저들은 어떡할 셈이지?",
                                 npc: 700486,
+                                speakerName: "로렌트",
                                 next: 51206817,
                             },
                             {
@@ -128616,6 +129757,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51206818,
                                 content: "일단 협회 본부로 가자. 자세한 건 가서 얘기하면 돼.",
                                 npc: 700486,
+                                speakerName: "로렌트",
                             },
                         ],
                     },
@@ -128663,12 +129805,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51207002,
                                 content:
                                     "꺼져, 이 새*야, 개한테도 안 빌려줘! 지난번에도 돈 빌려줬더니 깡그리 날렸지! 그러고 또 빌리러 와서, 또 날렸고. 제기랄, 니가 무슨 낯짝으로 여길 와?",
+                                speakerName: "화난 목소리",
                                 next: 51207003,
                             },
                             {
                                 id: 51207003,
                                 content:
                                     "크로거, 제발 나 좀 믿어줘! 전에는 시행착오였다고! 이제 무조건 이기는 방법을 찾았어! 돈만 빌려주면 꼭 갚을게!",
+                                speakerName: "비굴한 목소리",
                                 next: 51207004,
                             },
                             {
@@ -128682,6 +129826,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51207005,
                                 content:
                                     "아니야! 이번엔 달라... 이번엔 정말 다르다고! 이번엔 진짜 이길 수 있어! 크로거, 난 협회의 유일한 회계사라고! 그 '게임'의 규칙을 완전히 파악했어. 이번엔 꼭 이긴다니까!",
+                                speakerName: "비굴한 목소리",
                                 next: 51207006,
                             },
                             {
@@ -129741,6 +130886,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51207725,
                                 content: "잠깐만! {nickname}? 너 우리 삼촌의 사촌 누나의 조카네 옆집 걔 아니야? 여긴 어쩐 일이야?",
+                                speakerName: "뜻밖의 목소리",
                                 next: 51207726,
                             },
                             {
@@ -132761,6 +133907,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51210401,
                                 content: "뭐 하는 거야? 술 취해서 난동이라도 부리는 거냐?",
+                                speakerName: "반장",
                                 next: 51210402,
                             },
                             {
@@ -132798,6 +133945,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51210504,
                                 content: "아야... 내 머리... 내 엉덩이... 너, 너네 미쳤어?!",
+                                speakerName: "반장",
                                 next: 51210505,
                             },
                             {
@@ -132810,6 +133958,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51210506,
                                 content:
                                     "크로거, 근무 시간에 술을 마셔? 진짜로 월급 깎이고 싶어서 작정했지? 이번엔 로렌트가 와서 빌어도 소용없을 줄 알아!",
+                                speakerName: "반장",
                                 next: 51210507,
                             },
                             {
@@ -132826,6 +133975,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51210509,
                                 content: "그만! 그만 때려! 왜 술만 마시면 사람을 패는 거냐고!",
+                                speakerName: "반장",
                                 next: 51210510,
                             },
                             {
@@ -132844,6 +133994,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51210512,
                                 content:
                                     "벌레 같은 놈! 술주정뱅이! 약도 없는 쓰레기 같은 놈! 너, 넌 또 누구야? 너도 아까 나 때렸지? 내가 모르는 줄 알아? 너 여기 일꾼이야? 얼굴 기억했어!",
+                                speakerName: "반장",
                                 next: 51210513,
                             },
                             {
@@ -132855,6 +134006,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51210514,
                                 content: "그게 무슨 태도야?! 너 내가 절대 가만 안 둬!",
+                                speakerName: "반장",
                                 next: 51210515,
                             },
                             {
@@ -132866,6 +134018,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51210516,
                                 content: "밤의 도인? 무슨 소리야? 무슨 밤의 도인?",
+                                speakerName: "반장",
                                 next: 51210517,
                             },
                             {
@@ -132889,6 +134042,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51210520,
                                 content: "너희... 한패였냐? 너, 그 도둑놈 휴랑 한패였어?",
+                                speakerName: "반장",
                                 next: 51210521,
                             },
                             {
@@ -132901,6 +134055,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51210522,
                                 content:
                                     "아니... 밑도 끝도 없이 날 두들겨 패 놓곤, 이제 와서 아무것도 모르는 척하는 거야? 그럴 거면 왜 때렸어?",
+                                speakerName: "반장",
                                 next: 51210523,
                             },
                             {
@@ -132913,12 +134068,14 @@ export const questData_kr: QuestStory[] = [
                                 id: 51210524,
                                 content:
                                     "말할게, 말할게! 때리지 마! 휴라는 그 녀석, 얼마 전 한밤중에 의무실에 뭔가 훔치러 왔다가 현장에서 딱 걸렸어.",
+                                speakerName: "반장",
                                 next: 51210525,
                             },
                             {
                                 id: 51210525,
                                 content:
                                     "확인해 보니까 딱히 사라진 물건은 없었는데, 역장님이 그 녀석을 찾으러 오는 사람이 없으면 풀어주지 말라고 하셔서 계속 의무실에 가둬뒀어... 찾으러 갈 거면 가봐.",
+                                speakerName: "반장",
                                 next: 51210526,
                             },
                             {
@@ -132930,6 +134087,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51210527,
                                 content: "그건 역장님 생각이니까 내가 어떻게 알겠어? 다 말했으니까 이제 좀 놓아줘.",
+                                speakerName: "반장",
                                 next: 51210528,
                             },
                             {
@@ -134034,6 +135192,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51211943,
                                 content: "우린...",
+                                speakerName: "{nickname}&스노우",
                                 next: 51211944,
                             },
                             {
@@ -134061,16 +135220,19 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51212001,
                                 content: "로렌트, 솔직히 말해! 너 쫄았지?!",
+                                speakerName: "마지의 목소리",
                                 next: 51212002,
                             },
                             {
                                 id: 51212002,
                                 content: "마지, 모든 일이 주먹으로만 해결되는 건 아니야. 게다가 우리가 그 사람을 어떻게 이겨?",
+                                speakerName: "로렌트의 목소리",
                                 next: 51212003,
                             },
                             {
                                 id: 51212003,
                                 content: "한낱 쓸모없는 놈들이나 그런 소리 하지!",
+                                speakerName: "마지의 목소리",
                                 next: 51212004,
                             },
                             {
@@ -134425,6 +135587,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51210915,
                                 content: "뭐라고?!",
+                                speakerName: "크로거&{nickname}&스노우",
                                 next: 51210916,
                             },
                             {
@@ -135646,12 +136809,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "보아라! 적 하나가 뜨거운 폭풍 속으로 뛰어들었으니! 아득한 저 너머에서 승리의 찬가가 울려 퍼지고! 드높은 기적 소리가...",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213143,
                             },
                             {
                                 id: 51213143,
                                 content: "마치 천둥처럼 울려 퍼지며 우리를 부르노라!",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                             },
                         ],
                     },
@@ -135666,6 +136831,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51213145,
                                 content: "어머, 움직임이 제법 날렵하군요? 그래도 들여보내 드릴 순 없어요.",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213146,
                             },
                             {
@@ -135673,6 +136839,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "팬분들은 정말 이런 정보를 대체 어디서 듣고 오시는 건지... 자, 특별히 사인해 드릴 테니, 이것만 받고 얼른 돌아가세요. 오늘은 극단에 중요한 일이 있어서 구경은 정말 안 돼요.",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213147,
                             },
                             {
@@ -135705,12 +136872,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "...왜 저한테 이런 걸 주시는 거예요? 무슨 유명인이라도 되... 잠깐, {nickname}? 서, 설마 그 유명한 월석 사냥꾼이신가요?",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213150,
                             },
                             {
                                 id: 51213154,
                                 content: "자, 사인해 드렸으니까 다시는 찾아오지 마세요!",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213155,
                             },
                             {
@@ -135718,6 +136887,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "아... 제 팬이 아니었군요. 죄송해요. 요즘 제 팬들이 리허설 현장까지 찾아와 방해하는 일이 많거든요. 당신도 그런 줄 알았어요.",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213161,
                             },
                             {
@@ -135725,6 +136895,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     '"내 마음속 창가에도 별이 내려앉을 줄이야!"... 세상에, 이럴 수가, 아직 마음의 준비를 못 했는데? 저 지금 치마 엉망이죠? 맙소사, 이런 모습 보여 드려서 죄송해요.',
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213151,
                             },
                             {
@@ -135738,6 +136909,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "안녕하세요. 저는 '마법 피리' 극단의 배우 알시아 홀이에요. 지금은 기적 소리 살롱의 요청을 받아 연극의 자문 역할을 맡고 있어요.",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213162,
                             },
                             {
@@ -135745,6 +136917,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "저도 늘 월석 사냥꾼이 되고 싶었어요! 그렇지만 싸우는 데 영 재능이 없어서. 로트버드 한 마리한테도 쩔쩔매지만... 이 사인은 소중히 간직할게요.",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213152,
                             },
                             {
@@ -135752,6 +136925,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "알시아! 알시아 홀이잖아요. 제가 누군지도 모르면서... 이쪽엔 왜 오신 거예요? ...잠깐, 설마 절 보러 온 게 아니에요?",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213157,
                             },
                             {
@@ -135765,6 +136939,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51213152,
                                 content: "이런 우연이 다 있네요! 월석 사냥꾼님이 리허설을 보러 와 주실 줄은 몰랐어요.",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213161,
                             },
                             {
@@ -135784,6 +136959,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "이런... 방금은 실례가 많았네요. 정말 죄송합니다. 요즘 사람들이 자꾸 여기까지 절 찾아와 리허설을 방해해서, 그쪽도 비슷한 부류인 줄 알았어요.",
                                 npc: 700458,
+                                speakerName: "화려한 소녀",
                                 next: 51213161,
                             },
                             {
@@ -135839,12 +137015,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "알시아 씨 본인이 괜찮다는데, 네가 왜 막아서는 거야? 평소엔 신경도 안 쓰더니, 왜 하필 지금 와서 이러는 건데!",
                                 npc: 700462,
+                                speakerName: "분노하는 청년",
                                 next: 51213171,
                             },
                             {
                                 id: 51213171,
                                 content: "알시아 씨도 걱정되지만, 그보단 안전 문제가 더 걱정돼서 그래. 연극 소품에 꼭 진짜 총을 써야겠어?",
                                 npc: 700461,
+                                speakerName: "답답한 청년",
                                 next: 51213172,
                             },
                             {
@@ -135852,6 +137030,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "내가 목수들에게 돈을 더 주고, 도색을 더 진짜같이 해 달라고 할게... 그러니까 제발 소품에 너무 매달리지 말자, 응?",
                                 npc: 700461,
+                                speakerName: "답답한 청년",
                                 next: 51213173,
                             },
                             {
@@ -135859,6 +137038,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "회장님이 진짜 같을수록 좋다고 말씀하셨잖아! 총 구하는 게 뭐가 문제야? 돈만 제대로 주면 분명히 구할 수 있어. 지금 이 시점에 왜 연극 자문 선생 걱정을 대신 하고 있어?",
                                 npc: 700462,
+                                speakerName: "분노하는 청년",
                                 next: 51213174,
                             },
                             {
@@ -135866,6 +137046,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "공연 당일 이 무대 앞엔 빈 의자가 아니라 진짜 아이젠반 역장이 있을 거야! 너 정말 회장님 명령대로... 그냥 우리 그만두자. 잘못하면 우린 전부 죽은 목숨이라니까!",
                                 npc: 700461,
+                                speakerName: "답답한 청년",
                                 next: 51213175,
                             },
                             {
@@ -135873,6 +137054,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "여기까지 와서 빠지겠다고? 도망칠 수 있을 것 같아? 순진한 소리 하지 마. 아이젠반 역장만 한 수완은 아니라도, 시돈 회장님이 눈에 불을 켜고 우릴 지켜보고 계실 거라고.",
                                 npc: 700462,
+                                speakerName: "분노하는 청년",
                                 next: 51213176,
                             },
                             {
@@ -135886,6 +137068,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51213177,
                                 content: "에이, 싸우긴요. 그냥 연기 중이었어요. 리허설 상황은 언제든지 확인하셔도 돼요!",
                                 npc: 700462,
+                                speakerName: "분노하는 청년",
                                 next: 51213178,
                             },
                             {
@@ -135893,6 +137076,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "아! 아이젠반, 우리의 영웅이여! 관대함을 벗 삼고, 정의의 이름 아래 찬란히 빛나는 그 모습! 그대는 단 한 번도 나의 신념을 인정하지 않았지만... 나는 그대의 마음을 읽었다.",
                                 npc: 700462,
+                                speakerName: "분노하는 청년",
                                 next: 51213179,
                             },
                             {
@@ -135900,6 +137084,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "폭풍은 지나가고, 긴 밤도 끝날 것이다. 그리고 열차는 태양이 내뿜는 황금 빛줄기처럼, 찬란한 길이 되어 아이스레이크 시티와 디즈마니아를 이어 줄 것이다!",
                                 npc: 700462,
+                                speakerName: "분노하는 청년",
                                 next: 51213180,
                             },
                             {
@@ -135907,12 +137092,14 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "그러니 나는 이 폭풍을, 모든 것을 늦추는 이 폭풍을 저주하노라. 나의 모든 증오는 이 세 발의 탄환에 담겨, 울부짖는 저 보이지 않는 짐승을 향하리라!",
                                 npc: 700462,
+                                speakerName: "분노하는 청년",
                                 next: 51213181,
                             },
                             {
                                 id: 51213181,
                                 content: "그리고 마침내, 그 짐승을 몰아내는 태양이 되리라...",
                                 npc: 700462,
+                                speakerName: "분노하는 청년",
                                 next: 51213182,
                             },
                             {
@@ -135940,6 +137127,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51213184,
                                 content: "흠, 솜씨 좋은데? 이 연극에서 내 상대역으로 호흡을 맞추는 건 케일란보다 그쪽이 더 낫겠어.",
                                 npc: 700462,
+                                speakerName: "분노하는 청년",
                                 next: 51213185,
                             },
                             {
@@ -135947,6 +137135,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "너 또... 죄송합니다. 저희 같은 연극광들은 원래 한번 몰입하면 시도 때도 없이 아무나 붙잡고 대사를 맞춰 보려고 하거든요. 이번에 저 친구가 맡은 역할이 블룸필드역의 전임 역장이라, 당신을 역장님으로 보고 연기한 거예요.",
                                 npc: 700461,
+                                speakerName: "답답한 청년",
                                 next: 51213186,
                             },
                             {
@@ -135954,6 +137143,7 @@ export const questData_kr: QuestStory[] = [
                                 content:
                                     "알시아, 소개 좀 해 줄래? 방금 이분, 시돈 회장님이 리허설 진행 상황을 확인하러 보내신 손님이라고 했지?",
                                 npc: 700461,
+                                speakerName: "답답한 청년",
                                 next: 51213187,
                             },
                             {
@@ -140276,6 +141466,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51105310,
                                 content: "무기를 만드는 걸세!\n장사를 하는 거야!\n모험을 하는 거지!",
+                                speakerName: "대장장이 루나&종업원 루나&탐험가 루나",
                                 next: 51105311,
                             },
                             {
@@ -140686,6 +141877,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51105503,
                                 content: "사람 살려! 제발 살려 주세요!",
+                                speakerName: "근처에서 들려오는 소리",
                                 next: 51105504,
                             },
                             {
@@ -140836,6 +142028,7 @@ export const questData_kr: QuestStory[] = [
                                 id: 51105606,
                                 content: "성벽 밖으로 나갔다가 필토이드랑 마주쳤는데, 이분들이 우릴 구해 줬어.",
                                 npc: 700356,
+                                speakerName: "남자아이",
                                 next: 51105607,
                             },
                             {
@@ -141066,6 +142259,7 @@ export const questData_kr: QuestStory[] = [
                             {
                                 id: 51105725,
                                 content: "좋아!",
+                                speakerName: "사람들",
                                 next: 51105726,
                             },
                             {

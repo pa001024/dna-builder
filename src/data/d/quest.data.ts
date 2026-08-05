@@ -18,6 +18,7 @@ export interface Dialogue {
     content?: string
     voice?: string
     npc?: number
+    speakerName?: string
     next?: number
     impr?: [number, ImprType, number]
     options?: DialogueOption[]
@@ -1491,6 +1492,7 @@ export const questData: QuestStory[] = [
                                 content: "站住。",
                                 voice: "story/1002/101006/194929DA",
                                 npc: 200071,
+                                speakerName: "站岗的士兵",
                                 next: 10100602,
                             },
                             {
@@ -1505,6 +1507,7 @@ export const questData: QuestStory[] = [
                                 content: "谁问你了，皎皎之民。我是说——",
                                 voice: "story/1002/101006/19492A2E",
                                 npc: 200071,
+                                speakerName: "站岗的士兵",
                                 next: 10100604,
                             },
                             {
@@ -1512,6 +1515,7 @@ export const questData: QuestStory[] = [
                                 content: "听不见吗，一只眼的？跑那么快，是想赶着去治安署坐坐？",
                                 voice: "story/1002/101006/19492A58",
                                 npc: 200071,
+                                speakerName: "站岗的士兵",
                                 next: 10100605,
                             },
                             {
@@ -1526,6 +1530,7 @@ export const questData: QuestStory[] = [
                                 content: "不是本地人吧，哪来的？通行证呢？",
                                 voice: "story/1002/101006/19492AAC",
                                 npc: 200071,
+                                speakerName: "站岗的士兵",
                                 options: [
                                     {
                                         id: 101006061,
@@ -1552,6 +1557,7 @@ export const questData: QuestStory[] = [
                                 content: "哪个岛，说明白些，南边大了去了。",
                                 voice: "story/1002/101006/19492AD6",
                                 npc: 200071,
+                                speakerName: "站岗的士兵",
                                 next: 10100608,
                             },
                             {
@@ -1566,6 +1572,7 @@ export const questData: QuestStory[] = [
                                 content: "算了，通行证。",
                                 voice: "story/1002/101006/19492B00",
                                 npc: 200071,
+                                speakerName: "站岗的士兵",
                                 next: 101006110,
                             },
                             {
@@ -1607,6 +1614,7 @@ export const questData: QuestStory[] = [
                                     "{性别：喂、喂……兄弟你也老大不小了，别哭啊！|喂喂，你怎么哭了？见鬼，长官没说过怎么对付掉眼泪的小姑娘啊！}",
                                 voice: "story/1002/101006/19492BD2",
                                 npc: 200071,
+                                speakerName: "站岗的士兵",
                                 next: 10100614,
                             },
                             {
@@ -1615,6 +1623,7 @@ export const questData: QuestStory[] = [
                                     "要是放在以前也不是不行。只是……唉，卡米拉女士，您知道的，最近全国上下都在通缉那什么，“神奇的同盟”，所以长官特别吩咐了，各城镇都得严查。",
                                 voice: "story/1002/101006/19492BFC",
                                 npc: 200071,
+                                speakerName: "站岗的士兵",
                                 next: 10100615,
                             },
                             {
@@ -1630,6 +1639,7 @@ export const questData: QuestStory[] = [
                                     "行吧。您的人我放心。但千万记住，一定要看好{性别：他|她}，千万别在城里惹是生非，不然长官怪罪下来，咱俩就都有大麻烦了。",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200071,
+                                speakerName: "站岗的士兵",
                                 next: 10100617,
                             },
                             {
@@ -1659,6 +1669,7 @@ export const questData: QuestStory[] = [
                                 content: "别在城里惹事，记住没？",
                                 voice: "story/1002/101007/19493A42",
                                 npc: 200004,
+                                speakerName: "站岗的士兵",
                             },
                         ],
                     },
@@ -1855,6 +1866,7 @@ export const questData: QuestStory[] = [
                                 id: 10100814,
                                 content: "会有人将你从苦涩的海水中打捞出来，带向一片苦寒的荒原，命运将在那里降下真正的淬炼。",
                                 voice: "story/1002/100127/1910D56B",
+                                speakerName: "？？？",
                                 next: 10100815,
                             },
                             {
@@ -2043,6 +2055,7 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1002/101012/19498C74",
                                 npc: 200005,
+                                speakerName: "阴沉的男子",
                                 next: 10101203,
                             },
                             {
@@ -2050,6 +2063,7 @@ export const questData: QuestStory[] = [
                                 content: "没通行证？",
                                 voice: "story/1002/101012/19498C9E",
                                 npc: 200005,
+                                speakerName: "阴沉的男子",
                                 next: 10101204,
                             },
                             {
@@ -2062,6 +2076,7 @@ export const questData: QuestStory[] = [
                                 content: "……那女人无用的“热心肠”真多。",
                                 voice: "story/1002/101012/19498CF2",
                                 npc: 200005,
+                                speakerName: "阴沉的男子",
                                 next: 10101206,
                             },
                             {
@@ -2069,6 +2084,7 @@ export const questData: QuestStory[] = [
                                 content: "算了，拿出来吧。",
                                 voice: "story/1002/101012/19498D1C",
                                 npc: 200005,
+                                speakerName: "阴沉的男子",
                                 next: 10101207,
                             },
                             {
@@ -2083,6 +2099,7 @@ export const questData: QuestStory[] = [
                                 content: "你愿意给多少。",
                                 voice: "story/1002/101012/19498D70",
                                 npc: 200005,
+                                speakerName: "阴沉的男子",
                                 next: 10101209,
                             },
                             {
@@ -2097,6 +2114,7 @@ export const questData: QuestStory[] = [
                                 content: "没钱？",
                                 voice: "story/1002/101012/19498DC4",
                                 npc: 200005,
+                                speakerName: "阴沉的男子",
                                 next: 10101211,
                             },
                             {
@@ -2111,6 +2129,7 @@ export const questData: QuestStory[] = [
                                 content: "那就滚。",
                                 voice: "story/1002/101012/19498E18",
                                 npc: 200005,
+                                speakerName: "阴沉的男子",
                                 next: 10101213,
                             },
                             {
@@ -2149,6 +2168,7 @@ export const questData: QuestStory[] = [
                                 content: "你……是……新来的住客？",
                                 voice: "story/1002/101014/1949AD1A",
                                 npc: 200006,
+                                speakerName: "开朗的少女",
                                 next: 10101402,
                             },
                             {
@@ -2163,6 +2183,7 @@ export const questData: QuestStory[] = [
                                 content: "外乡人？那……赶出去的话，{性别：他|她}不就无家可归了吗？",
                                 voice: "story/1002/101014/1949AD6E",
                                 npc: 200006,
+                                speakerName: "开朗的少女",
                                 next: 10101404,
                             },
                             {
@@ -2178,6 +2199,7 @@ export const questData: QuestStory[] = [
                                     "可是……反正那间宅邸暂时还没有卖掉，借给{性别：他|她}住一晚也没关系吧？等{性别：他|她}有了旅费再还您，我们不是白赚一份租金？",
                                 voice: "story/1002/101014/1949ADC2",
                                 npc: 200006,
+                                speakerName: "开朗的少女",
                                 next: 10101406,
                             },
                             {
@@ -2185,6 +2207,7 @@ export const questData: QuestStory[] = [
                                 content: "您要是一直这样，对谁都冷冰冰的，宅子就真的卖不掉啦。",
                                 voice: "story/1002/101014/1949ADEC",
                                 npc: 200006,
+                                speakerName: "开朗的少女",
                                 next: 10101407,
                             },
                             {
@@ -2239,6 +2262,7 @@ export const questData: QuestStory[] = [
                                 content: "就是这里。",
                                 voice: "story/1002/101015/1949BDAC",
                                 npc: 200006,
+                                speakerName: "开朗的少女",
                             },
                         ],
                     },
@@ -2252,6 +2276,7 @@ export const questData: QuestStory[] = [
                                 content: "那座宅子就在南边，跟我走吧！",
                                 voice: "story/1002/101015/1949BD82",
                                 npc: 200006,
+                                speakerName: "开朗的少女",
                             },
                         ],
                     },
@@ -2265,6 +2290,7 @@ export const questData: QuestStory[] = [
                                 content: "这间刚刚打扫出来，今晚你就住这里吧。",
                                 voice: "story/1002/101016/1949CDEA",
                                 npc: 200006,
+                                speakerName: "开朗的少女",
                                 next: 10101602,
                             },
                             {
@@ -2280,6 +2306,7 @@ export const questData: QuestStory[] = [
                                     "你不要生气，其实恩里克叔叔并没有那么贪财。只是我们最近实在拮据，不然他也不会打算卖掉老宅补贴家用。",
                                 voice: "story/1002/101016/1949CE3E",
                                 npc: 200006,
+                                speakerName: "开朗的少女",
                                 next: 10101604,
                             },
                             {
@@ -2287,6 +2314,7 @@ export const questData: QuestStory[] = [
                                 content: "这里虽然荒废了几年，但打扫完之后还不错，至少能挡住外面的寒风，对吧！",
                                 voice: "story/1002/101016/1949CE68",
                                 npc: 200006,
+                                speakerName: "开朗的少女",
                                 next: 10101605,
                             },
                             {
@@ -2294,6 +2322,7 @@ export const questData: QuestStory[] = [
                                 content: "哦对了，还没告诉你们我的名字。我叫赛琪，是“修普诺斯之家”的住客，有时也会帮忙打打下手。",
                                 voice: "story/1002/101016/1949CE92",
                                 npc: 200006,
+                                speakerName: "开朗的少女",
                                 options: [
                                     {
                                         id: 101016051,
@@ -2434,6 +2463,7 @@ export const questData: QuestStory[] = [
                                 content: "我回来了。",
                                 voice: "story/1002/101018/1949EEBA",
                                 npc: 200006,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -2448,6 +2478,7 @@ export const questData: QuestStory[] = [
                                 content: "饿坏了吧？这是刚烤好的面包。",
                                 voice: "story/1002/101018/1949EEE4",
                                 npc: 200006,
+                                speakerName: "？？？",
                                 next: 10101803,
                             },
                             {
@@ -2462,6 +2493,7 @@ export const questData: QuestStory[] = [
                                 content: "……？",
                                 voice: "story/1002/101018/1949EF38",
                                 npc: 200006,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -2999,6 +3031,7 @@ export const questData: QuestStory[] = [
                                     "……然后，他趁我没防备袭击了我，抢走了刚到手的钱。狗东西，连卖废品的都不放过！那可是给贫民窟几家子筹措的生活费！",
                                 voice: "story/1002/101025/194A6192",
                                 npc: 200011,
+                                speakerName: "焦急的拾荒者",
                                 next: 10102502,
                             },
                             {
@@ -3007,6 +3040,7 @@ export const questData: QuestStory[] = [
                                     "没了那袋子铜币，那群老老少少下个月都要喝西北风了。唉，小贼不知道跑哪儿去了，我得找个人帮我一起堵他。",
                                 voice: "story/1002/101025/194A61BC",
                                 npc: 200011,
+                                speakerName: "焦急的拾荒者",
                                 next: 10102503,
                             },
                             {
@@ -3021,6 +3055,7 @@ export const questData: QuestStory[] = [
                                 content: "哎呀等治安署腾出手来管咱们卡戎的事，泪湖的冰都要化干净啦！",
                                 voice: "story/1002/101025/194A6210",
                                 npc: 200011,
+                                speakerName: "焦急的拾荒者",
                                 next: 10102505,
                             },
                             {
@@ -3029,6 +3064,7 @@ export const questData: QuestStory[] = [
                                     "我说最最善良美丽的卡米拉大姐，能不能麻烦您这里的狩月人帮个小忙……嗯，就一个小忙！我知道您人最好了。",
                                 voice: "story/1002/101025/194A623A",
                                 npc: 200011,
+                                speakerName: "焦急的拾荒者",
                                 next: 10102506,
                             },
                             {
@@ -3043,6 +3079,7 @@ export const questData: QuestStory[] = [
                                 content: "那能不能稍微……那个，便宜点……或者用其他的东西交换也可以！我想想，那句话怎么说来着——",
                                 voice: "story/1002/101025/194A628E",
                                 npc: 200011,
+                                speakerName: "焦急的拾荒者",
                                 next: 10102508,
                             },
                             {
@@ -3051,6 +3088,7 @@ export const questData: QuestStory[] = [
                                     "“情报就是金钱”！对对对，全冰湖城的垃圾桶都归我管，如果我以后翻到什么好玩的消息，第一时间告诉您，可以吧？",
                                 voice: "story/1002/101025/194A62B8",
                                 npc: 200011,
+                                speakerName: "焦急的拾荒者",
                             },
                         ],
                     },
@@ -3092,6 +3130,7 @@ export const questData: QuestStory[] = [
                                 content: "狩月人！那你们是找对地方了，正巧，现在这里就有一份委托——",
                                 voice: "story/1002/101026/194A72A2",
                                 npc: 200011,
+                                speakerName: "焦急的拾荒者",
                                 next: 10102606,
                             },
                             {
@@ -3593,6 +3632,7 @@ export const questData: QuestStory[] = [
                                 content: "你、你……至于追到这种地方来吗？你说你那钱本来就是拿来分给别人的，那分老子一点怎么了？",
                                 voice: "story/1002/101182/19547184",
                                 npc: 200053,
+                                speakerName: "可疑的青年",
                                 next: 10118203,
                             },
                             {
@@ -5042,6 +5082,7 @@ export const questData: QuestStory[] = [
                                 id: 10131004,
                                 content: "吼——",
                                 voice: "story/1002/101310/195BD051",
+                                speakerName: "秽兽",
                                 next: 10131005,
                             },
                             {
@@ -5092,6 +5133,7 @@ export const questData: QuestStory[] = [
                                 id: 10131201,
                                 content: "吼——",
                                 voice: "story/1002/101312/195BD055",
+                                speakerName: "秽兽",
                                 next: 10131202,
                             },
                             {
@@ -5954,6 +5996,7 @@ export const questData: QuestStory[] = [
                                 content: "奥特赛德！你今天回来得好晚，又去了哪里冒险吗？",
                                 voice: "story/1002/101060/194CA048",
                                 npc: 200020,
+                                speakerName: "病弱的少女",
                                 next: 10106005,
                             },
                             {
@@ -5961,6 +6004,7 @@ export const questData: QuestStory[] = [
                                 content: "雪狼出没的密林，还是沼泽女巫的塔楼？",
                                 voice: "story/1002/101060/194CA072",
                                 npc: 200020,
+                                speakerName: "病弱的少女",
                                 next: 10106006,
                             },
                             {
@@ -8056,6 +8100,7 @@ export const questData: QuestStory[] = [
                                 id: 10108311,
                                 content: "@#￥%……",
                                 voice: "story/1002/101135/19516E42",
+                                speakerName: "奇怪的声音",
                                 next: 10108312,
                             },
                             {
@@ -8209,6 +8254,7 @@ export const questData: QuestStory[] = [
                                 id: 10108311,
                                 content: "@#￥%……",
                                 voice: "story/1002/101135/19516E42",
+                                speakerName: "奇怪的声音",
                                 next: 10108312,
                             },
                             {
@@ -8608,12 +8654,14 @@ export const questData: QuestStory[] = [
                                 id: 10108914,
                                 content: "恩里克叔叔，您回来了。我已经倒好了热水，请您喝了，暖暖身子……",
                                 voice: "story/1002/101089/194E7CE2",
+                                speakerName: "赛琪的声音",
                                 next: 10108915,
                             },
                             {
                                 id: 10108915,
                                 content: "嗯。",
                                 voice: "story/1002/101089/194E7D0C",
+                                speakerName: "恩里克的声音",
                                 next: 10108916,
                             },
                             {
@@ -9748,6 +9796,7 @@ export const questData: QuestStory[] = [
                                 content: "啊啊……别打了，我投降！但真的不是我干的！！",
                                 voice: "story/1002/101102/194F50DA",
                                 npc: 200004,
+                                speakerName: "可疑的青年",
                                 next: 10110202,
                             },
                             {
@@ -9763,6 +9812,7 @@ export const questData: QuestStory[] = [
                                     "行吧。您的人我放心。但千万记住，一定要看好{性别：他|她}，千万别在城里惹是生非，不然长官怪罪下来，咱俩就都有大麻烦了。",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200004,
+                                speakerName: "站岗的士兵",
                                 next: 10110204,
                             },
                             {
@@ -9770,6 +9820,7 @@ export const questData: QuestStory[] = [
                                 content: "怎么刚好被你给逮到了……唉，{性别：大哥|大姐}你行行好，千万别说出去啊。",
                                 voice: "story/1002/101102/194F5158",
                                 npc: 200004,
+                                speakerName: "可疑的青年",
                                 next: 10110205,
                             },
                             {
@@ -9784,6 +9835,7 @@ export const questData: QuestStory[] = [
                                 content: "停手停手，钱袋还你！我也是好几天没吃顿饱饭了，一时糊涂才……唉，我错了我错了！",
                                 voice: "story/1002/101032/194AD496",
                                 npc: 200004,
+                                speakerName: "可疑的青年",
                                 next: 10110207,
                             },
                             {
@@ -9798,6 +9850,7 @@ export const questData: QuestStory[] = [
                                 content: "你小点声！都说了不是我干的，我只是把他的遗体悄悄运出来而已。",
                                 voice: "story/1002/101102/194F5200",
                                 npc: 200004,
+                                speakerName: "可疑的青年",
                                 next: 10110209,
                             },
                             {
@@ -9805,6 +9858,7 @@ export const questData: QuestStory[] = [
                                 content: "我叫凯文，你见过的，是冰湖城外围卫戍部队的……这个倒霉蛋是哈尔，我以前的邻居，我们打小就认识了。",
                                 voice: "story/1002/101102/194F522A",
                                 npc: 200004,
+                                speakerName: "可疑的青年",
                                 next: 10110210,
                             },
                             {
@@ -10260,6 +10314,7 @@ export const questData: QuestStory[] = [
                                 content: "啊啊……别打了，我投降！但真的不是我干的！！",
                                 voice: "story/1002/101102/194F50DA",
                                 npc: 200004,
+                                speakerName: "可疑的青年",
                                 next: 10110202,
                             },
                             {
@@ -10275,6 +10330,7 @@ export const questData: QuestStory[] = [
                                     "行吧。您的人我放心。但千万记住，一定要看好{性别：他|她}，千万别在城里惹是生非，不然长官怪罪下来，咱俩就都有大麻烦了。",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200004,
+                                speakerName: "站岗的士兵",
                                 next: 10110204,
                             },
                             {
@@ -10282,6 +10338,7 @@ export const questData: QuestStory[] = [
                                 content: "怎么刚好被你给逮到了……唉，{性别：大哥|大姐}你行行好，千万别说出去啊。",
                                 voice: "story/1002/101102/194F5158",
                                 npc: 200004,
+                                speakerName: "可疑的青年",
                                 next: 10110205,
                             },
                             {
@@ -10296,6 +10353,7 @@ export const questData: QuestStory[] = [
                                 content: "停手停手，钱袋还你！我也是好几天没吃顿饱饭了，一时糊涂才……唉，我错了我错了！",
                                 voice: "story/1002/101032/194AD496",
                                 npc: 200004,
+                                speakerName: "可疑的青年",
                                 next: 10110207,
                             },
                             {
@@ -10310,6 +10368,7 @@ export const questData: QuestStory[] = [
                                 content: "你小点声！都说了不是我干的，我只是把他的遗体悄悄运出来而已。",
                                 voice: "story/1002/101102/194F5200",
                                 npc: 200004,
+                                speakerName: "可疑的青年",
                                 next: 10110209,
                             },
                             {
@@ -10317,6 +10376,7 @@ export const questData: QuestStory[] = [
                                 content: "我叫凯文，你见过的，是冰湖城外围卫戍部队的……这个倒霉蛋是哈尔，我以前的邻居，我们打小就认识了。",
                                 voice: "story/1002/101102/194F522A",
                                 npc: 200004,
+                                speakerName: "可疑的青年",
                                 next: 10110210,
                             },
                             {
@@ -10914,12 +10974,14 @@ export const questData: QuestStory[] = [
                                 id: 10124003,
                                 content: "啊……没有没有。眼睛里进了紫露花的花粉而已。",
                                 voice: "story/1002/101240/1958293E",
+                                speakerName: "花店店主",
                                 next: 10124004,
                             },
                             {
                                 id: 10124004,
                                 content: "如果您说的是那位白衣服的先生，他现在……可能会在东北方向侧门的水潭那儿。",
                                 voice: "story/1002/101240/19582968",
+                                speakerName: "花店店主",
                                 next: 10124005,
                             },
                             {
@@ -10933,6 +10995,7 @@ export const questData: QuestStory[] = [
                                 id: 10124006,
                                 content: "等一下，您……",
                                 voice: "story/1002/101240/195829BC",
+                                speakerName: "花店店主",
                                 next: 10124007,
                             },
                             {
@@ -10946,6 +11009,7 @@ export const questData: QuestStory[] = [
                                 id: 10124008,
                                 content: "……不，我也许认错人了。抱歉……您收下这个吧。",
                                 voice: "story/1002/101240/19582A10",
+                                speakerName: "花店店主",
                                 next: 10124101,
                             },
                             {
@@ -10959,6 +11023,7 @@ export const questData: QuestStory[] = [
                                 id: 10124102,
                                 content: "嗯。您也有着红宝石一样的漂亮眼睛，与这朵紫露花很相称……愿您度过快乐的一天。",
                                 voice: "story/1002/101241/1958397C",
+                                speakerName: "花店店主",
                                 next: 10124103,
                             },
                             {
@@ -11151,6 +11216,7 @@ export const questData: QuestStory[] = [
                                 id: 10110519,
                                 content: "啊啊——",
                                 voice: "story/1002/101105/194F8489",
+                                speakerName: "远处的声音",
                                 next: 10110520,
                             },
                             {
@@ -11241,6 +11307,7 @@ export const questData: QuestStory[] = [
                                 content: "……请，帮帮我们……",
                                 voice: "story/1002/101107/194FA30C",
                                 npc: 200019,
+                                speakerName: "阴郁的少年",
                                 next: 10110702,
                             },
                             {
@@ -11248,6 +11315,7 @@ export const questData: QuestStory[] = [
                                 content: "恩里克先生……快……不行了……！",
                                 voice: "story/1002/101107/194FA336",
                                 npc: 200019,
+                                speakerName: "阴郁的少年",
                                 next: 10110703,
                             },
                             {
@@ -11275,6 +11343,7 @@ export const questData: QuestStory[] = [
                                 content: "拜托了，请跟我来！",
                                 voice: "story/1002/101146/195222BA",
                                 npc: 200019,
+                                speakerName: "阴郁的少年",
                             },
                         ],
                     },
@@ -11288,6 +11357,7 @@ export const questData: QuestStory[] = [
                                 content: "这边，恩里克先生的办公室！",
                                 voice: "story/1002/101147/19523322",
                                 npc: 200019,
+                                speakerName: "阴郁的少年",
                             },
                         ],
                     },
@@ -11795,54 +11865,63 @@ export const questData: QuestStory[] = [
                                 id: 20002601,
                                 content: "刚刚那个大姐姐怎么跑那么快？",
                                 voice: "story/2001/200026/32130CBA",
+                                speakerName: "困惑的儿童",
                                 next: 20002602,
                             },
                             {
                                 id: 20002602,
                                 content: "别问了，快走，快到城里去，那是秽蚀者！",
                                 voice: "story/2001/200026/32130CE4",
+                                speakerName: "惊慌的平民",
                                 next: 20002603,
                             },
                             {
                                 id: 20002603,
                                 content: "别……别慌……已经有人去找卫戍部队了！",
                                 voice: "story/2001/200026/32130D0E",
+                                speakerName: "强作镇定的士兵",
                                 next: 20002604,
                             },
                             {
                                 id: 20002604,
                                 content: "你们不要想趁机溜进城里，通行证，出示通行证！",
                                 voice: "story/2001/200026/32130D38",
+                                speakerName: "强作镇定的士兵",
                                 next: 20002605,
                             },
                             {
                                 id: 20002605,
                                 content: "求求你们让我们进去吧，通行证真的只是不小心弄丢了！",
                                 voice: "story/2001/200026/32130D62",
+                                speakerName: "惊慌的平民",
                                 next: 20002606,
                             },
                             {
                                 id: 20002606,
                                 content: "都什么时候了还通行证，反正在外面也是死，不如直接冲进去！",
                                 voice: "story/2001/200026/32130D8C",
+                                speakerName: "愤怒的平民",
                                 next: 20002607,
                             },
                             {
                                 id: 20002607,
                                 content: "停，停，你们再过来我就开枪了！",
                                 voice: "story/2001/200026/32130DB6",
+                                speakerName: "强作镇定的士兵",
                                 next: 20002608,
                             },
                             {
                                 id: 20002608,
                                 content: "开啊！开枪把秽蚀者引过来我们一起死！",
                                 voice: "story/2001/200026/32130DE0",
+                                speakerName: "愤怒的平民",
                                 next: 20002609,
                             },
                             {
                                 id: 20002609,
                                 content: "你……算你狠。行吧，先进来，等卫戍部队处理掉秽蚀者再说。",
                                 voice: "story/2001/200026/32130E0A",
+                                speakerName: "强作镇定的士兵",
                             },
                         ],
                     },
@@ -13122,6 +13201,7 @@ export const questData: QuestStory[] = [
                                 content: "……情况不太对劲。但还好，至少几位人质平安无事。",
                                 voice: "story/1002/101306/195BD036",
                                 npc: 100304,
+                                speakerName: "女性军官",
                                 next: 10130603,
                             },
                             {
@@ -13187,6 +13267,7 @@ export const questData: QuestStory[] = [
                                     "不对！长官，我看到了！虽然离得很远，但我先前探路的时候看到了，这几个卡戎……他们也会使用<W>魔法</>……",
                                 voice: "story/1002/101130/19511D8A",
                                 npc: 700065,
+                                speakerName: "慌张的帝国士兵",
                                 next: 10113011,
                             },
                             {
@@ -13195,6 +13276,7 @@ export const questData: QuestStory[] = [
                                     "他们、他们没准就是秽蚀者的同伙！这些低贱的家伙，一个个净是邪恶的魔法师，没有一个好东西！我看全都得……",
                                 voice: "story/1002/101130/19511DB4",
                                 npc: 700065,
+                                speakerName: "慌张的帝国士兵",
                                 next: 10113012,
                             },
                             {
@@ -13209,6 +13291,7 @@ export const questData: QuestStory[] = [
                                 content: "……呃，不……长官，我、我是说他们。也、也不是所有卡戎之民都……总之我不是意有所指！",
                                 voice: "story/1002/101130/19511E08",
                                 npc: 700065,
+                                speakerName: "慌张的帝国士兵",
                                 next: 10113014,
                             },
                             {
@@ -13592,6 +13675,7 @@ export const questData: QuestStory[] = [
                                 content: "你好，孩子。我是一名漂泊的雾海引渡人——或者，如果你更喜欢以姓名相称，也可以称呼我为妮弗尔夫人。",
                                 voice: "story/1002/101259/19596120",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125905,
                             },
                             {
@@ -13599,6 +13683,7 @@ export const questData: QuestStory[] = [
                                 content: "我旅行至此，听见此地彷徨灵魂的絮语，因此前来指引“她”回归雾海。",
                                 voice: "story/1002/101259/1959614A",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125906,
                             },
                             {
@@ -13613,6 +13698,7 @@ export const questData: QuestStory[] = [
                                 content: "是的。孩子，你是否也在牵挂着一位亡者？",
                                 voice: "story/1002/101259/1959619E",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125908,
                             },
                             {
@@ -13627,6 +13713,7 @@ export const questData: QuestStory[] = [
                                 content: "我的双眼能看到灵魂所思之物。",
                                 voice: "story/1002/101259/195961F2",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125910,
                             },
                             {
@@ -13634,6 +13721,7 @@ export const questData: QuestStory[] = [
                                 content: "方才，在引导她归去之时，我看到了她牵念的一切，其中便有你的身影。",
                                 voice: "story/1002/101259/1959621C",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125911,
                             },
                             {
@@ -13655,6 +13743,7 @@ export const questData: QuestStory[] = [
                                 content: "不，恰恰相反。我曾见过许多怀抱着强烈的遗憾与怨恨归去的灵魂，他们的恸哭悲号，如浓雾一般溢满河岸。",
                                 voice: "story/1002/101259/1959629A",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125914,
                             },
                             {
@@ -13662,6 +13751,7 @@ export const questData: QuestStory[] = [
                                 content: "但是，那个灵魂的声音非常温柔。没有哀叹，也没有愤怒与不甘，而是在诉说感谢以及……祝福。",
                                 voice: "story/1002/101259/195962C4",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125915,
                             },
                             {
@@ -13669,6 +13759,7 @@ export const questData: QuestStory[] = [
                                 content: "或许，那便是她所为你留下的。",
                                 voice: "story/1002/101259/195962EE",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125916,
                             },
                             {
@@ -13694,6 +13785,7 @@ export const questData: QuestStory[] = [
                                 content: "孩子，我已经在这世上活了很久、很久，送别了无数的亡魂，也曾无数次听过这样的话语。",
                                 voice: "story/1002/101259/19596342",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125918,
                             },
                             {
@@ -13702,6 +13794,7 @@ export const questData: QuestStory[] = [
                                     "草木会因一场山火而化作焦土，虫豸会因一阵狂风而溺于深水……无常本就是生命的一部分。或早或晚，死亡终将来临。",
                                 voice: "story/1002/101259/1959636C",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125919,
                             },
                             {
@@ -13709,6 +13802,7 @@ export const questData: QuestStory[] = [
                                 content: "除了诅咒命运的冷漠与残酷，或是哀叹自我的无力与渺小，我们还可以选择……珍惜切实存在过的记忆。",
                                 voice: "story/1002/101259/19596396",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125920,
                             },
                             {
@@ -13716,6 +13810,7 @@ export const questData: QuestStory[] = [
                                 content: "毕竟，如果说死亡是“必然”，那么活着的每一日，不正是与它擦肩而过的“奇迹”吗？",
                                 voice: "story/1002/101259/195963C0",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125921,
                             },
                             {
@@ -13724,6 +13819,7 @@ export const questData: QuestStory[] = [
                                     "我想，去往了雾海的那个灵魂，也一定会希望……当你回忆起与她共同经历的时日，你是面带笑意的，而非哀怜和悲泣。",
                                 voice: "story/1002/101259/195963EA",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 options: [
                                     {
                                         id: 101259211,
@@ -13738,6 +13834,7 @@ export const questData: QuestStory[] = [
                                     "雾海……是卡戎之民的生命之源，亦是安眠之地。亡者的灵魂回归雾海，生者的灵魂从中诞生。生命如此循环流转，生生不息。",
                                 voice: "story/1002/101259/19596414",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125923,
                             },
                             {
@@ -13764,6 +13861,7 @@ export const questData: QuestStory[] = [
                                     "如果向我提问的是别人，我应当会如此回答：生与死的循环是不容违背的世界法则，凭人类的力量绝对无法与之抗衡。",
                                 voice: "story/1002/101259/19596468",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125925,
                             },
                             {
@@ -13771,6 +13869,7 @@ export const questData: QuestStory[] = [
                                 content: "不过，孩子，我能感受得到……你背负着不同寻常的命运。",
                                 voice: "story/1002/101259/19596492",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125926,
                             },
                             {
@@ -13778,6 +13877,7 @@ export const questData: QuestStory[] = [
                                 content: "有朝一日，当你获得了足够强大的力量——当你能够直面世界的真相，甚至打破构筑它的法则本身……",
                                 voice: "story/1002/101259/195964BC",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125927,
                             },
                             {
@@ -13785,6 +13885,7 @@ export const questData: QuestStory[] = [
                                 content: "或许你便能踏入那生命的河流，在它的尽头——雾海，与往昔的灵魂再度相见。",
                                 voice: "story/1002/101259/195964E6",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 options: [
                                     {
                                         id: 101259271,
@@ -13798,6 +13899,7 @@ export const questData: QuestStory[] = [
                                 content: "呵呵……我不过是驻于河畔的一介旁观者。这个问题的答案，只能由你自己寻得。",
                                 voice: "story/1002/101259/19596510",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125929,
                             },
                             {
@@ -13805,6 +13907,7 @@ export const questData: QuestStory[] = [
                                 content: "如果你真的心怀渴望，那么，就请继续前进吧。纵是前路无常，也请你坚定地走下去。",
                                 voice: "story/1002/101259/1959653A",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                                 next: 10125930,
                             },
                             {
@@ -13812,6 +13915,7 @@ export const questData: QuestStory[] = [
                                 content: "一路顺风，亲爱的孩子。",
                                 voice: "story/1002/101259/19596564",
                                 npc: 200076,
+                                speakerName: "妮弗尔夫人",
                             },
                         ],
                     },
@@ -16278,6 +16382,7 @@ export const questData: QuestStory[] = [
                                 content: "喵——喵——",
                                 voice: "story/1003/100326/191D95C4",
                                 npc: 100320,
+                                speakerName: "猫",
                             },
                         ],
                     },
@@ -16293,6 +16398,7 @@ export const questData: QuestStory[] = [
                                 content: "喵……呜喵？",
                                 voice: "story/1003/100326/191D95EE",
                                 npc: 100320,
+                                speakerName: "猫",
                                 next: 10032604,
                             },
                             {
@@ -16328,6 +16434,7 @@ export const questData: QuestStory[] = [
                                 content: "喵——喵喵！",
                                 voice: "story/1003/100326/191D96C0",
                                 npc: 100320,
+                                speakerName: "猫",
                             },
                         ],
                     },
@@ -16369,6 +16476,7 @@ export const questData: QuestStory[] = [
                                 content: "喵——喵喵喵喵！",
                                 voice: "story/1003/100326/191D9714",
                                 npc: 100320,
+                                speakerName: "猫",
                             },
                         ],
                     },
@@ -17717,6 +17825,7 @@ export const questData: QuestStory[] = [
                                 id: 10033201,
                                 content: "——吼！！",
                                 voice: "story/1003/100332/191DF80A",
+                                speakerName: "？？？",
                                 next: 10033202,
                             },
                             {
@@ -17764,6 +17873,7 @@ export const questData: QuestStory[] = [
                                 id: 10033301,
                                 content: "——吼！！",
                                 voice: "story/1003/100333/191E0872",
+                                speakerName: "？？？",
                                 next: 10033302,
                             },
                             {
@@ -17853,6 +17963,7 @@ export const questData: QuestStory[] = [
                                 content: "吼……！",
                                 voice: "story/1003/100333/191E0A16",
                                 npc: 100328,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -18105,6 +18216,7 @@ export const questData: QuestStory[] = [
                                 content: "粉……碎……",
                                 voice: "story/1003/100333/191E0ABE",
                                 npc: 100328,
+                                speakerName: "？？？",
                                 next: 10033316,
                             },
                             {
@@ -18140,6 +18252,7 @@ export const questData: QuestStory[] = [
                                 content: "消……除……",
                                 voice: "story/1003/100333/191E0B66",
                                 npc: 100328,
+                                speakerName: "？？？",
                                 next: 10033320,
                             },
                             {
@@ -20149,6 +20262,7 @@ export const questData: QuestStory[] = [
                                 id: 10035255,
                                 content: "由冰湖城开往迪斯玛尼亚的列车将在一小时后出发。祝第十三军团返程顺利，荣耀尽归吾皇！",
                                 voice: "story/1003/100352/191F4906",
+                                speakerName: "广播",
                             },
                         ],
                     },
@@ -20455,6 +20569,7 @@ export const questData: QuestStory[] = [
                                 content: "愚蠢。",
                                 voice: "story/1003/100353/191F5626",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035337,
                             },
                         ],
@@ -20476,6 +20591,7 @@ export const questData: QuestStory[] = [
                                 content: "别来无恙，姐姐。",
                                 voice: "story/1003/100354/191F61F6",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035408,
                             },
                             {
@@ -20490,6 +20606,7 @@ export const questData: QuestStory[] = [
                                 content: "算了……我现在应该，称呼你，黎瑟长官。你，冷静点，了吗。",
                                 voice: "story/1003/100354/191F624A",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035410,
                             },
                             {
@@ -20504,6 +20621,7 @@ export const questData: QuestStory[] = [
                                 content: "布鲁斯·费西尔。你的，弟弟。那把口琴的，主人。",
                                 voice: "story/1003/100354/191F629E",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035412,
                             },
                             {
@@ -20525,6 +20643,7 @@ export const questData: QuestStory[] = [
                                 content: "呵……",
                                 voice: "story/1003/100354/191F631C",
                                 npc: 100327,
+                                speakerName: "布鲁斯？",
                                 next: 10035415,
                             },
                             {
@@ -20547,6 +20666,7 @@ export const questData: QuestStory[] = [
                                 content: "还给你吧。军团，背叛了我。再也，用不到它了。",
                                 voice: "story/1003/100354/191F639A",
                                 npc: 100327,
+                                speakerName: "布鲁斯？",
                                 next: 10035418,
                             },
                             {
@@ -20590,6 +20710,7 @@ export const questData: QuestStory[] = [
                                 content: "……你的，直觉，很敏锐。但这在帝国，不一定是，好事……",
                                 voice: "story/1003/100354/191F6496",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10035424,
                             },
                             {
@@ -20597,6 +20718,7 @@ export const questData: QuestStory[] = [
                                 content: "……黎瑟，我的姐姐……让我来告诉你吧，“桂冠卡戎”的，真相……",
                                 voice: "story/1003/100354/191F64C0",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                             },
                         ],
                     },
@@ -20624,6 +20746,7 @@ export const questData: QuestStory[] = [
                                 content: "“凶手”……",
                                 voice: "story/1003/100354/191F614E",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035404,
                             },
                             {
@@ -20631,6 +20754,7 @@ export const questData: QuestStory[] = [
                                 content: "看来，直到最后，他们也，没告诉你，真相。果然十三军团，也是，一丘之貉。",
                                 voice: "story/1003/100354/191F6178",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035405,
                             },
                             {
@@ -21762,6 +21886,7 @@ export const questData: QuestStory[] = [
                                 content: "……呵。",
                                 voice: "story/1003/100350/191F1F84",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035003,
                             },
                             {
@@ -21769,6 +21894,7 @@ export const questData: QuestStory[] = [
                                 content: "谎言，尚未揭穿。",
                                 voice: "story/1003/100350/191F1FAE",
                                 npc: 100327,
+                                speakerName: "？？？",
                                 next: 10035004,
                             },
                             {
@@ -21790,6 +21916,7 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100350/191F202C",
                                 npc: 100327,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -22043,6 +22170,7 @@ export const questData: QuestStory[] = [
                                     "“桂冠卡戎”——我曾视它为一颗最璀璨的金刚石。\n它在梦想的尽头熠熠生辉，如冰湖城最高处，那盏不灭的明灯。",
                                 voice: "story/1003/100355/191F7162",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10035502,
                             },
                             {
@@ -22051,6 +22179,7 @@ export const questData: QuestStory[] = [
                                     "后来我才知道，那并非坚硬的金刚石。\n它是玻璃——折射着虚幻的光，美丽，夺目，\n但一颗卵石，一块泥砖，便将它轻易打碎。",
                                 voice: "story/1003/100355/191F718C",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10035503,
                             },
                             {
@@ -22059,6 +22188,7 @@ export const questData: QuestStory[] = [
                                     "通过第六军团考核的卡戎之民，与任人宰割的困兽没有任何区别。\n倒不如说我们宁愿成为一头无知麻木的野兽——\n这样我们便不会为破灭的梦而痛苦，不会因无法完成的约定而恸哭。",
                                 voice: "story/1003/100355/191F71B6",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                             },
                         ],
                     },
@@ -22074,6 +22204,7 @@ export const questData: QuestStory[] = [
                                     "我们不知道这样的日子过去了多久，只知道自己的身体正一步步变成可怖的怪物。心也变得越发冰冷，碎裂在泪湖的冷风之中。",
                                 voice: "story/1003/100355/191F742C",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10035519,
                             },
                             {
@@ -22081,6 +22212,7 @@ export const questData: QuestStory[] = [
                                 content: "生而为人的旧日记忆渐行渐远。最终，连名字都被遗忘。",
                                 voice: "story/1003/100355/191F7456",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10035520,
                             },
                             {
@@ -22088,6 +22220,7 @@ export const questData: QuestStory[] = [
                                 content: "布鲁斯·费西尔死了。取而代之的是<W>47号</>——这个新的“称呼”。",
                                 voice: "story/1003/100355/191F7480",
                                 npc: 100327,
+                                speakerName: "47号",
                                 next: 10035521,
                             },
                             {
@@ -22095,6 +22228,7 @@ export const questData: QuestStory[] = [
                                 content: "可即使如此，我们的肉体依旧在苟延残喘地挣扎着。",
                                 voice: "story/1003/100355/191F74AA",
                                 npc: 100327,
+                                speakerName: "47号",
                             },
                         ],
                     },
@@ -22108,6 +22242,7 @@ export const questData: QuestStory[] = [
                                 content: "报告老师，排异反应终止了，各项指标趋于平稳。就是β型抑制剂好像使用太多了，精神状态不稳定。",
                                 voice: "story/1003/100355/191F74D4",
                                 npc: 100336,
+                                speakerName: "稚嫩的声音",
                                 next: 10035523,
                             },
                             {
@@ -22115,6 +22250,7 @@ export const questData: QuestStory[] = [
                                 content: "精神不过是生命代谢的废料，改造体能回答“是”就足够了。带它去试验场。",
                                 voice: "story/1003/100355/191F74FE",
                                 npc: 100337,
+                                speakerName: "冰冷的声音",
                                 next: 10035524,
                             },
                             {
@@ -22122,6 +22258,7 @@ export const questData: QuestStory[] = [
                                 content: "是，老师。",
                                 voice: "story/1003/100355/191F7528",
                                 npc: 100336,
+                                speakerName: "稚嫩的声音",
                             },
                         ],
                     },
@@ -22141,36 +22278,42 @@ export const questData: QuestStory[] = [
                                 id: 10035601,
                                 content: "有抑制剂在，<H>连违背我们的命令都做不到</>，简直像是牲畜一样。",
                                 voice: "story/1003/100356/191F81CA",
+                                speakerName: "炼金院内的声音",
                                 next: 10035602,
                             },
                             {
                                 id: 10035602,
                                 content: "凶恶野蛮，缺乏理性且毫无美感。不过，这才是卡戎之民原初的模样。",
                                 voice: "story/1003/100356/191F81F4",
+                                speakerName: "炼金院内的声音",
                                 next: 10035603,
                             },
                             {
                                 id: 10035603,
                                 content: "喂，离它远点，说不定身上有什么不干净的呢。",
                                 voice: "story/1003/100356/191F821E",
+                                speakerName: "炼金院内的声音",
                                 next: 10035604,
                             },
                             {
                                 id: 10035604,
                                 content: "等会儿好好记下它的战斗数据，不达标或者有可疑举动就处理掉。",
                                 voice: "story/1003/100356/191F8248",
+                                speakerName: "炼金院内的声音",
                                 next: 10035605,
                             },
                             {
                                 id: 10035605,
                                 content: "这样真的可以吗？会不会太残忍了？",
                                 voice: "story/1003/100356/191F8272",
+                                speakerName: "炼金院内的声音",
                                 next: 10035606,
                             },
                             {
                                 id: 10035606,
                                 content: "不，应该说正是吾皇的仁慈和炼金技术的伟大，才能赐予这样的垃圾献身于炼金院的价值。",
                                 voice: "story/1003/100356/191F829C",
+                                speakerName: "炼金院内的声音",
                                 next: 10035607,
                             },
                             {
@@ -22178,6 +22321,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "不要想着逃跑，电网与机炮可不像我们这般仁慈。也不要想着自毁，我们还有不少药品可以延续你那一文不值的生命。",
                                 voice: "story/1003/100356/191F82C6",
+                                speakerName: "炼金院内的声音",
                             },
                         ],
                     },
@@ -22190,12 +22334,14 @@ export const questData: QuestStory[] = [
                                 id: 10035608,
                                 content: "测试开始，投放改造体。",
                                 voice: "story/1003/100356/191F82F0",
+                                speakerName: "冰冷的声音",
                                 next: 10035609,
                             },
                             {
                                 id: 10035609,
                                 content: "47号，消灭一切阻拦者。",
                                 voice: "story/1003/100356/191F831A",
+                                speakerName: "稚嫩的声音",
                                 next: 10035610,
                             },
                             {
@@ -22203,6 +22349,7 @@ export const questData: QuestStory[] = [
                                 content: "是。",
                                 voice: "story/1003/100356/191F8344",
                                 npc: 100328,
+                                speakerName: "47号",
                             },
                         ],
                     },
@@ -22216,6 +22363,7 @@ export const questData: QuestStory[] = [
                                 id: 10035611,
                                 content: "那边还有敌人，不要停下来哦。",
                                 voice: "story/1003/100356/191F836E",
+                                speakerName: "稚嫩的声音",
                             },
                         ],
                     },
@@ -22228,6 +22376,7 @@ export const questData: QuestStory[] = [
                                 id: 10035617,
                                 content: "测试通过，带回收容处。我们准备迎接下一批改造体了。",
                                 voice: "story/1003/100356/191F846A",
+                                speakerName: "冰冷的声音",
                             },
                         ],
                     },
@@ -22241,6 +22390,7 @@ export const questData: QuestStory[] = [
                                 id: 10035612,
                                 content: "数据落后预期了，去把那边的敌人也清理掉，快。",
                                 voice: "story/1003/100356/191F8398",
+                                speakerName: "冰冷的声音",
                             },
                         ],
                     },
@@ -22254,6 +22404,7 @@ export const questData: QuestStory[] = [
                                 id: 10035613,
                                 content: "加油！加油！",
                                 voice: "story/1003/100356/191F83C2",
+                                speakerName: "稚嫩的声音",
                             },
                         ],
                     },
@@ -22267,6 +22418,7 @@ export const questData: QuestStory[] = [
                                 id: 10035614,
                                 content: "受伤了？这么脆弱吗？",
                                 voice: "story/1003/100356/191F83EC",
+                                speakerName: "冰冷的声音",
                             },
                         ],
                     },
@@ -22280,6 +22432,7 @@ export const questData: QuestStory[] = [
                                 id: 10035615,
                                 content: "去那边哦~",
                                 voice: "story/1003/100356/191F8416",
+                                speakerName: "稚嫩的声音",
                             },
                         ],
                     },
@@ -22292,6 +22445,7 @@ export const questData: QuestStory[] = [
                                 id: 10035616,
                                 content: "那边的敌人还有口气，这种敌人都处理不好吗？",
                                 voice: "story/1003/100356/191F8440",
+                                speakerName: "冰冷的声音",
                             },
                         ],
                     },
@@ -22313,6 +22467,7 @@ export const questData: QuestStory[] = [
                                 content: "醒醒，醒醒。",
                                 voice: "story/1003/100357/191F9232",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035702,
                             },
                             {
@@ -22320,6 +22475,7 @@ export const questData: QuestStory[] = [
                                 content: "我是36号，你是谁？",
                                 voice: "story/1003/100357/191F925C",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035703,
                             },
                             {
@@ -22327,6 +22483,7 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100357/191F9286",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035704,
                             },
                             {
@@ -22334,6 +22491,7 @@ export const questData: QuestStory[] = [
                                 content: "不想说话没事。你随便出一下声，让我知道你也活着就好。",
                                 voice: "story/1003/100357/191F92B0",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035705,
                             },
                             {
@@ -22341,6 +22499,7 @@ export const questData: QuestStory[] = [
                                 content: "……47号。",
                                 voice: "story/1003/100357/191F92DA",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035706,
                             },
                             {
@@ -22348,6 +22507,7 @@ export const questData: QuestStory[] = [
                                 content: "太好了，我还以为再也遇不到能说话的人了。",
                                 voice: "story/1003/100357/191F9304",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035707,
                             },
                             {
@@ -22355,6 +22515,7 @@ export const questData: QuestStory[] = [
                                 content: "我们很熟吗？",
                                 voice: "story/1003/100357/191F932E",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035708,
                             },
                             {
@@ -22362,6 +22523,7 @@ export const questData: QuestStory[] = [
                                 content: "哈哈，总会熟起来的嘛。毕竟我们是这鬼地方仅有的<H>人</>了。",
                                 voice: "story/1003/100357/191F9358",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035709,
                             },
                             {
@@ -22369,6 +22531,7 @@ export const questData: QuestStory[] = [
                                 content: "哈，也就你会觉得我们还算人了。",
                                 voice: "story/1003/100357/191F9382",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035710,
                             },
                             {
@@ -22376,6 +22539,7 @@ export const questData: QuestStory[] = [
                                 content: "重要的是心。",
                                 voice: "story/1003/100357/191F93AC",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035711,
                             },
                             {
@@ -22383,6 +22547,7 @@ export const questData: QuestStory[] = [
                                 content: "那种东西早就碎在了实验台上。",
                                 voice: "story/1003/100357/191F93D6",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035712,
                             },
                             {
@@ -22390,6 +22555,7 @@ export const questData: QuestStory[] = [
                                 content: "那就让我们把它再次拼起来吧，然后一起以人的身份逃出去。",
                                 voice: "story/1003/100357/191F9400",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035713,
                             },
                             {
@@ -22397,6 +22563,7 @@ export const questData: QuestStory[] = [
                                 content: "……白日做梦。",
                                 voice: "story/1003/100357/191F942A",
                                 npc: 100328,
+                                speakerName: "47号",
                             },
                         ],
                     },
@@ -22410,12 +22577,14 @@ export const questData: QuestStory[] = [
                                 id: 10035801,
                                 content: "测试开始。这次的敌人比较罕见，做好数据记录。",
                                 voice: "story/1003/100358/191FA29A",
+                                speakerName: "冰冷的声音",
                                 next: 10035802,
                             },
                             {
                                 id: 10035802,
                                 content: "是，老师！",
                                 voice: "story/1003/100358/191FA2C4",
+                                speakerName: "稚嫩的声音",
                             },
                         ],
                     },
@@ -22428,12 +22597,14 @@ export const questData: QuestStory[] = [
                                 id: 10035803,
                                 content: "虽然我们被抓了，但是敢给我们武器，那就让你们尝尝神的怒火！",
                                 voice: "story/1003/100358/191FA2EE",
+                                speakerName: "被俘的传颂会士兵",
                                 next: 10035804,
                             },
                             {
                                 id: 10035804,
                                 content: "海伯利亚人，堕落的亵渎者，竟然造出这样的怪物！杀了它！",
                                 voice: "story/1003/100358/191FA318",
+                                speakerName: "被俘的传颂会士兵",
                             },
                         ],
                     },
@@ -22446,6 +22617,7 @@ export const questData: QuestStory[] = [
                                 id: 10035805,
                                 content: "放，放过我们，我们明明已经投降了啊！",
                                 voice: "story/1003/100358/191FA342",
+                                speakerName: "被俘的传颂会士兵",
                                 next: 10035806,
                             },
                             {
@@ -22453,12 +22625,14 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100358/191FA36C",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035807,
                             },
                             {
                                 id: 10035807,
                                 content: "九神啊……！请怜悯我，赐我智慧，赐我力量，赐我庇护……！",
                                 voice: "story/1003/100358/191FA396",
+                                speakerName: "被俘的传颂会士兵",
                                 next: 10035808,
                             },
                             {
@@ -22466,12 +22640,14 @@ export const questData: QuestStory[] = [
                                 content: "抱歉。",
                                 voice: "story/1003/100358/191FA3C0",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035809,
                             },
                             {
                                 id: 10035809,
                                 content: "啊啊……宽恕我，宽恕我……",
                                 voice: "story/1003/100358/191FA3EA",
+                                speakerName: "被俘的传颂会士兵",
                             },
                         ],
                     },
@@ -22484,6 +22660,7 @@ export const questData: QuestStory[] = [
                                 id: 10035813,
                                 content: "实验数据采集完成，你们自己回去吧，我要去给老师提交报告。",
                                 voice: "story/1003/100358/191FA492",
+                                speakerName: "稚嫩的声音",
                             },
                         ],
                     },
@@ -22505,6 +22682,7 @@ export const questData: QuestStory[] = [
                                 content: "（无言的白雪啊……苍穹的女儿……）",
                                 voice: "story/1003/100359/191FB302",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035902,
                             },
                             {
@@ -22512,6 +22690,7 @@ export const questData: QuestStory[] = [
                                 content: "抱歉，吵醒你了吗？",
                                 voice: "story/1003/100359/191FB32C",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035903,
                             },
                             {
@@ -22519,6 +22698,7 @@ export const questData: QuestStory[] = [
                                 content: "难听得让人睡不着。头一次听到有人能把《雪国的孩子》里的唱段唱这么难听。",
                                 voice: "story/1003/100359/191FB356",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035904,
                             },
                             {
@@ -22526,6 +22706,7 @@ export const questData: QuestStory[] = [
                                 content: "哈哈，如果有乐器，能演奏就不难听了。",
                                 voice: "story/1003/100359/191FB380",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035905,
                             },
                             {
@@ -22533,6 +22714,7 @@ export const questData: QuestStory[] = [
                                 content: "你不难受吗？",
                                 voice: "story/1003/100359/191FB3AA",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035906,
                             },
                             {
@@ -22540,6 +22722,7 @@ export const questData: QuestStory[] = [
                                 content: "难受才要唱歌。",
                                 voice: "story/1003/100359/191FB3D4",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035907,
                             },
                             {
@@ -22547,6 +22730,7 @@ export const questData: QuestStory[] = [
                                 content: "省省吧。好不容易熬过了实验，别把自己唱死了。",
                                 voice: "story/1003/100359/191FB3FE",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035908,
                             },
                             {
@@ -22554,6 +22738,7 @@ export const questData: QuestStory[] = [
                                 content: "肉体的疼痛不算什么。把活生生的人给……！才让人难受……",
                                 voice: "story/1003/100359/191FB428",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035909,
                             },
                             {
@@ -22561,6 +22746,7 @@ export const questData: QuestStory[] = [
                                 content: "这么久了，你还认为自己还是人啊。我们是怪物，无知无觉的、任人驱使的怪物。记住这点，你就不难受了。",
                                 voice: "story/1003/100359/191FB452",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035910,
                             },
                             {
@@ -22568,6 +22754,7 @@ export const questData: QuestStory[] = [
                                 content: "不能……不能变成怪物……如果连心都投降了，就真的变成怪物了。",
                                 voice: "story/1003/100359/191FB47C",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035911,
                             },
                             {
@@ -22575,6 +22762,7 @@ export const questData: QuestStory[] = [
                                 content: "你忘了上次逃跑失败被按在电椅上了？省省吧，还是你想再挨一次？",
                                 voice: "story/1003/100359/191FB4A6",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035912,
                             },
                             {
@@ -22582,6 +22770,7 @@ export const questData: QuestStory[] = [
                                 content: "你看，你还在关心这些。这就证明了你还不是怪物。",
                                 voice: "story/1003/100359/191FB4D0",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10035913,
                             },
                             {
@@ -22589,6 +22778,7 @@ export const questData: QuestStory[] = [
                                 content: "诡辩。",
                                 voice: "story/1003/100359/191FB4FA",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10035914,
                             },
                             {
@@ -22596,6 +22786,7 @@ export const questData: QuestStory[] = [
                                 content: "放心，我会带你一起逃出去的。",
                                 voice: "story/1003/100359/191FB524",
                                 npc: 100331,
+                                speakerName: "36号",
                             },
                         ],
                     },
@@ -22608,18 +22799,21 @@ export const questData: QuestStory[] = [
                                 id: 10035810,
                                 content: "上啊，让我看看你们到底谁才是真正的恶魔，哈哈哈。",
                                 voice: "story/1003/100358/191FA414",
+                                speakerName: "稚嫩的声音",
                                 next: 10035811,
                             },
                             {
                                 id: 10035811,
                                 content: "真好用，配合这段时间注射的抑制剂，稳定性也高了不少。",
                                 voice: "story/1003/100358/191FA43E",
+                                speakerName: "稚嫩的声音",
                                 next: 10035812,
                             },
                             {
                                 id: 10035812,
                                 content: "这样下去把改造实验推广向其他军团也指日可待了。",
                                 voice: "story/1003/100358/191FA468",
+                                speakerName: "冰冷的声音",
                             },
                         ],
                     },
@@ -22632,24 +22826,28 @@ export const questData: QuestStory[] = [
                                 id: 10035915,
                                 content: "哇，这都没死成啊，再生能力看来也适应得不错。",
                                 voice: "story/1003/100359/191FB54E",
+                                speakerName: "稚嫩的声音",
                                 next: 10035916,
                             },
                             {
                                 id: 10035916,
                                 content: "喂，别以为我不知道你在想什么哦。",
                                 voice: "story/1003/100359/191FB578",
+                                speakerName: "稚嫩的声音",
                                 next: 10035917,
                             },
                             {
                                 id: 10035917,
                                 content: "明明能很轻松获胜的吧，居然故意露出破绽伤成这个样子。",
                                 voice: "story/1003/100359/191FB5A2",
+                                speakerName: "稚嫩的声音",
                                 next: 10035918,
                             },
                             {
                                 id: 10035918,
                                 content: "我们可不会让你们这么宝贵的改造体白白死掉呢！",
                                 voice: "story/1003/100359/191FB5CC",
+                                speakerName: "稚嫩的声音",
                             },
                         ],
                     },
@@ -22670,6 +22868,7 @@ export const questData: QuestStory[] = [
                                 content: "36号，喂，36号！",
                                 voice: "story/1003/100360/191FC36A",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036002,
                             },
                             {
@@ -22677,6 +22876,7 @@ export const questData: QuestStory[] = [
                                 content: "……",
                                 voice: "story/1003/100360/191FC394",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036003,
                             },
                             {
@@ -22684,6 +22884,7 @@ export const questData: QuestStory[] = [
                                 content: "喂……",
                                 voice: "story/1003/100360/191FC3BE",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036004,
                             },
                             {
@@ -22691,6 +22892,7 @@ export const questData: QuestStory[] = [
                                 content: "……",
                                 voice: "story/1003/100360/191FC3E8",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036005,
                             },
                             {
@@ -22698,6 +22900,7 @@ export const questData: QuestStory[] = [
                                 content: "嘿……这个，拿去……应该能缓解一下我们白天受的伤。",
                                 voice: "story/1003/100360/191FC412",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036006,
                             },
                             {
@@ -22705,6 +22908,7 @@ export const questData: QuestStory[] = [
                                 content: "……所以你白天任务完成那么慢，还挨了打，就是为了这几瓶药？",
                                 voice: "story/1003/100360/191FC43C",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036007,
                             },
                             {
@@ -22712,6 +22916,7 @@ export const questData: QuestStory[] = [
                                 content: "被你发现了呀……",
                                 voice: "story/1003/100360/191FC466",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036008,
                             },
                             {
@@ -22719,6 +22924,7 @@ export const questData: QuestStory[] = [
                                 content: "可别放弃活下去的念头。我说过，要带你活着逃出去。",
                                 voice: "story/1003/100360/191FC490",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036009,
                             },
                             {
@@ -22726,6 +22932,7 @@ export const questData: QuestStory[] = [
                                 content: "为什么想活着？我们都这样了，出去了又能有什么好事？",
                                 voice: "story/1003/100360/191FC4BA",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036010,
                             },
                             {
@@ -22733,6 +22940,7 @@ export const questData: QuestStory[] = [
                                 content: "但死掉就永远不会发生好事，我不甘心。",
                                 voice: "story/1003/100360/191FC4E4",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036011,
                             },
                             {
@@ -22740,6 +22948,7 @@ export const questData: QuestStory[] = [
                                 content: "我们都还有梦想没实现吧。",
                                 voice: "story/1003/100360/191FC50E",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036012,
                             },
                             {
@@ -22747,6 +22956,7 @@ export const questData: QuestStory[] = [
                                 content: "不重要了，反正都这样了。",
                                 voice: "story/1003/100360/191FC538",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036013,
                             },
                             {
@@ -22754,6 +22964,7 @@ export const questData: QuestStory[] = [
                                 content: "讲讲。反复说起，能提醒我们还是个人。",
                                 voice: "story/1003/100360/191FC562",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036014,
                             },
                             {
@@ -22761,6 +22972,7 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100360/191FC58C",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036015,
                             },
                             {
@@ -22768,6 +22980,7 @@ export const questData: QuestStory[] = [
                                 content: "……演员……",
                                 voice: "story/1003/100360/191FC5B6",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036016,
                             },
                             {
@@ -22775,6 +22988,7 @@ export const questData: QuestStory[] = [
                                 content: "什么？",
                                 voice: "story/1003/100360/191FC5E0",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036017,
                             },
                             {
@@ -22782,6 +22996,7 @@ export const questData: QuestStory[] = [
                                 content: "我曾经的梦想是做个演员。",
                                 voice: "story/1003/100360/191FC60A",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036018,
                             },
                             {
@@ -22790,6 +23005,7 @@ export const questData: QuestStory[] = [
                                     "参加第六军团的考核，也是为了有朝一日成为“桂冠卡戎”。只要过上更好的生活，就有机会登上更广大的舞台……",
                                 voice: "story/1003/100360/191FC634",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036019,
                             },
                             {
@@ -22798,6 +23014,7 @@ export const questData: QuestStory[] = [
                                     "再也不会只能对着舞台上的演员发呆，对着满屋的录音带沉默，只因为卡戎之民没有资格参加演出，因为头上那根角会污了观众的眼。",
                                 voice: "story/1003/100360/191FC65E",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036020,
                             },
                             {
@@ -22805,6 +23022,7 @@ export const questData: QuestStory[] = [
                                 content: "哈，哈哈。",
                                 voice: "story/1003/100360/191FC688",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036021,
                             },
                             {
@@ -22812,6 +23030,7 @@ export const questData: QuestStory[] = [
                                 content: "很可笑吧。",
                                 voice: "story/1003/100360/191FC6B2",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036022,
                             },
                             {
@@ -22819,6 +23038,7 @@ export const questData: QuestStory[] = [
                                 content: "我是觉得很搭。",
                                 voice: "story/1003/100360/191FC6DC",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036023,
                             },
                             {
@@ -22826,6 +23046,7 @@ export const questData: QuestStory[] = [
                                 content: "我也喜欢歌剧，难怪会和你一见如故。等我们逃出去，我们就搭个舞台，叫来亲朋好友，看我们表演。",
                                 voice: "story/1003/100360/191FC706",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036024,
                             },
                             {
@@ -22833,6 +23054,7 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100360/191FC730",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036025,
                             },
                             {
@@ -22840,6 +23062,7 @@ export const questData: QuestStory[] = [
                                 content: "不说话我就当你答应了，答应的诺言就得遵守。",
                                 voice: "story/1003/100360/191FC75A",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036026,
                             },
                             {
@@ -22847,6 +23070,7 @@ export const questData: QuestStory[] = [
                                 content: "我有预感，离开的机会就要到了。",
                                 voice: "story/1003/100360/191FC784",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036027,
                             },
                             {
@@ -22854,6 +23078,7 @@ export const questData: QuestStory[] = [
                                 content: "错觉罢了。",
                                 voice: "story/1003/100360/191FC7AE",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036028,
                             },
                             {
@@ -22861,6 +23086,7 @@ export const questData: QuestStory[] = [
                                 content: "这可不是错觉，你没感觉这些年下来，<H>抑制剂对我们的效果减弱了</>吗？",
                                 voice: "story/1003/100360/191FC7D8",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036029,
                             },
                             {
@@ -22868,6 +23094,7 @@ export const questData: QuestStory[] = [
                                 content: "这就是我们还是人的证明，连身体都在提醒我们，该反抗了！",
                                 voice: "story/1003/100360/191FC802",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036030,
                             },
                             {
@@ -22875,6 +23102,7 @@ export const questData: QuestStory[] = [
                                 content: "说难听点，就是这具该死的怪物的身体变异得太成功了。",
                                 voice: "story/1003/100360/191FC82C",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036031,
                             },
                             {
@@ -22882,6 +23110,7 @@ export const questData: QuestStory[] = [
                                 content: "哈哈，炼金术师还没注意到这种变异，结果来说是好的嘛！我想想，我们得约个行动暗号……",
                                 voice: "story/1003/100360/191FC856",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036032,
                             },
                             {
@@ -22889,6 +23118,7 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100360/191FC880",
                                 npc: 100328,
+                                speakerName: "47号",
                             },
                         ],
                     },
@@ -22908,18 +23138,21 @@ export const questData: QuestStory[] = [
                                 id: 10036113,
                                 content: "抱、抱歉老师……我没想到改造体居然能突破抑制剂的控制……",
                                 voice: "story/1003/100361/191FD5CA",
+                                speakerName: "稚嫩的声音",
                                 next: 10036114,
                             },
                             {
                                 id: 10036114,
                                 content: "这是所有改造体身上都未曾有过的<H>异变</>，也许这就是我们最成功的杰作！",
                                 voice: "story/1003/100361/191FD5F4",
+                                speakerName: "冰冷的声音",
                                 next: 10036115,
                             },
                             {
                                 id: 10036115,
                                 content: "封锁消息！使用最新的γ型抑制剂！务必活捉改造体！",
                                 voice: "story/1003/100361/191FD61E",
+                                speakerName: "冰冷的声音",
                             },
                         ],
                     },
@@ -22933,6 +23166,7 @@ export const questData: QuestStory[] = [
                                 content: "咳、咳……我做到了吗……",
                                 voice: "story/1003/100361/191FD648",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036117,
                             },
                             {
@@ -22940,6 +23174,7 @@ export const questData: QuestStory[] = [
                                 content: "做到了，你做到了！",
                                 voice: "story/1003/100361/191FD672",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036118,
                             },
                             {
@@ -22947,12 +23182,14 @@ export const questData: QuestStory[] = [
                                 content: "那就，好……",
                                 voice: "story/1003/100361/191FD69C",
                                 npc: 100331,
+                                speakerName: "36号",
                                 next: 10036119,
                             },
                             {
                                 id: 10036119,
                                 content: "逃？这世上除了战场与实验室，哪里有你们怪物的容身之所！",
                                 voice: "story/1003/100361/191FD6C6",
+                                speakerName: "冰冷的声音",
                                 next: 10036120,
                             },
                             {
@@ -22960,6 +23197,7 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100361/191FD6F0",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036121,
                             },
                             {
@@ -22967,6 +23205,7 @@ export const questData: QuestStory[] = [
                                 content: "我们不是怪物。我们是，人……！",
                                 voice: "story/1003/100361/191FD71A",
                                 npc: 100331,
+                                speakerName: "36号",
                             },
                         ],
                     },
@@ -22987,6 +23226,7 @@ export const questData: QuestStory[] = [
                                 content: "这边！",
                                 voice: "story/1003/100361/191FD744",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036123,
                             },
                             {
@@ -22994,6 +23234,7 @@ export const questData: QuestStory[] = [
                                 content: "这是……风吗？自由的……咳、咳……",
                                 voice: "story/1003/100361/191FD76E",
                                 npc: 100331,
+                                speakerName: "36号",
                             },
                         ],
                     },
@@ -23007,6 +23248,7 @@ export const questData: QuestStory[] = [
                                 content: "这里有水声，一定能通向外面。",
                                 voice: "story/1003/100361/191FD798",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036125,
                             },
                             {
@@ -23014,6 +23256,7 @@ export const questData: QuestStory[] = [
                                 content: "真是，太好了，咳……",
                                 voice: "story/1003/100361/191FD7C2",
                                 npc: 100331,
+                                speakerName: "36号",
                             },
                         ],
                     },
@@ -23036,6 +23279,7 @@ export const questData: QuestStory[] = [
                                 content: "我们出来了！",
                                 voice: "story/1003/100361/191FD7EC",
                                 npc: 100327,
+                                speakerName: "47号",
                                 next: 10036127,
                             },
                             {
@@ -23043,6 +23287,7 @@ export const questData: QuestStory[] = [
                                 content: "这是炼金院的下水道……应该会有通到外面的排水口。",
                                 voice: "story/1003/100361/191FD816",
                                 npc: 100328,
+                                speakerName: "36号",
                                 next: 10036128,
                             },
                             {
@@ -23050,6 +23295,7 @@ export const questData: QuestStory[] = [
                                 content: "太好了……我们……自由了……",
                                 voice: "story/1003/100361/191FD840",
                                 npc: 100328,
+                                speakerName: "36号",
                                 next: 10036129,
                             },
                             {
@@ -23057,6 +23303,7 @@ export const questData: QuestStory[] = [
                                 content: "——呃！",
                                 voice: "story/1003/100361/191FD86A",
                                 npc: 100328,
+                                speakerName: "36号",
                                 next: 10036130,
                             },
                             {
@@ -23064,6 +23311,7 @@ export const questData: QuestStory[] = [
                                 content: "你的伤……接下来交给我。",
                                 voice: "story/1003/100361/191FD894",
                                 npc: 100328,
+                                speakerName: "47号",
                                 next: 10036131,
                             },
                             {
@@ -23071,6 +23319,7 @@ export const questData: QuestStory[] = [
                                 content: "首先，要找个地方藏身……",
                                 voice: "story/1003/100361/191FD8BE",
                                 npc: 100328,
+                                speakerName: "47号",
                             },
                         ],
                     },
@@ -23115,6 +23364,7 @@ export const questData: QuestStory[] = [
                                 content: "我……还好。",
                                 voice: "story/1003/100362/191FE4B8",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036205,
                             },
                             {
@@ -23122,6 +23372,7 @@ export const questData: QuestStory[] = [
                                 content: "只可惜，命运只是，短暂地，垂怜了我们一下。逃出炼金院，不是，新生活的开始，而是，结束……",
                                 voice: "story/1003/100362/191FE4E2",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036206,
                             },
                             {
@@ -23129,6 +23380,7 @@ export const questData: QuestStory[] = [
                                 content: "……逃跑时，炼金术师，新型抑制剂……毁掉了，我的，喉咙，更摧毁了……心智……",
                                 voice: "story/1003/100362/191FE50C",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036207,
                             },
                             {
@@ -23136,6 +23388,7 @@ export const questData: QuestStory[] = [
                                 content: "我们时常，发疯，失控……而我的朋友，<H>36号</>，已经先我一步……",
                                 voice: "story/1003/100362/191FE536",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036208,
                             },
                             {
@@ -23151,6 +23404,7 @@ export const questData: QuestStory[] = [
                                 content: "姐姐，你听好。",
                                 voice: "story/1003/100362/191FE58A",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036210,
                             },
                             {
@@ -23158,6 +23412,7 @@ export const questData: QuestStory[] = [
                                 content: "第六军团，用桂冠卡戎，欺骗我们。",
                                 voice: "story/1003/100362/191FE5B4",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036211,
                             },
                             {
@@ -23165,6 +23420,7 @@ export const questData: QuestStory[] = [
                                 content: "离开，军团。",
                                 voice: "story/1003/100362/191FE5DE",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036212,
                             },
                             {
@@ -23172,6 +23428,7 @@ export const questData: QuestStory[] = [
                                 content: "找个，安稳的地方，好好——",
                                 voice: "story/1003/100362/191FE608",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036213,
                             },
                             {
@@ -23186,6 +23443,7 @@ export const questData: QuestStory[] = [
                                 content: "我……",
                                 voice: "story/1003/100362/191FE65C",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                             },
                         ],
                     },
@@ -23247,6 +23505,7 @@ export const questData: QuestStory[] = [
                                 content: "高不可及的东西，让它坠落到地面来不就好了吗？",
                                 voice: "story/1003/100362/191FE7AC",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036223,
                             },
                             {
@@ -23261,6 +23520,7 @@ export const questData: QuestStory[] = [
                                     "我有很多个名字，也有很多种身份，但这些说到底只是一个代号。而代号不管怎么变，我们这被神抛弃的本质都不会更改。",
                                 voice: "story/1003/100362/191FE800",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036225,
                             },
                             {
@@ -23268,6 +23528,7 @@ export const questData: QuestStory[] = [
                                 content: "说到这里，聪明的你们应该知道我是谁了吧。",
                                 voice: "story/1003/100362/191FE82A",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036226,
                             },
                             {
@@ -23275,6 +23536,7 @@ export const questData: QuestStory[] = [
                                 content: "我是来向你们发出一个邀请，加入我们，将那高不可及的索拉之民拖到地上，感受卡戎的怒火。",
                                 voice: "story/1003/100362/191FE854",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036227,
                             },
                             {
@@ -23283,6 +23545,7 @@ export const questData: QuestStory[] = [
                                     "别急着拒绝。好好想想帝国对你们的所作所为吧！他们用美好的谎言欺骗你们，用残忍的刑罚折磨你们，用无尽的绝望笼罩你们。",
                                 voice: "story/1003/100362/191FE87E",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036228,
                             },
                             {
@@ -23290,6 +23553,7 @@ export const questData: QuestStory[] = [
                                 content: "在这条路的尽头等你们的是什么？当上“桂冠卡戎”，过上更好的生活，实现更远的梦想？",
                                 voice: "story/1003/100362/191FE8A8",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036229,
                             },
                             {
@@ -23297,6 +23561,7 @@ export const questData: QuestStory[] = [
                                 content: "不！是被索拉人敲骨吸髓，被同胞中的叛徒追捕，最后死在哪个不知名的角落。",
                                 voice: "story/1003/100362/191FE8D2",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036230,
                             },
                             {
@@ -23304,6 +23569,7 @@ export const questData: QuestStory[] = [
                                 content: "他们用一个简单的承诺，驱使如你，如我，如所有渴望出人头地的卡戎，一头扎进深渊。",
                                 voice: "story/1003/100362/191FE8FC",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036231,
                             },
                             {
@@ -23312,6 +23578,7 @@ export const questData: QuestStory[] = [
                                     "只要第六军团和炼金院的谎言不被戳破，就不断会有冰湖城的卡戎之民沿着军团这条路走下去，一个又一个，踏上和你们一样的悲剧。",
                                 voice: "story/1003/100362/191FE926",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036232,
                             },
                             {
@@ -23325,6 +23592,7 @@ export const questData: QuestStory[] = [
                                 content: "我们被帝国夺走了过去，苟活在当下。未来我们也要这样毫无作为，让那群畜生碾碎我们所珍视的一切吗？",
                                 voice: "story/1003/100362/191FE97A",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036234,
                             },
                             {
@@ -23332,6 +23600,7 @@ export const questData: QuestStory[] = [
                                 content: "看啊，看看现在的你我。帝国贪求我们的力量，为我们套上镣铐，把我们变成野兽，沦为真正的恶魔。",
                                 voice: "story/1003/100362/191FE9A4",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036235,
                             },
                             {
@@ -23339,6 +23608,7 @@ export const questData: QuestStory[] = [
                                 content: "如今我们好不容易挣脱了枷锁，那不正是用帝国给予我们的这副獠牙，狠狠咬向他们咽喉的时刻吗！",
                                 voice: "story/1003/100362/191FE9CE",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036236,
                             },
                             {
@@ -23347,6 +23617,7 @@ export const questData: QuestStory[] = [
                                     "让他们记住我们的存在，感受我们的痛苦，再也不敢觊觎我们珍视的东西！让他们用鲜血去忏悔，去铭记我们的存在，让整个帝国呼唤我们的名字！",
                                 voice: "story/1003/100362/191FE9F8",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036237,
                             },
                             {
@@ -23361,6 +23632,7 @@ export const questData: QuestStory[] = [
                                     "你们可以把它理解成报复，但我更希望你们把它理解成保护，这是只有我们“恶魔”才能做到的责任——清理内城的“垃圾”，还你们的家人一个干净的未来。",
                                 voice: "story/1003/100362/191FEA4C",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                             },
                         ],
                     },
@@ -23376,6 +23648,7 @@ export const questData: QuestStory[] = [
                                 content: "（神弃者同盟……）",
                                 voice: "story/1003/100362/191FEA76",
                                 npc: 100328,
+                                speakerName: "布鲁斯",
                                 next: 10036240,
                             },
                             {
@@ -23383,6 +23656,7 @@ export const questData: QuestStory[] = [
                                 content: "我还有，未竟之事。",
                                 voice: "story/1003/100362/191FEAA0",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036241,
                             },
                             {
@@ -23397,6 +23671,7 @@ export const questData: QuestStory[] = [
                                 content: "不要跟来。",
                                 voice: "story/1003/100362/191FEAF4",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                             },
                         ],
                     },
@@ -23417,6 +23692,7 @@ export const questData: QuestStory[] = [
                                 content: "（盖雷亚剧院，我回来了。）",
                                 voice: "story/1003/100363/191FF54A",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036306,
                             },
                             {
@@ -23424,6 +23700,7 @@ export const questData: QuestStory[] = [
                                 content: "（只可惜是在这愚蠢的狂欢日……这群疯狂的家伙对这儿是一种玷污。）",
                                 voice: "story/1003/100363/191FF574",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036307,
                             },
                             {
@@ -23431,6 +23708,7 @@ export const questData: QuestStory[] = [
                                 content: "（……现在不是思考这个的时候。去和同盟的那家伙碰面吧。）",
                                 voice: "story/1003/100363/191FF59E",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                             },
                         ],
                     },
@@ -23450,18 +23728,21 @@ export const questData: QuestStory[] = [
                                 id: 10036317,
                                 content: "酷啊！这次的演出比往年还逼真！",
                                 voice: "story/1003/100363/191FF742",
+                                speakerName: "沸腾的人群",
                                 next: 10036318,
                             },
                             {
                                 id: 10036318,
                                 content: "喂，怎么还有人装扮成军团士兵的模样啊？看手里那家伙，跟真的一样啊！",
                                 voice: "story/1003/100363/191FF76C",
+                                speakerName: "沸腾的人群",
                                 next: 10036319,
                             },
                             {
                                 id: 10036319,
                                 content: "他们是在演什么战争戏吗？打起来，打起来！",
                                 voice: "story/1003/100363/191FF796",
+                                speakerName: "沸腾的人群",
                                 next: 10036320,
                             },
                             {
@@ -23469,18 +23750,21 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100363/191FF7C0",
                                 npc: 100310,
+                                speakerName: "克莱夫",
                                 next: 10036321,
                             },
                             {
                                 id: 10036321,
                                 content: "我*，这枪声，演得太真了吧！",
                                 voice: "story/1003/100363/191FF7EA",
+                                speakerName: "沸腾的人群",
                                 next: 10036322,
                             },
                             {
                                 id: 10036322,
                                 content: "哥们，好样的！再来一个！",
                                 voice: "story/1003/100363/191FF814",
+                                speakerName: "沸腾的人群",
                                 next: 10036323,
                             },
                             {
@@ -23488,6 +23772,7 @@ export const questData: QuestStory[] = [
                                 content: "唉……",
                                 voice: "story/1003/100363/191FF83E",
                                 npc: 100310,
+                                speakerName: "克莱夫",
                                 next: 10036324,
                             },
                             {
@@ -23495,18 +23780,21 @@ export const questData: QuestStory[] = [
                                 content: "第十三军团执行公务，枪弹无眼，再不滚就死！",
                                 voice: "story/1003/100363/191FF868",
                                 npc: 100310,
+                                speakerName: "克莱夫",
                                 next: 10036325,
                             },
                             {
                                 id: 10036325,
                                 content: "等、等下……是真家伙？！",
                                 voice: "story/1003/100363/191FF892",
+                                speakerName: "沸腾的人群",
                                 next: 10036326,
                             },
                             {
                                 id: 10036326,
                                 content: "是军团，真的军团！！",
                                 voice: "story/1003/100363/191FF8BC",
+                                speakerName: "沸腾的人群",
                                 next: 10036327,
                             },
                             {
@@ -23514,6 +23802,7 @@ export const questData: QuestStory[] = [
                                 content: "阿诺德、托马斯、疏散群众！",
                                 voice: "story/1003/100363/191FF8E6",
                                 npc: 100310,
+                                speakerName: "克莱夫",
                                 next: 10036328,
                             },
                             {
@@ -23521,6 +23810,7 @@ export const questData: QuestStory[] = [
                                 content: "其他人，继续压制。",
                                 voice: "story/1003/100363/191FF910",
                                 npc: 100310,
+                                speakerName: "克莱夫",
                             },
                         ],
                     },
@@ -23537,6 +23827,7 @@ export const questData: QuestStory[] = [
                                 content: "居然叫我来这种地方，你还有这般雅兴。",
                                 voice: "story/1003/100363/191FF5C8",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036309,
                             },
                             {
@@ -23544,6 +23835,7 @@ export const questData: QuestStory[] = [
                                 content: "我不是说过如无必要减少碰面吗？现在十三军团也撤走了，我们得尽快完成此前的约定才是。",
                                 voice: "story/1003/100363/191FF5F2",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036310,
                             },
                             {
@@ -23551,6 +23843,7 @@ export const questData: QuestStory[] = [
                                 content: "没错，可以完成，约定了。",
                                 voice: "story/1003/100363/191FF61C",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036311,
                             },
                             {
@@ -23558,6 +23851,7 @@ export const questData: QuestStory[] = [
                                 content: "…………？！",
                                 voice: "story/1003/100363/191FF646",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                             },
                         ],
                     },
@@ -23571,6 +23865,7 @@ export const questData: QuestStory[] = [
                                 content: "你……怎么……唔……呃——！",
                                 voice: "story/1003/100363/191FF670",
                                 npc: 100326,
+                                speakerName: "低沉的声音",
                                 next: 10036313,
                             },
                             {
@@ -23578,6 +23873,7 @@ export const questData: QuestStory[] = [
                                 content: "协助你，借此引来，十三军团，目的，达到。",
                                 voice: "story/1003/100363/191FF69A",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036314,
                             },
                             {
@@ -23585,6 +23881,7 @@ export const questData: QuestStory[] = [
                                 content: "但十三军团，拒绝，揭露真相。",
                                 voice: "story/1003/100363/191FF6C4",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036315,
                             },
                             {
@@ -23592,6 +23889,7 @@ export const questData: QuestStory[] = [
                                 content: "那么你，就没有，利用价值。",
                                 voice: "story/1003/100363/191FF6EE",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036316,
                             },
                             {
@@ -23599,6 +23897,7 @@ export const questData: QuestStory[] = [
                                 content: "神弃者，也是，祸患。",
                                 voice: "story/1003/100363/191FF718",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                             },
                         ],
                     },
@@ -23770,6 +24069,7 @@ export const questData: QuestStory[] = [
                                 content: "这可，不行。",
                                 voice: "story/1003/100365/19201812",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                             },
                         ],
                     },
@@ -23811,6 +24111,7 @@ export const questData: QuestStory[] = [
                                 content: "你们、怎么……",
                                 voice: "story/1003/100365/192018E4",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                             },
                         ],
                     },
@@ -23832,6 +24133,7 @@ export const questData: QuestStory[] = [
                                 content: "你们，怎么来了？你们、和军团交手，下场会——",
                                 voice: "story/1003/100365/19201938",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036525,
                             },
                             {
@@ -23920,6 +24222,7 @@ export const questData: QuestStory[] = [
                                 content: "……好吧，我答应。但姐姐也要，答应我一件事。",
                                 voice: "story/1003/100365/19201B06",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036536,
                             },
                             {
@@ -23927,6 +24230,7 @@ export const questData: QuestStory[] = [
                                 content: "无论发生什么，好好，活下去。",
                                 voice: "story/1003/100365/19201B30",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                             },
                         ],
                     },
@@ -23941,6 +24245,7 @@ export const questData: QuestStory[] = [
                                 content: "袭击了，军团，等待你们的只会是，无尽的折磨，或者死亡。",
                                 voice: "story/1003/100365/19201B5A",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036538,
                             },
                             {
@@ -23948,6 +24253,7 @@ export const questData: QuestStory[] = [
                                 content: "我也还有，愿望，没实现。所以抱歉，接下来的路，就请你一个人走了。",
                                 voice: "story/1003/100365/19201B84",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036539,
                             },
                             {
@@ -23955,6 +24261,7 @@ export const questData: QuestStory[] = [
                                 content: "冰湖城的，狩月人。能委托你们吗。把她……",
                                 voice: "story/1003/100365/19201BAE",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036540,
                             },
                             {
@@ -23969,6 +24276,7 @@ export const questData: QuestStory[] = [
                                 content: "逃跑，是，没有尽头的。",
                                 voice: "story/1003/100365/19201C02",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036542,
                             },
                             {
@@ -23983,6 +24291,7 @@ export const questData: QuestStory[] = [
                                 content: "走，吧，你是个，好人。和他，一样。",
                                 voice: "story/1003/100365/19201C56",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036544,
                             },
                             {
@@ -24011,6 +24320,7 @@ export const questData: QuestStory[] = [
                                 content: "“无言的白雪啊……苍穹的女儿……为那无名的孩子……献上祈祷吧……”",
                                 voice: "story/1003/100365/19201CFE",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036548,
                             },
                             {
@@ -24025,6 +24335,7 @@ export const questData: QuestStory[] = [
                                 content: "“他已深眠于……冻土之下……”",
                                 voice: "story/1003/100365/19201D52",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036582,
                             },
                             {
@@ -24053,6 +24364,7 @@ export const questData: QuestStory[] = [
                                 content: "……呵……",
                                 voice: "story/1003/100365/19201DFA",
                                 npc: 100328,
+                                speakerName: "布鲁斯？",
                                 next: 10036554,
                             },
                             {
@@ -24060,6 +24372,7 @@ export const questData: QuestStory[] = [
                                 content: "……什么时候，猜到的？",
                                 voice: "story/1003/100365/19201E24",
                                 npc: 100328,
+                                speakerName: "布鲁斯？",
                                 next: 10036555,
                             },
                             {
@@ -24155,6 +24468,7 @@ export const questData: QuestStory[] = [
                                 content: "连这个都，猜中了啊……",
                                 voice: "story/1003/100365/19202046",
                                 npc: 100328,
+                                speakerName: "布鲁斯？",
                                 next: 10036568,
                             },
                             {
@@ -24162,6 +24476,7 @@ export const questData: QuestStory[] = [
                                 content: "是的，布鲁斯已经不在了。但他不想，他的姐姐知道，是谁杀了自己……",
                                 voice: "story/1003/100365/19202070",
                                 npc: 100328,
+                                speakerName: "布鲁斯？",
                                 next: 10036569,
                             },
                             {
@@ -24169,6 +24484,7 @@ export const questData: QuestStory[] = [
                                 content: "你，很聪明。如果那时，我们，也和你一样……算了，哪有如果。",
                                 voice: "story/1003/100365/1920209A",
                                 npc: 100328,
+                                speakerName: "布鲁斯？",
                                 next: 100365691,
                             },
                             {
@@ -24177,6 +24493,7 @@ export const questData: QuestStory[] = [
                                     "我，骗了你们。那个故事里，我交换了，两个人的名字。是……布鲁斯，救了我。他再次告诉我，生而为人，是怎样的感觉。",
                                 voice: "story/1003/100365/192020C4",
                                 npc: 100328,
+                                speakerName: "布鲁斯？",
                                 next: 10036571,
                             },
                             {
@@ -24184,6 +24501,7 @@ export const questData: QuestStory[] = [
                                 content: "但我早已，被掠夺，为人的资格。名字，只是，死去的泡影……你便叫我<H>幻景</>吧。",
                                 voice: "story/1003/100365/192020EE",
                                 npc: 100328,
+                                speakerName: "布鲁斯？",
                                 next: 10036572,
                             },
                             {
@@ -24191,6 +24509,7 @@ export const questData: QuestStory[] = [
                                 content: "狩月人，我委托你，带上黎瑟，离开这里，保护好她。",
                                 voice: "story/1003/100365/19202118",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036573,
                             },
                             {
@@ -24198,6 +24517,7 @@ export const questData: QuestStory[] = [
                                 content: "并且，永远永远，不要对她，提起，我这个人。",
                                 voice: "story/1003/100365/19202142",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036574,
                             },
                             {
@@ -24219,6 +24539,7 @@ export const questData: QuestStory[] = [
                                 content: "谢、谢。",
                                 voice: "story/1003/100365/192021C0",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036577,
                             },
                             {
@@ -24233,6 +24554,7 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1003/100365/19202214",
                                 npc: 100328,
+                                speakerName: "幻景",
                             },
                         ],
                     },
@@ -24247,6 +24569,7 @@ export const questData: QuestStory[] = [
                                 content: "那么，还有最后一件事需要完成。",
                                 voice: "story/1003/100365/1920223E",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036580,
                             },
                             {
@@ -24254,6 +24577,7 @@ export const questData: QuestStory[] = [
                                 content: "只要，破坏他们身上，伤口的形状……",
                                 voice: "story/1003/100365/19202268",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036586,
                             },
                             {
@@ -24310,6 +24634,7 @@ export const questData: QuestStory[] = [
                                 content: "这样就，没人知道，你们来过。",
                                 voice: "story/1003/100366/192025DA",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036602,
                             },
                             {
@@ -24317,6 +24642,7 @@ export const questData: QuestStory[] = [
                                 content: "这个秘密，由我……带进坟墓。",
                                 voice: "story/1003/100366/19202604",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036603,
                             },
                             {
@@ -24324,6 +24650,7 @@ export const questData: QuestStory[] = [
                                 content: "布鲁斯，我完成约定了。",
                                 voice: "story/1003/100366/1920262E",
                                 npc: 100328,
+                                speakerName: "幻景",
                             },
                         ],
                     },
@@ -24337,6 +24664,7 @@ export const questData: QuestStory[] = [
                                 content: "神弃者同盟的人走了，布鲁斯，你的伤怎么样……布鲁斯，布鲁斯！",
                                 voice: "story/1003/100367/19203642",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036702,
                             },
                             {
@@ -24344,6 +24672,7 @@ export const questData: QuestStory[] = [
                                 content: "这具躯体，也不是，钢筋铁骨……这帝国炼金院，技术，也不怎么样。",
                                 voice: "story/1003/100367/1920366C",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036703,
                             },
                             {
@@ -24351,6 +24680,7 @@ export const questData: QuestStory[] = [
                                 content: "姐姐的……枪法还挺准，比以前厉害……多了。看来，她已经可以，保护好，自己……咳！",
                                 voice: "story/1003/100367/19203696",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036704,
                             },
                             {
@@ -24358,6 +24688,7 @@ export const questData: QuestStory[] = [
                                 content: "现在是说这种话的时候吗！",
                                 voice: "story/1003/100367/192036C0",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036705,
                             },
                             {
@@ -24365,6 +24696,7 @@ export const questData: QuestStory[] = [
                                 content: "哈，哈。",
                                 voice: "story/1003/100367/192036EA",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036706,
                             },
                             {
@@ -24372,6 +24704,7 @@ export const questData: QuestStory[] = [
                                 content: "撑住，我带你去找医生！只要用武力逼迫他们，就算是我们这样的怪物……",
                                 voice: "story/1003/100367/19203714",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036707,
                             },
                             {
@@ -24379,6 +24712,7 @@ export const questData: QuestStory[] = [
                                 content: "……没必要，了。",
                                 voice: "story/1003/100367/1920373E",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036708,
                             },
                             {
@@ -24386,6 +24720,7 @@ export const questData: QuestStory[] = [
                                 content: "你一直，不肯告诉我……但我能猜到，身上，洗不掉的血……是……哪来的……",
                                 voice: "story/1003/100367/19203768",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036709,
                             },
                             {
@@ -24393,6 +24728,7 @@ export const questData: QuestStory[] = [
                                 content: "这样，死掉，对大家，很好……",
                                 voice: "story/1003/100367/19203792",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036710,
                             },
                             {
@@ -24401,6 +24737,7 @@ export const questData: QuestStory[] = [
                                     "混蛋，别大家大家的，你自己呢？你忘了自己怎么说的？等逃出来，我们会搭起舞台，我会教你表演，让所有亲朋好友来看我们的演出！",
                                 voice: "story/1003/100367/192037BC",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036711,
                             },
                             {
@@ -24408,6 +24745,7 @@ export const questData: QuestStory[] = [
                                 content: "抱歉……要食言了……",
                                 voice: "story/1003/100367/192037E6",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036712,
                             },
                             {
@@ -24415,6 +24753,7 @@ export const questData: QuestStory[] = [
                                 content: "不……对了，姐姐、你的姐姐！你说过最想念的就是姐姐，你还没和她相认啊！",
                                 voice: "story/1003/100367/19203810",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036713,
                             },
                             {
@@ -24423,6 +24762,7 @@ export const questData: QuestStory[] = [
                                     "……我是个，懦夫……嘴上说着，想要与亲人团聚的，漂亮话。可，真的见到她，除了……落荒而逃……什么都，做不了……",
                                 voice: "story/1003/100367/1920383A",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036714,
                             },
                             {
@@ -24430,6 +24770,7 @@ export const questData: QuestStory[] = [
                                 content: "我、我有个……请求。",
                                 voice: "story/1003/100367/19203864",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036715,
                             },
                             {
@@ -24437,6 +24778,7 @@ export const questData: QuestStory[] = [
                                 content: "这条链子是……信物。找到姐姐，告诉她……第六军团……真相……不要，她……也被骗……",
                                 voice: "story/1003/100367/1920388E",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036716,
                             },
                             {
@@ -24444,6 +24786,7 @@ export const questData: QuestStory[] = [
                                 content: "还有，<H>绝对，别让她，知道……我死在，她手上。</>她会，受不住……",
                                 voice: "story/1003/100367/192038B8",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036717,
                             },
                             {
@@ -24451,6 +24794,7 @@ export const questData: QuestStory[] = [
                                 content: "拜托……你了。",
                                 voice: "story/1003/100367/192038E2",
                                 npc: 100327,
+                                speakerName: "布鲁斯",
                                 next: 10036718,
                             },
                             {
@@ -24458,6 +24802,7 @@ export const questData: QuestStory[] = [
                                 content: "布鲁斯……！！",
                                 voice: "story/1003/100367/1920390C",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036719,
                             },
                             {
@@ -24465,6 +24810,7 @@ export const questData: QuestStory[] = [
                                 content: "我答应你。",
                                 voice: "story/1003/100367/19203936",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036720,
                             },
                             {
@@ -24472,6 +24818,7 @@ export const questData: QuestStory[] = [
                                 content: "但是……用什么办法才能隐瞒你的死因，又让她相信第六军团的真相……",
                                 voice: "story/1003/100367/19203960",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036721,
                             },
                             {
@@ -24479,6 +24826,7 @@ export const questData: QuestStory[] = [
                                 content: "……我知道了。",
                                 voice: "story/1003/100367/1920398A",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036722,
                             },
                             {
@@ -24486,6 +24834,7 @@ export const questData: QuestStory[] = [
                                 content: "<H>只要让她以为“布鲁斯”还活着，让“布鲁斯”告诉她一切</>……只要这样……",
                                 voice: "story/1003/100367/192039B4",
                                 npc: 100328,
+                                speakerName: "幻景",
                             },
                         ],
                     },
@@ -24512,6 +24861,7 @@ export const questData: QuestStory[] = [
                                 content: "布鲁斯，我，做到了。谎言，揭穿了。",
                                 voice: "story/1003/100368/192046AA",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036802,
                             },
                             {
@@ -24519,6 +24869,7 @@ export const questData: QuestStory[] = [
                                 content: "黎瑟不会知道，你真正的死因。",
                                 voice: "story/1003/100368/192046D4",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036803,
                             },
                             {
@@ -24526,6 +24877,7 @@ export const questData: QuestStory[] = [
                                 content: "……",
                                 voice: "story/1003/100368/192046FE",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036804,
                             },
                             {
@@ -24533,6 +24885,7 @@ export const questData: QuestStory[] = [
                                 content: "我们，头一次的，合作表演，还，不错吧。",
                                 voice: "story/1003/100368/19204728",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036805,
                             },
                             {
@@ -24540,6 +24893,7 @@ export const questData: QuestStory[] = [
                                 content: "你们……终于来了。",
                                 voice: "story/1003/100368/19204752",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036806,
                             },
                             {
@@ -24547,6 +24901,7 @@ export const questData: QuestStory[] = [
                                 content: "你们，为了抓，这家伙，才把我放走……聪明，真聪明。",
                                 voice: "story/1003/100368/1920477C",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036807,
                             },
                             {
@@ -24554,6 +24909,7 @@ export const questData: QuestStory[] = [
                                 content: "这么聪明，一定，拿到了，我留的线索……但是，为什么，不说出来？",
                                 voice: "story/1003/100368/192047A6",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036808,
                             },
                             {
@@ -24561,6 +24917,7 @@ export const questData: QuestStory[] = [
                                 content: "第六军团的，真相……！",
                                 voice: "story/1003/100368/192047D0",
                                 npc: 100328,
+                                speakerName: "幻景",
                                 next: 10036809,
                             },
                             {
@@ -24589,6 +24946,7 @@ export const questData: QuestStory[] = [
                                 content: "……非做不可的事，吗。",
                                 voice: "story/1003/100368/19204878",
                                 npc: 100328,
+                                speakerName: "幻景",
                             },
                         ],
                     },
@@ -25339,37 +25697,44 @@ export const questData: QuestStory[] = [
                                 id: 10040101,
                                 content: "“在远方，或许有一家属于你自己的书店或是酒馆。”",
                                 voice: "story/1004/100401/19226412",
+                                speakerName: "广播",
                             },
                             {
                                 id: 10040102,
                                 content: "“远方，一个聚合了梦想、等待与不确定的词汇。“",
                                 voice: "story/1004/100401/1922643C",
+                                speakerName: "广播",
                             },
                             {
                                 id: 10040103,
                                 content: "“在远方，或许有你想念的人也在日夜等待着你的突然出现。”",
                                 voice: "story/1004/100401/19226466",
+                                speakerName: "广播",
                             },
                             {
                                 id: 10040104,
                                 content: "“在远方，有着无数的未知，但一定和现在大不一样。”",
                                 voice: "story/1004/100401/19226490",
+                                speakerName: "广播",
                             },
                             {
                                 id: 10040105,
                                 content: "“但远方并不遥远，你与远方之间，真的只隔着一张薄薄的车票！”",
                                 voice: "story/1004/100401/192264BA",
+                                speakerName: "广播",
                             },
                             {
                                 id: 10040106,
                                 content:
                                     "“欢迎乘坐帝国铁道的最新专列——极光号！她那由装甲列车改装的车体坚固而又安全。她携带的列车炮足以应对一切危险。”",
                                 voice: "story/1004/100401/192264E4",
+                                speakerName: "广播",
                             },
                             {
                                 id: 10040107,
                                 content: "“干净，明亮，富丽堂皇！在声声鸣笛中，让一切对于远方的幻想成为现实！",
                                 voice: "story/1004/100401/1922650E",
+                                speakerName: "广播",
                             },
                             {
                                 id: 10040108,
@@ -25767,24 +26132,28 @@ export const questData: QuestStory[] = [
                                 id: 10040408,
                                 content: "所有人，停下你们的脚步！",
                                 voice: "story/1004/100404/19229670",
+                                speakerName: "严肃的士兵",
                             },
                             {
                                 id: 10040409,
                                 content: "接下来，让我们迎接为帝国献身的老兵们，迎接他们再次回家！",
                                 voice: "story/1004/100404/1922969A",
                                 npc: 100410,
+                                speakerName: "严肃的士兵",
                             },
                             {
                                 id: 10040410,
                                 content: "他们成功镇压了神弃者同盟在帝国南方的叛乱，让我们以掌声与欢呼迎接他们的凯旋！",
                                 voice: "story/1004/100404/192296C4",
                                 npc: 100410,
+                                speakerName: "严肃的士兵",
                             },
                             {
                                 id: 10040411,
                                 content: "父亲！母亲！冰湖城！我终于活着回来了！",
                                 voice: "story/1004/100404/192296EE",
                                 npc: 100409,
+                                speakerName: "复员士兵",
                             },
                             {
                                 id: 10040412,
@@ -25803,12 +26172,14 @@ export const questData: QuestStory[] = [
                                 content: "……？",
                                 voice: "story/1004/100404/1922976C",
                                 npc: 100409,
+                                speakerName: "复员士兵",
                             },
                             {
                                 id: 10040415,
                                 content: "老人家，你是不是……认错人了？",
                                 voice: "story/1004/100404/19229796",
                                 npc: 100409,
+                                speakerName: "复员士兵",
                             },
                             {
                                 id: 10040416,
@@ -25827,6 +26198,7 @@ export const questData: QuestStory[] = [
                                 content: "你在说什么啊？什么你的孩子？这戒指是我自己在丹流城买的！",
                                 voice: "story/1004/100404/19229814",
                                 npc: 100409,
+                                speakerName: "复员士兵",
                             },
                         ],
                     },
@@ -25850,12 +26222,14 @@ export const questData: QuestStory[] = [
                                 content: "发现危险分子，为避免混乱进一步扩大，准备进行就地处理……",
                                 voice: "story/1004/100405/1922A5B2",
                                 npc: 100410,
+                                speakerName: "严肃的士兵",
                             },
                             {
                                 id: 10040502,
                                 content: "啊，艾森巴恩阁下……",
                                 voice: "story/1004/100405/1922A5DC",
                                 npc: 100410,
+                                speakerName: "严肃的士兵",
                             },
                             {
                                 id: 10040503,
@@ -25881,6 +26255,7 @@ export const questData: QuestStory[] = [
                                 content: "是，站长阁下，我立刻开动头脑。",
                                 voice: "story/1004/100405/1922A684",
                                 npc: 100410,
+                                speakerName: "严肃的士兵",
                             },
                             {
                                 id: 10040507,
@@ -25912,6 +26287,7 @@ export const questData: QuestStory[] = [
                                 content: "……喂、喂！我真不认识你，失心疯了吧！",
                                 voice: "story/1004/100405/1922A756",
                                 npc: 100409,
+                                speakerName: "复员士兵",
                             },
                             {
                                 id: 10040512,
@@ -25928,6 +26304,7 @@ export const questData: QuestStory[] = [
                                 content: "犯人已经擒获，先押送至禁闭室。",
                                 voice: "story/1004/100405/1922A7AA",
                                 npc: 100410,
+                                speakerName: "严肃的士兵",
                             },
                             {
                                 id: 10040514,
@@ -25961,6 +26338,7 @@ export const questData: QuestStory[] = [
                                 content: "早说过了，丹流城，一家叫“白银之心”的首饰店买的，不信自己去查。",
                                 voice: "story/1004/100405/1922A87C",
                                 npc: 100409,
+                                speakerName: "复员士兵",
                             },
                             {
                                 id: 10040519,
@@ -26180,18 +26558,21 @@ export const questData: QuestStory[] = [
                                     "您好，欢迎来到冰湖城百花车站，我们手中的枪、列车顶的巨炮和翱翔天空的飞艇都会竭诚保障您旅途的安全。",
                                 voice: "story/1004/100406/1922B61A",
                                 npc: 100420,
+                                speakerName: "认真的卫兵",
                             },
                             {
                                 id: 10040602,
                                 content: "希望您能够享受这段最新月髓技术的旅程。",
                                 voice: "story/1004/100406/1922B644",
                                 npc: 100421,
+                                speakerName: "礼貌的卫兵",
                             },
                             {
                                 id: 10040603,
                                 content: "那么，为了您，为了其他乘客，更是为了帝国动脉的安全，接下来我会进行安全检查。",
                                 voice: "story/1004/100406/1922B66E",
                                 npc: 100420,
+                                speakerName: "认真的卫兵",
                             },
                             {
                                 id: 10040604,
@@ -26205,12 +26586,14 @@ export const questData: QuestStory[] = [
                                 content: "还不是因为神弃者同盟嘛，可能你在冰湖城没什么感觉，其他地界神弃者同盟现在又闹腾起来了。",
                                 voice: "story/1004/100406/1922B6C2",
                                 npc: 100421,
+                                speakerName: "礼貌的卫兵",
                             },
                             {
                                 id: 10040606,
                                 content: "总能传出这儿着火了那儿爆炸了的事，所以不得不防啊，我们铁路是帝国动脉，可不能被这帮疯子给破坏了。",
                                 voice: "story/1004/100406/1922B6EC",
                                 npc: 100421,
+                                speakerName: "礼貌的卫兵",
                             },
                             {
                                 id: 10040607,
@@ -26224,6 +26607,7 @@ export const questData: QuestStory[] = [
                                 content: "不错，有志气，是可塑之才，可惜是个卡戎。有机会的话，可以尝试来报名成为桂冠卡戎。",
                                 voice: "story/1004/100406/1922B740",
                                 npc: 100421,
+                                speakerName: "礼貌的卫兵",
                                 options: [
                                     {
                                         id: 10040609,
@@ -26250,12 +26634,14 @@ export const questData: QuestStory[] = [
                                 content: "你这家伙，是不是这么应付朋友应付习惯了，对谁都这么说。",
                                 voice: "story/1004/100406/1922B7E8",
                                 npc: 100420,
+                                speakerName: "认真的卫兵",
                             },
                             {
                                 id: 10040613,
                                 content: "道理是这个道理，但这话在帝国嘛，你也知道，索拉要是当真没啥问题，卡戎要是当了真，就麻烦了。",
                                 voice: "story/1004/100406/1922B812",
                                 npc: 100420,
+                                speakerName: "认真的卫兵",
                             },
                             {
                                 id: 10040614,
@@ -26263,12 +26649,14 @@ export const questData: QuestStory[] = [
                                     "瞧你说的，我也听说过一些传闻，不过八成就是好事者编的都市传说。至于你选择相信哪一种事实，我也没法强迫你就是了。",
                                 voice: "story/1004/100406/1922B83C",
                                 npc: 100420,
+                                speakerName: "认真的卫兵",
                             },
                             {
                                 id: 10040627,
                                 content: "总之呢，安全检查不通过，都下次再来吧。",
                                 voice: "story/1004/100406/1922B83D",
                                 npc: 100421,
+                                speakerName: "认真的卫兵",
                             },
                             {
                                 id: 10040615,
@@ -26281,12 +26669,14 @@ export const questData: QuestStory[] = [
                                 content: "呃，油嘴滑舌没有用，老实面对你的问题——",
                                 voice: "story/1004/100406/1922B890",
                                 npc: 100421,
+                                speakerName: "礼貌的卫兵",
                             },
                             {
                                 id: 10040617,
                                 content: "就说你身上戴着的这个吊坠吧，做工精致材料名贵。如果我记得没错的话，是产自赫墨的宝石。",
                                 voice: "story/1004/100406/1922B8BA",
                                 npc: 100421,
+                                speakerName: "礼貌的卫兵",
                             },
                             {
                                 id: 10040618,
@@ -26294,6 +26684,7 @@ export const questData: QuestStory[] = [
                                     "我看你虽说是穿着衣服吧，但是也不是什么正经衣服，裹着布条子露个肚子的。我有理由怀疑这个吊坠不是你捡了后据为己有，就是从哪里顺的！",
                                 voice: "story/1004/100406/1922B8E4",
                                 npc: 100421,
+                                speakerName: "礼貌的卫兵",
                             },
                             {
                                 id: 10040619,
@@ -26306,6 +26697,7 @@ export const questData: QuestStory[] = [
                                 content: "好，那就让你妹妹过来，我们来核对一下。在那之前呢，就先由车站保管了。",
                                 voice: "story/1004/100406/1922B938",
                                 npc: 100421,
+                                speakerName: "礼貌的卫兵",
                             },
                             {
                                 id: 10040621,
@@ -26324,6 +26716,7 @@ export const questData: QuestStory[] = [
                                 content: "好，那您先过吧，但是安全检查也还是必要的。",
                                 voice: "story/1004/100406/1922B9B6",
                                 npc: 100421,
+                                speakerName: "礼貌的卫兵",
                             },
                             {
                                 id: 10040624,
@@ -26337,6 +26730,7 @@ export const questData: QuestStory[] = [
                                     "那也没有办法，刚刚大厅里那个老太太在闹事你应该也看见了，这要是发生在站内的话，还指不定有什么乱子出现。所以，理解一下。",
                                 voice: "story/1004/100406/1922BA0A",
                                 npc: 100420,
+                                speakerName: "认真的卫兵",
                             },
                             {
                                 id: 10040626,
@@ -26344,6 +26738,7 @@ export const questData: QuestStory[] = [
                                     "你们也一样，我也不是想要私吞你的东西什么的。但是站长让我们多留心，实在不敢大意啊，回去把你妹妹叫来，她的证词没问题我们就还你。",
                                 voice: "story/1004/100406/1922BA34",
                                 npc: 100421,
+                                speakerName: "礼貌的卫兵",
                             },
                         ],
                     },
@@ -26716,12 +27111,14 @@ export const questData: QuestStory[] = [
                                 content: "嘿！那边的年轻人！",
                                 voice: "story/1004/100494/192859DA",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049402,
                                 content: "没错，就是你！不知你是否愿意帮我一个小忙？我在皇都颇有一些家资，可以付给你公道无欺的报酬！",
                                 voice: "story/1004/100494/19285A04",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049403,
@@ -26734,12 +27131,14 @@ export const questData: QuestStory[] = [
                                 content: "我看你刚刚在这边忙来忙去，但我又看你衣服整洁，和人说话神态也毫不畏缩，看起来不像是来讨生活的。",
                                 voice: "story/1004/100494/19285A58",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049405,
                                 content: "倒是像去调查锻铁厂里面锻铁工生活情况的记者，或者，另有所图！",
                                 voice: "story/1004/100494/19285A82",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049406,
@@ -26752,6 +27151,7 @@ export const questData: QuestStory[] = [
                                 content: "别慌别慌，我和你实际上也差不多！我呢，其实是刚入职《海伯利亚早报》的记者，迪斯玛尼亚过来的！",
                                 voice: "story/1004/100494/19285AD6",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049408,
@@ -26759,6 +27159,7 @@ export const questData: QuestStory[] = [
                                     "我听小道消息说，冰湖城这边的第六军团，别看嘴上说着忠诚，私下里坏得冒烟，不知道干过多少欺负平民的勾当。",
                                 voice: "story/1004/100494/19285B00",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049409,
@@ -26766,12 +27167,14 @@ export const questData: QuestStory[] = [
                                     "别说，刚来到车站这个地方，我就觉得很不舒服了。我昨天才打听了一下午，就感觉走哪儿都有卫兵的视线盯着，他们一定在提防我……",
                                 voice: "story/1004/100494/19285B2A",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049410,
                                 content: "真是罪恶的城市！不过一个小小的车站，就埋藏着这么多不可告人的秘密。",
                                 voice: "story/1004/100494/19285B54",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049411,
@@ -26784,6 +27187,7 @@ export const questData: QuestStory[] = [
                                 content: "“我听说第六军团有很多不可告人的勾当，把你了解的都告诉我吧！让我们一起揭露这片土地上的邪恶。”",
                                 voice: "story/1004/100494/19285BA8",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                                 options: [
                                     {
                                         id: 10049413,
@@ -26810,12 +27214,14 @@ export const questData: QuestStory[] = [
                                 content: "奇怪了，动物挨打会出声，人不也应该差不多啊。还是说这边的情况已经糟糕到没有卡戎相信索拉了？",
                                 voice: "story/1004/100494/19285C50",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049417,
                                 content: "可是真毫不犹豫赞同我的也只有你一个，大家好像都多少有所猜忌防备。",
                                 voice: "story/1004/100494/19285C7A",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049418,
@@ -26823,6 +27229,7 @@ export const questData: QuestStory[] = [
                                     "我？危险分子？我要是危险分子他就是危险国王！我确实听说他把这车站当做自己的私有物一样，也打算调查调查他。",
                                 voice: "story/1004/100494/19285CA4",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049419,
@@ -26830,24 +27237,28 @@ export const questData: QuestStory[] = [
                                     "……总之，为了让埋在冰湖城的邪恶秘密公之于众，我需要一个人帮忙。我在这儿观察了一阵子，发现你就是最好的人选。",
                                 voice: "story/1004/100494/19285CCE",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049420,
                                 content: "首先，我刚刚已经说了，你应该也有自己的目的，想要调查些什么。",
                                 voice: "story/1004/100494/19285CF8",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049421,
                                 content: "其次，整个大厅当中你是跑得最快的那个，身手绝非常人，所以我觉得你可以信赖。",
                                 voice: "story/1004/100494/19285D22",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049422,
                                 content: "非要再说些什么的话，直觉告诉我……你不是坏人。",
                                 voice: "story/1004/100494/19285D4C",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049423,
@@ -26860,12 +27271,14 @@ export const questData: QuestStory[] = [
                                 content: "这很简单！我爸说过，“冰湖城那种乡下，没有一枚金币搞不定的事。如果有，那就再加一枚。”",
                                 voice: "story/1004/100494/19285DA0",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049425,
                                 content: "这一沓都是我的支票，每张价值5金币。如果遇到有人找你麻烦，直接塞给他就好了——我爸说的。",
                                 voice: "story/1004/100494/19285DCA",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049426,
@@ -26878,6 +27291,7 @@ export const questData: QuestStory[] = [
                                 content: "等调查出来真相，我也给你十张作为报酬，如何！",
                                 voice: "story/1004/100494/19285E1E",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049428,
@@ -26891,6 +27305,7 @@ export const questData: QuestStory[] = [
                                     "好，那么为了确保你确实能打探到消息，我需要你先去试一试。来，拿上这叠支票，凑到锻铁厂入口的那个监工附近，去和他套套近乎。",
                                 voice: "story/1004/100494/19285E72",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049430,
@@ -26903,6 +27318,7 @@ export const questData: QuestStory[] = [
                                 content: "也不是啦，毕竟我家的钱也不是大风刮来的，总得要确认一下才是。",
                                 voice: "story/1004/100494/19285EC6",
                                 npc: 100411,
+                                speakerName: "贵族模样的青年",
                             },
                             {
                                 id: 10049432,
@@ -27182,18 +27598,21 @@ export const questData: QuestStory[] = [
                                 content: "你们到底是怎么搞的，就这么个调试流程，乱七八糟。啊，前天是液压阀压力不够，昨天是月髓液喷料。",
                                 voice: "story/1004/100496/19287AAA",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                             },
                             {
                                 id: 10049602,
                                 content: "今天倒好咯，测试一开始，列车头撞出去十几米，我看你们不是在测试火车，是在测试飞艇哦。",
                                 voice: "story/1004/100496/19287AD4",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                             },
                             {
                                 id: 10049603,
                                 content: "要不是我眼疾手快躲到边上，就和这几个铸件一样，被压成铁饼了。卡诺，你来说一下这次的问题出在哪里。",
                                 voice: "story/1004/100496/19287AFE",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                             },
                             {
                                 id: 10049604,
@@ -27207,17 +27626,20 @@ export const questData: QuestStory[] = [
                                     "没错，这就是老师傅的实力，说什么都是一句话到点上。你们也都学着点，要是人人都像卡诺一样可靠，我也不用这样每天提心吊胆上工。",
                                 voice: "story/1004/100496/19287B52",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                             },
                             {
                                 id: 10049606,
                                 content: "都给我检查一下问题，问题不清零，决不重新开始调试！",
                                 voice: "story/1004/100496/19287B7C",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                             },
                             {
                                 id: 10049607,
                                 content: "好——",
                                 voice: "story/1004/100496/19287BA6",
+                                speakerName: "众工人",
                             },
                             {
                                 id: 10049608,
@@ -27230,6 +27652,7 @@ export const questData: QuestStory[] = [
                                 content: "不行，你也留下来，和他们一起检修。",
                                 voice: "story/1004/100496/19287BFA",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                             },
                             {
                                 id: 10049610,
@@ -27243,12 +27666,14 @@ export const questData: QuestStory[] = [
                                     "我管你是什么工人，想必刚刚你也听到了吧，我们这边在进行新型列车的实验，而实验的时候出现了大事故，导致火车头意外向前开动了。",
                                 voice: "story/1004/100496/19287C4E",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                             },
                             {
                                 id: 10049612,
                                 content: "所以我宣布，在我的视线范围内所有人，都应该来排除其他的风险，否则火车头一爆炸，大家都得死！",
                                 voice: "story/1004/100496/19287C78",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                             },
                             {
                                 id: 10049613,
@@ -27261,6 +27686,7 @@ export const questData: QuestStory[] = [
                                 content: "对，所以不想死的话！快动起来，安全问题大过天！",
                                 voice: "story/1004/100496/19287CCC",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                             },
                             {
                                 id: 10049615,
@@ -27355,6 +27781,7 @@ export const questData: QuestStory[] = [
                                 content: "这就恢复了？干得不错啊，今天的调试那就先到这里了，大家都回各自的工段吧。",
                                 voice: "story/1004/100499/1928AEAD",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                                 next: 10049701,
                             },
                             {
@@ -27369,6 +27796,7 @@ export const questData: QuestStory[] = [
                                 content: "我看你们几个干活挺麻利的，要不趁着肺还没被灰尘填满，别做烟囱工了，到我们车间来上工吧。",
                                 voice: "story/1004/100497/19288B3C",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                                 next: 10049703,
                             },
                             {
@@ -27383,6 +27811,7 @@ export const questData: QuestStory[] = [
                                 content: "行，什么时候想开了来找我。",
                                 voice: "story/1004/100497/19288B90",
                                 npc: 100407,
+                                speakerName: "威严的工人",
                             },
                         ],
                     },
@@ -27434,6 +27863,7 @@ export const questData: QuestStory[] = [
                                 id: 10049921,
                                 content: "发现危险，发现危险，需要立刻排除，需要立刻排除。",
                                 voice: "story/1004/100499/1928AF2A",
+                                speakerName: "警戒机器人",
                             },
                         ],
                     },
@@ -27761,6 +28191,7 @@ export const questData: QuestStory[] = [
                                 content: "哦？我说怎么有吵吵闹闹的声音，原来是白呀。",
                                 voice: "story/1004/100402/192276C6",
                                 npc: 100405,
+                                speakerName: "陌生但又不陌生的声音",
                             },
                             {
                                 id: 10040216,
@@ -27979,31 +28410,37 @@ export const questData: QuestStory[] = [
                                 id: 10049924,
                                 content: "听说了吗？刚刚在站前穹顶那边有人闹事。",
                                 voice: "story/1004/100499/1928AFA8",
+                                speakerName: "好事的车站工人",
                             },
                             {
                                 id: 10049925,
                                 content: "何止听说，我刚刚就在现场，就是一个疯疯癫癫的女人说一个回来的士兵偷了她儿子的东西。",
                                 voice: "story/1004/100499/1928AFD2",
+                                speakerName: "八卦的车站工人",
                             },
                             {
                                 id: 10049926,
                                 content: "哇，这不得出人命。",
                                 voice: "story/1004/100499/1928AFFC",
+                                speakerName: "好事的车站工人",
                             },
                             {
                                 id: 10049927,
                                 content: "倒没有，站长摆平了。还好摆平了，接下来还有要回来的老兵，让人家一回来就看到这场面，那可太难堪了。",
                                 voice: "story/1004/100499/1928B026",
+                                speakerName: "八卦的车站工人",
                             },
                             {
                                 id: 10049928,
                                 content: "今天还有几列啊？到底啥时候才能迎接完。",
                                 voice: "story/1004/100499/1928B050",
+                                speakerName: "好事的车站工人",
                             },
                             {
                                 id: 10049929,
                                 content: "还有两列吧，别抱怨了，快去七号站台准备着去。",
                                 voice: "story/1004/100499/1928B07A",
+                                speakerName: "八卦的车站工人",
                             },
                             {
                                 id: 10049930,
@@ -28022,6 +28459,7 @@ export const questData: QuestStory[] = [
                                 id: 10049931,
                                 content: "七号站台列车即将进站，列车自迪斯玛尼亚发车，开往冰湖城，本站是终点站。",
                                 voice: "story/1004/100499/1928B0CE",
+                                speakerName: "广播",
                             },
                         ],
                     },
@@ -28035,11 +28473,13 @@ export const questData: QuestStory[] = [
                                 id: 10049932,
                                 content: "七号站台的车快要来了，做好准备！一停车就带重伤员去医务室！",
                                 voice: "story/1004/100499/1928B0F8",
+                                speakerName: "好事的车站卫兵",
                             },
                             {
                                 id: 10049933,
                                 content: "调度是怎么搞的，七号站台去医务室还要过一个天桥，是嫌伤员病的不够重，再颠出些毛病是吗？",
                                 voice: "story/1004/100499/1928B122",
+                                speakerName: "八卦的车站卫兵",
                             },
                             {
                                 id: 10049934,
@@ -28124,12 +28564,14 @@ export const questData: QuestStory[] = [
                                     "十三军团专列寒鸦号的这个设计，真是怎么看都不会厌，和书上写的一样，那么威严而厚重……不枉我去档案室翻那么久。",
                                 voice: "story/1004/100418/19237AFA",
                                 npc: 100415,
+                                speakerName: "喜欢火车的孩子",
                             },
                             {
                                 id: 10041802,
                                 content: "我要是哪一天能坐上就好了……",
                                 voice: "story/1004/100418/19237B24",
                                 npc: 100415,
+                                speakerName: "喜欢火车的孩子",
                             },
                             {
                                 id: 10041803,
@@ -28142,6 +28584,7 @@ export const questData: QuestStory[] = [
                                 content: "我也没有很靠近，就在边上看着嘛……",
                                 voice: "story/1004/100418/19237B78",
                                 npc: 100415,
+                                speakerName: "喜欢火车的孩子",
                             },
                             {
                                 id: 10041805,
@@ -28154,6 +28597,7 @@ export const questData: QuestStory[] = [
                                 content: "好，谢谢，谢谢你们。",
                                 voice: "story/1004/100418/19237BCC",
                                 npc: 100415,
+                                speakerName: "喜欢火车的孩子",
                             },
                             {
                                 id: 10041807,
@@ -28209,6 +28653,7 @@ export const questData: QuestStory[] = [
                                 id: 10041817,
                                 content: "三号站台列车即将进站，列车自丹流城发车，开往冰湖城，本站是终点站。",
                                 voice: "story/1004/100418/19237D9A",
+                                speakerName: "广播",
                             },
                         ],
                     },
@@ -28228,12 +28673,14 @@ export const questData: QuestStory[] = [
                                 content: "……谢谢你们，刚刚我看寒鸦号入迷了，没有注意到其他人。",
                                 voice: "story/1004/100419/19238B62",
                                 npc: 100415,
+                                speakerName: "喜欢火车的孩子",
                             },
                             {
                                 id: 10041902,
                                 content: "不过，你们也是来看寒鸦号的吧，果然喜欢火车的没有坏人！",
                                 voice: "story/1004/100419/19238B8C",
                                 npc: 100415,
+                                speakerName: "喜欢火车的孩子",
                             },
                             {
                                 id: 10041903,
@@ -28247,12 +28694,14 @@ export const questData: QuestStory[] = [
                                     "那是当然！这辆寒鸦号是第十三军团军团长西比尔的专列。因为十三军团没有固定驻地，所以这辆车的出现位置也都不固定。",
                                 voice: "story/1004/100419/19238BE0",
                                 npc: 100415,
+                                speakerName: "喜欢火车的孩子",
                             },
                             {
                                 id: 10041905,
                                 content: "在火车爱好者群体中，有看到这辆车会交好运的说法。",
                                 voice: "story/1004/100419/19238C0A",
                                 npc: 100415,
+                                speakerName: "喜欢火车的孩子",
                             },
                             {
                                 id: 10041906,
@@ -28265,6 +28714,7 @@ export const questData: QuestStory[] = [
                                 content: "应该不在，虽然我不认识西比尔，但这辆车停在这里二十多天了，也没有什么特别大的动静。",
                                 voice: "story/1004/100419/19238C5E",
                                 npc: 100415,
+                                speakerName: "喜欢火车的孩子",
                             },
                             {
                                 id: 10041908,
@@ -28277,6 +28727,7 @@ export const questData: QuestStory[] = [
                                 content: "是呀，因为我是这里负责清理楼顶钢架的清洁工呀。自我介绍一下吧，我叫史蒂芬，是狂热的火车爱好者！",
                                 voice: "story/1004/100419/19238CB2",
                                 npc: 100415,
+                                speakerName: "喜欢火车的孩子",
                             },
                             {
                                 id: 10041910,
@@ -28607,6 +29058,7 @@ export const questData: QuestStory[] = [
                                 content: "所有位于百花车站内的人员，现在播报车次信息：开往伊瑟尔的夜间列车即将于晚七时发车，请所有人……\t",
                                 voice: "story/1004/100422/1923BD42",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10042206,
@@ -28619,6 +29071,7 @@ export const questData: QuestStory[] = [
                                 content: "请所有人做好上车准备——才怪！\t",
                                 voice: "story/1004/100422/1923BD96",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10042208,
@@ -28626,6 +29079,7 @@ export const questData: QuestStory[] = [
                                     "海伯利亚军团的走狗们听好了，我以神弃者同盟的名义要求你们释放计划运送的特殊囚犯，她必须在午夜零时得到自由，由同盟代为照顾。\t",
                                 voice: "story/1004/100422/1923BDC0",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10042209,
@@ -28633,6 +29087,7 @@ export const questData: QuestStory[] = [
                                     "当然，你们也可以拒绝。那么你们将于未来的某日看到百花车站升起一朵大烟花，到时候的盛大场面，将远比你们前些日子在歌剧院看到的更难忘。\t",
                                 voice: "story/1004/100422/1923BDEA",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                         ],
                     },
@@ -28736,6 +29191,7 @@ export const questData: QuestStory[] = [
                                 id: 100499158,
                                 content: "你们几个，鬼头鬼脑的，在那边干什么？",
                                 voice: "story/1004/100499/100499158",
+                                speakerName: "车站卫兵",
                             },
                             {
                                 id: 100499159,
@@ -29275,6 +29731,7 @@ export const questData: QuestStory[] = [
                                 content: "停手。",
                                 voice: "story/1004/100426/1923FF36",
                                 npc: 100404,
+                                speakerName: "优雅的声音",
                             },
                             {
                                 id: 10042608,
@@ -29313,6 +29770,7 @@ export const questData: QuestStory[] = [
                                 content: "谢谢你的好意，但我可以担保，这些人并非是制造爆炸的神弃者同盟成员。",
                                 voice: "story/1004/100426/19240032",
                                 npc: 100404,
+                                speakerName: "优雅的声音",
                             },
                             {
                                 id: 10042614,
@@ -29370,6 +29828,7 @@ export const questData: QuestStory[] = [
                                 content: "你们这些官员就是这样为帝国办事的吗？",
                                 voice: "story/1004/100426/192401AC",
                                 npc: 100404,
+                                speakerName: "优雅的声音",
                             },
                             {
                                 id: 10042623,
@@ -29383,6 +29842,7 @@ export const questData: QuestStory[] = [
                                 content: "人并不是零件。",
                                 voice: "story/1004/100426/19240200",
                                 npc: 100404,
+                                speakerName: "优雅的声音",
                             },
                             {
                                 id: 10042625,
@@ -29446,6 +29906,7 @@ export const questData: QuestStory[] = [
                                     "他们已经走远了。趁着今天还没有结束，赶紧去洗刷自己的污名吧。不过在那之前，到车厢里来，我想你们多少还有一些疑问。",
                                 voice: "story/1004/100426/192403A4",
                                 npc: 100404,
+                                speakerName: "优雅的声音",
                             },
                         ],
                     },
@@ -29463,12 +29924,14 @@ export const questData: QuestStory[] = [
                                     "更里侧的车厢涉及了军团的许多机密，所以只能请你们止步于这道门外，但你们可以相信，我并非你们的敌人。",
                                 voice: "story/1004/100427/19240EA2",
                                 npc: 100404,
+                                speakerName: "优雅的声音",
                             },
                             {
                                 id: 10042702,
                                 content: "也无需过分担忧同伴的安危，艾森巴恩作为帝国的官员，并没有那么嗜杀。",
                                 voice: "story/1004/100427/19240ECC",
                                 npc: 100404,
+                                speakerName: "优雅的声音",
                             },
                             {
                                 id: 10042703,
@@ -29481,6 +29944,7 @@ export const questData: QuestStory[] = [
                                 content: "我是第十三军团的监军，奉命到冰湖城来执行公务。期间多少目睹了您的一些所作所为。",
                                 voice: "story/1004/100427/19240F20",
                                 npc: 100404,
+                                speakerName: "优雅的声音",
                             },
                             {
                                 id: 10042706,
@@ -29488,6 +29952,7 @@ export const questData: QuestStory[] = [
                                     "虽然我不知道您为什么会出现在这里，但是我并不希望看到有能力的狩月人成为帝国行政机器的牺牲品。出于爱才之心，我想要帮您一把。",
                                 voice: "story/1004/100427/19240F74",
                                 npc: 100404,
+                                speakerName: "军团监军",
                                 options: [
                                     {
                                         id: 10042707,
@@ -29514,18 +29979,21 @@ export const questData: QuestStory[] = [
                                 content: "你确实可以这么理解，我需要有能力的人为我做事。而您毫无疑问是一名优秀的狩月人。",
                                 voice: "story/1004/100427/1924101C",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042711,
                                 content: "聪明，我确实有事想要拜托你。但首先，您需要先摆脱所处的困境，证明自己的清白。",
                                 voice: "story/1004/100427/19241046",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042712,
                                 content: "不客气，我只不过是出于自身的利益考量，在恰当的时刻做了我应该做的事情。",
                                 voice: "story/1004/100427/19241070",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042713,
@@ -29533,6 +30001,7 @@ export const questData: QuestStory[] = [
                                     "总之，快点去找到证据，为自己洗清冤屈吧。虽然艾森巴恩现在不会对奥特赛德不利，但是谁也不知道他的耐心什么时候会耗尽。",
                                 voice: "story/1004/100427/1924109A",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042714,
@@ -29545,12 +30014,14 @@ export const questData: QuestStory[] = [
                                 content: "……狩月人。",
                                 voice: "story/1004/100427/192410EE",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042716,
                                 content: "抓到嫌犯后，也回来这里和我讲一声吧。",
                                 voice: "story/1004/100427/19241118",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042717,
@@ -29585,6 +30056,7 @@ export const questData: QuestStory[] = [
                                 content: "愣着干什么，监军阁下都说了时间紧急，还不快出发。",
                                 voice: "story/1004/100428/19241F5E",
                                 npc: 100403,
+                                speakerName: "熟悉的声音",
                             },
                             {
                                 id: 10042804,
@@ -29622,18 +30094,21 @@ export const questData: QuestStory[] = [
                                 content: "没错，希尔妲是我的女仆。我想让她帮一帮你们，尽早救出奥特赛德。",
                                 voice: "story/1004/100428/1924205A",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042810,
                                 content: "也正是她告知我你们想要接近寒鸦号，然后又被当做嫌疑人的事情。",
                                 voice: "story/1004/100428/19242084",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042811,
                                 content: "我想，有她的帮助，你们应该能很快找到神弃者同盟。只不过她有时候说话有些刻薄，老毛病了，无视就行。",
                                 voice: "story/1004/100428/192420AE",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042812,
@@ -29646,6 +30121,7 @@ export const questData: QuestStory[] = [
                                 content: "不必担心我，如果他们真的有能力对我动手，那么一定不会用广播去提前预告自己的计划。",
                                 voice: "story/1004/100428/19242102",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042814,
@@ -29658,6 +30134,7 @@ export const questData: QuestStory[] = [
                                 content: "没什么可是的，帮助{性别：他们|她们}找到犯人，就是现在对我帮助最大的事。",
                                 voice: "story/1004/100428/19242156",
                                 npc: 100404,
+                                speakerName: "军团监军",
                             },
                             {
                                 id: 10042816,
@@ -30336,12 +30813,14 @@ export const questData: QuestStory[] = [
                                 content: "看来，刚刚的混乱就是你们制造的了。身手不错，脑子也很好用。",
                                 voice: "story/1004/100420/19239BCA",
                                 npc: 100403,
+                                speakerName: "神秘女子",
                             },
                             {
                                 id: 10042002,
                                 content: "那么，我提议，不如我们同时收手，如何？",
                                 voice: "story/1004/100420/19239BF4",
                                 npc: 100403,
+                                speakerName: "神秘女子",
                             },
                             {
                                 id: 10042003,
@@ -30361,6 +30840,7 @@ export const questData: QuestStory[] = [
                                     "这位先生说笑了，关于留有余力这一点，可以说是彼此彼此吧。我并不打算伤害二位，尤其是还没有确认二位身份的前提下。",
                                 voice: "story/1004/100420/19239C72",
                                 npc: 100403,
+                                speakerName: "神秘女子",
                             },
                             {
                                 id: 10042006,
@@ -30368,12 +30848,14 @@ export const questData: QuestStory[] = [
                                     "那么，请问二位到底是出于什么目的接近这辆列车呢？是收到了军团的雇佣来干脏活？还是说——你们是神弃者同盟的好帮手？",
                                 voice: "story/1004/100420/19239C9C",
                                 npc: 100403,
+                                speakerName: "神秘女子",
                             },
                             {
                                 id: 10042007,
                                 content: "在下，希尔妲，一介女仆，会根据你们的答案，选择妥帖而没有痛苦的招待方式。",
                                 voice: "story/1004/100420/19239CC6",
                                 npc: 100403,
+                                speakerName: "神秘女子",
                             },
                             {
                                 id: 10042008,
@@ -31522,11 +32004,13 @@ export const questData: QuestStory[] = [
                                 content:
                                     "根据内部调查，暂时排除此前抓获的狩月人嫌疑。本次爆炸案的嫌疑人确认为仓库管理员施蒂尔，他与神弃者同盟里应外合，策划了爆炸案。",
                                 voice: "story/1004/100439/1924D382",
+                                speakerName: "广播",
                             },
                             {
                                 id: 10043902,
                                 content: "目前，嫌疑人施蒂尔已经被控制，请大家不要惊慌。待今日审讯结束后，各位乘客就可以离开。",
                                 voice: "story/1004/100439/1924D3AC",
+                                speakerName: "广播",
                             },
                             {
                                 id: 10043903,
@@ -31586,6 +32070,7 @@ export const questData: QuestStory[] = [
                                 content: "哈哈，我早就觉得他不对劲了，整天上工就垮着个脸不知道给谁看，每次到仓库干点啥事都问东问西的。",
                                 voice: "story/1004/100440/1924E414",
                                 npc: 100422,
+                                speakerName: "乐开花的卫兵",
                                 next: 10044003,
                             },
                             {
@@ -31593,6 +32078,7 @@ export const questData: QuestStory[] = [
                                 content: "要说其他人是内鬼我都不信，要说是他，那我只能说像是他能干出来的事儿。",
                                 voice: "story/1004/100440/1924E43E",
                                 npc: 100422,
+                                speakerName: "乐开花的卫兵",
                                 next: 10044004,
                             },
                             {
@@ -31600,6 +32086,7 @@ export const questData: QuestStory[] = [
                                 content: "哈哈！我早就知道他不是什么好东西了！",
                                 voice: "story/1004/100440/1924E468",
                                 npc: 100422,
+                                speakerName: "乐开花的卫兵",
                                 next: 10044005,
                             },
                             {
@@ -31629,6 +32116,7 @@ export const questData: QuestStory[] = [
                                 content: "你先别说话，先听我说，你的事再大不会有我的大。",
                                 voice: "story/1004/100441/1924F47C",
                                 npc: 100422,
+                                speakerName: "神秘兮兮的卫兵",
                             },
                             {
                                 id: 10044103,
@@ -31642,18 +32130,21 @@ export const questData: QuestStory[] = [
                                     "那个总是摆老资历的仓库管理员，施蒂尔出事儿了！今天的爆炸案就是他干的。唉，也能理解。换了谁是他，不会一肚子气？",
                                 voice: "story/1004/100441/1924F4D0",
                                 npc: 100421,
+                                speakerName: "神秘兮兮的卫兵",
                             },
                             {
                                 id: 10044105,
                                 content: "听说他当年是和艾森巴恩站长一起从军团退役，到车站任职的，还是艾森巴恩站长的长官。",
                                 voice: "story/1004/100441/1924F4FA",
                                 npc: 100421,
+                                speakerName: "神秘兮兮的卫兵",
                             },
                             {
                                 id: 10044106,
                                 content: "但人往高处走水往低处流，艾森巴恩站长步步高升，他却越混越回去，这换了谁能受得了。",
                                 voice: "story/1004/100441/1924F524",
                                 npc: 100421,
+                                speakerName: "神秘兮兮的卫兵",
                             },
                             {
                                 id: 10044107,
@@ -31661,12 +32152,14 @@ export const questData: QuestStory[] = [
                                     "不过这么一说，要是我的话，我心里也会有想法，不过我不会走极端就是啦。不像他，也没个妻小的，一旦想不开只会越来越想不开。",
                                 voice: "story/1004/100441/1924F54E",
                                 npc: 100421,
+                                speakerName: "神秘兮兮的卫兵",
                             },
                             {
                                 id: 10044108,
                                 content: "人还是要有家庭的支持啊，女儿的笑容就是我每天工作的最大动力，要看看她的相片吗？",
                                 voice: "story/1004/100441/1924F578",
                                 npc: 100421,
+                                speakerName: "神秘兮兮的卫兵",
                             },
                             {
                                 id: 10044109,
@@ -31679,6 +32172,7 @@ export const questData: QuestStory[] = [
                                 content: "喂，你不是还有话要说吗？不说啦？",
                                 voice: "story/1004/100441/1924F5CC",
                                 npc: 100421,
+                                speakerName: "神秘兮兮的卫兵",
                             },
                         ],
                     },
@@ -31701,18 +32195,21 @@ export const questData: QuestStory[] = [
                                 content: "嗯……品味蛮差的，酒品也差。",
                                 voice: "story/1004/100442/192504E4",
                                 npc: 100443,
+                                speakerName: "醉醺醺的工人",
                             },
                             {
                                 id: 10044203,
                                 content: "说来有些不好意思，我这人没什么其他爱好，就喜欢每天下工后来上一口，就喜欢那种轻飘飘的感觉。",
                                 voice: "story/1004/100442/1925050E",
                                 npc: 100443,
+                                speakerName: "醉醺醺的工人",
                             },
                             {
                                 id: 10044204,
                                 content: "所以在车站里工作里的好酒之人，我都或多或少有点联系，时不时三五成群去喝酒，大家心照不宣轮流做东。",
                                 voice: "story/1004/100442/19250538",
                                 npc: 100443,
+                                speakerName: "醉醺醺的工人",
                             },
                             {
                                 id: 10044205,
@@ -31720,24 +32217,28 @@ export const questData: QuestStory[] = [
                                     "唯独这个施蒂尔就从来没做过东，一毛不拔。喝酒嘛又总是只抱着他在军团喝习惯了的“军团狼血”，那玩意儿和医用酒精没多大区别。",
                                 voice: "story/1004/100442/19250562",
                                 npc: 100443,
+                                speakerName: "醉醺醺的工人",
                             },
                             {
                                 id: 10044206,
                                 content: "他一喝多，就又总喜欢说他在军团时候如何如何精明利落，现在这些活对他来说轻轻松松，大材小用。",
                                 voice: "story/1004/100442/1925058C",
                                 npc: 100443,
+                                speakerName: "醉醺醺的工人",
                             },
                             {
                                 id: 10044207,
                                 content: "然后就开始嫌弃这嫌弃那的，什么没有危机意识，什么帝国上下就是个草台班子，烂透了。",
                                 voice: "story/1004/100442/192505B6",
                                 npc: 100443,
+                                speakerName: "醉醺醺的工人",
                             },
                             {
                                 id: 10044208,
                                 content: "说实话，大家本来就是被生活压得喘不过气来才想喝喝酒，谁爱听他说这说那的。",
                                 voice: "story/1004/100442/192505E0",
                                 npc: 100443,
+                                speakerName: "醉醺醺的工人",
                             },
                             {
                                 id: 10044209,
@@ -31745,6 +32246,7 @@ export const questData: QuestStory[] = [
                                     "总之，我不喜欢他。但没想到他居然真的把对帝国的不满付诸行动了，说明他还有点军人的血性，倒让我高看了他两眼。",
                                 voice: "story/1004/100442/1925060A",
                                 npc: 100443,
+                                speakerName: "醉醺醺的工人",
                             },
                             {
                                 id: 10044210,
@@ -32686,6 +33188,7 @@ export const questData: QuestStory[] = [
                                 content: "你僭越了，会不会给叔父增添烦恼，还轮不到你来揣度。",
                                 voice: "story/1004/100450/192588A2",
                                 npc: 100404,
+                                speakerName: "芙罗蒂娅公主",
                             },
                             {
                                 id: 10045006,
@@ -32693,6 +33196,7 @@ export const questData: QuestStory[] = [
                                     "而他们，则是我在冰湖城这短暂的自由时光认识的朋友。你也许有所耳闻，在冰湖城东区有一支新成立不久的狩月人小队，名为夜航者。",
                                 voice: "story/1004/100450/192588CC",
                                 npc: 100404,
+                                speakerName: "芙罗蒂娅公主",
                             },
                             {
                                 id: 10045007,
@@ -32700,12 +33204,14 @@ export const questData: QuestStory[] = [
                                     "他们先是解决了前一阵东区突发的秽蚀者事件，在卡戎狩猎案中，也协助了第十三军团。而我就在这个过程中与他们相识。",
                                 voice: "story/1004/100450/192588F6",
                                 npc: 100404,
+                                speakerName: "芙罗蒂娅公主",
                             },
                             {
                                 id: 10045008,
                                 content: "既然我即将被送回迪斯玛尼亚，那么他们今天来送我一程，也是理所应当。",
                                 voice: "story/1004/100450/19258920",
                                 npc: 100404,
+                                speakerName: "芙罗蒂娅公主",
                             },
                             {
                                 id: 10045009,
@@ -32713,6 +33219,7 @@ export const questData: QuestStory[] = [
                                     "如你所见，我的车厢外全都是十三军团的士兵，逃不掉。如果你实在不放心，大可以再加派你的下属将寒鸦号围住，待我们告别后再撤走。",
                                 voice: "story/1004/100450/1925894A",
                                 npc: 100404,
+                                speakerName: "芙罗蒂娅公主",
                             },
                             {
                                 id: 10045010,
@@ -32726,6 +33233,7 @@ export const questData: QuestStory[] = [
                                 content: "……好。搜完就跟我进来吧。",
                                 voice: "story/1004/100450/1925899E",
                                 npc: 100404,
+                                speakerName: "芙罗蒂娅公主",
                             },
                         ],
                     },
@@ -33549,12 +34057,14 @@ export const questData: QuestStory[] = [
                                 content:
                                     "下面是一则广播：刚刚的爆炸案件，列车卫兵已经进行了充分的调查，初步抓获了一名嫌疑人。该嫌疑人为男性，自称是狩月人，现在正在紧急审问中。",
                                 voice: "story/1004/100438/1924C566",
+                                speakerName: "广播",
                                 next: 10043816,
                             },
                             {
                                 id: 10043816,
                                 content: "请各位不要担心，列车卫兵会竭尽所能，保障您的乘车安全。另外，如果有其他线索，也欢迎向我们提供。",
                                 voice: "story/1004/100438/1924C590",
+                                speakerName: "广播",
                                 next: 10043817,
                             },
                             {
@@ -36403,6 +36913,7 @@ export const questData: QuestStory[] = [
                                 id: 10047410,
                                 content: "“极光号列车遭到神弃者同盟袭击，列车内卫兵不满定员，请求出动飞艇支援！”",
                                 voice: "story/1004/100474/19271334",
+                                speakerName: "车长的声音",
                             },
                             {
                                 id: 10047411,
@@ -36421,6 +36932,7 @@ export const questData: QuestStory[] = [
                                 content: "咳咳……不好意思，想占用大家一点时间。",
                                 voice: "story/1004/100474/192713B2",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047414,
@@ -36434,12 +36946,14 @@ export const questData: QuestStory[] = [
                                     "我，卡嘉，以神弃者同盟的名义向大家宣布一个特大好消息，请克制一下自己的激动情绪，毕竟火车在行驶中，要注意安全——",
                                 voice: "story/1004/100474/19271406",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047416,
                                 content: "这辆列车受到了我们神弃者同盟的眷顾，被安装了炸弹，现在正在全速向皇都行驶中。",
                                 voice: "story/1004/100474/19271430",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047417,
@@ -36447,6 +36961,7 @@ export const questData: QuestStory[] = [
                                     "在旅程的终点，皇都迪斯玛尼亚，列车会以爆炸引燃那些满是月髓的工厂，给在夜幕下的皇都增添色彩，惊醒贵族们的睡梦！惊不惊喜，意不意外？",
                                 voice: "story/1004/100474/1927145A",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047418,
@@ -36454,6 +36969,7 @@ export const questData: QuestStory[] = [
                                     "别哭，也别试着讲大道理，各位可爱的帝国子民。帝国对卡戎之民持续压迫了千年之久，虽然中途也有过短暂的示好，我们也曾愚蠢地信任过——",
                                 voice: "story/1004/100474/19271484",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047419,
@@ -36461,18 +36977,21 @@ export const questData: QuestStory[] = [
                                     "但无论是千年前的“泪湖之夜”，还是千年后的“血色晚餐”，你们无数次撕毁盟约，戕害我们的姊妹兄弟，露出残忍的獠牙。",
                                 voice: "story/1004/100474/192714AE",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047420,
                                 content: "这似乎给了诸位一些错觉，似乎只要说一句：“乖乖去死”，然后所有卡戎就会坐以待毙。",
                                 voice: "story/1004/100474/192714D8",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047421,
                                 content: "真遗憾，你们的愿望落空了。并且你们也会逐渐意识到，你们所谓的帝国，不堪一击。",
                                 voice: "story/1004/100474/19271502",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047422,
@@ -36480,12 +36999,14 @@ export const questData: QuestStory[] = [
                                     "不是经常有什么比喻说是海伯利亚是一辆轰鸣的战车，那么我们神弃者同盟会向各位演示，这辆战车是多么的不堪一击，如同这辆列车一样。",
                                 voice: "story/1004/100474/1927152C",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047423,
                                 content: "好了，吓人的话就说到这里，接下来是对你们的指示：请所有人放弃抵抗，静候命运的降临。",
                                 voice: "story/1004/100474/19271556",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047424,
@@ -36493,6 +37014,7 @@ export const questData: QuestStory[] = [
                                     "列车上唯一的守卫也已经被我解决，只有同盟在陪伴着大家，希望各位能够充分享受这趟充满惊喜与刺激而爆炸性的旅程。",
                                 voice: "story/1004/100474/19271580",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                         ],
                     },
@@ -36588,6 +37110,7 @@ export const questData: QuestStory[] = [
                                 content: "咳……咳咳……",
                                 voice: "story/1004/100475/1927241A",
                                 npc: 100418,
+                                speakerName: "轻微的声音",
                             },
                             {
                                 id: 10047514,
@@ -36660,6 +37183,7 @@ export const questData: QuestStory[] = [
                                     "不要试图抵抗，我们神弃者同盟素来是做好了万全的准备才动手的，想要反抗我们的话，结果可能不会很美妙哦。",
                                 voice: "story/1004/100476/192733DA",
                                 npc: 100413,
+                                speakerName: "广播",
                             },
                             {
                                 id: 10047610,
@@ -36948,11 +37472,13 @@ export const questData: QuestStory[] = [
                                 id: 10048204,
                                 content: "极光号列车上的危险分子，这里是第六军团，停止抵抗，停止计划！你们已经被帝国的飞艇锁定。",
                                 voice: "story/1004/100482/19279578",
+                                speakerName: "飞艇指挥官",
                             },
                             {
                                 id: 10048205,
                                 content: "帝国不接受你们提出的任何要求，飞艇的回击就是答案！",
                                 voice: "story/1004/100482/192795A2",
+                                speakerName: "飞艇指挥官",
                             },
                             {
                                 id: 10048206,
@@ -37751,6 +38277,7 @@ export const questData: QuestStory[] = [
                                 id: 10048304,
                                 content: "神弃者同盟的骗子们，你们总是像这样，把自己隐瞒在谎言的背后。对于我们帝国而言，你们毫无信誉可言。",
                                 voice: "story/1004/100483/1927A5E0",
+                                speakerName: "飞艇指挥官",
                             },
                             {
                                 id: 10048305,
@@ -37782,16 +38309,19 @@ export const questData: QuestStory[] = [
                                 content:
                                     "你要是芙罗蒂娅公主那我就是尤利乌斯皇帝。要不是我知道公主正在寒鸦号上，即将抵达皇都，我还真信了你这女人的鬼话。",
                                 voice: "story/1004/100483/1927A6B2",
+                                speakerName: "飞艇指挥官",
                             },
                             {
                                 id: 10048310,
                                 content: "我凭什么要相信你，就凭你一个人在这里的几句话？",
                                 voice: "story/1004/100483/1927A6DC",
+                                speakerName: "飞艇指挥官",
                             },
                             {
                                 id: 10048311,
                                 content: "就算你真的是芙罗蒂娅公主，那么你好不容易逃离了寒鸦号，为什么还要在这边坦诚自己的身份？",
                                 voice: "story/1004/100483/1927A706",
+                                speakerName: "飞艇指挥官",
                             },
                             {
                                 id: 10048312,
@@ -37861,12 +38391,14 @@ export const questData: QuestStory[] = [
                                     "你这孩子，敢冒这么大险登上车顶，要是长大了也应该是牌桌上一把好手。而这么刺激的事情，我又怎么能错过。",
                                 voice: "story/1004/100483/1927A8D4",
                                 npc: 100430,
+                                speakerName: "锻铁工迪米特里",
                             },
                             {
                                 id: 10048323,
                                 content: "后面还有人跟着呢，我的新赌友——我就说这个大表姐身份不一般吧，又赌赢了。",
                                 voice: "story/1004/100483/1927A8FE",
                                 npc: 100430,
+                                speakerName: "锻铁工迪米特里",
                             },
                             {
                                 id: 10048324,
@@ -37879,12 +38411,14 @@ export const questData: QuestStory[] = [
                                 content: "行了，说正事，我是提图斯·法斯图斯子爵，和神弃者同盟无关！你们识相点的就快停下！",
                                 voice: "story/1004/100483/1927A952",
                                 npc: 100439,
+                                speakerName: "提图斯·法斯图斯子爵",
                             },
                             {
                                 id: 10048326,
                                 content: "喂……飞艇的指挥官，我……我是第二代库普里乌斯男爵，并非神弃者同盟……我……我命令你……你们停止攻击。",
                                 voice: "story/1004/100483/1927A97C",
                                 npc: 100441,
+                                speakerName: "库普里乌斯男爵",
                             },
                             {
                                 id: 10048327,
@@ -37898,6 +38432,7 @@ export const questData: QuestStory[] = [
                                     "开飞艇的家伙！不想吃处罚的话，就乖乖回去！这是我百花车站内面包店纯爱酵母雇员，切达·培根的忠告！我也同样和神弃者同盟无关！",
                                 voice: "story/1004/100483/1927A9D0",
                                 npc: 100431,
+                                speakerName: "面包店雇员切达·培根",
                             },
                             {
                                 id: 10048329,
@@ -37910,6 +38445,7 @@ export const questData: QuestStory[] = [
                                 content: "冰湖城雾区裁缝，苏珊娜，我不是神弃者同盟！",
                                 voice: "story/1004/100483/1927AA24",
                                 npc: 100433,
+                                speakerName: "裁缝苏珊娜",
                             },
                             {
                                 id: 10048331,
@@ -37922,35 +38458,41 @@ export const questData: QuestStory[] = [
                                 content: "冰湖城下水道修理工，勒庞，并非神弃者同盟！",
                                 voice: "story/1004/100483/1927AA78",
                                 npc: 100426,
+                                speakerName: "邋遢的勒庞大叔",
                             },
                             {
                                 id: 10048333,
                                 content: "《海伯利亚早报》主编，莉薇娅。",
                                 voice: "story/1004/100483/1927AAA2",
                                 npc: 100440,
+                                speakerName: "报纸主编莉薇娅",
                             },
                             {
                                 id: 10048334,
                                 content: "吟游诗人，艾里斯。",
                                 voice: "story/1004/100483/1927AACC",
                                 npc: 100435,
+                                speakerName: "吟游诗人艾里斯",
                             },
                             {
                                 id: 10048335,
                                 content: "迪斯玛尼亚司法官，米兰达。",
                                 voice: "story/1004/100483/1927AAF6",
                                 npc: 100442,
+                                speakerName: "司法官米兰达",
                             },
                             {
                                 id: 10048336,
                                 content: "冰湖城洗衣工，汉娜。",
                                 voice: "story/1004/100483/1927AB20",
                                 npc: 100434,
+                                speakerName: "洗衣工汉娜",
                             },
                             {
                                 id: 10048337,
                                 content: "我们都并非神弃者同盟！",
                                 voice: "story/1004/100483/1927AB4A",
+                                speakerName: "众人",
                             },
                             {
                                 id: 10048338,
@@ -37969,6 +38511,7 @@ export const questData: QuestStory[] = [
                                 id: 10048340,
                                 content: "……",
                                 voice: "story/1004/100483/1927ABC8",
+                                speakerName: "飞艇指挥官",
                             },
                             {
                                 id: 10048341,
@@ -37980,12 +38523,14 @@ export const questData: QuestStory[] = [
                                 id: 10048342,
                                 content: "停止开火！向寒鸦号确认芙罗蒂娅殿下的行踪！",
                                 voice: "story/1004/100483/1927AC1C",
+                                speakerName: "飞艇指挥官",
                             },
                             {
                                 id: 10048343,
                                 content:
                                     "你们暂时安全了，不得不承认，这是我第一次见到帝国的贵族与平民们能够站在一起。我想不是皇室成员，是没有办法做到这种事的。",
                                 voice: "story/1004/100483/1927AC46",
+                                speakerName: "飞艇指挥官",
                             },
                             {
                                 id: 10048344,
@@ -38151,6 +38696,7 @@ export const questData: QuestStory[] = [
                                 id: 10048506,
                                 content: "对空战斗准备，极光号列车主炮开始装填。",
                                 voice: "story/1004/100485/1927C704",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10048507,
@@ -38162,11 +38708,13 @@ export const questData: QuestStory[] = [
                                 id: 10048508,
                                 content: "炮弹已装填，开始进行射击诸元校正。",
                                 voice: "story/1004/100485/1927C758",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10048509,
                                 content: "校正完毕……准备发射……",
                                 voice: "story/1004/100485/1927C782",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10048510,
@@ -38178,16 +38726,19 @@ export const questData: QuestStory[] = [
                                 id: 10048511,
                                 content: "3……",
                                 voice: "story/1004/100485/1927C7D6",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10048512,
                                 content: "2……",
                                 voice: "story/1004/100485/1927C800",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10048513,
                                 content: "1……",
                                 voice: "story/1004/100485/1927C82A",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -38200,6 +38751,7 @@ export const questData: QuestStory[] = [
                                 id: 10048601,
                                 content: "动力单元被击中，舵机失效，我们失去了对飞艇的控制，全员逃生，全员逃生。",
                                 voice: "story/1004/100486/1927D69A",
+                                speakerName: "飞艇指挥官",
                             },
                             {
                                 id: 10048602,
@@ -38589,12 +39141,14 @@ export const questData: QuestStory[] = [
                                 content:
                                     "紧急新闻。今日，神弃者同盟在科赛托斯省南缘劫持了“极光号”列车，随后利用列车头部装载的列车炮击坠前来救援的帝国飞艇。",
                                 voice: "story/1004/100490/19281936",
+                                speakerName: "收音机",
                             },
                             {
                                 id: 10049008,
                                 content:
                                     "飞艇在一棵巨大天之树处爆炸，致使天之树燃烧。这是今年发生的第二起点燃天之树事件。第六军团已增派救援，目前极光号乘客全部失联，生死不明。",
                                 voice: "story/1004/100490/19281960",
+                                speakerName: "收音机",
                             },
                             {
                                 id: 10049009,
@@ -38607,18 +39161,21 @@ export const questData: QuestStory[] = [
                                 content: "女士，请问我点的“冰湖往事”快要好了吗？",
                                 voice: "story/1004/100490/192819B4",
                                 npc: 100414,
+                                speakerName: "等候的吟游诗人",
                             },
                             {
                                 id: 10049011,
                                 content: "我和朋友今天出发离开这儿，所以我们想喝杯最有冰湖城特色的饮料作为纪念！",
                                 voice: "story/1004/100490/192819DE",
                                 npc: 100414,
+                                speakerName: "等候的吟游诗人",
                             },
                             {
                                 id: 10049012,
                                 content: "……店主女士？",
                                 voice: "story/1004/100490/19281A08",
                                 npc: 100414,
+                                speakerName: "等候的吟游诗人",
                             },
                             {
                                 id: 10049013,
@@ -39109,12 +39666,14 @@ export const questData: QuestStory[] = [
                                 content: "那位下属本不必死。",
                                 voice: "story/1004/100493/19284972",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049302,
                                 content: "你还是喜欢生额外的事端，就像我第一次见到你那样，“牲王”。",
                                 voice: "story/1004/100493/1928499C",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049303,
@@ -39134,12 +39693,14 @@ export const questData: QuestStory[] = [
                                     "“牲王”的意义，并非汇聚盲从的野兽，让它们如群氓般撕咬，而是教会它们如何潜伏在黑暗中，磨砺自己的爪子和牙齿，找准最合适的时机，一击毙命。",
                                 voice: "story/1004/100493/19284A1A",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049306,
                                 content: "愤怒总是驱使你做无意义的事，卡嘉。",
                                 voice: "story/1004/100493/19284A44",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049307,
@@ -39159,12 +39720,14 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1004/100493/19284AC2",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049310,
                                 content: "你僭越了，“牲王”。",
                                 voice: "story/1004/100493/19284AEC",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049311,
@@ -39183,6 +39746,7 @@ export const questData: QuestStory[] = [
                                 content: "卡嘉。",
                                 voice: "story/1004/100493/19284B6A",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049314,
@@ -39190,12 +39754,14 @@ export const questData: QuestStory[] = [
                                     "他们的死是有意义的。燃烧的天之树已经撕裂了帝国的天空，而燃烧仍将继续。我们已经无需担心那些飞在天空中的巨兽对我们进行单方面屠戮。",
                                 voice: "story/1004/100493/19284B94",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049315,
                                 content: "取而代之的，是战争。这一次，我们不会再有犹疑或怜悯。",
                                 voice: "story/1004/100493/19284BBE",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049316,
@@ -39203,6 +39769,7 @@ export const questData: QuestStory[] = [
                                     "是的，战争从未结束。隐忍了这么多年，这个时刻终于来临。而当它结束之时，海伯利亚帝国或是神弃者同盟，终有一方将被烧成灰烬。",
                                 voice: "story/1004/100493/19284BE8",
                                 npc: 100446,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -39225,18 +39792,21 @@ export const questData: QuestStory[] = [
                                 content: "……你终于醒啦。",
                                 voice: "story/1004/100498/19289B7A",
                                 npc: 100414,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049802,
                                 content: "我记得你，我们在冰湖城见过面！你漂流了很久吧，虚脱得很严重……不过已经没事了！这里是安全的。",
                                 voice: "story/1004/100498/19289BA4",
                                 npc: 100414,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 10049803,
                                 content: "欢迎来到“悠远海风号”，如冰原上独角兽一般的{性别：先生|小姐}。",
                                 voice: "story/1004/100498/19289BCE",
                                 npc: 100414,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -39348,12 +39918,14 @@ export const questData: QuestStory[] = [
                                 id: 11010102,
                                 content: "<W>……那只巨兽正拦在你的去路，扼住你的咽喉。</>",
                                 voice: "story/1002/110101/1B9008DC",
+                                speakerName: "？？？",
                                 next: 11010103,
                             },
                             {
                                 id: 11010103,
                                 content: "<W>你的血肉之躯因窒息而悸动，疼痛叩击着你深处最隐秘的渴望。</>",
                                 voice: "story/1002/110101/1B900906",
+                                speakerName: "？？？",
                                 next: 11010104,
                             },
                             {
@@ -39373,6 +39945,7 @@ export const questData: QuestStory[] = [
                                 id: 11010106,
                                 content: "<W>杀了它。聆听它的哀嚎，沐浴它的血。拥抱这甜蜜的死亡。</>",
                                 voice: "story/1002/110101/1B900984",
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 11010107,
@@ -39604,6 +40177,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "<W>湿滑黏腻的污物沾满了你的双手，你分不清那是秽兽的黏液还是内脏。你唯一知道的是，它们令你欣悦，连灵魂都为之震颤。</>",
                                 voice: "story/1002/110102/1B901A40",
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 11010209,
@@ -39616,6 +40190,7 @@ export const questData: QuestStory[] = [
                                 id: 11010210,
                                 content: "<W>不要抗拒。因为我是真正的你，是你的死之本能。终有一日你会遵从我的指引，遵从亘古的意志……</>",
                                 voice: "story/1002/110102/1B901A94",
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 11010211,
@@ -39930,6 +40505,7 @@ export const questData: QuestStory[] = [
                                 content: "喂？喂？",
                                 voice: "story/1002/110110/1B909CAE",
                                 npc: 110010,
+                                speakerName: "？？？",
                                 next: 11011004,
                             },
                             {
@@ -39944,6 +40520,7 @@ export const questData: QuestStory[] = [
                                 content: "<H>海伯利亚今日天气怎么样？</>",
                                 voice: "story/1002/110110/1B909D02",
                                 npc: 110010,
+                                speakerName: "？？？",
                                 next: 11011006,
                             },
                             {
@@ -39958,6 +40535,7 @@ export const questData: QuestStory[] = [
                                 content: "我是阿瓦尔·赫德兰中校。对面的“狮鹫”小队队员，你们在哪里？",
                                 voice: "story/1002/110110/1B909D56",
                                 npc: 110010,
+                                speakerName: "？？？",
                                 next: 11011008,
                             },
                             {
@@ -40301,6 +40879,7 @@ export const questData: QuestStory[] = [
                                 content: "阿瓦尔长官？我……在做梦吗……",
                                 voice: "story/1002/110110/1B909F78",
                                 npc: 110027,
+                                speakerName: "受伤的“狮鹫”小队成员",
                                 next: 11011021,
                             },
                             {
@@ -40323,6 +40902,7 @@ export const questData: QuestStory[] = [
                                 content: "向您致意……长官……荣耀……尽归吾皇……",
                                 voice: "story/1002/110110/1B909FCC",
                                 npc: 110028,
+                                speakerName: "受伤的“狮鹫”小队成员",
                                 next: 11011023,
                             },
                             {
@@ -40345,6 +40925,7 @@ export const questData: QuestStory[] = [
                                 content: "长官，以你们的判断，这次作战还有希望吗？",
                                 voice: "story/1002/110110/1B90A020",
                                 npc: 110026,
+                                speakerName: "受伤的“狮鹫”小队成员",
                                 next: 11011025,
                             },
                             {
@@ -40577,6 +41158,7 @@ export const questData: QuestStory[] = [
                                 id: 11017514,
                                 content: "<W>警告：检测到髓动轮异常关闭，即将重新启动。</>",
                                 voice: "story/1002/110175/1B94C8E4",
+                                speakerName: "机械音",
                                 next: 11017515,
                             },
                             {
@@ -40803,6 +41385,7 @@ export const questData: QuestStory[] = [
                                 id: 11017517,
                                 content: "<W>警告：当前月髓舱负荷过大，有过载风险，请检查是否启动过多髓动轮。</>",
                                 voice: "story/1002/110175/1B94C962",
+                                speakerName: "机械音",
                                 next: 11017518,
                             },
                             {
@@ -40882,6 +41465,7 @@ export const questData: QuestStory[] = [
                                 id: 11017611,
                                 content: "<W>警告：月髓舱即将损毁，请自首。</>",
                                 voice: "story/1002/110176/1B94D8CE",
+                                speakerName: "机械音",
                             },
                         ],
                     },
@@ -40901,6 +41485,7 @@ export const questData: QuestStory[] = [
                                 id: 11017613,
                                 content: "<W>警告：月髓舱即将损毁，请自首。</>",
                                 voice: "story/1002/110176/1B94D922",
+                                speakerName: "机械音",
                             },
                         ],
                     },
@@ -40933,6 +41518,7 @@ export const questData: QuestStory[] = [
                                 id: 11017605,
                                 content: "<W>警告：月髓舱负荷过大，已过载50%。请立即停止髓动轮设备使用，不得擅自撤离。</>",
                                 voice: "story/1002/110176/1B94D7D2",
+                                speakerName: "机械音",
                                 next: 11017606,
                             },
                             {
@@ -41127,6 +41713,7 @@ export const questData: QuestStory[] = [
                                 id: 11011317,
                                 content: "喂？喂喂？听到了吗？<H>海伯利亚今日天气怎么样？</>",
                                 voice: "story/1002/110113/1B90D032",
+                                speakerName: "焦急的声音",
                                 next: 11011318,
                             },
                             {
@@ -41140,6 +41727,7 @@ export const questData: QuestStory[] = [
                                 id: 11011319,
                                 content: "阿瓦尔长官？是您吗？我是维克！",
                                 voice: "story/1002/110113/1B90D086",
+                                speakerName: "焦急的声音",
                                 next: 11011320,
                             },
                             {
@@ -41153,6 +41741,7 @@ export const questData: QuestStory[] = [
                                 id: 11011321,
                                 content: "与您分开后，我和莫妮卡选择了外环路线，现在已经抵达动力室附近。",
                                 voice: "story/1002/110113/1B90D0DA",
+                                speakerName: "维克",
                                 next: 11011322,
                             },
                             {
@@ -41166,6 +41755,7 @@ export const questData: QuestStory[] = [
                                 id: 11011323,
                                 content: "我是来特地向您报告的，我们接下来会尝试关闭动力装置。",
                                 voice: "story/1002/110113/1B90D12E",
+                                speakerName: "维克",
                                 next: 11011324,
                             },
                             {
@@ -41179,6 +41769,7 @@ export const questData: QuestStory[] = [
                                 id: 11011325,
                                 content: "先让我们试试吧，长官！多耽误一分钟，其他人就多一分钟危险。",
                                 voice: "story/1002/110113/1B90D182",
+                                speakerName: "维克",
                                 next: 11011326,
                             },
                             {
@@ -41192,6 +41783,7 @@ export const questData: QuestStory[] = [
                                 id: 11011327,
                                 content: "还有最后一件事……既然{nickname2}在您那的话，能不能告诉我“狮鹫”分队的情况怎么样？我弟弟西蒙他……",
                                 voice: "story/1002/110113/1B90D1D6",
+                                speakerName: "维克",
                                 next: 11011328,
                             },
                             {
@@ -41212,6 +41804,7 @@ export const questData: QuestStory[] = [
                                 id: 11011330,
                                 content: "……啊……？",
                                 voice: "story/1002/110113/1B90D254",
+                                speakerName: "维克",
                                 next: 11011331,
                             },
                             {
@@ -41225,6 +41818,7 @@ export const questData: QuestStory[] = [
                                 id: 11011332,
                                 content: "……明白了，多谢。",
                                 voice: "story/1002/110113/1B90D2A8",
+                                speakerName: "维克",
                                 next: 11011333,
                             },
                             {
@@ -41308,6 +41902,7 @@ export const questData: QuestStory[] = [
                                 id: 11011506,
                                 content: "阿瓦尔，你在哪？",
                                 voice: "story/1002/110115/1B90EF34",
+                                speakerName: "？？？",
                                 next: 11011507,
                             },
                             {
@@ -41328,6 +41923,7 @@ export const questData: QuestStory[] = [
                                 id: 11011509,
                                 content: "怎么？连总指挥官的声音都听不出了？",
                                 voice: "story/1002/110115/1B90EFB2",
+                                speakerName: "？？？",
                                 next: 11011510,
                             },
                             {
@@ -41542,12 +42138,14 @@ export const questData: QuestStory[] = [
                                 id: 11011540,
                                 content: "队长、队长！",
                                 voice: "story/1002/110115/1B90F4C8",
+                                speakerName: "呼救的声音",
                                 next: 11011541,
                             },
                             {
                                 id: 11011541,
                                 content: "我是“狮鹫”分队的西蒙，队长，你在吗？",
                                 voice: "story/1002/110115/1B90F4F2",
+                                speakerName: "呼救的声音",
                                 next: 11011542,
                             },
                             {
@@ -41561,12 +42159,14 @@ export const questData: QuestStory[] = [
                                 id: 11011543,
                                 content: "轨道线一带有大片秽兽，大家被困在里面，请求支援！",
                                 voice: "story/1002/110115/1B90F546",
+                                speakerName: "呼救的声音",
                                 next: 11011544,
                             },
                             {
                                 id: 11011544,
                                 content: "拜托……你了！",
                                 voice: "story/1002/110115/1B90F570",
+                                speakerName: "呼救的声音",
                                 next: 11011545,
                             },
                             {
@@ -41714,18 +42314,21 @@ export const questData: QuestStory[] = [
                                 id: 11011403,
                                 content: "莫妮卡，听到……吗？……",
                                 voice: "story/1002/110114/1B90DE4E",
+                                speakerName: "维克",
                                 next: 11011404,
                             },
                             {
                                 id: 11011404,
                                 content: "动力室……快走……啊！",
                                 voice: "story/1002/110114/1B90DE78",
+                                speakerName: "维克",
                                 next: 11011405,
                             },
                             {
                                 id: 11011405,
                                 content: "……",
                                 voice: "story/1002/110114/1B90DE79",
+                                speakerName: "维克",
                                 next: 11011406,
                             },
                             {
@@ -42026,6 +42629,7 @@ export const questData: QuestStory[] = [
                                 content: "队长！嗨——在这里！",
                                 voice: "story/1002/110118/1B911F9A",
                                 npc: 110015,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -42113,6 +42717,7 @@ export const questData: QuestStory[] = [
                                 content: "你们还有一条路可以走……",
                                 voice: "story/1002/110118/1B912168",
                                 npc: 110017,
+                                speakerName: "年迈的卡戎之民",
                                 next: 11011813,
                             },
                             {
@@ -42162,6 +42767,7 @@ export const questData: QuestStory[] = [
                                 content: "……这位长官……",
                                 voice: "story/1002/110118/1B91228E",
                                 npc: 110034,
+                                speakerName: "恳切的卡戎少女",
                                 next: 11011820,
                             },
                             {
@@ -42169,6 +42775,7 @@ export const questData: QuestStory[] = [
                                 content: "如果只有一个卡戎之民的性命才能平息您的愤怒，就对我开枪吧。但在此之前，恳请您听一下我的解释……",
                                 voice: "story/1002/110118/1B9122B8",
                                 npc: 110034,
+                                speakerName: "恳切的卡戎少女",
                                 next: 11011821,
                             },
                             {
@@ -42176,6 +42783,7 @@ export const questData: QuestStory[] = [
                                 content: "卡嘉，回来，别犯傻！",
                                 voice: "story/1002/110118/1B9122E2",
                                 npc: 110017,
+                                speakerName: "年迈的卡戎之民",
                                 next: 11011822,
                             },
                             {
@@ -43272,6 +43880,7 @@ export const questData: QuestStory[] = [
                                 id: 11012731,
                                 content: "是！",
                                 voice: "story/1002/110127/1B91B82E",
+                                speakerName: "全员",
                                 next: 11012732,
                             },
                             {
@@ -43942,12 +44551,14 @@ export const questData: QuestStory[] = [
                                 id: 11013401,
                                 content: "……权限覆盖完毕……",
                                 voice: "story/1002/110134/1B92261A",
+                                speakerName: "机械音",
                                 next: 11013402,
                             },
                             {
                                 id: 11013402,
                                 content: "……当前权限：阿瓦尔·赫德兰……",
                                 voice: "story/1002/110134/1B922644",
+                                speakerName: "机械音",
                                 next: 11013403,
                             },
                             {
@@ -43955,6 +44566,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "尊敬的阿瓦尔·赫德兰中校，下午好！海伯利亚军团箴言第十六条：当敌人在你的射程内，别忘了你也在敌人的射程内。",
                                 voice: "story/1002/110134/1B92266E",
+                                speakerName: "机械音",
                                 next: 11013404,
                             },
                             {
@@ -44461,6 +45073,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "尊敬的阿瓦尔·赫德兰中校，您尚未输入指令。海伯利亚军团箴言第十七条：服从命令，信任战友，才会在战场上活得更久。",
                                 voice: "story/1002/110137/1B925824",
+                                speakerName: "机械音",
                             },
                         ],
                     },
@@ -44590,6 +45203,7 @@ export const questData: QuestStory[] = [
                                 id: 11018702,
                                 content: "防御模式启动中，请先重置至安全模式。",
                                 voice: "story/1002/110187/1B958BCC",
+                                speakerName: "机械音",
                                 options: [
                                     {
                                         id: 11018801,
@@ -44696,18 +45310,21 @@ export const questData: QuestStory[] = [
                                 id: 11013101,
                                 content: "“海伯利亚的暴虐，我等卡戎之民早已不堪忍受。”",
                                 voice: "story/1002/110131/1B91F4E2",
+                                speakerName: "带签名的文件",
                                 next: 11013102,
                             },
                             {
                                 id: 11013102,
                                 content: "“我会向神弃者同盟献上自己的忠诚，这是帝国应得的惩罚。”",
                                 voice: "story/1002/110131/1B91F50C",
+                                speakerName: "带签名的文件",
                                 next: 11013103,
                             },
                             {
                                 id: 11013103,
                                 content: "“——阿瓦尔·赫德兰”",
                                 voice: "story/1002/110131/1B91F536",
+                                speakerName: "带签名的文件",
                                 next: 11013104,
                             },
                             {
@@ -44763,6 +45380,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "“十三军团会在两日内发起突袭。安东尼·富尔维斯向西比尔立下军令状，若他的枪管无法打破要塞的坚壁，就打破自己的脑壳。西比尔把一批精锐拨给了他。”",
                                 voice: "story/1002/110130/1B91E47A",
+                                speakerName: "冷静的声音",
                                 next: 11013002,
                             },
                             {
@@ -44784,6 +45402,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "“军团是一定要收复龙莎要塞的，守住要塞的事就别想了。当下最要紧的是快点从要塞撤离，以保存我们神弃者同盟的有生力量。”",
                                 voice: "story/1002/110130/1B91E4A4",
+                                speakerName: "冷静的声音",
                                 next: 11013003,
                             },
                             {
@@ -44797,42 +45416,49 @@ export const questData: QuestStory[] = [
                                 id: 11013003,
                                 content: "“只是撤退的话，太可惜了。我们总得让这些海伯利亚的走狗吃点苦头。”",
                                 voice: "story/1002/110130/1B91E4CE",
+                                speakerName: "不忿的声音",
                                 next: 11013004,
                             },
                             {
                                 id: 11013004,
                                 content: "“这很好办。交给阿瓦尔，他这次负责两支先遣分队的调度，那群蠢货都很听他话。”",
                                 voice: "story/1002/110130/1B91E4F8",
+                                speakerName: "冷静的声音",
                                 next: 11013005,
                             },
                             {
                                 id: 11013005,
                                 content: "“你们提前把机关备好，阿瓦尔自会拖延他们的进攻速度，让那些家伙都交代在这儿。”",
                                 voice: "story/1002/110130/1B91E522",
+                                speakerName: "冷静的声音",
                                 next: 11013006,
                             },
                             {
                                 id: 11013006,
                                 content: "“很快，我们就会从报纸上看到这样的新闻——”",
                                 voice: "story/1002/110130/1B91E54C",
+                                speakerName: "冷静的声音",
                                 next: 11013007,
                             },
                             {
                                 id: 11013007,
                                 content: "“‘龙莎战役中，十三军团为了保卫吾皇神圣的土地浴血奋战，先遣队超过九成士官在这场战役中阵亡。'”",
                                 voice: "story/1002/110130/1B91E576",
+                                speakerName: "冷静的声音",
                                 next: 11013008,
                             },
                             {
                                 id: 11013008,
                                 content: "“幸存的阿瓦尔中校对这些战士的亡故表示悼念，并致以无上光荣的褒奖。”",
                                 voice: "story/1002/110130/1B91E5A0",
+                                speakerName: "冷静的声音",
                                 next: 11013009,
                             },
                             {
                                 id: 11013009,
                                 content: "“好个阿瓦尔！就按你们说的办吧。只可惜这样的哀荣便宜了这群猪猡。”",
                                 voice: "story/1002/110130/1B91E5CA",
+                                speakerName: "不忿的声音",
                                 next: 11013010,
                             },
                             {
@@ -44873,18 +45499,21 @@ export const questData: QuestStory[] = [
                                 id: 11013801,
                                 content: "<W>……不要沉溺于永恒的虚无……</>",
                                 voice: "story/1002/110138/1B9267BA",
+                                speakerName: "？？？",
                                 next: 11013802,
                             },
                             {
                                 id: 11013802,
                                 content: "<W>……醒来吧……</>",
                                 voice: "story/1002/110138/1B9267E4",
+                                speakerName: "？？？",
                                 next: 11013803,
                             },
                             {
                                 id: 11013803,
                                 content: "<W>……在鲜血化为奔流的河之前……一切远未结束……</>",
                                 voice: "story/1002/110138/1B92680E",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -44939,12 +45568,14 @@ export const questData: QuestStory[] = [
                                 id: 11014005,
                                 content: "龙莎要塞全体十三军团士兵听令。现通缉前“狮鹫”小队医务员、神弃者同盟间谍达芙涅·塞奥多尔。",
                                 voice: "story/1002/110140/1B928932",
+                                speakerName: "广播",
                                 next: 11014006,
                             },
                             {
                                 id: 11014006,
                                 content: "任何人发现达芙涅·塞奥多尔，即刻处决。",
                                 voice: "story/1002/110140/1B92895C",
+                                speakerName: "广播",
                                 next: 11014007,
                             },
                             {
@@ -44958,6 +45589,7 @@ export const questData: QuestStory[] = [
                                 id: 11018820,
                                 content: "<W>警告：自毁模式将在20分钟后启动，请迅速撤离，请迅速撤离。</>",
                                 voice: "story/1002/110188/1B959F28",
+                                speakerName: "机械音",
                                 next: 11019306,
                             },
                             {
@@ -45105,6 +45737,7 @@ export const questData: QuestStory[] = [
                                 id: 11014701,
                                 content: "当前水位高于预定值，无法开启安全门，请调整水位后再试。",
                                 voice: "story/1002/110147/1B92FB62",
+                                speakerName: "机械音",
                                 next: 11014702,
                             },
                             {
@@ -45518,6 +46151,7 @@ export const questData: QuestStory[] = [
                                 id: 11015150,
                                 content: "因为战局不顺，西比尔军团长也在赶来龙莎要塞的路上。",
                                 voice: "story/1002/110151/1B93450C",
+                                speakerName: "士兵",
                                 next: 11015151,
                             },
                             {
@@ -45840,6 +46474,7 @@ export const questData: QuestStory[] = [
                                 id: 11014306,
                                 content: "警告，无通行权限，无通行权限。",
                                 voice: "story/1002/110143/1B92BA94",
+                                speakerName: "机械音",
                                 next: 11014307,
                             },
                             {
@@ -45853,6 +46488,7 @@ export const questData: QuestStory[] = [
                                 id: 11014308,
                                 content: "发现目标了！在这里！",
                                 voice: "story/1002/110143/1B92BAE8",
+                                speakerName: "“一角鲸”小队成员",
                                 next: 11014309,
                             },
                             {
@@ -46004,6 +46640,7 @@ export const questData: QuestStory[] = [
                                 id: 11014412,
                                 content: "是，一名女性医务员，达芙涅·塞奥多尔。先遣小队的伤兵不要命地拖延时间，让她跑了。",
                                 voice: "story/1002/110144/1B92CBF8",
+                                speakerName: "士兵",
                                 next: 11014413,
                             },
                             {
@@ -46011,6 +46648,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "现在“一角鲸”分队已经开始陆续进入要塞，但清理先遣小队的事不能让我们之外的人知道。一旦达芙涅向他们求助，事情就难办了。",
                                 voice: "story/1002/110144/1B92CC22",
+                                speakerName: "士兵",
                                 next: 11014414,
                             },
                             {
@@ -46018,12 +46656,14 @@ export const questData: QuestStory[] = [
                                 content:
                                     "而且，因为战局不顺，西比尔军团长也在赶来龙莎要塞的路上。情况现在有些棘手，不过好在最关键的阿瓦尔已经死了。",
                                 voice: "story/1002/110144/1B92CC4C",
+                                speakerName: "士兵",
                                 next: 11014415,
                             },
                             {
                                 id: 11014415,
                                 content: "至于达芙涅这个人，您的意思是……",
                                 voice: "story/1002/110144/1B92CC76",
+                                speakerName: "士兵",
                                 next: 11014416,
                             },
                             {
@@ -46038,6 +46678,7 @@ export const questData: QuestStory[] = [
                                 id: 11014417,
                                 content: "是。",
                                 voice: "story/1002/110144/1B92CCCA",
+                                speakerName: "士兵",
                                 next: 11014418,
                             },
                             {
@@ -46363,12 +47004,14 @@ export const questData: QuestStory[] = [
                                 id: 11015404,
                                 content: "帝国的背叛者……",
                                 voice: "story/1002/110154/1B936E64",
+                                speakerName: "？？？",
                                 next: 11015405,
                             },
                             {
                                 id: 11015405,
                                 content: "若你坚称自己是无辜的，就向我证明你的正义吧。",
                                 voice: "story/1002/110154/1B936E8E",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -46402,6 +47045,7 @@ export const questData: QuestStory[] = [
                                 content: "如审判长大人所见，我们的作战计划全被泄露了……",
                                 voice: "story/1002/110155/1B937ECC",
                                 npc: 110054,
+                                speakerName: "莱昂？",
                                 next: 11015503,
                             },
                             {
@@ -46409,6 +47053,7 @@ export const questData: QuestStory[] = [
                                 content: "……阿瓦尔长官参与了先遣队作战计划的拟定……",
                                 voice: "story/1002/110155/1B937EF6",
                                 npc: 110054,
+                                speakerName: "莱昂？",
                                 next: 11015504,
                             },
                             {
@@ -46416,6 +47061,7 @@ export const questData: QuestStory[] = [
                                 content: "……我想，身为卡戎之民的他，是最可能向神弃者同盟泄露计划的人……",
                                 voice: "story/1002/110155/1B937F20",
                                 npc: 110054,
+                                speakerName: "莱昂？",
                                 next: 11015505,
                             },
                             {
@@ -46443,6 +47089,7 @@ export const questData: QuestStory[] = [
                                 content: "……神弃者同盟在每一条路上都设置了陷阱……",
                                 voice: "story/1002/110156/1B938F34",
                                 npc: 110055,
+                                speakerName: "马尔科？",
                                 next: 11015603,
                             },
                             {
@@ -46450,6 +47097,7 @@ export const questData: QuestStory[] = [
                                 content: "如审判长大人所见，有人……背叛了我们……",
                                 voice: "story/1002/110156/1B938F5E",
                                 npc: 110055,
+                                speakerName: "马尔科？",
                                 next: 11015604,
                             },
                             {
@@ -46471,6 +47119,7 @@ export const questData: QuestStory[] = [
                                 content: "如审判长大人所见，我是阿瓦尔·赫德兰的女儿，达芙涅·塞奥多尔……",
                                 voice: "story/1002/110159/1B93C042",
                                 npc: 110005,
+                                speakerName: "达芙涅？",
                                 next: 11015902,
                             },
                             {
@@ -46478,6 +47127,7 @@ export const questData: QuestStory[] = [
                                 content: "我的父亲……与{nickname2}……原本计划平分向同盟出卖情报的报酬……",
                                 voice: "story/1002/110159/1B93C06C",
                                 npc: 110005,
+                                speakerName: "达芙涅？",
                                 next: 11015903,
                             },
                             {
@@ -46485,6 +47135,7 @@ export const questData: QuestStory[] = [
                                 content: "……在要塞核心区域……因分赃不均……",
                                 voice: "story/1002/110159/1B93C096",
                                 npc: 110005,
+                                speakerName: "达芙涅？",
                                 next: 11015904,
                             },
                             {
@@ -46492,6 +47143,7 @@ export const questData: QuestStory[] = [
                                 content: "我的父亲……被……",
                                 voice: "story/1002/110159/1B93C0C0",
                                 npc: 110005,
+                                speakerName: "达芙涅？",
                                 next: 11015905,
                             },
                             {
@@ -46499,6 +47151,7 @@ export const questData: QuestStory[] = [
                                 content: "被{nickname2}设计害死……",
                                 voice: "story/1002/110159/1B93C0EA",
                                 npc: 110005,
+                                speakerName: "达芙涅？",
                                 next: 11015906,
                             },
                             {
@@ -46506,6 +47159,7 @@ export const questData: QuestStory[] = [
                                 content: "在那之后，{性别2：他|她}还欺骗了我……父亲死亡的真相……",
                                 voice: "story/1002/110159/1B93C114",
                                 npc: 110005,
+                                speakerName: "达芙涅？",
                                 next: 11015907,
                             },
                             {
@@ -46513,6 +47167,7 @@ export const questData: QuestStory[] = [
                                 content: "我将凶手带到审判长大人面前……恳求审判长大人给予公正的判决……",
                                 voice: "story/1002/110159/1B93C13E",
                                 npc: 110005,
+                                speakerName: "达芙涅？",
                                 next: 11015908,
                             },
                             {
@@ -46540,6 +47195,7 @@ export const questData: QuestStory[] = [
                                 content: "如审判长大人所见，我是龙莎战役先遣小队的指挥官阿瓦尔·赫德兰……",
                                 voice: "story/1002/110158/1B93B004",
                                 npc: 110010,
+                                speakerName: "阿瓦尔？",
                                 next: 11015803,
                             },
                             {
@@ -46547,6 +47203,7 @@ export const questData: QuestStory[] = [
                                 content: "我背叛了海伯利亚帝国，背叛了十三军团……出卖了“狮鹫”、“雪狼”两支先遣队……",
                                 voice: "story/1002/110158/1B93B02E",
                                 npc: 110010,
+                                speakerName: "阿瓦尔？",
                                 next: 11015804,
                             },
                             {
@@ -46555,6 +47212,7 @@ export const questData: QuestStory[] = [
                                     "我的协助者是……我和前妻克劳迪娅·塞奥多尔的女儿……达芙涅……以及……我在皇家军事学院的学生……{nickname2}……",
                                 voice: "story/1002/110158/1B93B058",
                                 npc: 110010,
+                                speakerName: "阿瓦尔？",
                                 next: 11015805,
                             },
                             {
@@ -46582,6 +47240,7 @@ export const questData: QuestStory[] = [
                                 id: 11015808,
                                 content: "…………",
                                 voice: "story/1002/110158/1B93B100",
+                                speakerName: "阿瓦尔？",
                             },
                         ],
                     },
@@ -46629,6 +47288,7 @@ export const questData: QuestStory[] = [
                                 content: "最后一个问题，阿瓦尔·赫德兰的死亡，是否是你所为？",
                                 voice: "story/1002/110163/1B9401E2",
                                 npc: 110032,
+                                speakerName: "典狱长",
                                 next: 11016302,
                             },
                             {
@@ -46636,6 +47296,7 @@ export const questData: QuestStory[] = [
                                 content: "即使他背叛了帝国，他也一直信任你。他葬身火海中的时候，你在做什么？",
                                 voice: "story/1002/110163/1B94020C",
                                 npc: 110032,
+                                speakerName: "典狱长",
                                 next: 11016305,
                             },
                             {
@@ -46643,6 +47304,7 @@ export const questData: QuestStory[] = [
                                 content: "若你背弃了同伴的正义，就被这狱火灼烧殆尽！",
                                 voice: "story/1002/110163/1B94028A",
                                 npc: 110032,
+                                speakerName: "典狱长",
                                 next: 11019052,
                             },
                             {
@@ -46664,6 +47326,7 @@ export const questData: QuestStory[] = [
                                 content: "坚称无罪之人，若你仍不曾动摇，就把胸中意志熔铸成锋刃——",
                                 voice: "story/1002/110190/1B95C58C",
                                 npc: 110032,
+                                speakerName: "典狱长",
                                 next: 11019055,
                             },
                             {
@@ -46671,6 +47334,7 @@ export const questData: QuestStory[] = [
                                 content: "用你手中的剑回答我！",
                                 voice: "story/1002/110190/1B95C5B6",
                                 npc: 110032,
+                                speakerName: "典狱长",
                             },
                         ],
                     },
@@ -47189,6 +47853,7 @@ export const questData: QuestStory[] = [
                                 content: "“有机会的话，请你找到达芙涅。如果她还活着，带她一起……逃出去。等安全了，告诉她——”",
                                 voice: "story/1002/110168/1B945804",
                                 npc: 110040,
+                                speakerName: "阿瓦尔&{nickname2}",
                                 next: 11016827,
                             },
                             {
@@ -47336,6 +48001,7 @@ export const questData: QuestStory[] = [
                                 id: 11017001,
                                 content: "维吉尔亲王殿下！这是审讯犯人的肮脏地方，请您留步！",
                                 voice: "story/1002/110170/1B9474BA",
+                                speakerName: "士兵",
                             },
                         ],
                     },
@@ -47477,30 +48143,35 @@ export const questData: QuestStory[] = [
                                 id: 11016001,
                                 content: "如审判长大人所见，我是龙莎要塞中央控制室的控制台……",
                                 voice: "story/1002/110160/1B93D0AA",
+                                speakerName: "机械音",
                                 next: 11019317,
                             },
                             {
                                 id: 11019317,
                                 content: "要塞被攻占的当日，在中央控制室执行操作的，只有阿瓦尔·赫德兰和{nickname2}。",
                                 voice: "story/1002/110193/1B95F0B2",
+                                speakerName: "机械音",
                                 next: 11019318,
                             },
                             {
                                 id: 11019318,
                                 content: "最终，{nickname2}开启了自毁模式。",
                                 voice: "story/1002/110193/1B95F0DC",
+                                speakerName: "机械音",
                                 next: 11019320,
                             },
                             {
                                 id: 11019320,
                                 content: "但我搭载了工程炼金院全新材料制造的机密记录仪，即使控制台被烧坏，操作记录也不会消失，哈哈，哈哈。",
                                 voice: "story/1002/110193/1B95F130",
+                                speakerName: "机械音",
                                 next: 11016005,
                             },
                             {
                                 id: 11016005,
                                 content: "海伯利亚军团箴言第十八条：过于顺利的战况之后，很可能就是敌人的埋伏……",
                                 voice: "story/1002/110160/1B93D152",
+                                speakerName: "机械音",
                                 next: 11016006,
                             },
                             {
@@ -47555,6 +48226,7 @@ export const questData: QuestStory[] = [
                                 content: "第二个问题，龙莎一役中，先遣队伍全军覆没，是否与你有关？",
                                 voice: "story/1002/110190/1B95C0F4",
                                 npc: 110032,
+                                speakerName: "典狱长",
                                 next: 11019027,
                             },
                             {
@@ -47562,6 +48234,7 @@ export const questData: QuestStory[] = [
                                 content: "若你背弃了同胞的正义，就溅血于自己的锋刃！",
                                 voice: "story/1002/110190/1B95C11E",
                                 npc: 110032,
+                                speakerName: "典狱长",
                                 next: 11019028,
                             },
                             {
@@ -47675,6 +48348,7 @@ export const questData: QuestStory[] = [
                                 content: "坚称无罪之人，你会因愤怒动摇吗？",
                                 voice: "story/1002/110190/1B95C298",
                                 npc: 110032,
+                                speakerName: "典狱长",
                             },
                         ],
                     },
@@ -47754,6 +48428,7 @@ export const questData: QuestStory[] = [
                                 content: "坚称无罪之人，你会因迷惘动摇吗？",
                                 voice: "story/1002/110190/1B95C412",
                                 npc: 110032,
+                                speakerName: "典狱长",
                                 next: 11019046,
                             },
                             {
@@ -48568,6 +49243,7 @@ export const questData: QuestStory[] = [
                                 content: "…………",
                                 voice: "story/1200/120007/1E0AE34E",
                                 npc: 220014,
+                                speakerName: "异国风情的女士",
                                 next: 12000801,
                             },
                             {
@@ -48735,6 +49411,7 @@ export const questData: QuestStory[] = [
                                 content: "我听见这里的喧闹声……出了什么事吗？",
                                 voice: "story/1200/120011/1E0B2446",
                                 npc: 210004,
+                                speakerName: "异国风情的女士",
                                 next: 12001112,
                             },
                             {
@@ -48763,6 +49440,7 @@ export const questData: QuestStory[] = [
                                 content: "哦？活该被……？",
                                 voice: "story/1200/120011/1E0B24EE",
                                 npc: 210004,
+                                speakerName: "异国风情的女士",
                                 next: 12001116,
                             },
                             {
@@ -48777,6 +49455,7 @@ export const questData: QuestStory[] = [
                                 content: "无妨，想必你也是无心之言。",
                                 voice: "story/1200/120011/1E0B2542",
                                 npc: 210004,
+                                speakerName: "异国风情的女士",
                                 next: 12001118,
                             },
                             {
@@ -48791,6 +49470,7 @@ export const questData: QuestStory[] = [
                                 content: "嗯……事情的来龙去脉我已经了解了。",
                                 voice: "story/1200/120011/1E0B2596",
                                 npc: 210004,
+                                speakerName: "异国风情的女士",
                                 next: 12001120,
                             },
                             {
@@ -48798,6 +49478,7 @@ export const questData: QuestStory[] = [
                                 content: "我想，这里可能有些误会。这两位小朋友应该是头等包厢的客人。",
                                 voice: "story/1200/120011/1E0B25C0",
                                 npc: 210004,
+                                speakerName: "异国风情的女士",
                                 next: 12001121,
                             },
                             {
@@ -48820,6 +49501,7 @@ export const questData: QuestStory[] = [
                                 content: "——止流，对吗？",
                                 voice: "story/1200/120011/1E0B263E",
                                 npc: 210004,
+                                speakerName: "异国风情的女士",
                                 next: 12001201,
                             },
                             {
@@ -50294,6 +50976,7 @@ export const questData: QuestStory[] = [
                                 content: "截止目前，未出现符合目标特征的对象。汇报完毕。",
                                 voice: "story/1200/120017/1E0B8B24",
                                 npc: 220022,
+                                speakerName: "英格丽德",
                                 next: 12001739,
                             },
                             {
@@ -50308,6 +50991,7 @@ export const questData: QuestStory[] = [
                                 content: "四分钟前，有一个皎皎之民来讨要硬币，被我呵斥走了。",
                                 voice: "story/1200/120017/1E0B8B78",
                                 npc: 220022,
+                                speakerName: "英格丽德",
                                 next: 12001741,
                             },
                             {
@@ -50322,6 +51006,7 @@ export const questData: QuestStory[] = [
                                 content: "……有、有问题吗，长官？目标是外表年龄约十八岁的卡戎{性别：少年|少女}，应当不可能伪装成皎皎族……",
                                 voice: "story/1200/120017/1E0B8BCC",
                                 npc: 220022,
+                                speakerName: "英格丽德",
                                 next: 12001743,
                             },
                             {
@@ -50636,6 +51321,7 @@ export const questData: QuestStory[] = [
                                 content: "你若是逃入那处井盖，却是顺了他们的心意。",
                                 voice: "story/1200/120017/1E0B8DEE",
                                 npc: 210004,
+                                speakerName: "？？？",
                                 next: 12001756,
                             },
                             {
@@ -51132,6 +51818,7 @@ export const questData: QuestStory[] = [
                                 id: 12010020,
                                 content: "止流大当家——",
                                 voice: "story/1201/120100/1E10D9E8",
+                                speakerName: "远处的声音",
                                 next: 12010021,
                             },
                             {
@@ -51754,6 +52441,7 @@ export const questData: QuestStory[] = [
                                 id: 12010235,
                                 content: "大当家——不好意思，属下来迟了——",
                                 voice: "story/1201/120102/1E10FD2E",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -52409,6 +53097,7 @@ export const questData: QuestStory[] = [
                                 id: 12010503,
                                 content: "吼————",
                                 voice: "story/1201/120105/1E112926",
+                                speakerName: "？？？",
                                 next: 12010504,
                             },
                             {
@@ -52465,6 +53154,7 @@ export const questData: QuestStory[] = [
                                 content: "上天庇佑，白龙神君庇佑！你们还好吗？",
                                 voice: "story/1201/120105/1E1129F8",
                                 npc: 210033,
+                                speakerName: "路过的行商",
                                 next: 12010509,
                             },
                             {
@@ -52480,6 +53170,7 @@ export const questData: QuestStory[] = [
                                     "我并无大碍，只是被那骇人的双目瞪上一眼，腿有点麻，缓缓就好了。但你们看起来是刚来此地的外乡人，不能将你们置之不理。",
                                 voice: "story/1201/120105/1E112A4C",
                                 npc: 210033,
+                                speakerName: "路过的行商",
                                 options: [
                                     {
                                         id: 120105101,
@@ -52507,6 +53198,7 @@ export const questData: QuestStory[] = [
                                 content: "这样吗，那太好了……",
                                 voice: "story/1201/120105/1E112AA0",
                                 npc: 210033,
+                                speakerName: "路过的行商",
                                 next: 12010513,
                             },
                             {
@@ -52535,6 +53227,7 @@ export const questData: QuestStory[] = [
                                 content: "噗嗤……烟津渡周围的水域如此广阔，光靠游，一天一夜也游不出几里。",
                                 voice: "story/1201/120105/1E112B48",
                                 npc: 210033,
+                                speakerName: "路过的行商",
                                 next: 12010517,
                             },
                             {
@@ -52543,6 +53236,7 @@ export const questData: QuestStory[] = [
                                     "你们不必惊慌。玄色狴犴与狴犴仅仅是外形近似，但它们并非华胥的执法者，而是<H>烛阴之灾</>影响下紊乱失序的产物。",
                                 voice: "story/1201/120105/1E112B72",
                                 npc: 210033,
+                                speakerName: "路过的行商",
                                 next: 12010518,
                             },
                             {
@@ -52550,6 +53244,7 @@ export const questData: QuestStory[] = [
                                 content: "这些玄色狴犴神志浑浊暴虐，不受大风九章的控制。攻击它们不会招致责罚。\n",
                                 voice: "story/1201/120105/1E112B9C",
                                 npc: 210033,
+                                speakerName: "路过的行商",
                                 next: 12010519,
                             },
                             {
@@ -52557,6 +53252,7 @@ export const questData: QuestStory[] = [
                                 content: "只是最近这玄色狴犴袭人事件，是愈来愈频发了。我刚刚续上的香，这就又用完了……",
                                 voice: "story/1201/120105/1E112BC6",
                                 npc: 210033,
+                                speakerName: "路过的行商",
                                 next: 12010520,
                             },
                             {
@@ -52571,6 +53267,7 @@ export const questData: QuestStory[] = [
                                 content: "锦鲤皎皎，你怎在此处？",
                                 voice: "story/1201/120105/1E112C1A",
                                 npc: 210033,
+                                speakerName: "路过的行商",
                                 next: 12010522,
                             },
                             {
@@ -52607,6 +53304,7 @@ export const questData: QuestStory[] = [
                                 content: "确是如此。",
                                 voice: "story/1201/120105/1E112CEC",
                                 npc: 210033,
+                                speakerName: "路过的行商",
                                 next: 12010527,
                             },
                             {
@@ -52729,6 +53427,7 @@ export const questData: QuestStory[] = [
                                 id: 12010602,
                                 content: "愿此香华云，直达太皓处，恳求大慈悲，施与众生乐。",
                                 voice: "story/1201/120106/1E113964",
+                                speakerName: "虔诚的香客",
                                 next: 12010603,
                             },
                             {
@@ -53541,6 +54240,7 @@ export const questData: QuestStory[] = [
                                 content: "……",
                                 voice: "story/1201/120115/1E11CD0C",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011503,
                             },
                             {
@@ -53555,6 +54255,7 @@ export const questData: QuestStory[] = [
                                 content: "我为应天尉，只愿济苍生，安黎元，并非为那些身外俗物。",
                                 voice: "story/1201/120115/1E11CD60",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011505,
                             },
                             {
@@ -53582,6 +54283,7 @@ export const questData: QuestStory[] = [
                                 content: "你们是化外无关人士，不应卷入这场恶战。这里由我一人应对就好。",
                                 voice: "story/1201/120119/1E120E82",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011902,
                             },
                             {
@@ -53603,6 +54305,7 @@ export const questData: QuestStory[] = [
                                 content: "……我明白了。",
                                 voice: "story/1201/120119/1E120F00",
                                 npc: 210007,
+                                speakerName: "应天尉",
                             },
                         ],
                     },
@@ -53625,6 +54328,7 @@ export const questData: QuestStory[] = [
                                 content: "这些孽畜，总算是尽数清缴了。多谢两位施以援手。",
                                 voice: "story/1201/120120/1E121EEA",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12012002,
                             },
                             {
@@ -53936,6 +54640,7 @@ export const questData: QuestStory[] = [
                                 content: "出口在前方。我便护送两位到这里为止。",
                                 voice: "story/1201/120117/1E11EDB2",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011709,
                             },
                         ],
@@ -53966,6 +54671,7 @@ export const questData: QuestStory[] = [
                                 content: "嗷呜——！！",
                                 voice: "story/1201/120117/1E11EE30",
                                 npc: 100001,
+                                speakerName: "？？？",
                                 next: 12011705,
                             },
                             {
@@ -54023,6 +54729,7 @@ export const questData: QuestStory[] = [
                                 content: "不用，本是职责所在。",
                                 voice: "story/1201/120114/1E11BCA4",
                                 npc: 210007,
+                                speakerName: "？？？",
                                 next: 12011403,
                             },
                             {
@@ -54044,6 +54751,7 @@ export const questData: QuestStory[] = [
                                 content: "……我奉命来此肃清玄色狴犴。如今众敌环伺，职责未尽，恕我无暇闲聊。",
                                 voice: "story/1201/120114/1E11BD22",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011406,
                             },
                             {
@@ -54058,6 +54766,7 @@ export const questData: QuestStory[] = [
                                 content: "大风九章，天命。",
                                 voice: "story/1201/120114/1E11BD76",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011408,
                             },
                             {
@@ -54079,6 +54788,7 @@ export const questData: QuestStory[] = [
                                 content: "若香已散尽，以我一人之力，恐难护得二位周全。二位若无要事，还请速速离去，寻一安稳之所。",
                                 voice: "story/1201/120114/1E11BDF4",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011411,
                             },
                             {
@@ -54093,6 +54803,7 @@ export const questData: QuestStory[] = [
                                 content: "洞窟对面？据我所知，那里除岸滩搁浅的沉船残阙外，别无旁物。",
                                 voice: "story/1201/120114/1E11BE48",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011413,
                             },
                             {
@@ -54107,6 +54818,7 @@ export const questData: QuestStory[] = [
                                 content: "黑市、谈生意？两位若非要与鸡鸣狗盗之辈为伍，我也无话可说。",
                                 voice: "story/1201/120114/1E11BE9C",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011415,
                             },
                             {
@@ -54135,6 +54847,7 @@ export const questData: QuestStory[] = [
                                 content: "……抱歉。是我武断了。",
                                 voice: "story/1201/120114/1E11BF44",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011419,
                             },
                             {
@@ -54142,6 +54855,7 @@ export const questData: QuestStory[] = [
                                 content: "话虽如此，黑市之人鱼龙混杂，你们需当心甄别，莫被欺瞒利用了。",
                                 voice: "story/1201/120114/1E11BF6E",
                                 npc: 210007,
+                                speakerName: "应天尉",
                                 next: 12011420,
                             },
                             {
@@ -54149,6 +54863,7 @@ export const questData: QuestStory[] = [
                                 content: "此地不安全，让我护送你们过去吧。",
                                 voice: "story/1201/120114/1E11BF98",
                                 npc: 210007,
+                                speakerName: "应天尉",
                             },
                         ],
                     },
@@ -54359,6 +55074,7 @@ export const questData: QuestStory[] = [
                                 content: "你——简直欺人太甚！！",
                                 voice: "story/1201/120122/1E123FBA",
                                 npc: 210011,
+                                speakerName: "？？？",
                                 next: 12012202,
                             },
                             {
@@ -54782,6 +55498,7 @@ export const questData: QuestStory[] = [
                                 content: "够了——不可怠慢贵客！",
                                 voice: "story/1201/120126/1E1282AA",
                                 npc: 210010,
+                                speakerName: "？？？",
                                 next: 12012610,
                             },
                             {
@@ -55640,6 +56357,7 @@ export const questData: QuestStory[] = [
                                 id: 12013436,
                                 content: "魂兮游离，循时索归：盈亏月下，若木长青……",
                                 voice: "story/1201/120134/1E130A58",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -55750,6 +56468,7 @@ export const questData: QuestStory[] = [
                                 id: 12013445,
                                 content: "群玄啸鸣，灾愆降世……",
                                 voice: "story/1201/120134/1E130BD2",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -55814,12 +56533,14 @@ export const questData: QuestStory[] = [
                                 id: 120134311,
                                 content: "呜呼哀哉……",
                                 voice: "story/1201/120134/1E130CF8",
+                                speakerName: "？？？",
                                 next: 12013432,
                             },
                             {
                                 id: 12013432,
                                 content: "魂兮游离，循时索归：山之阴，海之涯……",
                                 voice: "story/1201/120134/1E1309B0",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -55853,6 +56574,7 @@ export const questData: QuestStory[] = [
                                 id: 12013436,
                                 content: "魂兮游离，循时索归：盈亏月下，若木长青……",
                                 voice: "story/1201/120134/1E130A58",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -55865,6 +56587,7 @@ export const questData: QuestStory[] = [
                                 id: 12013438,
                                 content: "比星斗兮天阙，纳阴灵兮坟茔。孰离合兮可为，蹇谁留兮他乡？",
                                 voice: "story/1201/120134/1E130AAC",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -55955,6 +56678,7 @@ export const questData: QuestStory[] = [
                                 id: 12022701,
                                 content: "{nickname}，是你！",
                                 voice: "story/1201/120227/1E18FA62",
+                                speakerName: "？？？",
                                 next: 12022702,
                             },
                             {
@@ -56163,6 +56887,7 @@ export const questData: QuestStory[] = [
                                 content: "万万不可啊，止流大当家——",
                                 voice: "story/1201/120229/1E191CD6",
                                 npc: 210031,
+                                speakerName: "中年男子",
                                 next: 12022912,
                             },
                             {
@@ -56184,6 +56909,7 @@ export const questData: QuestStory[] = [
                                 content: "<W>杀伤及盗者，天厌之</>，这是大风九章的古训！",
                                 voice: "story/1201/120229/1E191D54",
                                 npc: 210031,
+                                speakerName: "中年男子",
                                 next: 12022915,
                             },
                             {
@@ -56191,6 +56917,7 @@ export const questData: QuestStory[] = [
                                 content: "……可是攻击玄色狴犴，并不会招致责罚呀？",
                                 voice: "story/1201/120229/1E191D7E",
                                 npc: 210077,
+                                speakerName: "围观者",
                                 next: 12022916,
                             },
                             {
@@ -56198,6 +56925,7 @@ export const questData: QuestStory[] = [
                                 content: "大风九章，岂能如此浅显地解读？！",
                                 voice: "story/1201/120229/1E191DA8",
                                 npc: 210031,
+                                speakerName: "中年男子",
                                 next: 12022917,
                             },
                             {
@@ -56206,6 +56934,7 @@ export const questData: QuestStory[] = [
                                     "发乎于心，现乎于行。若是动了兵戈，人心就会变质。无论这兵戈朝向的是友邻还是恶敌，性质都是相同的！终是逆了天意呀！",
                                 voice: "story/1201/120229/1E191DD2",
                                 npc: 210031,
+                                speakerName: "中年男子",
                                 next: 12022918,
                             },
                             {
@@ -56220,6 +56949,7 @@ export const questData: QuestStory[] = [
                                 content: "白龙神君会为我们驱除恶邪的！要是招来白龙神君的厌弃，失去了祂的庇护，那才是因小失大。您请三思啊！",
                                 voice: "story/1201/120229/1E191E26",
                                 npc: 210031,
+                                speakerName: "中年男子",
                                 next: 12022920,
                             },
                             {
@@ -56227,6 +56957,7 @@ export const questData: QuestStory[] = [
                                 content: "有了黍离之战的前车之鉴，难道还不够吗？！",
                                 voice: "story/1201/120229/1E191E50",
                                 npc: 210031,
+                                speakerName: "中年男子",
                                 next: 12022921,
                             },
                             {
@@ -56234,6 +56965,7 @@ export const questData: QuestStory[] = [
                                 content: "好像言之有理……",
                                 voice: "story/1201/120229/1E191E7A",
                                 npc: 210077,
+                                speakerName: "围观者",
                                 next: 12022922,
                             },
                             {
@@ -56248,6 +56980,7 @@ export const questData: QuestStory[] = [
                                 content: "狴犴和应天尉随后就能赶到，只要稍作等待……",
                                 voice: "story/1201/120229/1E191ECE",
                                 npc: 210031,
+                                speakerName: "中年男子",
                                 next: 12022924,
                             },
                             {
@@ -56262,6 +56995,7 @@ export const questData: QuestStory[] = [
                                 content: "这……",
                                 voice: "story/1201/120229/1E191F22",
                                 npc: 210031,
+                                speakerName: "中年男子",
                                 next: 12022926,
                             },
                             {
@@ -57814,6 +58548,7 @@ export const questData: QuestStory[] = [
                                 content: "啊，是白色妖怪！",
                                 voice: "story/1201/120143/1E139842",
                                 npc: 210016,
+                                speakerName: "？？？",
                                 next: 12014302,
                             },
                             {
@@ -58564,6 +59299,7 @@ export const questData: QuestStory[] = [
                                 content: "……救救……救救……",
                                 voice: "story/1201/120158/1E148EAE",
                                 npc: 210028,
+                                speakerName: "？？？",
                                 next: 12015804,
                             },
                             {
@@ -58585,6 +59321,7 @@ export const questData: QuestStory[] = [
                                 content: "不能消失……我还有……",
                                 voice: "story/1201/120158/1E148F2C",
                                 npc: 210028,
+                                speakerName: "？？？",
                                 next: 12015807,
                             },
                             {
@@ -58592,6 +59329,7 @@ export const questData: QuestStory[] = [
                                 content: "在……之前……请让我……",
                                 voice: "story/1201/120158/1E148F56",
                                 npc: 210028,
+                                speakerName: "？？？",
                                 next: 12015808,
                             },
                             {
@@ -59317,6 +60055,7 @@ export const questData: QuestStory[] = [
                                 id: 12017401,
                                 content: "我好痛啊……我的疮口在流脓，痛到彻夜难眠……",
                                 voice: "story/1201/120174/1E1594DA",
+                                speakerName: "患者幻影",
                             },
                         ],
                     },
@@ -59329,6 +60068,7 @@ export const questData: QuestStory[] = [
                                 id: 12017402,
                                 content: "我……已经没有活路了吧。祝由大人，给我一个了断吧……",
                                 voice: "story/1201/120174/1E159504",
+                                speakerName: "患者幻影",
                             },
                         ],
                     },
@@ -59341,6 +60081,7 @@ export const questData: QuestStory[] = [
                                 id: 12017403,
                                 content: "我的孩儿刚出生，她都还没有开口唤过一声“阿娘”啊！求求您，救救她，救救她！",
                                 voice: "story/1201/120174/1E15952E",
+                                speakerName: "患者幻影",
                             },
                         ],
                     },
@@ -59353,6 +60094,7 @@ export const questData: QuestStory[] = [
                                 id: 12017404,
                                 content: "传闻中的扶氏不是手到病除吗？快治啊，莫非你不愿出力？",
                                 voice: "story/1201/120174/1E159558",
+                                speakerName: "患者幻影",
                             },
                         ],
                     },
@@ -59428,6 +60170,7 @@ export const questData: QuestStory[] = [
                                 content: "咿！咿！",
                                 voice: "story/1201/120182/1E16181A",
                                 npc: 210017,
+                                speakerName: "不会说话的无由生",
                             },
                         ],
                     },
@@ -59539,6 +60282,7 @@ export const questData: QuestStory[] = [
                                 content: "咿呀，咿！",
                                 voice: "story/1201/120182/1E161A3C",
                                 npc: 210017,
+                                speakerName: "不会说话的无由生",
                                 next: 12018215,
                             },
                             {
@@ -59566,6 +60310,7 @@ export const questData: QuestStory[] = [
                                 content: "咿呀，咿！",
                                 voice: "story/1201/120182/1E161A3C",
                                 npc: 210017,
+                                speakerName: "不会说话的无由生",
                                 next: 12018215,
                             },
                             {
@@ -59687,6 +60432,7 @@ export const questData: QuestStory[] = [
                                 content: "咿，咿呀！这下完全没问题了，我们赶紧出发吧！",
                                 voice: "story/1201/120182/1E161D06",
                                 npc: 210017,
+                                speakerName: "无由生",
                             },
                         ],
                     },
@@ -59700,6 +60446,7 @@ export const questData: QuestStory[] = [
                                 content: "咿咿，呀！",
                                 voice: "story/1201/120182/1E161D30",
                                 npc: 210017,
+                                speakerName: "受困的无由生",
                                 next: 12018233,
                             },
                             {
@@ -59741,12 +60488,14 @@ export const questData: QuestStory[] = [
                                 id: 12018236,
                                 content: "祝由大人，还有没见过的白发勇者，谢谢你们！",
                                 voice: "story/1201/120182/1E161DD8",
+                                speakerName: "受困的无由生",
                                 next: 12018237,
                             },
                             {
                                 id: 12018237,
                                 content: "俺也来助你们一臂之力！俺的铁头槌，连大地都能砸的梆梆作响哟！",
                                 voice: "story/1201/120182/1E161E02",
+                                speakerName: "受困的无由生",
                             },
                         ],
                     },
@@ -59759,6 +60508,7 @@ export const questData: QuestStory[] = [
                                 id: 12018238,
                                 content: "最后的同伴，最后的同伴！",
                                 voice: "story/1201/120182/1E161E2C",
+                                speakerName: "无由生",
                                 next: 12018239,
                             },
                             {
@@ -59780,18 +60530,21 @@ export const questData: QuestStory[] = [
                                 id: 12018240,
                                 content: "以老夫平生武艺，竟险些折在了此处。惭愧，惭愧……",
                                 voice: "story/1201/120182/1E161E80",
+                                speakerName: "老成的无由生",
                                 next: 12018241,
                             },
                             {
                                 id: 12018241,
                                 content: "这样一来，同伴就集齐啦！没有人被落下，没有人被落下！",
                                 voice: "story/1201/120182/1E161EAA",
+                                speakerName: "无由生",
                                 next: 12018242,
                             },
                             {
                                 id: 12018242,
                                 content: "前方为一巨花秽兽所盘踞，其把持了前往此世之出口。让老夫随你们同去，降妖除魔，清源正本！",
                                 voice: "story/1201/120182/1E161ED4",
+                                speakerName: "老成的无由生",
                             },
                         ],
                     },
@@ -59812,6 +60565,7 @@ export const questData: QuestStory[] = [
                                 content: "多谢两位救命之恩，以后必将回报。我们便先离去啦！",
                                 voice: "story/1201/120183/1E162858",
                                 npc: 210017,
+                                speakerName: "无由生们",
                                 next: 12018301,
                             },
                             {
@@ -59917,6 +60671,7 @@ export const questData: QuestStory[] = [
                                 content: "咿！咿！",
                                 voice: "story/1201/120183/1E162ACE",
                                 npc: 210036,
+                                speakerName: "不会说话的无由生",
                                 next: 12018316,
                             },
                             {
@@ -59952,6 +60707,7 @@ export const questData: QuestStory[] = [
                                 content: "咿呀咿！咿咿！",
                                 voice: "story/1201/120183/1E162BA0",
                                 npc: 210036,
+                                speakerName: "不会说话的无由生",
                                 next: 12018321,
                             },
                             {
@@ -59973,6 +60729,7 @@ export const questData: QuestStory[] = [
                                 content: "咿！",
                                 voice: "story/1201/120183/1E162C1E",
                                 npc: 210036,
+                                speakerName: "不会说话的无由生",
                                 next: 12018324,
                             },
                             {
@@ -60284,6 +61041,7 @@ export const questData: QuestStory[] = [
                                 content: "头儿，您来了！",
                                 voice: "story/1201/120186/1E1659BA",
                                 npc: 210010,
+                                speakerName: "黑市小弟",
                                 next: 12018602,
                             },
                             {
@@ -60299,6 +61057,7 @@ export const questData: QuestStory[] = [
                                     "如您所料，那猎物负了伤，已被逼入了听鸦原。这儿四面环海，呈孤岛之势，它逃不掉的。接下来只要瓮中捉鳖就好了！",
                                 voice: "story/1201/120186/1E165A0E",
                                 npc: 210010,
+                                speakerName: "黑市小弟",
                                 next: 12018604,
                             },
                             {
@@ -61112,6 +61871,7 @@ export const questData: QuestStory[] = [
                                 content: "真好，有人来了！这下不仅是我一人困在这里了。",
                                 voice: "story/1201/120193/1E16CC92",
                                 npc: 210021,
+                                speakerName: "洒脱不羁的男子",
                                 next: 12019302,
                             },
                             {
@@ -61549,6 +62309,7 @@ export const questData: QuestStory[] = [
                                 content: "呼……千钧一发之际，险险成功了。",
                                 voice: "story/1201/120209/1E17D312",
                                 npc: 210005,
+                                speakerName: "织星客",
                                 next: 12020902,
                             },
                             {
@@ -61638,6 +62399,7 @@ export const questData: QuestStory[] = [
                                 content: "是，大当家！",
                                 voice: "story/1201/120138/1E134691",
                                 npc: 210004,
+                                speakerName: "杜立",
                             },
                         ],
                     },
@@ -61650,6 +62412,7 @@ export const questData: QuestStory[] = [
                                 id: 12021001,
                                 content: "魂兮游离，北狩荒秽……彼我烛阴，罹殃千岁……",
                                 voice: "story/1201/120210/1E17E37A",
+                                speakerName: "？？？",
                                 next: 12021002,
                             },
                             {
@@ -61690,6 +62453,7 @@ export const questData: QuestStory[] = [
                                 id: 12021201,
                                 content: "魂魄佚散，畴昔倾颓……荒忽焉极，循时索归……",
                                 voice: "story/1201/120212/1E18044A",
+                                speakerName: "？？？",
                                 next: 12021202,
                             },
                             {
@@ -61797,6 +62561,7 @@ export const questData: QuestStory[] = [
                                 id: 12022014,
                                 content: "……孰离合兮可为，蹇谁留兮他乡？",
                                 voice: "story/1201/120220/1E1889AC",
+                                speakerName: "烛阴",
                                 next: 12022015,
                             },
                             {
@@ -61810,6 +62575,7 @@ export const questData: QuestStory[] = [
                                 id: 12022016,
                                 content: "万事已矣，不可复挽矣。天下将趋不可避之大祸……",
                                 voice: "story/1201/120220/1E188A00",
+                                speakerName: "烛阴",
                             },
                         ],
                     },
@@ -64780,6 +65546,7 @@ export const questData: QuestStory[] = [
                                 content: "卡珊德拉，你要带我去哪里？",
                                 voice: "story/1201/120114/1E1F83D2",
                                 npc: 211015,
+                                speakerName: "？？？",
                                 next: 12032902,
                             },
                             {
@@ -65870,12 +66637,14 @@ export const questData: QuestStory[] = [
                                 id: 12034101,
                                 content: "所有人不许动，我们是治安署的！",
                                 voice: "story/1201/120114/1E2048B2",
+                                speakerName: "治安署士兵",
                                 next: 12034102,
                             },
                             {
                                 id: 12034102,
                                 content: "嗯……？这些强盗……已经被制服了？",
                                 voice: "story/1201/120114/1E2048DC",
+                                speakerName: "治安署士兵",
                                 next: 12034103,
                             },
                             {
@@ -65889,6 +66658,7 @@ export const questData: QuestStory[] = [
                                 id: 12034104,
                                 content: "是吗？",
                                 voice: "story/1201/120114/1E204930",
+                                speakerName: "治安署士兵",
                                 next: 12034105,
                             },
                             {
@@ -65902,12 +66672,14 @@ export const questData: QuestStory[] = [
                                 id: 12034106,
                                 content: "……好吧，那我们就把这些强盗带走了。",
                                 voice: "story/1201/120114/1E204984",
+                                speakerName: "治安署士兵",
                                 next: 12034107,
                             },
                             {
                                 id: 12034107,
                                 content: "之前有个臭捡垃圾的卡戎一直来署里吵着说什么泪湖有强盗，还以为她是瞎编的，没想到居然是真的……",
                                 voice: "story/1201/120114/1E2049AE",
+                                speakerName: "治安署士兵",
                             },
                         ],
                     },
@@ -66257,12 +67029,14 @@ export const questData: QuestStory[] = [
                                 id: 12034101,
                                 content: "所有人不许动，我们是治安署的！",
                                 voice: "story/1201/120114/1E2048B2",
+                                speakerName: "治安署士兵",
                                 next: 12034102,
                             },
                             {
                                 id: 12034102,
                                 content: "嗯……？这些强盗……已经被制服了？",
                                 voice: "story/1201/120114/1E2048DC",
+                                speakerName: "治安署士兵",
                                 next: 12034103,
                             },
                             {
@@ -66276,6 +67050,7 @@ export const questData: QuestStory[] = [
                                 id: 12034104,
                                 content: "是吗？",
                                 voice: "story/1201/120114/1E204930",
+                                speakerName: "治安署士兵",
                                 next: 12034105,
                             },
                             {
@@ -66289,12 +67064,14 @@ export const questData: QuestStory[] = [
                                 id: 12034106,
                                 content: "……好吧，那我们就把这些强盗带走了。",
                                 voice: "story/1201/120114/1E204984",
+                                speakerName: "治安署士兵",
                                 next: 12034107,
                             },
                             {
                                 id: 12034107,
                                 content: "之前有个臭捡垃圾的卡戎一直来署里吵着说什么泪湖有强盗，还以为她是瞎编的，没想到居然是真的……",
                                 voice: "story/1201/120114/1E2049AE",
+                                speakerName: "治安署士兵",
                             },
                         ],
                     },
@@ -68397,6 +69174,7 @@ export const questData: QuestStory[] = [
                                 id: 12010503,
                                 content: "吼————",
                                 voice: "story/1201/120105/1E112926",
+                                speakerName: "？？？",
                                 next: 12010504,
                             },
                             {
@@ -68637,6 +69415,7 @@ export const questData: QuestStory[] = [
                                 id: 12041810,
                                 content: "怎么是他？！",
                                 voice: "story/1204/120418/1E253974",
+                                speakerName: "{nickname}&白",
                             },
                         ],
                     },
@@ -69636,6 +70415,7 @@ export const questData: QuestStory[] = [
                                 id: 12042603,
                                 content: "哔——哔——",
                                 voice: "story/1204/120426/1E25BB8E",
+                                speakerName: "偃雀",
                                 next: 12042604,
                             },
                             {
@@ -69685,6 +70465,7 @@ export const questData: QuestStory[] = [
                                 id: 12021301,
                                 content: "……汝乃何人？",
                                 voice: "story/1201/120213/1E1814B2",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -70019,6 +70800,7 @@ export const questData: QuestStory[] = [
                                 id: 12049035,
                                 content: "上天入地，无拘无束，好不逍遥～",
                                 voice: "story/1204/120490/1E29DACE",
+                                speakerName: "？？？",
                                 next: 12049036,
                             },
                             {
@@ -70068,6 +70850,7 @@ export const questData: QuestStory[] = [
                                 id: 12049035,
                                 content: "上天入地，无拘无束，好不逍遥～",
                                 voice: "story/1204/120490/1E29DACE",
+                                speakerName: "？？？",
                                 next: 12049036,
                             },
                             {
@@ -70618,6 +71401,7 @@ export const questData: QuestStory[] = [
                                 content: "……那边……明白……",
                                 voice: "story/1204/120429/1E25F3FE",
                                 npc: 100001,
+                                speakerName: "？？？",
                                 next: 12042948,
                             },
                             {
@@ -70935,6 +71719,7 @@ export const questData: QuestStory[] = [
                                 content: "……那边……明白……",
                                 voice: "story/1204/120429/1E25F3FE",
                                 npc: 100001,
+                                speakerName: "？？？",
                                 next: 12042948,
                             },
                             {
@@ -71041,6 +71826,7 @@ export const questData: QuestStory[] = [
                                 id: 12043104,
                                 content: "止流掌柜？&那个女人？！",
                                 voice: "story/1204/120431/1E260DC0",
+                                speakerName: "扶疏&刻舟",
                                 next: 12043105,
                             },
                             {
@@ -71614,6 +72400,7 @@ export const questData: QuestStory[] = [
                                 content: "老、老人家？！",
                                 voice: "story/1204/120434/1E263EA4",
                                 npc: 240026,
+                                speakerName: "路人少女",
                                 next: 12043403,
                             },
                             {
@@ -71621,6 +72408,7 @@ export const questData: QuestStory[] = [
                                 content: "不认识，你找错人了吧。",
                                 voice: "story/1204/120434/1E263ECE",
                                 npc: 240026,
+                                speakerName: "路人少女",
                                 next: 12043404,
                             },
                             {
@@ -71635,6 +72423,7 @@ export const questData: QuestStory[] = [
                                 content: "说了你找错人了，别再来问我了。",
                                 voice: "story/1204/120434/1E263F22",
                                 npc: 240026,
+                                speakerName: "路人少女",
                                 next: 12043406,
                             },
                             {
@@ -71649,6 +72438,7 @@ export const questData: QuestStory[] = [
                                 content: "这里又不是什么私家园林，无主之地而已。我就爱在这儿散步，越偏僻越能激发灵感，不行吗？",
                                 voice: "story/1204/120434/1E263F76",
                                 npc: 240026,
+                                speakerName: "路人少女",
                                 next: 12043408,
                             },
                             {
@@ -72318,6 +73108,7 @@ export const questData: QuestStory[] = [
                                 id: 12043737,
                                 content: "不妥。",
                                 voice: "story/1204/120437/1E26759A",
+                                speakerName: "扶疏&苏乙",
                                 next: 12043738,
                             },
                             {
@@ -78418,12 +79209,14 @@ export const questData: QuestStory[] = [
                                 id: 12049130,
                                 content: "止流，你是要成为千古罪人吗？",
                                 voice: "story/1204/120491/1E29EA64",
+                                speakerName: "先人",
                                 next: 12049131,
                             },
                             {
                                 id: 12049131,
                                 content: "天地大德，祖宗之法，岂容汝等凡人悖逆？！",
                                 voice: "story/1204/120491/1E29EA8E",
+                                speakerName: "先人",
                             },
                         ],
                     },
@@ -78603,6 +79396,7 @@ export const questData: QuestStory[] = [
                                 id: 12049132,
                                 content: "现在回头，为时不晚！",
                                 voice: "story/1204/120491/1E29EAB8",
+                                speakerName: "先人",
                             },
                         ],
                     },
@@ -78615,6 +79409,7 @@ export const questData: QuestStory[] = [
                                 id: 12049133,
                                 content: "停下，别再前进了！",
                                 voice: "story/1204/120491/1E29EAE2",
+                                speakerName: "先人",
                             },
                         ],
                     },
@@ -78627,6 +79422,7 @@ export const questData: QuestStory[] = [
                                 id: 12049134,
                                 content: "千秋万代之伟业，便要终结在你手上！",
                                 voice: "story/1204/120491/1E29EB0C",
+                                speakerName: "先人",
                             },
                         ],
                     },
@@ -78639,6 +79435,7 @@ export const questData: QuestStory[] = [
                                 id: 12049135,
                                 content: "止流，你当真想好了吗——",
                                 voice: "story/1204/120491/1E29EB36",
+                                speakerName: "先人",
                             },
                         ],
                     },
@@ -80198,6 +80995,7 @@ export const questData: QuestStory[] = [
                                 id: 12049138,
                                 content: "入侵者，可承天威之怒乎？",
                                 voice: "story/1204/120491/1E29EBB4",
+                                speakerName: "太皓&烛阴",
                             },
                         ],
                     },
@@ -80403,12 +81201,14 @@ export const questData: QuestStory[] = [
                                 id: 12047903,
                                 content: "心、理平衡，则道生，圣人以道莅天下，其治若水，不争而善应，不令而自正……",
                                 voice: "story/1204/120479/1E292116",
+                                speakerName: "矩&飏",
                                 next: 12047904,
                             },
                             {
                                 id: 12047904,
                                 content: "此理，你们二位如何见得？",
                                 voice: "story/1204/120479/1E292140",
+                                speakerName: "矩&飏",
                                 next: 12047905,
                             },
                             {
@@ -80457,6 +81257,7 @@ export const questData: QuestStory[] = [
                                 id: 12047910,
                                 content: "二位，将手递与我罢。",
                                 voice: "story/1204/120479/1E29223C",
+                                speakerName: "矩&飏",
                             },
                         ],
                     },
@@ -80470,6 +81271,7 @@ export const questData: QuestStory[] = [
                                 id: 12049140,
                                 content: "……万物负阴而抱阳，冲气以为和……",
                                 voice: "story/1204/120491/1E29EC08",
+                                speakerName: "太皓&烛阴",
                             },
                         ],
                     },
@@ -80482,6 +81284,7 @@ export const questData: QuestStory[] = [
                                 id: 12049141,
                                 content: "……持而盈之，不如其已；揣而锐之，不可长保……",
                                 voice: "story/1204/120491/1E29EC32",
+                                speakerName: "太皓&烛阴",
                             },
                         ],
                     },
@@ -80509,12 +81312,14 @@ export const questData: QuestStory[] = [
                                 id: 12047903,
                                 content: "心、理平衡，则道生，圣人以道莅天下，其治若水，不争而善应，不令而自正……",
                                 voice: "story/1204/120479/1E292116",
+                                speakerName: "矩&飏",
                                 next: 12047904,
                             },
                             {
                                 id: 12047904,
                                 content: "此理，你们二位如何见得？",
                                 voice: "story/1204/120479/1E292140",
+                                speakerName: "矩&飏",
                                 next: 12047905,
                             },
                             {
@@ -80563,6 +81368,7 @@ export const questData: QuestStory[] = [
                                 id: 12047910,
                                 content: "二位，将手递与我罢。",
                                 voice: "story/1204/120479/1E29223C",
+                                speakerName: "矩&飏",
                             },
                         ],
                     },
@@ -82982,6 +83788,7 @@ export const questData: QuestStory[] = [
                                 content: "真是太阳打西边出来——世风日下，还有人帮着飘零人说话了。什么“飘零四杰”，简直荒唐！",
                                 voice: "story/1206/120610/1E31864E",
                                 npc: 250015,
+                                speakerName: "傲慢的男子",
                                 next: 12061004,
                             },
                             {
@@ -82996,6 +83803,7 @@ export const questData: QuestStory[] = [
                                 content: "妥当？那你在这里妖言惑众就妥当了？",
                                 voice: "story/1206/120610/1E3186A2",
                                 npc: 250015,
+                                speakerName: "傲慢的男子",
                                 next: 12061006,
                             },
                             {
@@ -83003,6 +83811,7 @@ export const questData: QuestStory[] = [
                                 content: "那飘零四杰引河水浇灭百年不熄的香炉，纵火烧光了六座藏书阁，如此大的动作，当真没有人伤亡？",
                                 voice: "story/1206/120610/1E3186CC",
                                 npc: 250015,
+                                speakerName: "傲慢的男子",
                                 next: 12061007,
                             },
                             {
@@ -83011,6 +83820,7 @@ export const questData: QuestStory[] = [
                                     "那“文竹衔环”在人门前悬挂文竹，行凶伤人。说是为了寻仇，但那手下亡魂就当真是罪有应得？谁给了她们裁决断罪的权力？",
                                 voice: "story/1206/120610/1E3186F6",
                                 npc: 250015,
+                                speakerName: "傲慢的男子",
                                 next: 12061008,
                             },
                             {
@@ -83019,6 +83829,7 @@ export const questData: QuestStory[] = [
                                     "还有那坠落在荒野郊外的机关巨鸟，你应当见过才是。那自天而降的庞然大物毁了多少段河堤，又淹了多少顷良田。此等行径的始作俑者，我说一句居心险恶不为过吧。",
                                 voice: "story/1206/120610/1E318720",
                                 npc: 250015,
+                                speakerName: "傲慢的男子",
                                 next: 12061009,
                             },
                             {
@@ -83026,6 +83837,7 @@ export const questData: QuestStory[] = [
                                 content: "什么飘零人，一群狼狈为奸的恶徒罢了！",
                                 voice: "story/1206/120610/1E31874A",
                                 npc: 250015,
+                                speakerName: "傲慢的男子",
                                 next: 12061010,
                             },
                             {
@@ -83054,6 +83866,7 @@ export const questData: QuestStory[] = [
                                 content: "呵……这事情原委，我不知道，你反倒就知道了？难不成你也是那飘零人的一份子？",
                                 voice: "story/1206/120610/1E3187F2",
                                 npc: 250015,
+                                speakerName: "傲慢的男子",
                                 next: 12061014,
                             },
                             {
@@ -83068,6 +83881,7 @@ export const questData: QuestStory[] = [
                                 content: "当然啦，大家都是道听途说嘛。这事情原委，就看谁编得更真——干脆举办一个讲故事大会好了！",
                                 voice: "story/1206/120610/1E318846",
                                 npc: 250015,
+                                speakerName: "傲慢的男子？",
                                 next: 12061016,
                             },
                             {
@@ -83075,12 +83889,14 @@ export const questData: QuestStory[] = [
                                 content: "哎呀，这样一想，万一我编的故事不好，听众会不会不喜欢我呀？不行不行，得赶紧对镜练习一下才行。",
                                 voice: "story/1206/120610/1E318870",
                                 npc: 250015,
+                                speakerName: "傲慢的男子？",
                                 next: 12061017,
                             },
                             {
                                 id: 12061017,
                                 content: "……这个人说话怎么颠三倒四的，难不成脑子不好？",
                                 voice: "story/1206/120610/1E31889A",
+                                speakerName: "观众",
                                 next: 12061018,
                             },
                             {
@@ -83088,6 +83904,7 @@ export const questData: QuestStory[] = [
                                 content: "什么人？！竟然敢冒充我说话？！不成体统！",
                                 voice: "story/1206/120610/1E3188C4",
                                 npc: 250015,
+                                speakerName: "傲慢的男子",
                                 next: 12061019,
                             },
                             {
@@ -83095,6 +83912,7 @@ export const questData: QuestStory[] = [
                                 content: "嘻嘻……什么人吵不过别人就开始反咬一口，惹人发笑！",
                                 voice: "story/1206/120610/1E3188EE",
                                 npc: 250015,
+                                speakerName: "傲慢的男子？",
                                 next: 12061020,
                             },
                             {
@@ -83102,12 +83920,14 @@ export const questData: QuestStory[] = [
                                 content: "你……！",
                                 voice: "story/1206/120610/1E318918",
                                 npc: 250015,
+                                speakerName: "傲慢的男子",
                                 next: 12061021,
                             },
                             {
                                 id: 12061021,
                                 content: "妈妈，你快过来看，这个大哥哥在和自己吵架耶！",
                                 voice: "story/1206/120610/1E318942",
+                                speakerName: "观众",
                                 next: 12061022,
                             },
                             {
@@ -83122,6 +83942,7 @@ export const questData: QuestStory[] = [
                                 content: "算了，赛事在际，不和你纠缠。我们走！",
                                 voice: "story/1206/120610/1E318996",
                                 npc: 250015,
+                                speakerName: "傲慢的男子",
                             },
                         ],
                     },
@@ -83501,6 +84322,7 @@ export const questData: QuestStory[] = [
                                 content: "何事在此喧闹？",
                                 voice: "story/1206/120612/1E31A96A",
                                 npc: 250005,
+                                speakerName: "？？？",
                                 next: 12061218,
                             },
                             {
@@ -84117,6 +84939,7 @@ export const questData: QuestStory[] = [
                                 content: "你、你们不要过来！",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "？？？",
                                 next: 12061446,
                             },
                             {
@@ -84162,6 +84985,7 @@ export const questData: QuestStory[] = [
                                 content: "小安！小安，你在那里吗？！",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061505,
                             },
                             {
@@ -84169,6 +84993,7 @@ export const questData: QuestStory[] = [
                                 content: "你这孩子，明明腿有旧疾，怎么还非要跑出来……",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061506,
                             },
                             {
@@ -84287,6 +85112,7 @@ export const questData: QuestStory[] = [
                                 content: "你、你们不要过来！",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "？？？",
                                 next: 12061446,
                             },
                             {
@@ -84331,6 +85157,7 @@ export const questData: QuestStory[] = [
                                 content: "小安！小安，你在那里吗？！",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061505,
                             },
                             {
@@ -84338,6 +85165,7 @@ export const questData: QuestStory[] = [
                                 content: "你这孩子，明明腿有旧疾，怎么还非要跑出来……",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061506,
                             },
                             {
@@ -84450,6 +85278,7 @@ export const questData: QuestStory[] = [
                                 content: "你、你们不要过来！",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "？？？",
                                 next: 12061446,
                             },
                             {
@@ -84495,6 +85324,7 @@ export const questData: QuestStory[] = [
                                 content: "小安！小安，你在那里吗？！",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061505,
                             },
                             {
@@ -84502,6 +85332,7 @@ export const questData: QuestStory[] = [
                                 content: "你这孩子，明明腿有旧疾，怎么还非要跑出来……",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "？？？",
                                 next: 12061506,
                             },
                             {
@@ -84854,6 +85685,7 @@ export const questData: QuestStory[] = [
                                 id: 12061706,
                                 content: "喂喂，听说有飘零人混入了比赛，是真的吗……？",
                                 voice: "story/1206/120617/1E31F9A4",
+                                speakerName: "群众的窃窃私语",
                                 next: 12061707,
                             },
                             {
@@ -84861,18 +85693,21 @@ export const questData: QuestStory[] = [
                                 content:
                                     "飘零人？那些传说中青面獠牙，手持大棒的恶棍？他们该不会是专门趁这个风云变幻的时机，来搞什么破坏的吧？",
                                 voice: "story/1206/120617/1E31F9CE",
+                                speakerName: "群众的窃窃私语",
                                 next: 12061708,
                             },
                             {
                                 id: 12061708,
                                 content: "原来飘零人这么可怕吗，我还只在小说话本中看到过呢……",
                                 voice: "story/1206/120617/1E31F9F8",
+                                speakerName: "群众的窃窃私语",
                                 next: 12061709,
                             },
                             {
                                 id: 12061709,
                                 content: "我倒是也听说过飘零人行侠仗义的故事……不过创作归创作，在现实中果然还是不想遇到这些人。",
                                 voice: "story/1206/120617/1E31FA22",
+                                speakerName: "群众的窃窃私语",
                                 next: 12061710,
                             },
                             {
@@ -84921,12 +85756,14 @@ export const questData: QuestStory[] = [
                                 id: 12061716,
                                 content: "原来是她！",
                                 voice: "story/1206/120617/1E31FB48",
+                                speakerName: "群众的窃窃私语",
                                 next: 12061717,
                             },
                             {
                                 id: 12061717,
                                 content: "看着文文弱弱一个小姑娘，没想到竟然是传说中的飘零人……但好像也没有传说中的那么可怕？",
                                 voice: "story/1206/120617/1E31FB72",
+                                speakerName: "群众的窃窃私语",
                                 next: 12061718,
                             },
                             {
@@ -85658,6 +86495,7 @@ export const questData: QuestStory[] = [
                                 content: "别打了别打了——是我，是唐叔啊！",
                                 voice: "story/1206/120622/1E324ADA",
                                 npc: 250024,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -85673,6 +86511,7 @@ export const questData: QuestStory[] = [
                                 content: "别打了别打了——是我，是唐叔啊！",
                                 voice: "story/1206/120622/1E324ADA",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062202,
                             },
                             {
@@ -85680,6 +86519,7 @@ export const questData: QuestStory[] = [
                                 content: "哎哟喂我这一把老腰。你们年轻人倒好，一言不合就动刀动枪的，差点把我闪着了。",
                                 voice: "story/1206/120622/1E324B04",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 options: [
                                     {
                                         id: 12062203,
@@ -85707,6 +86547,7 @@ export const questData: QuestStory[] = [
                                 content: "自然是担心我们小苏了！",
                                 voice: "story/1206/120622/1E324BAC",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062207,
                             },
                             {
@@ -85714,6 +86555,7 @@ export const questData: QuestStory[] = [
                                 content: "唉，孩子大了不中留，我要是进去啊，她肯定得嘴硬把我轰出来。所以我就只好在外面偷摸张望一下。",
                                 voice: "story/1206/120622/1E324BD6",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062208,
                             },
                             {
@@ -85722,6 +86564,7 @@ export const questData: QuestStory[] = [
                                     "小苏这次参加比赛也是，一声不吭就跑了出去。她这点心思山外山上下谁人不知啊，明明大家都能理解她，但她自己别扭，过意不去。",
                                 voice: "story/1206/120622/1E324C00",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062209,
                             },
                             {
@@ -85729,6 +86572,7 @@ export const questData: QuestStory[] = [
                                 content: "这孩子，平时身上的包袱太重了，觉得自己不应当如此任性，所以瞒着大家谁也不说。",
                                 voice: "story/1206/120622/1E324C2A",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062210,
                             },
                             {
@@ -85736,6 +86580,7 @@ export const questData: QuestStory[] = [
                                 content: "好在小苏遇着了你，有你和她组队，我这提着的心啊才算是放下了一点。对了，她刚刚和你说什么了？",
                                 voice: "story/1206/120622/1E324C54",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 options: [
                                     {
                                         id: 12062211,
@@ -85749,6 +86594,7 @@ export const questData: QuestStory[] = [
                                 content: "她说自己“前所未有的好”？完了完了。",
                                 voice: "story/1206/120622/1E324CA8",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062213,
                             },
                             {
@@ -85757,6 +86603,7 @@ export const questData: QuestStory[] = [
                                     "小苏这丫头我看着长大的，我太了解她了。她呀，越生气的时候，表面看起来反而越冷静。如果说“前所未有的好”，那得是气急了。",
                                 voice: "story/1206/120622/1E324CD2",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062214,
                             },
                             {
@@ -85765,6 +86612,7 @@ export const questData: QuestStory[] = [
                                     "她平时表现得很成熟可靠，常常让人忘了她还只是一个半大的姑娘呢。这丫头啊，遇上她姑姑的事就会表现得很不冷静。",
                                 voice: "story/1206/120622/1E324CFC",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062215,
                             },
                             {
@@ -85772,6 +86620,7 @@ export const questData: QuestStory[] = [
                                 content: "对了，小苏有和你说过她姑姑苏暮鹧的事情吗？这前后的来龙去脉你了解多少？",
                                 voice: "story/1206/120622/1E324D26",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062216,
                             },
                             {
@@ -85786,6 +86635,7 @@ export const questData: QuestStory[] = [
                                 content: "连这个都说了？看来她真的很信任你。",
                                 voice: "story/1206/120622/1E324D7A",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062218,
                             },
                             {
@@ -85793,6 +86643,7 @@ export const questData: QuestStory[] = [
                                 content: "当时消息传来时，我们便都知道这是个死局。但没人劝得住她，她却还是去了。",
                                 voice: "story/1206/120622/1E324DA4",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062219,
                             },
                             {
@@ -85800,6 +86651,7 @@ export const questData: QuestStory[] = [
                                 content: "那灭蒙巨鸟最终没被控制住，将那东郊砸了个稀巴烂，和她前半生的理想背道而驰。小苏一直释怀不下。",
                                 voice: "story/1206/120622/1E324DCE",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062220,
                             },
                             {
@@ -85808,6 +86660,7 @@ export const questData: QuestStory[] = [
                                     "我们这些老家伙都快半截入土了，操心不了年轻人的爱恨纠葛。希望小苏有一天能想明白，人不能总被过去的仇恨束缚住，还是得向前看哟……",
                                 voice: "story/1206/120622/1E324DF8",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062221,
                             },
                             {
@@ -85821,6 +86674,7 @@ export const questData: QuestStory[] = [
                                 content: "哇！什么动静？！",
                                 voice: "story/1206/120622/1E324E4C",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062223,
                             },
                             {
@@ -85835,6 +86689,7 @@ export const questData: QuestStory[] = [
                                 content: "我唐叔再不小心，也不会一下碰倒这么多东西，这声音不太寻常。听这动静，好像是从山外山入口处传来的。",
                                 voice: "story/1206/120622/1E324EA0",
                                 npc: 250024,
+                                speakerName: "唐叔",
                                 next: 12062225,
                             },
                             {
@@ -86344,6 +87199,7 @@ export const questData: QuestStory[] = [
                                 id: 12062501,
                                 content: "…………",
                                 voice: "story/1206/120625/1E327C12",
+                                speakerName: "众人",
                                 next: 12062502,
                             },
                             {
@@ -86499,18 +87355,21 @@ export const questData: QuestStory[] = [
                                 id: 12062521,
                                 content: "这么危险的东西，司事会怎么允许使用的……？",
                                 voice: "story/1206/120625/1E327F5A",
+                                speakerName: "群众的窃窃私语",
                                 next: 12062522,
                             },
                             {
                                 id: 12062522,
                                 content: "那个机傀如果在人群里爆炸了，后果简直不堪设想……",
                                 voice: "story/1206/120625/1E327F84",
+                                speakerName: "群众的窃窃私语",
                                 next: 12062523,
                             },
                             {
                                 id: 12062523,
                                 content: "要是飘零人都是这样的危险份子，谁来保障我们的安全？！把他们赶出去！",
                                 voice: "story/1206/120625/1E327FAE",
+                                speakerName: "群众的窃窃私语",
                                 next: 12062524,
                             },
                             {
@@ -87049,6 +87908,7 @@ export const questData: QuestStory[] = [
                                 id: 12062721,
                                 content: "对不起啊，小苏。姑姑如果继续留在这里，只会拖累你和你的母亲。",
                                 voice: "story/1206/120627/1E32A02A",
+                                speakerName: "苏暮鹧",
                                 next: 12062722,
                             },
                             {
@@ -87062,12 +87922,14 @@ export const questData: QuestStory[] = [
                                 id: 12062723,
                                 content: "不，他们不是坏人。",
                                 voice: "story/1206/120627/1E32A07E",
+                                speakerName: "苏暮鹧",
                                 next: 12062724,
                             },
                             {
                                 id: 12062724,
                                 content: "虽然他们给小鸟儿戴上了黄金的脚链，但他们心里是为了小鸟儿好。",
                                 voice: "story/1206/120627/1E32A0A8",
+                                speakerName: "苏暮鹧",
                                 next: 12062725,
                             },
                             {
@@ -87081,6 +87943,7 @@ export const questData: QuestStory[] = [
                                 id: 12062726,
                                 content: "当然了。因为小鸟儿自己知道，比起黄金的锁链，她更想要辽阔的天空，还有无拘无束、自在飞翔的未来。",
                                 voice: "story/1206/120627/1E32A0FC",
+                                speakerName: "苏暮鹧",
                                 next: 12062727,
                             },
                             {
@@ -87088,6 +87951,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "如果那天真的到来了，我们小苏就不用被关在宅子里，人们也可以更加尽力去开发机枢术，研究出更多造福大家的技术。",
                                 voice: "story/1206/120627/1E32A126",
+                                speakerName: "苏暮鹧",
                                 next: 12062728,
                             },
                             {
@@ -87102,18 +87966,21 @@ export const questData: QuestStory[] = [
                                 id: 12062729,
                                 content: "当然——如果姑姑能做得到的话。",
                                 voice: "story/1206/120627/1E32A17A",
+                                speakerName: "苏暮鹧",
                                 next: 12062730,
                             },
                             {
                                 id: 12062730,
                                 content: "可惜，姑姑并没有那么厉害。就连我最擅长的机枢工造，小苏也很快就能超过我。",
                                 voice: "story/1206/120627/1E32A1A4",
+                                speakerName: "苏暮鹧",
                                 next: 12062731,
                             },
                             {
                                 id: 12062731,
                                 content: "幸好，我已经把我毕生所学全部教给了你。遗憾的事呀，又少了一件。",
                                 voice: "story/1206/120627/1E32A1CE",
+                                speakerName: "苏暮鹧",
                                 next: 12062732,
                             },
                             {
@@ -87128,6 +87995,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "小苏，别哭。我们约好了，如果姑姑成功改变了大风九章，就回来带上你，还有你的父亲母亲，去东郊放飞我们一起做的机巧鸟玩，好吗？",
                                 voice: "story/1206/120627/1E32A222",
+                                speakerName: "苏暮鹧",
                                 next: 12062734,
                             },
                             {
@@ -87142,6 +88010,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "如果失败了，姑姑还有你啊。就算失败，至少也能告诉你，我所行的乃是错误的道路。那样你就能及时避开啦。",
                                 voice: "story/1206/120627/1E32A276",
+                                speakerName: "苏暮鹧",
                                 next: 12062736,
                             },
                             {
@@ -87156,6 +88025,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "没关系，像我一样，你也会拥有你的学生。你可以告诉他们，不要犯你犯的错误呀。学生又会有新的学生，总有一个人能看到一切改变的那一天，不是吗？",
                                 voice: "story/1206/120627/1E32A2CA",
+                                speakerName: "苏暮鹧",
                                 next: 12062738,
                             },
                             {
@@ -87169,24 +88039,28 @@ export const questData: QuestStory[] = [
                                 id: 12062739,
                                 content: "这就难说了……唉，真头疼呀。",
                                 voice: "story/1206/120627/1E32A31E",
+                                speakerName: "苏暮鹧",
                                 next: 12062740,
                             },
                             {
                                 id: 12062740,
                                 content: "为了一起看到那一天，那不就只能在我这里成功了嘛。小苏一定要好好吃饭睡觉，等着我的好消息哦。",
                                 voice: "story/1206/120627/1E32A348",
+                                speakerName: "苏暮鹧",
                                 next: 12062741,
                             },
                             {
                                 id: 12062741,
                                 content: "……还有最后一件事……",
                                 voice: "story/1206/120627/1E32A372",
+                                speakerName: "苏暮鹧",
                                 next: 12062742,
                             },
                             {
                                 id: 12062742,
                                 content: "改变必定伴随着代价。如果——我不是故意乌鸦嘴，我只是说如果——姑姑有一天犯下了什么大错……",
                                 voice: "story/1206/120627/1E32A39C",
+                                speakerName: "苏暮鹧",
                                 next: 12062743,
                             },
                             {
@@ -87478,6 +88352,7 @@ export const questData: QuestStory[] = [
                                 content: "……来人啊……有谁在吗…………",
                                 voice: "story/1206/120629/1E32BE5A",
                                 npc: 250017,
+                                speakerName: "？？？",
                                 next: 12062906,
                             },
                             {
@@ -87627,6 +88502,7 @@ export const questData: QuestStory[] = [
                                 id: 12063801,
                                 content: "扫描完成……正在建立追踪路径……",
                                 voice: "story/1206/120638/1E33515A",
+                                speakerName: "青鸾贰型",
                                 next: 12063802,
                             },
                             {
@@ -88182,18 +89058,21 @@ export const questData: QuestStory[] = [
                                 id: 12063321,
                                 content: "又是那个少年英杰！{nickname}！",
                                 voice: "story/1206/120633/1E33029A",
+                                speakerName: "嘈杂的议论声",
                                 next: 12063322,
                             },
                             {
                                 id: 12063322,
                                 content: "还有那个飘零人，我就说嘛，飘零人才不是传说中青面獠牙的样子咧！那个两条大辫子的小姑娘还怪可爱的！",
                                 voice: "story/1206/120633/1E3302C4",
+                                speakerName: "嘈杂的议论声",
                                 next: 12063323,
                             },
                             {
                                 id: 12063323,
                                 content: "我从未亲眼见过飘零人，或许，他们也只是和我们一样的普通人，会迷茫，也会奋起。",
                                 voice: "story/1206/120633/1E3302EE",
+                                speakerName: "嘈杂的议论声",
                             },
                         ],
                     },
@@ -89065,6 +89944,7 @@ export const questData: QuestStory[] = [
                                 content: "年轻人啊，老朽常年漂泊在外，居无定所。要不，就让老朽跟随你—阵子?",
                                 voice: "story/2001/200005/3211B7F8",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                                 next: 20000524,
                             },
                             {
@@ -89072,6 +89952,7 @@ export const questData: QuestStory[] = [
                                 content: "从海伯利亚到艾利西安，老朽见过、锻造过的武器可多啦！如果你想锻造什么兵器，就包在我身上吧。",
                                 voice: "story/2001/200005/3211B822",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                                 next: 20000525,
                             },
                             {
@@ -89086,6 +89967,7 @@ export const questData: QuestStory[] = [
                                 content: "价钱肯定比外面的铁匠便宜！你只要让我得空研究研究你那把剑就好了，哈哈。",
                                 voice: "story/2001/200005/3211B876",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                             },
                         ],
                     },
@@ -89184,6 +90066,7 @@ export const questData: QuestStory[] = [
                                 content: "年轻人啊，老朽常年漂泊在外，居无定所。要不，就让老朽跟随你—阵子?",
                                 voice: "story/2001/200005/3211B7F8",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                                 next: 20000524,
                             },
                             {
@@ -89191,6 +90074,7 @@ export const questData: QuestStory[] = [
                                 content: "从海伯利亚到艾利西安，老朽见过、锻造过的武器可多啦！如果你想锻造什么兵器，就包在我身上吧。",
                                 voice: "story/2001/200005/3211B822",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                                 next: 20000525,
                             },
                             {
@@ -89205,6 +90089,7 @@ export const questData: QuestStory[] = [
                                 content: "价钱肯定比外面的铁匠便宜！你只要让我得空研究研究你那把剑就好了，哈哈。",
                                 voice: "story/2001/200005/3211B876",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                             },
                         ],
                     },
@@ -89218,6 +90103,7 @@ export const questData: QuestStory[] = [
                                 content: "看样子年轻人这是答应啦。好，好！快带老朽去你的住处吧！",
                                 voice: "story/2001/200005/3211B99C",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                             },
                         ],
                     },
@@ -89231,6 +90117,7 @@ export const questData: QuestStory[] = [
                                 content: "嗬……年轻人的表情，这是在怀疑老朽吧。",
                                 voice: "story/2001/200005/3211B8CA",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                                 next: 20000529,
                             },
                             {
@@ -89238,6 +90125,7 @@ export const questData: QuestStory[] = [
                                 content: "你大可放心——“皎皎之民永远不会主动伤害人类”，这是整片阿特拉西亚大陆人尽皆知的事实。",
                                 voice: "story/2001/200005/3211B8F4",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                                 next: 20000530,
                             },
                             {
@@ -89266,6 +90154,7 @@ export const questData: QuestStory[] = [
                                 content: "看样子年轻人这是答应啦。好，好！快带老朽去你的住处吧！",
                                 voice: "story/2001/200005/3211B99C",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                             },
                         ],
                     },
@@ -89360,6 +90249,7 @@ export const questData: QuestStory[] = [
                                 content: "年轻人，你是不是从什么偏僻地方来的？",
                                 voice: "story/2001/200006/3211C4EE",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                                 next: 20000604,
                             },
                             {
@@ -89375,6 +90265,7 @@ export const questData: QuestStory[] = [
                                     "哈哈，难怪，难怪。毕竟在老朽走过的地方啊，有人类的地方就有皎皎之民。像你这样没见过我们一族的孩子，已经不多啦。",
                                 voice: "story/2001/200006/3211C542",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                                 options: [
                                     {
                                         id: 200006051,
@@ -89423,6 +90314,7 @@ export const questData: QuestStory[] = [
                                 content: "的确。老朽活了这么大岁数，也是第一次看到长角的皎皎之民。这模样，和<H>卡戎之民</>颇有些相似……",
                                 voice: "story/2001/200006/3211C63E",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                                 next: 20000612,
                             },
                             {
@@ -89437,6 +90329,7 @@ export const questData: QuestStory[] = [
                                 content: "嗬……年轻人野心不小啊！",
                                 voice: "story/2001/200006/3211C692",
                                 npc: 200024,
+                                speakerName: "铁匠皎皎",
                                 next: 20000614,
                             },
                             {
@@ -90391,6 +91284,7 @@ export const questData: QuestStory[] = [
                                 id: 20005301,
                                 content: "不可以欺负魔灵！榛子，撞飞他们！",
                                 voice: "story/2001/200053/3214C7B2",
+                                speakerName: "清脆的声音",
                                 next: 20005302,
                             },
                             {
@@ -90404,6 +91298,7 @@ export const questData: QuestStory[] = [
                                 id: 20005303,
                                 content: "他们想跑！喂，那边的{性别：大哥哥|大姐姐}和小朋友，帮一帮我。",
                                 voice: "story/2001/200053/3214C806",
+                                speakerName: "清脆的声音",
                                 next: 20005304,
                             },
                             {
@@ -90482,6 +91377,7 @@ export const questData: QuestStory[] = [
                                 content: "刚刚那是我在叫你们啦。",
                                 voice: "story/2001/200054/3214D916",
                                 npc: 200074,
+                                speakerName: "？？？",
                                 next: 20005408,
                             },
                             {
@@ -90678,6 +91574,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 20005425,
                                 content: "哒哒……？",
+                                speakerName: "脱困的魔灵",
                                 next: 20005426,
                             },
                             {
@@ -90691,6 +91588,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 20005427,
                                 content: "哒哒！哒哒哒！",
+                                speakerName: "脱困的魔灵",
                                 next: 20005428,
                             },
                             {
@@ -90718,6 +91616,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 20005431,
                                 content: "哒哒哒哒！",
+                                speakerName: "脱困的魔灵",
                                 options: [
                                     {
                                         id: 200054311,
@@ -90734,6 +91633,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 20005432,
                                 content: "哒哒——！",
+                                speakerName: "脱困的魔灵",
                                 next: 20005434,
                             },
                             {
@@ -91252,6 +92152,7 @@ export const questData: QuestStory[] = [
                                 content: "咿咿呀——",
                                 voice: "story/2001/200060/32153BB0",
                                 npc: 820000,
+                                speakerName: "脱困的魔灵",
                                 next: 20006009,
                             },
                             {
@@ -91282,6 +92183,7 @@ export const questData: QuestStory[] = [
                                 content: "咿咿咿呀——",
                                 voice: "story/2001/200060/32153C58",
                                 npc: 820000,
+                                speakerName: "脱困的魔灵",
                                 next: 20006013,
                             },
                             {
@@ -91393,6 +92295,7 @@ export const questData: QuestStory[] = [
                                 content: "嗯嗯嗯！",
                                 voice: "story/2001/200060/32153E7A",
                                 npc: 700251,
+                                speakerName: "重新被困的魔灵",
                                 next: 20006026,
                             },
                             {
@@ -91879,6 +92782,7 @@ export const questData: QuestStory[] = [
                                 content: "咿咿。",
                                 voice: "story/2001/200067/3215AE88",
                                 npc: 700251,
+                                speakerName: "魔灵潘神",
                                 next: 20006709,
                             },
                             {
@@ -91998,6 +92902,7 @@ export const questData: QuestStory[] = [
                                 content: "咿咿呀——",
                                 voice: "story/2001/200066/32159D78",
                                 npc: 700251,
+                                speakerName: "魔灵潘神",
                                 next: 20006605,
                             },
                             {
@@ -92011,18 +92916,21 @@ export const questData: QuestStory[] = [
                                 id: 20006606,
                                 content: "啾——",
                                 voice: "story/2001/200066/32159DCC",
+                                speakerName: "？？？",
                                 next: 20006607,
                             },
                             {
                                 id: 20006607,
                                 content: "咩——",
                                 voice: "story/2001/200066/32159DF6",
+                                speakerName: "？？？",
                                 next: 20006608,
                             },
                             {
                                 id: 20006608,
                                 content: "叮咚——",
                                 voice: "story/2001/200066/32159E20",
+                                speakerName: "？？？",
                                 next: 20006609,
                             },
                             {
@@ -92334,6 +93242,7 @@ export const questData: QuestStory[] = [
                                 content: "咿咿。",
                                 voice: "story/2001/200067/3215B128",
                                 npc: 700251,
+                                speakerName: "魔灵潘神",
                                 next: 20006725,
                             },
                             {
@@ -92362,6 +93271,7 @@ export const questData: QuestStory[] = [
                                 content: "咿咿咿。",
                                 voice: "story/2001/200067/3215B1D0",
                                 npc: 700251,
+                                speakerName: "魔灵潘神",
                             },
                         ],
                     },
@@ -93186,6 +94096,7 @@ export const questData: QuestStory[] = [
                                 id: 51000894,
                                 content: "安妮……原来这就是我的名字啊。总觉得稍微有点陌生呢……",
                                 npc: 700032,
+                                speakerName: "安妮",
                                 next: 51000895,
                             },
                             {
@@ -93198,6 +94109,7 @@ export const questData: QuestStory[] = [
                                 id: 51000895,
                                 content: "抱歉，我都忘了……谢谢，真的谢谢你！带我去找妈妈吧，她一定会重谢你的！",
                                 npc: 700032,
+                                speakerName: "安妮",
                                 options: [
                                     {
                                         id: 510008141,
@@ -93210,17 +94122,20 @@ export const questData: QuestStory[] = [
                                 id: 51000805,
                                 content: "我叫爱丽丝，是一名来自伊瑟尔的考古学学生……",
                                 npc: 700032,
+                                speakerName: "爱丽丝",
                                 next: 51000806,
                             },
                             {
                                 id: 51000814,
                                 content: "谢谢你！她一定很担心我。",
                                 npc: 700032,
+                                speakerName: "安妮",
                             },
                             {
                                 id: 51000806,
                                 content: "当时我正在维德弗尼尔雪山勘查，却恰巧遭遇了接连数日的暴风雪，很快我就迷失了方向……",
                                 npc: 700032,
+                                speakerName: "爱丽丝",
                                 next: 51000807,
                             },
                             {
@@ -93228,24 +94143,28 @@ export const questData: QuestStory[] = [
                                 content:
                                     "后来，我遇见了奄奄一息的安妮，我们一起艰难生活了数日。我们鼓励着彼此活下去，约好在暴风雪停歇后，我要去她在冰湖城的家做客……",
                                 npc: 700032,
+                                speakerName: "爱丽丝",
                                 next: 51000808,
                             },
                             {
                                 id: 51000808,
                                 content: "可是她伤得太重了，最终还是没能挺过去……最后她把衣服给了我，希望我再穿暖和一些，能活着走出雪山……",
                                 npc: 700032,
+                                speakerName: "爱丽丝",
                                 next: 51000809,
                             },
                             {
                                 id: 51000809,
                                 content: "安妮……",
                                 npc: 700032,
+                                speakerName: "爱丽丝",
                                 next: 51000810,
                             },
                             {
                                 id: 51000810,
                                 content: "谢谢你……我会永远记住安妮的。",
                                 npc: 700032,
+                                speakerName: "爱丽丝",
                                 next: 51000811,
                             },
                             {
@@ -93253,6 +94172,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "（爱丽丝温柔地抚摸着衣物，这是一个女孩保护了另一个女孩的见证。你告别爱丽丝，准备将事实转告爱尔莎。）",
                                 npc: 700032,
+                                speakerName: "爱丽丝",
                             },
                         ],
                     },
@@ -95243,6 +96163,7 @@ export const questData: QuestStory[] = [
                                 id: 51004907,
                                 content:
                                     "“城外的秽兽吃我们的肉，城内的农场主剪我们的毛。猎犬们吃着白面包，卡戎羊儿嚼着地上的草。摸爬滚打、摇尾乞怜，只为博主人芳心一笑。”",
+                                speakerName: "潦草的字迹",
                                 next: 51004908,
                             },
                             {
@@ -95294,11 +96215,13 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51004914,
                                 content: "“我曾是一个吟游诗人。几个仇恨卡戎的人绑架了我。他们嘲弄我，殴打我，割去我的头发，划破我的皮肤。”",
+                                speakerName: "潦草的字迹",
                                 next: 510049141,
                             },
                             {
                                 id: 510049141,
                                 content: "“直到他们喂我喝下莲草制成的毒药。我虽然没死，但嗓子再也没法说话了。”",
+                                speakerName: "潦草的字迹",
                                 next: 51004915,
                             },
                             {
@@ -95315,6 +96238,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51004917,
                                 content: "“憋在心里太难受。”",
+                                speakerName: "潦草的字迹",
                                 options: [
                                     {
                                         id: 510049171,
@@ -95339,11 +96263,13 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51004918,
                                 content: "“是啊。什么都改变不了，我甚至写了都不敢给别人看，但我还是忍不住想写点什么。”",
+                                speakerName: "潦草的字迹",
                                 next: 51004919,
                             },
                             {
                                 id: 51004923,
                                 content: "“你谬赞了，我只是一个只敢在纸上发牢骚的胆小鬼，我连把这些东西给其他人看的勇气都没有。”",
+                                speakerName: "潦草的字迹",
                                 next: 51004924,
                             },
                             {
@@ -95355,6 +96281,7 @@ export const questData: QuestStory[] = [
                                 id: 51004919,
                                 content:
                                     "“我已经唱不了歌了，我怕如果有一天我什么也不写了，我就会弄丢最后一件珍贵的东西，那时我就真的什么也没有了。”",
+                                speakerName: "潦草的字迹",
                                 next: 51004920,
                             },
                             {
@@ -95366,6 +96293,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51004928,
                                 content: "“这些全都送给你，求你把那张纸还给我吧。”",
+                                speakerName: "潦草的字迹",
                                 next: 51004929,
                             },
                             {
@@ -95393,10 +96321,12 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51004926,
                                 content: "“谢谢你还给我，好心人。这是给你的报酬。”",
+                                speakerName: "潦草的字迹",
                             },
                             {
                                 id: 51004922,
                                 content: "“谢谢你还给我，好心人。这是给你的报酬。”",
+                                speakerName: "潦草的字迹",
                             },
                         ],
                     },
@@ -95602,11 +96532,13 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51004966,
                                 content: "（露娜低下头，似是陷入了长长的思索。）",
+                                speakerName: "潦草的字迹",
                                 next: 51004967,
                             },
                             {
                                 id: 51004967,
                                 content: "“唱我心中所想，即使以喉咙为代价。”",
+                                speakerName: "潦草的字迹",
                                 next: 51004968,
                             },
                             {
@@ -95835,6 +96767,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51004401,
                                 content: "下水道里的什么是不会消失的？",
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 510044011,
@@ -95856,10 +96789,12 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51004402,
                                 content: "进来吧。",
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51004403,
                                 content: "这不是什么都不知道的蠢货该来的地方。",
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -98072,6 +99007,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51005929,
                                 content: "大大哥们好！",
+                                speakerName: "帝国三兄弟",
                                 next: 51005930,
                             },
                             {
@@ -98158,6 +99094,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51005941,
                                 content: "谢谢大大哥们！",
+                                speakerName: "帝国三兄弟",
                                 next: 51005942,
                             },
                             {
@@ -98331,6 +99268,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51005929,
                                 content: "大大哥们好！",
+                                speakerName: "帝国三兄弟",
                                 next: 51005930,
                             },
                             {
@@ -98417,6 +99355,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51005941,
                                 content: "谢谢大大哥们！",
+                                speakerName: "帝国三兄弟",
                                 next: 51005942,
                             },
                             {
@@ -98696,16 +99635,19 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007126,
                                 content: "……好吧，没错。我是杰西卡。这些垃圾确实是我扔的，行了吧？你弯弯绕绕说了一大堆，不就想看我笑话吗？",
+                                speakerName: "杰西卡",
                                 next: 51007127,
                             },
                             {
                                 id: 51007127,
                                 content: "没错，我和所有穷鬼一样，根本坐不起这破车，满意了吗？！",
+                                speakerName: "杰西卡",
                                 next: 51007128,
                             },
                             {
                                 id: 51007128,
                                 content: "……什么美梦成真……都是骗人的。",
+                                speakerName: "杰西卡",
                                 next: 51007129,
                             },
                             {
@@ -98718,11 +99660,13 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007130,
                                 content: "呵，那我要怎么做，温柔地安慰他们吗？",
+                                speakerName: "杰西卡",
                                 next: 51007131,
                             },
                             {
                                 id: 51007131,
                                 content: "然后让他们产生不切实际的妄想，以为自己有一天也配坐上老爷们的列车？！",
+                                speakerName: "杰西卡",
                                 next: 51007132,
                             },
                             {
@@ -98734,6 +99678,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007133,
                                 content: "你是织星客？！那你……你知道一个叫“嘉言”的华胥织星客吗？他是十三年前到过冰湖城的。",
+                                speakerName: "杰西卡",
                                 next: 51007134,
                             },
                             {
@@ -98745,6 +99690,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007135,
                                 content: "……好吧。",
+                                speakerName: "杰西卡",
                                 next: 51007136,
                             },
                             {
@@ -98756,6 +99702,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007137,
                                 content: "呵呵，朋友？不，那是我最讨厌的人。",
+                                speakerName: "杰西卡",
                                 next: 51007138,
                             },
                             {
@@ -98766,22 +99713,26 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007139,
                                 content: "他说自己去过很多国家，见过许多有趣的人和事。每卖出一件货物，他就会讲一个来自远方的故事。",
+                                speakerName: "杰西卡",
                                 next: 51007140,
                             },
                             {
                                 id: 51007140,
                                 content: "我就像个傻子一样，把他故事里的每个句子都记下来，背下来，以为这样就能更接近他说的那个广阔世界。",
+                                speakerName: "杰西卡",
                                 next: 51007141,
                             },
                             {
                                 id: 51007141,
                                 content:
                                     "他说“星星是愿望的种子，当它坠落，就如果实收获，你所期盼的，都会实现。”他说“无数由珍爱之物做成的星，将在地上发芽。”",
+                                speakerName: "杰西卡",
                                 next: 51007142,
                             },
                             {
                                 id: 51007142,
                                 content: "我很想和他一起走，继续听他讲不完的故事。但是我买不起车票，最后只能独自目送他登上了远去的火车。",
+                                speakerName: "杰西卡",
                                 next: 51007143,
                             },
                             {
@@ -98792,22 +99743,26 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007144,
                                 content: "哈哈……找到了。这一张，是他登上的那趟列车。那辆列车将穿越海伯利亚大平原，去向遥远的南方。",
+                                speakerName: "杰西卡",
                                 next: 51007145,
                             },
                             {
                                 id: 51007145,
                                 content: "当时的售票员看我可怜，在发车后把没卖出去的废票给了我一张，安慰我说去那边的列车还有很多。",
+                                speakerName: "杰西卡",
                                 next: 51007146,
                             },
                             {
                                 id: 51007146,
                                 content:
                                     "可是我始终买不起票，只能眼巴巴地在旁边看着。久而久之我也把卖票的流程看熟了，后来就接替她当了售票员。",
+                                speakerName: "杰西卡",
                                 next: 51006931,
                             },
                             {
                                 id: 51006931,
                                 content: "成为售票员的第一年零八个月，我终于攒够了可以从冰湖城坐到南方丹流城的车票钱。",
+                                speakerName: "杰西卡",
                                 next: 51006932,
                             },
                             {
@@ -98820,6 +99775,7 @@ export const questData: QuestStory[] = [
                                 id: 51006933,
                                 content:
                                     "接近？你忘了<H>卡戎监护金</>了吗？票本身的价格连买票要交的监护金零头都不到！要想买去他那边的票，我要不吃不喝五年！可我还有家要养……",
+                                speakerName: "杰西卡",
                                 next: 51007147,
                             },
                             {
@@ -98830,6 +99786,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007148,
                                 content: "现在你明白了吧？这些纸星星就是不折不扣的垃圾。谢谢你特地拿来还给我，下次我会把它们撕成碎片再扔。",
+                                speakerName: "杰西卡",
                                 next: 51007149,
                             },
                             {
@@ -98841,6 +99798,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007150,
                                 content: "我用不着你可怜，织星客。",
+                                speakerName: "杰西卡",
                                 options: [
                                     {
                                         id: 51007151,
@@ -98853,16 +99811,19 @@ export const questData: QuestStory[] = [
                                 id: 51007152,
                                 content:
                                     "“好好说话”？你的意思是要我也像那个织星客、像那个售票员一样，说些漂亮的空话，什么“远方”，什么“未来”，然后让人眼巴巴地盼望着？",
+                                speakerName: "杰西卡",
                                 next: 51007153,
                             },
                             {
                                 id: 51007153,
                                 content: "既然你是卡戎，你应该比我、比这个华胥人更清楚冰湖城到底是个什么地方！",
+                                speakerName: "杰西卡",
                                 next: 51007154,
                             },
                             {
                                 id: 51007154,
                                 content: "去城里走上一圈，人人都在悲叹、抱怨、咒骂！在这种地方，好好说话有意义吗？",
+                                speakerName: "杰西卡",
                                 next: 51007155,
                             },
                             {
@@ -98891,6 +99852,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007159,
                                 content: "你什么意思啊……？我哪来的钱买这么精致的盒子……",
+                                speakerName: "杰西卡",
                                 next: 51007160,
                             },
                             {
@@ -98924,6 +99886,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007169,
                                 content: "把它拿走吧。你以为我为什么要扔掉那些星星？这么多年下来，该想的我早就想清楚了，现实也早就认清了。",
+                                speakerName: "杰西卡",
                                 next: 51007170,
                             },
                             {
@@ -98946,32 +99909,38 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007171,
                                 content: "…………",
+                                speakerName: "杰西卡",
                                 next: 51007172,
                             },
                             {
                                 id: 51007166,
                                 content: "你……",
+                                speakerName: "杰西卡",
                                 next: 51007167,
                             },
                             {
                                 id: 51007172,
                                 content: "……对了，就算是开往同一个目的地，不同车次的价格也不一样，有几趟会便宜些。虽然也省不了多少钱，但……",
+                                speakerName: "杰西卡",
                                 next: 51007173,
                             },
                             {
                                 id: 51007167,
                                 content: "好……好吧。受不了你的啰嗦了，我收下就是了。谢……谢谢。",
+                                speakerName: "杰西卡",
                                 next: 51007172,
                             },
                             {
                                 id: 51007173,
                                 content:
                                     "如果，有一天你们真能从自己的破口袋里掏出点钱来买票的话……我可以帮你们提前看一看，预留最便宜的那趟车的票。",
+                                speakerName: "杰西卡",
                                 next: 51007174,
                             },
                             {
                                 id: 51007174,
                                 content: "作为交换，星星的事，别说出去。",
+                                speakerName: "杰西卡",
                                 next: 51007175,
                             },
                             {
@@ -98990,6 +99959,7 @@ export const questData: QuestStory[] = [
                                 id: 51007177,
                                 content:
                                     "谢谢你的好意，不过……不用了。如果有一天真的能离开这里，我大概也不会去找他了。我想去个不会下雪的地方，看看外边的人是不是都和冰湖城不一样。",
+                                speakerName: "杰西卡",
                                 next: 51007178,
                             },
                             {
@@ -99001,6 +99971,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007179,
                                 content: "……嗯。",
+                                speakerName: "杰西卡",
                                 next: 51007186,
                             },
                             {
@@ -99137,6 +100108,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51007181,
                                 content: "我名李安德，是织星客。前日子，生意有点赔，现在城门附近用心摆摊，请光顾！",
+                                speakerName: "李安德",
                             },
                         ],
                     },
@@ -99574,6 +100546,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51006304,
                                 content: "汪汪——",
+                                speakerName: "恶犬",
                             },
                         ],
                     },
@@ -99877,11 +100850,13 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51006726,
                                 content: "“生命是航行在无尽长夜里的孤船。”",
+                                speakerName: "？？？",
                                 next: 51006727,
                             },
                             {
                                 id: 51006727,
                                 content: "“河流泪水满溢，夹岸荆棘丛生。”",
+                                speakerName: "？？？",
                                 next: 51006728,
                             },
                             {
@@ -101454,6 +102429,7 @@ export const questData: QuestStory[] = [
                                 id: 51007690,
                                 content: "西奥，你又跑到哪里去了？天呐，瞧瞧你，怎么把衣服弄得这么脏！",
                                 npc: 700205,
+                                speakerName: "打扮得体的女士",
                                 next: 51007691,
                             },
                             {
@@ -103835,6 +104811,7 @@ export const questData: QuestStory[] = [
                                 id: 51009629,
                                 content: "咳、咳……",
                                 npc: 700301,
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 51009630,
@@ -103847,6 +104824,7 @@ export const questData: QuestStory[] = [
                                 id: 510095401,
                                 content: "怎么还会有年轻人到这种地方……你在雪原迷路了吗？冰湖城的方向是——",
                                 npc: 700301,
+                                speakerName: "？？？",
                                 next: 51009631,
                             },
                             {
@@ -104621,12 +105599,14 @@ export const questData: QuestStory[] = [
                                 id: 51009723,
                                 content: "难享安眠……难享安眠！",
                                 npc: 700309,
+                                speakerName: "？？？",
                                 next: 51009724,
                             },
                             {
                                 id: 51009724,
                                 content: "可怜的人啊，你是否同我一样？身处冰冷的回廊，焦急地观望，那因爱与希冀而闪烁的星光……",
                                 npc: 700309,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -104642,6 +105622,7 @@ export const questData: QuestStory[] = [
                                 id: 51009726,
                                 content: "哒……哒哒……",
                                 npc: 700309,
+                                speakerName: "？？？",
                                 next: 51009727,
                             },
                             {
@@ -104654,12 +105635,14 @@ export const questData: QuestStory[] = [
                                 id: 51009728,
                                 content: "哦，抱歉，我好像吓到了你？我在这里，稍微往前五步。对，就是这边。",
                                 npc: 700309,
+                                speakerName: "？？？",
                                 next: 51009729,
                             },
                             {
                                 id: 51009729,
                                 content: "你好，今夜无法入眠的朋友。",
                                 npc: 700309,
+                                speakerName: "？？？",
                                 options: [
                                     {
                                         id: 510096391,
@@ -104929,12 +105912,14 @@ export const questData: QuestStory[] = [
                                 id: 51009763,
                                 content: "请问……你是谁？从刚才开始似乎就一直在我家附近转悠。",
                                 npc: 700302,
+                                speakerName: "？？？",
                                 next: 51009764,
                             },
                             {
                                 id: 51009764,
                                 content: "是有委托找我吗，找人？还是收集素材？其他的委托也不是不接，但必须合法。",
                                 npc: 700302,
+                                speakerName: "？？？",
                                 next: 51009765,
                             },
                             {
@@ -104947,6 +105932,7 @@ export const questData: QuestStory[] = [
                                 id: 51009766,
                                 content: "嗯？原来你不是来找我发委托的？",
                                 npc: 700302,
+                                speakerName: "？？？",
                                 next: 51009767,
                             },
                             {
@@ -106119,12 +107105,14 @@ export const questData: QuestStory[] = [
                                 id: 51009930,
                                 content: "“亲爱的人儿，请不要为我悲伤！在这个无眠之夜，我将远航——”",
                                 npc: 700300,
+                                speakerName: "艾诺拉",
                                 next: 51009931,
                             },
                             {
                                 id: 51009931,
                                 content: "“风儿鼓起船帆，我撑起木桨——灯塔映在海里啊，月光多明亮！”",
                                 npc: 700300,
+                                speakerName: "艾诺拉",
                                 next: 51009932,
                             },
                             {
@@ -106132,6 +107120,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "谢谢你，艾诺拉……你演得很好，很好。呵呵……我想象中的普蒂妮啊，她就是你的样子……热烈，勇敢，心儿永远向着自由……",
                                 npc: 700300,
+                                speakerName: "维尔莉特",
                                 next: 51009933,
                             },
                             {
@@ -106139,18 +107128,21 @@ export const questData: QuestStory[] = [
                                 content:
                                     "谢谢！这个是我自己瞎唱的……不过我认识一位很优秀的作曲家！他叫卡瓦拉多西。我们可以拜托他把《普蒂妮》改编成歌剧——",
                                 npc: 700300,
+                                speakerName: "艾诺拉",
                                 next: 51009934,
                             },
                             {
                                 id: 51009934,
                                 content: "……不过我应该没有机会演唱了。",
                                 npc: 700300,
+                                speakerName: "艾诺拉",
                                 next: 51009935,
                             },
                             {
                                 id: 51009935,
                                 content: "我已经十八岁了。父亲已经给我安排好了婚事，就在两个月后。对方也是炼金院的年轻长官。",
                                 npc: 700300,
+                                speakerName: "艾诺拉",
                                 next: 51009936,
                             },
                             {
@@ -106158,18 +107150,21 @@ export const questData: QuestStory[] = [
                                 content:
                                     "我想我接下来的一生，不是要待在小房间里做个瓷娃娃一样的漂亮摆件，就是要和那些该死的月髓液罐子打一辈子交道了。",
                                 npc: 700300,
+                                speakerName: "艾诺拉",
                                 next: 51009937,
                             },
                             {
                                 id: 51009937,
                                 content: "不，不……艾诺拉，不应该是这样的——你有着云雀一样的歌喉……你不属于小房间……而是更大的，更大的舞台……",
                                 npc: 700300,
+                                speakerName: "维尔莉特",
                                 next: 51009938,
                             },
                             {
                                 id: 51009938,
                                 content: "每一个热爱歌唱的人……都有资格在舞台上熠熠发光……无论是索拉还是卡戎，是富有还是贫穷……",
                                 npc: 700300,
+                                speakerName: "维尔莉特",
                                 next: 51009939,
                             },
                             {
@@ -106177,12 +107172,14 @@ export const questData: QuestStory[] = [
                                 content:
                                     "我会想办法让哥哥放你离开。我的身体已经没有办法了，我不知道还有没有机会把《普蒂妮》的最后一幕写完……",
                                 npc: 700300,
+                                speakerName: "维尔莉特",
                                 next: 51009940,
                             },
                             {
                                 id: 51009940,
                                 content: "但艾诺拉，请你答应我，一定要走上舞台，把我们的《普蒂妮》唱给所有人……",
                                 npc: 700300,
+                                speakerName: "维尔莉特",
                                 next: 51009941,
                             },
                             {
@@ -106928,12 +107925,14 @@ export const questData: QuestStory[] = [
                                 id: 51010052,
                                 content: "……啊！",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010053,
                             },
                             {
                                 id: 51010053,
                                 content: "抱……抱歉，我刚才没看路！没受伤吧？有没有哪里不舒服？",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010054,
                             },
                             {
@@ -106946,6 +107945,7 @@ export const questData: QuestStory[] = [
                                 id: 51010055,
                                 content: "嗯——",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010056,
                             },
                             {
@@ -106958,6 +107958,7 @@ export const questData: QuestStory[] = [
                                 id: 51010057,
                                 content: "没什么，嘻嘻……谢谢你的草药。啊，约定好的时间要过了！",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010058,
                             },
                             {
@@ -106970,6 +107971,7 @@ export const questData: QuestStory[] = [
                                 id: 51010059,
                                 content: "——送给你了！！",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010060,
                             },
                             {
@@ -107147,6 +108149,7 @@ export const questData: QuestStory[] = [
                                 id: 51010084,
                                 content: "吉赛尔，我需要你给我一个解释！",
                                 npc: 700304,
+                                speakerName: "？？？",
                                 next: 51010085,
                             },
                             {
@@ -107274,12 +108277,14 @@ export const questData: QuestStory[] = [
                                 id: 51010105,
                                 content: "……啊！",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010106,
                             },
                             {
                                 id: 51010106,
                                 content: "抱……抱歉，我刚才没看路！没受伤吧？有没有哪里不舒服？",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010107,
                             },
                             {
@@ -107292,6 +108297,7 @@ export const questData: QuestStory[] = [
                                 id: 51010108,
                                 content: "嗯——",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010109,
                             },
                             {
@@ -107304,18 +108310,21 @@ export const questData: QuestStory[] = [
                                 id: 51010110,
                                 content: "没什么，嘻嘻……谢谢你的草药。",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010111,
                             },
                             {
                                 id: 51010111,
                                 content: "约定的时间要来不及了哦。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010112,
                             },
                             {
                                 id: 51010112,
                                 content: "啊抱歉了我得走了！来了来了，等等我！",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010113,
                             },
                             {
@@ -107328,6 +108337,7 @@ export const questData: QuestStory[] = [
                                 id: 51010114,
                                 content: "——送给你了！！",
                                 npc: 700305,
+                                speakerName: "活泼的女孩",
                                 next: 51010115,
                             },
                             {
@@ -107346,12 +108356,14 @@ export const questData: QuestStory[] = [
                                 id: 51010117,
                                 content: "勇敢的蝴蝶挣脱了茧，向着天空振翅，她随风隐去，就像一枝紫罗兰消失在花海。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010118,
                             },
                             {
                                 id: 51010118,
                                 content: "她可能很长一段时间都不会再同你我见面了……所以收下这份临别的礼物吧，她珍视的朋友。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010119,
                             },
                             {
@@ -107381,6 +108393,7 @@ export const questData: QuestStory[] = [
                                 id: 51010123,
                                 content: "嘘——虽然我认可你们的揭发，但还是会保守秘密的孩子更可爱哦。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010124,
                             },
                             {
@@ -107394,6 +108407,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "“薇奥莱塔”不会再登台，可我短期内并不打算离开这里。当然，就算你再次揭发，我也不会有怨言。只是事关我的另一位学生，我无法弃之不顾。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010126,
                             },
                             {
@@ -107406,12 +108420,14 @@ export const questData: QuestStory[] = [
                                 id: 51010127,
                                 content: "……感谢你的沉默。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010128,
                             },
                             {
                                 id: 51010128,
                                 content: "那么失陪了，愿二位度过一个美妙的假日。",
                                 npc: 700311,
+                                speakerName: "？？？",
                                 next: 51010129,
                             },
                             {
@@ -108471,6 +109487,7 @@ export const questData: QuestStory[] = [
                                 id: 51100067,
                                 content: "谁呀，打扰我的好梦？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100068,
                             },
                             {
@@ -108506,6 +109523,7 @@ export const questData: QuestStory[] = [
                                 id: 51100073,
                                 content: "太皓？你称我为太皓？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100074,
                             },
                             {
@@ -108518,6 +109536,7 @@ export const questData: QuestStory[] = [
                                 id: 51100075,
                                 content: "哈哈，你说得倒没错，我……吾的意思就是如此，区区凡人，怎可直呼吾名？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100076,
                             },
                             {
@@ -108531,6 +109550,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "无妨，吾气量宽宏，就原谅你这一回！那人间的凡夫俗子，今日来这鸟……偏僻之地搅扰本座清静，到底所为何事啊？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100078,
                             },
                             {
@@ -108557,6 +109577,7 @@ export const questData: QuestStory[] = [
                                 id: 51100081,
                                 content: "哦！我……吾想起来了！是你！上回你磕到脑袋，抓着吾的袖口满嘴胡言乱语，险些吐吾身上，都不记得了？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100082,
                             },
                             {
@@ -108588,12 +109609,14 @@ export const questData: QuestStory[] = [
                                 id: 51100086,
                                 content: "？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100087,
                             },
                             {
                                 id: 51100087,
                                 content: "哈哈哈哈哈哈哈哈哈哈哈哈哈……好！说得好！有眼光！",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100088,
                             },
                             {
@@ -108612,6 +109635,7 @@ export const questData: QuestStory[] = [
                                 id: 51100090,
                                 content: "人之性情禀赋，不可强行扭转，既然爱笑，就随{性别:他|她}笑吧。",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100091,
                             },
                             {
@@ -108625,12 +109649,14 @@ export const questData: QuestStory[] = [
                                 id: 51100092,
                                 content: "哦？那大风九章第九条，不也说要“垂聆天宪，恭肃为敬”？你先是冒犯于我，我念你神志不清，不予追究。",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100093,
                             },
                             {
                                 id: 51100093,
                                 content: "现在你神思清明，却又顶撞于我，该当何罪！",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100094,
                             },
                             {
@@ -108661,6 +109687,7 @@ export const questData: QuestStory[] = [
                                 id: 51100067,
                                 content: "谁呀，打扰我的好梦？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100068,
                             },
                             {
@@ -108696,6 +109723,7 @@ export const questData: QuestStory[] = [
                                 id: 51100073,
                                 content: "太皓？你称我为太皓？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100074,
                             },
                             {
@@ -108708,6 +109736,7 @@ export const questData: QuestStory[] = [
                                 id: 51100075,
                                 content: "哈哈，你说得倒没错，我……吾的意思就是如此，区区凡人，怎可直呼吾名？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100076,
                             },
                             {
@@ -108721,6 +109750,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "无妨，吾气量宽宏，就原谅你这一回！那人间的凡夫俗子，今日来这鸟……偏僻之地搅扰本座清静，到底所为何事啊？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100078,
                             },
                             {
@@ -108747,6 +109777,7 @@ export const questData: QuestStory[] = [
                                 id: 51100081,
                                 content: "哦！我……吾想起来了！是你！上回你磕到脑袋，抓着吾的袖口满嘴胡言乱语，险些吐吾身上，都不记得了？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100082,
                             },
                             {
@@ -108778,12 +109809,14 @@ export const questData: QuestStory[] = [
                                 id: 51100086,
                                 content: "？",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100087,
                             },
                             {
                                 id: 51100087,
                                 content: "哈哈哈哈哈哈哈哈哈哈哈哈哈……好！说得好！有眼光！",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100088,
                             },
                             {
@@ -108802,6 +109835,7 @@ export const questData: QuestStory[] = [
                                 id: 51100090,
                                 content: "人之性情禀赋，不可强行扭转，既然爱笑，就随{性别:他|她}笑吧。",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100091,
                             },
                             {
@@ -108815,12 +109849,14 @@ export const questData: QuestStory[] = [
                                 id: 51100092,
                                 content: "哦？那大风九章第九条，不也说要“垂聆天宪，恭肃为敬”？你先是冒犯于我，我念你神志不清，不予追究。",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100093,
                             },
                             {
                                 id: 51100093,
                                 content: "现在你神思清明，却又顶撞于我，该当何罪！",
                                 npc: 700318,
+                                speakerName: "？？？",
                                 next: 51100094,
                             },
                             {
@@ -110071,6 +111107,7 @@ export const questData: QuestStory[] = [
                                 id: 51102036,
                                 content: "吼——",
                                 npc: 210087,
+                                speakerName: "玄色狴犴",
                             },
                         ],
                     },
@@ -110162,6 +111199,7 @@ export const questData: QuestStory[] = [
                                 id: 51102046,
                                 content: "且慢。",
                                 npc: 700322,
+                                speakerName: "？？？",
                                 next: 51102047,
                             },
                             {
@@ -112987,6 +114025,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51125022,
                                 content: "来嘞！",
+                                speakerName: "群众演员",
                                 next: 51125023,
                             },
                             {
@@ -113013,6 +114052,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51125026,
                                 content: "兄弟们，上啊！",
+                                speakerName: "群众演员",
                             },
                         ],
                     },
@@ -113032,6 +114072,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51125029,
                                 content: "这厮好生厉害，中了缚仙索还不落下风！兄弟们快撤！",
+                                speakerName: "群众演员",
                                 next: 51125030,
                             },
                             {
@@ -113380,6 +114421,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51125083,
                                 content: "兄弟们，上啊！",
+                                speakerName: "群众演员",
                             },
                         ],
                     },
@@ -113399,6 +114441,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51125086,
                                 content: "这厮好生厉害，中了缚仙索还不落下风！兄弟们快撤！",
+                                speakerName: "群众演员",
                                 next: 51125087,
                             },
                             {
@@ -114501,6 +115544,7 @@ export const questData: QuestStory[] = [
                                 id: 51140003,
                                 content: "敢问二位……",
                                 npc: 701074,
+                                speakerName: "陌生的声音",
                             },
                             {
                                 id: 51140004,
@@ -115299,10 +116343,12 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51152003,
                                 content: "呜……呜……",
+                                speakerName: "中年男子",
                             },
                             {
                                 id: 51152004,
                                 content: "呜……别过来，不要逼我……不要逼我！",
+                                speakerName: "中年男子",
                             },
                             {
                                 id: 51152005,
@@ -115398,6 +116444,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51152014,
                                 content: "按照你的意思。我们应该在原地待着，什么都不做，束手就擒……是吗？",
+                                speakerName: "止流",
                             },
                             {
                                 id: 51152015,
@@ -115722,6 +116769,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51114022,
                                 content: "……",
+                                speakerName: "小杨&小张",
                                 next: 51114023,
                             },
                             {
@@ -118586,6 +119634,7 @@ export const questData: QuestStory[] = [
                                 id: 51165501,
                                 content: "咳咳……咳咳咳……腌臜恶物，滚……滚开！",
                                 npc: 700386,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51165502,
@@ -118596,16 +119645,19 @@ export const questData: QuestStory[] = [
                                 id: 51165503,
                                 content: "你……你们，咳咳，宫某多谢侠士出手相助。",
                                 npc: 700386,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51165504,
                                 content: "在下已经独居许久，爱徒们有的蠢笨不堪被我赶走，有的娇生惯养自行离去，只留老朽一个人在此。",
                                 npc: 700386,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51165505,
                                 content: "无以为报，只能抚琴一曲，以报救命之恩了。",
                                 npc: 700386,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51165506,
@@ -118852,6 +119904,7 @@ export const questData: QuestStory[] = [
                                 id: 51165553,
                                 content: "先生等等！",
                                 npc: 700387,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -118866,6 +119919,7 @@ export const questData: QuestStory[] = [
                                 id: 51165601,
                                 content: "先生，好久不见。",
                                 npc: 700387,
+                                speakerName: "？？？",
                             },
                             {
                                 id: 51165602,
@@ -119589,18 +120643,21 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51175210,
                                 content: "您追求的阴阳逆转之法本不可得，但虞泉既因烛阴之灾的缘故连通往隙，那或许便可有解。",
+                                speakerName: "无由生",
                                 next: 51175211,
                             },
                             {
                                 id: 51175211,
                                 content:
                                     "若在往隙开放时刻，前往忘川动用枯荣之术，届时，您想见之故人自当应召而来——前提是，她的灵魂还尚存于世。",
+                                speakerName: "无由生",
                                 next: 51175212,
                             },
                             {
                                 id: 51175212,
                                 content:
                                     "然后，您便可以使用枯荣术最终极的阴阳逆转秘法。只是，您应当知晓，那秘法要求施术者拥有极高资质，即使是祝由也罕有成功。而代价更是……",
+                                speakerName: "无由生",
                                 next: 51175213,
                             },
                             {
@@ -120224,6 +121281,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51175403,
                                 content: "祝由大人，为什么……",
+                                speakerName: "痛苦的患者",
                             },
                         ],
                     },
@@ -120235,11 +121293,13 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51175404,
                                 content: "我一直相信您会来救我们，但为什么您突然消失了，留下我们在痛苦与绝望中死去！",
+                                speakerName: "绝望的患者",
                                 next: 51175405,
                             },
                             {
                                 id: 51175405,
                                 content: "我们托付错了人……或许从一开始就不该指望什么祝由……",
+                                speakerName: "悲观的患者",
                                 next: 51175406,
                             },
                             {
@@ -120269,16 +121329,19 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51175408,
                                 content: "祝由上膺天命，下悯苍生，应克己守节，普渡众生……此身为烛，此心为薪，燃魂济世……",
+                                speakerName: "父亲的声音",
                                 next: 51175409,
                             },
                             {
                                 id: 51175409,
                                 content: "扶疏，你不可辱了家传使命。记住了吗？",
+                                speakerName: "父亲的声音",
                                 next: 51175410,
                             },
                             {
                                 id: 51175410,
                                 content: "扶疏记住了！",
+                                speakerName: "年幼的扶疏",
                                 next: 51175411,
                             },
                             {
@@ -120308,26 +121371,31 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51175413,
                                 content: "姐姐……父亲寂灭了……",
+                                speakerName: "年幼的扶疏",
                                 next: 51175414,
                             },
                             {
                                 id: 51175414,
                                 content: "…………",
+                                speakerName: "年幼的扶风",
                                 next: 51175415,
                             },
                             {
                                 id: 51175415,
                                 content: "小疏，你觉得这样对吗？",
+                                speakerName: "年幼的扶风",
                                 next: 51175416,
                             },
                             {
                                 id: 51175416,
                                 content: "但，以枯荣之术渡人苦厄，直至寂灭，这是祝由的使命……",
+                                speakerName: "年幼的扶疏",
                                 next: 51175417,
                             },
                             {
                                 id: 51175417,
                                 content: "不，我偏不信这个理！小疏，我才不要死，也不要眼睁睁看着大家去死！",
+                                speakerName: "年幼的扶风",
                             },
                         ],
                     },
@@ -120608,11 +121676,13 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51175502,
                                 content: "放心！只是轻微骨折，我给你敷上药，打上夹板固定好了。现在还请不要剧烈运动，在旁边先休息一下。",
+                                speakerName: "泽生阁学徒",
                                 next: 51175503,
                             },
                             {
                                 id: 51175503,
                                 content: "不行不行，我大哥也是泽生阁的药师，他这会肯定在城里哪个地方救人呢，我得过去帮他！",
+                                speakerName: "激动的患者",
                             },
                         ],
                     },
@@ -120637,16 +121707,19 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51175505,
                                 content: "胡闹！泽生阁的药师人手足够，尚不用一个伤员来帮忙！",
+                                speakerName: "泽生阁学徒",
                                 next: 51175506,
                             },
                             {
                                 id: 51175506,
                                 content: "大夫，我这就一点小擦伤而已，我自己缠个绷带就好，你去帮其他人吧。",
+                                speakerName: "坚强的患者",
                                 next: 51175507,
                             },
                             {
                                 id: 51175507,
                                 content: "嗯，动乱还未结束，你多加小心。",
+                                speakerName: "泽生阁学徒",
                             },
                         ],
                     },
@@ -120738,11 +121811,13 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51175520,
                                 content: "那边还有伤员，来人搭把手。",
+                                speakerName: "泽生阁学徒",
                                 next: 51175521,
                             },
                             {
                                 id: 51175521,
                                 content: "我家里还有担架，等我回去拿一下！",
+                                speakerName: "缠着绷带的患者",
                                 next: 51175522,
                             },
                             {
@@ -120835,6 +121910,7 @@ export const questData: QuestStory[] = [
                                 id: 51200003,
                                 content: "爸爸，我的腿只是瘸了不是断了，求你不要因此不要我啊！",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200004,
                             },
                             {
@@ -120860,12 +121936,14 @@ export const questData: QuestStory[] = [
                                 content:
                                     "爸爸！你不要我了吗？我在这里等了你们好久，每天指望着贵族老爷们施舍的铜币买一块泛着霉味、又干又硬的黑面包果腹！只为了等你们回来接我！",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200008,
                             },
                             {
                                 id: 51200008,
                                 content: "你怎么能这么对我呢？我只是……我只是想要跟你们回家啊……呜呜呜……",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200009,
                             },
                             {
@@ -121029,6 +122107,7 @@ export const questData: QuestStory[] = [
                                 id: 51200034,
                                 content: "……",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200035,
                             },
                             {
@@ -121052,6 +122131,7 @@ export const questData: QuestStory[] = [
                                 id: 51200038,
                                 content: "我好像也没有让你们帮我吧。",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200039,
                             },
                             {
@@ -121077,12 +122157,14 @@ export const questData: QuestStory[] = [
                                 id: 51200045,
                                 content: "……",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200046,
                             },
                             {
                                 id: 51200046,
                                 content: "他们的确不是我的父母，但是你们怎么知道他没有可能是我的父母呢？",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200047,
                             },
                             {
@@ -121095,12 +122177,14 @@ export const questData: QuestStory[] = [
                                 id: 51200048,
                                 content: "我的意思是，他们可以是我的父母，也可以不是我的父母，你们也一样，可以是我的父母，也可以不是。",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200049,
                             },
                             {
                                 id: 51200049,
                                 content: "只需要看你们想不想，愿不愿意，我说得不对吗？",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200050,
                             },
                             {
@@ -121119,6 +122203,7 @@ export const questData: QuestStory[] = [
                                 id: 51200052,
                                 content: "没错，只要是两个人，怎么都无所谓。",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 options: [
                                     {
                                         id: 51200055,
@@ -121138,6 +122223,7 @@ export const questData: QuestStory[] = [
                                 id: 51200059,
                                 content: "所以我来给你们道歉，你，我的爸爸，以及这位皎皎，我的妈妈。",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200060,
                             },
                             {
@@ -121156,6 +122242,7 @@ export const questData: QuestStory[] = [
                                 id: 51200062,
                                 content: "怎么了，不满意这个称呼吗？那换过来也可以。你，我的妈妈，以及我的皎皎爸爸。",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200063,
                             },
                             {
@@ -121181,6 +122268,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "虽然现在腿瘸了，但能用手做的事情我都可以做，我不怕吃苦，可以顿顿吃黑面包，对睡的地方也不挑剔，阁楼或者楼梯下的储物间之类的都可以。",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 next: 51200067,
                             },
                             {
@@ -121188,6 +122276,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "毕竟家里的脚步总能好过火车发动时候的轰鸣声吧……所以——你们当我的父母，带我离开车站吧，只要能带我走，我什么都可以做！",
                                 npc: 700402,
+                                speakerName: "瘸腿的孩子",
                                 options: [
                                     {
                                         id: 51200068,
@@ -121431,6 +122520,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "哟！这不是我们螺丝刀行会的烟囱双将吗？哦！我忘了，现在是烟囱单将了……不不不，也不对，我们的单将好像瘸腿了，那得叫——烟囱瘸将！",
                                 npc: 700405,
+                                speakerName: "冷漠的工人",
                                 next: 51200095,
                             },
                             {
@@ -121438,12 +122528,14 @@ export const questData: QuestStory[] = [
                                 content:
                                     "小子，你今天又骚扰了一个贵族老爷吧？你也适可而止吧，别真闹大了，让那些人以为我们螺丝刀都是什么泼皮无赖。",
                                 npc: 700405,
+                                speakerName: "冷漠的工人",
                                 next: 51200096,
                             },
                             {
                                 id: 51200096,
                                 content: "你最好祈祷你骚扰的那些人不会找上艾森巴恩，不然他以此来难为我们，那就谁也别想跑。",
                                 npc: 700405,
+                                speakerName: "冷漠的工人",
                                 next: 51200097,
                             },
                             {
@@ -121456,12 +122548,14 @@ export const questData: QuestStory[] = [
                                 id: 51200098,
                                 content: "差不多得了，有气不要朝孩子撒。",
                                 npc: 700406,
+                                speakerName: "和善的工人",
                                 next: 51200099,
                             },
                             {
                                 id: 51200099,
                                 content: "我这是教他认清现实！不是所有人都像斯维亚那么幸运，被拐走还有父母坚持不懈找了好几年，还能被找到！",
                                 npc: 700405,
+                                speakerName: "冷漠的工人",
                                 next: 51200100,
                             },
                             {
@@ -121469,6 +122563,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "而你，你就是个弃婴，这么多年了还没明白吗？没有人会来车站接你的，离开这里你连一份能赚钱的工作都没有，所以——别做那些不切实际的梦。",
                                 npc: 700405,
+                                speakerName: "冷漠的工人",
                                 next: 51200101,
                             },
                             {
@@ -121492,6 +122587,7 @@ export const questData: QuestStory[] = [
                                 id: 51200104,
                                 content: "对嘛……这才是乖孩子，正好，我们刚接了个清洁玻璃的活，你只是瘸了也不是手断了，还是可以做的吧？",
                                 npc: 700405,
+                                speakerName: "冷漠的工人",
                                 next: 51200105,
                             },
                             {
@@ -121504,18 +122600,21 @@ export const questData: QuestStory[] = [
                                 id: 51200106,
                                 content: "扣除还给行会的钱，你还能拿10铜币的小费，好好工作，不要辜负会长的好心~",
                                 npc: 700405,
+                                speakerName: "冷漠的工人",
                                 next: 51200107,
                             },
                             {
                                 id: 51200107,
                                 content: "克罗格，可以了，快走吧，会长安排的事情还没做完呢！",
                                 npc: 700406,
+                                speakerName: "和善的工人",
                                 next: 51200108,
                             },
                             {
                                 id: 51200108,
                                 content: "知——道——了——罗连特，那天我们喝酒的时候，都说你是螺丝刀里最啰嗦的家伙……",
                                 npc: 700405,
+                                speakerName: "冷漠的工人",
                                 next: 51200109,
                             },
                             {
@@ -122067,6 +123166,7 @@ export const questData: QuestStory[] = [
                                 id: 51200187,
                                 content: "柯尼真是好运气，能遇到两位这么善良的好心人。",
                                 npc: 700406,
+                                speakerName: "和善的工人",
                                 next: 51200188,
                             },
                             {
@@ -122079,12 +123179,14 @@ export const questData: QuestStory[] = [
                                 id: 51200189,
                                 content: "克罗格，可以了，快走吧，会长安排的事情还没做完呢！",
                                 npc: 700406,
+                                speakerName: "和善的工人",
                                 next: 51200190,
                             },
                             {
                                 id: 51200190,
                                 content: "知——道——了——罗连特，那天我们喝酒的时候，都说你是螺丝刀里最啰嗦的家伙……",
                                 npc: 700405,
+                                speakerName: "冷漠的工人",
                                 next: 51200191,
                             },
                             {
@@ -122743,6 +123845,7 @@ export const questData: QuestStory[] = [
                                 id: 51200486,
                                 content: "住手——使不得啊——",
                                 npc: 700398,
+                                speakerName: "？？？",
                             },
                         ],
                     },
@@ -122778,6 +123881,7 @@ export const questData: QuestStory[] = [
                                 id: 51200488,
                                 content: "抱歉，打扰一下。我无意间听见你们在讨论怎么处理这个烟盒。既然你们不想要了，能不能卖给我？",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200489,
                             },
                             {
@@ -122790,6 +123894,7 @@ export const questData: QuestStory[] = [
                                 id: 51200490,
                                 content: "50银币吧。行吗？",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200491,
                             },
                             {
@@ -122802,6 +123907,7 @@ export const questData: QuestStory[] = [
                                 id: 51200492,
                                 content: "我看这烟盒也不是什么九九新稀罕物，50银币绝对是个公道价了。要不是我急着收，都不会出这么多钱。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200493,
                             },
                             {
@@ -122874,6 +123980,7 @@ export const questData: QuestStory[] = [
                                 id: 51200501,
                                 content: "这……他们这是怎么了？",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200502,
                             },
                             {
@@ -122887,6 +123994,7 @@ export const questData: QuestStory[] = [
                                 id: 51200503,
                                 content: "真是没什么风度，我看你得好好管教你的仆人了……话说回来，你们到底花了多少钱啊？",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200504,
                             },
                             {
@@ -122900,6 +124008,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "这可不是十年前的限量款，这是上周的。十年前的限量款，那可是真正的天价了。整个汽笛沙龙合资才凑了2500银币，收了一个。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200506,
                             },
                             {
@@ -122907,6 +124016,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "那可是我的梦情款啊，要是我也能遇见，压上这条命我肯定也要买的，到时候摆在床头，日夜摸摸，祈求好运。啊，站长，我的神，你会拯救我吗……",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200507,
                             },
                             {
@@ -122926,6 +124036,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "那当然了！今天我们相聚在这里，是为了我们共同的站长，艾森巴恩站长大人的赴任十周年活动……等等，你不是汽笛沙龙的人啊？",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200510,
                             },
                             {
@@ -122938,24 +124049,28 @@ export const questData: QuestStory[] = [
                                 id: 51200511,
                                 content: "外地来的还头这么铁，溢价硬收啊，我还以为是有实力的同好呢。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200512,
                             },
                             {
                                 id: 51200512,
                                 content: "你们这是遇上赚差价的二道贩子了……最近十周年了，这些东西确实比较溢价，但也没到那种程度。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200513,
                             },
                             {
                                 id: 51200513,
                                 content: "这种样子不太出挑、发售量也比较大的款式，一般也就10-30银币左右。我是情况特殊，才想着高价收一个。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200514,
                             },
                             {
                                 id: 51200514,
                                 content: "这种情况上报给治安官也不会有人管的。哎，只能自认倒霉了。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200515,
                             },
                             {
@@ -122969,12 +124084,14 @@ export const questData: QuestStory[] = [
                                 content:
                                     "能懂，能懂，唉，这帮二道贩子对艾森巴恩站长大人的了解，真不比我们少，要不然也没法跟同好卖货。我刚入坑的时候也总是被人骗，幸好后来加入了汽笛沙龙。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200517,
                             },
                             {
                                 id: 51200517,
                                 content: "说到这个，你要不要也加入我们？我们——汽笛沙龙。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 options: [
                                     {
                                         id: 51200518,
@@ -122997,18 +124114,21 @@ export const questData: QuestStory[] = [
                                 id: 51200519,
                                 content: "你问这个名字？顾名思义，这是在百花车站，支持艾森巴恩站长大人的贵族们，休闲小聚、饮茶读书的地方。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200520,
                             },
                             {
                                 id: 51200530,
                                 content: "说到艾森巴恩站长大人，那些事情可两天两夜都讲不完。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200531,
                             },
                             {
                                 id: 51200533,
                                 content: "百花车站是艾森巴恩站长大人的驻地，没有他，就没有百花车站。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200534,
                             },
                             {
@@ -123016,6 +124136,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "汽笛啊，多美妙的声音，这是只属于火车的艺术，只有真正有品位、有身份的绅士，才会有资格成为汽笛沙龙的成员。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200521,
                             },
                             {
@@ -123023,6 +124144,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "你要是感兴趣，可以加入我们汽笛沙龙。艾森巴恩站长大人赴任十周年在即，让我们为了艾森巴恩站长大人的笑容而战吧！",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200535,
                             },
                             {
@@ -123030,6 +124152,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "可以说在站长赴任之前，百花车站只是车站，是他来，他见，他治理，这里才会成为生机盎然的地方——我们灵魂的归处啊！",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200535,
                             },
                             {
@@ -123037,6 +124160,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "绅士们会用自己的方式，来表达对艾森巴恩站长大人的崇拜，比如说……“摆阵”，把印着艾森巴恩站长大人的烟盒或者海报，像太阳的光束一样排开。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200522,
                             },
                             {
@@ -123049,24 +124173,28 @@ export const questData: QuestStory[] = [
                                 id: 51200522,
                                 content: "那时候，在一整个房间内，墙上、地面、天花板，到处都是艾森巴恩站长大人的身影~啊，想想就好幸福。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200523,
                             },
                             {
                                 id: 51200536,
                                 content: "好。这是汽笛沙龙的名片，上面有汽笛沙龙的聚会地址。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200537,
                             },
                             {
                                 id: 51200523,
                                 content: "这时候往往会选用一些特殊的，有意义的数字，来构成烟盒、海报的数量，比如说99、999……",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200524,
                             },
                             {
                                 id: 51200537,
                                 content: "我们汽笛沙龙因为共同愿望而连接在一起，只要你加入了这个大家庭，大家就都是兄弟姐妹……",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200538,
                             },
                             {
@@ -123074,6 +124202,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "我买你的烟盒，也是为了“摆阵”。我已经凑齐了98个同款的烟盒了，只差最后一个，这才想着多出点钱，赶紧收一个，好完成我的心愿。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200525,
                             },
                             {
@@ -123086,6 +124215,7 @@ export const questData: QuestStory[] = [
                                 id: 51200525,
                                 content: "如果没有凑齐，我想我大概死都不会瞑目的。幸好遇见你了！艾森巴恩站长大人见证了我们的相遇。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200526,
                             },
                             {
@@ -123112,6 +124242,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "什么叫没有正经用处！表达对艾森巴恩站长大人的尊敬和崇拜，就是人生头等大事好吧，你那是什么表情？这一点都不丢人！",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200528,
                             },
                             {
@@ -123124,6 +124255,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "你既然高价购买了艾森巴恩站长大人的烟盒，已经说明你是慧眼识珠、品味卓越的人，汽笛沙龙欢迎你的加入。",
                                 npc: 700398,
+                                speakerName: "风尘仆仆的男人",
                                 next: 51200535,
                             },
                         ],
@@ -124497,6 +125629,7 @@ export const questData: QuestStory[] = [
                                 id: 51200807,
                                 content: "没吵——\n谁会和他吵架——",
                                 npc: 700409,
+                                speakerName: "奥特赛德&白",
                                 next: 51200808,
                             },
                             {
@@ -124674,6 +125807,7 @@ export const questData: QuestStory[] = [
                                 id: 51200836,
                                 content: "你们在干什么？",
                                 npc: 700410,
+                                speakerName: "似曾相识的声音",
                                 next: 51200837,
                             },
                             {
@@ -125804,6 +126938,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "在将你们引荐给会长之前，我先正式自我介绍一下，我叫罗连特——你们已经知道了，身份是螺丝刀行会的……算是二把手吧？",
                                 npc: 700486,
+                                speakerName: "罗连特",
                                 next: 51206803,
                             },
                             {
@@ -125823,6 +126958,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "好吧，看来你喜欢更直接一些的方式，那就只能长话短说，我们行会遇到了一些麻烦事，正需要你这样有能力又有善心的人出手帮忙。",
                                 npc: 700486,
+                                speakerName: "罗连特",
                                 options: [
                                     {
                                         id: 51206806,
@@ -125848,6 +126984,7 @@ export const questData: QuestStory[] = [
                                 id: 51206809,
                                 content: "呵呵~我喜欢和你这种直接的人对话，脑子转的很快，所以我才说我们应该从最开始的正式自我介绍开始。",
                                 npc: 700486,
+                                speakerName: "罗连特",
                                 next: 51206810,
                             },
                             {
@@ -125855,6 +126992,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "你不了解我们，不是吗？你所听说的有关螺丝刀行会的内容，只由柯尼那个孩子所述，不够全面，所以你不清楚我们是怎么样的一个组织。",
                                 npc: 700486,
+                                speakerName: "罗连特",
                                 next: 51206811,
                             },
                             {
@@ -125867,6 +127005,7 @@ export const questData: QuestStory[] = [
                                 id: 51206812,
                                 content: "恰恰相反，我们是由无数个柯尼组成的联盟，里面全是在这个车站光鲜亮丽的皮囊下蠕动的可怜虫。",
                                 npc: 700486,
+                                speakerName: "罗连特",
                                 next: 51206813,
                             },
                             {
@@ -125874,6 +127013,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "我们聚在一起，抱团取暖，谁在工作上出了岔子，我们就施以援手，就像对柯尼那孩子一样，我们每天都在帮助这些辛勤劳作的工人们。",
                                 npc: 700486,
+                                speakerName: "罗连特",
                                 next: 51206814,
                             },
                             {
@@ -125887,6 +127027,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "没错，总之就是，百花车站的工人们的互助组织。手持螺丝刀的，都是我们的兄弟姐妹。当然了，这也只是理想情况。",
                                 npc: 700486,
+                                speakerName: "罗连特",
                                 next: 51206816,
                             },
                             {
@@ -125894,6 +127035,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "柯尼欠我们的钱，是同样生活在水深火热里的其他工人缴纳的一笔笔费用攒出来的，你救了柯尼，可他们怎么办呢？",
                                 npc: 700486,
+                                speakerName: "罗连特",
                                 next: 51206817,
                             },
                             {
@@ -125906,6 +127048,7 @@ export const questData: QuestStory[] = [
                                 id: 51206818,
                                 content: "先去目前的行会总部吧，具体的事情过去再说。",
                                 npc: 700486,
+                                speakerName: "罗连特",
                             },
                         ],
                     },
@@ -125952,12 +127095,14 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51207002,
                                 content: "去***，狗都不借！上次就是，钱借给你了之后输了个精光！然后又来借，又**输了，现在还有脸来？",
+                                speakerName: "暴躁的声音",
                                 next: 51207003,
                             },
                             {
                                 id: 51207003,
                                 content:
                                     "求你了克罗格，你得相信我，我之前是在试错！我已经找到了必胜的方法了！你把钱借给我，我一定会还回来的！",
+                                speakerName: "卑微的声音",
                                 next: 51207004,
                             },
                             {
@@ -125970,6 +127115,7 @@ export const questData: QuestStory[] = [
                                 id: 51207005,
                                 content:
                                     "不！这次不一样，这次真的不一样，这次真的能赢！克罗格，我可是行会里唯一的会计啊！我已经完全摸清了那个“游戏”的规律，这次，一定能赢！",
+                                speakerName: "卑微的声音",
                                 next: 51207006,
                             },
                             {
@@ -127007,6 +128153,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51207725,
                                 content: "等一下！{nickname}？你不是我舅舅的远方表姐的侄子的邻居吗？怎么突然到这里来了？",
+                                speakerName: "不合时宜的声音",
                                 next: 51207726,
                             },
                             {
@@ -129946,6 +131093,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210401,
                                 content: "什么情况？发酒疯了？",
+                                speakerName: "工头",
                                 next: 51210402,
                             },
                             {
@@ -129983,6 +131131,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210504,
                                 content: "诶呦……我的头……我的屁股……你们，你们发什么疯？",
+                                speakerName: "工头",
                                 next: 51210505,
                             },
                             {
@@ -129994,6 +131143,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210506,
                                 content: "克罗格，工作时间喝酒，你是真的想被扣钱了，我告诉你，这次罗连特来求情也保不住你，你等着吧！",
+                                speakerName: "工头",
                                 next: 51210507,
                             },
                             {
@@ -130010,6 +131160,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210509,
                                 content: "别打了！别打了！怎么每次喝完酒就要揍人！",
+                                speakerName: "工头",
                                 next: 51210510,
                             },
                             {
@@ -130027,6 +131178,7 @@ export const questData: QuestStory[] = [
                                 id: 51210512,
                                 content:
                                     "臭虫！酒蒙子！无药可救的混蛋！你，你又是谁？你刚刚也打我了，别以为我不知道，你是这里的工人？我记住你了！",
+                                speakerName: "工头",
                                 next: 51210513,
                             },
                             {
@@ -130038,6 +131190,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210514,
                                 content: "你这是什么态度？我一定会找你们麻烦的！",
+                                speakerName: "工头",
                                 next: 51210515,
                             },
                             {
@@ -130049,6 +131202,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210516,
                                 content: "一夜禅师？你在说什么？什么一夜禅师？",
+                                speakerName: "工头",
                                 next: 51210517,
                             },
                             {
@@ -130072,6 +131226,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210520,
                                 content: "你们是……是一伙的？你和那个休——那个偷东西的贼是一伙的？",
+                                speakerName: "工头",
                                 next: 51210521,
                             },
                             {
@@ -130083,6 +131238,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210522,
                                 content: "不是……你们怎么莫名其妙揍我一顿，然后现在摆出一副什么都不知道的样子？我白挨打了吗？",
+                                speakerName: "工头",
                                 next: 51210523,
                             },
                             {
@@ -130094,12 +131250,14 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210524,
                                 content: "我说我说！别打我！那个叫休的工人，前段时间不知道为什么大半夜跑到医务室偷东西，被我们抓了个现行。",
+                                speakerName: "工头",
                                 next: 51210525,
                             },
                             {
                                 id: 51210525,
                                 content:
                                     "虽然我们检查后什么也没丢，但是站长说没人来找他的话就别把他放走，所以一直栓在医务室里关着，你们要去找他就去吧。",
+                                speakerName: "工头",
                                 next: 51210526,
                             },
                             {
@@ -130111,6 +131269,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210527,
                                 content: "那是站长大人的想法，我怎么知道呢？我已经说了，可以放过我了吧。",
+                                speakerName: "工头",
                                 next: 51210528,
                             },
                             {
@@ -131189,6 +132348,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51211943,
                                 content: "我们……",
+                                speakerName: "{nickname}&白",
                                 next: 51211944,
                             },
                             {
@@ -131216,16 +132376,19 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51212001,
                                 content: "罗连特，实话说吧！你就是个怂货！",
+                                speakerName: "玛吉的声音",
                                 next: 51212002,
                             },
                             {
                                 id: 51212002,
                                 content: "玛吉，凡事不是只靠拳头就能解决的，再说了，我们能碰的过他吗？",
+                                speakerName: "罗连特的声音",
                                 next: 51212003,
                             },
                             {
                                 id: 51212003,
                                 content: "废物才会这么说！",
+                                speakerName: "玛吉的声音",
                                 next: 51212004,
                             },
                             {
@@ -131575,6 +132738,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51210915,
                                 content: "什么？！",
+                                speakerName: "克罗格&{nickname}&白",
                                 next: 51210916,
                             },
                             {
@@ -132768,12 +133932,14 @@ export const questData: QuestStory[] = [
                                 id: 51213142,
                                 content: "看那，一位敌人，闯入了狂热的风暴之中。凯歌，从那更遥远的地方吹响了，嘹亮的汽笛声，正在呼唤着——",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213143,
                             },
                             {
                                 id: 51213143,
                                 content: "雷鸣般的演奏！",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                             },
                         ],
                     },
@@ -132788,6 +133954,7 @@ export const questData: QuestStory[] = [
                                 id: 51213145,
                                 content: "咦，你的身手不错嘛，但就算是这样，我也不能让你过去哦。",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213146,
                             },
                             {
@@ -132795,6 +133962,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "真不知道你们这些粉丝是哪来的消息……喏，给你的特别签名，拿了快走吧，剧团今天真的不能开放参观，有很重要的事情。",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213147,
                             },
                             {
@@ -132826,12 +133994,14 @@ export const questData: QuestStory[] = [
                                 id: 51213149,
                                 content: "……给我这个干嘛？你又不是什么名人……等等，{nickname}，你、你不是那个很有名的狩月人吗？",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213150,
                             },
                             {
                                 id: 51213154,
                                 content: "写好了，给你。别再找过来了！",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213155,
                             },
                             {
@@ -132839,6 +134009,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "哈……原来不是我的追随者啊。抱歉，最近总有人来这里找我，都打扰到大家排练了，我还以为您也是为此而来的呢。",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213161,
                             },
                             {
@@ -132846,6 +134017,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "“不想有一日，那在我心上的明星竟坠落在我的窗边！”——天哪，天哪，我还没有准备好，我的衣裙是不是已经凌乱了？真是叫您见笑。",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213151,
                             },
                             {
@@ -132858,18 +134030,21 @@ export const questData: QuestStory[] = [
                                 id: 51213161,
                                 content: "您好，我是阿尔西娅·霍尔，“魔笛”剧团的演员，目前被汽笛沙龙的人请来做戏剧顾问。",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213162,
                             },
                             {
                                 id: 51213151,
                                 content: "我一直也很想成为狩月人！只是可惜我没有战斗天赋，连只罗特鸟都打不过……您的签名我一定会好好收藏的。",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213152,
                             },
                             {
                                 id: 51213156,
                                 content: "阿尔西娅！阿尔西娅·霍尔，你都不认识我，为什么还要来这里围堵我？……等等，难道你不是来找我的？",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213157,
                             },
                             {
@@ -132882,6 +134057,7 @@ export const questData: QuestStory[] = [
                                 id: 51213152,
                                 content: "真是巧！没想到您也会来参观彩排。",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213161,
                             },
                             {
@@ -132901,6 +134077,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "天哪……真抱歉，方才对您出言不逊了。最近总有人来这里找我，都打扰到大家排练了，我还以为您也是为此而来的呢。",
                                 npc: 700458,
+                                speakerName: "华丽的少女",
                                 next: 51213161,
                             },
                             {
@@ -132954,18 +134131,21 @@ export const questData: QuestStory[] = [
                                 content:
                                     "阿尔西娅小姐自己都说没问题，我真不懂你在阻拦什么，你能不能别在这时候犯浑？平常怎么不见你做护花使者！",
                                 npc: 700462,
+                                speakerName: "愤怒的青年",
                                 next: 51213171,
                             },
                             {
                                 id: 51213171,
                                 content: "我的确担心阿尔西娅小姐，但我更担心的是安全问题，剧里的道具，就一定要用真枪吗？",
                                 npc: 700461,
+                                speakerName: "无奈的青年",
                                 next: 51213172,
                             },
                             {
                                 id: 51213172,
                                 content: "我给木匠多加点钱，让他们涂装得精致点……你别纠结道具的问题了，行吗？",
                                 npc: 700461,
+                                speakerName: "无奈的青年",
                                 next: 51213173,
                             },
                             {
@@ -132973,6 +134153,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "会长大人不是说了吗，越真实越好！枪械不是问题，只要钱到位了，肯定能搞来。你这时候发什么昏，去担心一个戏剧指导的问题！",
                                 npc: 700462,
+                                speakerName: "愤怒的青年",
                                 next: 51213174,
                             },
                             {
@@ -132980,6 +134161,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "到时候台下的可不是空椅子，是真正的艾森巴恩站长！该不会你真的要听会长的命令去……要不还是算了吧，说不定我们都得交代在那儿！",
                                 npc: 700461,
+                                speakerName: "无奈的青年",
                                 next: 51213175,
                             },
                             {
@@ -132987,6 +134169,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "都到了这份上了，想退出？你以为能逃掉？别天真了，西顿会长虽然手段不如艾森巴恩，但是他肯定也盯着咱们呢。",
                                 npc: 700462,
+                                speakerName: "愤怒的青年",
                                 next: 51213176,
                             },
                             {
@@ -133000,6 +134183,7 @@ export const questData: QuestStory[] = [
                                 id: 51213177,
                                 content: "没有吵， 没有吵。我们只是在酝酿情绪，随时接受检查！",
                                 npc: 700462,
+                                speakerName: "愤怒的青年",
                                 next: 51213178,
                             },
                             {
@@ -133007,6 +134191,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "啊——艾森巴恩，那是我们的英雄！他与慷慨并肩而行，他与正义交相辉映！我知道你从未认可我的理念，可是——我早已读懂你了。",
                                 npc: 700462,
+                                speakerName: "愤怒的青年",
                                 next: 51213179,
                             },
                             {
@@ -133014,6 +134199,7 @@ export const questData: QuestStory[] = [
                                 content:
                                     "风暴终究会过去，长夜也终将结束。列车也必定如同太阳放射出的金色丝线一般，连接起冰湖城与迪斯玛尼亚。",
                                 npc: 700462,
+                                speakerName: "愤怒的青年",
                                 next: 51213180,
                             },
                             {
@@ -133021,12 +134207,14 @@ export const questData: QuestStory[] = [
                                 content:
                                     "所以，我诅咒它，诅咒这迟滞一切的风暴，我将以我的全部恨意灌注至这三颗弹丸内，向着这怒吼的无形畜类开火。",
                                 npc: 700462,
+                                speakerName: "愤怒的青年",
                                 next: 51213181,
                             },
                             {
                                 id: 51213181,
                                 content: "并最终，成为驱散它的太阳——",
                                 npc: 700462,
+                                speakerName: "愤怒的青年",
                                 next: 51213182,
                             },
                             {
@@ -133054,6 +134242,7 @@ export const questData: QuestStory[] = [
                                 id: 51213184,
                                 content: "哼，身手不错。我感觉你要比凯兰更适合当我的搭档，一起演这场戏。",
                                 npc: 700462,
+                                speakerName: "愤怒的青年",
                                 next: 51213185,
                             },
                             {
@@ -133061,12 +134250,14 @@ export const questData: QuestStory[] = [
                                 content:
                                     "你又……不好意思，我们这些剧迷就是这样，上头了就随时随地和别人搭戏。他这次扮演的角色是百花车站的前站长，这是把你当成站长来演了。",
                                 npc: 700461,
+                                speakerName: "无奈的青年",
                                 next: 51213186,
                             },
                             {
                                 id: 51213186,
                                 content: "阿尔西娅，介绍一下？你刚刚说这位是西顿会长派来检查我们进度的客人？",
                                 npc: 700461,
+                                speakerName: "无奈的青年",
                                 next: 51213187,
                             },
                             {
@@ -137224,6 +138415,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51105310,
                                 content: "锻造！\n经商！\n冒险！",
+                                speakerName: "铁匠皎皎&侍者皎皎&探险家皎皎",
                                 next: 51105311,
                             },
                             {
@@ -137620,6 +138812,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51105503,
                                 content: "救命啊，救命——",
+                                speakerName: "附近传来的声音",
                                 next: 51105504,
                             },
                             {
@@ -137766,6 +138959,7 @@ export const questData: QuestStory[] = [
                                 id: 51105606,
                                 content: "我们去了城外，遇到了秽兽，多亏了他们，救了我们。",
                                 npc: 700356,
+                                speakerName: "男孩",
                                 next: 51105607,
                             },
                             {
@@ -137988,6 +139182,7 @@ export const questData: QuestStory[] = [
                             {
                                 id: 51105725,
                                 content: "好！",
+                                speakerName: "众人",
                                 next: 51105726,
                             },
                             {

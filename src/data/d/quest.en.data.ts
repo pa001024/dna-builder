@@ -1447,6 +1447,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Stop right there.",
                                 voice: "story/1002/101006/194929DA",
                                 npc: 200071,
+                                speakerName: "Sentry",
                                 next: 10100602,
                             },
                             {
@@ -1462,6 +1463,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Not you, Luno. I was talking to—",
                                 voice: "story/1002/101006/19492A2E",
                                 npc: 200071,
+                                speakerName: "Sentry",
                                 next: 10100604,
                             },
                             {
@@ -1469,6 +1471,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Oi, one-eye! In such a hurry to visit the Security Bureau for tea, eh?",
                                 voice: "story/1002/101006/19492A58",
                                 npc: 200071,
+                                speakerName: "Sentry",
                                 next: 10100605,
                             },
                             {
@@ -1483,6 +1486,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You're not from here, are you? Where are you from? Got your travel permit?",
                                 voice: "story/1002/101006/19492AAC",
                                 npc: 200071,
+                                speakerName: "Sentry",
                                 options: [
                                     {
                                         id: 101006061,
@@ -1509,6 +1513,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Which island? Be specific, there are like a million islands in the South.",
                                 voice: "story/1002/101006/19492AD6",
                                 npc: 200071,
+                                speakerName: "Sentry",
                                 next: 10100608,
                             },
                             {
@@ -1523,6 +1528,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Never mind, show me your travel permit.",
                                 voice: "story/1002/101006/19492B00",
                                 npc: 200071,
+                                speakerName: "Sentry",
                                 next: 101006110,
                             },
                             {
@@ -1566,6 +1572,7 @@ export const questData_en: QuestStory[] = [
                                     "{性别:Stop it... Whoa... aren't you a bit old to be a crybaby, mate?|Whoa... why are you crying? Darn it, Chief never told us how to deal with tearful young ladies!}",
                                 voice: "story/1002/101006/19492BD2",
                                 npc: 200071,
+                                speakerName: "Sentry",
                                 next: 10100614,
                             },
                             {
@@ -1574,6 +1581,7 @@ export const questData_en: QuestStory[] = [
                                     'This would\'ve been a simple matter in the past, Ms Camilla, but... you know, recently that "Fork Shakens" or something is wanted nationwide, so the Chief specifically asked for strict security checks across towns.',
                                 voice: "story/1002/101006/19492BFC",
                                 npc: 200071,
+                                speakerName: "Sentry",
                                 next: 10100615,
                             },
                             {
@@ -1590,6 +1598,7 @@ export const questData_en: QuestStory[] = [
                                     "Alright, I trust you, Ms Camilla. But remember, keep a close eye on this kid and don't let {性别:him|her} stir up any trouble in town. If the Chief finds out about this, we'll both be in for it.",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200071,
+                                speakerName: "Sentry",
                                 next: 10100617,
                             },
                             {
@@ -1619,6 +1628,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Don't cause any trouble in town, you hear me?",
                                 voice: "story/1002/101007/19493A42",
                                 npc: 200004,
+                                speakerName: "Sentry",
                             },
                         ],
                     },
@@ -1821,6 +1831,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Someone will pluck you from the briny waters and lead you to a frozen wilderness, where destiny will pose the ultimate test.",
                                 voice: "story/1002/100127/1910D56B",
+                                speakerName: "???",
                                 next: 10100815,
                             },
                             {
@@ -2018,6 +2029,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1002/101012/19498C74",
                                 npc: 200005,
+                                speakerName: "Sullen Man",
                                 next: 10101203,
                             },
                             {
@@ -2025,6 +2037,7 @@ export const questData_en: QuestStory[] = [
                                 content: "No travel permit?",
                                 voice: "story/1002/101012/19498C9E",
                                 npc: 200005,
+                                speakerName: "Sullen Man",
                                 next: 10101204,
                             },
                             {
@@ -2037,6 +2050,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...That woman's misplaced compassion knows no bounds.",
                                 voice: "story/1002/101012/19498CF2",
                                 npc: 200005,
+                                speakerName: "Sullen Man",
                                 next: 10101206,
                             },
                             {
@@ -2044,6 +2058,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Alright then, let's see it.",
                                 voice: "story/1002/101012/19498D1C",
                                 npc: 200005,
+                                speakerName: "Sullen Man",
                                 next: 10101207,
                             },
                             {
@@ -2058,6 +2073,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The price you're willing to pay.",
                                 voice: "story/1002/101012/19498D70",
                                 npc: 200005,
+                                speakerName: "Sullen Man",
                                 next: 10101209,
                             },
                             {
@@ -2072,6 +2088,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Haven't got any money?",
                                 voice: "story/1002/101012/19498DC4",
                                 npc: 200005,
+                                speakerName: "Sullen Man",
                                 next: 10101211,
                             },
                             {
@@ -2086,6 +2103,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Then get lost.",
                                 voice: "story/1002/101012/19498E18",
                                 npc: 200005,
+                                speakerName: "Sullen Man",
                                 next: 10101213,
                             },
                             {
@@ -2124,6 +2142,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Are you... a new lodger?",
                                 voice: "story/1002/101014/1949AD1A",
                                 npc: 200006,
+                                speakerName: "Cheerful Girl",
                                 next: 10101402,
                             },
                             {
@@ -2138,6 +2157,7 @@ export const questData_en: QuestStory[] = [
                                 content: "An outsider? But... if you kick {性别:him|her} out, won't {性别:he|she} be homeless?",
                                 voice: "story/1002/101014/1949AD6E",
                                 npc: 200006,
+                                speakerName: "Cheerful Girl",
                                 next: 10101404,
                             },
                             {
@@ -2153,6 +2173,7 @@ export const questData_en: QuestStory[] = [
                                     "But... the house is still unsold anyway, lending it to {性别:him|her} for one night wouldn't hurt, right? {性别:He|She} can pay you back when {性别:he|she} can, that way we get a little extra cash for basically nothing.",
                                 voice: "story/1002/101014/1949ADC2",
                                 npc: 200006,
+                                speakerName: "Cheerful Girl",
                                 next: 10101406,
                             },
                             {
@@ -2160,6 +2181,7 @@ export const questData_en: QuestStory[] = [
                                 content: "If you keep being so cold to everyone, you'll never find a buyer for that place.",
                                 voice: "story/1002/101014/1949ADEC",
                                 npc: 200006,
+                                speakerName: "Cheerful Girl",
                                 next: 10101407,
                             },
                             {
@@ -2214,6 +2236,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Here we are.",
                                 voice: "story/1002/101015/1949BDAC",
                                 npc: 200006,
+                                speakerName: "Cheerful Girl",
                             },
                         ],
                     },
@@ -2227,6 +2250,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The house is to the south, follow me!",
                                 voice: "story/1002/101015/1949BD82",
                                 npc: 200006,
+                                speakerName: "Cheerful Girl",
                             },
                         ],
                     },
@@ -2240,6 +2264,7 @@ export const questData_en: QuestStory[] = [
                                 content: "This room has just been cleaned up. You can stay here tonight.",
                                 voice: "story/1002/101016/1949CDEA",
                                 npc: 200006,
+                                speakerName: "Cheerful Girl",
                                 next: 10101602,
                             },
                             {
@@ -2255,6 +2280,7 @@ export const questData_en: QuestStory[] = [
                                     "Don't be upset, Mr Henrik isn't really that greedy. It's just we've been quite strapped for cash lately, otherwise he wouldn't consider selling his old house to make ends meet.",
                                 voice: "story/1002/101016/1949CE3E",
                                 npc: 200006,
+                                speakerName: "Cheerful Girl",
                                 next: 10101604,
                             },
                             {
@@ -2263,6 +2289,7 @@ export const questData_en: QuestStory[] = [
                                     "It's been neglected for years, but after a good clean, it's not half bad, right? At least it keeps out the chill!",
                                 voice: "story/1002/101016/1949CE68",
                                 npc: 200006,
+                                speakerName: "Cheerful Girl",
                                 next: 10101605,
                             },
                             {
@@ -2271,6 +2298,7 @@ export const questData_en: QuestStory[] = [
                                     "Oh, I haven't introduced myself. I'm Psyche, a lodger at the Hypnos' House. And sometimes I help Mr Henrik out.",
                                 voice: "story/1002/101016/1949CE92",
                                 npc: 200006,
+                                speakerName: "Cheerful Girl",
                                 options: [
                                     {
                                         id: 101016051,
@@ -2415,6 +2443,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I'm back.",
                                 voice: "story/1002/101018/1949EEBA",
                                 npc: 200006,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -2429,6 +2458,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You must be starving. Here's some freshly baked bread.",
                                 voice: "story/1002/101018/1949EEE4",
                                 npc: 200006,
+                                speakerName: "???",
                                 next: 10101803,
                             },
                             {
@@ -2443,6 +2473,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...?",
                                 voice: "story/1002/101018/1949EF38",
                                 npc: 200006,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -2995,6 +3026,7 @@ export const questData_en: QuestStory[] = [
                                     "...And then, out of nowhere, he ambushed me and pinched the cash I'd just gotten. That rotter, doesn't even spare us scavengers! That money was for several families' upkeep in the slums!",
                                 voice: "story/1002/101025/194A6192",
                                 npc: 200011,
+                                speakerName: "Anxious Scavenger",
                                 next: 10102502,
                             },
                             {
@@ -3003,6 +3035,7 @@ export const questData_en: QuestStory[] = [
                                     "Without that bag of coins, all the young and old will have to tighten their belts even more next month. Ugh... I have no idea where the thief has run off to, I need someone to help me nab him.",
                                 voice: "story/1002/101025/194A61BC",
                                 npc: 200011,
+                                speakerName: "Anxious Scavenger",
                                 next: 10102503,
                             },
                             {
@@ -3018,6 +3051,7 @@ export const questData_en: QuestStory[] = [
                                     "Well, by the time the Security Bureau bothers with us Charons, the ice in Lamenting Lake would've melted away!",
                                 voice: "story/1002/101025/194A6210",
                                 npc: 200011,
+                                speakerName: "Anxious Scavenger",
                                 next: 10102505,
                             },
                             {
@@ -3026,6 +3060,7 @@ export const questData_en: QuestStory[] = [
                                     "Please, Ms Camilla, the kindest and most beautiful lady in Icelake, could you maybe ask some of the Phoxhunters here to lend a hand... Just one tiny favour! Pretty please!",
                                 voice: "story/1002/101025/194A623A",
                                 npc: 200011,
+                                speakerName: "Anxious Scavenger",
                                 next: 10102506,
                             },
                             {
@@ -3041,6 +3076,7 @@ export const questData_en: QuestStory[] = [
                                     "Well then, can you maybe... give me a discount... or I could offer you something else! How does it go again—",
                                 voice: "story/1002/101025/194A628E",
                                 npc: 200011,
+                                speakerName: "Anxious Scavenger",
                                 next: 10102508,
                             },
                             {
@@ -3049,6 +3085,7 @@ export const questData_en: QuestStory[] = [
                                     '"Information is as good as gold", right? I deal with all the rubbish bins in Icelake, so how about this — if I stumble upon any useful info, you\'ll be the first to know.',
                                 voice: "story/1002/101025/194A62B8",
                                 npc: 200011,
+                                speakerName: "Anxious Scavenger",
                             },
                         ],
                     },
@@ -3090,6 +3127,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Then you came to the right place! There's a commission for Phoxhunters right now—",
                                 voice: "story/1002/101026/194A72A2",
                                 npc: 200011,
+                                speakerName: "Anxious Scavenger",
                                 next: 10102606,
                             },
                             {
@@ -3602,6 +3640,7 @@ export const questData_en: QuestStory[] = [
                                     "Wha... Did you really have to chase me all the way up here? You said you were going to share the money with the poor anyway, so why can't I get a piece of it?",
                                 voice: "story/1002/101182/19547184",
                                 npc: 200053,
+                                speakerName: "Suspicious Young Man",
                                 next: 10118203,
                             },
                             {
@@ -5095,6 +5134,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10131004,
                                 content: "*Roar—*",
                                 voice: "story/1002/101310/195BD051",
+                                speakerName: "Filthoids",
                                 next: 10131005,
                             },
                             {
@@ -5147,6 +5187,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10131201,
                                 content: "*Roar—*",
                                 voice: "story/1002/101312/195BD055",
+                                speakerName: "Filthoids",
                                 next: 10131202,
                             },
                             {
@@ -6032,6 +6073,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Outsider! You're home so late today. Where have you been adventuring?",
                                 voice: "story/1002/101060/194CA048",
                                 npc: 200020,
+                                speakerName: "Frail Girl",
                                 next: 10106005,
                             },
                             {
@@ -6039,6 +6081,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Was it in the dense woods where snow wolves prowl, or the swamp witch's tower?",
                                 voice: "story/1002/101060/194CA072",
                                 npc: 200020,
+                                speakerName: "Frail Girl",
                                 next: 10106006,
                             },
                             {
@@ -8181,6 +8224,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10108311,
                                 content: "@#￥%……",
                                 voice: "story/1002/101135/19516E42",
+                                speakerName: "Strange Sounds",
                                 next: 10108312,
                             },
                             {
@@ -8339,6 +8383,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10108311,
                                 content: "@#￥%……",
                                 voice: "story/1002/101135/19516E42",
+                                speakerName: "Strange Sounds",
                                 next: 10108312,
                             },
                             {
@@ -8748,12 +8793,14 @@ export const questData_en: QuestStory[] = [
                                 id: 10108914,
                                 content: "Mr Henrik, you're back. Here's a cup of hot water for you to warm up a bit...",
                                 voice: "story/1002/101089/194E7CE2",
+                                speakerName: "Psyche's Voice",
                                 next: 10108915,
                             },
                             {
                                 id: 10108915,
                                 content: "Mmm.",
                                 voice: "story/1002/101089/194E7D0C",
+                                speakerName: "Henrik's Voice",
                                 next: 10108916,
                             },
                             {
@@ -9906,6 +9953,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Alright, alright, I surrender! But it wasn't me, I swear!",
                                 voice: "story/1002/101102/194F50DA",
                                 npc: 200004,
+                                speakerName: "Suspicious Young Man",
                                 next: 10110202,
                             },
                             {
@@ -9921,6 +9969,7 @@ export const questData_en: QuestStory[] = [
                                     "Alright, I trust you, Ms Camilla. But remember, keep a close eye on this kid and don't let {性别:him|her} stir up any trouble in town. If the Chief finds out about this, we'll both be in for it.",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200004,
+                                speakerName: "Sentry",
                                 next: 10110204,
                             },
                             {
@@ -9929,6 +9978,7 @@ export const questData_en: QuestStory[] = [
                                     "D**n ! Didn't expect to run into you... Do me a favour, {性别:mate|miss}, keep this between us, will you?",
                                 voice: "story/1002/101102/194F5158",
                                 npc: 200004,
+                                speakerName: "Suspicious Young Man",
                                 next: 10110205,
                             },
                             {
@@ -9944,6 +9994,7 @@ export const questData_en: QuestStory[] = [
                                     "Alright, alright, here's your money bag! I haven't had a decent meal in days, so I got desperate... I'm sorry!",
                                 voice: "story/1002/101032/194AD496",
                                 npc: 200004,
+                                speakerName: "Suspicious Young Man",
                                 next: 10110207,
                             },
                             {
@@ -9958,6 +10009,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Keep it down! I told you it wasn't me. I was just trying to sneak the body out.",
                                 voice: "story/1002/101102/194F5200",
                                 npc: 200004,
+                                speakerName: "Suspicious Young Man",
                                 next: 10110209,
                             },
                             {
@@ -9966,6 +10018,7 @@ export const questData_en: QuestStory[] = [
                                     "My name's Kevin. We've met before — I'm in the outskirts escort... And this poor soul here is Hal, my old neighbour. We've known each other since we were kids.",
                                 voice: "story/1002/101102/194F522A",
                                 npc: 200004,
+                                speakerName: "Suspicious Young Man",
                                 next: 10110210,
                             },
                             {
@@ -10434,6 +10487,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Alright, alright, I surrender! But it wasn't me, I swear!",
                                 voice: "story/1002/101102/194F50DA",
                                 npc: 200004,
+                                speakerName: "Suspicious Young Man",
                                 next: 10110202,
                             },
                             {
@@ -10449,6 +10503,7 @@ export const questData_en: QuestStory[] = [
                                     "Alright, I trust you, Ms Camilla. But remember, keep a close eye on this kid and don't let {性别:him|her} stir up any trouble in town. If the Chief finds out about this, we'll both be in for it.",
                                 voice: "story/1002/101006/19492C50",
                                 npc: 200004,
+                                speakerName: "Sentry",
                                 next: 10110204,
                             },
                             {
@@ -10457,6 +10512,7 @@ export const questData_en: QuestStory[] = [
                                     "D**n ! Didn't expect to run into you... Do me a favour, {性别:mate|miss}, keep this between us, will you?",
                                 voice: "story/1002/101102/194F5158",
                                 npc: 200004,
+                                speakerName: "Suspicious Young Man",
                                 next: 10110205,
                             },
                             {
@@ -10472,6 +10528,7 @@ export const questData_en: QuestStory[] = [
                                     "Alright, alright, here's your money bag! I haven't had a decent meal in days, so I got desperate... I'm sorry!",
                                 voice: "story/1002/101032/194AD496",
                                 npc: 200004,
+                                speakerName: "Suspicious Young Man",
                                 next: 10110207,
                             },
                             {
@@ -10486,6 +10543,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Keep it down! I told you it wasn't me. I was just trying to sneak the body out.",
                                 voice: "story/1002/101102/194F5200",
                                 npc: 200004,
+                                speakerName: "Suspicious Young Man",
                                 next: 10110209,
                             },
                             {
@@ -10494,6 +10552,7 @@ export const questData_en: QuestStory[] = [
                                     "My name's Kevin. We've met before — I'm in the outskirts escort... And this poor soul here is Hal, my old neighbour. We've known each other since we were kids.",
                                 voice: "story/1002/101102/194F522A",
                                 npc: 200004,
+                                speakerName: "Suspicious Young Man",
                                 next: 10110210,
                             },
                             {
@@ -11103,12 +11162,14 @@ export const questData_en: QuestStory[] = [
                                 id: 10124003,
                                 content: "Ah... no, it's just some Dewiolet pollen in my eyes. Thank you for asking.",
                                 voice: "story/1002/101240/1958293E",
+                                speakerName: "Florist Owner",
                                 next: 10124004,
                             },
                             {
                                 id: 10124004,
                                 content: "If you mean the gentleman in white... I believe he's by the pond, northeast of here.",
                                 voice: "story/1002/101240/19582968",
+                                speakerName: "Florist Owner",
                                 next: 10124005,
                             },
                             {
@@ -11122,6 +11183,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10124006,
                                 content: "Wait, you...",
                                 voice: "story/1002/101240/195829BC",
+                                speakerName: "Florist Owner",
                                 next: 10124007,
                             },
                             {
@@ -11135,6 +11197,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10124008,
                                 content: "...No, I might have mistaken you for someone else. Sorry... Here, please take this.",
                                 voice: "story/1002/101240/19582A10",
+                                speakerName: "Florist Owner",
                                 next: 10124101,
                             },
                             {
@@ -11149,6 +11212,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "That's right. Your eyes sparkle like rubies, perfectly matching this flower... I hope you have a lovely day.",
                                 voice: "story/1002/101241/1958397C",
+                                speakerName: "Florist Owner",
                                 next: 10124103,
                             },
                             {
@@ -11348,6 +11412,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10110519,
                                 content: "Aaaargh!",
                                 voice: "story/1002/101105/194F8489",
+                                speakerName: "Distant Voice",
                                 next: 10110520,
                             },
                             {
@@ -11438,6 +11503,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Please help us...",
                                 voice: "story/1002/101107/194FA30C",
                                 npc: 200019,
+                                speakerName: "Gloomy Boy",
                                 next: 10110702,
                             },
                             {
@@ -11445,6 +11511,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Mr Henrik is... in really bad shape...!",
                                 voice: "story/1002/101107/194FA336",
                                 npc: 200019,
+                                speakerName: "Gloomy Boy",
                                 next: 10110703,
                             },
                             {
@@ -11472,6 +11539,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Please help us...! Follow me!",
                                 voice: "story/1002/101146/195222BA",
                                 npc: 200019,
+                                speakerName: "Gloomy Boy",
                             },
                         ],
                     },
@@ -11485,6 +11553,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Over here! Mr Henrik's in his office!",
                                 voice: "story/1002/101147/19523322",
                                 npc: 200019,
+                                speakerName: "Gloomy Boy",
                             },
                         ],
                     },
@@ -11998,54 +12067,63 @@ export const questData_en: QuestStory[] = [
                                 id: 20002601,
                                 content: "That young lady just swooshed by. How did she do that?",
                                 voice: "story/2001/200026/32130CBA",
+                                speakerName: "Confused Child",
                                 next: 20002602,
                             },
                             {
                                 id: 20002602,
                                 content: "Ssh, drop it and get back into the city! That is a Deteriorator!",
                                 voice: "story/2001/200026/32130CE4",
+                                speakerName: "Panicked Civilian",
                                 next: 20002603,
                             },
                             {
                                 id: 20002603,
                                 content: "Don...Don't panic... The Escort will be here soon!",
                                 voice: "story/2001/200026/32130D0E",
+                                speakerName: "Soldier Feigning Calm",
                                 next: 20002604,
                             },
                             {
                                 id: 20002604,
                                 content: "Don't you slip into the city amidst the chaos! Show your travel permit first!",
                                 voice: "story/2001/200026/32130D38",
+                                speakerName: "Soldier Feigning Calm",
                                 next: 20002605,
                             },
                             {
                                 id: 20002605,
                                 content: "Please, let us in. We did accidentally lose our travel permit! ",
                                 voice: "story/2001/200026/32130D62",
+                                speakerName: "Panicked Civilian",
                                 next: 20002606,
                             },
                             {
                                 id: 20002606,
                                 content: "All you can think of is that damn travel permit! We must get in, or we'll die here!",
                                 voice: "story/2001/200026/32130D8C",
+                                speakerName: "Angry Civilian",
                                 next: 20002607,
                             },
                             {
                                 id: 20002607,
                                 content: "Stop! I said stop! One step closer and I'll shoot!",
                                 voice: "story/2001/200026/32130DB6",
+                                speakerName: "Soldier Feigning Calm",
                                 next: 20002608,
                             },
                             {
                                 id: 20002608,
                                 content: "Go ahead! Make the damn noise and draw the Deteriorator here to kill you too!",
                                 voice: "story/2001/200026/32130DE0",
+                                speakerName: "Angry Civilian",
                                 next: 20002609,
                             },
                             {
                                 id: 20002609,
                                 content: "You... Fine, just get in. I'll get to you after the Escort has taken care of the Deteriorator.",
                                 voice: "story/2001/200026/32130E0A",
+                                speakerName: "Soldier Feigning Calm",
                             },
                         ],
                     },
@@ -13347,6 +13425,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Something's off. But the hostages are safe, at least.",
                                 voice: "story/1002/101306/195BD036",
                                 npc: 100304,
+                                speakerName: "Female Officer",
                                 next: 10130603,
                             },
                             {
@@ -13412,6 +13491,7 @@ export const questData_en: QuestStory[] = [
                                     "That's not it! Ma'am, during my earlier scouting — though from a distance — I saw these Charons using <W>magic</>...",
                                 voice: "story/1002/101130/19511D8A",
                                 npc: 700065,
+                                speakerName: "Panicked Imperial Soldier",
                                 next: 10113011,
                             },
                             {
@@ -13420,6 +13500,7 @@ export const questData_en: QuestStory[] = [
                                     "They... They might be accomplices of the Deteriorator! These low-life beings, all wicked sorcerers! They should all be...",
                                 voice: "story/1002/101130/19511DB4",
                                 npc: 700065,
+                                speakerName: "Panicked Imperial Soldier",
                                 next: 10113012,
                             },
                             {
@@ -13435,6 +13516,7 @@ export const questData_en: QuestStory[] = [
                                     "...Er, I'm not saying... I was just referring to them, ma'am. I'm not saying that all Charons are... Anyway, I didn't mean anything by it!",
                                 voice: "story/1002/101130/19511E08",
                                 npc: 700065,
+                                speakerName: "Panicked Imperial Soldier",
                                 next: 10113014,
                             },
                             {
@@ -13830,6 +13912,7 @@ export const questData_en: QuestStory[] = [
                                     "Greetings, child. I roam as the Ferrywoman of the Misty Sea — or, if you prefer a more personal touch, you may call me Lady Nifle.",
                                 voice: "story/1002/101259/19596120",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125905,
                             },
                             {
@@ -13838,6 +13921,7 @@ export const questData_en: QuestStory[] = [
                                     "Having journeyed here, I've heard the whispers of a wandering soul in this place; thus I've come to guide \"her\" back to the Misty Sea.",
                                 voice: "story/1002/101259/1959614A",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125906,
                             },
                             {
@@ -13852,6 +13936,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yes. Child, do you, too, hold a departed soul in your thoughts?",
                                 voice: "story/1002/101259/1959619E",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125908,
                             },
                             {
@@ -13866,6 +13951,7 @@ export const questData_en: QuestStory[] = [
                                 content: "My eyes can see the longings of souls.",
                                 voice: "story/1002/101259/195961F2",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125910,
                             },
                             {
@@ -13873,6 +13959,7 @@ export const questData_en: QuestStory[] = [
                                 content: "As I guided her, I glimpsed all she held dear — and among these visions, I saw you.",
                                 voice: "story/1002/101259/1959621C",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125911,
                             },
                             {
@@ -13895,6 +13982,7 @@ export const questData_en: QuestStory[] = [
                                     "Quite the opposite. Many souls I've witnessed depart with intense grievances and bitterness, their cries thick as the fog along the riverbanks.",
                                 voice: "story/1002/101259/1959629A",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125914,
                             },
                             {
@@ -13903,6 +13991,7 @@ export const questData_en: QuestStory[] = [
                                     "But her voice was very gentle. It bore no sorrow, anger, nor resentment — only expressions of gratitude and... blessings.",
                                 voice: "story/1002/101259/195962C4",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125915,
                             },
                             {
@@ -13910,6 +13999,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Perhaps, those were meant for you.",
                                 voice: "story/1002/101259/195962EE",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125916,
                             },
                             {
@@ -13936,6 +14026,7 @@ export const questData_en: QuestStory[] = [
                                     "Child, I have lived long and bid farewell to countless souls, and I've heard such words time and again.",
                                 voice: "story/1002/101259/19596342",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125918,
                             },
                             {
@@ -13944,6 +14035,7 @@ export const questData_en: QuestStory[] = [
                                     "Just as plants succumb to wildfires and bugs perish in storms... Impermanence is a part of life. Sooner or later, death touches us all.",
                                 voice: "story/1002/101259/1959636C",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125919,
                             },
                             {
@@ -13952,6 +14044,7 @@ export const questData_en: QuestStory[] = [
                                     "Rather than cursing fate's indifference and cruelty, or lamenting our frailty, we can choose to... cherish the memories we hold dear.",
                                 voice: "story/1002/101259/19596396",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125920,
                             },
                             {
@@ -13960,6 +14053,7 @@ export const questData_en: QuestStory[] = [
                                     "After all, if death is the inevitable, then every moment alive is a miracle that defies the odds, isn't it?",
                                 voice: "story/1002/101259/195963C0",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125921,
                             },
                             {
@@ -13968,6 +14062,7 @@ export const questData_en: QuestStory[] = [
                                     "I believe that the gentle soul who journeyed to the Misty Sea would also wish that... when you recall your time together, you'd find yourself smiling, not crying with grief.",
                                 voice: "story/1002/101259/195963EA",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 options: [
                                     {
                                         id: 101259211,
@@ -13982,6 +14077,7 @@ export const questData_en: QuestStory[] = [
                                     "The Misty Sea... is the cradle and resting place of life for Charons. Souls of the deceased return there, and the living emerge from it, life flowing in endless cycles.",
                                 voice: "story/1002/101259/19596414",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125923,
                             },
                             {
@@ -14008,6 +14104,7 @@ export const questData_en: QuestStory[] = [
                                     "Were it someone else asking, my answer would be this: The cycle of life and death is a universal law, not to be defied by human might.",
                                 voice: "story/1002/101259/19596468",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125925,
                             },
                             {
@@ -14015,6 +14112,7 @@ export const questData_en: QuestStory[] = [
                                 content: "However, child, I sense... you are bound by an unusual destiny.",
                                 voice: "story/1002/101259/19596492",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125926,
                             },
                             {
@@ -14023,6 +14121,7 @@ export const questData_en: QuestStory[] = [
                                     "One day, when you have garnered enough strength to confront this world's unveiled truths and even challenge its very laws... ",
                                 voice: "story/1002/101259/195964BC",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125927,
                             },
                             {
@@ -14031,6 +14130,7 @@ export const questData_en: QuestStory[] = [
                                     "Perhaps then might you step into the river of life, to its terminus — the Misty Sea, where the departed souls await beyond the veil of time.",
                                 voice: "story/1002/101259/195964E6",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 options: [
                                     {
                                         id: 101259271,
@@ -14045,6 +14145,7 @@ export const questData_en: QuestStory[] = [
                                     "Hehe... I am merely an observer by the riverbank. The answer to this question must be discovered by yourself.",
                                 voice: "story/1002/101259/19596510",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125929,
                             },
                             {
@@ -14052,6 +14153,7 @@ export const questData_en: QuestStory[] = [
                                 content: "If your heart truly yearns for it, then proceed on your path.",
                                 voice: "story/1002/101259/1959653A",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                                 next: 10125930,
                             },
                             {
@@ -14059,6 +14161,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Godspeed, dear child.",
                                 voice: "story/1002/101259/19596564",
                                 npc: 200076,
+                                speakerName: "Lady Nifle",
                             },
                         ],
                     },
@@ -16616,6 +16719,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Meow— Meow!",
                                 voice: "story/1003/100326/191D95C4",
                                 npc: 100320,
+                                speakerName: "Cat",
                             },
                         ],
                     },
@@ -16631,6 +16735,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Meow... Meow?",
                                 voice: "story/1003/100326/191D95EE",
                                 npc: 100320,
+                                speakerName: "Cat",
                                 next: 10032604,
                             },
                             {
@@ -16666,6 +16771,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Meow— Meowww!",
                                 voice: "story/1003/100326/191D96C0",
                                 npc: 100320,
+                                speakerName: "Cat",
                             },
                         ],
                     },
@@ -16707,6 +16813,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Meow— Meow meow meowwww!",
                                 voice: "story/1003/100326/191D9714",
                                 npc: 100320,
+                                speakerName: "Cat",
                             },
                         ],
                     },
@@ -18104,6 +18211,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10033201,
                                 content: "—ROAR!!",
                                 voice: "story/1003/100332/191DF80A",
+                                speakerName: "???",
                                 next: 10033202,
                             },
                             {
@@ -18153,6 +18261,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10033301,
                                 content: "—ROAR!!",
                                 voice: "story/1003/100333/191E0872",
+                                speakerName: "???",
                                 next: 10033302,
                             },
                             {
@@ -18246,6 +18355,7 @@ export const questData_en: QuestStory[] = [
                                 content: "—ROAR!!",
                                 voice: "story/1003/100333/191E0A16",
                                 npc: 100328,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -18503,6 +18613,7 @@ export const questData_en: QuestStory[] = [
                                 content: "CRRRRUSH...",
                                 voice: "story/1003/100333/191E0ABE",
                                 npc: 100328,
+                                speakerName: "???",
                                 next: 10033316,
                             },
                             {
@@ -18538,6 +18649,7 @@ export const questData_en: QuestStory[] = [
                                 content: "DESTRRRROY...",
                                 voice: "story/1003/100333/191E0B66",
                                 npc: 100328,
+                                speakerName: "???",
                                 next: 10033320,
                             },
                             {
@@ -20610,6 +20722,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "The train departing from Icelake to Dismania will leave in one hour. Godspeed to the 13th Legion! All glory to our Emperor!",
                                 voice: "story/1003/100352/191F4906",
+                                speakerName: "PA System",
                             },
                         ],
                     },
@@ -20928,6 +21041,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Naive.",
                                 voice: "story/1003/100353/191F5626",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035337,
                             },
                         ],
@@ -20949,6 +21063,7 @@ export const questData_en: QuestStory[] = [
                                 content: "It's been so long, Sister.",
                                 voice: "story/1003/100354/191F61F6",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035408,
                             },
                             {
@@ -20963,6 +21078,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Or should I say... Officer Fischer. Have you... calmed down... now?",
                                 voice: "story/1003/100354/191F624A",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035410,
                             },
                             {
@@ -20977,6 +21093,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Blues Fischer. Your younger brother. The owner of that harmonica.",
                                 voice: "story/1003/100354/191F629E",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035412,
                             },
                             {
@@ -20998,6 +21115,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Heh...",
                                 voice: "story/1003/100354/191F631C",
                                 npc: 100327,
+                                speakerName: '"Blues"',
                                 next: 10035415,
                             },
                             {
@@ -21020,6 +21138,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Take it back. The Legion betrayed me. I don't need it anymore.",
                                 voice: "story/1003/100354/191F639A",
                                 npc: 100327,
+                                speakerName: '"Blues"',
                                 next: 10035418,
                             },
                             {
@@ -21066,6 +21185,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Your instincts... are sharp. But in the Empire... that's not always... a good thing.",
                                 voice: "story/1003/100354/191F6496",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10035424,
                             },
                             {
@@ -21074,6 +21194,7 @@ export const questData_en: QuestStory[] = [
                                     'Rhythm... my sister. Let me tell you... the cruel truth behind... the title of "Laurelled Charon."',
                                 voice: "story/1003/100354/191F64C0",
                                 npc: 100327,
+                                speakerName: "Blues",
                             },
                         ],
                     },
@@ -21101,6 +21222,7 @@ export const questData_en: QuestStory[] = [
                                 content: '"Perpetrator"...?',
                                 voice: "story/1003/100354/191F614E",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035404,
                             },
                             {
@@ -21109,6 +21231,7 @@ export const questData_en: QuestStory[] = [
                                     "Hmph. Even now, they haven't... told you... the truth. Dirty liars. Even the 13th Legion... is no exception.",
                                 voice: "story/1003/100354/191F6178",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035405,
                             },
                             {
@@ -22276,6 +22399,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Heh.",
                                 voice: "story/1003/100350/191F1F84",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035003,
                             },
                             {
@@ -22283,6 +22407,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The lies... remain hidden in the shadows.",
                                 voice: "story/1003/100350/191F1FAE",
                                 npc: 100327,
+                                speakerName: "???",
                                 next: 10035004,
                             },
                             {
@@ -22304,6 +22429,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100350/191F202C",
                                 npc: 100327,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -22560,6 +22686,7 @@ export const questData_en: QuestStory[] = [
                                     'The "Laurelled Charon" — once, I believed it to be a diamond of the utmost brilliance.\nIt gleamed at the horizon of my dreams, like the eternal light atop Icelake\'s highest peak.',
                                 voice: "story/1003/100355/191F7162",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10035502,
                             },
                             {
@@ -22568,6 +22695,7 @@ export const questData_en: QuestStory[] = [
                                     "But later, I realised it wasn't a diamond at all.\nIt was glass — reflecting an illusory light. Beautiful, dazzling, but so fragile it could be shattered by a single pebble or a chunk of clay.",
                                 voice: "story/1003/100355/191F718C",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10035503,
                             },
                             {
@@ -22576,6 +22704,7 @@ export const questData_en: QuestStory[] = [
                                     "A Charon who passes the 6th Legion's tests is nothing more than a caged beast awaiting slaughter.\nIn truth, we would rather become numb, unthinking beasts —\nFor then we wouldn't endure the agony of shattered dreams or weep over unfulfilled promises.",
                                 voice: "story/1003/100355/191F71B6",
                                 npc: 100327,
+                                speakerName: "Blues",
                             },
                         ],
                     },
@@ -22591,6 +22720,7 @@ export const questData_en: QuestStory[] = [
                                     "I don't know how long those days dragged on, only that my body was slowly twisted into the shape of a grotesque monster. My heart grew colder with each passing moment, shattered into shards by the frigid winds of Lamenting Lake.",
                                 voice: "story/1003/100355/191F742C",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10035519,
                             },
                             {
@@ -22599,6 +22729,7 @@ export const questData_en: QuestStory[] = [
                                     "The old memories as a human slipped further and further away, until even my name was lost, swallowed by the abyss.",
                                 voice: "story/1003/100355/191F7456",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10035520,
                             },
                             {
@@ -22607,6 +22738,7 @@ export const questData_en: QuestStory[] = [
                                     "Blues Fischer is dead. In his place remains a hollow shell, his name erased — now known only as <W>Subject 47</>.",
                                 voice: "story/1003/100355/191F7480",
                                 npc: 100327,
+                                speakerName: "Subject 47",
                                 next: 10035521,
                             },
                             {
@@ -22614,6 +22746,7 @@ export const questData_en: QuestStory[] = [
                                 content: "And yet, this wretched body still clung desperately to the instinct to survive.",
                                 voice: "story/1003/100355/191F74AA",
                                 npc: 100327,
+                                speakerName: "Subject 47",
                             },
                         ],
                     },
@@ -22628,6 +22761,7 @@ export const questData_en: QuestStory[] = [
                                     "Professor, the subject's rejection response has ceased, and all vital signs are stabilising. However, it seems we've overused the β-type suppressant — the subject's mental state is unstable.",
                                 voice: "story/1003/100355/191F74D4",
                                 npc: 100336,
+                                speakerName: "Young Voice",
                                 next: 10035523,
                             },
                             {
@@ -22636,6 +22770,7 @@ export const questData_en: QuestStory[] = [
                                     'The mind is nothing more than a byproduct of biological processes. All we need is obedience — as long as the subject can respond with a "yes." Take it to the testing ground.',
                                 voice: "story/1003/100355/191F74FE",
                                 npc: 100337,
+                                speakerName: "Cold Voice",
                                 next: 10035524,
                             },
                             {
@@ -22643,6 +22778,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yes, Professor.",
                                 voice: "story/1003/100355/191F7528",
                                 npc: 100336,
+                                speakerName: "Young Voice",
                             },
                         ],
                     },
@@ -22663,6 +22799,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "With those suppressants, <H>it couldn't defy our orders even if it tried</>. Like pathetic, mindless beasts.",
                                 voice: "story/1003/100356/191F81CA",
+                                speakerName: "Voice within the Alchemy Academy",
                                 next: 10035602,
                             },
                             {
@@ -22670,12 +22807,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Savage, brutish, devoid of intelligence or elegance. Hmph, but this is the true form of a Charon.",
                                 voice: "story/1003/100356/191F81F4",
+                                speakerName: "Voice within the Alchemy Academy",
                                 next: 10035603,
                             },
                             {
                                 id: 10035603,
                                 content: "Hey, stay away from it. Who knows what kind of filth it's carrying?",
                                 voice: "story/1003/100356/191F821E",
+                                speakerName: "Voice within the Alchemy Academy",
                                 next: 10035604,
                             },
                             {
@@ -22683,12 +22822,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Make sure to record its combat data thoroughly. If it fails to meet the standards or shows any suspicious behaviour, dispose of it immediately.",
                                 voice: "story/1003/100356/191F8248",
+                                speakerName: "Voice within the Alchemy Academy",
                                 next: 10035605,
                             },
                             {
                                 id: 10035605,
                                 content: "Are you sure we can do that? This feels excessively cruel, doesn't it?",
                                 voice: "story/1003/100356/191F8272",
+                                speakerName: "Voice within the Alchemy Academy",
                                 next: 10035606,
                             },
                             {
@@ -22696,6 +22837,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Cruel? You've got it all wrong. It is by His Majesty's benevolence and the magnificence of alchemical technology that this trash has been given the honour of serving the academy's great cause.",
                                 voice: "story/1003/100356/191F829C",
+                                speakerName: "Voice within the Alchemy Academy",
                                 next: 10035607,
                             },
                             {
@@ -22703,6 +22845,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Don't even think about running. The electrified grids and gun turrets are far less forgiving than we are. And forget self-destruction — we have plenty of drugs to prolong your worthless existence.",
                                 voice: "story/1003/100356/191F82C6",
+                                speakerName: "Voice within the Alchemy Academy",
                             },
                         ],
                     },
@@ -22715,12 +22858,14 @@ export const questData_en: QuestStory[] = [
                                 id: 10035608,
                                 content: "Test begins. Release the subject.",
                                 voice: "story/1003/100356/191F82F0",
+                                speakerName: "Cold Voice",
                                 next: 10035609,
                             },
                             {
                                 id: 10035609,
                                 content: "Subject 47, eliminate all obstacles.",
                                 voice: "story/1003/100356/191F831A",
+                                speakerName: "Young Voice",
                                 next: 10035610,
                             },
                             {
@@ -22728,6 +22873,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yes.",
                                 voice: "story/1003/100356/191F8344",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                             },
                         ],
                     },
@@ -22741,6 +22887,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10035611,
                                 content: "There are still enemies over there. Don't stop now.",
                                 voice: "story/1003/100356/191F836E",
+                                speakerName: "Young Voice",
                             },
                         ],
                     },
@@ -22753,6 +22900,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10035617,
                                 content: "Test complete. Return it to the cell. Prepare for the next batch of subjects.",
                                 voice: "story/1003/100356/191F846A",
+                                speakerName: "Cold Voice",
                             },
                         ],
                     },
@@ -22766,6 +22914,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10035612,
                                 content: "The numbers are underwhelming. Go and clear out the enemies over there. Now.",
                                 voice: "story/1003/100356/191F8398",
+                                speakerName: "Cold Voice",
                             },
                         ],
                     },
@@ -22779,6 +22928,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10035613,
                                 content: "Keep it up! Keep it up!",
                                 voice: "story/1003/100356/191F83C2",
+                                speakerName: "Young Voice",
                             },
                         ],
                     },
@@ -22792,6 +22942,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10035614,
                                 content: "Injured already? Useless worm.",
                                 voice: "story/1003/100356/191F83EC",
+                                speakerName: "Cold Voice",
                             },
                         ],
                     },
@@ -22805,6 +22956,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10035615,
                                 content: "Go that way! Hurry up~!",
                                 voice: "story/1003/100356/191F8416",
+                                speakerName: "Young Voice",
                             },
                         ],
                     },
@@ -22817,6 +22969,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10035616,
                                 content: "That one over there is still breathing. Can't you even handle that? Finish it!",
                                 voice: "story/1003/100356/191F8440",
+                                speakerName: "Cold Voice",
                             },
                         ],
                     },
@@ -22838,6 +22991,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Hey, wake up.",
                                 voice: "story/1003/100357/191F9232",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035702,
                             },
                             {
@@ -22845,6 +22999,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I'm 36. Who are you?",
                                 voice: "story/1003/100357/191F925C",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035703,
                             },
                             {
@@ -22852,6 +23007,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100357/191F9286",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035704,
                             },
                             {
@@ -22859,6 +23015,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Not in the mood to talk? That's fine. Just make a sound so I know you're alive.",
                                 voice: "story/1003/100357/191F92B0",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035705,
                             },
                             {
@@ -22866,6 +23023,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...47.",
                                 voice: "story/1003/100357/191F92DA",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035706,
                             },
                             {
@@ -22873,6 +23031,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Thank goodness. I thought I'd never meet another person to talk to.",
                                 voice: "story/1003/100357/191F9304",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035707,
                             },
                             {
@@ -22880,6 +23039,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Do we know each other?",
                                 voice: "story/1003/100357/191F932E",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035708,
                             },
                             {
@@ -22887,6 +23047,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Haha, not yet, but we'll get there. After all, we're the only <H>humans</> in this hellhole.",
                                 voice: "story/1003/100357/191F9358",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035709,
                             },
                             {
@@ -22894,6 +23055,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Humans? Only you would still think of us that way.",
                                 voice: "story/1003/100357/191F9382",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035710,
                             },
                             {
@@ -22901,6 +23063,7 @@ export const questData_en: QuestStory[] = [
                                 content: "It's what's in the heart that counts.",
                                 voice: "story/1003/100357/191F93AC",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035711,
                             },
                             {
@@ -22908,6 +23071,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The heart? That was torn apart on the operating table long ago.",
                                 voice: "story/1003/100357/191F93D6",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035712,
                             },
                             {
@@ -22916,6 +23080,7 @@ export const questData_en: QuestStory[] = [
                                     "Then let's piece it back together. And once we've done that, we'll get out of here together — as humans.",
                                 voice: "story/1003/100357/191F9400",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035713,
                             },
                             {
@@ -22923,6 +23088,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Keep dreaming.",
                                 voice: "story/1003/100357/191F942A",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                             },
                         ],
                     },
@@ -22937,12 +23103,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Test begins. The targets assigned to the subject this time are rare. Ensure the data is recorded in meticulous detail.",
                                 voice: "story/1003/100358/191FA29A",
+                                speakerName: "Cold Voice",
                                 next: 10035802,
                             },
                             {
                                 id: 10035802,
                                 content: "Yes, Professor!",
                                 voice: "story/1003/100358/191FA2C4",
+                                speakerName: "Young Voice",
                             },
                         ],
                     },
@@ -22956,6 +23124,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "We may be prisoners, but now that we're given weapons, we can still show you the wrath of the gods!",
                                 voice: "story/1003/100358/191FA2EE",
+                                speakerName: "Captive Elysian Soldier",
                                 next: 10035804,
                             },
                             {
@@ -22963,6 +23132,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Hyperboreans, you vile degenerates! How dare you create such a blasphemous monster! Let's kill this abomination!",
                                 voice: "story/1003/100358/191FA318",
+                                speakerName: "Captive Elysian Soldier",
                             },
                         ],
                     },
@@ -22975,6 +23145,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10035805,
                                 content: "Please, spare us! We've already surrendered!",
                                 voice: "story/1003/100358/191FA342",
+                                speakerName: "Captive Elysian Soldier",
                                 next: 10035806,
                             },
                             {
@@ -22982,6 +23153,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100358/191FA36C",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035807,
                             },
                             {
@@ -22989,6 +23161,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "O the Great Nine...! Hear me... grant me your mercy, your wisdom, your strength, and your deliverance...",
                                 voice: "story/1003/100358/191FA396",
+                                speakerName: "Captive Elysian Soldier",
                                 next: 10035808,
                             },
                             {
@@ -22996,12 +23169,14 @@ export const questData_en: QuestStory[] = [
                                 content: "Sorry.",
                                 voice: "story/1003/100358/191FA3C0",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035809,
                             },
                             {
                                 id: 10035809,
                                 content: "O merciful gods... grant me forgiveness, grant me absolution...",
                                 voice: "story/1003/100358/191FA3EA",
+                                speakerName: "Captive Elysian Soldier",
                             },
                         ],
                     },
@@ -23015,6 +23190,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Data's all logged. You can head back on your own — I've got to prepare the report for the Professor.",
                                 voice: "story/1003/100358/191FA492",
+                                speakerName: "Young Voice",
                             },
                         ],
                     },
@@ -23036,6 +23212,7 @@ export const questData_en: QuestStory[] = [
                                 content: "*Humming*",
                                 voice: "story/1003/100359/191FB302",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035902,
                             },
                             {
@@ -23043,6 +23220,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Sorry, did I wake you?",
                                 voice: "story/1003/100359/191FB32C",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035903,
                             },
                             {
@@ -23051,6 +23229,7 @@ export const questData_en: QuestStory[] = [
                                     "I wasn't sleeping. Your singing's just so unbearable. I've never heard anyone butcher a tune from Children From the Snowfield like that.",
                                 voice: "story/1003/100359/191FB356",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035904,
                             },
                             {
@@ -23058,6 +23237,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Haha! If I had an instrument, maybe it wouldn't sound so bad.",
                                 voice: "story/1003/100359/191FB380",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035905,
                             },
                             {
@@ -23065,6 +23245,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Don't you feel the pain?",
                                 voice: "story/1003/100359/191FB3AA",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035906,
                             },
                             {
@@ -23072,6 +23253,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The worse it hurts, the more you need to sing.",
                                 voice: "story/1003/100359/191FB3D4",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035907,
                             },
                             {
@@ -23079,6 +23261,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Save your breath. Surviving the experiments is hard enough.",
                                 voice: "story/1003/100359/191FB3FE",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035908,
                             },
                             {
@@ -23086,6 +23269,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Physical pain doesn't matter. It's what they've turned human into that hurts...",
                                 voice: "story/1003/100359/191FB428",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035909,
                             },
                             {
@@ -23094,6 +23278,7 @@ export const questData_en: QuestStory[] = [
                                     "After all this, you still think we're human? Face it. We're nothing but monsters now — mindless, soulless tools at their command. Accept it, and it won't hurt anymore.",
                                 voice: "story/1003/100359/191FB452",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035910,
                             },
                             {
@@ -23102,6 +23287,7 @@ export const questData_en: QuestStory[] = [
                                     "No... We can't let ourselves become monsters... The day your heart gives up is the day you truly become one.",
                                 voice: "story/1003/100359/191FB47C",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035911,
                             },
                             {
@@ -23110,6 +23296,7 @@ export const questData_en: QuestStory[] = [
                                     "Did you forget what happened the last time you tried to escape? They strapped you to the electric chair. You want another round of that?",
                                 voice: "story/1003/100359/191FB4A6",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035912,
                             },
                             {
@@ -23117,6 +23304,7 @@ export const questData_en: QuestStory[] = [
                                 content: "See? The fact that you still care — that's proof enough you're not a monster.",
                                 voice: "story/1003/100359/191FB4D0",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10035913,
                             },
                             {
@@ -23124,6 +23312,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Twisted logic.",
                                 voice: "story/1003/100359/191FB4FA",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10035914,
                             },
                             {
@@ -23131,6 +23320,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Don't worry. I'll get us out of here.",
                                 voice: "story/1003/100359/191FB524",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                             },
                         ],
                     },
@@ -23143,6 +23333,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10035810,
                                 content: "Go on! Let's see which of you truly deserves to be called a demon — haha!",
                                 voice: "story/1003/100358/191FA414",
+                                speakerName: "Young Voice",
                                 next: 10035811,
                             },
                             {
@@ -23150,6 +23341,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Impressive! The suppressants we've been injecting are finally showing results. Stability's never been this high.",
                                 voice: "story/1003/100358/191FA43E",
+                                speakerName: "Young Voice",
                                 next: 10035812,
                             },
                             {
@@ -23157,6 +23349,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "At this rate, it won't be long before we can roll out these augmentation experiments across the other legions.",
                                 voice: "story/1003/100358/191FA468",
+                                speakerName: "Cold Voice",
                             },
                         ],
                     },
@@ -23169,12 +23362,14 @@ export const questData_en: QuestStory[] = [
                                 id: 10035915,
                                 content: "Wow, still kicking? Looks like the regeneration ability is adapting better than expected.",
                                 voice: "story/1003/100359/191FB54E",
+                                speakerName: "Young Voice",
                                 next: 10035916,
                             },
                             {
                                 id: 10035916,
                                 content: "Hey, don't think I don't know what you're up to.",
                                 voice: "story/1003/100359/191FB578",
+                                speakerName: "Young Voice",
                                 next: 10035917,
                             },
                             {
@@ -23182,6 +23377,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "You could've easily won, couldn't you? Yet you just had to get yourself hurt. What a performance.",
                                 voice: "story/1003/100359/191FB5A2",
+                                speakerName: "Young Voice",
                                 next: 10035918,
                             },
                             {
@@ -23189,6 +23385,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Don't get your hopes up. We're not letting such a valuable augmented subject die for nothing! That'd be a colossal waste!",
                                 voice: "story/1003/100359/191FB5CC",
+                                speakerName: "Young Voice",
                             },
                         ],
                     },
@@ -23209,6 +23406,7 @@ export const questData_en: QuestStory[] = [
                                 content: "36! Hey, 36!",
                                 voice: "story/1003/100360/191FC36A",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036002,
                             },
                             {
@@ -23216,6 +23414,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100360/191FC394",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036003,
                             },
                             {
@@ -23223,6 +23422,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Hey...",
                                 voice: "story/1003/100360/191FC3BE",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036004,
                             },
                             {
@@ -23230,6 +23430,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100360/191FC3E8",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036005,
                             },
                             {
@@ -23237,6 +23438,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Hey... here, take this... it should help ease the injuries from earlier.",
                                 voice: "story/1003/100360/191FC412",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036006,
                             },
                             {
@@ -23245,6 +23447,7 @@ export const questData_en: QuestStory[] = [
                                     "...So that's why you dragged your tasks out today? Even took a good thrashing, just to get your hands on these phials of medicine?",
                                 voice: "story/1003/100360/191FC43C",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036007,
                             },
                             {
@@ -23252,6 +23455,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Caught me, huh...",
                                 voice: "story/1003/100360/191FC466",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036008,
                             },
                             {
@@ -23259,6 +23463,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Don't you dare give up. I told you — I'm getting us both out of here alive.",
                                 voice: "story/1003/100360/191FC490",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036009,
                             },
                             {
@@ -23267,6 +23472,7 @@ export const questData_en: QuestStory[] = [
                                     "Why bother? Even if we managed to escape, what kind of life awaits us now that we've become like this?",
                                 voice: "story/1003/100360/191FC4BA",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036010,
                             },
                             {
@@ -23275,6 +23481,7 @@ export const questData_en: QuestStory[] = [
                                     "But once you're dead, nothing good can ever happen to you again. I won't go down without a fight.",
                                 voice: "story/1003/100360/191FC4E4",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036011,
                             },
                             {
@@ -23282,6 +23489,7 @@ export const questData_en: QuestStory[] = [
                                 content: "We both have dreams we've yet to fulfil, haven't we?",
                                 voice: "story/1003/100360/191FC50E",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036012,
                             },
                             {
@@ -23289,6 +23497,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Doesn't matter anymore. Look at us now.",
                                 voice: "story/1003/100360/191FC538",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036013,
                             },
                             {
@@ -23296,6 +23505,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Tell me about them. Talking about your dreams reminds you that you're still human.",
                                 voice: "story/1003/100360/191FC562",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036014,
                             },
                             {
@@ -23303,6 +23513,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100360/191FC58C",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036015,
                             },
                             {
@@ -23310,6 +23521,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...A performer...",
                                 voice: "story/1003/100360/191FC5B6",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036016,
                             },
                             {
@@ -23317,6 +23529,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Huh?",
                                 voice: "story/1003/100360/191FC5E0",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036017,
                             },
                             {
@@ -23324,6 +23537,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I used to dream of becoming a performer.",
                                 voice: "story/1003/100360/191FC60A",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036018,
                             },
                             {
@@ -23332,6 +23546,7 @@ export const questData_en: QuestStory[] = [
                                     "Participating in the 6th Legion's tests was meant to be my first step toward becoming a Laurelled Charon. I thought if I could build a better life, I might one day stand on a grander stage...",
                                 voice: "story/1003/100360/191FC634",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036019,
                             },
                             {
@@ -23340,6 +23555,7 @@ export const questData_en: QuestStory[] = [
                                     "I wouldn't have to hide in the shadows anymore, watching others bask in the spotlight, or surround myself with tapes of songs I couldn't even play — all because, as a Charon, my horn was deemed \"sickening\" to the audience.",
                                 voice: "story/1003/100360/191FC65E",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036020,
                             },
                             {
@@ -23347,6 +23563,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ha, hahaha.",
                                 voice: "story/1003/100360/191FC688",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036021,
                             },
                             {
@@ -23354,6 +23571,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I know — it's a ridiculous dream.",
                                 voice: "story/1003/100360/191FC6B2",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036022,
                             },
                             {
@@ -23361,6 +23579,7 @@ export const questData_en: QuestStory[] = [
                                 content: "No, I just thought of us.",
                                 voice: "story/1003/100360/191FC6DC",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036023,
                             },
                             {
@@ -23369,6 +23588,7 @@ export const questData_en: QuestStory[] = [
                                     "I love opera too. No wonder we hit it off. After we get out, we'll set up a stage of our own, invite everyone we know, and put on a wonderful show for them.",
                                 voice: "story/1003/100360/191FC706",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036024,
                             },
                             {
@@ -23376,6 +23596,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100360/191FC730",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036025,
                             },
                             {
@@ -23383,6 +23604,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I'll take that as a yes. And a promise is a promise — I'll hold you to it.",
                                 voice: "story/1003/100360/191FC75A",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036026,
                             },
                             {
@@ -23390,6 +23612,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I've got a feeling... our chance to escape is coming.",
                                 voice: "story/1003/100360/191FC784",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036027,
                             },
                             {
@@ -23397,6 +23620,7 @@ export const questData_en: QuestStory[] = [
                                 content: "It might be just a delusion.",
                                 voice: "story/1003/100360/191FC7AE",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036028,
                             },
                             {
@@ -23405,6 +23629,7 @@ export const questData_en: QuestStory[] = [
                                     "It's not. Haven't you noticed? <H>The suppressants have been growing less effective on us</> over the years.",
                                 voice: "story/1003/100360/191FC7D8",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036029,
                             },
                             {
@@ -23413,6 +23638,7 @@ export const questData_en: QuestStory[] = [
                                     "That's proof we're still human — even our bodies are telling us it's time to fight for ourselves!",
                                 voice: "story/1003/100360/191FC802",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036030,
                             },
                             {
@@ -23420,6 +23646,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Or maybe it's just this cursed, monstrous body mutating for its own survival.",
                                 voice: "story/1003/100360/191FC82C",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036031,
                             },
                             {
@@ -23428,6 +23655,7 @@ export const questData_en: QuestStory[] = [
                                     "Haha, but the alchemists haven't even noticed it yet. Their negligence is our chance. Let me think... we should come up with a secret signal for when the time comes.",
                                 voice: "story/1003/100360/191FC856",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036032,
                             },
                             {
@@ -23435,6 +23663,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100360/191FC880",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                             },
                         ],
                     },
@@ -23454,6 +23683,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10036113,
                                 content: "P—Professor... I'm sorry! I didn't expect the subjects to resist the suppressant's effect...",
                                 voice: "story/1003/100361/191FD5CA",
+                                speakerName: "Young Voice",
                                 next: 10036114,
                             },
                             {
@@ -23461,6 +23691,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "This kind of <H>mutation</> is unprecedented in any of our test subjects. Fascinating... Perhaps they're our greatest masterpiece yet!",
                                 voice: "story/1003/100361/191FD5F4",
+                                speakerName: "Cold Voice",
                                 next: 10036115,
                             },
                             {
@@ -23468,6 +23699,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Lock down all information! Deploy the latest γ-type suppressant — bring the subject in alive, no matter the cost!",
                                 voice: "story/1003/100361/191FD61E",
+                                speakerName: "Cold Voice",
                             },
                         ],
                     },
@@ -23481,6 +23713,7 @@ export const questData_en: QuestStory[] = [
                                 content: "*coughs* Did I make it...?",
                                 voice: "story/1003/100361/191FD648",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036117,
                             },
                             {
@@ -23488,6 +23721,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yes! You made it!",
                                 voice: "story/1003/100361/191FD672",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036118,
                             },
                             {
@@ -23495,6 +23729,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Great...",
                                 voice: "story/1003/100361/191FD69C",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                                 next: 10036119,
                             },
                             {
@@ -23502,6 +23737,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Where do you think you can run off to? Monsters like you have no place in this world — your only purpose is to serve on the battlefield or in a lab!",
                                 voice: "story/1003/100361/191FD6C6",
+                                speakerName: "Cold Voice",
                                 next: 10036120,
                             },
                             {
@@ -23509,6 +23745,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100361/191FD6F0",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036121,
                             },
                             {
@@ -23516,6 +23753,7 @@ export const questData_en: QuestStory[] = [
                                 content: "We're not monsters... We're human!",
                                 voice: "story/1003/100361/191FD71A",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                             },
                         ],
                     },
@@ -23536,6 +23774,7 @@ export const questData_en: QuestStory[] = [
                                 content: "This way!",
                                 voice: "story/1003/100361/191FD744",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036123,
                             },
                             {
@@ -23543,6 +23782,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Is this... wind? The air of freedom... *coughs*",
                                 voice: "story/1003/100361/191FD76E",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                             },
                         ],
                     },
@@ -23556,6 +23796,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I hear water. There must be an outlet leading outside.",
                                 voice: "story/1003/100361/191FD798",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036125,
                             },
                             {
@@ -23563,6 +23804,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Thank god... *coughs*",
                                 voice: "story/1003/100361/191FD7C2",
                                 npc: 100331,
+                                speakerName: "Subject 36",
                             },
                         ],
                     },
@@ -23585,6 +23827,7 @@ export const questData_en: QuestStory[] = [
                                 content: "We made it out!",
                                 voice: "story/1003/100361/191FD7EC",
                                 npc: 100327,
+                                speakerName: "Subject 47",
                                 next: 10036127,
                             },
                             {
@@ -23592,6 +23835,7 @@ export const questData_en: QuestStory[] = [
                                 content: "This is the academy's drainage tunnels... There must be an outlet leading outside.",
                                 voice: "story/1003/100361/191FD816",
                                 npc: 100328,
+                                speakerName: "Subject 36",
                                 next: 10036128,
                             },
                             {
@@ -23599,6 +23843,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Can't believe we actually made it... We're... finally free...",
                                 voice: "story/1003/100361/191FD840",
                                 npc: 100328,
+                                speakerName: "Subject 36",
                                 next: 10036129,
                             },
                             {
@@ -23606,6 +23851,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ugh...",
                                 voice: "story/1003/100361/191FD86A",
                                 npc: 100328,
+                                speakerName: "Subject 36",
                                 next: 10036130,
                             },
                             {
@@ -23613,6 +23859,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You're hurt... I'll take care of everything from here.",
                                 voice: "story/1003/100361/191FD894",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                                 next: 10036131,
                             },
                             {
@@ -23620,6 +23867,7 @@ export const questData_en: QuestStory[] = [
                                 content: "First, we need to find a place to hide...",
                                 voice: "story/1003/100361/191FD8BE",
                                 npc: 100328,
+                                speakerName: "Subject 47",
                             },
                         ],
                     },
@@ -23664,6 +23912,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...I'm fine.",
                                 voice: "story/1003/100362/191FE4B8",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036205,
                             },
                             {
@@ -23672,6 +23921,7 @@ export const questData_en: QuestStory[] = [
                                     "But fate only gave us a fleeting moment of mercy — escaping the academy wasn't the start of a new life... but the beginning of the end.",
                                 voice: "story/1003/100362/191FE4E2",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036206,
                             },
                             {
@@ -23680,6 +23930,7 @@ export const questData_en: QuestStory[] = [
                                     "During our escape... the alchemists... their new suppressant ruined my voice... and messed up our minds...",
                                 voice: "story/1003/100362/191FE50C",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036207,
                             },
                             {
@@ -23688,6 +23939,7 @@ export const questData_en: QuestStory[] = [
                                     "We couldn't control ourselves... we'd go berserk from time to time... And my friend... <H>36</>... has already left this world before me.",
                                 voice: "story/1003/100362/191FE536",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036208,
                             },
                             {
@@ -23703,6 +23955,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Listen, Sister.",
                                 voice: "story/1003/100362/191FE58A",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036210,
                             },
                             {
@@ -23710,6 +23963,7 @@ export const questData_en: QuestStory[] = [
                                 content: 'The 6th Legion... they use the title of "Laurelled Charon"... as a lure to deceive us.',
                                 voice: "story/1003/100362/191FE5B4",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036211,
                             },
                             {
@@ -23717,6 +23971,7 @@ export const questData_en: QuestStory[] = [
                                 content: "LEAVE... the Legion.",
                                 voice: "story/1003/100362/191FE5DE",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036212,
                             },
                             {
@@ -23724,6 +23979,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Find a quiet, safe place... and take care of yourse—",
                                 voice: "story/1003/100362/191FE608",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036213,
                             },
                             {
@@ -23738,6 +23994,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I...",
                                 voice: "story/1003/100362/191FE65C",
                                 npc: 100327,
+                                speakerName: "Blues",
                             },
                         ],
                     },
@@ -23800,6 +24057,7 @@ export const questData_en: QuestStory[] = [
                                 content: "If something is unreachable, why not pull it down to the ground?",
                                 voice: "story/1003/100362/191FE7AC",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036223,
                             },
                             {
@@ -23814,6 +24072,7 @@ export const questData_en: QuestStory[] = [
                                     "I have many names, many faces. But in the end, they're all just labels. No matter how those labels shift or change, one truth remains — we have been forsaken by the gods.",
                                 voice: "story/1003/100362/191FE800",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036225,
                             },
                             {
@@ -23821,6 +24080,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Now, someone as sharp as you should already know who I am.",
                                 voice: "story/1003/100362/191FE82A",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036226,
                             },
                             {
@@ -23829,6 +24089,7 @@ export const questData_en: QuestStory[] = [
                                     "I'm here to extend an invitation. Join us. Drag the untouchable Solas down to the ground, and let them feel the wrath of Charons.",
                                 voice: "story/1003/100362/191FE854",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036227,
                             },
                             {
@@ -23837,6 +24098,7 @@ export const questData_en: QuestStory[] = [
                                     "Don't rush to reject me. Reflect on what the Empire has done to you. They lured you in with sweet lies, broke you with merciless torture, and buried you under an ocean of despair.",
                                 voice: "story/1003/100362/191FE87E",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036228,
                             },
                             {
@@ -23845,6 +24107,7 @@ export const questData_en: QuestStory[] = [
                                     "And what lies at the end of this path? Becoming a Laurelled Charon? A better life? Greater dreams fulfilled?",
                                 voice: "story/1003/100362/191FE8A8",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036229,
                             },
                             {
@@ -23853,6 +24116,7 @@ export const questData_en: QuestStory[] = [
                                     "Absolutely not! What awaits is a slow death — your bones picked clean by the Sola elites, hunted by traitors among our own kind, until you're discarded like trash in some forgotten corner.",
                                 voice: "story/1003/100362/191FE8D2",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036230,
                             },
                             {
@@ -23860,6 +24124,7 @@ export const questData_en: QuestStory[] = [
                                 content: "With a single empty promise, they lure aspiring Charons like you and me straight into the abyss.",
                                 voice: "story/1003/100362/191FE8FC",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036231,
                             },
                             {
@@ -23868,6 +24133,7 @@ export const questData_en: QuestStory[] = [
                                     "As long as the 6th Legion and the Alchemy Academy's web of lies remains intact, Charons of Icelake will continue walking this path to ruin, marching straight into the same tragedy as you... again and again.",
                                 voice: "story/1003/100362/191FE926",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036232,
                             },
                             {
@@ -23882,6 +24148,7 @@ export const questData_en: QuestStory[] = [
                                     "The Empire stripped us of what we once had and left us trapped in this miserable present. Are we really going to let them crush everything we hold dear without putting up a fight?",
                                 voice: "story/1003/100362/191FE97A",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036234,
                             },
                             {
@@ -23890,6 +24157,7 @@ export const questData_en: QuestStory[] = [
                                     "Look at us. The Empire coveted our strength, shackled us like animals, and twisted us into grotesque monsters — into real demons.",
                                 voice: "story/1003/100362/191FE9A4",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036235,
                             },
                             {
@@ -23898,6 +24166,7 @@ export const questData_en: QuestStory[] = [
                                     "But now, we've broken free of those chains. Isn't it time to turn their own weapons against them? Time we made them pay?",
                                 voice: "story/1003/100362/191FE9CE",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036236,
                             },
                             {
@@ -23906,6 +24175,7 @@ export const questData_en: QuestStory[] = [
                                     "Let them tremble at the mere thought of us. Let them feel the pain we've endured. Make them never dare to covet what we hold dear again! Let them repent with their blood and remember us for eternity. Let the entire Empire scream our names in terror!",
                                 voice: "story/1003/100362/191FE9F8",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036237,
                             },
                             {
@@ -23920,6 +24190,7 @@ export const questData_en: QuestStory[] = [
                                     'You may call it vengeance, but I call it protection. We "demons" bear a duty to protect our kind. We\'ll rid the inner city of its "filth" and give your loved ones the cleaner, brighter future they deserve.',
                                 voice: "story/1003/100362/191FEA4C",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                             },
                         ],
                     },
@@ -23935,6 +24206,7 @@ export const questData_en: QuestStory[] = [
                                 content: "(The Forsakens...)",
                                 voice: "story/1003/100362/191FEA76",
                                 npc: 100328,
+                                speakerName: "Blues",
                                 next: 10036240,
                             },
                             {
@@ -23942,6 +24214,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I still have... unfinished business.",
                                 voice: "story/1003/100362/191FEAA0",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036241,
                             },
                             {
@@ -23956,6 +24229,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Do not follow.",
                                 voice: "story/1003/100362/191FEAF4",
                                 npc: 100327,
+                                speakerName: "Blues",
                             },
                         ],
                     },
@@ -23976,6 +24250,7 @@ export const questData_en: QuestStory[] = [
                                 content: "(Galea Theatre. I'm back.)",
                                 voice: "story/1003/100363/191FF54A",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036306,
                             },
                             {
@@ -23984,6 +24259,7 @@ export const questData_en: QuestStory[] = [
                                     "(Shame it's during this ridiculous celebration... Such cacophony of lunacy defiles the sanctity of this place.)",
                                 voice: "story/1003/100363/191FF574",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036307,
                             },
                             {
@@ -23991,6 +24267,7 @@ export const questData_en: QuestStory[] = [
                                 content: "(...Focus. Now isn't the time for sentimentality. I need to meet with the Forsakens' contact.)",
                                 voice: "story/1003/100363/191FF59E",
                                 npc: 100327,
+                                speakerName: "Blues",
                             },
                         ],
                     },
@@ -24010,6 +24287,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10036317,
                                 content: "Awesome! This year's show is on a whole new level — it looks so real!",
                                 voice: "story/1003/100363/191FF742",
+                                speakerName: "Exuberant Civilian",
                                 next: 10036318,
                             },
                             {
@@ -24017,12 +24295,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Check that out! Someone's really gone all in with that soldier costume. That gear... it looks legit!",
                                 voice: "story/1003/100363/191FF76C",
+                                speakerName: "Exuberant Civilian",
                                 next: 10036319,
                             },
                             {
                                 id: 10036319,
                                 content: "Is this a war-themed play or what? Come on, let's see some action already!",
                                 voice: "story/1003/100363/191FF796",
+                                speakerName: "Exuberant Civilian",
                                 next: 10036320,
                             },
                             {
@@ -24030,18 +24310,21 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100363/191FF7C0",
                                 npc: 100310,
+                                speakerName: "Clive",
                                 next: 10036321,
                             },
                             {
                                 id: 10036321,
                                 content: "Holy s***! Did you hear that? Man, the sound effects are spot on!",
                                 voice: "story/1003/100363/191FF7EA",
+                                speakerName: "Exuberant Civilian",
                                 next: 10036322,
                             },
                             {
                                 id: 10036322,
                                 content: "Bravo! Let's hear it again!",
                                 voice: "story/1003/100363/191FF814",
+                                speakerName: "Exuberant Civilian",
                                 next: 10036323,
                             },
                             {
@@ -24049,6 +24332,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100363/191FF83E",
                                 npc: 100310,
+                                speakerName: "Clive",
                                 next: 10036324,
                             },
                             {
@@ -24056,18 +24340,21 @@ export const questData_en: QuestStory[] = [
                                 content: "The 13th Legion is on official business. Live ammunition. Move it, or you'll die.",
                                 voice: "story/1003/100363/191FF868",
                                 npc: 100310,
+                                speakerName: "Clive",
                                 next: 10036325,
                             },
                             {
                                 id: 10036325,
                                 content: "Wait — what? Are those real guns?",
                                 voice: "story/1003/100363/191FF892",
+                                speakerName: "Exuberant Civilian",
                                 next: 10036326,
                             },
                             {
                                 id: 10036326,
                                 content: "It's the Legion... it's actually the Legion!",
                                 voice: "story/1003/100363/191FF8BC",
+                                speakerName: "Exuberant Civilian",
                                 next: 10036327,
                             },
                             {
@@ -24075,6 +24362,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Arnold, Thomas, evacuate the civilians!",
                                 voice: "story/1003/100363/191FF8E6",
                                 npc: 100310,
+                                speakerName: "Clive",
                                 next: 10036328,
                             },
                             {
@@ -24082,6 +24370,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The rest of you, hold suppression!",
                                 voice: "story/1003/100363/191FF910",
                                 npc: 100310,
+                                speakerName: "Clive",
                             },
                         ],
                     },
@@ -24099,6 +24388,7 @@ export const questData_en: QuestStory[] = [
                                     "Can't believe you chose to meet in a place like this. Never took you for someone who enjoys such frivolities.",
                                 voice: "story/1003/100363/191FF5C8",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036309,
                             },
                             {
@@ -24107,6 +24397,7 @@ export const questData_en: QuestStory[] = [
                                     "And didn't I tell you to minimise contact unless absolutely necessary? The 13th Legion is gone. We've got to finish our deal ASAP.",
                                 voice: "story/1003/100363/191FF5F2",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036310,
                             },
                             {
@@ -24114,6 +24405,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yes. It can be... finished now. As we... agreed.",
                                 voice: "story/1003/100363/191FF61C",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036311,
                             },
                             {
@@ -24121,6 +24413,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...!?",
                                 voice: "story/1003/100363/191FF646",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                             },
                         ],
                     },
@@ -24134,6 +24427,7 @@ export const questData_en: QuestStory[] = [
                                 content: "What are you... why... Urgh... Agh!",
                                 voice: "story/1003/100363/191FF670",
                                 npc: 100326,
+                                speakerName: "Deep Voice",
                                 next: 10036313,
                             },
                             {
@@ -24141,6 +24435,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I only... cooperated with you... to draw out... the 13th Legion. Now... it's done.",
                                 voice: "story/1003/100363/191FF69A",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036314,
                             },
                             {
@@ -24148,6 +24443,7 @@ export const questData_en: QuestStory[] = [
                                 content: "But the 13th Legion... refused to expose the truth.",
                                 voice: "story/1003/100363/191FF6C4",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036315,
                             },
                             {
@@ -24155,6 +24451,7 @@ export const questData_en: QuestStory[] = [
                                 content: "So now, you've outlived... your usefulness.",
                                 voice: "story/1003/100363/191FF6EE",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036316,
                             },
                             {
@@ -24162,6 +24459,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The Forsakens... are just another... plague to cleanse.",
                                 voice: "story/1003/100363/191FF718",
                                 npc: 100327,
+                                speakerName: "Blues",
                             },
                         ],
                     },
@@ -24340,6 +24638,7 @@ export const questData_en: QuestStory[] = [
                                 content: "That won't be... happening.",
                                 voice: "story/1003/100365/19201812",
                                 npc: 100327,
+                                speakerName: "Blues",
                             },
                         ],
                     },
@@ -24381,6 +24680,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You guys... why would you...",
                                 voice: "story/1003/100365/192018E4",
                                 npc: 100327,
+                                speakerName: "Blues",
                             },
                         ],
                     },
@@ -24402,6 +24702,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You... Why are you here? You attacked... the Legion... You will—",
                                 voice: "story/1003/100365/19201938",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036525,
                             },
                             {
@@ -24495,6 +24796,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Alright, I'll leave. But, Sister... can you promise me something too?",
                                 voice: "story/1003/100365/19201B06",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036536,
                             },
                             {
@@ -24502,6 +24804,7 @@ export const questData_en: QuestStory[] = [
                                 content: "No matter what happens... be brave... and live on.",
                                 voice: "story/1003/100365/19201B30",
                                 npc: 100327,
+                                speakerName: "Blues",
                             },
                         ],
                     },
@@ -24517,6 +24820,7 @@ export const questData_en: QuestStory[] = [
                                     "You've attacked... the Legion. From here on, all that awaits you... is endless torment... or death.",
                                 voice: "story/1003/100365/19201B5A",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036538,
                             },
                             {
@@ -24524,6 +24828,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I still... have one thing... to do. Sorry... but from here on, you're on your own.",
                                 voice: "story/1003/100365/19201B84",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036539,
                             },
                             {
@@ -24531,6 +24836,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Phoxhunters of Icelake... may I entrust her to you...?",
                                 voice: "story/1003/100365/19201BAE",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036540,
                             },
                             {
@@ -24545,6 +24851,7 @@ export const questData_en: QuestStory[] = [
                                 content: "There's no end... to running.",
                                 voice: "story/1003/100365/19201C02",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036542,
                             },
                             {
@@ -24559,6 +24866,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Leave. You're a good person. Just like him.",
                                 voice: "story/1003/100365/19201C56",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036544,
                             },
                             {
@@ -24588,6 +24896,7 @@ export const questData_en: QuestStory[] = [
                                     '"The silent silent snow, child of the sky... May the nameless child... be bathed in pure light..."',
                                 voice: "story/1003/100365/19201CFE",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036548,
                             },
                             {
@@ -24602,6 +24911,7 @@ export const questData_en: QuestStory[] = [
                                 content: '"The crystal heart will... keep shining through..."',
                                 voice: "story/1003/100365/19201D52",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036582,
                             },
                             {
@@ -24631,6 +24941,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Heh...",
                                 voice: "story/1003/100365/19201DFA",
                                 npc: 100328,
+                                speakerName: '"Blues"',
                                 next: 10036554,
                             },
                             {
@@ -24638,6 +24949,7 @@ export const questData_en: QuestStory[] = [
                                 content: "How long... have you known?",
                                 voice: "story/1003/100365/19201E24",
                                 npc: 100328,
+                                speakerName: '"Blues"',
                                 next: 10036555,
                             },
                             {
@@ -24737,6 +25049,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You even... figured that out...",
                                 voice: "story/1003/100365/19202046",
                                 npc: 100328,
+                                speakerName: '"Blues"',
                                 next: 10036568,
                             },
                             {
@@ -24744,6 +25057,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Blues is gone. But he didn't want his sister to ever know who it was... that killed him.",
                                 voice: "story/1003/100365/19202070",
                                 npc: 100328,
+                                speakerName: '"Blues"',
                                 next: 10036569,
                             },
                             {
@@ -24752,6 +25066,7 @@ export const questData_en: QuestStory[] = [
                                     "You're sharp. If only... we'd been... as perceptive back then... Doesn't matter now. Regrets won't... change the past.",
                                 voice: "story/1003/100365/1920209A",
                                 npc: 100328,
+                                speakerName: '"Blues"',
                                 next: 100365691,
                             },
                             {
@@ -24760,6 +25075,7 @@ export const questData_en: QuestStory[] = [
                                     "I... lied to you. In the story, I swapped our names. It was the other way around — Blues was the one... who saved me. He reminded me what it felt like... to be human.",
                                 voice: "story/1003/100365/192020C4",
                                 npc: 100328,
+                                speakerName: '"Blues"',
                                 next: 10036571,
                             },
                             {
@@ -24768,6 +25084,7 @@ export const questData_en: QuestStory[] = [
                                     "But I lost the right... to call myself human long ago. What's the point... of a name for a ghost of the past...? If a name is required, just call me <H>Phantasio</>.",
                                 voice: "story/1003/100365/192020EE",
                                 npc: 100328,
+                                speakerName: '"Blues"',
                                 next: 10036572,
                             },
                             {
@@ -24775,6 +25092,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Phoxhunters, here's my commission: Take Rhythm, leave this place, and keep her safe.",
                                 voice: "story/1003/100365/19202118",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036573,
                             },
                             {
@@ -24782,6 +25100,7 @@ export const questData_en: QuestStory[] = [
                                 content: "And... never ever... tell her about me.",
                                 voice: "story/1003/100365/19202142",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036574,
                             },
                             {
@@ -24803,6 +25122,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Thank... you.",
                                 voice: "story/1003/100365/192021C0",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036577,
                             },
                             {
@@ -24818,6 +25138,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100365/19202214",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                             },
                         ],
                     },
@@ -24832,6 +25153,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Now... there's one last thing to do.",
                                 voice: "story/1003/100365/1920223E",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036580,
                             },
                             {
@@ -24839,6 +25161,7 @@ export const questData_en: QuestStory[] = [
                                 content: "If I... tamper with the shapes... of their wounds...",
                                 voice: "story/1003/100365/19202268",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036586,
                             },
                             {
@@ -24895,6 +25218,7 @@ export const questData_en: QuestStory[] = [
                                 content: "This way, no one will ever know you were here... and attacked the Legion.",
                                 voice: "story/1003/100366/192025DA",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036602,
                             },
                             {
@@ -24902,6 +25226,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I'm taking this secret... to the grave.",
                                 voice: "story/1003/100366/19202604",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036603,
                             },
                             {
@@ -24909,6 +25234,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Blues... I've fulfilled my promise.",
                                 voice: "story/1003/100366/1920262E",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                             },
                         ],
                     },
@@ -24922,6 +25248,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The Forsakens guy is gone now... How are you feeling? Blues? Blues!",
                                 voice: "story/1003/100367/19203642",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036702,
                             },
                             {
@@ -24930,6 +25257,7 @@ export const questData_en: QuestStory[] = [
                                     "Turns out this body... isn't exactly indestructible after all... So much for the Empire's so-called... alchemical genius.",
                                 voice: "story/1003/100367/1920366C",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036703,
                             },
                             {
@@ -24938,6 +25266,7 @@ export const questData_en: QuestStory[] = [
                                     "My sister's aim... has gotten a lot better... Looks like she's capable... of protecting herself now... *coughs*",
                                 voice: "story/1003/100367/19203696",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036704,
                             },
                             {
@@ -24945,6 +25274,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Is that what's important right now!?",
                                 voice: "story/1003/100367/192036C0",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036705,
                             },
                             {
@@ -24952,6 +25282,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Huff... huff...",
                                 voice: "story/1003/100367/192036EA",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036706,
                             },
                             {
@@ -24960,6 +25291,7 @@ export const questData_en: QuestStory[] = [
                                     "Hang in there! I'll take you to a doctor! As long as we use force to coerce them, even monsters like us can—",
                                 voice: "story/1003/100367/19203714",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036707,
                             },
                             {
@@ -24967,6 +25299,7 @@ export const questData_en: QuestStory[] = [
                                 content: "No need for... that.",
                                 voice: "story/1003/100367/1920373E",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036708,
                             },
                             {
@@ -24975,6 +25308,7 @@ export const questData_en: QuestStory[] = [
                                     "You refused... to tell me... about all the bloodstains on me... that won't wash off... but I've figured it out...",
                                 voice: "story/1003/100367/19203768",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036709,
                             },
                             {
@@ -24982,6 +25316,7 @@ export const questData_en: QuestStory[] = [
                                 content: "It's a good thing... to let me die here... at least it'll bring peace... to everyone...",
                                 voice: "story/1003/100367/19203792",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036710,
                             },
                             {
@@ -24990,6 +25325,7 @@ export const questData_en: QuestStory[] = [
                                     "Peace to everyone? What about you!? You idiot! You said after we got out, we'd set up a stage of our own! I'd teach you how to perform, and we'd invite everyone we know to watch our show!",
                                 voice: "story/1003/100367/192037BC",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036711,
                             },
                             {
@@ -24997,6 +25333,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Sorry... looks like... I won't be able to keep that promise...",
                                 voice: "story/1003/100367/192037E6",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036712,
                             },
                             {
@@ -25005,6 +25342,7 @@ export const questData_en: QuestStory[] = [
                                     "No... Oh! What about your sister!? You said she's the one you missed the most! You haven't even reunited with her yet!",
                                 voice: "story/1003/100367/19203810",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036713,
                             },
                             {
@@ -25013,6 +25351,7 @@ export const questData_en: QuestStory[] = [
                                     "...I'm a coward... I said I wanted to see her again... but when I finally did... I ran like a coward. There was nothing... I could do...",
                                 voice: "story/1003/100367/1920383A",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036714,
                             },
                             {
@@ -25020,6 +25359,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I... I have one last request.",
                                 voice: "story/1003/100367/19203864",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036715,
                             },
                             {
@@ -25028,6 +25368,7 @@ export const questData_en: QuestStory[] = [
                                     "This chain... it's a keepsake. Find my sister. Tell her the truth... about the 6th Legion... Don't let her fall into their trap... like I did...",
                                 voice: "story/1003/100367/1920388E",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036716,
                             },
                             {
@@ -25036,6 +25377,7 @@ export const questData_en: QuestStory[] = [
                                     "And... <H>don't ever let her know... that I died... by her hand.</> She wouldn't... be able to bear it...",
                                 voice: "story/1003/100367/192038B8",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036717,
                             },
                             {
@@ -25043,6 +25385,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Please... Promise me...",
                                 voice: "story/1003/100367/192038E2",
                                 npc: 100327,
+                                speakerName: "Blues",
                                 next: 10036718,
                             },
                             {
@@ -25050,6 +25393,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Blues...!!",
                                 voice: "story/1003/100367/1920390C",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036719,
                             },
                             {
@@ -25057,6 +25401,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I promise.",
                                 voice: "story/1003/100367/19203936",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036720,
                             },
                             {
@@ -25064,6 +25409,7 @@ export const questData_en: QuestStory[] = [
                                 content: "But... how do I tell her the truth without letting her know you're gone...?",
                                 voice: "story/1003/100367/19203960",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036721,
                             },
                             {
@@ -25071,6 +25417,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...I get it.",
                                 voice: "story/1003/100367/1920398A",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036722,
                             },
                             {
@@ -25079,6 +25426,7 @@ export const questData_en: QuestStory[] = [
                                     '<H>I just need to make her believe Blues is still alive... Let "Blues" tell her everything.</> So...',
                                 voice: "story/1003/100367/192039B4",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                             },
                         ],
                     },
@@ -25105,6 +25453,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Blues... I did it. The 6th Legion's lies... are finally exposed.",
                                 voice: "story/1003/100368/192046AA",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036802,
                             },
                             {
@@ -25112,6 +25461,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Rhythm... she'll never know the truth about your death.",
                                 voice: "story/1003/100368/192046D4",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036803,
                             },
                             {
@@ -25119,6 +25469,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1003/100368/192046FE",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036804,
                             },
                             {
@@ -25126,6 +25477,7 @@ export const questData_en: QuestStory[] = [
                                 content: "That was... our first performance together. Not bad, wouldn't you say?",
                                 voice: "story/1003/100368/19204728",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036805,
                             },
                             {
@@ -25133,6 +25485,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You finally... came.",
                                 voice: "story/1003/100368/19204752",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036806,
                             },
                             {
@@ -25140,6 +25493,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You purposely... let me loose... so that you could... catch this guy. That's quite brilliant.",
                                 voice: "story/1003/100368/1920477C",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036807,
                             },
                             {
@@ -25148,6 +25502,7 @@ export const questData_en: QuestStory[] = [
                                     "And if you're that brilliant, surely... you've already... noticed the clues I left behind. Why, then? Why haven't you... said anything?",
                                 voice: "story/1003/100368/192047A6",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036808,
                             },
                             {
@@ -25155,6 +25510,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Why didn't you reveal the truth... about the 6th Legion...!?",
                                 voice: "story/1003/100368/192047D0",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                                 next: 10036809,
                             },
                             {
@@ -25184,6 +25540,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Something you must fulfil... I see.",
                                 voice: "story/1003/100368/19204878",
                                 npc: 100328,
+                                speakerName: "Phantasio",
                             },
                         ],
                     },
@@ -25949,39 +26306,46 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "\"Somewhere out there, perhaps there's a bookshop, or a tavern... that's yours, and yours alone.\"",
                                 voice: "story/1004/100401/19226412",
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10040102,
                                 content: "\"'Somewhere out there' — three little words that pack in dreams, longing, and surprise.\"",
                                 voice: "story/1004/100401/1922643C",
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10040103,
                                 content:
                                     '"Somewhere out there, the person you miss most might be waiting... hoping you\'ll show up at their door one day."',
                                 voice: "story/1004/100401/19226466",
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10040104,
                                 content: '"Somewhere out there is all unknowns... and it won\'t feel anything like here."',
                                 voice: "story/1004/100401/19226490",
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10040105,
                                 content: "\"In fact, it isn't as far away as it sounds. Sometimes, it's only a ticket away!\"",
                                 voice: "story/1004/100401/192264BA",
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10040106,
                                 content:
                                     "\"So why not travel in comfort? Choose the Empire Railway's newest special service — the Aurora Express! Rebuilt from an armoured train, she's tough, steady, and safe... and the cannons she carries are more than enough to deal with any threat.\"",
                                 voice: "story/1004/100401/192264E4",
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10040107,
                                 content:
                                     "\"Clean, bright, and wonderfully grand... step aboard, and let 'somewhere out there' become somewhere you can reach!\"",
                                 voice: "story/1004/100401/1922650E",
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10040108,
@@ -26399,24 +26763,28 @@ export const questData_en: QuestStory[] = [
                                 id: 10040408,
                                 content: "Everyone — hold it! Stop where you are!",
                                 voice: "story/1004/100404/19229670",
+                                speakerName: "Stern Soldier",
                             },
                             {
                                 id: 10040409,
                                 content: "Right then! Eyes up — our heroes are back!",
                                 voice: "story/1004/100404/1922969A",
                                 npc: 100410,
+                                speakerName: "Stern Soldier",
                             },
                             {
                                 id: 10040410,
                                 content: "They've just driven the Forsakens out of the south! Give them a proper welcome home!",
                                 voice: "story/1004/100404/192296C4",
                                 npc: 100410,
+                                speakerName: "Stern Soldier",
                             },
                             {
                                 id: 10040411,
                                 content: "Dad! Mum! Icelake! I made it back in one piece!",
                                 voice: "story/1004/100404/192296EE",
                                 npc: 100409,
+                                speakerName: "Demobilised Soldier",
                             },
                             {
                                 id: 10040412,
@@ -26436,12 +26804,14 @@ export const questData_en: QuestStory[] = [
                                 content: "...What?",
                                 voice: "story/1004/100404/1922976C",
                                 npc: 100409,
+                                speakerName: "Demobilised Soldier",
                             },
                             {
                                 id: 10040415,
                                 content: "Ma'am... I think you've mistaken me for someone else.",
                                 voice: "story/1004/100404/19229796",
                                 npc: 100409,
+                                speakerName: "Demobilised Soldier",
                             },
                             {
                                 id: 10040416,
@@ -26462,6 +26832,7 @@ export const questData_en: QuestStory[] = [
                                     "Who's your boy? I don't know what you're talking about. I bought this ring myself in Scarletriver!",
                                 voice: "story/1004/100404/19229814",
                                 npc: 100409,
+                                speakerName: "Demobilised Soldier",
                             },
                         ],
                     },
@@ -26485,12 +26856,14 @@ export const questData_en: QuestStory[] = [
                                 content: "Threat confirmed. Contain the crowd before it escalates. If she resists — shoot her on the spot.",
                                 voice: "story/1004/100405/1922A5B2",
                                 npc: 100410,
+                                speakerName: "Stern Soldier",
                             },
                             {
                                 id: 10040502,
                                 content: "Ah, Stationmaster Eisenbahn...",
                                 voice: "story/1004/100405/1922A5DC",
                                 npc: 100410,
+                                speakerName: "Stern Soldier",
                             },
                             {
                                 id: 10040503,
@@ -26517,6 +26890,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yes, sir. I'll think of a solution right now.",
                                 voice: "story/1004/100405/1922A684",
                                 npc: 100410,
+                                speakerName: "Stern Soldier",
                             },
                             {
                                 id: 10040507,
@@ -26548,6 +26922,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Hey! I don't know you! What's your problem!?",
                                 voice: "story/1004/100405/1922A756",
                                 npc: 100409,
+                                speakerName: "Demobilised Soldier",
                             },
                             {
                                 id: 10040512,
@@ -26564,6 +26939,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Suspect secured. Taking her to the detention room.",
                                 voice: "story/1004/100405/1922A7AA",
                                 npc: 100410,
+                                speakerName: "Stern Soldier",
                             },
                             {
                                 id: 10040514,
@@ -26598,6 +26974,7 @@ export const questData_en: QuestStory[] = [
                                     "I told you — I bought it in Scarletriver. From a jewellery shop called Silverheart. Go and check if you don't believe me.",
                                 voice: "story/1004/100405/1922A87C",
                                 npc: 100409,
+                                speakerName: "Demobilised Soldier",
                             },
                             {
                                 id: 10040519,
@@ -26830,12 +27207,14 @@ export const questData_en: QuestStory[] = [
                                     "Welcome to Bloomfield Station. Armed guards on duty, cannons mounted on every train, airship patrols overhead — you'll have a safe journey.",
                                 voice: "story/1004/100406/1922B61A",
                                 npc: 100420,
+                                speakerName: "Diligent Guard",
                             },
                             {
                                 id: 10040602,
                                 content: "We hope you enjoy our latest Phoxichor-powered service.",
                                 voice: "story/1004/100406/1922B644",
                                 npc: 100421,
+                                speakerName: "Polite Guard",
                             },
                             {
                                 id: 10040603,
@@ -26843,6 +27222,7 @@ export const questData_en: QuestStory[] = [
                                     "Now. Routine check. It's for your safety, everyone else's — and the security of the Empire's railways.",
                                 voice: "story/1004/100406/1922B66E",
                                 npc: 100420,
+                                speakerName: "Diligent Guard",
                             },
                             {
                                 id: 10040604,
@@ -26857,6 +27237,7 @@ export const questData_en: QuestStory[] = [
                                     "We've the Forsakens to thank for that. You might not feel it in Icelake, but they've been stirring trouble elsewhere.",
                                 voice: "story/1004/100406/1922B6C2",
                                 npc: 100421,
+                                speakerName: "Polite Guard",
                             },
                             {
                                 id: 10040606,
@@ -26864,6 +27245,7 @@ export const questData_en: QuestStory[] = [
                                     "Fires. Blasts. Every week it's something. So we're taking extra measures. Rail's the Empire's lifeline — we're not letting a pack of lunatics take a swing at it.",
                                 voice: "story/1004/100406/1922B6EC",
                                 npc: 100421,
+                                speakerName: "Polite Guard",
                             },
                             {
                                 id: 10040607,
@@ -26878,6 +27260,7 @@ export const questData_en: QuestStory[] = [
                                     "That's the spirit. You're a tough young man. Pity you're Charon. Still — ever thought about going for Laurelled Charon? You look like you've got the makings of one.",
                                 voice: "story/1004/100406/1922B740",
                                 npc: 100421,
+                                speakerName: "Polite Guard",
                                 options: [
                                     {
                                         id: 10040609,
@@ -26905,6 +27288,7 @@ export const questData_en: QuestStory[] = [
                                 content: "That's what you always say when you're fobbing your friends off, isn't it?",
                                 voice: "story/1004/100406/1922B7E8",
                                 npc: 100420,
+                                speakerName: "Diligent Guard",
                             },
                             {
                                 id: 10040613,
@@ -26912,6 +27296,7 @@ export const questData_en: QuestStory[] = [
                                     "In theory, sure. But in the Empire? You know how it goes. A Solarian says it and it's a nice gesture. A Charon says it and it's trouble.",
                                 voice: "story/1004/100406/1922B812",
                                 npc: 100420,
+                                speakerName: "Diligent Guard",
                             },
                             {
                                 id: 10040614,
@@ -26919,12 +27304,14 @@ export const questData_en: QuestStory[] = [
                                     "Hm. Heard the rumours myself. Most of it's probably tavern gossip people tell to sound interesting. Believe what you like — I'm not here to argue.",
                                 voice: "story/1004/100406/1922B83C",
                                 npc: 100420,
+                                speakerName: "Diligent Guard",
                             },
                             {
                                 id: 10040627,
                                 content: "Either way, nobody goes through without clearing the check. Come back another day.",
                                 voice: "story/1004/100406/1922B83D",
                                 npc: 100421,
+                                speakerName: "Diligent Guard",
                             },
                             {
                                 id: 10040615,
@@ -26938,6 +27325,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Alright. Save the patter. I'll tell you what you didn't clear.",
                                 voice: "story/1004/100406/1922B890",
                                 npc: 100421,
+                                speakerName: "Polite Guard",
                             },
                             {
                                 id: 10040617,
@@ -26945,6 +27333,7 @@ export const questData_en: QuestStory[] = [
                                     "That pendant, for a start. Fine work. Pricey materials. And if I'm not mistaken... that stone's from Khemet.",
                                 voice: "story/1004/100406/1922B8BA",
                                 npc: 100421,
+                                speakerName: "Polite Guard",
                             },
                             {
                                 id: 10040618,
@@ -26952,6 +27341,7 @@ export const questData_en: QuestStory[] = [
                                     "And your outfit — what even is that? All I'm seeing is a few strips of cloth. I can see your belly button. So I've got reason to suspect you either found it and kept it... or pinched it off someone else.",
                                 voice: "story/1004/100406/1922B8E4",
                                 npc: 100421,
+                                speakerName: "Polite Guard",
                             },
                             {
                                 id: 10040619,
@@ -26964,6 +27354,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Then bring her in. Let her say it to my face. Until then, it stays here.",
                                 voice: "story/1004/100406/1922B938",
                                 npc: 100421,
+                                speakerName: "Polite Guard",
                             },
                             {
                                 id: 10040621,
@@ -26983,6 +27374,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Of course, sir. Right this way — just the routine check first.",
                                 voice: "story/1004/100406/1922B9B6",
                                 npc: 100421,
+                                speakerName: "Polite Guard",
                             },
                             {
                                 id: 10040624,
@@ -26996,6 +27388,7 @@ export const questData_en: QuestStory[] = [
                                     "Afraid so, sir. You saw that old lady causing a scene in the Rotunda earlier, didn't you? We can't take any chances. If something like that happens inside the station proper, it can turn ugly fast. We'd appreciate your understanding, sir.",
                                 voice: "story/1004/100406/1922BA0A",
                                 npc: 100420,
+                                speakerName: "Diligent Guard",
                             },
                             {
                                 id: 10040626,
@@ -27003,6 +27396,7 @@ export const questData_en: QuestStory[] = [
                                     "Same goes for you. Make no mistake — I'm not trying to pocket your lucky charm. Stationmaster Eisenbahn told us to stay sharp. We can't afford to be careless. Go back and bring your sister. If her story checks out, you'll get it back.",
                                 voice: "story/1004/100406/1922BA34",
                                 npc: 100421,
+                                speakerName: "Polite Guard",
                             },
                         ],
                     },
@@ -27386,6 +27780,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Hey — excuse me! You there!",
                                 voice: "story/1004/100494/192859DA",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049402,
@@ -27393,6 +27788,7 @@ export const questData_en: QuestStory[] = [
                                     "Yes, you. Would you mind doing me a quick favour? I'll make it worth your while — my family has means in the Imperial Capital.",
                                 voice: "story/1004/100494/19285A04",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049403,
@@ -27406,6 +27802,7 @@ export const questData_en: QuestStory[] = [
                                     "I saw you running around earlier. But you're dressed far too neatly to be looking for day labour, and you don't look like the sort who gets shoved about either.",
                                 voice: "story/1004/100494/19285A58",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049405,
@@ -27413,6 +27810,7 @@ export const questData_en: QuestStory[] = [
                                     "So either you're some reporter snooping into how the ironworks lot live... or you've got another agenda.",
                                 voice: "story/1004/100494/19285A82",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049406,
@@ -27426,6 +27824,7 @@ export const questData_en: QuestStory[] = [
                                     "Easy. I'm not having a go. Honestly, I'm much the same. I'm a new reporter with The Hyperborea Daily — just in from Dismania.",
                                 voice: "story/1004/100494/19285AD6",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049408,
@@ -27433,6 +27832,7 @@ export const questData_en: QuestStory[] = [
                                     "And I've been hearing things about the 6th Legion stationed in Icelake. They talk loyalty, but behind closed doors? Rotten to the core. Leaning on commoners, throwing their weight around... you name it.",
                                 voice: "story/1004/100494/19285B00",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049409,
@@ -27440,6 +27840,7 @@ export const questData_en: QuestStory[] = [
                                     "And the moment I stepped into this station, I hated it. Yesterday I spent the whole afternoon talking to people — asking questions — and everywhere I went, I could feel the guards staring holes through me. They're onto me. I'm sure of it.",
                                 voice: "story/1004/100494/19285B2A",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049410,
@@ -27447,6 +27848,7 @@ export const questData_en: QuestStory[] = [
                                     "What a vile city. I've only seen a single station, and it's already stuffed full of secrets no one wants dragged into the light.",
                                 voice: "story/1004/100494/19285B54",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049411,
@@ -27460,6 +27862,7 @@ export const questData_en: QuestStory[] = [
                                     "Exactly what needs asking! I walk right up and I say, \"I hear the 6th Legion's done plenty they don't want known. Tell me everything you know. Let's expose the evil together.\"",
                                 voice: "story/1004/100494/19285BA8",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                                 options: [
                                     {
                                         id: 10049413,
@@ -27488,6 +27891,7 @@ export const questData_en: QuestStory[] = [
                                     "Strange, isn't it? Even animals make noise when they're hurt. You'd think people would talk when they're being crushed. Unless it's so bad here that no Charon would trust a Solarian anymore.",
                                 voice: "story/1004/100494/19285C50",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049417,
@@ -27495,6 +27899,7 @@ export const questData_en: QuestStory[] = [
                                     "Exactly! But you're the only one who's agreed without flinching. Everyone else looks at me like I'm trying to lure them into a trap.",
                                 voice: "story/1004/100494/19285C7A",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049418,
@@ -27502,6 +27907,7 @@ export const questData_en: QuestStory[] = [
                                     "Me? A \"dangerous element\"? If anyone's dangerous, it's him. I've heard he treats this station like his private kingdom. Honestly, I was going to look into him as well.",
                                 voice: "story/1004/100494/19285CA4",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049419,
@@ -27509,12 +27915,14 @@ export const questData_en: QuestStory[] = [
                                     "Anyway. If we're going to drag the truth into the open, I need someone to help me — and you're the best bet I've seen all day.",
                                 voice: "story/1004/100494/19285CCE",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049420,
                                 content: "Firstly, you've clearly got your own reason for being here. You're looking into something too.",
                                 voice: "story/1004/100494/19285CF8",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049421,
@@ -27522,12 +27930,14 @@ export const questData_en: QuestStory[] = [
                                     "Secondly, out of everyone I've seen in this station, you're the quickest on your feet — sharp reflexes. I reckon you can handle yourself.",
                                 voice: "story/1004/100494/19285D22",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049422,
                                 content: "And if you want a third reason... call it instinct, but you feel honest to me.",
                                 voice: "story/1004/100494/19285D4C",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049423,
@@ -27541,6 +27951,7 @@ export const questData_en: QuestStory[] = [
                                     "That's easy. Money smooths things over. My father always says, \"In a one-horse town like Icelake, there's nothing one gold coin can't fix. And if there is — throw in another.\"",
                                 voice: "story/1004/100494/19285DA0",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049425,
@@ -27548,6 +27959,7 @@ export const questData_en: QuestStory[] = [
                                     "See these cheques? Five gold apiece. If anyone gives you trouble, just press one into their hand. That's my father's wisdom.",
                                 voice: "story/1004/100494/19285DCA",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049426,
@@ -27560,6 +27972,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Bring me something real, and I'll pay you ten more on top. Deal?",
                                 voice: "story/1004/100494/19285E1E",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049428,
@@ -27573,6 +27986,7 @@ export const questData_en: QuestStory[] = [
                                     "Excellent! Then we'll start with a little test. Take these, go have a friendly chat with the foreman by the ironworks entrance. See what you can get out of him.",
                                 voice: "story/1004/100494/19285E72",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049430,
@@ -27585,6 +27999,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Of course not. My family's money doesn't grow on trees. I just want proof you can deliver.",
                                 voice: "story/1004/100494/19285EC6",
                                 npc: 100411,
+                                speakerName: "Young man of noble appearance",
                             },
                             {
                                 id: 10049432,
@@ -27878,6 +28293,7 @@ export const questData_en: QuestStory[] = [
                                     "What's with you lot? It's a simple test run and you've made a complete dog's dinner of it! Day before yesterday the hydraulic pressure was low. Yesterday you sprayed Phoxichor everywhere.",
                                 voice: "story/1004/100496/19287AAA",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                             },
                             {
                                 id: 10049602,
@@ -27885,6 +28301,7 @@ export const questData_en: QuestStory[] = [
                                     "And today the loco jumps forward a dozen metres the second the test begins. At this rate you're not testing a train — you're trying to launch a bloody airship.",
                                 voice: "story/1004/100496/19287AD4",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                             },
                             {
                                 id: 10049603,
@@ -27892,6 +28309,7 @@ export const questData_en: QuestStory[] = [
                                     "If I hadn't jumped aside when I did, I'd be flatter than those castings over there. Carnot — tell me what went wrong.",
                                 voice: "story/1004/100496/19287AFE",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                             },
                             {
                                 id: 10049604,
@@ -27905,17 +28323,20 @@ export const questData_en: QuestStory[] = [
                                     "Exactly. That's an old hand — he spots the fault the moment he sees it. You lot take notes. If the rest of you were half as steady as him, I wouldn't walk in every morning wondering if today's the day I get killed.",
                                 voice: "story/1004/100496/19287B52",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                             },
                             {
                                 id: 10049606,
                                 content: "Now check everything. Nothing restarts until every fault's cleared. Understood?",
                                 voice: "story/1004/100496/19287B7C",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                             },
                             {
                                 id: 10049607,
                                 content: "Yes, sir!",
                                 voice: "story/1004/100496/19287BA6",
+                                speakerName: "Workers",
                             },
                             {
                                 id: 10049608,
@@ -27928,6 +28349,7 @@ export const questData_en: QuestStory[] = [
                                 content: "No. You stay. You're helping with the checks.",
                                 voice: "story/1004/100496/19287BFA",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                             },
                             {
                                 id: 10049610,
@@ -27941,6 +28363,7 @@ export const questData_en: QuestStory[] = [
                                     "I don't care what crew you are. You heard me. We're trialling a new model and we've just had a serious incident — the locomotive moved when it shouldn't have.",
                                 voice: "story/1004/100496/19287C4E",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                             },
                             {
                                 id: 10049612,
@@ -27948,6 +28371,7 @@ export const questData_en: QuestStory[] = [
                                     "So here's how it works: if I can see you, you're helping fix it. Because if that thing blows, we all die.",
                                 voice: "story/1004/100496/19287C78",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                             },
                             {
                                 id: 10049613,
@@ -27960,6 +28384,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Including you. So unless you've got a death wish — move. Safety first.",
                                 voice: "story/1004/100496/19287CCC",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                             },
                             {
                                 id: 10049615,
@@ -28057,6 +28482,7 @@ export const questData_en: QuestStory[] = [
                                 content: "It's back in place already? Not bad. Alright. Testing's over for today. Back to your stations.",
                                 voice: "story/1004/100499/1928AEAD",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                                 next: 10049701,
                             },
                             {
@@ -28072,6 +28498,7 @@ export const questData_en: QuestStory[] = [
                                     "You lot are quick. Tell you what — before your lungs fill up with soot, stop climbing stacks and come work on my floor.",
                                 voice: "story/1004/100497/19288B3C",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                                 next: 10049703,
                             },
                             {
@@ -28086,6 +28513,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Suit yourself. If you change your mind, you know where to find me.",
                                 voice: "story/1004/100497/19288B90",
                                 npc: 100407,
+                                speakerName: "Dignified worker",
                             },
                         ],
                     },
@@ -28139,6 +28567,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10049921,
                                 content: "Hazard detected. Threat must be neutralised. Immediate response required.",
                                 voice: "story/1004/100499/1928AF2A",
+                                speakerName: "Security robot",
                             },
                         ],
                     },
@@ -28480,6 +28909,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I was wondering what all that racket was. Of course it's you, Snow.",
                                 voice: "story/1004/100402/192276C6",
                                 npc: 100405,
+                                speakerName: "A voice both strange and familiar",
                             },
                             {
                                 id: 10040216,
@@ -28705,33 +29135,39 @@ export const questData_en: QuestStory[] = [
                                 id: 10049924,
                                 content: "Did you hear what happened over at the Forecourt Rotunda?",
                                 voice: "story/1004/100499/1928AFA8",
+                                speakerName: "Nosy Station Hand",
                             },
                             {
                                 id: 10049925,
                                 content:
                                     "Hear about it? I was right there. Some woman completely lost it. Said one of the demobbed lot nicked something of her son's.",
                                 voice: "story/1004/100499/1928AFD2",
+                                speakerName: "Gossipy Station Hand",
                             },
                             {
                                 id: 10049926,
                                 content: "Blimey. That could've turned nasty. She didn't get killed, did she?",
                                 voice: "story/1004/100499/1928AFFC",
+                                speakerName: "Nosy Station Hand",
                             },
                             {
                                 id: 10049927,
                                 content:
                                     "No. Stationmaster stepped in and sorted it. Thank goodness he did. We've still got more ex-servicemen coming through — last thing they need is to walk into a scene like that.",
                                 voice: "story/1004/100499/1928B026",
+                                speakerName: "Gossipy Station Hand",
                             },
                             {
                                 id: 10049928,
                                 content: "How many more arrivals today?",
                                 voice: "story/1004/100499/1928B050",
+                                speakerName: "Nosy Station Hand",
                             },
                             {
                                 id: 10049929,
                                 content: "Two, I think. Quit grumbling and get yourself over to Platform 7. We need to be in position.",
                                 voice: "story/1004/100499/1928B07A",
+                                speakerName: "Gossipy Station Hand",
                             },
                             {
                                 id: 10049930,
@@ -28750,6 +29186,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10049931,
                                 content: "Now arriving at Platform 7: the Dismania service to Icelake. This train terminates here.",
                                 voice: "story/1004/100499/1928B0CE",
+                                speakerName: "PA System",
                             },
                         ],
                     },
@@ -28764,12 +29201,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Heads up. Train's about to pull in at Platform 7. As soon as it stops, get the badly wounded straight to the infirmary!",
                                 voice: "story/1004/100499/1928B0F8",
+                                speakerName: "Nosy Station Guard",
                             },
                             {
                                 id: 10049933,
                                 content:
                                     "Yeah, brilliant. Platform 7's the furthest from the infirmary. Let's have the badly injured haul themselves over a footbridge. What were they thinking?",
                                 voice: "story/1004/100499/1928B122",
+                                speakerName: "Gossipy Station Guard",
                             },
                             {
                                 id: 10049934,
@@ -28856,12 +29295,14 @@ export const questData_en: QuestStory[] = [
                                     "This is it... the 13th Legion special. The Jackdaw. I'll never get tired of looking at it. Built like a fortress — just like the books said. All that time digging through old records was totally worth it.",
                                 voice: "story/1004/100418/19237AFA",
                                 npc: 100415,
+                                speakerName: "Train-loving Child",
                             },
                             {
                                 id: 10041802,
                                 content: "If I could ride it... just once...",
                                 voice: "story/1004/100418/19237B24",
                                 npc: 100415,
+                                speakerName: "Train-loving Child",
                             },
                             {
                                 id: 10041803,
@@ -28874,6 +29315,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I'm not doing anything! I'm just looking...",
                                 voice: "story/1004/100418/19237B78",
                                 npc: 100415,
+                                speakerName: "Train-loving Child",
                             },
                             {
                                 id: 10041805,
@@ -28886,6 +29328,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Got it. Thank you, sir.",
                                 voice: "story/1004/100418/19237BCC",
                                 npc: 100415,
+                                speakerName: "Train-loving Child",
                             },
                             {
                                 id: 10041807,
@@ -28942,6 +29385,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10041817,
                                 content: "Now arriving at Platform 3: the Scarletriver service to Icelake. This train terminates here.",
                                 voice: "story/1004/100418/19237D9A",
+                                speakerName: "PA System",
                             },
                         ],
                     },
@@ -28961,12 +29405,14 @@ export const questData_en: QuestStory[] = [
                                 content: "...Thanks. I was so caught up in watching the Jackdaw, I didn't even clock the crowd.",
                                 voice: "story/1004/100419/19238B62",
                                 npc: 100415,
+                                speakerName: "Train-loving Child",
                             },
                             {
                                 id: 10041902,
                                 content: "You're here for it too, aren't you? Knew it. Railway buffs are always nice people!",
                                 voice: "story/1004/100419/19238B8C",
                                 npc: 100415,
+                                speakerName: "Train-loving Child",
                             },
                             {
                                 id: 10041903,
@@ -28980,12 +29426,14 @@ export const questData_en: QuestStory[] = [
                                     "Uh-huh! That's Chief Sibylle Mason's special train. The 13th Legion doesn't stay put, so it turns up wherever they do.",
                                 voice: "story/1004/100419/19238BE0",
                                 npc: 100415,
+                                speakerName: "Train-loving Child",
                             },
                             {
                                 id: 10041905,
                                 content: "Railway buffs say spotting it brings good luck.",
                                 voice: "story/1004/100419/19238C0A",
                                 npc: 100415,
+                                speakerName: "Train-loving Child",
                             },
                             {
                                 id: 10041906,
@@ -28999,6 +29447,7 @@ export const questData_en: QuestStory[] = [
                                     "I don't think so. I've never met her, but the train's been sitting here for almost a month. If she were aboard, you'd notice.",
                                 voice: "story/1004/100419/19238C5E",
                                 npc: 100415,
+                                speakerName: "Train-loving Child",
                             },
                             {
                                 id: 10041908,
@@ -29012,6 +29461,7 @@ export const questData_en: QuestStory[] = [
                                     "Pretty much. I clean the roof steelwork in the main hall. I'm Stéphane — and I'm obsessed with trains!",
                                 voice: "story/1004/100419/19238CB2",
                                 npc: 100415,
+                                speakerName: "Train-loving Child",
                             },
                             {
                                 id: 10041910,
@@ -29352,6 +29802,7 @@ export const questData_en: QuestStory[] = [
                                     "Attention, passengers at Bloomfield Station. Service announcement: the night train to Aethyrie is scheduled to depart at 19:00. Please make your way to the platform...",
                                 voice: "story/1004/100422/1923BD42",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10042206,
@@ -29365,6 +29816,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Please make your way to the platform and prepare to board... or don't!",
                                 voice: "story/1004/100422/1923BD96",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10042208,
@@ -29372,6 +29824,7 @@ export const questData_en: QuestStory[] = [
                                     'Listen up, lapdogs of the Hyperborean Legions. In the name of the Forsakens, I demand the release of the "special prisoner" you intend to transfer. She walks free at midnight. We will be the ones to take her.',
                                 voice: "story/1004/100422/1923BDC0",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10042209,
@@ -29379,6 +29832,7 @@ export const questData_en: QuestStory[] = [
                                     "You can refuse, of course. If you do... you'll get a magnificent fireworks show right here at Bloomfield Station. And I promise you, it'll be even more unforgettable than the one you saw at the opera house.",
                                 voice: "story/1004/100422/1923BDEA",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                         ],
                     },
@@ -29483,6 +29937,7 @@ export const questData_en: QuestStory[] = [
                                 id: 100499158,
                                 content: "You three! What do you think you're doing?",
                                 voice: "story/1004/100499/100499158",
+                                speakerName: "Station Guard",
                             },
                             {
                                 id: 100499159,
@@ -30040,6 +30495,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Enough.",
                                 voice: "story/1004/100426/1923FF36",
                                 npc: 100404,
+                                speakerName: "An Elegant Voice",
                             },
                             {
                                 id: 10042608,
@@ -30079,6 +30535,7 @@ export const questData_en: QuestStory[] = [
                                     "I appreciate the concern. But I will state this plainly: these people are not responsible for the explosion. They are not with the Forsakens.",
                                 voice: "story/1004/100426/19240032",
                                 npc: 100404,
+                                speakerName: "An Elegant Voice",
                             },
                             {
                                 id: 10042614,
@@ -30140,6 +30597,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Is this what Imperial duty means to you?",
                                 voice: "story/1004/100426/192401AC",
                                 npc: 100404,
+                                speakerName: "An Elegant Voice",
                             },
                             {
                                 id: 10042623,
@@ -30153,6 +30611,7 @@ export const questData_en: QuestStory[] = [
                                 content: "People are not parts.",
                                 voice: "story/1004/100426/19240200",
                                 npc: 100404,
+                                speakerName: "An Elegant Voice",
                             },
                             {
                                 id: 10042625,
@@ -30218,6 +30677,7 @@ export const questData_en: QuestStory[] = [
                                     "They're gone. There is still time before nightfall. Clear your names while you can. But first — come to my carriage. I imagine you have questions.",
                                 voice: "story/1004/100426/192403A4",
                                 npc: 100404,
+                                speakerName: "An Elegant Voice",
                             },
                         ],
                     },
@@ -30235,6 +30695,7 @@ export const questData_en: QuestStory[] = [
                                     "The inner carriages contain confidential Legion material. I must ask you to stop here. That said... set one concern aside. I am not your enemy.",
                                 voice: "story/1004/100427/19240EA2",
                                 npc: 100404,
+                                speakerName: "An Elegant Voice",
                             },
                             {
                                 id: 10042702,
@@ -30242,6 +30703,7 @@ export const questData_en: QuestStory[] = [
                                     "And you need not trouble yourself over your companion's safety. Eisenbahn is an Imperial official. He is not a man who spills blood lightly.",
                                 voice: "story/1004/100427/19240ECC",
                                 npc: 100404,
+                                speakerName: "An Elegant Voice",
                             },
                             {
                                 id: 10042703,
@@ -30254,6 +30716,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I'm here to oversee 13th Legion matters in Icelake. I've crossed paths with you more than once.",
                                 voice: "story/1004/100427/19240F20",
                                 npc: 100404,
+                                speakerName: "An Elegant Voice",
                             },
                             {
                                 id: 10042706,
@@ -30261,6 +30724,7 @@ export const questData_en: QuestStory[] = [
                                     "I do not yet know what brings you to this station. But I would rather not see a capable Phoxhunter ground down by bureaucracy. If you wish to call it kindness, you may. In truth, it is simply that I value talent.",
                                 voice: "story/1004/100427/19240F74",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                                 options: [
                                     {
                                         id: 10042707,
@@ -30288,6 +30752,7 @@ export const questData_en: QuestStory[] = [
                                     "You may see it that way. On occasion, I require capable people to act where I cannot. And you have proven yourself capable.",
                                 voice: "story/1004/100427/1924101C",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042711,
@@ -30295,12 +30760,14 @@ export const questData_en: QuestStory[] = [
                                     "A practical question. Yes — there is something I will ask of you. But first, clear your name and get yourself out of this mess.",
                                 voice: "story/1004/100427/19241046",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042712,
                                 content: "You're too kind. I act in my own interest, when it's prudent.",
                                 voice: "story/1004/100427/19241070",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042713,
@@ -30308,6 +30775,7 @@ export const questData_en: QuestStory[] = [
                                     "Now go. Find something solid enough to clear your name. Eisenbahn will not harm Outsider for the moment... but his patience is not infinite.",
                                 voice: "story/1004/100427/1924109A",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042714,
@@ -30320,12 +30788,14 @@ export const questData_en: QuestStory[] = [
                                 content: "...Phoxhunter.",
                                 voice: "story/1004/100427/192410EE",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042716,
                                 content: "When you have the culprit, return to me. I would hear it from you directly.",
                                 voice: "story/1004/100427/19241118",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042717,
@@ -30361,6 +30831,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Why are you still standing about? You heard Her Ladyship — time's against you. Move.",
                                 voice: "story/1004/100428/19241F5E",
                                 npc: 100403,
+                                speakerName: "Familiar Voice",
                             },
                             {
                                 id: 10042804,
@@ -30400,6 +30871,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yes. Hilda serves me. I asked her to assist you. The sooner Outsider is recovered, the better.",
                                 voice: "story/1004/100428/1924205A",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042810,
@@ -30407,6 +30879,7 @@ export const questData_en: QuestStory[] = [
                                     "It was she who informed me that you attempted to approach the Jackdaw... and were promptly treated as suspects.",
                                 voice: "story/1004/100428/19242084",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042811,
@@ -30414,6 +30887,7 @@ export const questData_en: QuestStory[] = [
                                     "With her help, you should have little difficulty locating the Forsakens. Though I must warn you — her tongue can be sharp. It is a longstanding habit. Do not take it to heart.",
                                 voice: "story/1004/100428/192420AE",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042812,
@@ -30428,6 +30902,7 @@ export const questData_en: QuestStory[] = [
                                     "You need not worry for me. If they had the means to reach me, they would not be broadcasting threats over the PA.",
                                 voice: "story/1004/100428/19242102",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042814,
@@ -30440,6 +30915,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Hilda. Helping them find the culprit is, at present, the most efficient way to protect me.",
                                 voice: "story/1004/100428/19242156",
                                 npc: 100404,
+                                speakerName: "Imperial Overseer",
                             },
                             {
                                 id: 10042816,
@@ -31137,12 +31613,14 @@ export const questData_en: QuestStory[] = [
                                     "So that little scene on the platform was your handiwork. Neat work — quick hands, and quick thinking.",
                                 voice: "story/1004/100420/19239BCA",
                                 npc: 100403,
+                                speakerName: "Mysterious Woman",
                             },
                             {
                                 id: 10042002,
                                 content: "Let's be civil. We lower our weapons at the same time. Deal?",
                                 voice: "story/1004/100420/19239BF4",
                                 npc: 100403,
+                                speakerName: "Mysterious Woman",
                             },
                             {
                                 id: 10042003,
@@ -31163,6 +31641,7 @@ export const questData_en: QuestStory[] = [
                                     "You flatter me, sir. I'd say we were both trying to avoid a mess. I've no intention of harming either of you... not until I know who you are.",
                                 voice: "story/1004/100420/19239C72",
                                 npc: 100403,
+                                speakerName: "Mysterious Woman",
                             },
                             {
                                 id: 10042006,
@@ -31170,6 +31649,7 @@ export const questData_en: QuestStory[] = [
                                     "So. Why are you snooping around this train? Were you hired by the Legion to do something unpleasant? Or are you... friends of the Forsakens?",
                                 voice: "story/1004/100420/19239C9C",
                                 npc: 100403,
+                                speakerName: "Mysterious Woman",
                             },
                             {
                                 id: 10042007,
@@ -31177,6 +31657,7 @@ export const questData_en: QuestStory[] = [
                                     'My name is Hilda. Just a maid. Depending on your answer, I\'ll decide how to "receive" you — quietly, and without needless pain.',
                                 voice: "story/1004/100420/19239CC6",
                                 npc: 100403,
+                                speakerName: "Mysterious Woman",
                             },
                             {
                                 id: 10042008,
@@ -32360,12 +32841,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Attention please. Following further investigation, the Phoxhunter detained earlier has been cleared. The suspect in the explosion has now been identified as the storehouse keeper, Stiller. He is believed to have acted in league with the Forsakens.",
                                 voice: "story/1004/100439/1924D382",
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10043902,
                                 content:
                                     "Stiller has been taken into custody. Please remain calm. Passengers will be free to leave once today's questioning is complete.",
                                 voice: "story/1004/100439/1924D3AC",
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10043903,
@@ -32426,6 +32909,7 @@ export const questData_en: QuestStory[] = [
                                     "Ha. I knew there was something off about that bloke. He's always stomping about with that long face, like everyone's wronged him. And every time I need something from the storehouse, he grills me like I'm a criminal.",
                                 voice: "story/1004/100440/1924E414",
                                 npc: 100422,
+                                speakerName: "Gloating Guard",
                                 next: 10044003,
                             },
                             {
@@ -32433,6 +32917,7 @@ export const questData_en: QuestStory[] = [
                                 content: "If you told me anyone else was the inside man, I wouldn't believe it. Him? Yeah. That tracks.",
                                 voice: "story/1004/100440/1924E43E",
                                 npc: 100422,
+                                speakerName: "Gloating Guard",
                                 next: 10044004,
                             },
                             {
@@ -32440,6 +32925,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ha! Never liked the bloke.",
                                 voice: "story/1004/100440/1924E468",
                                 npc: 100422,
+                                speakerName: "Gloating Guard",
                                 next: 10044005,
                             },
                             {
@@ -32469,6 +32955,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Hold on. Hear me out first. Whatever you've got, mine's more explosive.",
                                 voice: "story/1004/100441/1924F47C",
                                 npc: 100422,
+                                speakerName: "Mysterious Guard",
                             },
                             {
                                 id: 10044103,
@@ -32482,6 +32969,7 @@ export const questData_en: QuestStory[] = [
                                     "Stiller's finally gone and done it. You know, the bloke who's always pulling rank. They're saying he was behind the blast. I mean, I can see how it happens. Sit where he's sat long enough and you'd be bitter too.",
                                 voice: "story/1004/100441/1924F4D0",
                                 npc: 100421,
+                                speakerName: "Mysterious Guard",
                             },
                             {
                                 id: 10044105,
@@ -32489,6 +32977,7 @@ export const questData_en: QuestStory[] = [
                                     "He and Stationmaster Eisenbahn left the Legion around the same time and ended up here. Stiller used to be Eisenbahn's superior, you know.",
                                 voice: "story/1004/100441/1924F4FA",
                                 npc: 100421,
+                                speakerName: "Mysterious Guard",
                             },
                             {
                                 id: 10044106,
@@ -32496,6 +32985,7 @@ export const questData_en: QuestStory[] = [
                                     "Now look at them. Eisenbahn runs the place, Stiller keeps watch in the storehouse. That sort of thing eats at a man.",
                                 voice: "story/1004/100441/1924F524",
                                 npc: 100421,
+                                speakerName: "Mysterious Guard",
                             },
                             {
                                 id: 10044107,
@@ -32503,6 +32993,7 @@ export const questData_en: QuestStory[] = [
                                     "Me, I'd grumble, sure, but I wouldn't go that far. He's got no wife, no kids... nothing to pull him back when he starts going off the rails.",
                                 voice: "story/1004/100441/1924F54E",
                                 npc: 100421,
+                                speakerName: "Mysterious Guard",
                             },
                             {
                                 id: 10044108,
@@ -32510,6 +33001,7 @@ export const questData_en: QuestStory[] = [
                                     "That's why you need family. My little girl's smile is what gets me through every shift. Want to see her photo?",
                                 voice: "story/1004/100441/1924F578",
                                 npc: 100421,
+                                speakerName: "Mysterious Guard",
                             },
                             {
                                 id: 10044109,
@@ -32522,6 +33014,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Wait... weren't you gonna ask me something?",
                                 voice: "story/1004/100441/1924F5CC",
                                 npc: 100421,
+                                speakerName: "Mysterious Guard",
                             },
                         ],
                     },
@@ -32544,6 +33037,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Mm. Awful taste. And he's even worse after a few glasses.",
                                 voice: "story/1004/100442/192504E4",
                                 npc: 100443,
+                                speakerName: "Tipsy Worker",
                             },
                             {
                                 id: 10044203,
@@ -32551,6 +33045,7 @@ export const questData_en: QuestStory[] = [
                                     "Not proud of it, but my only hobby is a drink or two after my shift. Just enough to take the edge off and leave me nicely buzzed.",
                                 voice: "story/1004/100442/1925050E",
                                 npc: 100443,
+                                speakerName: "Tipsy Worker",
                             },
                             {
                                 id: 10044204,
@@ -32558,6 +33053,7 @@ export const questData_en: QuestStory[] = [
                                     "So anyone in the station who likes a proper pint, I know them. We go out in small groups and take turns buying. It's not a written rule, but most people have the decency to stick to it.",
                                 voice: "story/1004/100442/19250538",
                                 npc: 100443,
+                                speakerName: "Tipsy Worker",
                             },
                             {
                                 id: 10044205,
@@ -32565,6 +33061,7 @@ export const questData_en: QuestStory[] = [
                                     "Except Stiller. Never buys a round. Not once. And he only drinks what he drank in the Legion — Legion Wolfblood. Stuff's so strong they say it doubles as a disinfectant on the battlefield.",
                                 voice: "story/1004/100442/19250562",
                                 npc: 100443,
+                                speakerName: "Tipsy Worker",
                             },
                             {
                                 id: 10044206,
@@ -32572,6 +33069,7 @@ export const questData_en: QuestStory[] = [
                                     "Once he's had enough, he starts going on about how good he was back in the Legion, and how this job's beneath him.",
                                 voice: "story/1004/100442/1925058C",
                                 npc: 100443,
+                                speakerName: "Tipsy Worker",
                             },
                             {
                                 id: 10044207,
@@ -32579,12 +33077,14 @@ export const questData_en: QuestStory[] = [
                                     "Then he starts slagging everything off. Says everyone's lazy, no one's got a sense of urgency, and the Empire's rotten to the core. That sort of thing.",
                                 voice: "story/1004/100442/192505B6",
                                 npc: 100443,
+                                speakerName: "Tipsy Worker",
                             },
                             {
                                 id: 10044208,
                                 content: "Truth is, we drink because life's hard. Nobody comes to a tavern for a lecture.",
                                 voice: "story/1004/100442/192505E0",
                                 npc: 100443,
+                                speakerName: "Tipsy Worker",
                             },
                             {
                                 id: 10044209,
@@ -32592,6 +33092,7 @@ export const questData_en: QuestStory[] = [
                                     "So yeah, I don't like that bloke. Still... didn't think he had that in him. Guess he's got some fight left. Didn't see that coming.",
                                 voice: "story/1004/100442/1925060A",
                                 npc: 100443,
+                                speakerName: "Tipsy Worker",
                             },
                             {
                                 id: 10044210,
@@ -33557,6 +34058,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Mind your place. My uncle's concerns are not yours to guess.",
                                 voice: "story/1004/100450/192588A2",
                                 npc: 100404,
+                                speakerName: "Princess Flodia",
                             },
                             {
                                 id: 10045006,
@@ -33564,6 +34066,7 @@ export const questData_en: QuestStory[] = [
                                     "As for them, they are friends I made during my brief taste of freedom in Icelake. You may have heard of a newly formed Phoxhunter team in the eastern district — the Noctoyagers.",
                                 voice: "story/1004/100450/192588CC",
                                 npc: 100404,
+                                speakerName: "Princess Flodia",
                             },
                             {
                                 id: 10045007,
@@ -33571,12 +34074,14 @@ export const questData_en: QuestStory[] = [
                                     "They dealt with the recent Deteriorator outbreak there, and they assisted the 13th Legion during the Charon Hunt. That is how we came to know one another.",
                                 voice: "story/1004/100450/192588F6",
                                 npc: 100404,
+                                speakerName: "Princess Flodia",
                             },
                             {
                                 id: 10045008,
                                 content: "Since I am to be sent back to Dismania, it is only natural that they should see me off.",
                                 voice: "story/1004/100450/19258920",
                                 npc: 100404,
+                                speakerName: "Princess Flodia",
                             },
                             {
                                 id: 10045009,
@@ -33584,6 +34089,7 @@ export const questData_en: QuestStory[] = [
                                     "And as you can see, the 13th Legion is posted all around this carriage. I am not going anywhere. If that still fails to reassure you, feel free to post more of your guards around the Jackdaw. Once we have said our farewells, you can withdraw them.",
                                 voice: "story/1004/100450/1925894A",
                                 npc: 100404,
+                                speakerName: "Princess Flodia",
                             },
                             {
                                 id: 10045010,
@@ -33597,6 +34103,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Very well. Once that is done, join me inside.",
                                 voice: "story/1004/100450/1925899E",
                                 npc: 100404,
+                                speakerName: "Princess Flodia",
                             },
                         ],
                     },
@@ -34452,6 +34959,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Attention, please. Regarding the recent explosion, station security has completed an initial investigation and apprehended a suspect. The suspect is male and claims to be a Phoxhunter. He is currently being questioned.",
                                 voice: "story/1004/100438/1924C566",
+                                speakerName: "PA System",
                                 next: 10043816,
                             },
                             {
@@ -34459,6 +34967,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Please remain calm. Your safety is our highest priority. If you have any further information, please speak to station staff as soon as possible.",
                                 voice: "story/1004/100438/1924C590",
+                                speakerName: "PA System",
                                 next: 10043817,
                             },
                             {
@@ -37390,6 +37899,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     '"Aurora Express under attack by the Forsakens. Guard detail below minimum strength. Requesting immediate airship reinforcement!"',
                                 voice: "story/1004/100474/19271334",
+                                speakerName: "The conductor's voice",
                             },
                             {
                                 id: 10047411,
@@ -37408,6 +37918,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ahem... may I have a moment of your time, please?",
                                 voice: "story/1004/100474/192713B2",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047414,
@@ -37421,6 +37932,7 @@ export const questData_en: QuestStory[] = [
                                     "This is Katya, speaking on behalf of the Forsakens. I have some very good news. Try not to get too excited — the train's already in motion. Mind your step.",
                                 voice: "story/1004/100474/19271406",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047416,
@@ -37428,6 +37940,7 @@ export const questData_en: QuestStory[] = [
                                     "This train has been chosen by the Forsakens. We've fitted it with bombs, and it's now racing at full speed towards the capital.",
                                 voice: "story/1004/100474/19271430",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047417,
@@ -37435,6 +37948,7 @@ export const questData_en: QuestStory[] = [
                                     "At our destination — Dismania — the blast will ignite those factories stuffed with Phoxichor. The result? A grand fireworks display. A splash of colour against the night sky. A lovely way to wake the nobles from their sweet dreams. A pleasant surprise, wouldn't you say?",
                                 voice: "story/1004/100474/1927145A",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047418,
@@ -37442,6 +37956,7 @@ export const questData_en: QuestStory[] = [
                                     'Now, now. Don\'t cry. And spare me the speeches, my dear Imperial citizens. For a thousand years the Empire has ground the Charon under its heel. Yes, there were brief moments of "kindness", and we were foolish enough to believe them...',
                                 voice: "story/1004/100474/19271484",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047419,
@@ -37449,6 +37964,7 @@ export const questData_en: QuestStory[] = [
                                     "Whether it was the Night of Lamenting Lake a millennium ago, or the Scarlet Supper more recently, you tore up the treaty of alliance again and again — and sank your fangs into our brothers and sisters.",
                                 voice: "story/1004/100474/192714AE",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047420,
@@ -37456,6 +37972,7 @@ export const questData_en: QuestStory[] = [
                                     'You started to think it was enough to say, "Die," and every Charon would obediently lie down under your blade.',
                                 voice: "story/1004/100474/192714D8",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047421,
@@ -37463,6 +37980,7 @@ export const questData_en: QuestStory[] = [
                                     "What a shame — not this time. And soon you'll learn something else: that precious Empire of yours is far more fragile than you like to pretend.",
                                 voice: "story/1004/100474/19271502",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047422,
@@ -37470,6 +37988,7 @@ export const questData_en: QuestStory[] = [
                                     "People love to say Hyperborea is a roaring war chariot. Fine. Then watch the Forsakens demonstrate how easily a chariot breaks — just like this train.",
                                 voice: "story/1004/100474/1927152C",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047423,
@@ -37477,6 +37996,7 @@ export const questData_en: QuestStory[] = [
                                     "All right. That's enough to frighten the children. Here are my instructions: stop resisting, stay where you are, and await your fate.",
                                 voice: "story/1004/100474/19271556",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047424,
@@ -37484,6 +38004,7 @@ export const questData_en: QuestStory[] = [
                                     "The only guard on board has already been dealt with. Now it's just the Forsakens keeping you company. So enjoy the ride — a journey full of surprises, thrills... and a truly explosive finale.",
                                 voice: "story/1004/100474/19271580",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                         ],
                     },
@@ -37582,6 +38103,7 @@ export const questData_en: QuestStory[] = [
                                 content: "*cough*",
                                 voice: "story/1004/100475/1927241A",
                                 npc: 100418,
+                                speakerName: "Faint Voice",
                             },
                             {
                                 id: 10047514,
@@ -37654,6 +38176,7 @@ export const questData_en: QuestStory[] = [
                                     "Don't resist. We don't start a job unless we've already stacked the deck. Try to fight back, and it'll get ugly.",
                                 voice: "story/1004/100476/192733DA",
                                 npc: 100413,
+                                speakerName: "PA System",
                             },
                             {
                                 id: 10047610,
@@ -37954,11 +38477,13 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Extremists aboard the Aurora Express — this is the 6th Legion. Cease all resistance. Abort your operation immediately. You are under target lock.",
                                 voice: "story/1004/100482/19279578",
+                                speakerName: "Airship commander",
                             },
                             {
                                 id: 10048205,
                                 content: "The Empire will not accept your demands. This is the only answer you will get.",
                                 voice: "story/1004/100482/192795A2",
+                                speakerName: "Airship commander",
                             },
                             {
                                 id: 10048206,
@@ -38794,6 +39319,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10048304,
                                 content: "The Forsakens are deceitful fanatics. The Empire has no reason to trust you.",
                                 voice: "story/1004/100483/1927A5E0",
+                                speakerName: "Airship commander",
                             },
                             {
                                 id: 10048305,
@@ -38826,17 +39352,20 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "If you're Princess Flodia, then I'm Emperor Julius. The princess is on the Jackdaw, heading for the capital. Nice try.",
                                 voice: "story/1004/100483/1927A6B2",
+                                speakerName: "Airship commander",
                             },
                             {
                                 id: 10048310,
                                 content: "Why should I believe you? You don't have any proof.",
                                 voice: "story/1004/100483/1927A6DC",
+                                speakerName: "Airship commander",
                             },
                             {
                                 id: 10048311,
                                 content:
                                     "And if you really are the princess, why reveal yourself after escaping the Jackdaw? Shouldn't you be hiding somewhere?",
                                 voice: "story/1004/100483/1927A706",
+                                speakerName: "Airship commander",
                             },
                             {
                                 id: 10048312,
@@ -38908,6 +39437,7 @@ export const questData_en: QuestStory[] = [
                                     "You've got nerve climbing up here, kid. Give it a few years and you'll be a tough nut at the card table. And something this exciting? No chance I'm missing it.",
                                 voice: "story/1004/100483/1927A8D4",
                                 npc: 100430,
+                                speakerName: "Dmitri, Ironworker",
                             },
                             {
                                 id: 10048323,
@@ -38915,6 +39445,7 @@ export const questData_en: QuestStory[] = [
                                     "More coming up behind me — my new betting buddy. Told you that lass was a big deal. That's another win for me.",
                                 voice: "story/1004/100483/1927A8FE",
                                 npc: 100430,
+                                speakerName: "Dmitri, Ironworker",
                             },
                             {
                                 id: 10048324,
@@ -38929,6 +39460,7 @@ export const questData_en: QuestStory[] = [
                                     "All right. This isn't the time for that. Titus Fastus, Viscount. Nothing to do with the Forsakens. If you've got any sense up there, stop firing!",
                                 voice: "story/1004/100483/1927A952",
                                 npc: 100439,
+                                speakerName: "Titus Fastus, Viscount",
                             },
                             {
                                 id: 10048326,
@@ -38936,6 +39468,7 @@ export const questData_en: QuestStory[] = [
                                     "C—Commander, I—I'm Baron Cuprius, second of my line. Not with the Forsakens... I—I order you to cease fire.",
                                 voice: "story/1004/100483/1927A97C",
                                 npc: 100441,
+                                speakerName: "Baron Cuprius",
                             },
                             {
                                 id: 10048327,
@@ -38950,6 +39483,7 @@ export const questData_en: QuestStory[] = [
                                     "Oi, you lot in the airship! If you don't want trouble for this, turn back and go home! Cheddar Bacon — Loaf & Love Bakery, Bloomfield Station. Not with the Forsakens!",
                                 voice: "story/1004/100483/1927A9D0",
                                 npc: 100431,
+                                speakerName: "Cheddar Bacon, Loaf & Love Bakery",
                             },
                             {
                                 id: 10048329,
@@ -38963,6 +39497,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Susanna. Seamstress, Mist Aken, Icelake. Not with the Forsakens!",
                                 voice: "story/1004/100483/1927AA24",
                                 npc: 100433,
+                                speakerName: "Susanna, Seamstress",
                             },
                             {
                                 id: 10048331,
@@ -38975,35 +39510,41 @@ export const questData_en: QuestStory[] = [
                                 content: "Lebon. Sewer repairman, Icelake. Not with the Forsakens!",
                                 voice: "story/1004/100483/1927AA78",
                                 npc: 100426,
+                                speakerName: "Unkempt Uncle Lebon",
                             },
                             {
                                 id: 10048333,
                                 content: "Livia. Editor-in-Chief of The Hyperborea Daily.",
                                 voice: "story/1004/100483/1927AAA2",
                                 npc: 100440,
+                                speakerName: "Livia, Editor-in-Chief",
                             },
                             {
                                 id: 10048334,
                                 content: "Iris. Wandering bard.",
                                 voice: "story/1004/100483/1927AACC",
                                 npc: 100435,
+                                speakerName: "Iris, Wandering Bard",
                             },
                             {
                                 id: 10048335,
                                 content: "Miranda. Justiciar of Dismania.",
                                 voice: "story/1004/100483/1927AAF6",
                                 npc: 100442,
+                                speakerName: "Miranda, Justiciar",
                             },
                             {
                                 id: 10048336,
                                 content: "Hannah. Laundrywoman, Icelake.",
                                 voice: "story/1004/100483/1927AB20",
                                 npc: 100434,
+                                speakerName: "Hannah, Laundrywoman",
                             },
                             {
                                 id: 10048337,
                                 content: "None of us are with the Forsakens!",
                                 voice: "story/1004/100483/1927AB4A",
+                                speakerName: "Crowd",
                             },
                             {
                                 id: 10048338,
@@ -39022,6 +39563,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10048340,
                                 content: "...",
                                 voice: "story/1004/100483/1927ABC8",
+                                speakerName: "Airship commander",
                             },
                             {
                                 id: 10048341,
@@ -39033,12 +39575,14 @@ export const questData_en: QuestStory[] = [
                                 id: 10048342,
                                 content: "Cease fire! Verify Princess Flodia's presence aboard the Jackdaw!",
                                 voice: "story/1004/100483/1927AC1C",
+                                speakerName: "Airship commander",
                             },
                             {
                                 id: 10048343,
                                 content:
                                     "You're safe for now. I've never seen nobles and commoners stand together like this. I didn't think anyone but royalty could pull it off.",
                                 voice: "story/1004/100483/1927AC46",
+                                speakerName: "Airship commander",
                             },
                             {
                                 id: 10048344,
@@ -39206,6 +39750,7 @@ export const questData_en: QuestStory[] = [
                                 id: 10048506,
                                 content: "Anti-air system online. Aurora Express main gun loading.",
                                 voice: "story/1004/100485/1927C704",
+                                speakerName: "???",
                             },
                             {
                                 id: 10048507,
@@ -39217,11 +39762,13 @@ export const questData_en: QuestStory[] = [
                                 id: 10048508,
                                 content: "Round loaded. Computing firing solution.",
                                 voice: "story/1004/100485/1927C758",
+                                speakerName: "???",
                             },
                             {
                                 id: 10048509,
                                 content: "Solution confirmed. Preparing to fire.",
                                 voice: "story/1004/100485/1927C782",
+                                speakerName: "???",
                             },
                             {
                                 id: 10048510,
@@ -39233,16 +39780,19 @@ export const questData_en: QuestStory[] = [
                                 id: 10048511,
                                 content: "Three...",
                                 voice: "story/1004/100485/1927C7D6",
+                                speakerName: "???",
                             },
                             {
                                 id: 10048512,
                                 content: "Two...",
                                 voice: "story/1004/100485/1927C800",
+                                speakerName: "???",
                             },
                             {
                                 id: 10048513,
                                 content: "One...",
                                 voice: "story/1004/100485/1927C82A",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -39256,6 +39806,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Power unit hit. Steering failure. We've lost control of the airship. All crew — evacuate immediately.",
                                 voice: "story/1004/100486/1927D69A",
+                                speakerName: "Airship commander",
                             },
                             {
                                 id: 10048602,
@@ -39657,12 +40208,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Breaking news. Earlier today, the Forsakens seized the Aurora Express on the southern edge of the Cocytus Region. An Imperial airship moved in to intervene. The hijackers responded by firing the train-mounted cannon.",
                                 voice: "story/1004/100490/19281936",
+                                speakerName: "Radio",
                             },
                             {
                                 id: 10049008,
                                 content:
                                     "The airship was hit and detonated near a massive Heaventree, setting it alight. This is the second Heaventree fire reported this year. The 6th Legion has dispatched additional units. All Aurora Express passengers remain unaccounted for. Their condition is unknown.",
                                 voice: "story/1004/100490/19281960",
+                                speakerName: "Radio",
                             },
                             {
                                 id: 10049009,
@@ -39675,6 +40228,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ma'am? Is my Tales of Icelake ready?",
                                 voice: "story/1004/100490/192819B4",
                                 npc: 100414,
+                                speakerName: "Bard in Waiting",
                             },
                             {
                                 id: 10049011,
@@ -39682,12 +40236,14 @@ export const questData_en: QuestStory[] = [
                                     "My friend and I are heading out today, so we wanted something that tastes like Icelake. Something to remember this place by.",
                                 voice: "story/1004/100490/192819DE",
                                 npc: 100414,
+                                speakerName: "Bard in Waiting",
                             },
                             {
                                 id: 10049012,
                                 content: "...Ma'am?",
                                 voice: "story/1004/100490/19281A08",
                                 npc: 100414,
+                                speakerName: "Bard in Waiting",
                             },
                             {
                                 id: 10049013,
@@ -40193,12 +40749,14 @@ export const questData_en: QuestStory[] = [
                                 content: "Halogi didn't have to die.",
                                 voice: "story/1004/100493/19284972",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049302,
                                 content: "You still can't help making things messy... same as the first time we met, Beast-King.",
                                 voice: "story/1004/100493/1928499C",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049303,
@@ -40219,12 +40777,14 @@ export const questData_en: QuestStory[] = [
                                     '"Beast-King" doesn\'t mean whipping mindless animals into a frenzy. It means teaching them to wait in the dark. To sharpen claws and fangs. To strike at the right moment — and kill in one blow.',
                                 voice: "story/1004/100493/19284A1A",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049306,
                                 content: "Your anger keeps leading you into pointless choices, Katya.",
                                 voice: "story/1004/100493/19284A44",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049307,
@@ -40244,12 +40804,14 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1004/100493/19284AC2",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049310,
                                 content: "Mind your place, Beast-King.",
                                 voice: "story/1004/100493/19284AEC",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049311,
@@ -40269,6 +40831,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Listen, Katya.",
                                 voice: "story/1004/100493/19284B6A",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049314,
@@ -40276,12 +40839,14 @@ export const questData_en: QuestStory[] = [
                                     "Their deaths weren't pointless. The burning Heaventree has torn open the Empire's sky, and the fire won't stop here. Soon we won't have to fear those skyborne leviathans hunting us at their leisure.",
                                 voice: "story/1004/100493/19284B94",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049315,
                                 content: "What comes now... is war. And this time, we won't hesitate. We won't show mercy.",
                                 voice: "story/1004/100493/19284BBE",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049316,
@@ -40289,6 +40854,7 @@ export const questData_en: QuestStory[] = [
                                     "You were right. The war never truly ended. We suffered in silence until now. And when it finally ends... either the Hyperborean Empire, or the Forsakens, will turn to ash.",
                                 voice: "story/1004/100493/19284BE8",
                                 npc: 100446,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -40311,6 +40877,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...You're awake.",
                                 voice: "story/1004/100498/19289B7A",
                                 npc: 100414,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049802,
@@ -40318,6 +40885,7 @@ export const questData_en: QuestStory[] = [
                                     "I remember you. We met in Icelake. You must've been in the water for hours — you were barely breathing... but you're safe now.",
                                 voice: "story/1004/100498/19289BA4",
                                 npc: 100414,
+                                speakerName: "???",
                             },
                             {
                                 id: 10049803,
@@ -40325,6 +40893,7 @@ export const questData_en: QuestStory[] = [
                                     "Welcome aboard the Farwind, {性别：sir|miss}. You're a magnificent unicorn, wandering across the tundra.",
                                 voice: "story/1004/100498/19289BCE",
                                 npc: 100414,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -40438,6 +41007,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11010102,
                                 content: "<W>...That giant beast blocked your path, its grip tightening around your throat.</>",
                                 voice: "story/1002/110101/1B9008DC",
+                                speakerName: "???",
                                 next: 11010103,
                             },
                             {
@@ -40445,6 +41015,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "<W>Your body shakes as you suffocate, sharp pains triggering the deepest desire within your soul.</>",
                                 voice: "story/1002/110101/1B900906",
+                                speakerName: "???",
                                 next: 11010104,
                             },
                             {
@@ -40465,6 +41036,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "<W>Kill it. Listen to its death throes, bathe in its blood, and embrace the sweet release of death.</>",
                                 voice: "story/1002/110101/1B900984",
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 11010107,
@@ -40701,6 +41273,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "<W>Your hands are drenched in wet, slimy filth, uncertain whether it's the Filthoid's secretions or its innards. Yet, a sudden joy tingles through your soul, bringing an inexplicable elation.</>",
                                 voice: "story/1002/110102/1B901A40",
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 11010209,
@@ -40714,6 +41287,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "<W>Do not resist, because I am what you actually are. I am your instinct for death. One day you shall follow my lead and obey the ancient will...</>",
                                 voice: "story/1002/110102/1B901A94",
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 11010211,
@@ -41033,6 +41607,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Copy? Do you copy?",
                                 voice: "story/1002/110110/1B909CAE",
                                 npc: 110010,
+                                speakerName: "???",
                                 next: 11011004,
                             },
                             {
@@ -41047,6 +41622,7 @@ export const questData_en: QuestStory[] = [
                                 content: "<H>What's the weather like in Hyperborea today?</>",
                                 voice: "story/1002/110110/1B909D02",
                                 npc: 110010,
+                                speakerName: "???",
                                 next: 11011006,
                             },
                             {
@@ -41061,6 +41637,7 @@ export const questData_en: QuestStory[] = [
                                 content: "This is Lieutenant Colonel Avar Hrodland. Report your position, Squad Griffins.",
                                 voice: "story/1002/110110/1B909D56",
                                 npc: 110010,
+                                speakerName: "???",
                                 next: 11011008,
                             },
                             {
@@ -41411,6 +41988,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Commander Avar...? Am I... in a dream...?",
                                 voice: "story/1002/110110/1B909F78",
                                 npc: 110027,
+                                speakerName: "Injured Squad Griffin Soldier",
                                 next: 11011021,
                             },
                             {
@@ -41433,6 +42011,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I salute you, sir... All glory... to our Emperor...",
                                 voice: "story/1002/110110/1B909FCC",
                                 npc: 110028,
+                                speakerName: "Injured Squad Griffin Soldier",
                                 next: 11011023,
                             },
                             {
@@ -41455,6 +42034,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Sir, do you think we still have a chance?",
                                 voice: "story/1002/110110/1B90A020",
                                 npc: 110026,
+                                speakerName: "Injured Squad Griffin Soldier",
                                 next: 11011025,
                             },
                             {
@@ -41695,6 +42275,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11017514,
                                 content: "<W>WARNING: Abnormal Phoxynamo Wheel shutdown detected. Re-activating Phoxynamo Wheels now.</>",
                                 voice: "story/1002/110175/1B94C8E4",
+                                speakerName: "Mechanical Sound",
                                 next: 11017515,
                             },
                             {
@@ -41925,6 +42506,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "<W>WARNING: Phoxichor tank overload risk detected. Please check if more than required Phoxynamo Wheels have been activated.</>",
                                 voice: "story/1002/110175/1B94C962",
+                                speakerName: "Mechanical Sound",
                                 next: 11017518,
                             },
                             {
@@ -42006,6 +42588,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "<W>WARNING: Phoxichor tank sabotage detected. Anyone held responsible should confess your crime.</>",
                                 voice: "story/1002/110176/1B94D8CE",
+                                speakerName: "Mechanical Sound",
                             },
                         ],
                     },
@@ -42026,6 +42609,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "<W>WARNING: Phoxichor tank sabotage detected. Anyone held responsible should confess your crime.</>",
                                 voice: "story/1002/110176/1B94D922",
+                                speakerName: "Mechanical Sound",
                             },
                         ],
                     },
@@ -42059,6 +42643,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "<W>WARNING: Phoxichor tank is overloaded by 50%. Please shut down the Phoxynamo Wheels immediately; unauthorized departure is not permitted.</>",
                                 voice: "story/1002/110176/1B94D7D2",
+                                speakerName: "Mechanical Sound",
                                 next: 11017606,
                             },
                             {
@@ -42258,6 +42843,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11011317,
                                 content: "Hello? Does anyone copy? <H>What's the weather like in Hyperborea today?</>",
                                 voice: "story/1002/110113/1B90D032",
+                                speakerName: "Anxious Voice",
                                 next: 11011318,
                             },
                             {
@@ -42271,6 +42857,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11011319,
                                 content: "Commander Avar? Is that you? I'm Vic!",
                                 voice: "story/1002/110113/1B90D086",
+                                speakerName: "Anxious Voice",
                                 next: 11011320,
                             },
                             {
@@ -42285,6 +42872,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "After we split our forces, Monica and I took the path along the outer perimeter. We're about to reach the engine room.",
                                 voice: "story/1002/110113/1B90D0DA",
+                                speakerName: "Vic",
                                 next: 11011322,
                             },
                             {
@@ -42299,6 +42887,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I'm calling you specifically to give you an update, sir. We'll make an attempt to shut down the power unit.",
                                 voice: "story/1002/110113/1B90D12E",
+                                speakerName: "Vic",
                                 next: 11011324,
                             },
                             {
@@ -42313,6 +42902,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11011325,
                                 content: "Please, let us try, sir! Every moment we delay puts our comrades in greater danger.",
                                 voice: "story/1002/110113/1B90D182",
+                                speakerName: "Vic",
                                 next: 11011326,
                             },
                             {
@@ -42327,6 +42917,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "And one more thing... Since Captain {nickname2} is with you, may I ask how the Griffins are doing? My brother Simon is in that squad...",
                                 voice: "story/1002/110113/1B90D1D6",
+                                speakerName: "Vic",
                                 next: 11011328,
                             },
                             {
@@ -42347,6 +42938,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11011330,
                                 content: "...Wha...?",
                                 voice: "story/1002/110113/1B90D254",
+                                speakerName: "Vic",
                                 next: 11011331,
                             },
                             {
@@ -42361,6 +42953,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11011332,
                                 content: "...Understood. Thank you, sir.",
                                 voice: "story/1002/110113/1B90D2A8",
+                                speakerName: "Vic",
                                 next: 11011333,
                             },
                             {
@@ -42447,6 +43040,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11011506,
                                 content: "Avar, where are you?",
                                 voice: "story/1002/110115/1B90EF34",
+                                speakerName: "???",
                                 next: 11011507,
                             },
                             {
@@ -42467,6 +43061,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11011509,
                                 content: "What's your problem? Can't even recognise the chief commander's voice?",
                                 voice: "story/1002/110115/1B90EFB2",
+                                speakerName: "???",
                                 next: 11011510,
                             },
                             {
@@ -42696,12 +43291,14 @@ export const questData_en: QuestStory[] = [
                                 id: 11011540,
                                 content: "Captain! Captain!",
                                 voice: "story/1002/110115/1B90F4C8",
+                                speakerName: "Voice Calling For Help",
                                 next: 11011541,
                             },
                             {
                                 id: 11011541,
                                 content: "This is Simon from the Griffins. Do you copy, Captain?",
                                 voice: "story/1002/110115/1B90F4F2",
+                                speakerName: "Voice Calling For Help",
                                 next: 11011542,
                             },
                             {
@@ -42716,12 +43313,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "We're trapped by a Filthoid horde along the rail track. If you have any forces to spare, we need an extraction!",
                                 voice: "story/1002/110115/1B90F546",
+                                speakerName: "Voice Calling For Help",
                                 next: 11011544,
                             },
                             {
                                 id: 11011544,
                                 content: "Please... Captain!",
                                 voice: "story/1002/110115/1B90F570",
+                                speakerName: "Voice Calling For Help",
                                 next: 11011545,
                             },
                             {
@@ -42877,18 +43476,21 @@ export const questData_en: QuestStory[] = [
                                 id: 11011403,
                                 content: "Monica! Can... hear me?",
                                 voice: "story/1002/110114/1B90DE4E",
+                                speakerName: "Vic",
                                 next: 11011404,
                             },
                             {
                                 id: 11011404,
                                 content: "The engine room... Run... Argh...!",
                                 voice: "story/1002/110114/1B90DE78",
+                                speakerName: "Vic",
                                 next: 11011405,
                             },
                             {
                                 id: 11011405,
                                 content: "... ...",
                                 voice: "story/1002/110114/1B90DE79",
+                                speakerName: "Vic",
                                 next: 11011406,
                             },
                             {
@@ -43192,6 +43794,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Captain! Captain, over here!",
                                 voice: "story/1002/110118/1B911F9A",
                                 npc: 110015,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -43283,6 +43886,7 @@ export const questData_en: QuestStory[] = [
                                 content: "There's actually another way...",
                                 voice: "story/1002/110118/1B912168",
                                 npc: 110017,
+                                speakerName: "Elderly Charon",
                                 next: 11011813,
                             },
                             {
@@ -43334,6 +43938,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Sir.",
                                 voice: "story/1002/110118/1B91228E",
                                 npc: 110034,
+                                speakerName: "Sincere Charon Girl",
                                 next: 11011820,
                             },
                             {
@@ -43342,6 +43947,7 @@ export const questData_en: QuestStory[] = [
                                     "If sacrificing one Charon can quell your anger, then take me. But first, please, let me explain...",
                                 voice: "story/1002/110118/1B9122B8",
                                 npc: 110034,
+                                speakerName: "Sincere Charon Girl",
                                 next: 11011821,
                             },
                             {
@@ -43349,6 +43955,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Come back, Katya! Don't be silly!",
                                 voice: "story/1002/110118/1B9122E2",
                                 npc: 110017,
+                                speakerName: "Elderly Charon",
                                 next: 11011822,
                             },
                             {
@@ -44455,6 +45062,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11012731,
                                 content: "Yes, sir!",
                                 voice: "story/1002/110127/1B91B82E",
+                                speakerName: "All",
                                 next: 11012732,
                             },
                             {
@@ -45141,12 +45749,14 @@ export const questData_en: QuestStory[] = [
                                 id: 11013401,
                                 content: "...Authority override successful...",
                                 voice: "story/1002/110134/1B92261A",
+                                speakerName: "Mechanical Sound",
                                 next: 11013402,
                             },
                             {
                                 id: 11013402,
                                 content: "...Current authority: Avar Hrodland...",
                                 voice: "story/1002/110134/1B922644",
+                                speakerName: "Mechanical Sound",
                                 next: 11013403,
                             },
                             {
@@ -45154,6 +45764,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Good afternoon, Lieutenant Colonel Avar Hrodland! Motto 16 of the Hyperborean Legion: When you have the enemy within range, beware that you are also within theirs...",
                                 voice: "story/1002/110134/1B92266E",
+                                speakerName: "Mechanical Sound",
                                 next: 11013404,
                             },
                             {
@@ -45668,6 +46279,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Lieutenant Colonel Avar Hrodland, you have yet to enter any command. Motto 17 of the Hyperborean Legion: Obeying orders and trusting your comrades give you a better chance of survival on the battlefield.",
                                 voice: "story/1002/110137/1B925824",
+                                speakerName: "Mechanical Sound",
                             },
                         ],
                     },
@@ -45803,6 +46415,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11018702,
                                 content: "Defence Mode currently active. Please switch to Safe Mode to proceed.",
                                 voice: "story/1002/110187/1B958BCC",
+                                speakerName: "Mechanical Sound",
                                 options: [
                                     {
                                         id: 11018801,
@@ -45910,6 +46523,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11013101,
                                 content: '"Charons like us can no longer stand Hyperborean tyranny."',
                                 voice: "story/1002/110131/1B91F4E2",
+                                speakerName: "Signed Document",
                                 next: 11013102,
                             },
                             {
@@ -45917,12 +46531,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     '"I hereby pledge my allegiance to The Forsakens. The Empire must be held accountable for its actions."',
                                 voice: "story/1002/110131/1B91F50C",
+                                speakerName: "Signed Document",
                                 next: 11013103,
                             },
                             {
                                 id: 11013103,
                                 content: '"—Avar Hrodland"',
                                 voice: "story/1002/110131/1B91F536",
+                                speakerName: "Signed Document",
                                 next: 11013104,
                             },
                             {
@@ -45978,6 +46594,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     '"The 13th Legion will attack in two days. Antonius Fulvis has vowed before Sibylle that if his forces fail to breach the fortress, he would shoot himself with his own gun. Sibylle then assigned him the best troops."',
                                 voice: "story/1002/110130/1B91E47A",
+                                speakerName: "Calm Voice",
                                 next: 11013002,
                             },
                             {
@@ -45999,6 +46616,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     '"The Legion will do everything they can to take Lonza Fortress back. We should not attempt to defend the Fortress against such odds. Withdraw our forces and ensure the survival of The Forsakens."',
                                 voice: "story/1002/110130/1B91E4A4",
+                                speakerName: "Calm Voice",
                                 next: 11013003,
                             },
                             {
@@ -46013,6 +46631,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     '"Merely retreating would squander a perfect opportunity. We should make the Hyperboreans pay dearly."',
                                 voice: "story/1002/110130/1B91E4CE",
+                                speakerName: "Disgruntled Voice",
                                 next: 11013004,
                             },
                             {
@@ -46020,6 +46639,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     '"Easy. Leave it to Avar. He\'ll be commanding two vanguard squads in the operation. Those fools always listen to him."',
                                 voice: "story/1002/110130/1B91E4F8",
+                                speakerName: "Calm Voice",
                                 next: 11013005,
                             },
                             {
@@ -46027,12 +46647,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     '"Avar will hold off their assault. Use this time to lay traps and fortify our defences. The fortress will become their graveyard."',
                                 voice: "story/1002/110130/1B91E522",
+                                speakerName: "Calm Voice",
                                 next: 11013006,
                             },
                             {
                                 id: 11013006,
                                 content: '"We\'ll soon read this headline in the news—"',
                                 voice: "story/1002/110130/1B91E54C",
+                                speakerName: "Calm Voice",
                                 next: 11013007,
                             },
                             {
@@ -46040,6 +46662,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "\"'During the battle in Lonza Fortress, the 13th Legion valiantly defended the Emperor's lands. The vanguard suffered ninety percent casualties in the fierce conflict...'\"",
                                 voice: "story/1002/110130/1B91E576",
+                                speakerName: "Calm Voice",
                                 next: 11013008,
                             },
                             {
@@ -46047,6 +46670,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "\"'Lieutenant Colonel Avar, one of the survivors, mourned the fallen and delivered a eulogy of unmatched honour.'\"",
                                 voice: "story/1002/110130/1B91E5A0",
+                                speakerName: "Calm Voice",
                                 next: 11013009,
                             },
                             {
@@ -46054,6 +46678,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     '"Good for Avar! Let\'s go with this plan then. Shame those dead dogs will receive posthumous honours, though."',
                                 voice: "story/1002/110130/1B91E5CA",
+                                speakerName: "Disgruntled Voice",
                                 next: 11013010,
                             },
                             {
@@ -46094,18 +46719,21 @@ export const questData_en: QuestStory[] = [
                                 id: 11013801,
                                 content: "<W>...Do not indulge in the eternal void...</>",
                                 voice: "story/1002/110138/1B9267BA",
+                                speakerName: "???",
                                 next: 11013802,
                             },
                             {
                                 id: 11013802,
                                 content: "<W>...Wake up...</>",
                                 voice: "story/1002/110138/1B9267E4",
+                                speakerName: "???",
                                 next: 11013803,
                             },
                             {
                                 id: 11013803,
                                 content: "<W>...Before blood flows like swollen rivers... This is far from over...</>",
                                 voice: "story/1002/110138/1B92680E",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -46161,12 +46789,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Attention to all 13th Legion soldiers in Lonza Fortress. Daphne Theodore, the former Medic of Squad Griffins, is now classified as a Forsakens spy.",
                                 voice: "story/1002/110140/1B928932",
+                                speakerName: "Broadcast",
                                 next: 11014006,
                             },
                             {
                                 id: 11014006,
                                 content: "Daphne Theodore is to be executed upon sight.",
                                 voice: "story/1002/110140/1B92895C",
+                                speakerName: "Broadcast",
                                 next: 11014007,
                             },
                             {
@@ -46181,6 +46811,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "<W>Warning: Self-destruct sequence initiated. Estimated time to detonation: 20 minutes. Evacuate immediately. Repeat: Evacuate immediately.</>",
                                 voice: "story/1002/110188/1B959F28",
+                                speakerName: "Mechanical Sound",
                                 next: 11019306,
                             },
                             {
@@ -46329,6 +46960,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Current water level exceeds safety threshold. Safety gate will remain closed. Reduce water level to reopen.",
                                 voice: "story/1002/110147/1B92FB62",
+                                speakerName: "Mechanical Sound",
                                 next: 11014702,
                             },
                             {
@@ -46751,6 +47383,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11015150,
                                 content: "Chief Sibylle is en route to Lonza Fortress after hearing the battle has turned.",
                                 voice: "story/1002/110151/1B93450C",
+                                speakerName: "Soldier",
                                 next: 11015151,
                             },
                             {
@@ -47084,6 +47717,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11014306,
                                 content: "Warning. No access privileges.",
                                 voice: "story/1002/110143/1B92BA94",
+                                speakerName: "Mechanical Sound",
                                 next: 11014307,
                             },
                             {
@@ -47097,6 +47731,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11014308,
                                 content: "Target sighted! Over here!",
                                 voice: "story/1002/110143/1B92BAE8",
+                                speakerName: "Squad Narwhals Soldier",
                                 next: 11014309,
                             },
                             {
@@ -47256,6 +47891,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Yes, ma'am. A female medic named Daphne Theodore. The vanguard squads fought back fiercely, allowing her to escape.",
                                 voice: "story/1002/110144/1B92CBF8",
+                                speakerName: "Soldier",
                                 next: 11014413,
                             },
                             {
@@ -47263,6 +47899,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "The Narwhals are entering the fortress. But no one else must know that we cleaned up the vanguards. The situation may turn for the worse if Daphne contacts them for help.",
                                 voice: "story/1002/110144/1B92CC22",
+                                speakerName: "Soldier",
                                 next: 11014414,
                             },
                             {
@@ -47270,12 +47907,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "The situation is delicate. Chief Sibylle is en route to Lonza Fortress after hearing the battle has turned. Luckily, Avar is already out of the picture.",
                                 voice: "story/1002/110144/1B92CC4C",
+                                speakerName: "Soldier",
                                 next: 11014415,
                             },
                             {
                                 id: 11014415,
                                 content: "As for Daphne, what do you want us to do with her...?",
                                 voice: "story/1002/110144/1B92CC76",
+                                speakerName: "Soldier",
                                 next: 11014416,
                             },
                             {
@@ -47290,6 +47929,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11014417,
                                 content: "Yes, ma'am.",
                                 voice: "story/1002/110144/1B92CCCA",
+                                speakerName: "Soldier",
                                 next: 11014418,
                             },
                             {
@@ -47625,12 +48265,14 @@ export const questData_en: QuestStory[] = [
                                 id: 11015404,
                                 content: "Traitor of the Empire...",
                                 voice: "story/1002/110154/1B936E64",
+                                speakerName: "???",
                                 next: 11015405,
                             },
                             {
                                 id: 11015405,
                                 content: "If you claim to be innocent, prove it to me.",
                                 voice: "story/1002/110154/1B936E8E",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -47664,6 +48306,7 @@ export const questData_en: QuestStory[] = [
                                 content: "As you can see, ma'am, all our plans have been leaked...",
                                 voice: "story/1002/110155/1B937ECC",
                                 npc: 110054,
+                                speakerName: '"Leon"',
                                 next: 11015503,
                             },
                             {
@@ -47671,6 +48314,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Commander Avar participated in the formulation of the vanguard squad's combat plan...",
                                 voice: "story/1002/110155/1B937EF6",
                                 npc: 110054,
+                                speakerName: '"Leon"',
                                 next: 11015504,
                             },
                             {
@@ -47678,6 +48322,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...He's a Charon. He was the one most likely to reveal our plans to The Forsakens...",
                                 voice: "story/1002/110155/1B937F20",
                                 npc: 110054,
+                                speakerName: '"Leon"',
                                 next: 11015505,
                             },
                             {
@@ -47705,6 +48350,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...The Forsakens set traps in every path...",
                                 voice: "story/1002/110156/1B938F34",
                                 npc: 110055,
+                                speakerName: '"Marco"',
                                 next: 11015603,
                             },
                             {
@@ -47712,6 +48358,7 @@ export const questData_en: QuestStory[] = [
                                 content: "As you can see, ma'am, someone... betrayed us...",
                                 voice: "story/1002/110156/1B938F5E",
                                 npc: 110055,
+                                speakerName: '"Marco"',
                                 next: 11015604,
                             },
                             {
@@ -47733,6 +48380,7 @@ export const questData_en: QuestStory[] = [
                                 content: "As you can see, ma'am, I am Daphne Theodore, daughter of Avar Hrodland...",
                                 voice: "story/1002/110159/1B93C042",
                                 npc: 110005,
+                                speakerName: '"Daphne"',
                                 next: 11015902,
                             },
                             {
@@ -47741,6 +48389,7 @@ export const questData_en: QuestStory[] = [
                                     "My father... and {nickname2}... they planned to split the payment for selling intel to The Forsakens...",
                                 voice: "story/1002/110159/1B93C06C",
                                 npc: 110005,
+                                speakerName: '"Daphne"',
                                 next: 11015903,
                             },
                             {
@@ -47748,6 +48397,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...But at the heart of the fortress... They disagreed on the division of the spoils...",
                                 voice: "story/1002/110159/1B93C096",
                                 npc: 110005,
+                                speakerName: '"Daphne"',
                                 next: 11015904,
                             },
                             {
@@ -47755,6 +48405,7 @@ export const questData_en: QuestStory[] = [
                                 content: "My father... was...",
                                 voice: "story/1002/110159/1B93C0C0",
                                 npc: 110005,
+                                speakerName: '"Daphne"',
                                 next: 11015905,
                             },
                             {
@@ -47762,6 +48413,7 @@ export const questData_en: QuestStory[] = [
                                 content: "He was killed in a ruse woven by {nickname2} ...",
                                 voice: "story/1002/110159/1B93C0EA",
                                 npc: 110005,
+                                speakerName: '"Daphne"',
                                 next: 11015906,
                             },
                             {
@@ -47769,6 +48421,7 @@ export const questData_en: QuestStory[] = [
                                 content: "{性别2:He|She} then deceived me about how my father died...",
                                 voice: "story/1002/110159/1B93C114",
                                 npc: 110005,
+                                speakerName: '"Daphne"',
                                 next: 11015907,
                             },
                             {
@@ -47777,6 +48430,7 @@ export const questData_en: QuestStory[] = [
                                     "I've brought the murderer to you, ma'am... I humbly request you to deliver a fair and just verdict...",
                                 voice: "story/1002/110159/1B93C13E",
                                 npc: 110005,
+                                speakerName: '"Daphne"',
                                 next: 11015908,
                             },
                             {
@@ -47804,6 +48458,7 @@ export const questData_en: QuestStory[] = [
                                 content: "As you can see, ma'am, I am Avar Hrodland, Commander of the vanguard squads in this mission...",
                                 voice: "story/1002/110158/1B93B004",
                                 npc: 110010,
+                                speakerName: '"Avar"',
                                 next: 11015803,
                             },
                             {
@@ -47812,6 +48467,7 @@ export const questData_en: QuestStory[] = [
                                     "I turned my back on the Hyperborean Empire. I betrayed the 13th Legion... I sold out the Griffins and the Snow Wolves...",
                                 voice: "story/1002/110158/1B93B02E",
                                 npc: 110010,
+                                speakerName: '"Avar"',
                                 next: 11015804,
                             },
                             {
@@ -47820,6 +48476,7 @@ export const questData_en: QuestStory[] = [
                                     "My accomplices include... my daughter Daphne, from my ex-wife Claudia Theodore... and my protege at the Imperial Military College, {nickname2}...",
                                 voice: "story/1002/110158/1B93B058",
                                 npc: 110010,
+                                speakerName: '"Avar"',
                                 next: 11015805,
                             },
                             {
@@ -47847,6 +48504,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11015808,
                                 content: "...",
                                 voice: "story/1002/110158/1B93B100",
+                                speakerName: '"Avar"',
                             },
                         ],
                     },
@@ -47894,6 +48552,7 @@ export const questData_en: QuestStory[] = [
                                 content: "One last question. Are you the cause of Avar Hrodland's demise?",
                                 voice: "story/1002/110163/1B9401E2",
                                 npc: 110032,
+                                speakerName: "Warden",
                                 next: 11016302,
                             },
                             {
@@ -47901,6 +48560,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Despite his faults, he trusted you. Where were you when he was consumed by flames?",
                                 voice: "story/1002/110163/1B94020C",
                                 npc: 110032,
+                                speakerName: "Warden",
                                 next: 11016305,
                             },
                             {
@@ -47908,6 +48568,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Should you betray the loyalty of friendship, these infernal flames shall burn you to ashes!",
                                 voice: "story/1002/110163/1B94028A",
                                 npc: 110032,
+                                speakerName: "Warden",
                                 next: 11019052,
                             },
                             {
@@ -47929,6 +48590,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You who claim innocence — if your resolve still holds true, then forge that will into a blade...",
                                 voice: "story/1002/110190/1B95C58C",
                                 npc: 110032,
+                                speakerName: "Warden",
                                 next: 11019055,
                             },
                             {
@@ -47936,6 +48598,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...and answer me with your sword!",
                                 voice: "story/1002/110190/1B95C5B6",
                                 npc: 110032,
+                                speakerName: "Warden",
                             },
                         ],
                     },
@@ -48469,6 +49132,7 @@ export const questData_en: QuestStory[] = [
                                     "\"Find Daphne if possible. If she's alive, get her out of here... Once you're both safe, tell her—\"",
                                 voice: "story/1002/110168/1B945804",
                                 npc: 110040,
+                                speakerName: "Avar & {nickname2}",
                                 next: 11016827,
                             },
                             {
@@ -48621,6 +49285,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Your Royal Highness Prince Vergilius! This place isn't fitting for someone of your stature. Please don't proceed any further!",
                                 voice: "story/1002/110170/1B9474BA",
+                                speakerName: "Soldier",
                             },
                         ],
                     },
@@ -48764,6 +49429,7 @@ export const questData_en: QuestStory[] = [
                                 id: 11016001,
                                 content: "As you can see, ma'am, I am the control panel in the central control room of Lonza Fortress...",
                                 voice: "story/1002/110160/1B93D0AA",
+                                speakerName: "Mechanical Sound",
                                 next: 11019317,
                             },
                             {
@@ -48771,12 +49437,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "On the day the fortress fell, only Avar Hrodland and {nickname2} accessed the central control room.",
                                 voice: "story/1002/110193/1B95F0B2",
+                                speakerName: "Mechanical Sound",
                                 next: 11019318,
                             },
                             {
                                 id: 11019318,
                                 content: "In the end, it was {nickname2} who triggered the self-destruct sequence.",
                                 voice: "story/1002/110193/1B95F0DC",
+                                speakerName: "Mechanical Sound",
                                 next: 11019320,
                             },
                             {
@@ -48784,6 +49452,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "But I was fitted with next-gen encrypted logging tech — The Aeolipile's pride and joy! Even if you melt me down, the data remains! Ha-ha... Ha-ha-ha!",
                                 voice: "story/1002/110193/1B95F130",
+                                speakerName: "Mechanical Sound",
                                 next: 11016005,
                             },
                             {
@@ -48791,6 +49460,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Motto 18 of the Hyperborean Legion: An unexpectedly easy victory often leads to an impending ambush...",
                                 voice: "story/1002/110160/1B93D152",
+                                speakerName: "Mechanical Sound",
                                 next: 11016006,
                             },
                             {
@@ -48846,6 +49516,7 @@ export const questData_en: QuestStory[] = [
                                     "Second question: The vanguard squads were annihilated at Lonza Fortress. Were you the architect of their doom?",
                                 voice: "story/1002/110190/1B95C0F4",
                                 npc: 110032,
+                                speakerName: "Warden",
                                 next: 11019027,
                             },
                             {
@@ -48853,6 +49524,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Should you betray the justice of your comrades, your own blade shall spill your blood!",
                                 voice: "story/1002/110190/1B95C11E",
                                 npc: 110032,
+                                speakerName: "Warden",
                                 next: 11019028,
                             },
                             {
@@ -48968,6 +49640,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You who claim innocence — will your resolve falter in anger?",
                                 voice: "story/1002/110190/1B95C298",
                                 npc: 110032,
+                                speakerName: "Warden",
                             },
                         ],
                     },
@@ -49047,6 +49720,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You who claim innocence — will your resolve crumble under the weight of doubt?",
                                 voice: "story/1002/110190/1B95C412",
                                 npc: 110032,
+                                speakerName: "Warden",
                                 next: 11019046,
                             },
                             {
@@ -49882,6 +50556,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1200/120007/1E0AE34E",
                                 npc: 220014,
+                                speakerName: "Foreign Lady",
                                 next: 12000801,
                             },
                             {
@@ -50056,6 +50731,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I heard a commotion... Is something wrong here?",
                                 voice: "story/1200/120011/1E0B2446",
                                 npc: 210004,
+                                speakerName: "Foreign Lady",
                                 next: 12001112,
                             },
                             {
@@ -50086,6 +50762,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Oh? Deserve to be... what?",
                                 voice: "story/1200/120011/1E0B24EE",
                                 npc: 210004,
+                                speakerName: "Foreign Lady",
                                 next: 12001116,
                             },
                             {
@@ -50101,6 +50778,7 @@ export const questData_en: QuestStory[] = [
                                 content: "No offence taken. I'm sure it was an innocent slip of the tongue.",
                                 voice: "story/1200/120011/1E0B2542",
                                 npc: 210004,
+                                speakerName: "Foreign Lady",
                                 next: 12001118,
                             },
                             {
@@ -50116,6 +50794,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Mmm... I see. I believe I understand the situation now.",
                                 voice: "story/1200/120011/1E0B2596",
                                 npc: 210004,
+                                speakerName: "Foreign Lady",
                                 next: 12001120,
                             },
                             {
@@ -50124,6 +50803,7 @@ export const questData_en: QuestStory[] = [
                                     "It appears there's been a misunderstanding. These two young ones are actually guests for the VIP suite.",
                                 voice: "story/1200/120011/1E0B25C0",
                                 npc: 210004,
+                                speakerName: "Foreign Lady",
                                 next: 12001121,
                             },
                             {
@@ -50147,6 +50827,7 @@ export const questData_en: QuestStory[] = [
                                 content: "—Zhiliu, correct?",
                                 voice: "story/1200/120011/1E0B263E",
                                 npc: 210004,
+                                speakerName: "Foreign Lady",
                                 next: 12001201,
                             },
                             {
@@ -51666,6 +52347,7 @@ export const questData_en: QuestStory[] = [
                                 content: "As of now, no individuals matching the target's description have been sighted. Over.",
                                 voice: "story/1200/120017/1E0B8B24",
                                 npc: 220022,
+                                speakerName: "Ingrid",
                                 next: 12001739,
                             },
                             {
@@ -51680,6 +52362,7 @@ export const questData_en: QuestStory[] = [
                                 content: "About four minutes ago, a Lunarian approached me asking for a coin. I sent her away.",
                                 voice: "story/1200/120017/1E0B8B78",
                                 npc: 220022,
+                                speakerName: "Ingrid",
                                 next: 12001741,
                             },
                             {
@@ -51695,6 +52378,7 @@ export const questData_en: QuestStory[] = [
                                     "...Is there a problem, Commander? The target is supposed to be a Charon {性别:young man|young woman} around eighteen years old. It seems highly unlikely {性别:he|she} would disguise {性别:himself|herself} as a Lunarian...",
                                 voice: "story/1200/120017/1E0B8BCC",
                                 npc: 220022,
+                                speakerName: "Ingrid",
                                 next: 12001743,
                             },
                             {
@@ -52019,6 +52703,7 @@ export const questData_en: QuestStory[] = [
                                 content: "If you flee into that manhole, you'll be playing right into their hands.",
                                 voice: "story/1200/120017/1E0B8DEE",
                                 npc: 210004,
+                                speakerName: "???",
                                 next: 12001756,
                             },
                             {
@@ -52537,6 +53222,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12010020,
                                 content: "Miss Zhiliu—!",
                                 voice: "story/1201/120100/1E10D9E8",
+                                speakerName: "Distant Voice",
                                 next: 12010021,
                             },
                             {
@@ -53183,6 +53869,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12010235,
                                 content: "Miss Zhiliu—! My apologies for arriving late!",
                                 voice: "story/1201/120102/1E10FD2E",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -53867,6 +54554,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12010503,
                                 content: "Rrrrroaaaarrrrr—!",
                                 voice: "story/1201/120105/1E112926",
+                                speakerName: "???",
                                 next: 12010504,
                             },
                             {
@@ -53923,6 +54611,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Heaven and Lord Argent bless us... Are you all alright?",
                                 voice: "story/1201/120105/1E1129F8",
                                 npc: 210033,
+                                speakerName: "Passing Merchant",
                                 next: 12010509,
                             },
                             {
@@ -53939,6 +54628,7 @@ export const questData_en: QuestStory[] = [
                                     "I'm fine. That beast's terrifying glare shook me a bit. I'll feel better after a short rest. But you seemed new to this place... I couldn't just stand by and leave you in danger.",
                                 voice: "story/1201/120105/1E112A4C",
                                 npc: 210033,
+                                speakerName: "Passing Merchant",
                                 options: [
                                     {
                                         id: 120105101,
@@ -53967,6 +54657,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I see... I'm glad to hear it.",
                                 voice: "story/1201/120105/1E112AA0",
                                 npc: 210033,
+                                speakerName: "Passing Merchant",
                                 next: 12010513,
                             },
                             {
@@ -53997,6 +54688,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The waters around Mistwharf stretch far and wide. You wouldn't get very far by swimming.",
                                 voice: "story/1201/120105/1E112B48",
                                 npc: 210033,
+                                speakerName: "Passing Merchant",
                                 next: 12010517,
                             },
                             {
@@ -54005,6 +54697,7 @@ export const questData_en: QuestStory[] = [
                                     "There's no need to panic. The sable Bi'an may look like the argent ones, but the beasts are not the enforcer of Huaxu. They're aberrations, born from the <H>Scourge of Zhuyin</>.",
                                 voice: "story/1201/120105/1E112B72",
                                 npc: 210033,
+                                speakerName: "Passing Merchant",
                                 next: 12010518,
                             },
                             {
@@ -54013,6 +54706,7 @@ export const questData_en: QuestStory[] = [
                                     "Mindless and violent, they exist outside the reach of the Nine Chapters of Dafeng. Attacking them doesn't break any law.",
                                 voice: "story/1201/120105/1E112B9C",
                                 npc: 210033,
+                                speakerName: "Passing Merchant",
                                 next: 12010519,
                             },
                             {
@@ -54021,6 +54715,7 @@ export const questData_en: QuestStory[] = [
                                     "But lately... these attacks have been happening more and more often. The incense I just replaced has already burned down again...",
                                 voice: "story/1201/120105/1E112BC6",
                                 npc: 210033,
+                                speakerName: "Passing Merchant",
                                 next: 12010520,
                             },
                             {
@@ -54035,6 +54730,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Lunocarp? What are you doing here?",
                                 voice: "story/1201/120105/1E112C1A",
                                 npc: 210033,
+                                speakerName: "Passing Merchant",
                                 next: 12010522,
                             },
                             {
@@ -54072,6 +54768,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yes, that was it.",
                                 voice: "story/1201/120105/1E112CEC",
                                 npc: 210033,
+                                speakerName: "Passing Merchant",
                                 next: 12010527,
                             },
                             {
@@ -54200,6 +54897,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "May this incense rise in fragrant clouds to the halls of Heaven. With humble prayer, we seek mercy — to grant peace and joy to all beings.",
                                 voice: "story/1201/120106/1E113964",
+                                speakerName: "Devout Pilgrim",
                                 next: 12010603,
                             },
                             {
@@ -55058,6 +55756,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...",
                                 voice: "story/1201/120115/1E11CD0C",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011503,
                             },
                             {
@@ -55073,6 +55772,7 @@ export const questData_en: QuestStory[] = [
                                     "As a Magistrate of Yingtian, I serve only to safeguard the people and bring peace to the land. I did not assume this role for worldly gain.",
                                 voice: "story/1201/120115/1E11CD60",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011505,
                             },
                             {
@@ -55101,6 +55801,7 @@ export const questData_en: QuestStory[] = [
                                 content: "This fight doesn't concern you outsiders. Just leave. I'll deal with them myself.",
                                 voice: "story/1201/120119/1E120E82",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011902,
                             },
                             {
@@ -55122,6 +55823,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Alright.",
                                 voice: "story/1201/120119/1E120F00",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                             },
                         ],
                     },
@@ -55144,6 +55846,7 @@ export const questData_en: QuestStory[] = [
                                 content: "These vile beasts... finally cleansed. Thank you both for your aid.",
                                 voice: "story/1201/120120/1E121EEA",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12012002,
                             },
                             {
@@ -55464,6 +56167,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The exit lies just ahead. This is where I leave you.",
                                 voice: "story/1201/120117/1E11EDB2",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011709,
                             },
                         ],
@@ -55494,6 +56198,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Rrrrrrraaaahhh—!!",
                                 voice: "story/1201/120117/1E11EE30",
                                 npc: 100001,
+                                speakerName: "???",
                                 next: 12011705,
                             },
                             {
@@ -55551,6 +56256,7 @@ export const questData_en: QuestStory[] = [
                                 content: "It's okay. I am merely fulfilling my duty.",
                                 voice: "story/1201/120114/1E11BCA4",
                                 npc: 210007,
+                                speakerName: "???",
                                 next: 12011403,
                             },
                             {
@@ -55574,6 +56280,7 @@ export const questData_en: QuestStory[] = [
                                     "...I was assigned to purge the Sable Bi'an here. With danger still looming, my duty remains. I have no time for idle chatter.",
                                 voice: "story/1201/120114/1E11BD22",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011406,
                             },
                             {
@@ -55588,6 +56295,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The Nine Chapters of Dafeng. The Mandate of Heaven.",
                                 voice: "story/1201/120114/1E11BD76",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011408,
                             },
                             {
@@ -55612,6 +56320,7 @@ export const questData_en: QuestStory[] = [
                                     "If your incense has burned out, I may not be able to keep you both safe on my own. If you have no urgent business here, I suggest you leave for safer ground.",
                                 voice: "story/1201/120114/1E11BDF4",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011411,
                             },
                             {
@@ -55627,6 +56336,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The far side? As far as I know, there's nothing there but some beached wreckage.",
                                 voice: "story/1201/120114/1E11BE48",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011413,
                             },
                             {
@@ -55643,6 +56353,7 @@ export const questData_en: QuestStory[] = [
                                     "The black market... for business? If you insist on mingling with swindlers and scoundrels, I have nothing more to say.",
                                 voice: "story/1201/120114/1E11BE9C",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011415,
                             },
                             {
@@ -55672,6 +56383,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...My apologies. It was hasty of me to pass judgement.",
                                 voice: "story/1201/120114/1E11BF44",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011419,
                             },
                             {
@@ -55679,6 +56391,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Still, that place harbours all manner of folk. Beware of deceit and manipulation.",
                                 voice: "story/1201/120114/1E11BF6E",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                                 next: 12011420,
                             },
                             {
@@ -55686,6 +56399,7 @@ export const questData_en: QuestStory[] = [
                                 content: "This cavern is not safe. Allow me to escort you across.",
                                 voice: "story/1201/120114/1E11BF98",
                                 npc: 210007,
+                                speakerName: "Magistrate of Yingtian",
                             },
                         ],
                     },
@@ -55905,6 +56619,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You—! This is outrageous!",
                                 voice: "story/1201/120122/1E123FBA",
                                 npc: 210011,
+                                speakerName: "???",
                                 next: 12012202,
                             },
                             {
@@ -56343,6 +57058,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Enough — mind your manners in front of our guest!",
                                 voice: "story/1201/120126/1E1282AA",
                                 npc: 210010,
+                                speakerName: "???",
                                 next: 12012610,
                             },
                             {
@@ -57233,6 +57949,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "The soul drifts untethered, returning with the turning of time: Beneath the waxing moon, by the evergreen wood...",
                                 voice: "story/1201/120134/1E130A58",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -57346,6 +58063,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12013445,
                                 content: "The beasts howl in chorus. Calamity descends upon the mortal realm...",
                                 voice: "story/1201/120134/1E130BD2",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -57412,6 +58130,7 @@ export const questData_en: QuestStory[] = [
                                 id: 120134311,
                                 content: "Woe unto me...",
                                 voice: "story/1201/120134/1E130CF8",
+                                speakerName: "???",
                                 next: 12013432,
                             },
                             {
@@ -57419,6 +58138,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "The soul drifts untethered, returning with the turning of time: To the mountain's shadow... to the ocean's edge...",
                                 voice: "story/1201/120134/1E1309B0",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -57453,6 +58173,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "The soul drifts untethered, returning with the turning of time: Beneath the waxing moon, by the evergreen wood...",
                                 voice: "story/1201/120134/1E130A58",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -57466,6 +58187,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Loftier than the stars towers the celestial gate. Restless souls drift towards graves' eternal shade. Who might decree the weaving of fates, of sunderings and partings?\nWho roves forlorn, tarrying in lands beyond all chartings?",
                                 voice: "story/1201/120134/1E130AAC",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -57561,6 +58283,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12022701,
                                 content: "{nickname}! You're here!",
                                 voice: "story/1201/120227/1E18FA62",
+                                speakerName: "???",
                                 next: 12022702,
                             },
                             {
@@ -57777,6 +58500,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Please, Miss Zhiliu — this is wrong!",
                                 voice: "story/1201/120229/1E191CD6",
                                 npc: 210031,
+                                speakerName: "Middle-aged Man",
                                 next: 12022912,
                             },
                             {
@@ -57799,6 +58523,7 @@ export const questData_en: QuestStory[] = [
                                     '<W>"To kill or steal is to be forsaken by Heaven"</> — this is an ancient tenet of the Nine Chapters!',
                                 voice: "story/1201/120229/1E191D54",
                                 npc: 210031,
+                                speakerName: "Middle-aged Man",
                                 next: 12022915,
                             },
                             {
@@ -57806,6 +58531,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...But attacking the Sable Bi'an — surely that's no crime?",
                                 voice: "story/1201/120229/1E191D7E",
                                 npc: 210077,
+                                speakerName: "Onlooker",
                                 next: 12022916,
                             },
                             {
@@ -57813,6 +58539,7 @@ export const questData_en: QuestStory[] = [
                                 content: "The Nine Chapters of Dafeng are not so shallow as that!",
                                 voice: "story/1201/120229/1E191DA8",
                                 npc: 210031,
+                                speakerName: "Middle-aged Man",
                                 next: 12022917,
                             },
                             {
@@ -57821,6 +58548,7 @@ export const questData_en: QuestStory[] = [
                                     "It begins in the heart and takes shape in one's deeds. Once a blade is drawn, the heart is changed — no matter if that blade is turned on friend or foe, the nature of it is the same. In the end... it defies the will of Heaven!",
                                 voice: "story/1201/120229/1E191DD2",
                                 npc: 210031,
+                                speakerName: "Middle-aged Man",
                                 next: 12022918,
                             },
                             {
@@ -57836,6 +58564,7 @@ export const questData_en: QuestStory[] = [
                                     "Lord Argent will drive this evil away for us! If we provoke Their wrath and lose Their protection, that would be our true ruin. I beg you — please reconsider!",
                                 voice: "story/1201/120229/1E191E26",
                                 npc: 210031,
+                                speakerName: "Middle-aged Man",
                                 next: 12022920,
                             },
                             {
@@ -57843,6 +58572,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Have we learned nothing from the lesson of the Battle of Shuli!?",
                                 voice: "story/1201/120229/1E191E50",
                                 npc: 210031,
+                                speakerName: "Middle-aged Man",
                                 next: 12022921,
                             },
                             {
@@ -57850,6 +58580,7 @@ export const questData_en: QuestStory[] = [
                                 content: "He has a point...",
                                 voice: "story/1201/120229/1E191E7A",
                                 npc: 210077,
+                                speakerName: "Onlooker",
                                 next: 12022922,
                             },
                             {
@@ -57866,6 +58597,7 @@ export const questData_en: QuestStory[] = [
                                     "The argent Bi'an and the Magistrates of Yingtian will come. We only have to endure a little longer...",
                                 voice: "story/1201/120229/1E191ECE",
                                 npc: 210031,
+                                speakerName: "Middle-aged Man",
                                 next: 12022924,
                             },
                             {
@@ -57880,6 +58612,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Well...",
                                 voice: "story/1201/120229/1E191F22",
                                 npc: 210031,
+                                speakerName: "Middle-aged Man",
                                 next: 12022926,
                             },
                             {
@@ -59487,6 +60220,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ah! White monsters!",
                                 voice: "story/1201/120143/1E139842",
                                 npc: 210016,
+                                speakerName: "???",
                                 next: 12014302,
                             },
                             {
@@ -60267,6 +61001,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Save me... save me...",
                                 voice: "story/1201/120158/1E148EAE",
                                 npc: 210028,
+                                speakerName: "???",
                                 next: 12015804,
                             },
                             {
@@ -60288,6 +61023,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Can't disappear... I still have to...",
                                 voice: "story/1201/120158/1E148F2C",
                                 npc: 210028,
+                                speakerName: "???",
                                 next: 12015807,
                             },
                             {
@@ -60295,6 +61031,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Before it's too late... let me...",
                                 voice: "story/1201/120158/1E148F56",
                                 npc: 210028,
+                                speakerName: "???",
                                 next: 12015808,
                             },
                             {
@@ -61039,6 +61776,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12017401,
                                 content: "It hurts so much... My wounds are festering — I haven't known sleep in days...",
                                 voice: "story/1201/120174/1E1594DA",
+                                speakerName: "Phantom of the Sick Person",
                             },
                         ],
                     },
@@ -61051,6 +61789,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12017402,
                                 content: "There's no hope left, is there? Lady Zhuyou... please, put me out of my misery...",
                                 voice: "story/1201/120174/1E159504",
+                                speakerName: "Phantom of the Sick Person",
                             },
                         ],
                     },
@@ -61064,6 +61803,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "My baby... she's just come into the world, and hasn't even called me \"Mama\" yet! Please, I beg you — save her. Save her!",
                                 voice: "story/1201/120174/1E15952E",
+                                speakerName: "Phantom of the Sick Person",
                             },
                         ],
                     },
@@ -61077,6 +61817,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "They say the House of Zhuyou can heal any affliction — so why won't you help us? Don't you care!?",
                                 voice: "story/1201/120174/1E159558",
+                                speakerName: "Phantom of the Sick Person",
                             },
                         ],
                     },
@@ -61154,6 +61895,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ee-ee! Ee!",
                                 voice: "story/1201/120182/1E16181A",
                                 npc: 210017,
+                                speakerName: "Mute Wishen",
                             },
                         ],
                     },
@@ -61267,6 +62009,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ee-ya, ee!",
                                 voice: "story/1201/120182/1E161A3C",
                                 npc: 210017,
+                                speakerName: "Mute Wishen",
                                 next: 12018215,
                             },
                             {
@@ -61294,6 +62037,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ee-ya, ee!",
                                 voice: "story/1201/120182/1E161A3C",
                                 npc: 210017,
+                                speakerName: "Mute Wishen",
                                 next: 12018215,
                             },
                             {
@@ -61417,6 +62161,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ee-ya! Now we're all set — let's go!",
                                 voice: "story/1201/120182/1E161D06",
                                 npc: 210017,
+                                speakerName: "Wishen",
                             },
                         ],
                     },
@@ -61430,6 +62175,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ee-ee, ya!",
                                 voice: "story/1201/120182/1E161D30",
                                 npc: 210017,
+                                speakerName: "Trapped Wishen",
                                 next: 12018233,
                             },
                             {
@@ -61472,12 +62218,14 @@ export const questData_en: QuestStory[] = [
                                 id: 12018236,
                                 content: "Lady Zhuyou! And the white-haired stranger — thank you both!",
                                 voice: "story/1201/120182/1E161DD8",
+                                speakerName: "Trapped Wishen",
                                 next: 12018237,
                             },
                             {
                                 id: 12018237,
                                 content: "Let me lend a hand too! My iron headbutt can even crack the earth!",
                                 voice: "story/1201/120182/1E161E02",
+                                speakerName: "Trapped Wishen",
                             },
                         ],
                     },
@@ -61490,6 +62238,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12018238,
                                 content: "The last ones! Friends still trapped!",
                                 voice: "story/1201/120182/1E161E2C",
+                                speakerName: "Wishen",
                                 next: 12018239,
                             },
                             {
@@ -61512,12 +62261,14 @@ export const questData_en: QuestStory[] = [
                                 id: 12018240,
                                 content: "With all my years of martial skill, I nearly met my end here... How shameful...",
                                 voice: "story/1201/120182/1E161E80",
+                                speakerName: "Mature Wishen",
                                 next: 12018241,
                             },
                             {
                                 id: 12018241,
                                 content: "Now we're all here — no one left behind, not a single one!",
                                 voice: "story/1201/120182/1E161EAA",
+                                speakerName: "Wishen",
                                 next: 12018242,
                             },
                             {
@@ -61525,6 +62276,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "The final path is blocked by a monstrous Filthoid flower. Let me stand with you. Together, we shall cut it down and restore this place!",
                                 voice: "story/1201/120182/1E161ED4",
+                                speakerName: "Mature Wishen",
                             },
                         ],
                     },
@@ -61545,6 +62297,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Thank you, both of you! We'll never forget this kindness. Goodbye for now!",
                                 voice: "story/1201/120183/1E162858",
                                 npc: 210017,
+                                speakerName: "Wishen",
                                 next: 12018301,
                             },
                             {
@@ -61655,6 +62408,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ee-ee! Ee!",
                                 voice: "story/1201/120183/1E162ACE",
                                 npc: 210036,
+                                speakerName: "Mute Wishen",
                                 next: 12018316,
                             },
                             {
@@ -61690,6 +62444,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ee-ya-ee! Ee-ee!",
                                 voice: "story/1201/120183/1E162BA0",
                                 npc: 210036,
+                                speakerName: "Mute Wishen",
                                 next: 12018321,
                             },
                             {
@@ -61712,6 +62467,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Ee!",
                                 voice: "story/1201/120183/1E162C1E",
                                 npc: 210036,
+                                speakerName: "Mute Wishen",
                                 next: 12018324,
                             },
                             {
@@ -62040,6 +62796,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Boss!",
                                 voice: "story/1201/120186/1E1659BA",
                                 npc: 210010,
+                                speakerName: "Black Market Lackey",
                                 next: 12018602,
                             },
                             {
@@ -62055,6 +62812,7 @@ export const questData_en: QuestStory[] = [
                                     "Just as you foresaw — the prey's been wounded and driven into Crowsong Hollow. The place is ringed by the sea — like an island cut off from the world. There's no way out for it. Now we've only to close the net.",
                                 voice: "story/1201/120186/1E165A0E",
                                 npc: 210010,
+                                speakerName: "Black Market Lackey",
                                 next: 12018604,
                             },
                             {
@@ -62899,6 +63657,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Haha... Finally, some company! I'm not alone in this pit anymore.",
                                 voice: "story/1201/120193/1E16CC92",
                                 npc: 210021,
+                                speakerName: "Free-Spirited Man",
                                 next: 12019302,
                             },
                             {
@@ -63349,6 +64108,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Whew... that was way too close.",
                                 voice: "story/1201/120209/1E17D312",
                                 npc: 210005,
+                                speakerName: "Starweaver",
                                 next: 12020902,
                             },
                             {
@@ -63442,6 +64202,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yes, Miss Zhiliu!",
                                 voice: "story/1201/120138/1E134691",
                                 npc: 210004,
+                                speakerName: "Du Li",
                             },
                         ],
                     },
@@ -63455,6 +64216,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "O soul adrift, to the north thou stray; to hunt the blight where shadows lay. Bound by Zhuyin, thee and I; bear the doom till time should die...",
                                 voice: "story/1201/120210/1E17E37A",
+                                speakerName: "???",
                                 next: 12021002,
                             },
                             {
@@ -63496,6 +64258,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "O scattered soul, the past doth wane; foundations crumble, lost in bane. Through realms forlorn, thine end awaits; Yet Time shall guide thee back to Fate.",
                                 voice: "story/1201/120212/1E18044A",
+                                speakerName: "???",
                                 next: 12021202,
                             },
                             {
@@ -63609,6 +64372,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "...Who might decree the weaving of fates, of sunderings and partings? Who roves forlorn, tarrying in lands beyond all chartings?",
                                 voice: "story/1201/120220/1E1889AC",
+                                speakerName: "Zhuyin",
                                 next: 12022015,
                             },
                             {
@@ -63622,6 +64386,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12022016,
                                 content: "All is done... beyond recall... A doom shall befall the world, inescapable, unbound...",
                                 voice: "story/1201/120220/1E188A00",
+                                speakerName: "Zhuyin",
                             },
                         ],
                     },
@@ -66666,6 +67431,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Where are we going, Cassandra?",
                                 voice: "story/1201/120114/1E1F83D2",
                                 npc: 211015,
+                                speakerName: "???",
                                 next: 12032902,
                             },
                             {
@@ -67774,12 +68540,14 @@ export const questData_en: QuestStory[] = [
                                 id: 12034101,
                                 content: "Nobody move! Security Bureau!",
                                 voice: "story/1201/120114/1E2048B2",
+                                speakerName: "Security Bureau Soldier",
                                 next: 12034102,
                             },
                             {
                                 id: 12034102,
                                 content: "Wait... these bandits are already down?",
                                 voice: "story/1201/120114/1E2048DC",
+                                speakerName: "Security Bureau Soldier",
                                 next: 12034103,
                             },
                             {
@@ -67793,6 +68561,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12034104,
                                 content: "Is that so?",
                                 voice: "story/1201/120114/1E204930",
+                                speakerName: "Security Bureau Soldier",
                                 next: 12034105,
                             },
                             {
@@ -67806,6 +68575,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12034106,
                                 content: "...Alright then. We'll take them from here.",
                                 voice: "story/1201/120114/1E204984",
+                                speakerName: "Security Bureau Soldier",
                                 next: 12034107,
                             },
                             {
@@ -67813,6 +68583,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "That filthy Charon scavenger wouldn't stop pestering us about bandits near the lake. Thought she was full of it — but turns out that lass was right...",
                                 voice: "story/1201/120114/1E2049AE",
+                                speakerName: "Security Bureau Soldier",
                             },
                         ],
                     },
@@ -68173,12 +68944,14 @@ export const questData_en: QuestStory[] = [
                                 id: 12034101,
                                 content: "Nobody move! Security Bureau!",
                                 voice: "story/1201/120114/1E2048B2",
+                                speakerName: "Security Bureau Soldier",
                                 next: 12034102,
                             },
                             {
                                 id: 12034102,
                                 content: "Wait... these bandits are already down?",
                                 voice: "story/1201/120114/1E2048DC",
+                                speakerName: "Security Bureau Soldier",
                                 next: 12034103,
                             },
                             {
@@ -68192,6 +68965,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12034104,
                                 content: "Is that so?",
                                 voice: "story/1201/120114/1E204930",
+                                speakerName: "Security Bureau Soldier",
                                 next: 12034105,
                             },
                             {
@@ -68205,6 +68979,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12034106,
                                 content: "...Alright then. We'll take them from here.",
                                 voice: "story/1201/120114/1E204984",
+                                speakerName: "Security Bureau Soldier",
                                 next: 12034107,
                             },
                             {
@@ -68212,6 +68987,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "That filthy Charon scavenger wouldn't stop pestering us about bandits near the lake. Thought she was full of it — but turns out that lass was right...",
                                 voice: "story/1201/120114/1E2049AE",
+                                speakerName: "Security Bureau Soldier",
                             },
                         ],
                     },
@@ -70372,6 +71148,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12010503,
                                 content: "Rrrrroaaaarrrrr—!",
                                 voice: "story/1201/120105/1E112926",
+                                speakerName: "???",
                                 next: 12010504,
                             },
                             {
@@ -70617,6 +71394,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12041810,
                                 content: "It's him!?",
                                 voice: "story/1204/120418/1E253974",
+                                speakerName: "{nickname} & Snow",
                             },
                         ],
                     },
@@ -71649,6 +72427,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12042603,
                                 content: "BEEP—BEEP—",
                                 voice: "story/1204/120426/1E25BB8E",
+                                speakerName: "Yanfinch",
                                 next: 12042604,
                             },
                             {
@@ -71699,6 +72478,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12021301,
                                 content: "...Who art thou?",
                                 voice: "story/1201/120213/1E1814B2",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -72044,6 +72824,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12049035,
                                 content: "Soaring to the skies, diving to the depths — unbound, untamed, utterly free~!",
                                 voice: "story/1204/120490/1E29DACE",
+                                speakerName: "???",
                                 next: 12049036,
                             },
                             {
@@ -72093,6 +72874,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12049035,
                                 content: "Soaring to the skies, diving to the depths — unbound, untamed, utterly free~!",
                                 voice: "story/1204/120490/1E29DACE",
+                                speakerName: "???",
                                 next: 12049036,
                             },
                             {
@@ -72657,6 +73439,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...That way... understood...",
                                 voice: "story/1204/120429/1E25F3FE",
                                 npc: 100001,
+                                speakerName: "???",
                                 next: 12042948,
                             },
                             {
@@ -72984,6 +73767,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...That way... understood...",
                                 voice: "story/1204/120429/1E25F3FE",
                                 npc: 100001,
+                                speakerName: "???",
                                 next: 12042948,
                             },
                             {
@@ -73093,6 +73877,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12043104,
                                 content: "Zhiliu!?",
                                 voice: "story/1204/120431/1E260DC0",
+                                speakerName: "Fushu & Kezhou",
                                 next: 12043105,
                             },
                             {
@@ -73680,6 +74465,7 @@ export const questData_en: QuestStory[] = [
                                 content: "O—Old lady!?",
                                 voice: "story/1204/120434/1E263EA4",
                                 npc: 240026,
+                                speakerName: "Passerby Girl",
                                 next: 12043403,
                             },
                             {
@@ -73687,6 +74473,7 @@ export const questData_en: QuestStory[] = [
                                 content: "No idea. You've got the wrong person.",
                                 voice: "story/1204/120434/1E263ECE",
                                 npc: 240026,
+                                speakerName: "Passerby Girl",
                                 next: 12043404,
                             },
                             {
@@ -73701,6 +74488,7 @@ export const questData_en: QuestStory[] = [
                                 content: "I said you've got the wrong person. Stop bothering me.",
                                 voice: "story/1204/120434/1E263F22",
                                 npc: 240026,
+                                speakerName: "Passerby Girl",
                                 next: 12043406,
                             },
                             {
@@ -73716,6 +74504,7 @@ export const questData_en: QuestStory[] = [
                                     "This isn't some private estate. Anyone's free to be here. I happen to enjoy walks in the middle of nowhere — the more deserted, the better for inspiration. Problem?",
                                 voice: "story/1204/120434/1E263F76",
                                 npc: 240026,
+                                speakerName: "Passerby Girl",
                                 next: 12043408,
                             },
                             {
@@ -74407,6 +75196,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12043737,
                                 content: "Unwise.",
                                 voice: "story/1204/120437/1E26759A",
+                                speakerName: "Fushu & Su Yi",
                                 next: 12043738,
                             },
                             {
@@ -80748,6 +81538,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12049130,
                                 content: "Zhiliu, would you make yourself a sinner for all eternity?",
                                 voice: "story/1204/120491/1E29EA64",
+                                speakerName: "Forebear",
                                 next: 12049131,
                             },
                             {
@@ -80755,6 +81546,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "The grace of Heaven, and the ordinances wrought by your forebears — would you, a mere mortal, presume to defy them!?",
                                 voice: "story/1204/120491/1E29EA8E",
+                                speakerName: "Forebear",
                             },
                         ],
                     },
@@ -80943,6 +81735,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12049132,
                                 content: "Turn back now — before it is too late!",
                                 voice: "story/1204/120491/1E29EAB8",
+                                speakerName: "Forebear",
                             },
                         ],
                     },
@@ -80955,6 +81748,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12049133,
                                 content: "Stop! You must go no further!",
                                 voice: "story/1204/120491/1E29EAE2",
+                                speakerName: "Forebear",
                             },
                         ],
                     },
@@ -80967,6 +81761,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12049134,
                                 content: "Would you truly see the grand design of millennia end by your hand!?",
                                 voice: "story/1204/120491/1E29EB0C",
+                                speakerName: "Forebear",
                             },
                         ],
                     },
@@ -80979,6 +81774,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12049135,
                                 content: "Zhiliu — is your mind truly set?",
                                 voice: "story/1204/120491/1E29EB36",
+                                speakerName: "Forebear",
                             },
                         ],
                     },
@@ -82583,6 +83379,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12049138,
                                 content: "Intruder... can you withstand Heaven's wrath?",
                                 voice: "story/1204/120491/1E29EBB4",
+                                speakerName: "Taihao & Zhuyin",
                             },
                         ],
                     },
@@ -82796,12 +83593,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "When heart and principle stand in balance, then arises the Dao. Abiding in the Dao, the sage governs as water flows: does not contend and yet answers, does not speak and yet corrects.",
                                 voice: "story/1204/120479/1E292116",
+                                speakerName: "Ju & Yang",
                                 next: 12047904,
                             },
                             {
                                 id: 12047904,
                                 content: "Now — what do you discern in these words?",
                                 voice: "story/1204/120479/1E292140",
+                                speakerName: "Ju & Yang",
                                 next: 12047905,
                             },
                             {
@@ -82852,6 +83651,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12047910,
                                 content: "Then — both of you. Place your hands in ours.",
                                 voice: "story/1204/120479/1E29223C",
+                                speakerName: "Ju & Yang",
                             },
                         ],
                     },
@@ -82865,6 +83665,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12049140,
                                 content: "...All things bear the yin and embrace the yang; from their union is wrought the concord...",
                                 voice: "story/1204/120491/1E29EC08",
+                                speakerName: "Taihao & Zhuyin",
                             },
                         ],
                     },
@@ -82878,6 +83679,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "...Fill a vessel unto brimming, and it spills; whet a blade to utmost keenness, and its edge shall not endure...",
                                 voice: "story/1204/120491/1E29EC32",
+                                speakerName: "Taihao & Zhuyin",
                             },
                         ],
                     },
@@ -82907,12 +83709,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "When heart and principle stand in balance, then arises the Dao. Abiding in the Dao, the sage governs as water flows: does not contend and yet answers, does not speak and yet corrects.",
                                 voice: "story/1204/120479/1E292116",
+                                speakerName: "Ju & Yang",
                                 next: 12047904,
                             },
                             {
                                 id: 12047904,
                                 content: "Now — what do you discern in these words?",
                                 voice: "story/1204/120479/1E292140",
+                                speakerName: "Ju & Yang",
                                 next: 12047905,
                             },
                             {
@@ -82963,6 +83767,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12047910,
                                 content: "Then — both of you. Place your hands in ours.",
                                 voice: "story/1204/120479/1E29223C",
+                                speakerName: "Ju & Yang",
                             },
                         ],
                     },
@@ -85456,6 +86261,7 @@ export const questData_en: QuestStory[] = [
                                     "Well, I never... The world's gone to the dogs — people are actually making excuses for Drifters now. \"The Four Drifters\"? Don't make me laugh.",
                                 voice: "story/1206/120610/1E31864E",
                                 npc: 250015,
+                                speakerName: "Arrogant Man",
                                 next: 12061004,
                             },
                             {
@@ -85471,6 +86277,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Decent? And you think it's decent to stand here peddling lies and misleading people?",
                                 voice: "story/1206/120610/1E3186A2",
                                 npc: 250015,
+                                speakerName: "Arrogant Man",
                                 next: 12061006,
                             },
                             {
@@ -85479,6 +86286,7 @@ export const questData_en: QuestStory[] = [
                                     "Those four Drifters rerouted a river to douse a censer that had been burning for a hundred years, then torched six archive halls to the ground. Do you really believe not a single soul was harmed in the process?",
                                 voice: "story/1206/120610/1E3186CC",
                                 npc: 250015,
+                                speakerName: "Arrogant Man",
                                 next: 12061007,
                             },
                             {
@@ -85487,6 +86295,7 @@ export const questData_en: QuestStory[] = [
                                     "They hung wenzhu fronds outside people's doors, then ambushed them and left them bleeding. They call it vengeance — but did everyone who died at their hands truly deserve it? Who gave them the right to sit in judgement and mete out retribution?",
                                 voice: "story/1206/120610/1E3186F6",
                                 npc: 250015,
+                                speakerName: "Arrogant Man",
                                 next: 12061008,
                             },
                             {
@@ -85495,6 +86304,7 @@ export const questData_en: QuestStory[] = [
                                     "And that giant mech-bird out in the wilds — you've seen it, haven't you? That leviathan fell from the sky, smashed through embankments, and flooded farmland for miles. Whoever was behind it, \"malicious\" doesn't even begin to cover it.",
                                 voice: "story/1206/120610/1E318720",
                                 npc: 250015,
+                                speakerName: "Arrogant Man",
                                 next: 12061009,
                             },
                             {
@@ -85502,6 +86312,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Drifters? They're nothing but a pack of thugs, all in cahoots with each other!",
                                 voice: "story/1206/120610/1E31874A",
                                 npc: 250015,
+                                speakerName: "Arrogant Man",
                                 next: 12061010,
                             },
                             {
@@ -85532,6 +86343,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Heh... So I don't know the truth, but you do? What are you, one of those Drifters?",
                                 voice: "story/1206/120610/1E3187F2",
                                 npc: 250015,
+                                speakerName: "Arrogant Man",
                                 next: 12061014,
                             },
                             {
@@ -85548,6 +86360,7 @@ export const questData_en: QuestStory[] = [
                                     "Oh, of course. It's all hearsay, isn't it? If it's all made up anyway, then it just comes down to who tells it better — so why don't we make it a storytelling contest?",
                                 voice: "story/1206/120610/1E318846",
                                 npc: 250015,
+                                speakerName: '"Arrogant Man"',
                                 next: 12061016,
                             },
                             {
@@ -85556,12 +86369,14 @@ export const questData_en: QuestStory[] = [
                                     "Oh no... what if my story's rubbish? What if the audience stops liking me? No, no... I'd better go practise in front of a mirror. Right now.",
                                 voice: "story/1206/120610/1E318870",
                                 npc: 250015,
+                                speakerName: '"Arrogant Man"',
                                 next: 12061017,
                             },
                             {
                                 id: 12061017,
                                 content: "...What's he talking about? Is he right in the head?",
                                 voice: "story/1206/120610/1E31889A",
+                                speakerName: "Spectators",
                                 next: 12061018,
                             },
                             {
@@ -85569,6 +86384,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Who's there!? Who dares imitate my voice!?",
                                 voice: "story/1206/120610/1E3188C4",
                                 npc: 250015,
+                                speakerName: "Arrogant Man",
                                 next: 12061019,
                             },
                             {
@@ -85576,6 +86392,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Hee-hee... Look at this man — can't win an argument, so he starts snapping. What a clown!",
                                 voice: "story/1206/120610/1E3188EE",
                                 npc: 250015,
+                                speakerName: '"Arrogant Man"',
                                 next: 12061020,
                             },
                             {
@@ -85583,12 +86400,14 @@ export const questData_en: QuestStory[] = [
                                 content: "You...!",
                                 voice: "story/1206/120610/1E318918",
                                 npc: 250015,
+                                speakerName: "Arrogant Man",
                                 next: 12061021,
                             },
                             {
                                 id: 12061021,
                                 content: "Mum, come look! That man's arguing with himself!",
                                 voice: "story/1206/120610/1E318942",
+                                speakerName: "Spectators",
                                 next: 12061022,
                             },
                             {
@@ -85604,6 +86423,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Hmph. Forget it. The Proving's about to start — I've no time for this. Let's go.",
                                 voice: "story/1206/120610/1E318996",
                                 npc: 250015,
+                                speakerName: "Arrogant Man",
                             },
                         ],
                     },
@@ -85996,6 +86816,7 @@ export const questData_en: QuestStory[] = [
                                 content: "What is happening here?",
                                 voice: "story/1206/120612/1E31A96A",
                                 npc: 250005,
+                                speakerName: "???",
                                 next: 12061218,
                             },
                             {
@@ -86632,6 +87453,7 @@ export const questData_en: QuestStory[] = [
                                 content: "S—Stay away from me!",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "???",
                                 next: 12061446,
                             },
                             {
@@ -86677,6 +87499,7 @@ export const questData_en: QuestStory[] = [
                                 content: "An! An— are you there!?",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061505,
                             },
                             {
@@ -86684,6 +87507,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You silly boy... with your leg like that, what were you thinking, running out here?",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061506,
                             },
                             {
@@ -86805,6 +87629,7 @@ export const questData_en: QuestStory[] = [
                                 content: "S—Stay away from me!",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "???",
                                 next: 12061446,
                             },
                             {
@@ -86849,6 +87674,7 @@ export const questData_en: QuestStory[] = [
                                 content: "An! An— are you there!?",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061505,
                             },
                             {
@@ -86856,6 +87682,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You silly boy... with your leg like that, what were you thinking, running out here?",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061506,
                             },
                             {
@@ -86971,6 +87798,7 @@ export const questData_en: QuestStory[] = [
                                 content: "S—Stay away from me!",
                                 voice: "story/1206/120614/1E31CED2",
                                 npc: 250017,
+                                speakerName: "???",
                                 next: 12061446,
                             },
                             {
@@ -87016,6 +87844,7 @@ export const questData_en: QuestStory[] = [
                                 content: "An! An— are you there!?",
                                 voice: "story/1206/120615/1E31D880",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061505,
                             },
                             {
@@ -87023,6 +87852,7 @@ export const questData_en: QuestStory[] = [
                                 content: "You silly boy... with your leg like that, what were you thinking, running out here?",
                                 voice: "story/1206/120615/1E31D8AA",
                                 npc: 250018,
+                                speakerName: "???",
                                 next: 12061506,
                             },
                             {
@@ -87385,6 +88215,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12061706,
                                 content: "Hey, did you hear? They say a Drifter snuck into the competition. Is it true...?",
                                 voice: "story/1206/120617/1E31F9A4",
+                                speakerName: "Whispers from the Crowd",
                                 next: 12061707,
                             },
                             {
@@ -87392,12 +88223,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "A Drifter? One of those brutes from the stories — green-skinned, fanged, swinging a great club? And with Huaxu in the middle of all these reforms... you think they're here to stir up trouble?",
                                 voice: "story/1206/120617/1E31F9CE",
+                                speakerName: "Whispers from the Crowd",
                                 next: 12061708,
                             },
                             {
                                 id: 12061708,
                                 content: "Are Drifters really that scary? I've only read about them in novels...",
                                 voice: "story/1206/120617/1E31F9F8",
+                                speakerName: "Whispers from the Crowd",
                                 next: 12061709,
                             },
                             {
@@ -87405,6 +88238,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I've heard some Drifters have done good too... but I suppose stories are just stories. I'd still rather not meet one in the flesh.",
                                 voice: "story/1206/120617/1E31FA22",
+                                speakerName: "Whispers from the Crowd",
                                 next: 12061710,
                             },
                             {
@@ -87456,6 +88290,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12061716,
                                 content: "So she's the Drifter who slipped in...",
                                 voice: "story/1206/120617/1E31FB48",
+                                speakerName: "Whispers from the Crowd",
                                 next: 12061717,
                             },
                             {
@@ -87463,6 +88298,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "She looks harmless... just some dainty young woman. And they're saying she's a Drifter? Doesn't look half as scary as the stories.",
                                 voice: "story/1206/120617/1E31FB72",
+                                speakerName: "Whispers from the Crowd",
                                 next: 12061718,
                             },
                             {
@@ -88211,6 +89047,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Stop, stop— it's me!",
                                 voice: "story/1206/120622/1E324ADA",
                                 npc: 250024,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -88226,6 +89063,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Stop, stop— it's me!",
                                 voice: "story/1206/120622/1E324ADA",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062202,
                             },
                             {
@@ -88234,6 +89072,7 @@ export const questData_en: QuestStory[] = [
                                     "Ow... my poor back... You kids go reaching for your weapons at the slightest thing. Nearly put my back out.",
                                 voice: "story/1206/120622/1E324B04",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 options: [
                                     {
                                         id: 12062203,
@@ -88261,6 +89100,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Because I was worried about our little Yi, of course!",
                                 voice: "story/1206/120622/1E324BAC",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062207,
                             },
                             {
@@ -88269,6 +89109,7 @@ export const questData_en: QuestStory[] = [
                                     "Ugh... Kids grow up fast. You can't keep them close forever. If I went in, she'd put on a brave face and kick me right back out. So I just lingered outside for a quick look.",
                                 voice: "story/1206/120622/1E324BD6",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062208,
                             },
                             {
@@ -88277,6 +89118,7 @@ export const questData_en: QuestStory[] = [
                                     "Same with this event — she signed up and ran off without a word. Everyone in the Outer Peaks knows what's weighing on her. We understand. But she's a sensitive kid... and she carries it like it's all her fault.",
                                 voice: "story/1206/120622/1E324C00",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062209,
                             },
                             {
@@ -88285,6 +89127,7 @@ export const questData_en: QuestStory[] = [
                                     "She's always too hard on herself. Thinks she shouldn't be so wilful, so she keeps it from everyone and tries to shoulder it all alone.",
                                 voice: "story/1206/120622/1E324C2A",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062210,
                             },
                             {
@@ -88293,6 +89136,7 @@ export const questData_en: QuestStory[] = [
                                     "Good thing she's got you. With you by her side, I can finally breathe a little easier. So — what did she say to you just now?",
                                 voice: "story/1206/120622/1E324C54",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 options: [
                                     {
                                         id: 12062211,
@@ -88306,6 +89150,7 @@ export const questData_en: QuestStory[] = [
                                 content: "She said she's \"never felt better\"? Oh no... no, no — that's not good.",
                                 voice: "story/1206/120622/1E324CA8",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062213,
                             },
                             {
@@ -88314,6 +89159,7 @@ export const questData_en: QuestStory[] = [
                                     "That girl grew up right before my eyes. I know her too well. The angrier she gets, the calmer she looks. If she's saying she's \"never felt better\", she's furious...",
                                 voice: "story/1206/120622/1E324CD2",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062214,
                             },
                             {
@@ -88322,6 +89168,7 @@ export const questData_en: QuestStory[] = [
                                     "Most days she's so steady and reliable you forget she's still just a kid. But mention her aunt, and she comes undone in a heartbeat.",
                                 voice: "story/1206/120622/1E324CFC",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062215,
                             },
                             {
@@ -88329,6 +89176,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Has she ever told you about her aunt — Su Muzhe? How much do you know about what happened?",
                                 voice: "story/1206/120622/1E324D26",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062216,
                             },
                             {
@@ -88344,6 +89192,7 @@ export const questData_en: QuestStory[] = [
                                 content: "She even told you that...? Then she must trust you a great deal.",
                                 voice: "story/1206/120622/1E324D7A",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062218,
                             },
                             {
@@ -88352,6 +89201,7 @@ export const questData_en: QuestStory[] = [
                                     "When word reached us, we all knew nothing good would come of it. But nobody could talk Muzhe out of it. She went anyway.",
                                 voice: "story/1206/120622/1E324DA4",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062219,
                             },
                             {
@@ -88360,6 +89210,7 @@ export const questData_en: QuestStory[] = [
                                     "In the end, she couldn't contain Miemeng. It went rampant, tore the eastern outskirts apart, and ruined everything Muzhe had worked for. Yi's never been able to move past it.",
                                 voice: "story/1206/120622/1E324DCE",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062220,
                             },
                             {
@@ -88368,6 +89219,7 @@ export const questData_en: QuestStory[] = [
                                     "We old folk have got one foot in the grave. We've no business meddling in the young ones' old grudges and unfinished business. I just hope Yi figures it out one day — you can't stay chained to the past forever. You've got to keep moving.",
                                 voice: "story/1206/120622/1E324DF8",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062221,
                             },
                             {
@@ -88381,6 +89233,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Whoa! What was that!?",
                                 voice: "story/1206/120622/1E324E4C",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062223,
                             },
                             {
@@ -88396,6 +89249,7 @@ export const questData_en: QuestStory[] = [
                                     "Even if I were clumsy, I couldn't knock over that much in one go. Something's off. Sounded like it came from the entrance to the Outer Peaks.",
                                 voice: "story/1206/120622/1E324EA0",
                                 npc: 250024,
+                                speakerName: "Uncle Tang",
                                 next: 12062225,
                             },
                             {
@@ -88927,6 +89781,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12062501,
                                 content: "...",
                                 voice: "story/1206/120625/1E327C12",
+                                speakerName: "Crowd",
                                 next: 12062502,
                             },
                             {
@@ -89088,12 +89943,14 @@ export const questData_en: QuestStory[] = [
                                 id: 12062521,
                                 content: "How did the Stewards' Council let something that dangerous onto the field...?",
                                 voice: "story/1206/120625/1E327F5A",
+                                speakerName: "Whispers from the Crowd",
                                 next: 12062522,
                             },
                             {
                                 id: 12062522,
                                 content: "If that thing had gone off in the crowd... I don't even want to think about it.",
                                 voice: "story/1206/120625/1E327F84",
+                                speakerName: "Whispers from the Crowd",
                                 next: 12062523,
                             },
                             {
@@ -89101,6 +89958,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "If Drifters are all ticking time bombs like her, who's keeping the rest of us safe? Get them out of here!",
                                 voice: "story/1206/120625/1E327FAE",
+                                speakerName: "Whispers from the Crowd",
                                 next: 12062524,
                             },
                             {
@@ -89657,6 +90515,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12062721,
                                 content: "I'm sorry, sweetie. If I stay, I'll only bring trouble to you and your mother.",
                                 voice: "story/1206/120627/1E32A02A",
+                                speakerName: "Su Muzhe",
                                 next: 12062722,
                             },
                             {
@@ -89670,12 +90529,14 @@ export const questData_en: QuestStory[] = [
                                 id: 12062723,
                                 content: "No. They're not bad people.",
                                 voice: "story/1206/120627/1E32A07E",
+                                speakerName: "Su Muzhe",
                                 next: 12062724,
                             },
                             {
                                 id: 12062724,
                                 content: "They put a golden chain on a little bird's leg, thinking it's for her own good.",
                                 voice: "story/1206/120627/1E32A0A8",
+                                speakerName: "Su Muzhe",
                                 next: 12062725,
                             },
                             {
@@ -89690,6 +90551,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Of course it is. But the little bird knows what she wants, and it isn't a golden chain. She wants the open sky, and a future where she can fly free.",
                                 voice: "story/1206/120627/1E32A0FC",
+                                speakerName: "Su Muzhe",
                                 next: 12062727,
                             },
                             {
@@ -89697,6 +90559,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "When that day comes, you won't have to be cooped up in this house anymore. And artificers can devote themselves to the craft of mechapuppetry, building automations that genuinely improve people's lives.",
                                 voice: "story/1206/120627/1E32A126",
+                                speakerName: "Su Muzhe",
                                 next: 12062728,
                             },
                             {
@@ -89711,18 +90574,21 @@ export const questData_en: QuestStory[] = [
                                 id: 12062729,
                                 content: "Yes... if I can pull it off.",
                                 voice: "story/1206/120627/1E32A17A",
+                                speakerName: "Su Muzhe",
                                 next: 12062730,
                             },
                             {
                                 id: 12062730,
                                 content: "But I'm not that amazing. You'll surpass me at mechapuppetry soon enough.",
                                 voice: "story/1206/120627/1E32A1A4",
+                                speakerName: "Su Muzhe",
                                 next: 12062731,
                             },
                             {
                                 id: 12062731,
                                 content: "At least I've taught you everything I know. That's one less regret for me to carry.",
                                 voice: "story/1206/120627/1E32A1CE",
+                                speakerName: "Su Muzhe",
                                 next: 12062732,
                             },
                             {
@@ -89737,6 +90603,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Don't cry, sweetie. We made a promise, didn't we? If I manage to change the Nine Chapters, I'll come back and take you — your mother and father too — to the eastern outskirts. We'll fly the little mech-birds we built together, all right?",
                                 voice: "story/1206/120627/1E32A222",
+                                speakerName: "Su Muzhe",
                                 next: 12062734,
                             },
                             {
@@ -89751,6 +90618,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "If I fail... I'll still have you. At the very least, I can teach you not to make the same mistakes I did.",
                                 voice: "story/1206/120627/1E32A276",
+                                speakerName: "Su Muzhe",
                                 next: 12062736,
                             },
                             {
@@ -89765,6 +90633,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "That's all right. Someday, you'll have students of your own. You'll teach them what you learned the hard way. And they'll pass it on in turn... until, one day, someone lives to see things truly change.",
                                 voice: "story/1206/120627/1E32A2CA",
+                                speakerName: "Su Muzhe",
                                 next: 12062738,
                             },
                             {
@@ -89778,6 +90647,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12062739,
                                 content: "Mm... I honestly don't know. That's the trouble, isn't it?",
                                 voice: "story/1206/120627/1E32A31E",
+                                speakerName: "Su Muzhe",
                                 next: 12062740,
                             },
                             {
@@ -89785,12 +90655,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "If we're both going to see that day... then I suppose I'll have to pull it off, won't I? Promise me you'll look after yourself, and wait for my good news, all right?",
                                 voice: "story/1206/120627/1E32A348",
+                                speakerName: "Su Muzhe",
                                 next: 12062741,
                             },
                             {
                                 id: 12062741,
                                 content: "And one last thing...",
                                 voice: "story/1206/120627/1E32A372",
+                                speakerName: "Su Muzhe",
                                 next: 12062742,
                             },
                             {
@@ -89798,6 +90670,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Change always comes at a cost. And if... I'm not trying to jinx it— I'm just saying... if one day I make a terrible mistake...",
                                 voice: "story/1206/120627/1E32A39C",
+                                speakerName: "Su Muzhe",
                                 next: 12062743,
                             },
                             {
@@ -90094,6 +90967,7 @@ export const questData_en: QuestStory[] = [
                                 content: "...Help... Is anyone there...?",
                                 voice: "story/1206/120629/1E32BE5A",
                                 npc: 250017,
+                                speakerName: "???",
                                 next: 12062906,
                             },
                             {
@@ -90244,6 +91118,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12063801,
                                 content: "Scan complete... Establishing tracking path...",
                                 voice: "story/1206/120638/1E33515A",
+                                speakerName: "Qingluan Type Ⅱ",
                                 next: 12063802,
                             },
                             {
@@ -90812,6 +91687,7 @@ export const questData_en: QuestStory[] = [
                                 id: 12063321,
                                 content: "It's that young hero! {nickname}!",
                                 voice: "story/1206/120633/1E33029A",
+                                speakerName: "Buzz from the Crowd",
                                 next: 12063322,
                             },
                             {
@@ -90819,6 +91695,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "And that Drifter! See? I told you — the stories make them out to be green-faced monsters with fangs, but they're nothing like that. That girl with the two long braids is actually adorable.",
                                 voice: "story/1206/120633/1E3302C4",
+                                speakerName: "Buzz from the Crowd",
                                 next: 12063323,
                             },
                             {
@@ -90826,6 +91703,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I've never seen a Drifter in person before. Maybe they're just ordinary people like us. They get lost... then they pick themselves up and keep going.",
                                 voice: "story/1206/120633/1E3302EE",
+                                speakerName: "Buzz from the Crowd",
                             },
                         ],
                     },
@@ -91716,6 +92594,7 @@ export const questData_en: QuestStory[] = [
                                     "Kiddo, I'm Lunosmith, a wandering blacksmith. Would you mind if I accompanied you on your journey?",
                                 voice: "story/2001/200005/3211B7F8",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                                 next: 20000524,
                             },
                             {
@@ -91724,6 +92603,7 @@ export const questData_en: QuestStory[] = [
                                     "I've travelled all over the land, from Hyperborea to Elysium, and I've forged countless weapons. If you require any weapons, I'm at your disposal.",
                                 voice: "story/2001/200005/3211B822",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                                 next: 20000525,
                             },
                             {
@@ -91738,6 +92618,7 @@ export const questData_en: QuestStory[] = [
                                 content: "All I request is a basic salary, and an opportunity to examine your sword, hehe.",
                                 voice: "story/2001/200005/3211B876",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                             },
                         ],
                     },
@@ -91839,6 +92720,7 @@ export const questData_en: QuestStory[] = [
                                     "Kiddo, I'm Lunosmith, a wandering blacksmith. Would you mind if I accompanied you on your journey?",
                                 voice: "story/2001/200005/3211B7F8",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                                 next: 20000524,
                             },
                             {
@@ -91847,6 +92729,7 @@ export const questData_en: QuestStory[] = [
                                     "I've travelled all over the land, from Hyperborea to Elysium, and I've forged countless weapons. If you require any weapons, I'm at your disposal.",
                                 voice: "story/2001/200005/3211B822",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                                 next: 20000525,
                             },
                             {
@@ -91861,6 +92744,7 @@ export const questData_en: QuestStory[] = [
                                 content: "All I request is a basic salary, and an opportunity to examine your sword, hehe.",
                                 voice: "story/2001/200005/3211B876",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                             },
                         ],
                     },
@@ -91874,6 +92758,7 @@ export const questData_en: QuestStory[] = [
                                 content: "So you'll have me? Excellent! Then take me to where you live.",
                                 voice: "story/2001/200005/3211B99C",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                             },
                         ],
                     },
@@ -91887,6 +92772,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Look, I can see scepticism written on your face.",
                                 voice: "story/2001/200005/3211B8CA",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                                 next: 20000529,
                             },
                             {
@@ -91894,6 +92780,7 @@ export const questData_en: QuestStory[] = [
                                 content: 'You can trust me. You must know the saying, "Lunos never harm." Everyone in Atlasia knows that.',
                                 voice: "story/2001/200005/3211B8F4",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                                 next: 20000530,
                             },
                             {
@@ -91922,6 +92809,7 @@ export const questData_en: QuestStory[] = [
                                 content: "So you'll have me? Excellent! Then take me to where you live.",
                                 voice: "story/2001/200005/3211B99C",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                             },
                         ],
                     },
@@ -92017,6 +92905,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Did you come from a remote village or something, kiddo?",
                                 voice: "story/2001/200006/3211C4EE",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                                 next: 20000604,
                             },
                             {
@@ -92032,6 +92921,7 @@ export const questData_en: QuestStory[] = [
                                     "Ha, that explains it. In all my travels, wherever there are humans, Lunos can always be found. It's quite uncommon to come across someone like you who's never heard of us.",
                                 voice: "story/2001/200006/3211C542",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                                 options: [
                                     {
                                         id: 200006051,
@@ -92081,6 +92971,7 @@ export const questData_en: QuestStory[] = [
                                     "Indeed. In all my years, I've never seen a Luno with horns like those. You look just like those human <H>Charons</>.",
                                 voice: "story/2001/200006/3211C63E",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                                 next: 20000612,
                             },
                             {
@@ -92096,6 +92987,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Oh... that's quite the ambition.",
                                 voice: "story/2001/200006/3211C692",
                                 npc: 200024,
+                                speakerName: "Lunosmith",
                                 next: 20000614,
                             },
                             {
@@ -93068,6 +93960,7 @@ export const questData_en: QuestStory[] = [
                                 id: 20005301,
                                 content: "Don't hurt the Geniemons! Filbert, knock them off!",
                                 voice: "story/2001/200053/3214C7B2",
+                                speakerName: "Lively Voice",
                                 next: 20005302,
                             },
                             {
@@ -93082,6 +93975,7 @@ export const questData_en: QuestStory[] = [
                                 id: 20005303,
                                 content: "They're getting away! {性别:Sir|Miss}, and your little friend, could you give me a hand?",
                                 voice: "story/2001/200053/3214C806",
+                                speakerName: "Lively Voice",
                                 next: 20005304,
                             },
                             {
@@ -93163,6 +94057,7 @@ export const questData_en: QuestStory[] = [
                                 content: "That was me!",
                                 voice: "story/2001/200054/3214D916",
                                 npc: 200074,
+                                speakerName: "???",
                                 next: 20005408,
                             },
                             {
@@ -93363,6 +94258,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 20005425,
                                 content: "Da da...?",
+                                speakerName: "Rescued Geniemon",
                                 next: 20005426,
                             },
                             {
@@ -93376,6 +94272,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 20005427,
                                 content: "Da da! Da da da!",
+                                speakerName: "Rescued Geniemon",
                                 next: 20005428,
                             },
                             {
@@ -93403,6 +94300,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 20005431,
                                 content: "Da da da da!",
+                                speakerName: "Rescued Geniemon",
                                 options: [
                                     {
                                         id: 200054311,
@@ -93419,6 +94317,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 20005432,
                                 content: "Da da— !",
+                                speakerName: "Rescued Geniemon",
                                 next: 20005434,
                             },
                             {
@@ -93953,6 +94852,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yip—!",
                                 voice: "story/2001/200060/32153BB0",
                                 npc: 820000,
+                                speakerName: "Rescued Geniemon",
                                 next: 20006009,
                             },
                             {
@@ -93983,6 +94883,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yiiiip—!",
                                 voice: "story/2001/200060/32153C58",
                                 npc: 820000,
+                                speakerName: "Rescued Geniemon",
                                 next: 20006013,
                             },
                             {
@@ -94097,6 +94998,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yiip—!",
                                 voice: "story/2001/200060/32153E7A",
                                 npc: 700251,
+                                speakerName: "Geniemon Recaptured",
                                 next: 20006026,
                             },
                             {
@@ -94599,6 +95501,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yip.",
                                 voice: "story/2001/200067/3215AE88",
                                 npc: 700251,
+                                speakerName: "Paniemon",
                                 next: 20006709,
                             },
                             {
@@ -94722,6 +95625,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yip—!",
                                 voice: "story/2001/200066/32159D78",
                                 npc: 700251,
+                                speakerName: "Paniemon",
                                 next: 20006605,
                             },
                             {
@@ -94735,18 +95639,21 @@ export const questData_en: QuestStory[] = [
                                 id: 20006606,
                                 content: "Chirp—!",
                                 voice: "story/2001/200066/32159DCC",
+                                speakerName: "???",
                                 next: 20006607,
                             },
                             {
                                 id: 20006607,
                                 content: "Baa—!",
                                 voice: "story/2001/200066/32159DF6",
+                                speakerName: "???",
                                 next: 20006608,
                             },
                             {
                                 id: 20006608,
                                 content: "Ding-dong—!",
                                 voice: "story/2001/200066/32159E20",
+                                speakerName: "???",
                                 next: 20006609,
                             },
                             {
@@ -95065,6 +95972,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yip.",
                                 voice: "story/2001/200067/3215B128",
                                 npc: 700251,
+                                speakerName: "Paniemon",
                                 next: 20006725,
                             },
                             {
@@ -95094,6 +96002,7 @@ export const questData_en: QuestStory[] = [
                                 content: "Yiiiip~",
                                 voice: "story/2001/200067/3215B1D0",
                                 npc: 700251,
+                                speakerName: "Paniemon",
                             },
                         ],
                     },
@@ -95944,6 +96853,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51000894,
                                 content: "Annie... So that's my name. Has a strange ring to it...",
                                 npc: 700032,
+                                speakerName: "Annie",
                                 next: 51000895,
                             },
                             {
@@ -95957,6 +96867,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Sorry, I really don't remember a thing... Thank you, really, thank you so much! Could you take me to my mother? She will definitely give you a ton of thank-you gifts!",
                                 npc: 700032,
+                                speakerName: "Annie",
                                 options: [
                                     {
                                         id: 510008141,
@@ -95969,18 +96880,21 @@ export const questData_en: QuestStory[] = [
                                 id: 51000805,
                                 content: "My name is Alice, I'm an archaeology student from Aethyrie...",
                                 npc: 700032,
+                                speakerName: "Alice",
                                 next: 51000806,
                             },
                             {
                                 id: 51000814,
                                 content: "Thank you! She must be worried about me.",
                                 npc: 700032,
+                                speakerName: "Annie",
                             },
                             {
                                 id: 51000806,
                                 content:
                                     "I was conducting a survey in the Vidofnir Mountains when I got caught in a snowstorm that lasted for days, and soon I lost my way...",
                                 npc: 700032,
+                                speakerName: "Alice",
                                 next: 51000807,
                             },
                             {
@@ -95988,6 +96902,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Later on, I met Annie, who was clinging to life by a mere thread. Together, we struggled to live on for several days. We encouraged each other to try to survive, and she invited me to visit her home in Icelake after the storm...",
                                 npc: 700032,
+                                speakerName: "Alice",
                                 next: 51000808,
                             },
                             {
@@ -95995,18 +96910,21 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "But... she was too badly hurt. She didn't make it. Before she passed, she gave me her coat. Said it might keep me warm enough to get through...",
                                 npc: 700032,
+                                speakerName: "Alice",
                                 next: 51000809,
                             },
                             {
                                 id: 51000809,
                                 content: "Annie...",
                                 npc: 700032,
+                                speakerName: "Alice",
                                 next: 51000810,
                             },
                             {
                                 id: 51000810,
                                 content: "Thank you... I will always remember Annie.",
                                 npc: 700032,
+                                speakerName: "Alice",
                                 next: 51000811,
                             },
                             {
@@ -96014,6 +96932,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "(Alice gently strokes the clothing which is a testament of one girl protecting the other. You bid farewell to Alice and get ready to tell Elsa the truth.)",
                                 npc: 700032,
+                                speakerName: "Alice",
                             },
                         ],
                     },
@@ -98077,6 +98996,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51004907,
                                 content:
                                     '"Wild Filthoids gorge on our flesh, city lords shear our fleece. The hounds dine on fine white loaves, while lowly Charon sheep chew yellowed grass. We roll and we crawl, we baa and we fawn. The masters laugh, while we bear it all."',
+                                speakerName: "Illegible Handwriting",
                                 next: 51004908,
                             },
                             {
@@ -98130,12 +99050,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51004914,
                                 content:
                                     '"I used to be a wandering bard. Then they came — those thugs who hate the Charon. They dragged me away. Mocked me. Beat me. Shaved my head. Tore my skin."',
+                                speakerName: "Illegible Handwriting",
                                 next: 510049141,
                             },
                             {
                                 id: 510049141,
                                 content:
                                     '"Then they forced poison brewed from Eclipta Grass down my throat. It didn\'t kill me... but it took my voice."',
+                                speakerName: "Illegible Handwriting",
                                 next: 51004915,
                             },
                             {
@@ -98152,6 +99074,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51004917,
                                 content: '"Keeping it bottled up inside hurts a lot."',
+                                speakerName: "Illegible Handwriting",
                                 options: [
                                     {
                                         id: 510049171,
@@ -98177,12 +99100,14 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51004918,
                                 content: "\"I know. I can't even show others what I wrote. But I just can't help it.\"",
+                                speakerName: "Illegible Handwriting",
                                 next: 51004919,
                             },
                             {
                                 id: 51004923,
                                 content:
                                     "\"You flatter me. I'm just a coward whose complaints remain on useless pieces of scrap. I don't even have the courage to show them to anyone.\"",
+                                speakerName: "Illegible Handwriting",
                                 next: 51004924,
                             },
                             {
@@ -98195,6 +99120,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51004919,
                                 content:
                                     "\"I can't sing anymore. And if I give up writing too, I'll lose the last valuable thing I have. When that happens, I'll truly have nothing to call my own.\"",
+                                speakerName: "Illegible Handwriting",
                                 next: 51004920,
                             },
                             {
@@ -98207,6 +99133,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51004928,
                                 content: '"This is all yours. Just give me back that piece of paper."',
+                                speakerName: "Illegible Handwriting",
                                 next: 51004929,
                             },
                             {
@@ -98234,10 +99161,12 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51004926,
                                 content: '"Thank you for returning this to me, gentle soul. Please accpet this as a thank-you gift."',
+                                speakerName: "Illegible Handwriting",
                             },
                             {
                                 id: 51004922,
                                 content: '"Thank you for returning this to me, gentle soul. Please accpet this as a thank-you gift."',
+                                speakerName: "Illegible Handwriting",
                             },
                         ],
                     },
@@ -98449,11 +99378,13 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51004966,
                                 content: "(She lowers her head, falling into deep thought.)",
+                                speakerName: "Illegible Handwriting",
                                 next: 51004967,
                             },
                             {
                                 id: 51004967,
                                 content: "\"I'd sing what's in my heart — even if it costs me my voice all over again.\"",
+                                speakerName: "Illegible Handwriting",
                                 next: 51004968,
                             },
                             {
@@ -98693,6 +99624,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51004401,
                                 content: "What's in the sewers that never goes away?",
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 510044011,
@@ -98714,10 +99646,12 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51004402,
                                 content: "Come on in.",
+                                speakerName: "???",
                             },
                             {
                                 id: 51004403,
                                 content: "This is no place for a clueless fool like you.",
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -101002,6 +101936,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51005929,
                                 content: "Howdy, Super Bros!",
+                                speakerName: "The Imperial Three",
                                 next: 51005930,
                             },
                             {
@@ -101089,6 +102024,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51005941,
                                 content: "Thank you, Super Bros!",
+                                speakerName: "The Imperial Three",
                                 next: 51005942,
                             },
                             {
@@ -101266,6 +102202,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51005929,
                                 content: "Howdy, Super Bros!",
+                                speakerName: "The Imperial Three",
                                 next: 51005930,
                             },
                             {
@@ -101353,6 +102290,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51005941,
                                 content: "Thank you, Super Bros!",
+                                speakerName: "The Imperial Three",
                                 next: 51005942,
                             },
                             {
@@ -101643,17 +102581,20 @@ export const questData_en: QuestStory[] = [
                                 id: 51007126,
                                 content:
                                     "...Alright, fine. I'm Jessica. I'm the one who threw this \"rubbish\" away, happy? You've just danced around to mock me, huh?",
+                                speakerName: "Jessica",
                                 next: 51007127,
                             },
                             {
                                 id: 51007127,
                                 content:
                                     "Yeah, you got me. Just like every other pauper in this dump, I can't even scrape together half a ticket for this bloody train. Is that what you wanted to hear? Happy now!?",
+                                speakerName: "Jessica",
                                 next: 51007128,
                             },
                             {
                                 id: 51007128,
                                 content: "...Dreams coming true my foot...",
+                                speakerName: "Jessica",
                                 next: 51007129,
                             },
                             {
@@ -101666,11 +102607,13 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51007130,
                                 content: "Heh, what am I supposed to do then — gently comfort them?",
+                                speakerName: "Jessica",
                                 next: 51007131,
                             },
                             {
                                 id: 51007131,
                                 content: "And let them nurse fantasies about someday boarding the trains meant for the rich lords!?",
+                                speakerName: "Jessica",
                                 next: 51007132,
                             },
                             {
@@ -101683,6 +102626,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51007133,
                                 content:
                                     "You're a Starweaver!? Then, do you know another Huaxu Starweaver named Jiayan? He was here in Icelake thirteen years ago.",
+                                speakerName: "Jessica",
                                 next: 51007134,
                             },
                             {
@@ -101694,6 +102638,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51007135,
                                 content: "...Alright.",
+                                speakerName: "Jessica",
                                 next: 51007136,
                             },
                             {
@@ -101705,6 +102650,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51007137,
                                 content: "Hmph, a friend? No, he's the person I hate the most.",
+                                speakerName: "Jessica",
                                 next: 51007138,
                             },
                             {
@@ -101717,24 +102663,28 @@ export const questData_en: QuestStory[] = [
                                 id: 51007139,
                                 content:
                                     "He claimed he had visited many countries, met many fascinating people, and had countless wonderful experiences. With each piece of merchandise he sold, he told a story of the outside world.",
+                                speakerName: "Jessica",
                                 next: 51007140,
                             },
                             {
                                 id: 51007140,
                                 content:
                                     "I noted every line of his stories and memorised all of them like an idiot, believing it would bring me closer to that vast world he described.",
+                                speakerName: "Jessica",
                                 next: 51007141,
                             },
                             {
                                 id: 51007141,
                                 content:
                                     'He said, "Stars are the seeds of wishes; as they fall, like fruit to be harvested, your desires come to fruition." He also said, "Countless stars, crafted from cherished dreams, will sprout upon the earth."',
+                                speakerName: "Jessica",
                                 next: 51007142,
                             },
                             {
                                 id: 51007142,
                                 content:
                                     "I wanted to go with him and hear more of his endless stories. But I couldn't afford the ticket, so all I could do was watch him board that train and leave.",
+                                speakerName: "Jessica",
                                 next: 51007143,
                             },
                             {
@@ -101747,24 +102697,28 @@ export const questData_en: QuestStory[] = [
                                 id: 51007144,
                                 content:
                                     "Ha... here it is. This is the ticket from his train — the one bound for the far south, across the great plains of Hyperborea.",
+                                speakerName: "Jessica",
                                 next: 51007145,
                             },
                             {
                                 id: 51007145,
                                 content:
                                     "The ticket seller back then... she felt sorry for me. After the train left, she slipped me an expired, unsold ticket and told me there'd be other trains heading that way.",
+                                speakerName: "Jessica",
                                 next: 51007146,
                             },
                             {
                                 id: 51007146,
                                 content:
                                     "But I could never afford the real thing. All I could do was stand there and watch the trains roll out. I learned every step of the process by heart. And when that old ticket seller retired, I took her place.",
+                                speakerName: "Jessica",
                                 next: 51006931,
                             },
                             {
                                 id: 51006931,
                                 content:
                                     "One year and eight months into the job, I finally saved enough for a single fare to Scarletriver — one of the big southern cities.",
+                                speakerName: "Jessica",
                                 next: 51006932,
                             },
                             {
@@ -101777,6 +102731,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51006933,
                                 content:
                                     "Closer? Have you forgotten about the <H>supervision levies</> they slap on Charons? The ticket itself is nothing compared to the fees we have to pay just to be allowed to buy one! To afford a ticket to where he went, I'd have to starve myself for five whole years. And even if I managed that... I still have a family to feed.",
+                                speakerName: "Jessica",
                                 next: 51007147,
                             },
                             {
@@ -101789,6 +102744,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51007148,
                                 content:
                                     "Now you get it, right? These paper stars are nothing but rubbish. Thanks for bringing them back to me. Next time, I'll tear them up before throwing them away.",
+                                speakerName: "Jessica",
                                 next: 51007149,
                             },
                             {
@@ -101800,6 +102756,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51007150,
                                 content: "I don't need you to pity me, Starweaver.",
+                                speakerName: "Jessica",
                                 options: [
                                     {
                                         id: 51007151,
@@ -101812,18 +102769,21 @@ export const questData_en: QuestStory[] = [
                                 id: 51007152,
                                 content:
                                     'Be nice? You mean like that Starweaver and that ticket seller, sugar-coating reality with pretty, empty words about "the outside world" or "the future" and getting people\'s hopes up for nothing?',
+                                speakerName: "Jessica",
                                 next: 51007153,
                             },
                             {
                                 id: 51007153,
                                 content:
                                     "As a Charon, you should know what a terrible place Icelake is better than I do, or at least better than this Huaxu man does!",
+                                speakerName: "Jessica",
                                 next: 51007154,
                             },
                             {
                                 id: 51007154,
                                 content:
                                     "Take a walk around the city — everyone's complaining, wailing, and cursing! In such a place, what good does being nice do?",
+                                speakerName: "Jessica",
                                 next: 51007155,
                             },
                             {
@@ -101852,6 +102812,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51007159,
                                 content: "What do you mean...? There's no way I can afford this fancy box...",
+                                speakerName: "Jessica",
                                 next: 51007160,
                             },
                             {
@@ -101887,6 +102848,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51007169,
                                 content:
                                     "Take it away. Why do you think I wanted to throw those stars away? I've thought it all through over the years and have come to terms with reality.",
+                                speakerName: "Jessica",
                                 next: 51007170,
                             },
                             {
@@ -101910,33 +102872,39 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51007171,
                                 content: "...",
+                                speakerName: "Jessica",
                                 next: 51007172,
                             },
                             {
                                 id: 51007166,
                                 content: "...",
+                                speakerName: "Jessica",
                                 next: 51007167,
                             },
                             {
                                 id: 51007172,
                                 content:
                                     "...By the way, even to the same destination, ticket prices vary. Some are cheaper — not by much, but still...",
+                                speakerName: "Jessica",
                                 next: 51007173,
                             },
                             {
                                 id: 51007167,
                                 content: "A—Alright... I'll take it — but only because I've had enough of your rambling. Th—Thank you.",
+                                speakerName: "Jessica",
                                 next: 51007172,
                             },
                             {
                                 id: 51007173,
                                 content:
                                     "If you ever manage to scrape together enough for a ticket, I can help you find the cheapest available.",
+                                speakerName: "Jessica",
                                 next: 51007174,
                             },
                             {
                                 id: 51007174,
                                 content: "In exchange, don't tell others about the stars.",
+                                speakerName: "Jessica",
                                 next: 51007175,
                             },
                             {
@@ -101955,6 +102923,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51007177,
                                 content:
                                     "Thank you, but... you don't have to. If I ever get to leave here, I probably won't go looking for him. I'd rather go to a warm place where it never snows, to see if the people are different from those in Icelake.",
+                                speakerName: "Jessica",
                                 next: 51007178,
                             },
                             {
@@ -101966,6 +102935,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51007179,
                                 content: "...Yeah.",
+                                speakerName: "Jessica",
                                 next: 51007186,
                             },
                             {
@@ -102105,6 +103075,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51007181,
                                 content:
                                     "Li An'de, me name, Starweaver. Days ago, business bad. Now sell goods at city gate, me work hard! Please come!",
+                                speakerName: "Li An'de",
                             },
                         ],
                     },
@@ -102563,6 +103534,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51006304,
                                 content: "Woof, woof—",
+                                speakerName: "Fierce Dog",
                             },
                         ],
                     },
@@ -102876,12 +103848,14 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51006726,
                                 content: '"Life is like a lonely cruise through the boundless darkness of the night."',
+                                speakerName: "???",
                                 next: 51006727,
                             },
                             {
                                 id: 51006727,
                                 content:
                                     '"The river weeps, overflowing its banks, while the thorny thickets on either side stand as a testament to its sorrow."',
+                                speakerName: "???",
                                 next: 51006728,
                             },
                             {
@@ -104494,6 +105468,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51007690,
                                 content: "Theo! Where have you been this time!? And just look at you — you're filthy!",
                                 npc: 700205,
+                                speakerName: "Well-Dressed Lady",
                                 next: 51007691,
                             },
                             {
@@ -106931,6 +107906,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51009629,
                                 content: "*cough*",
                                 npc: 700301,
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 51009630,
@@ -106943,6 +107919,7 @@ export const questData_en: QuestStory[] = [
                                 id: 510095401,
                                 content: "What's a youngster like you doing here? Are you lost in the snowfield? Icelake's that way—",
                                 npc: 700301,
+                                speakerName: "???",
                                 next: 51009631,
                             },
                             {
@@ -107739,6 +108716,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51009723,
                                 content: "Another restless night... no peace for the weary!",
                                 npc: 700309,
+                                speakerName: "???",
                                 next: 51009724,
                             },
                             {
@@ -107746,6 +108724,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "O, wretched soul — do you too wander these icy halls, chasing the distant gleam, yearning for love and a starlit dream?",
                                 npc: 700309,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -107761,6 +108740,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51009726,
                                 content: "Da... Da da...",
                                 npc: 700309,
+                                speakerName: "???",
                                 next: 51009727,
                             },
                             {
@@ -107773,12 +108753,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51009728,
                                 content: "Oh — pardon me. I didn't mean to startle you. I'm right here — five steps ahead. Yes, just here.",
                                 npc: 700309,
+                                speakerName: "???",
                                 next: 51009729,
                             },
                             {
                                 id: 51009729,
                                 content: "A good evening to you, sleepless one.",
                                 npc: 700309,
+                                speakerName: "???",
                                 options: [
                                     {
                                         id: 510096391,
@@ -108051,6 +109033,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51009763,
                                 content: "Excuse me... who are you? You've been hanging around my place for a while.",
                                 npc: 700302,
+                                speakerName: "???",
                                 next: 51009764,
                             },
                             {
@@ -108058,6 +109041,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Looking to hire someone? I take all kinds of commissions — tracking, foraging, courier work — so long as it's legal.",
                                 npc: 700302,
+                                speakerName: "???",
                                 next: 51009765,
                             },
                             {
@@ -108070,6 +109054,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51009766,
                                 content: "Huh? So you're not here to hire me?",
                                 npc: 700302,
+                                speakerName: "???",
                                 next: 51009767,
                             },
                             {
@@ -109280,6 +110265,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51009930,
                                 content: '"My dearest, weep no tears for me — on this sleepless night, I set off in silver light."',
                                 npc: 700300,
+                                speakerName: "Enola",
                                 next: 51009931,
                             },
                             {
@@ -109287,6 +110273,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     '"The wind fills my sail, the tide kisses my oar. The lighthouse aglow, \'neath the moon — oh, so bright!"',
                                 npc: 700300,
+                                speakerName: "Enola",
                                 next: 51009932,
                             },
                             {
@@ -109294,6 +110281,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Thank you, Enola... that was beautiful. Truly. Hehe... Whenever I imagined Putini, she always looked like you — bold, radiant, and forever chasing her freedom...",
                                 npc: 700300,
+                                speakerName: "Violet",
                                 next: 51009933,
                             },
                             {
@@ -109301,12 +110289,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Thanks! I did a bit of improvising... But I know a brilliant composer — his name's Cavaradossi. Maybe we could ask him to adapt Putini into an opera—",
                                 npc: 700300,
+                                speakerName: "Enola",
                                 next: 51009934,
                             },
                             {
                                 id: 51009934,
                                 content: "...Not that I'll ever get the chance to sing it.",
                                 npc: 700300,
+                                speakerName: "Enola",
                                 next: 51009935,
                             },
                             {
@@ -109314,6 +110304,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I'm eighteen now. My father's already arranged my marriage — two months from now, to some young officer from the Alchemy Academy.",
                                 npc: 700300,
+                                speakerName: "Enola",
                                 next: 51009936,
                             },
                             {
@@ -109321,6 +110312,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Guess I'll spend the rest of my life as a pretty trophy collecting dust in a parlour... or elbow-deep in those wretched Phoxichor canisters.",
                                 npc: 700300,
+                                speakerName: "Enola",
                                 next: 51009937,
                             },
                             {
@@ -109328,6 +110320,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "No, no... Enola, this isn't how it should be. You have a voice as sweet as a lark's... You don't belong in some parlour... You belong on a grand stage — the grandest there is.",
                                 npc: 700300,
+                                speakerName: "Violet",
                                 next: 51009938,
                             },
                             {
@@ -109335,6 +110328,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Everyone who loves to sing... deserves their moment in the spotlight... Solarian or Charon, rich or poor...",
                                 npc: 700300,
+                                speakerName: "Violet",
                                 next: 51009939,
                             },
                             {
@@ -109342,12 +110336,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I'll talk to my brother. I'll find a way to help you escape. My body's already giving out... and I may never finish the final act of Putini...",
                                 npc: 700300,
+                                speakerName: "Violet",
                                 next: 51009940,
                             },
                             {
                                 id: 51009940,
                                 content: "But Enola — promise me that you'll take the stage, and share our Putini with the world...",
                                 npc: 700300,
+                                speakerName: "Violet",
                                 next: 51009941,
                             },
                             {
@@ -110119,12 +111115,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51010052,
                                 content: "...Whoops!",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010053,
                             },
                             {
                                 id: 51010053,
                                 content: "S—Sorry! I didn't see you! Are you okay? Did I hurt you?",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010054,
                             },
                             {
@@ -110137,6 +111135,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51010055,
                                 content: "Mm...",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010056,
                             },
                             {
@@ -110149,6 +111148,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51010057,
                                 content: "Nope! Hehe... Thanks for the herbs! Oh no, I'm gonna be late!",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010058,
                             },
                             {
@@ -110161,6 +111161,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51010059,
                                 content: "You can keep it!!!",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010060,
                             },
                             {
@@ -110343,6 +111344,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51010084,
                                 content: "Giselle — you owe me an explanation!",
                                 npc: 700304,
+                                speakerName: "???",
                                 next: 51010085,
                             },
                             {
@@ -110474,12 +111476,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51010105,
                                 content: "...Whoops!",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010106,
                             },
                             {
                                 id: 51010106,
                                 content: "S—Sorry! I didn't see you! Are you okay? Did I hurt you?",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010107,
                             },
                             {
@@ -110492,6 +111496,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51010108,
                                 content: "Mm...",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010109,
                             },
                             {
@@ -110504,18 +111509,21 @@ export const questData_en: QuestStory[] = [
                                 id: 51010110,
                                 content: "Nothing! Hehe... Thanks for the herbs!",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010111,
                             },
                             {
                                 id: 51010111,
                                 content: "Time's ticking. Hurry or you'll miss it.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010112,
                             },
                             {
                                 id: 51010112,
                                 content: "Oh no... Sorry! I gotta go! I'm coming — wait for me!",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010113,
                             },
                             {
@@ -110528,6 +111536,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51010114,
                                 content: "You can keep it!!!",
                                 npc: 700305,
+                                speakerName: "Bubbly Girl",
                                 next: 51010115,
                             },
                             {
@@ -110547,12 +111556,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "A brave butterfly has broken free of her cocoon and taken wing. She's vanished into the wind — like a violet in a sea of blooms.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010118,
                             },
                             {
                                 id: 51010118,
                                 content: "She may not return for some time. So take it — a parting gift, from someone who held you dear.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010119,
                             },
                             {
@@ -110584,6 +111595,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Shhh — I respect your choice to reveal the truth, but those who know how to keep a secret are always the most charming.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010124,
                             },
                             {
@@ -110597,6 +111609,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "\"Violetta\" won't return to the stage — but I'm not quite ready to leave. Even if you turn me in again, I won't blame you. There's still another student I have to protect.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010126,
                             },
                             {
@@ -110609,12 +111622,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51010127,
                                 content: "...Thank you for your silence.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010128,
                             },
                             {
                                 id: 51010128,
                                 content: "Then I'll take my leave. Wishing you both a lovely evening.",
                                 npc: 700311,
+                                speakerName: "???",
                                 next: 51010129,
                             },
                             {
@@ -111711,6 +112726,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51100067,
                                 content: "Who is it? I was sleeping!",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100068,
                             },
                             {
@@ -111747,6 +112763,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51100073,
                                 content: "Taihao? You call me Taihao?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100074,
                             },
                             {
@@ -111760,6 +112777,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Hah! Right... yes, precisely what I meant! A mere mortal should know better than to bandy my name about so freely!",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100076,
                             },
                             {
@@ -111773,6 +112791,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "No matter — I am magnanimous enough to forgive you this once! Now then, mortal... what brings you to this rotten—ahem... this remote place, disturbing my peace?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100078,
                             },
                             {
@@ -111801,6 +112820,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Ah! Yes, yes, I recall now! You're the one who cracked your head! You clung to my sleeve, babbling nonsense — near spewed all over me! Don't you remember?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100082,
                             },
                             {
@@ -111832,12 +112852,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51100086,
                                 content: "...?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100087,
                             },
                             {
                                 id: 51100087,
                                 content: "Hahahahaha! Well said! You've quite the eye for greatness!",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100088,
                             },
                             {
@@ -111857,6 +112879,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Ahem... Human nature cannot be bent by force. If {性别:he|she} wishes to laugh, let {性别:him|her}.",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100091,
                             },
                             {
@@ -111871,12 +112894,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     'Oh? And does not the Ninth Admonition say: "Attend to Heaven\'s edict with a reverent mind and a solemn heart"? You offended me once — I forgave you, knowing your mind was muddled.',
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100093,
                             },
                             {
                                 id: 51100093,
                                 content: "But now, with your wits clear, you dare disrespect me again — what punishment do you deserve?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100094,
                             },
                             {
@@ -111907,6 +112932,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51100067,
                                 content: "Who is it? I was sleeping!",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100068,
                             },
                             {
@@ -111943,6 +112969,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51100073,
                                 content: "Taihao? You call me Taihao?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100074,
                             },
                             {
@@ -111956,6 +112983,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Hah! Right... yes, precisely what I meant! A mere mortal should know better than to bandy my name about so freely!",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100076,
                             },
                             {
@@ -111969,6 +112997,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "No matter — I am magnanimous enough to forgive you this once! Now then, mortal... what brings you to this rotten—ahem... this remote place, disturbing my peace?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100078,
                             },
                             {
@@ -111997,6 +113026,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Ah! Yes, yes, I recall now! You're the one who cracked your head! You clung to my sleeve, babbling nonsense — near spewed all over me! Don't you remember?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100082,
                             },
                             {
@@ -112028,12 +113058,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51100086,
                                 content: "...?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100087,
                             },
                             {
                                 id: 51100087,
                                 content: "Hahahahaha! Well said! You've quite the eye for greatness!",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100088,
                             },
                             {
@@ -112053,6 +113085,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Ahem... Human nature cannot be bent by force. If {性别:he|she} wishes to laugh, let {性别:him|her}.",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100091,
                             },
                             {
@@ -112067,12 +113100,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     'Oh? And does not the Ninth Admonition say: "Attend to Heaven\'s edict with a reverent mind and a solemn heart"? You offended me once — I forgave you, knowing your mind was muddled.',
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100093,
                             },
                             {
                                 id: 51100093,
                                 content: "But now, with your wits clear, you dare disrespect me again — what punishment do you deserve?",
                                 npc: 700318,
+                                speakerName: "???",
                                 next: 51100094,
                             },
                             {
@@ -113364,6 +114399,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51102036,
                                 content: "Roaaaar—!",
                                 npc: 210087,
+                                speakerName: "Sable Bi'an",
                             },
                         ],
                     },
@@ -113455,6 +114491,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51102046,
                                 content: "Not so fast.",
                                 npc: 700322,
+                                speakerName: "???",
                                 next: 51102047,
                             },
                             {
@@ -116377,6 +117414,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51125022,
                                 content: "Hah!",
+                                speakerName: "Extra",
                                 next: 51125023,
                             },
                             {
@@ -116403,6 +117441,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51125026,
                                 content: "Let's get him, lads!",
+                                speakerName: "Extra",
                             },
                         ],
                     },
@@ -116422,6 +117461,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51125029,
                                 content: "He's still standing even bound by the Rope! Fall back, now!",
+                                speakerName: "Extra",
                                 next: 51125030,
                             },
                             {
@@ -116778,6 +117818,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51125083,
                                 content: "Let's get him, lads!",
+                                speakerName: "Extra",
                             },
                         ],
                     },
@@ -116797,6 +117838,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51125086,
                                 content: "He's still standing even bound by the Rope! Fall back, now!",
+                                speakerName: "Extra",
                                 next: 51125087,
                             },
                             {
@@ -117952,6 +118994,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51140003,
                                 content: "Er, pardon me...",
                                 npc: 701074,
+                                speakerName: "A Strange Voice",
                             },
                             {
                                 id: 51140004,
@@ -118799,10 +119842,12 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51152003,
                                 content: "Woo... woo...",
+                                speakerName: "Middle-aged Man",
                             },
                             {
                                 id: 51152004,
                                 content: "Woo... don't come any closer... Don't make me do this... Don't—!",
+                                speakerName: "Middle-aged Man",
                             },
                             {
                                 id: 51152005,
@@ -118899,6 +119944,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51152014,
                                 content: "So you're saying we should stand idle, do nothing — and let them devour us? Is that it?",
+                                speakerName: "Zhiliu",
                             },
                             {
                                 id: 51152015,
@@ -119233,6 +120279,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51114022,
                                 content: "...",
+                                speakerName: "Yang & Zhang",
                                 next: 51114023,
                             },
                             {
@@ -122173,6 +123220,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51165501,
                                 content: "Cough... cough... Wretched creatures... Get... get away from me...",
                                 npc: 700386,
+                                speakerName: "???",
                             },
                             {
                                 id: 51165502,
@@ -122183,18 +123231,21 @@ export const questData_en: QuestStory[] = [
                                 id: 51165503,
                                 content: "You... you two... cough... This humble Gong thanks you, young heroes, for your aid.",
                                 npc: 700386,
+                                speakerName: "???",
                             },
                             {
                                 id: 51165504,
                                 content:
                                     "I have lived alone for many years now. Some students were too dull and I sent them away. Others so pampered that they left on their own. In the end... only this old man remains.",
                                 npc: 700386,
+                                speakerName: "???",
                             },
                             {
                                 id: 51165505,
                                 content:
                                     "I have no way to repay you... but if you'll allow me, let me offer a single tune on the qin, as thanks for saving this life.",
                                 npc: 700386,
+                                speakerName: "???",
                             },
                             {
                                 id: 51165506,
@@ -122446,6 +123497,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51165553,
                                 content: "Master, wait!",
                                 npc: 700387,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -122460,6 +123512,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51165601,
                                 content: "Master, it has been a long time.",
                                 npc: 700387,
+                                speakerName: "???",
                             },
                             {
                                 id: 51165602,
@@ -123223,18 +124276,21 @@ export const questData_en: QuestStory[] = [
                                 id: 51175210,
                                 content:
                                     "What you seek — the reversal of yin and yang — is no simple thing. But with the Spring of Yu linked to the Oblivion Rift through the Scourge of Zhuyin, there may be a way.",
+                                speakerName: "Wishen",
                                 next: 51175211,
                             },
                             {
                                 id: 51175211,
                                 content:
                                     "When the Oblivion Rift opens, go to the River of Forgetting and use the Art of Ephemerality. The person you wish to see may answer your call — if her soul still lingers in this world.",
+                                speakerName: "Wishen",
                                 next: 51175212,
                             },
                             {
                                 id: 51175212,
                                 content:
                                     "Then you may attempt the final reversal. But you should know: it demands rare talent. Even among Zhuyou, few succeed. And the cost is...",
+                                speakerName: "Wishen",
                                 next: 51175213,
                             },
                             {
@@ -123873,6 +124929,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51175403,
                                 content: "Zhuyou... why...",
+                                speakerName: "Afflicted Patient",
                             },
                         ],
                     },
@@ -123884,11 +124941,13 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51175404,
                                 content: "You said you would save us... Why did you disappear and leave us in despair!?",
+                                speakerName: "Despairing Patient",
                                 next: 51175405,
                             },
                             {
                                 id: 51175405,
                                 content: "We placed our faith in you... Perhaps we were wrong.",
+                                speakerName: "Despondent Patient",
                                 next: 51175406,
                             },
                             {
@@ -123919,16 +124978,19 @@ export const questData_en: QuestStory[] = [
                                 id: 51175408,
                                 content:
                                     "A Zhuyou receives the mandate of heaven, with pity for all beneath. One must hold fast to virtue, and guide every soul across. This body a candle, this heart its wick — burning away the self, to mend the world.",
+                                speakerName: "Father's Voice",
                                 next: 51175409,
                             },
                             {
                                 id: 51175409,
                                 content: "Remember the motto of your family, Fushu.",
+                                speakerName: "Father's Voice",
                                 next: 51175410,
                             },
                             {
                                 id: 51175410,
                                 content: "I will, Father!",
+                                speakerName: "Young Fushu",
                                 next: 51175411,
                             },
                             {
@@ -123958,28 +125020,33 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51175413,
                                 content: "Sister... Father is gone...",
+                                speakerName: "Young Fushu",
                                 next: 51175414,
                             },
                             {
                                 id: 51175414,
                                 content: "...",
+                                speakerName: "Young Fufeng",
                                 next: 51175415,
                             },
                             {
                                 id: 51175415,
                                 content: "Tell me, Shu. Do you really believe this is right?",
+                                speakerName: "Young Fufeng",
                                 next: 51175416,
                             },
                             {
                                 id: 51175416,
                                 content:
                                     "To ease the suffering of others through the Art of Ephemerality, until even our own bodies fall to ruin... That is the duty of a Zhuyou.",
+                                speakerName: "Young Fushu",
                                 next: 51175417,
                             },
                             {
                                 id: 51175417,
                                 content:
                                     "No. I refuse to accept that. I don't want to die. And I don't want to watch everyone else die either.",
+                                speakerName: "Young Fufeng",
                             },
                         ],
                     },
@@ -124269,12 +125336,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51175502,
                                 content:
                                     "Nothing serious. It's just a minor fracture. I've set it and secured a splint. Don't put weight on it. Sit tight for now.",
+                                speakerName: "Zesheng Pharmacy Apprentice",
                                 next: 51175503,
                             },
                             {
                                 id: 51175503,
                                 content:
                                     "No, I can't! My brother's a healer too. He's out there somewhere helping people. I need to assist him!",
+                                speakerName: "Anxious Patient",
                             },
                         ],
                     },
@@ -124299,16 +125368,19 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51175505,
                                 content: "Don't be ridiculous. We have enough hands. We don't need an injured man rushing back in.",
+                                speakerName: "Zesheng Pharmacy Apprentice",
                                 next: 51175506,
                             },
                             {
                                 id: 51175506,
                                 content: "It's just a scrape. I can wrap it myself. You can help someone worse off, doctor.",
+                                speakerName: "Resilient Patient",
                                 next: 51175507,
                             },
                             {
                                 id: 51175507,
                                 content: "Be careful. Things still aren't fully settled.",
+                                speakerName: "Zesheng Pharmacy Apprentice",
                             },
                         ],
                     },
@@ -124403,11 +125475,13 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51175520,
                                 content: "Another stretcher over here!",
+                                speakerName: "Zesheng Pharmacy Apprentice",
                                 next: 51175521,
                             },
                             {
                                 id: 51175521,
                                 content: "I've got one at home. I'll bring it!",
+                                speakerName: "Bandaged Patient",
                                 next: 51175522,
                             },
                             {
@@ -124503,6 +125577,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Dad, my leg's just hurt a bit — it's not really broken! Please... please don't leave me just because I limp!",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200004,
                             },
                             {
@@ -124530,12 +125605,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Dad! Are you really leaving me behind? I've been waiting here for you all this time... every day, begging passing nobles for a few coins just so I could buy some hard, stale black bread. I stayed here because I thought you'd come back for me...",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200008,
                             },
                             {
                                 id: 51200008,
                                 content: "How could you do this to me? I just... I just wanted to go home with you...",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200009,
                             },
                             {
@@ -124708,6 +125785,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200034,
                                 content: "...",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200035,
                             },
                             {
@@ -124732,6 +125810,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200038,
                                 content: "I don't remember asking you to help me.",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200039,
                             },
                             {
@@ -124758,12 +125837,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51200045,
                                 content: "...",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200046,
                             },
                             {
                                 id: 51200046,
                                 content: "They weren't really my parents, no. But who's to say they couldn't have been?",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200047,
                             },
                             {
@@ -124777,12 +125858,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I mean, they could have been my parents. Or maybe not. Same with you. You could be my parents too. Or maybe not.",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200049,
                             },
                             {
                                 id: 51200049,
                                 content: "All it takes is for you to say yes, and then you are. Isn't that right?",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200050,
                             },
                             {
@@ -124802,6 +125885,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200052,
                                 content: "That's right. As long as there are two of them, nothing else matters.",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 options: [
                                     {
                                         id: 51200055,
@@ -124821,6 +125905,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200059,
                                 content: "That's why I've come to apologise. To you, my father... and to this Luno here, my mother.",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200060,
                             },
                             {
@@ -124840,6 +125925,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "What? You don't like that? I can swap you round. You can be my mother, and the Luno can be my father.",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200063,
                             },
                             {
@@ -124865,6 +125951,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "My leg's no good, but if it's work I can do with my hands, I can do it. I'm not afraid of hard work. I can live on black bread, and I don't mind where I sleep — in an attic, in a little room under the stairs, anywhere.",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 next: 51200067,
                             },
                             {
@@ -124872,6 +125959,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Anything would be better than hearing trains roaring out all day... so be my parents, and take me away from this station. If you'll just take me with you, I'll do anything!",
                                 npc: 700402,
+                                speakerName: "Limping Child",
                                 options: [
                                     {
                                         id: 51200068,
@@ -125125,6 +126213,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Well, look who it is — the Screwdrivers' chimney duo. Ah, no, that won't do any more, will it? More like a one-man act now... though with that limp, maybe not even that. Guess you're just our little cripple from the chimneys now.",
                                 npc: 700405,
+                                speakerName: "Aloof Worker",
                                 next: 51200095,
                             },
                             {
@@ -125132,6 +126221,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "You tried your luck on another noble today, didn't you? You ought to know where the line is. Keep this up and people will start looking at all of us like we're nothing but street trash.",
                                 npc: 700405,
+                                speakerName: "Aloof Worker",
                                 next: 51200096,
                             },
                             {
@@ -125139,6 +126229,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "You'd better hope none of them take it to Eisenbahn. If he uses this as an excuse to crack down on the union, none of us will come out of it clean.",
                                 npc: 700405,
+                                speakerName: "Aloof Worker",
                                 next: 51200097,
                             },
                             {
@@ -125152,6 +126243,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200098,
                                 content: "That's enough. No need to take it out on him. He's just a kid.",
                                 npc: 700406,
+                                speakerName: "Friendly Worker",
                                 next: 51200099,
                             },
                             {
@@ -125159,6 +126251,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I'm just trying to knock some sense into him. Not everyone gets Svea's kind of luck — got kidnapped as a kid, then found his way home years later because his parents never stopped looking for him.",
                                 npc: 700405,
+                                speakerName: "Aloof Worker",
                                 next: 51200100,
                             },
                             {
@@ -125166,6 +126259,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "But you? You're a foundling. How many years has it been now? Still haven't worked it out? No one's coming to the station to take you home. And if you leave this place, you won't even have a job to keep yourself fed. So stop daydreaming.",
                                 npc: 700405,
+                                speakerName: "Aloof Worker",
                                 next: 51200101,
                             },
                             {
@@ -125192,6 +126286,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "That's better... much better. Good boy. Tell you what — we've just picked up a window-cleaning job. Your leg's bad, not your hands. You can still handle that, can't you?",
                                 npc: 700405,
+                                speakerName: "Aloof Worker",
                                 next: 51200105,
                             },
                             {
@@ -125205,12 +126300,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Once the union's taken what you owe, you'll still have ten coppers left for yourself. So do the job properly, and be grateful for the boss's generosity.",
                                 npc: 700405,
+                                speakerName: "Aloof Worker",
                                 next: 51200107,
                             },
                             {
                                 id: 51200107,
                                 content: "Kroger, that's enough. Come on — we still haven't finished what the boss told us to do.",
                                 npc: 700406,
+                                speakerName: "Friendly Worker",
                                 next: 51200108,
                             },
                             {
@@ -125218,6 +126315,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Yeah, yeah. Lorent, remember when we were drinking the other night? Everyone agreed you're the biggest nag in the whole union...",
                                 npc: 700405,
+                                speakerName: "Aloof Worker",
                                 next: 51200109,
                             },
                             {
@@ -125798,6 +126896,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200187,
                                 content: "Coney's a lucky boy, running into two people with hearts of gold like you.",
                                 npc: 700406,
+                                speakerName: "Friendly Worker",
                                 next: 51200188,
                             },
                             {
@@ -125810,6 +126909,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200189,
                                 content: "Kroger, that's enough. Come on — we still haven't finished what the boss told us to do.",
                                 npc: 700406,
+                                speakerName: "Friendly Worker",
                                 next: 51200190,
                             },
                             {
@@ -125817,6 +126917,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Yeah, yeah. Lorent, remember when we were drinking the other night? Everyone agreed you're the biggest nag in the whole union...",
                                 npc: 700405,
+                                speakerName: "Aloof Worker",
                                 next: 51200191,
                             },
                             {
@@ -126503,6 +127604,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200486,
                                 content: "Stop! Don't do that!",
                                 npc: 700398,
+                                speakerName: "???",
                             },
                         ],
                     },
@@ -126539,6 +127641,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Sorry to interrupt. I couldn't help overhearing you discussing what to do with that cigarette pack. Since you don't seem especially attached to it... would you consider selling it to me?",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200489,
                             },
                             {
@@ -126551,6 +127654,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200490,
                                 content: "Fifty silver. What do you say?",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200491,
                             },
                             {
@@ -126564,6 +127668,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "It's not as though this is some mint-condition rarity. Fifty's a fair price. I wouldn't be offering that much if I didn't need it to complete a set.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200493,
                             },
                             {
@@ -126638,6 +127743,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200501,
                                 content: "Er... what was that all about?",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200502,
                             },
                             {
@@ -126652,6 +127758,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Honestly, you really ought to keep them in check, or they'll be making a spectacle of themselves wherever they go... Anyway, how much did you pay?",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200504,
                             },
                             {
@@ -126665,6 +127772,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Ten years ago? This one isn't from ten years ago — it's from last week. The ones from ten years ago are the truly priceless ones. The entire Steamwhistle Salon had to pool 2,500 silver just to get hold of a single pack.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200506,
                             },
                             {
@@ -126672,6 +127780,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "That's my holy grail. If I ever came across one, I'd pay whatever it took. I'd keep it by my bedside, look at it every day, pray for a little luck... Ah, Stationmaster Eisenbahn — light of my life... would you smile on me?",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200507,
                             },
                             {
@@ -126691,6 +127800,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Of course I do! We've all come here today for the same reason — to celebrate the tenth anniversary of Stationmaster Eisenbahn's appointment... Wait. You're not with the Steamwhistle Salon?",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200510,
                             },
                             {
@@ -126704,6 +127814,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "You're from out of town and still paid that kind of price without a second thought? I took you for a fellow collector with money to spare.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200512,
                             },
                             {
@@ -126711,6 +127822,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "You've been had by a flipper. With the tenth anniversary coming up, prices have gone up, yes, but not by that much.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200513,
                             },
                             {
@@ -126718,6 +127830,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "A design like this isn't especially rare, and packs like this are easy enough to find. Usually they go for ten to thirty silver. I'm only willing to offer that much because I need this one to complete a set.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200514,
                             },
                             {
@@ -126725,6 +127838,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "And there'd be no point reporting it to the constables. No one's going to lift a finger over something like this... I'm afraid you'll just have to take the loss.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200515,
                             },
                             {
@@ -126738,12 +127852,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I know, I know. These flippers understand Stationmaster Eisenbahn almost as well as we devoted admirers do — otherwise they'd never be able to sell to us. I was duped more than once myself when I first began collecting. Luckily, that stopped once I joined the Steamwhistle Salon.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200517,
                             },
                             {
                                 id: 51200517,
                                 content: "Which reminds me... would you care to join us as well? The Steamwhistle Salon, that is.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 options: [
                                     {
                                         id: 51200518,
@@ -126767,12 +127883,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Oh, it's exactly what it sounds like. The Steamwhistle Salon is where Stationmaster Eisenbahn's more refined admirers gather for tea, conversation, and reading.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200520,
                             },
                             {
                                 id: 51200530,
                                 content: "Stationmaster Eisenbahn? I could talk about him for days and still not be done.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200531,
                             },
                             {
@@ -126780,6 +127898,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "It's Stationmaster Eisenbahn's kingdom. Without him, it would never have become what it is today.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200534,
                             },
                             {
@@ -126787,6 +127906,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "And the steam whistle — what could be more exquisite? It is the very soul of the railway. Only ladies and gentlemen of taste, breeding, and proper standing are worthy of membership.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200521,
                             },
                             {
@@ -126794,6 +127914,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "If you're interested, you should join the Steamwhistle Salon. The tenth anniversary of Mr Eisenbahn's appointment is almost here — we simply must do something truly worthy of the occasion... something that might earn us a smile from him!",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200535,
                             },
                             {
@@ -126801,6 +127922,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Before he arrived, it was just a humble station. He came in, took charge, and turned it into somewhere people actually wanted to be — lively, thriving... the sort of place people would gladly give their hearts and souls to!",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200535,
                             },
                             {
@@ -126808,6 +127930,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Naturally, each of us has our own way of expressing our admiration for Mr Eisenbahn. Some collect his cigarette packs and posters and arrange them in elaborate displays — spread out in radiant lines, like sunbeams from a single source.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200522,
                             },
                             {
@@ -126821,18 +127944,21 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Done properly, they can fill an entire room. Walls, floor, ceiling — every surface covered in Mr Eisenbahn's likeness... Ah. The very thought of it makes my heart flutter.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200523,
                             },
                             {
                                 id: 51200536,
                                 content: "Of course. Here — this is the Salon's card. The address of our meeting place is on it.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200537,
                             },
                             {
                                 id: 51200523,
                                 content: "And of course, the numbers matter. We favour certain meaningful totals — 99, 999, and so on.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200524,
                             },
                             {
@@ -126840,6 +127966,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "We're bound together by a shared devotion. Once you join the family, you'll find brothers and sisters everywhere...",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200538,
                             },
                             {
@@ -126847,6 +127974,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "That's why I wanted your pack. I was putting together one of my own displays. I already had 98 of the same design, and needed just one more. That's why I was willing to pay over the odds to complete it.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200525,
                             },
                             {
@@ -126860,6 +127988,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "If I'd had to go without it, it would have haunted me forever. How fortunate that I ran into you. Mr Eisenbahn must have been watching over me.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200526,
                             },
                             {
@@ -126886,6 +128015,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "What do you mean? Showing reverence and admiration for Mr Eisenbahn is the most meaningful purpose there is. What's with that look? I'm serious! There's nothing embarrassing about it.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200528,
                             },
                             {
@@ -126898,6 +128028,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Anyone willing to pay handsomely for one of Mr Eisenbahn's cigarette packs clearly has excellent taste. The Steamwhistle Salon would be delighted to welcome someone of your discernment.",
                                 npc: 700398,
+                                speakerName: "Travel-Weary Man",
                                 next: 51200535,
                             },
                         ],
@@ -128317,6 +129448,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200807,
                                 content: "We weren't fighting.\n Knock what off?",
                                 npc: 700409,
+                                speakerName: "Outsider & Snow",
                                 next: 51200808,
                             },
                             {
@@ -128501,6 +129633,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51200836,
                                 content: "What are you doing?",
                                 npc: 700410,
+                                speakerName: "A Familiar Voice",
                                 next: 51200837,
                             },
                             {
@@ -129668,6 +130801,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Before I take you to the chairman, let me introduce myself properly. Lorent. Though I suppose you already knew that. I'm the Screwdriver Union's... second-in-command, more or less.",
                                 npc: 700486,
+                                speakerName: "Lorent",
                                 next: 51206803,
                             },
                             {
@@ -129687,6 +130821,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Fair enough. Straight to the point — I like that. The Union's in trouble, and we could use someone capable — someone kind enough to help.",
                                 npc: 700486,
+                                speakerName: "Lorent",
                                 options: [
                                     {
                                         id: 51206806,
@@ -129713,6 +130848,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Heh. Direct, and sharp too. I like that. That's exactly why I wanted to start with a proper introduction.",
                                 npc: 700486,
+                                speakerName: "Lorent",
                                 next: 51206810,
                             },
                             {
@@ -129720,6 +130856,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "You don't really know us yet. Everything you've heard about the Screwdriver Union came from Coney, and he only gave you one side of the story. You still don't know what the Union actually does.",
                                 npc: 700486,
+                                speakerName: "Lorent",
                                 next: 51206811,
                             },
                             {
@@ -129733,6 +130870,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Quite the opposite. The Union is made up of people like Coney — poor souls scraping by beneath the station's polished surface.",
                                 npc: 700486,
+                                speakerName: "Lorent",
                                 next: 51206813,
                             },
                             {
@@ -129740,6 +130878,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "We band together and look after our own. When someone gets into trouble at work, we help them through it — just like we did for Coney. Day after day, we keep the workers here from going under.",
                                 npc: 700486,
+                                speakerName: "Lorent",
                                 next: 51206814,
                             },
                             {
@@ -129753,6 +130892,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "It did. Put simply, we're a mutual aid organisation for the workers of Bloomfield Station. Anyone who earns a living with a screwdriver is a brother or sister to us. In theory, at least.",
                                 npc: 700486,
+                                speakerName: "Lorent",
                                 next: 51206816,
                             },
                             {
@@ -129760,6 +130900,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "The money Coney owes came from dues paid by workers no better off than him. They scraped it together coin by coin. You helped Coney... but what about the rest of them?",
                                 npc: 700486,
+                                speakerName: "Lorent",
                                 next: 51206817,
                             },
                             {
@@ -129772,6 +130913,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51206818,
                                 content: "Come to our place. I'll explain the details once we're there.",
                                 npc: 700486,
+                                speakerName: "Lorent",
                             },
                         ],
                     },
@@ -129819,12 +130961,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51207002,
                                 content:
                                     "Get lost! I'm not lending you another damn coin. Last time I gave you money, you lost the lot. Then you came crawling back for more, lost that too, and now you've got the nerve to show your face and ask again?",
+                                speakerName: "An Irritable Voice",
                                 next: 51207003,
                             },
                             {
                                 id: 51207003,
                                 content:
                                     "Please, Kroger, you have to believe me! I was still figuring things out back then. But I've cracked it this time! Lend me the money, and I'll pay back every last coin!",
+                                speakerName: "A Timid Voice",
                                 next: 51207004,
                             },
                             {
@@ -129838,6 +130982,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51207005,
                                 content:
                                     "No! This time is different! I can really win! Kroger, I'm the Union's only accountant! I've worked out every rule of that \"game\". This time... this time, I can't lose!",
+                                speakerName: "A Timid Voice",
                                 next: 51207006,
                             },
                             {
@@ -130914,6 +132059,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51207725,
                                 content: "Hold on! {nickname}? Aren't you my uncle's cousin's nephew's neighbour? What are you doing here?",
+                                speakerName: "An Unexpected Voice",
                                 next: 51207726,
                             },
                             {
@@ -133968,6 +135114,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51210401,
                                 content: "What's going on here? Had too much beer and lost your mind again?",
+                                speakerName: "Foreman",
                                 next: 51210402,
                             },
                             {
@@ -134005,6 +135152,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51210504,
                                 content: "Urgh... My head... My arse... Have you all lost your minds!?",
+                                speakerName: "Foreman",
                                 next: 51210505,
                             },
                             {
@@ -134018,6 +135166,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51210506,
                                 content:
                                     "Kroger! Drinking on the job again, are you? You really want your pay docked this time? I'm telling you, even if Lorent comes begging on your behalf, it won't do a damn thing. You asked for this.",
+                                speakerName: "Foreman",
                                 next: 51210507,
                             },
                             {
@@ -134035,6 +135184,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51210509,
                                 content: "Stop it! Stop! Why do you always get like this when you're drunk!?",
+                                speakerName: "Foreman",
                                 next: 51210510,
                             },
                             {
@@ -134052,6 +135202,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51210512,
                                 content:
                                     "You drunken bastard. You hopeless bloody idiot. And you — who the hell are you supposed to be? You hit me too! Don't think I didn't notice! You work here? I'll remember that face!",
+                                speakerName: "Foreman",
                                 next: 51210513,
                             },
                             {
@@ -134063,6 +135214,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51210514,
                                 content: "Don't get clever with me! You'll regret this!",
+                                speakerName: "Foreman",
                                 next: 51210515,
                             },
                             {
@@ -134074,6 +135226,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51210516,
                                 content: "Sleep-On what? What are you talking about?",
+                                speakerName: "Foreman",
                                 next: 51210517,
                             },
                             {
@@ -134097,6 +135250,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51210520,
                                 content: "Wait... You lot are in on this too? You're working with that thief?",
+                                speakerName: "Foreman",
                                 next: 51210521,
                             },
                             {
@@ -134109,6 +135263,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51210522,
                                 content:
                                     "What is wrong with you people!? You beat the hell out of me, and now you're acting like you don't even know what's going on!? Did you lot hit me for nothing!?",
+                                speakerName: "Foreman",
                                 next: 51210523,
                             },
                             {
@@ -134121,12 +135276,14 @@ export const questData_en: QuestStory[] = [
                                 id: 51210524,
                                 content:
                                     "All right! All right! I'll talk! Don't hit me! Hugh snuck into the infirmary a while back, middle of the night. Tried to steal something. We caught him red-handed.",
+                                speakerName: "Foreman",
                                 next: 51210525,
                             },
                             {
                                 id: 51210525,
                                 content:
                                     "Nothing was missing when we checked, but the Stationmaster said to keep him there unless someone came looking. So he's been tied up in the infirmary ever since. If you want him, that's where he is.",
+                                speakerName: "Foreman",
                                 next: 51210526,
                             },
                             {
@@ -134139,6 +135296,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51210527,
                                 content:
                                     "Stationmaster Eisenbahn wanted him kept there. We were just following orders. I've told you everything. Can I go now?",
+                                speakerName: "Foreman",
                                 next: 51210528,
                             },
                             {
@@ -135258,6 +136416,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51211943,
                                 content: "Huh...?",
+                                speakerName: "{nickname} & Snow",
                                 next: 51211944,
                             },
                             {
@@ -135285,17 +136444,20 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51212001,
                                 content: "Lorent, just admit it! You're a bloody coward!",
+                                speakerName: "Maggie's Voice",
                                 next: 51212002,
                             },
                             {
                                 id: 51212002,
                                 content:
                                     "Maggie, not every problem can be solved by throwing punches. Besides, do you really think we have the strength to go up against him?",
+                                speakerName: "Lorent's Voice",
                                 next: 51212003,
                             },
                             {
                                 id: 51212003,
                                 content: "That's exactly what a coward would say!",
+                                speakerName: "Maggie's Voice",
                                 next: 51212004,
                             },
                             {
@@ -135657,6 +136819,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51210915,
                                 content: "What!?",
+                                speakerName: "Kroger, {nickname} & Snow",
                                 next: 51210916,
                             },
                             {
@@ -136900,12 +138063,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Behold! An enemy has strayed into the eye of the raging storm. From far beyond the horizon, a song of triumph rings out. The steam whistle sings clear... and calls for—",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213143,
                             },
                             {
                                 id: 51213143,
                                 content: "A performance fit to shake the heavens!",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                             },
                         ],
                     },
@@ -136920,6 +138085,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51213145,
                                 content: "Oh? Not bad. You've got some skill. Even so, I can't let you in.",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213146,
                             },
                             {
@@ -136927,6 +138093,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Honestly, how do you fans always find out so quickly...? Here. A special autograph, just for you. Happy now? The troupe isn't seeing visitors today. We have something important to prepare.",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213147,
                             },
                             {
@@ -136959,12 +138126,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "...Why are you giving me this? You're not even a celebrity— Wait. {nickname}!? You're the Phoxhunter people have been talking about, aren't you?",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213150,
                             },
                             {
                                 id: 51213154,
                                 content: "There. Now please leave us alone.",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213155,
                             },
                             {
@@ -136972,6 +138141,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Ah... So you're not one of my admirers after all. Sorry. Fans keep turning up here looking for me, and it's been interrupting rehearsals. I thought you were here for the same reason.",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213161,
                             },
                             {
@@ -136979,6 +138149,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     '"Never did I dream that the star I admired from afar would one day fall outside my window!" Oh dear, oh dear... I wasn\'t ready for this at all. Is my dress sitting properly? Do I look presentable?',
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213151,
                             },
                             {
@@ -136992,6 +138163,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Hello. I'm Arcia Hall, a performer with the Magic Flute Troupe. The Steamwhistle Salon has hired me as a drama consultant for the time being.",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213162,
                             },
                             {
@@ -136999,6 +138171,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I've always wanted to become a Phoxhunter myself. Unfortunately, I have no talent for combat. I doubt I could even beat a Rottbird. Thank you for giving me your autograph! I'll treasure it forever.",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213152,
                             },
                             {
@@ -137006,6 +138179,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Arcia! Arcia Hall! If you don't even know who I am, why were you looking for me in the first place? ...Wait. Don't tell me you weren't here for me at all.",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213157,
                             },
                             {
@@ -137019,6 +138193,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51213152,
                                 content: "What a pleasant surprise... I never expected you to come all this way to watch our rehearsal.",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213161,
                             },
                             {
@@ -137038,6 +138213,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Oh dear... My apologies for being so rude earlier. Fans keep turning up here looking for me, and it's been disrupting rehearsals. I assumed you were one of them.",
                                 npc: 700458,
+                                speakerName: "Well-Dressed Girl",
                                 next: 51213161,
                             },
                             {
@@ -137093,6 +138269,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Even Miss Arcia says it's fine. What are you still trying to stop? Could you, for once, stop making everything harder than it needs to be? Since when did you become a knight in shining armour?",
                                 npc: 700462,
+                                speakerName: "Angry Young Man",
                                 next: 51213171,
                             },
                             {
@@ -137100,6 +138277,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I am worried about Miss Arcia. But I'm even more worried about everyone's safety. Do the props really have to be real guns?",
                                 npc: 700461,
+                                speakerName: "Resigned Young Man",
                                 next: 51213172,
                             },
                             {
@@ -137107,6 +138285,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "I'll pay the carpenter extra. We can make the replicas look convincing enough... Will you please stop obsessing over the props?",
                                 npc: 700461,
+                                speakerName: "Resigned Young Man",
                                 next: 51213173,
                             },
                             {
@@ -137114,6 +138293,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Didn't Mr Seaton say the more realistic, the better? We've got the money. We can get whatever we need, real guns included. This isn't the time to show Miss Arcia what a gentleman you are!",
                                 npc: 700462,
+                                speakerName: "Angry Young Man",
                                 next: 51213174,
                             },
                             {
@@ -137121,6 +138301,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "We won't be pointing a gun at an empty seat that day. Stationmaster Eisenbahn himself will be sitting there. You're not seriously planning to follow Mr Seaton's instructions and— Actually... maybe we should call the whole thing off. We could all be dead on the spot if this goes wrong.",
                                 npc: 700461,
+                                speakerName: "Resigned Young Man",
                                 next: 51213175,
                             },
                             {
@@ -137128,6 +138309,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "We've come this far, and now you want out? You think you can just walk away at this point? Don't be naive. Mr Seaton may not be as cold and calculating as Eisenbahn, but he's watching us too.",
                                 npc: 700462,
+                                speakerName: "Angry Young Man",
                                 next: 51213176,
                             },
                             {
@@ -137142,6 +138324,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "We're not arguing. Not at all. We're just getting into character. Ready for inspection at any time!",
                                 npc: 700462,
+                                speakerName: "Angry Young Man",
                                 next: 51213178,
                             },
                             {
@@ -137149,6 +138332,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Ah, Eisenbahn — our hero! He walks with generosity at his side and shines with the radiance of justice! I know you have never approved of my ideals, but... I have long since come to understand you.",
                                 npc: 700462,
+                                speakerName: "Angry Young Man",
                                 next: 51213179,
                             },
                             {
@@ -137156,6 +138340,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "The storm will pass. Even the longest night must one day give way. And the railway shall stretch forth like golden threads spun from the sun itself, linking Icelake and Dismania.",
                                 npc: 700462,
+                                speakerName: "Angry Young Man",
                                 next: 51213180,
                             },
                             {
@@ -137163,12 +138348,14 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "And so I curse that storm — that howling, formless beast that holds all things back. Into these three bullets, I pour all my hatred.",
                                 npc: 700462,
+                                speakerName: "Angry Young Man",
                                 next: 51213181,
                             },
                             {
                                 id: 51213181,
                                 content: "And in the end... I shall become the sun that scatters it—",
                                 npc: 700462,
+                                speakerName: "Angry Young Man",
                                 next: 51213182,
                             },
                             {
@@ -137197,6 +138384,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51213184,
                                 content: "Hmph. Not bad. Honestly, I think you'd make a better scene partner than Kieran.",
                                 npc: 700462,
+                                speakerName: "Angry Young Man",
                                 next: 51213185,
                             },
                             {
@@ -137204,6 +138392,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Seriously...? Sorry about that. Theatre people can be like this. Once we get carried away, we start playing opposite whoever happens to be standing there. He was playing the former Stationmaster of Bloomfield Station, so I suppose he cast you as the current one for the scene.",
                                 npc: 700461,
+                                speakerName: "Resigned Young Man",
                                 next: 51213186,
                             },
                             {
@@ -137211,6 +138400,7 @@ export const questData_en: QuestStory[] = [
                                 content:
                                     "Arcia, would you mind introducing us? You said this {性别:gentleman|lady} was sent by Mr Seaton to inspect our progress?",
                                 npc: 700461,
+                                speakerName: "Resigned Young Man",
                                 next: 51213187,
                             },
                             {
@@ -141567,6 +142757,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51105310,
                                 content: "FORGING! TRADING! ADVENTURE!",
+                                speakerName: "Lunosmith, Lunotress, and Lunoxplorer (in unison)",
                                 next: 51105311,
                             },
                             {
@@ -141982,6 +143173,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51105503,
                                 content: "Help! Someone, help!",
+                                speakerName: "Voice from Nearby",
                                 next: 51105504,
                             },
                             {
@@ -142133,6 +143325,7 @@ export const questData_en: QuestStory[] = [
                                 id: 51105606,
                                 content: "We went outside the city and ran into some Filthoids. Luckily, they saved us!",
                                 npc: 700356,
+                                speakerName: "Boy",
                                 next: 51105607,
                             },
                             {
@@ -142367,6 +143560,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 51105725,
                                 content: "Yeah!",
+                                speakerName: "Crowd",
                                 next: 51105726,
                             },
                             {
