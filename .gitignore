@@ -59,3 +59,4 @@ test-results/
 tools/deploy_server.sh
 .omx/
 mock/
+server/data/race-lottery/*.jsonl

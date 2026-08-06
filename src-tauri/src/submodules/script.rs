@@ -19,7 +19,7 @@ use boa_engine::builtins::promise::PromiseState;
 use boa_engine::context::ContextBuilder;
 use boa_engine::job::JobExecutor;
 use boa_engine::object::builtins::JsPromise;
-use boa_engine::{JsError, JsNativeError, JsResult, JsValue, Module, Script, Source};
+use boa_engine::{JsError, JsNativeError, JsResult, JsValue, Module, Script, Source, js_string};
 use boa_gc::{Finalize, Trace};
 use mcp_server::{ScriptConsoleEntry, ScriptExecConsoleEntry};
 use std::cell::RefCell;
@@ -286,7 +286,11 @@ fn evaluate_script_program(
             module.link(context)?;
             let evaluate_promise = module.evaluate(context);
             job_executor.clone().run_jobs(context)?;
-            settled_promise_result(&evaluate_promise, "evaluate")
+            settled_promise_result(&evaluate_promise, "evaluate")?;
+            // ESM 没有经典脚本的表达式完成值，使用标准 default 导出作为脚本返回值。
+            module
+                .namespace(context)
+                .get(js_string!("default"), context)
         }
     }
 }
@@ -333,6 +337,30 @@ mod program_tests {
             .expect("执行 ESM 根脚本失败");
 
         assert!(result.is_undefined());
+    }
+
+    #[test]
+    fn esm_root_returns_default_export_result_after_await() {
+        let job_executor = std::rc::Rc::new(TokioJobExecutor::new());
+        let mut context = test_context(job_executor.clone());
+        let source = br##"
+            const output = await Promise.resolve(JSON.stringify({ value: 42 }));
+            export default output;
+        "##;
+        let program = parse_script_program(source, Some(Path::new("memory-main.js")), &mut context)
+            .expect("解析带返回值的 ESM 根脚本失败");
+
+        assert!(matches!(program, ScriptProgram::Module(_)));
+        let result = evaluate_script_program(program, &job_executor, &mut context)
+            .expect("执行带返回值的 ESM 根脚本失败");
+
+        assert_eq!(
+            result
+                .to_string(&mut context)
+                .expect("转换 ESM 返回值失败")
+                .to_std_string_escaped(),
+            r#"{"value":42}"#
+        );
     }
 }
 

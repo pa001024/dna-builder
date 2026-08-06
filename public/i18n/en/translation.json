@@ -7149,6 +7149,10 @@
     "questchain-list": {
         "title": "Quest Chain List"
     },
+    "race-lottery": {
+        "desc": "Daily race player buff statistics",
+        "title": "Geniemon Race"
+    },
     "raid-rank": {
         "title": "Ranking rewards"
     },

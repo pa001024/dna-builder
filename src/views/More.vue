@@ -107,6 +107,11 @@ const itemsRaw = [
         icon: "ri:file-zip-line",
         show: env.isApp && !setting.safeMode,
     },
+    {
+        name: "race-lottery",
+        path: "/race-lottery",
+        icon: "ri:run-line",
+    },
 ] satisfies { name: string; path: string; icon: IconTypes; show?: boolean }[]
 
 const items = computed(

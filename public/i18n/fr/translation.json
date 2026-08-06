@@ -7184,6 +7184,10 @@
     "questchain-list": {
         "title": "Liste des chaînes de quêtes"
     },
+    "race-lottery": {
+        "desc": "Consulter les statistiques quotidiennes des buffs des participants",
+        "title": "Course de Géniemon"
+    },
     "raid-rank": {
         "title": "Récompenses de classement"
     },

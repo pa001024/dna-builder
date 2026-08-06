@@ -39,6 +39,12 @@ const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(900, 700),
     },
     {
+        name: "race-lottery",
+        path: "/race-lottery",
+        component: () => import("./views/RaceLottery.vue"),
+        beforeEnter: () => setMinSize(900, 700),
+    },
+    {
         path: "/char",
         children: [
             { name: "char-build-list", path: "", component: CharListView, beforeEnter: () => setMinSize(600, 600) },

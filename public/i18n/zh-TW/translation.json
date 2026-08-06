@@ -7007,6 +7007,10 @@
     "questchain-list": {
         "title": "任務劇情列表"
     },
+    "race-lottery": {
+        "desc": "每日競速比賽的選手詞條統計",
+        "title": "魔靈競速"
+    },
     "raid-rank": {
         "title": "排名獎勵"
     },

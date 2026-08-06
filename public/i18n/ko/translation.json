@@ -7150,6 +7150,10 @@
     "questchain-list": {
         "title": "퀘스트 체인 목록"
     },
+    "race-lottery": {
+        "desc": "매일 진행되는 레이스 선수 버프 통계 확인",
+        "title": "마령 레이스"
+    },
     "raid-rank": {
         "title": "순위 보상"
     },

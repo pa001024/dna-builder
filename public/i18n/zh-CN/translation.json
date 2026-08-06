@@ -1621,6 +1621,10 @@
     "questchain-list": {
         "title": "任务剧情列表"
     },
+    "race-lottery": {
+        "desc": "每日竞速比赛的选手词条统计",
+        "title": "魔灵竞速"
+    },
     "raid-rank": {
         "title": "排名奖励"
     },

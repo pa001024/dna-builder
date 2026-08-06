@@ -8,6 +8,7 @@ import { yogaPlugin } from "./db"
 import "dotenv/config"
 import { apiPlugin } from "./api"
 import { dnaAuthPlugin } from "./api/dna-auth"
+import { raceLotteryPlugin } from "./api/race-lottery"
 
 import { botPlugin } from "./bot"
 
@@ -18,6 +19,7 @@ const app = new Elysia()
     // .use(cronPlugin())
     .use(apiPlugin())
     .use(dnaAuthPlugin())
+    .use(raceLotteryPlugin())
     .use(aiPlugin())
     .use(
         cors({

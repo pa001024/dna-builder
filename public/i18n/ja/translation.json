@@ -7128,6 +7128,10 @@
     "questchain-list": {
         "title": "クエストチェイン一覧"
     },
+    "race-lottery": {
+        "desc": "毎日のレース選手バフ統計を確認",
+        "title": "ジェネモンレース"
+    },
     "raid-rank": {
         "title": "ランキング報酬"
     },
