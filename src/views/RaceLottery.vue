@@ -409,7 +409,12 @@ onMounted(loadDailyData)
                         class="flex min-w-0 items-center gap-2 rounded-md border border-base-300 bg-base-100/80 p-2 text-left transition hover:border-warning/70 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
                         @click="selectedPlayerId = item.player.playerId"
                     >
-                        <span class="w-5 shrink-0 text-center text-sm font-black tabular-nums text-warning">{{ index + 1 }}</span>
+                        <span class="flex w-10 shrink-0 flex-col items-center justify-center leading-none">
+                            <span class="text-sm font-black tabular-nums text-warning">#{{ index + 1 }}</span>
+                            <span class="mt-0.5 whitespace-nowrap text-[0.5rem] font-semibold uppercase tracking-wide text-base-content/50">
+                                NO.{{ String(item.order + 1).padStart(2, "0") }}
+                            </span>
+                        </span>
                         <img
                             :src="getPlayerIconUrl(item.player.icon)"
                             :alt="item.player.name"
