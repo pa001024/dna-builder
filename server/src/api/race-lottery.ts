@@ -21,6 +21,33 @@ type StoredEntry = {
 
 type DailyCache = {
     entries: Map<string, StoredEntry>
+    entriesByPlayer: Map<number, Map<string, StoredEntry>>
+    aggregatedEntries: Map<number, AggregatedEntry>
+}
+
+type AggregatedEntry = {
+    playerId: number
+    buffIds: RaceLotteryBuffIds
+    submissionCount: number
+    lastUpdatedBy: string
+}
+
+type PublicAggregatedEntry = AggregatedEntry & {
+    isMine: boolean
+    myBuffIds: RaceLotteryBuffIds | null
+}
+
+type BuffStat = {
+    weight: number
+    firstSeen: number
+}
+
+type AggregatedPlayer = {
+    playerId: number
+    submissionCount: number
+    stats: Map<number, BuffStat>
+    lastUpdatedBy: string
+    lastUpdatedAt: number
 }
 
 const writeLocks = new Map<string, Promise<void>>()
@@ -147,9 +174,7 @@ async function getDailyCache(date: string, dataDir: string, cacheByDate: Map<str
     const cached = cacheByDate.get(date)
     if (cached) return cached
 
-    const loading = readDailyEntries(date, dataDir).then(entries => ({
-        entries: new Map(entries.map(entry => [getEntryKey(entry.userId, entry.playerId), entry])),
-    }))
+    const loading = readDailyEntries(date, dataDir).then(entries => createDailyCache(entries))
     cacheByDate.set(date, loading)
     try {
         return await loading
@@ -168,6 +193,142 @@ async function getDailyCache(date: string, dataDir: string, cacheByDate: Map<str
 async function appendDailyEntry(date: string, entry: StoredEntry, dataDir: string): Promise<void> {
     await mkdir(dataDir, { recursive: true })
     await appendFile(getDataFile(date, dataDir), `${JSON.stringify(entry)}\n`, "utf8")
+}
+
+/**
+ * 按社区提交频次统计每个选手的前三个词条。
+ * @param entries 当前日期的最新提交记录。
+ * @returns 每个选手一条统计后的公开记录。
+ */
+function aggregateEntries(entries: Iterable<StoredEntry>): AggregatedEntry[] {
+    const players = new Map<number, AggregatedPlayer>()
+    let firstSeen = 0
+
+    for (const entry of entries) {
+        let player = players.get(entry.playerId)
+        if (!player) {
+            player = {
+                playerId: entry.playerId,
+                submissionCount: 0,
+                stats: new Map(),
+                lastUpdatedBy: entry.userName,
+                lastUpdatedAt: entry.updatedAt,
+            }
+            players.set(entry.playerId, player)
+        }
+
+        player.submissionCount += 1
+        if (entry.updatedAt >= player.lastUpdatedAt) {
+            player.lastUpdatedBy = entry.userName
+            player.lastUpdatedAt = entry.updatedAt
+        }
+
+        for (const buffId of new Set(entry.buffIds.filter(id => id > 0))) {
+            const stat = player.stats.get(buffId)
+            if (stat) stat.weight += 1
+            else {
+                player.stats.set(buffId, { weight: 1, firstSeen })
+                firstSeen += 1
+            }
+        }
+    }
+
+    return Array.from(players.values()).map(player => {
+        const topBuffIds = Array.from(player.stats.entries())
+            .sort(([, left], [, right]) => right.weight - left.weight || left.firstSeen - right.firstSeen)
+            .slice(0, 3)
+            .map(([buffId]) => buffId)
+
+        return {
+            playerId: player.playerId,
+            buffIds: [topBuffIds[0] || 0, topBuffIds[1] || 0, topBuffIds[2] || 0],
+            submissionCount: player.submissionCount,
+            lastUpdatedBy: player.lastUpdatedBy,
+        }
+    })
+}
+
+/**
+ * 只重算一个选手的聚合结果，用于提交写入后的增量更新。
+ * @param playerId 选手 ID。
+ * @param entries 该选手的最新用户记录。
+ * @returns 选手聚合结果。
+ */
+function aggregatePlayerEntry(playerId: number, entries: Iterable<StoredEntry>): AggregatedEntry {
+    return (
+        aggregateEntries(entries).find(entry => entry.playerId === playerId) || {
+            playerId,
+            buffIds: [0, 0, 0],
+            submissionCount: 0,
+            lastUpdatedBy: "",
+        }
+    )
+}
+
+/**
+ * 创建日期内存缓存，并在首次读取 JSONL 时完成一次全量统计。
+ * @param entries 日期内每个用户与选手的最新记录。
+ * @returns 日期缓存。
+ */
+function createDailyCache(entries: StoredEntry[]): DailyCache {
+    const entryMap = new Map<string, StoredEntry>()
+    const entriesByPlayer = new Map<number, Map<string, StoredEntry>>()
+    for (const entry of entries) {
+        entryMap.set(getEntryKey(entry.userId, entry.playerId), entry)
+        let playerEntries = entriesByPlayer.get(entry.playerId)
+        if (!playerEntries) {
+            playerEntries = new Map<string, StoredEntry>()
+            entriesByPlayer.set(entry.playerId, playerEntries)
+        }
+        playerEntries.set(entry.userId, entry)
+    }
+
+    const aggregatedEntries = new Map(aggregateEntries(entries).map(entry => [entry.playerId, entry]))
+    return { entries: entryMap, entriesByPlayer, aggregatedEntries }
+}
+
+/**
+ * 将一条聚合结果补充为当前用户可见的公开响应。
+ * @param entry 缓存中的聚合结果。
+ * @param cache 日期缓存。
+ * @param currentUserId 当前用户 ID。
+ * @returns 公开聚合结果。
+ */
+function toPublicAggregatedEntry(entry: AggregatedEntry, cache: DailyCache, currentUserId?: string): PublicAggregatedEntry {
+    const mine = currentUserId ? cache.entriesByPlayer.get(entry.playerId)?.get(currentUserId) : undefined
+    return {
+        ...entry,
+        isMine: mine !== undefined,
+        myBuffIds: mine?.buffIds || null,
+    }
+}
+
+/**
+ * 读取缓存中的聚合结果，不重新计算权重。
+ * @param cache 日期缓存。
+ * @param currentUserId 当前用户 ID。
+ * @returns 公开聚合结果。
+ */
+function getPublicAggregatedEntries(cache: DailyCache, currentUserId?: string): PublicAggregatedEntry[] {
+    return Array.from(cache.aggregatedEntries.values()).map(entry => toPublicAggregatedEntry(entry, cache, currentUserId))
+}
+
+/**
+ * 写入一条最新记录并增量更新对应选手的缓存。
+ * @param cache 日期缓存。
+ * @param entry 最新提交记录。
+ */
+function updateDailyCacheEntry(cache: DailyCache, entry: StoredEntry): void {
+    const key = getEntryKey(entry.userId, entry.playerId)
+    cache.entries.set(key, entry)
+
+    let playerEntries = cache.entriesByPlayer.get(entry.playerId)
+    if (!playerEntries) {
+        playerEntries = new Map<string, StoredEntry>()
+        cache.entriesByPlayer.set(entry.playerId, playerEntries)
+    }
+    playerEntries.set(entry.userId, entry)
+    cache.aggregatedEntries.set(entry.playerId, aggregatePlayerEntry(entry.playerId, playerEntries.values()))
 }
 
 /**
@@ -208,24 +369,6 @@ function getUser(request: Request): JWTUser | null {
 }
 
 /**
- * 将内部记录转换为公开响应，避免暴露用户 ID。
- * @param entry 内部记录。
- * @param currentUserId 当前用户 ID。
- * @returns 公开记录。
- */
-function toPublicEntry(entry: StoredEntry, currentUserId?: string) {
-    return {
-        id: entry.id,
-        playerId: entry.playerId,
-        buffIds: entry.buffIds,
-        submittedBy: entry.userName,
-        isMine: entry.userId === currentUserId,
-        createdAt: entry.createdAt,
-        updatedAt: entry.updatedAt,
-    }
-}
-
-/**
  * 创建 RaceLottery JSONL 存储 API。
  * @param dataDir 可选的数据目录，测试时可传入临时目录。
  * @returns Elysia 插件实例。
@@ -247,9 +390,7 @@ export function raceLotteryPlugin(dataDir = getDataDir()) {
                 const user = getUser(request)
                 return {
                     date,
-                    entries: Array.from(cache.entries.values())
-                        .sort((left, right) => left.playerId - right.playerId)
-                        .map(entry => toPublicEntry(entry, user?.id)),
+                    entries: getPublicAggregatedEntries(cache, user?.id).sort((left, right) => left.playerId - right.playerId),
                 }
             },
             {
@@ -278,7 +419,7 @@ export function raceLotteryPlugin(dataDir = getDataDir()) {
                 }
 
                 const now = Date.now()
-                let savedEntry: StoredEntry | undefined
+                let aggregatedEntry: AggregatedEntry | undefined
                 await withDateLock(date, async () => {
                     const cache = await getDailyCache(date, dataDir, cacheByDate)
                     const key = getEntryKey(user.id, body.playerId)
@@ -301,11 +442,12 @@ export function raceLotteryPlugin(dataDir = getDataDir()) {
                           }
 
                     await appendDailyEntry(date, nextEntry, dataDir)
-                    cache.entries.set(key, nextEntry)
-                    savedEntry = nextEntry
+                    updateDailyCacheEntry(cache, nextEntry)
+                    const cachedEntry = cache.aggregatedEntries.get(body.playerId)
+                    if (cachedEntry) aggregatedEntry = toPublicAggregatedEntry(cachedEntry, cache, user.id)
                 })
 
-                return { success: true, entry: toPublicEntry(savedEntry!, user.id) }
+                return { success: true, entry: aggregatedEntry }
             },
             {
                 params: t.Object({ date: t.String() }),

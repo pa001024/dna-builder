@@ -69,10 +69,45 @@ describe("RaceLottery JSONL API", () => {
             expect(second.status).toBe(200)
             expect(response.status).toBe(200)
             expect(data.entries).toHaveLength(1)
-            expect(data.entries[0].buffIds).toEqual([0, 0, 1003])
+            expect(data.entries[0].buffIds).toEqual([1003, 0, 0])
             expect(fileLines).toHaveLength(2)
             expect(fileLines[0].buffIds).toEqual([1004, 1002, 0])
             expect(fileLines[1].buffIds).toEqual([0, 0, 1003])
+        } finally {
+            await rm(dataDir, { recursive: true, force: true })
+        }
+    })
+
+    it("按最新提交记录的出现频次输出每个选手权重最高的三个词条", async () => {
+        const { app, dataDir } = await createTestApp()
+        try {
+            const first = await postEntry(app, createToken("user-1", "用户一"), 4013, [1004, 1002, 0])
+            const second = await postEntry(app, createToken("user-2", "用户二"), 4013, [0, 0, 1003])
+            const response = await app.handle(new Request(`http://localhost/api/race-lottery/${DATE}`))
+            const data = (await response.json()) as {
+                entries: {
+                    playerId: number
+                    buffIds: number[]
+                    submissionCount: number
+                    lastUpdatedBy: string
+                    isMine: boolean
+                    myBuffIds: number[] | null
+                }[]
+            }
+
+            expect(first.status).toBe(200)
+            expect(second.status).toBe(200)
+            expect(response.status).toBe(200)
+            expect(data.entries).toEqual([
+                {
+                    playerId: 4013,
+                    buffIds: [1004, 1002, 1003],
+                    submissionCount: 2,
+                    lastUpdatedBy: "用户二",
+                    isMine: false,
+                    myBuffIds: null,
+                },
+            ])
         } finally {
             await rm(dataDir, { recursive: true, force: true })
         }

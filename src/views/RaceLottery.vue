@@ -8,13 +8,12 @@ import { useUserStore } from "@/store/user"
 import { mergeRaceLotteryBuffIds, parseRaceLotteryOcr, type RaceLotteryBuffIds, type RaceLotteryOcrBuff } from "@/utils/race-lottery-ocr"
 
 type RaceLotteryEntry = {
-    id: string
     playerId: number
     buffIds: RaceLotteryBuffIds
-    submittedBy: string
+    submissionCount: number
+    lastUpdatedBy: string
     isMine: boolean
-    createdAt: number
-    updatedAt: number
+    myBuffIds: RaceLotteryBuffIds | null
 }
 
 type DailyResponse = {
@@ -57,11 +56,13 @@ const errorMessage = ref("")
 const captureRegion = useLocalStorage<RaceLotteryCaptureRegion | null>("race-lottery.ocr-region", null)
 
 const coveredPlayerCount = computed(() => new Set(dailyEntries.value.map(entry => entry.playerId)).size)
+const communitySubmissionCount = computed(() => dailyEntries.value.reduce((total, entry) => total + entry.submissionCount, 0))
 const raceLotteryOcrBuffs: RaceLotteryOcrBuff[] = [...raceLotteryData.outsideBuffs.map(buff => ({ buffId: buff.rumorId, name: buff.name }))]
 const raceLotteryBuffById = new Map(raceLotteryData.outsideBuffs.map(buff => [buff.rumorId, buff]))
 const hasSelectedBuff = computed(() => selectedBuffIds.value.some(buffId => buffId > 0))
 const selectedPlayer = computed(() => raceLotteryData.players.find(player => player.playerId === selectedPlayerId.value))
 const selectedPlayerEntries = computed(() => dailyEntries.value.filter(entry => entry.playerId === selectedPlayerId.value))
+const selectedPlayerSummary = computed(() => selectedPlayerEntries.value[0])
 const selectedPlayerStatusIds = computed(() => mergeRaceLotteryBuffIds(selectedPlayerEntries.value.map(entry => entry.buffIds)))
 const selectedPlayerStatusLines = computed(() =>
     Array.from({ length: 3 }, (_, statusIndex) => {
@@ -72,7 +73,7 @@ const selectedPlayerStatusLines = computed(() =>
             buffId,
             name: buff?.name || (buffId ? `未知词条 ${buffId}` : "未知"),
             buffMap: buff?.buffMap || "",
-            submittedBy: entry?.submittedBy || "",
+            submissionCount: entry?.submissionCount || 0,
         }
     })
 )
@@ -83,7 +84,7 @@ const selectedPlayerStatusLines = computed(() =>
  * @returns 词条提交数量。
  */
 function getPlayerEntryCount(playerId: number): number {
-    return dailyEntries.value.filter(entry => entry.playerId === playerId).length
+    return dailyEntries.value.find(entry => entry.playerId === playerId)?.submissionCount || 0
 }
 
 /**
@@ -271,7 +272,7 @@ async function loadDailyData(): Promise<void> {
  * 回填当前用户在选中选手上的词条，方便继续编辑。
  */
 function fillOwnEntry(): void {
-    const buffIds = dailyEntries.value.find(entry => entry.playerId === selectedPlayerId.value && entry.isMine)?.buffIds
+    const buffIds = dailyEntries.value.find(entry => entry.playerId === selectedPlayerId.value && entry.isMine)?.myBuffIds
     selectedBuffIds.value = buffIds ? [...buffIds] : [0, 0, 0]
 }
 
@@ -303,11 +304,11 @@ async function submitEntry(playerId = selectedPlayerId.value, buffIds = selected
         const result = (await response.json()) as { success?: boolean; entry?: RaceLotteryEntry; error?: string }
         if (!response.ok || !result.success || !result.entry) throw new Error(result.error || "提交失败")
 
-        const index = dailyEntries.value.findIndex(entry => entry.id === result.entry?.id)
+        const index = dailyEntries.value.findIndex(entry => entry.playerId === result.entry?.playerId)
         if (index >= 0) dailyEntries.value[index] = result.entry
         else dailyEntries.value.push(result.entry)
         selectedPlayerId.value = player.playerId
-        selectedBuffIds.value = [...result.entry.buffIds]
+        selectedBuffIds.value = [...normalizedBuffIds]
         return true
     } catch (error) {
         errorMessage.value = error instanceof Error ? error.message : "提交失败"
@@ -384,7 +385,7 @@ onMounted(loadDailyData)
                     <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-base-content/60">
                         <span>{{ raceLotteryData.players.length }} 名选手</span>
                         <span>{{ coveredPlayerCount }}/{{ raceLotteryData.players.length }} 已有词条</span>
-                        <span>{{ dailyEntries.length }} 条社区记录</span>
+                        <span>{{ communitySubmissionCount }} 条社区记录</span>
                     </div>
                 </div>
                 <label class="form-control w-full sm:w-auto sm:min-w-44">
@@ -545,7 +546,7 @@ onMounted(loadDailyData)
                                         v-for="(statusLine, statusIndex) in selectedPlayerStatusLines"
                                         :key="`status-${statusIndex}`"
                                         class="flex min-h-9 min-w-0 items-center justify-between gap-2 rounded-sm border border-base-content/10 bg-neutral-content/10 px-2 py-1.5 text-sm"
-                                        :title="statusLine.submittedBy ? `提交者：${statusLine.submittedBy}` : undefined"
+                                        :title="statusLine.submissionCount ? `${statusLine.submissionCount} 条社区提交` : undefined"
                                     >
                                         <span class="min-w-0 flex-1 truncate font-medium text-base-content/85">
                                             状态{{ statusIndex + 1 }}：{{ statusLine.name }}
@@ -567,6 +568,12 @@ onMounted(loadDailyData)
                                             </template>
                                             <span v-else class="size-5" />
                                         </span>
+                                    </div>
+                                    <div
+                                        v-if="selectedPlayerSummary?.lastUpdatedBy"
+                                        class="pt-0.5 text-right text-[0.65rem] text-base-content/50"
+                                    >
+                                        最后更新：{{ selectedPlayerSummary.lastUpdatedBy }}
                                     </div>
                                 </div>
                             </div>
