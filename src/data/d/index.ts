@@ -190,13 +190,19 @@ function rebuildStaticIndexes(): void {
                 if (!modDungeonMap.has(modId)) {
                     modDungeonMap.set(modId, [])
                 }
-                modDungeonMap.get(modId)!.push(dungeon as Dungeon)
+                const modDungeons = modDungeonMap.get(modId)!
+                if (!modDungeons.some(existingDungeon => existingDungeon.id === dungeon.id)) {
+                    modDungeons.push(dungeon as Dungeon)
+                }
             }
             for (const draftId of draftIds) {
                 if (!draftDungeonMap.has(draftId)) {
                     draftDungeonMap.set(draftId, [])
                 }
-                draftDungeonMap.get(draftId)!.push(dungeon as Dungeon)
+                const draftDungeons = draftDungeonMap.get(draftId)!
+                if (!draftDungeons.some(existingDungeon => existingDungeon.id === dungeon.id)) {
+                    draftDungeons.push(dungeon as Dungeon)
+                }
             }
         }
     }
