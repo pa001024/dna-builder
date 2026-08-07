@@ -481,7 +481,62 @@ const MAPPINGS: Mapping[] = [
         targetStem: "ironsurvival",
         targetVar: "ironSurvivalData",
     },
+    {
+        source: async () => {
+            const dropText = await readFile(path.join(OUT_ROOT, "MonsterLevelDrop.json"), "utf8")
+            const drops = JSON.parse(dropText) as Record<string, MonsterLevelDropRow>
+            const record: Record<number, MonsterLevelDropRow> = {}
+            for (const [key, row] of Object.entries(drops)) {
+                record[Number(key)] = row
+            }
+
+            return [
+                {
+                    targetVar: "monsterLevelDropData",
+                    text: formatTsValue(record, 0),
+                },
+            ]
+        },
+        targetStem: "ironsurvival",
+        targetVar: "monsterLevelDropData",
+    },
+    {
+        source: async () => {
+            const [defenceText, ironSurvivalDungeonText] = await Promise.all([
+                readFile(path.join(OUT_ROOT, "Defence.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "IronSurvivalDungeon.json"), "utf8"),
+            ])
+            const defence = JSON.parse(defenceText) as Record<string, Record<string, unknown>>
+            const dungeonIds = new Set(Object.keys(JSON.parse(ironSurvivalDungeonText) as Record<string, unknown>))
+            const calamity: Record<number, Record<string, unknown>> = {}
+            for (const [key, row] of Object.entries(defence)) {
+                if (dungeonIds.has(key)) {
+                    calamity[Number(key)] = row
+                }
+            }
+
+            return [
+                {
+                    targetVar: "defenceData",
+                    text: formatTsValue(calamity, 0),
+                },
+            ]
+        },
+        targetStem: "ironsurvival",
+        targetVar: "defenceData",
+    },
 ]
+
+type MonsterLevelDropRow = {
+    BaseProbability: number[]
+    EndTime: number
+    MonsterLevel: number[]
+    MonsterLevelDropId: number
+    MonsterLevelDropView: number
+    ProbabilityUp: number[]
+    RewardId: number[]
+    StartTime: number
+}
 
 type RougeConditionRow = {
     ConditionId: number

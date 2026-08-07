@@ -1,6 +1,14 @@
 <script lang="ts" setup>
-import { computed } from "vue"
-import { dungeonMap, ironSurvivalData, ironSurvivalDungeonData, LeveledChar, MonsterLevelUpperLimit, monsterLevelDropMap, rewardMap } from "@/data"
+import { computed, ref } from "vue"
+import {
+    dungeonMap,
+    ironSurvivalData,
+    ironSurvivalDungeonData,
+    LeveledChar,
+    MonsterLevelUpperLimit,
+    monsterLevelDropData,
+    rewardMap,
+} from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
 import type { Reward, RewardChild } from "@/data/data-types"
 import { getDungeonType } from "@/utils/dungeon-utils"
@@ -49,9 +57,14 @@ const IRON_SURVIVAL_LEVEL_STEP = 5
 const IRON_SURVIVAL_REWARD_BATCH_COUNT = 1
 const strongKillCount = computed(() => dungeon.value?.StrongKillCount?.[0] || 50)
 const selectedWave = computed(() => Math.max(1, props.wave ?? 1))
-const monsterLevelLimit = computed(() =>
-    dungeonDetail.value ? IronSurvivalMonsterLevelLimit : MonsterLevelUpperLimit
-)
+const useCompoundReward = ref(false)
+const monsterLevelLimit = computed(() => {
+    const ticketMax = Math.max(0, ...(dungeonDetail.value?.AvaliableTicketLevel || [0]))
+    if (ticketMax > 0) {
+        return ticketMax
+    }
+    return dungeonDetail.value ? IronSurvivalMonsterLevelLimit : MonsterLevelUpperLimit
+})
 
 /**
  * 计算深境探险怪物展示等级。
@@ -65,7 +78,7 @@ const ironSurvivalMonsterLevel = computed(() => {
 
 const monsterLevelDropRows = computed<MonsterLevelDropRow[]>(() => {
     return (dungeonDetail.value?.MonsterLevelDrop || [])
-        .map(dropId => monsterLevelDropMap.get(dropId))
+        .map(dropId => monsterLevelDropData[dropId])
         .filter((drop): drop is NonNullable<typeof drop> => !!drop)
         .flatMap(drop =>
             drop.MonsterLevel.map((level, index) => ({
@@ -219,32 +232,18 @@ function getRewardRowWaveCount(threshold: number): number {
     return endWave - startWave + 1
 }
 
-const roundsCumulativeRewards = computed<CumulativeRewardDisplayItem[]>(() => {
-    if (!rewardRows.value.length) {
-        return []
-    }
-
-    const buckets = new Map<string, CumulativeRewardBucket>()
-    const currentThreshold = ironSurvivalMonsterLevel.value
-
-    rewardRows.value.forEach(row => {
-        if (!row.rewardId) {
-            return
-        }
-
-        if (row.threshold > currentThreshold) {
-            return
-        }
-
-        const waveCount = getRewardRowWaveCount(row.threshold)
-        if (waveCount <= 0) {
-            return
-        }
-
-        collectRewardExpectationBucketsFromReward(row.rewardId, buckets, waveCount * IRON_SURVIVAL_REWARD_BATCH_COUNT)
-    })
-
+/**
+ * 将累计桶转换为可展示列表。
+ * @param buckets 累计容器
+ * @param excludeIronTicket 是否排除罗盘项（基础收益未排除；复利路径下罗盘同样保留展示）
+ * @returns 排序后的展示列表
+ */
+function toCumulativeDisplayItems(
+    buckets: Map<string, CumulativeRewardBucket>,
+    excludeIronTicket = false
+): CumulativeRewardDisplayItem[] {
     return Array.from(buckets.values())
+        .filter(bucket => !(excludeIronTicket && bucket.t === "IronTicket"))
         .map(bucket => {
             const finalAmount = formatRewardAmount(bucket.amount)
             if (bucket.t === "Mod") {
@@ -273,7 +272,93 @@ const roundsCumulativeRewards = computed<CumulativeRewardDisplayItem[]>(() => {
             }
         })
         .sort((a, b) => b.amount - a.amount)
+}
+
+const roundsCumulativeRewards = computed<CumulativeRewardDisplayItem[]>(() => {
+    if (!rewardRows.value.length) {
+        return []
+    }
+
+    const buckets = new Map<string, CumulativeRewardBucket>()
+    const currentThreshold = ironSurvivalMonsterLevel.value
+
+    rewardRows.value.forEach(row => {
+        if (!row.rewardId) {
+            return
+        }
+
+        if (row.threshold > currentThreshold) {
+            return
+        }
+
+        const waveCount = getRewardRowWaveCount(row.threshold)
+        if (waveCount <= 0) {
+            return
+        }
+
+        collectRewardExpectationBucketsFromReward(row.rewardId, buckets, waveCount * IRON_SURVIVAL_REWARD_BATCH_COUNT)
+    })
+
+    return toCumulativeDisplayItems(buckets)
 })
+
+const ironTicketExpectationCache = new Map<number, number>()
+
+/**
+ * 计算单个奖励组展开后罗盘（IronTicket）的总掉落期望。
+ * @param rewardId 奖励组ID
+ * @returns 罗盘掉落期望数量
+ */
+function getIronTicketExpectation(rewardId: number): number {
+    const cached = ironTicketExpectationCache.get(rewardId)
+    if (cached !== undefined) {
+        return cached
+    }
+
+    const buckets = new Map<string, CumulativeRewardBucket>()
+    collectRewardExpectationBucketsFromReward(rewardId, buckets)
+    const expectation = Array.from(buckets.values()).reduce((sum, bucket) => sum + (bucket.t === "IronTicket" ? bucket.amount : 0), 0)
+    ironTicketExpectationCache.set(rewardId, expectation)
+    return expectation
+}
+
+/**
+ * 复利累计奖励：每波正常打一次，同时将掉落罗盘（等级为下一波等级）继续投入下一波，
+ * 逐波递归，直到达到当前设定波次等级。
+ * 第 w 波被打次数 Q_w 满足 Q_{w+1} = 1 + Q_w × t_w（t_w 为该波打一次的罗盘掉落期望）。
+ * 罗盘项保留展示，数量为复利路径下含再投资产生的总期望。
+ */
+const compoundCumulativeRewards = computed<CumulativeRewardDisplayItem[]>(() => {
+    const buckets = new Map<string, CumulativeRewardBucket>()
+    const baseLevel = dungeonBase.value?.lv || 1
+    const maxLevel = ironSurvivalMonsterLevel.value
+    let playCount = 1
+
+    for (let wave = 1; ; wave++) {
+        const level = baseLevel + (wave - 1) * IRON_SURVIVAL_LEVEL_STEP
+        if (level > maxLevel) {
+            break
+        }
+
+        const rows = rewardRows.value.filter(row => row.threshold <= level)
+        if (!rows.length) {
+            continue
+        }
+
+        let waveTicket = 0
+        for (const row of rows) {
+            collectRewardExpectationBucketsFromReward(row.rewardId, buckets, playCount * IRON_SURVIVAL_REWARD_BATCH_COUNT)
+            waveTicket += getIronTicketExpectation(row.rewardId)
+        }
+        playCount = 1 + playCount * waveTicket
+    }
+
+    return toCumulativeDisplayItems(buckets)
+})
+
+const displayedCumulativeRewards = computed(() =>
+    useCompoundReward.value ? compoundCumulativeRewards.value : roundsCumulativeRewards.value
+)
 
 const rewardRowDetails = computed(() => {
     return rewardRows.value.map(row => ({
@@ -305,11 +390,18 @@ const rewardRowDetails = computed(() => {
         <div class="p-3 rounded bg-base-200">
             <div class="mb-2 flex items-center justify-between gap-2">
                 <div class="text-xs text-base-content/70">累计奖励</div>
-                <div class="text-xs text-base-content/70">3次/轮，Lv.{{ ironSurvivalMonsterLevel }} 及以下</div>
+                <div class="flex items-center gap-2">
+                    <span v-if="useCompoundReward" class="text-xs text-base-content/70">（含复利）</span>
+                    <label class="label cursor-pointer gap-1 p-0">
+                        <span class="text-xs text-base-content/70">复利</span>
+                        <input v-model="useCompoundReward" type="checkbox" class="checkbox checkbox-xs" />
+                    </label>
+                    <span class="text-xs text-base-content/70">Lv.{{ ironSurvivalMonsterLevel }} 及以下</span>
+                </div>
             </div>
-            <div v-if="roundsCumulativeRewards.length" class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+            <div v-if="displayedCumulativeRewards.length" class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
                 <ResourceCostItem
-                    v-for="item in roundsCumulativeRewards"
+                    v-for="item in displayedCumulativeRewards"
                     :key="item.key"
                     :name="item.name"
                     :value="item.value"
