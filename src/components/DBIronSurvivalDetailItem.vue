@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { dungeonMap, ironSurvivalDungeonData, LeveledChar, monsterLevelDropMap, rewardMap } from "@/data"
+import { dungeonMap, ironSurvivalData, ironSurvivalDungeonData, LeveledChar, MonsterLevelUpperLimit, monsterLevelDropMap, rewardMap } from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
-import type { IronSurvival } from "@/data/d/ironsurvival.data"
 import type { Reward, RewardChild } from "@/data/data-types"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
@@ -38,17 +37,21 @@ interface CumulativeRewardDisplayItem {
 type CumulativeRewardValue = [number | string, number | string, "Mod" | "Draft" | "IronTicket"]
 
 const props = defineProps<{
-    dungeon: IronSurvival
+    dungeonId: number
     hideTitle?: boolean
     wave?: number
 }>()
 
-const dungeonDetail = computed(() => ironSurvivalDungeonData[props.dungeon.DungeonId] || null)
-const dungeonBase = computed(() => dungeonMap.get(props.dungeon.DungeonId) || null)
+const dungeon = computed(() => ironSurvivalData[props.dungeonId] || null)
+const dungeonDetail = computed(() => ironSurvivalDungeonData[props.dungeonId] || null)
+const dungeonBase = computed(() => dungeonMap.get(props.dungeonId) || null)
 const IRON_SURVIVAL_LEVEL_STEP = 5
 const IRON_SURVIVAL_REWARD_BATCH_COUNT = 1
-const strongKillCount = computed(() => props.dungeon.StrongKillCount?.[0] || 50)
+const strongKillCount = computed(() => dungeon.value?.StrongKillCount?.[0] || 50)
 const selectedWave = computed(() => Math.max(1, props.wave ?? 1))
+const monsterLevelLimit = computed(() =>
+    dungeonDetail.value ? IronSurvivalMonsterLevelLimit : MonsterLevelUpperLimit
+)
 
 /**
  * 计算深境探险怪物展示等级。
@@ -57,7 +60,7 @@ const selectedWave = computed(() => Math.max(1, props.wave ?? 1))
 const ironSurvivalMonsterLevel = computed(() => {
     const baseLevel = dungeonBase.value?.lv || 1
     const level = baseLevel + (selectedWave.value - 1) * IRON_SURVIVAL_LEVEL_STEP
-    return Math.min(IronSurvivalMonsterLevelLimit, level)
+    return Math.min(monsterLevelLimit.value, level)
 })
 
 const monsterLevelDropRows = computed<MonsterLevelDropRow[]>(() => {
@@ -336,7 +339,7 @@ const rewardRowDetails = computed(() => {
             </div>
         </div>
 
-        <div class="p-3 rounded bg-base-200">
+        <div v-if="monsterLevelDropRewards.length" class="p-3 rounded bg-base-200">
             <div class="mb-2 flex items-center justify-between gap-2">
                 <div class="text-xs text-base-content/70">强敌掉落表</div>
                 <div class="text-xs text-base-content/70">{{ strongKillCount }}击杀/强敌</div>
@@ -358,6 +361,6 @@ const rewardRowDetails = computed(() => {
             </div>
         </div>
 
-        <DBIronSurvivalSpawn v-if="!hideTitle" :dungeon="dungeon" :wave="wave" />
+        <DBIronSurvivalSpawn v-if="dungeon && !hideTitle" :dungeon-id="props.dungeonId" :wave="wave" />
     </div>
 </template>

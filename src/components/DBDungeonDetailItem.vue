@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import type { Dungeon, RewardChild } from "@/data"
-import { ironSurvivalData, LeveledChar, LeveledMonsterHelper, MonsterLevelUpperLimit, rewardMap } from "@/data"
+import { ironSurvivalData, ironSurvivalDungeonData, LeveledChar, LeveledMonsterHelper, MonsterLevelUpperLimit, rewardMap } from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import { getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
@@ -16,7 +16,7 @@ const ENDLESS_MAX_WAVE = 99
 const ENDLESS_LEVEL_STEP = 5
 const IRON_SURVIVAL_MONSTER_HP_MULTIPLIER = 8
 const maxMonsterLevel = computed(() => {
-    return props.dungeon.t === "IronSurvival" ? IronSurvivalMonsterLevelLimit : MonsterLevelUpperLimit
+    return props.dungeon.id in ironSurvivalDungeonData ? IronSurvivalMonsterLevelLimit : MonsterLevelUpperLimit
 })
 type SpawnWave = NonNullable<Dungeon["spawn"]>[number]
 type SpawnGenerator = SpawnWave[number]
@@ -569,12 +569,7 @@ watch(
         </template>
 
         <template v-else-if="activeTab === 'wave'">
-            <DBIronSurvivalSpawn
-                v-if="ironSurvivalData[dungeon.id]"
-                :dungeon="ironSurvivalData[dungeon.id]"
-                hideTitle
-                :wave="selectedEndlessWave"
-            />
+            <DBIronSurvivalSpawn v-if="ironSurvivalData[dungeon.id]" :dungeon-id="dungeon.id" hideTitle :wave="selectedEndlessWave" />
             <template v-else>
                 <div class="card bg-base-200 rounded-lg p-3">
                     <div class="flex items-center justify-between">
@@ -809,8 +804,8 @@ watch(
                 </div>
                 <!-- 深境探险奖励表 -->
                 <DBIronSurvivalDetailItem
-                    v-if="ironSurvivalData[dungeon.id]"
-                    :dungeon="ironSurvivalData[dungeon.id]"
+                    v-if="ironSurvivalDungeonData[dungeon.id]"
+                    :dungeon-id="dungeon.id"
                     hideTitle
                     :wave="selectedEndlessWave"
                 />
