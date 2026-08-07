@@ -24,10 +24,11 @@ async function createTestApp() {
  * 创建测试用户 JWT。
  * @param id 用户 ID。
  * @param name 用户名。
+ * @param roles 用户角色（逗号分隔字符串）。
  * @returns JWT 字符串。
  */
-function createToken(id: string, name: string): string {
-    return jwt.sign({ id, name }, jwtToken)
+function createToken(id: string, name: string, roles?: string): string {
+    return jwt.sign({ id, name, roles }, jwtToken)
 }
 
 /**
@@ -47,6 +48,27 @@ function postEntry(app: ReturnType<typeof raceLotteryPlugin>, token: string, pla
                 token,
             },
             body: JSON.stringify({ playerId, buffIds }),
+        })
+    )
+}
+
+/**
+ * 发送最终速度保存请求。
+ * @param app 测试 API 实例。
+ * @param token 登录 JWT。
+ * @param date 日期。
+ * @param finalSpeeds 各选手最终速度。
+ * @returns HTTP 响应。
+ */
+function putFinalSpeeds(app: ReturnType<typeof raceLotteryPlugin>, token: string, date: string, finalSpeeds: Record<string, number>) {
+    return app.handle(
+        new Request(`http://localhost/api/race-lottery/${date}/final-speeds`, {
+            method: "PUT",
+            headers: {
+                "content-type": "application/json",
+                token,
+            },
+            body: JSON.stringify({ finalSpeeds }),
         })
     )
 }
@@ -145,8 +167,8 @@ describe("RaceLottery JSONL API", () => {
 
             expect(first.status).toBe(200)
             expect(second.status).toBe(200)
-            expect(await first.json()).toEqual({ date: DATE, entries: [] })
-            expect(await second.json()).toEqual({ date: DATE, entries: [] })
+            expect(await first.json()).toEqual({ date: DATE, baseSpeeds: {}, entries: [] })
+            expect(await second.json()).toEqual({ date: DATE, baseSpeeds: {}, entries: [] })
         } finally {
             await rm(dataDir, { recursive: true, force: true })
         }
@@ -164,6 +186,61 @@ describe("RaceLottery JSONL API", () => {
             )
 
             expect(response.status).toBe(401)
+        } finally {
+            await rm(dataDir, { recursive: true, force: true })
+        }
+    })
+
+    it("管理员可保存最终速度并持久化到独立文件", async () => {
+        const { app, dataDir } = await createTestApp()
+        try {
+            const adminToken = createToken("admin-1", "管理员", "admin")
+            const saveResponse = await putFinalSpeeds(app, adminToken, DATE, { "4013": 1.32, "4073": 0.87 })
+            const getResponse = await app.handle(new Request(`http://localhost/api/race-lottery/${DATE}/final-speeds`))
+            const data = (await getResponse.json()) as { finalSpeeds: Record<string, number> }
+            const fileContent = await readFile(join(dataDir, `${DATE}.final-speeds.json`), "utf8")
+
+            expect(saveResponse.status).toBe(200)
+            expect(data.finalSpeeds).toEqual({ "4013": 1.32, "4073": 0.87 })
+            expect(fileContent).toContain('"4013":1.32')
+        } finally {
+            await rm(dataDir, { recursive: true, force: true })
+        }
+    })
+
+    it("非管理员无法保存最终速度", async () => {
+        const { app, dataDir } = await createTestApp()
+        try {
+            const userToken = createToken("user-1", "测试用户")
+            const response = await putFinalSpeeds(app, userToken, DATE, { "4013": 1.32 })
+
+            expect(response.status).toBe(403)
+        } finally {
+            await rm(dataDir, { recursive: true, force: true })
+        }
+    })
+
+    it("未登录无法保存最终速度", async () => {
+        const { app, dataDir } = await createTestApp()
+        try {
+            const response = await putFinalSpeeds(app, "", DATE, { "4013": 1.32 })
+
+            expect(response.status).toBe(401)
+        } finally {
+            await rm(dataDir, { recursive: true, force: true })
+        }
+    })
+
+    it("日期接口返回前一天记录的最终速度作为基础速度", async () => {
+        const { app, dataDir } = await createTestApp()
+        try {
+            const adminToken = createToken("admin-1", "管理员", "admin")
+            await putFinalSpeeds(app, adminToken, "2026-08-06", { "4013": 1.32 })
+            const response = await app.handle(new Request(`http://localhost/api/race-lottery/2026-08-07`))
+            const data = (await response.json()) as { date: string; baseSpeeds: Record<string, number> }
+
+            expect(response.status).toBe(200)
+            expect(data.baseSpeeds).toEqual({ "4013": 1.32 })
         } finally {
             await rm(dataDir, { recursive: true, force: true })
         }

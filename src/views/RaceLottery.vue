@@ -18,7 +18,15 @@ type RaceLotteryEntry = {
 
 type DailyResponse = {
     date: string
+    baseSpeeds: Record<string, number>
     entries: RaceLotteryEntry[]
+}
+
+type FinalSpeedsResponse = {
+    date: string
+    updatedAt: number
+    updatedBy: string
+    finalSpeeds: Record<string, number>
 }
 
 type RaceLotteryCaptureRegion = {
@@ -47,6 +55,14 @@ const orderedPlayers = raceLotteryPlayersOrder.flatMap(playerId => {
 })
 const selectedPlayerId = ref(orderedPlayers[0]?.playerId || 0)
 const dailyEntries = ref<RaceLotteryEntry[]>([])
+const baseSpeeds = ref<Record<string, number>>({})
+const finalSpeeds = ref<Record<string, number>>({})
+const finalSpeedsUpdatedAt = ref(0)
+const finalSpeedsUpdatedBy = ref("")
+const adminSpeedInputs = ref<Record<string, string>>({})
+const adminSpeedEditing = ref(false)
+const adminSpeedSaving = ref(false)
+const adminSpeedError = ref("")
 const selectedBuffIds = ref<RaceLotteryBuffIds>([0, 0, 0])
 const loading = ref(false)
 const submitting = ref(false)
@@ -114,6 +130,18 @@ function getPlayerKnownOutsideBuffs(playerId: number) {
 }
 
 /**
+ * 获取选手当天的基础速度。
+ * 基础速度由前一天记录的最终速度决定，由 API 返回；无记录时使用静态默认值 1。
+ * @param playerId 选手 ID
+ * @returns 基础速度
+ */
+function getPlayerBaseSpeed(playerId: number): number {
+    const apiSpeed = baseSpeeds.value[String(playerId)]
+    if (typeof apiSpeed === "number" && Number.isFinite(apiSpeed)) return apiSpeed
+    return raceLotteryData.players.find(item => item.playerId === playerId)?.defaultSpeed ?? 1
+}
+
+/**
  * 计算选手当前已知外部词条对应的最终速度。
  * @param playerId 选手 ID
  * @returns 已知词条存在时的最终速度，否则返回 null
@@ -125,7 +153,7 @@ function getPlayerFinalSpeed(playerId: number): number | null {
     const knownBuffs = getPlayerKnownOutsideBuffs(playerId)
     if (!knownBuffs.length) return null
 
-    return knownBuffs.reduce((speed, buff) => speed * buff.pValueEffect, player.defaultSpeed)
+    return knownBuffs.reduce((speed, buff) => speed * buff.pValueEffect, getPlayerBaseSpeed(playerId))
 }
 
 /**
@@ -134,8 +162,7 @@ function getPlayerFinalSpeed(playerId: number): number | null {
  * @returns 已知词条的最终速度或基础速度
  */
 function getPlayerCurrentSpeed(playerId: number): number {
-    const player = raceLotteryData.players.find(item => item.playerId === playerId)
-    return player ? (getPlayerFinalSpeed(playerId) ?? player.defaultSpeed) : 0
+    return getPlayerFinalSpeed(playerId) ?? getPlayerBaseSpeed(playerId)
 }
 
 /**
@@ -259,12 +286,101 @@ async function loadDailyData(): Promise<void> {
     errorMessage.value = ""
     try {
         const result = await requestDailyData(selectedDate.value)
+        baseSpeeds.value = result.baseSpeeds || {}
         dailyEntries.value = result.entries
     } catch (error) {
         errorMessage.value = error instanceof Error ? error.message : "读取赛事数据失败"
         dailyEntries.value = []
+        baseSpeeds.value = {}
     } finally {
         loading.value = false
+    }
+}
+
+/**
+ * 加载指定日期的最终速度记录。
+ */
+async function loadFinalSpeeds(date = selectedDate.value): Promise<void> {
+    const response = await fetch(`${env.apiEndpoint}/api/race-lottery/${encodeURIComponent(date)}/final-speeds`, {
+        headers: user.jwtToken ? { token: user.jwtToken } : {},
+    })
+    const result = (await response.json()) as FinalSpeedsResponse
+    if (!response.ok) throw new Error((result as FinalSpeedsResponse & { error?: string }).error || "读取最终速度失败")
+    finalSpeeds.value = result.finalSpeeds || {}
+    finalSpeedsUpdatedAt.value = result.updatedAt || 0
+    finalSpeedsUpdatedBy.value = result.updatedBy || ""
+    syncAdminSpeedInputs()
+}
+
+/**
+ * 将最终速度记录同步到管理员编辑表单。
+ */
+function syncAdminSpeedInputs(): void {
+    const next: Record<string, string> = {}
+    for (const player of orderedPlayers) {
+        const speed = finalSpeeds.value[String(player.playerId)]
+        next[String(player.playerId)] = speed !== undefined ? String(speed) : ""
+    }
+    adminSpeedInputs.value = next
+}
+
+/**
+ * 开始管理员编辑最终速度。
+ */
+function startAdminSpeedEdit(): void {
+    syncAdminSpeedInputs()
+    adminSpeedError.value = ""
+    adminSpeedEditing.value = true
+}
+
+/**
+ * 取消管理员编辑最终速度。
+ */
+function cancelAdminSpeedEdit(): void {
+    syncAdminSpeedInputs()
+    adminSpeedError.value = ""
+    adminSpeedEditing.value = false
+}
+
+/**
+ * 保存管理员修改后的最终速度到后端。
+ */
+async function saveAdminFinalSpeeds(): Promise<void> {
+    if (!user.isAdmin || adminSpeedSaving.value) return
+    adminSpeedSaving.value = true
+    adminSpeedError.value = ""
+    try {
+        const finalSpeedMap: Record<string, number> = {}
+        for (const player of orderedPlayers) {
+            const raw = adminSpeedInputs.value[String(player.playerId)]
+            if (raw === undefined || raw === "") continue
+            const value = Number(raw)
+            if (!Number.isFinite(value) || value < 0) {
+                throw new Error(`${player.name} 的速度值无效`)
+            }
+            finalSpeedMap[String(player.playerId)] = value
+        }
+
+        const response = await fetch(`${env.apiEndpoint}/api/race-lottery/${encodeURIComponent(selectedDate.value)}/final-speeds`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                token: user.jwtToken,
+            },
+            body: JSON.stringify({ finalSpeeds: finalSpeedMap }),
+        })
+        const result = (await response.json()) as FinalSpeedsResponse & { success?: boolean; error?: string }
+        if (!response.ok || !result.success) throw new Error(result.error || "保存最终速度失败")
+
+        finalSpeeds.value = result.finalSpeeds || {}
+        finalSpeedsUpdatedAt.value = result.updatedAt || 0
+        finalSpeedsUpdatedBy.value = result.updatedBy || ""
+        adminSpeedEditing.value = false
+        await loadDailyData()
+    } catch (error) {
+        adminSpeedError.value = error instanceof Error ? error.message : "保存最终速度失败"
+    } finally {
+        adminSpeedSaving.value = false
     }
 }
 
@@ -365,10 +481,14 @@ function resetCaptureRegion(): void {
 }
 
 watch(selectedDate, loadDailyData)
+watch(selectedDate, () => loadFinalSpeeds().catch(() => {}))
 watch(selectedPlayerId, fillOwnEntry)
 watch(dailyEntries, fillOwnEntry)
 
-onMounted(loadDailyData)
+onMounted(async () => {
+    await loadDailyData()
+    loadFinalSpeeds().catch(() => {})
+})
 </script>
 
 <template>
@@ -537,7 +657,7 @@ onMounted(loadDailyData)
                                     <div class="mt-1 flex items-center justify-center gap-2 text-sm text-base-content/60">
                                         <span>基础速度</span>
                                         <span class="text-xl font-bold tabular-nums text-base-content">{{
-                                            selectedPlayer.defaultSpeed.toFixed(2)
+                                            getPlayerBaseSpeed(selectedPlayer.playerId).toFixed(2)
                                         }}</span>
                                     </div>
                                 </div>
@@ -654,6 +774,69 @@ onMounted(loadDailyData)
                                 {{ user.jwtToken ? "提交词条" : "登录后提交" }}
                             </button>
                         </form>
+                    </section>
+
+                    <section v-if="user.isAdmin" class="rounded-lg border border-error/30 bg-error/5 p-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <h2 class="text-sm font-bold">最终速度</h2>
+                                <p class="mt-1 text-xs text-base-content/60">
+                                    {{ selectedDate }} 的比赛结果，将作为次日基础速度
+                                    <template v-if="finalSpeedsUpdatedBy"> · {{ finalSpeedsUpdatedBy }} 更新</template>
+                                </p>
+                            </div>
+                            <button
+                                v-if="!adminSpeedEditing"
+                                class="btn btn-error btn-ghost btn-sm"
+                                type="button"
+                                @click="startAdminSpeedEdit"
+                            >
+                                编辑
+                            </button>
+                        </div>
+                        <div v-if="adminSpeedEditing" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                            <label v-for="player in orderedPlayers" :key="player.playerId" class="form-control">
+                                <span class="label-text mb-0.5 text-[0.7rem]">{{ player.name }}</span>
+                                <input
+                                    v-model="adminSpeedInputs[String(player.playerId)]"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    class="input input-bordered input-sm w-full"
+                                    :aria-label="`${player.name} 最终速度`"
+                                />
+                            </label>
+                        </div>
+                        <div v-else class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-base-content/70">
+                            <span v-for="player in orderedPlayers" :key="player.playerId" class="inline-flex items-center gap-1">
+                                <span class="text-base-content/50">{{ player.name }}</span>
+                                <span class="font-bold tabular-nums">
+                                    {{ finalSpeeds[String(player.playerId)]?.toFixed(2) ?? "—" }}
+                                </span>
+                            </span>
+                        </div>
+                        <div v-if="adminSpeedError" class="alert alert-error mt-3 py-1.5 text-xs">
+                            <span>{{ adminSpeedError }}</span>
+                        </div>
+                        <div v-if="adminSpeedEditing" class="mt-3 flex gap-2">
+                            <button
+                                class="btn btn-error btn-sm flex-1"
+                                type="button"
+                                :disabled="adminSpeedSaving"
+                                @click="saveAdminFinalSpeeds"
+                            >
+                                <span v-if="adminSpeedSaving" class="loading loading-spinner loading-sm" />
+                                保存最终速度
+                            </button>
+                            <button
+                                class="btn btn-ghost btn-sm"
+                                type="button"
+                                :disabled="adminSpeedSaving"
+                                @click="cancelAdminSpeedEdit"
+                            >
+                                取消
+                            </button>
+                        </div>
                     </section>
 
                     <section class="rounded-lg border border-base-300 bg-base-200/40 p-3">

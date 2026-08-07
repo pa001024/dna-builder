@@ -1,4 +1,4 @@
-import { appendFile, mkdir, readFile } from "node:fs/promises"
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import Elysia, { t } from "elysia"
 import jwt from "jsonwebtoken"
@@ -52,6 +52,17 @@ type AggregatedPlayer = {
 
 const writeLocks = new Map<string, Promise<void>>()
 
+/** 单日各选手的最终速度，按 playerId 索引。 */
+export type RaceLotteryFinalSpeeds = Record<string, number>
+
+/** 日期最终速度文件内容。 */
+type StoredFinalSpeeds = {
+    date: string
+    updatedAt: number
+    updatedBy: string
+    finalSpeeds: RaceLotteryFinalSpeeds
+}
+
 /**
  * 获取 RaceLottery 日期文件目录。
  * @returns 日期 JSONL 文件目录。
@@ -73,6 +84,17 @@ function normalizeDate(date: string): string | null {
 }
 
 /**
+ * 计算给定日期的前一天。
+ * @param date 合法日期。
+ * @returns 前一天的 YYYY-MM-DD。
+ */
+function getPreviousDate(date: string): string {
+    const parsed = new Date(`${date}T00:00:00Z`)
+    parsed.setUTCDate(parsed.getUTCDate() - 1)
+    return parsed.toISOString().slice(0, 10)
+}
+
+/**
  * 获取日期 JSONL 文件路径。
  * @param date 合法日期。
  * @param dataDir 数据目录。
@@ -80,6 +102,84 @@ function normalizeDate(date: string): string | null {
  */
 function getDataFile(date: string, dataDir: string): string {
     return resolve(dataDir, `${date}.jsonl`)
+}
+
+/**
+ * 获取单日最终速度文件路径。
+ * @param date 合法日期。
+ * @param dataDir 数据目录。
+ * @returns 最终速度文件路径。
+ */
+function getFinalSpeedsFile(date: string, dataDir: string): string {
+    return resolve(dataDir, `${date}.final-speeds.json`)
+}
+
+/**
+ * 解析最终速度文件中的存储内容。
+ * @param raw 文件原始文本。
+ * @returns 有效内容或 null。
+ */
+function parseStoredFinalSpeeds(raw: string): StoredFinalSpeeds | null {
+    try {
+        const value = JSON.parse(raw) as Partial<StoredFinalSpeeds>
+        if (!value || typeof value !== "object") return null
+        if (typeof value.finalSpeeds !== "object" || value.finalSpeeds === null) return null
+        const finalSpeeds: RaceLotteryFinalSpeeds = {}
+        for (const [playerId, speed] of Object.entries(value.finalSpeeds)) {
+            if (typeof speed === "number" && Number.isFinite(speed)) finalSpeeds[playerId] = speed
+        }
+        if (typeof value.date !== "string" || typeof value.updatedAt !== "number" || typeof value.updatedBy !== "string") {
+            return null
+        }
+        return {
+            date: value.date,
+            updatedAt: value.updatedAt,
+            updatedBy: value.updatedBy,
+            finalSpeeds,
+        }
+    } catch {
+        return null
+    }
+}
+
+/**
+ * 读取单日最终速度文件；不存在或内容无效时返回空记录。
+ * @param date 日期。
+ * @param dataDir 数据目录。
+ * @returns 最终速度记录。
+ */
+async function readStoredFinalSpeeds(date: string, dataDir: string): Promise<StoredFinalSpeeds | null> {
+    try {
+        const raw = await readFile(getFinalSpeedsFile(date, dataDir), "utf8")
+        const stored = parseStoredFinalSpeeds(raw)
+        return stored && stored.date === date ? stored : null
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return null
+        throw error
+    }
+}
+
+/**
+ * 覆盖写入单日最终速度文件。
+ * @param date 日期。
+ * @param finalSpeeds 各选手最终速度。
+ * @param updatedBy 修改人用户名。
+ * @param dataDir 数据目录。
+ */
+async function writeStoredFinalSpeeds(
+    date: string,
+    finalSpeeds: RaceLotteryFinalSpeeds,
+    updatedBy: string,
+    dataDir: string
+): Promise<void> {
+    await mkdir(dataDir, { recursive: true })
+    const content: StoredFinalSpeeds = {
+        date,
+        updatedAt: Date.now(),
+        updatedBy,
+        finalSpeeds,
+    }
+    await writeFile(getFinalSpeedsFile(date, dataDir), `${JSON.stringify(content)}\n`, "utf8")
 }
 
 /**
@@ -369,12 +469,45 @@ function getUser(request: Request): JWTUser | null {
 }
 
 /**
+ * 获取单日最终速度的内存缓存，首次读取一次文件。
+ * @param date 日期。
+ * @param dataDir 数据目录。
+ * @param cacheByDate 最终速度缓存表。
+ * @returns 单日最终速度（无记录时为空对象）。
+ */
+async function getFinalSpeedsCache(
+    date: string,
+    dataDir: string,
+    cacheByDate: Map<string, Promise<StoredFinalSpeeds | null>>
+): Promise<StoredFinalSpeeds | null> {
+    const cached = cacheByDate.get(date)
+    if (cached) return cached
+
+    const loading = readStoredFinalSpeeds(date, dataDir)
+    cacheByDate.set(date, loading)
+    try {
+        return await loading
+    } catch (error) {
+        if (cacheByDate.get(date) === loading) cacheByDate.delete(date)
+        throw error
+    }
+}
+
+/** RaceLottery 插件选项，便于测试注入。 */
+type RaceLotteryPluginOptions = {
+    isAdmin?: (user: JWTUser) => boolean
+}
+
+/**
  * 创建 RaceLottery JSONL 存储 API。
  * @param dataDir 可选的数据目录，测试时可传入临时目录。
+ * @param options 可选的插件选项。
  * @returns Elysia 插件实例。
  */
-export function raceLotteryPlugin(dataDir = getDataDir()) {
+export function raceLotteryPlugin(dataDir = getDataDir(), options: RaceLotteryPluginOptions = {}) {
     const cacheByDate = new Map<string, Promise<DailyCache>>()
+    const finalSpeedsCacheByDate = new Map<string, Promise<StoredFinalSpeeds | null>>()
+    const isAdmin = options.isAdmin || ((user: JWTUser) => user.roles?.includes("admin"))
 
     return new Elysia({ prefix: "/api/race-lottery" })
         .get(
@@ -388,13 +521,99 @@ export function raceLotteryPlugin(dataDir = getDataDir()) {
 
                 const cache = await getDailyCache(date, dataDir, cacheByDate)
                 const user = getUser(request)
+
+                // 当日基础速度取自前一天记录的最终速度；无记录时为 0。
+                const previousDate = getPreviousDate(date)
+                const previousFinalSpeeds = await getFinalSpeedsCache(previousDate, dataDir, finalSpeedsCacheByDate)
                 return {
                     date,
+                    baseSpeeds: previousFinalSpeeds?.finalSpeeds || {},
                     entries: getPublicAggregatedEntries(cache, user?.id).sort((left, right) => left.playerId - right.playerId),
                 }
             },
             {
                 params: t.Object({ date: t.String() }),
+            }
+        )
+        .get(
+            "/:date/final-speeds",
+            async ({ params, set }) => {
+                const date = normalizeDate(params.date)
+                if (!date) {
+                    set.status = 400
+                    return { success: false, error: "日期格式无效" }
+                }
+
+                const stored = await getFinalSpeedsCache(date, dataDir, finalSpeedsCacheByDate)
+                return {
+                    date,
+                    updatedAt: stored?.updatedAt || 0,
+                    updatedBy: stored?.updatedBy || "",
+                    finalSpeeds: stored?.finalSpeeds || {},
+                }
+            },
+            {
+                params: t.Object({ date: t.String() }),
+            }
+        )
+        .put(
+            "/:date/final-speeds",
+            async ({ params, body, request, set }) => {
+                const date = normalizeDate(params.date)
+                if (!date) {
+                    set.status = 400
+                    return { success: false, error: "日期格式无效" }
+                }
+
+                const user = getUser(request)
+                if (!user) {
+                    set.status = 401
+                    return { success: false, error: "请先登录" }
+                }
+                if (!isAdmin(user)) {
+                    set.status = 403
+                    return { success: false, error: "仅管理员可修改最终速度" }
+                }
+
+                const finalSpeeds: RaceLotteryFinalSpeeds = {}
+                for (const [playerId, speed] of Object.entries(body.finalSpeeds)) {
+                    const playerIdNum = Number(playerId)
+                    if (!Number.isInteger(playerIdNum) || playerIdNum <= 0) {
+                        set.status = 400
+                        return { success: false, error: "选手 ID 无效" }
+                    }
+                    if (typeof speed !== "number" || !Number.isFinite(speed) || speed < 0) {
+                        set.status = 400
+                        return { success: false, error: "速度值无效" }
+                    }
+                    finalSpeeds[String(playerIdNum)] = speed
+                }
+
+                const stored = await withDateLock(`final-speeds:${date}`, async () => {
+                    await writeStoredFinalSpeeds(date, finalSpeeds, user.name, dataDir)
+                    const next: StoredFinalSpeeds = {
+                        date,
+                        updatedAt: Date.now(),
+                        updatedBy: user.name,
+                        finalSpeeds,
+                    }
+                    finalSpeedsCacheByDate.set(date, Promise.resolve(next))
+                    return next
+                })
+
+                return {
+                    success: true,
+                    date: stored.date,
+                    updatedAt: stored.updatedAt,
+                    updatedBy: stored.updatedBy,
+                    finalSpeeds: stored.finalSpeeds,
+                }
+            },
+            {
+                params: t.Object({ date: t.String() }),
+                body: t.Object({
+                    finalSpeeds: t.Record(t.String(), t.Number()),
+                }),
             }
         )
         .post(

@@ -60,3 +60,4 @@ tools/deploy_server.sh
 .omx/
 mock/
 server/data/race-lottery/*.jsonl
+server/data/race-lottery/*.final-speeds.json
