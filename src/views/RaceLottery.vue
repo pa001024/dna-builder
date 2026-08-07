@@ -2,8 +2,10 @@
 import { useLocalStorage } from "@vueuse/core"
 import { computed, onMounted, ref, watch } from "vue"
 import { execScript } from "@/api/app"
+import RaceLotterySimulator from "@/components/RaceLotterySimulator.vue"
 import { raceLotteryData, raceLotteryPlayersOrder } from "@/data/d/race-lottery.data"
 import { env } from "@/env"
+import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { mergeRaceLotteryBuffIds, parseRaceLotteryOcr, type RaceLotteryBuffIds, type RaceLotteryOcrBuff } from "@/utils/race-lottery-ocr"
 
@@ -53,6 +55,7 @@ const RACE_LOTTERY_SERVERS = ["CN", "ASIA", "US", "EU", "SEA"] as const
 type RaceLotteryServer = (typeof RACE_LOTTERY_SERVERS)[number]
 
 const user = useUserStore()
+const ui = useUIStore()
 const selectedServer = useLocalStorage<RaceLotteryServer>("rl.server", "CN")
 const selectedDate = ref(getLocalDate())
 const orderedPlayers = raceLotteryPlayersOrder.flatMap(playerId => {
@@ -205,6 +208,31 @@ const fastestPlayers = computed(() =>
         .sort((left, right) => right.speed - left.speed || left.order - right.order)
         .slice(0, 6)
 )
+
+/** 赛跑模拟弹窗是否打开。 */
+const isSimulatorOpen = ref(false)
+
+/** 赛跑模拟使用的选手列表：按最终速度（无词条时为基础速度）排序。 */
+const simulatorPlayers = computed(() =>
+    orderedPlayers
+        .map(player => ({ player, speed: getPlayerCurrentSpeed(player.playerId) }))
+        .sort((left, right) => right.speed - left.speed)
+)
+
+/**
+ * 当前词条录入情况：全部选手均填满 3 个状态词条时为 true。
+ */
+const isAllKnown = computed(() => orderedPlayers.every(player => getPlayerStatusCount(player.playerId) >= 3))
+
+/**
+ * 点击模拟前的校验：词条未完全录入时弹窗确认，确认后才打开模拟器。
+ */
+async function openSimulator() {
+    if (!isAllKnown.value && !(await ui.showDialog("确认模拟", "当前数据未完全录入 确定要进行模拟吗?"))) {
+        return
+    }
+    isSimulatorOpen.value = true
+}
 
 /**
  * 获取浏览器本地日期，避免 UTC 日期在东八区跨日时显示错误。
@@ -514,8 +542,9 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="h-full overflow-auto">
-        <main class="mx-auto max-w-375 space-y-3 p-3 sm:p-5">
+    <div class="h-full relative">
+        <div class="h-full overflow-auto">
+            <main class="mx-auto max-w-375 space-y-3 p-3 sm:p-5">
             <header
                 class="flex flex-col gap-3 rounded-lg border border-base-300 bg-base-100/80 px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
             >
@@ -541,6 +570,15 @@ onMounted(async () => {
                         <span class="label-text mb-1 text-xs">比赛日期</span>
                         <input v-model="selectedDate" type="date" class="input input-bordered input-sm w-full" />
                     </label>
+                    <button
+                        class="btn btn-primary btn-sm"
+                        type="button"
+                        title="按当天最终速度与赛内词条模拟一场比赛"
+                        @click="openSimulator"
+                    >
+                        <Icon icon="ri:play-fill" />
+                        模拟
+                    </button>
                 </div>
             </header>
 
@@ -648,9 +686,15 @@ onMounted(async () => {
                                 <div class="flex shrink-0 items-center justify-center gap-1 py-0.5 text-[0.55rem] text-base-content/55">
                                     <span
                                         class="size-1.5 rounded-full"
-                                        :class="getPlayerEntryCount(player.playerId) ? 'bg-success' : 'bg-base-content/25'"
+                                        :class="
+                                            getPlayerStatusCount(player.playerId) >= 3
+                                                ? 'bg-success'
+                                                : getPlayerEntryCount(player.playerId)
+                                                  ? 'bg-warning'
+                                                  : 'bg-base-content/25'
+                                        "
                                     />
-                                    <span>{{ getPlayerEntryCount(player.playerId) ? "已知" : "待补充" }}</span>
+                                    <span>{{ getPlayerStatusCount(player.playerId) >= 3 ? "已知" : "待补充" }}</span>
                                 </div>
                             </div>
                         </button>
@@ -894,6 +938,12 @@ onMounted(async () => {
                     </details>
                 </aside>
             </div>
-        </main>
+            </main>
+        </div>
+
+        <!-- 赛跑模拟全屏覆盖层 -->
+        <div v-if="isSimulatorOpen" class="absolute inset-0 z-50 bg-base-100">
+            <RaceLotterySimulator :players="simulatorPlayers" @close="isSimulatorOpen = false" />
+        </div>
     </div>
 </template>
