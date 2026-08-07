@@ -52,6 +52,35 @@ type AggregatedPlayer = {
 
 const writeLocks = new Map<string, Promise<void>>()
 
+/**
+ * 静态词条倍率，与前端 src/data/d/race-lottery.data.ts 保持一致。
+ * 服务端独立部署，无法共享前端数据文件，因此在此维护一份用于自动计算。
+ */
+const OUTSIDE_BUFF_EFFECT: Record<number, number> = {
+    1001: 1.05,
+    1002: 1.1,
+    1003: 1.15,
+    1004: 1.2,
+    1005: 1.3,
+    1006: 2,
+    2001: 0.95,
+    2002: 0.91,
+    2003: 0.87,
+    2004: 0.83,
+    2005: 0.77,
+    2006: 0.5,
+}
+
+/** 基础速度兜底值，与前端静态 defaultSpeed 一致。 */
+const DEFAULT_BASE_SPEED = 1
+
+/** 支持的服务器。 */
+const RACE_LOTTERY_SERVERS = ["CN", "ASIA", "US", "EU", "SEA"] as const
+type RaceLotteryServer = (typeof RACE_LOTTERY_SERVERS)[number]
+
+/** 默认服务器。 */
+const DEFAULT_SERVER: RaceLotteryServer = "CN"
+
 /** 单日各选手的最终速度，按 playerId 索引。 */
 export type RaceLotteryFinalSpeeds = Record<string, number>
 
@@ -61,6 +90,14 @@ type StoredFinalSpeeds = {
     updatedAt: number
     updatedBy: string
     finalSpeeds: RaceLotteryFinalSpeeds
+}
+
+/** 单日有效的最终速度结果。 */
+type EffectiveFinalSpeeds = {
+    finalSpeeds: RaceLotteryFinalSpeeds
+    isAuto: boolean
+    updatedAt: number
+    updatedBy: string
 }
 
 /**
@@ -84,6 +121,19 @@ function normalizeDate(date: string): string | null {
 }
 
 /**
+ * 校验并规范化服务器名；非法或未提供时回退为默认服务器 CN。
+ * @param server 服务器字符串。
+ * @returns 合法服务器或 CN。
+ */
+function normalizeServer(server: unknown): RaceLotteryServer {
+    if (typeof server === "string") {
+        const upper = server.toUpperCase() as RaceLotteryServer
+        if ((RACE_LOTTERY_SERVERS as readonly string[]).includes(upper)) return upper
+    }
+    return DEFAULT_SERVER
+}
+
+/**
  * 计算给定日期的前一天。
  * @param date 合法日期。
  * @returns 前一天的 YYYY-MM-DD。
@@ -96,22 +146,26 @@ function getPreviousDate(date: string): string {
 
 /**
  * 获取日期 JSONL 文件路径。
+ * CN 服务器保留原路径不变；其他服务器使用各自的子目录，便于分开统计。
  * @param date 合法日期。
+ * @param server 服务器。
  * @param dataDir 数据目录。
  * @returns 日期数据文件路径。
  */
-function getDataFile(date: string, dataDir: string): string {
-    return resolve(dataDir, `${date}.jsonl`)
+function getDataFile(date: string, server: RaceLotteryServer, dataDir: string): string {
+    return server === DEFAULT_SERVER ? resolve(dataDir, `${date}.jsonl`) : resolve(dataDir, server, `${date}.jsonl`)
 }
 
 /**
  * 获取单日最终速度文件路径。
+ * CN 服务器保留原路径不变；其他服务器使用各自的子目录。
  * @param date 合法日期。
+ * @param server 服务器。
  * @param dataDir 数据目录。
  * @returns 最终速度文件路径。
  */
-function getFinalSpeedsFile(date: string, dataDir: string): string {
-    return resolve(dataDir, `${date}.final-speeds.json`)
+function getFinalSpeedsFile(date: string, server: RaceLotteryServer, dataDir: string): string {
+    return server === DEFAULT_SERVER ? resolve(dataDir, `${date}.final-speeds.json`) : resolve(dataDir, server, `${date}.final-speeds.json`)
 }
 
 /**
@@ -145,12 +199,13 @@ function parseStoredFinalSpeeds(raw: string): StoredFinalSpeeds | null {
 /**
  * 读取单日最终速度文件；不存在或内容无效时返回空记录。
  * @param date 日期。
+ * @param server 服务器。
  * @param dataDir 数据目录。
  * @returns 最终速度记录。
  */
-async function readStoredFinalSpeeds(date: string, dataDir: string): Promise<StoredFinalSpeeds | null> {
+async function readStoredFinalSpeeds(date: string, server: RaceLotteryServer, dataDir: string): Promise<StoredFinalSpeeds | null> {
     try {
-        const raw = await readFile(getFinalSpeedsFile(date, dataDir), "utf8")
+        const raw = await readFile(getFinalSpeedsFile(date, server, dataDir), "utf8")
         const stored = parseStoredFinalSpeeds(raw)
         return stored && stored.date === date ? stored : null
     } catch (error) {
@@ -162,24 +217,27 @@ async function readStoredFinalSpeeds(date: string, dataDir: string): Promise<Sto
 /**
  * 覆盖写入单日最终速度文件。
  * @param date 日期。
+ * @param server 服务器。
  * @param finalSpeeds 各选手最终速度。
  * @param updatedBy 修改人用户名。
  * @param dataDir 数据目录。
  */
 async function writeStoredFinalSpeeds(
     date: string,
+    server: RaceLotteryServer,
     finalSpeeds: RaceLotteryFinalSpeeds,
     updatedBy: string,
     dataDir: string
 ): Promise<void> {
-    await mkdir(dataDir, { recursive: true })
+    const file = getFinalSpeedsFile(date, server, dataDir)
+    await mkdir(resolve(file, ".."), { recursive: true })
     const content: StoredFinalSpeeds = {
         date,
         updatedAt: Date.now(),
         updatedBy,
         finalSpeeds,
     }
-    await writeFile(getFinalSpeedsFile(date, dataDir), `${JSON.stringify(content)}\n`, "utf8")
+    await writeFile(file, `${JSON.stringify(content)}\n`, "utf8")
 }
 
 /**
@@ -242,13 +300,14 @@ function parseStoredEntry(value: unknown): StoredEntry | null {
 /**
  * 读取单日 JSONL 并保留每个用户与选手的最新记录。
  * @param date 日期。
+ * @param server 服务器。
  * @param dataDir 数据目录。
  * @returns 单日最新记录。
  */
-async function readDailyEntries(date: string, dataDir: string): Promise<StoredEntry[]> {
+async function readDailyEntries(date: string, server: RaceLotteryServer, dataDir: string): Promise<StoredEntry[]> {
     let raw: string
     try {
-        raw = await readFile(getDataFile(date, dataDir), "utf8")
+        raw = await readFile(getDataFile(date, server, dataDir), "utf8")
     } catch (error) {
         if ((error as NodeJS.ErrnoException).code === "ENOENT") return []
         throw error
@@ -266,20 +325,27 @@ async function readDailyEntries(date: string, dataDir: string): Promise<StoredEn
 /**
  * 获取日期缓存，首次访问时读取一次 JSONL，后续 API 调用只读内存。
  * @param date 日期。
+ * @param server 服务器。
  * @param dataDir 数据目录。
  * @param cacheByDate 日期缓存表。
  * @returns 日期缓存。
  */
-async function getDailyCache(date: string, dataDir: string, cacheByDate: Map<string, Promise<DailyCache>>): Promise<DailyCache> {
-    const cached = cacheByDate.get(date)
+async function getDailyCache(
+    date: string,
+    server: RaceLotteryServer,
+    dataDir: string,
+    cacheByDate: Map<string, Promise<DailyCache>>
+): Promise<DailyCache> {
+    const cacheKey = `${server}:${date}`
+    const cached = cacheByDate.get(cacheKey)
     if (cached) return cached
 
-    const loading = readDailyEntries(date, dataDir).then(entries => createDailyCache(entries))
-    cacheByDate.set(date, loading)
+    const loading = readDailyEntries(date, server, dataDir).then(entries => createDailyCache(entries))
+    cacheByDate.set(cacheKey, loading)
     try {
         return await loading
     } catch (error) {
-        if (cacheByDate.get(date) === loading) cacheByDate.delete(date)
+        if (cacheByDate.get(cacheKey) === loading) cacheByDate.delete(cacheKey)
         throw error
     }
 }
@@ -287,12 +353,14 @@ async function getDailyCache(date: string, dataDir: string, cacheByDate: Map<str
 /**
  * 追加一条 JSONL 记录，不重写整日文件。
  * @param date 日期。
+ * @param server 服务器。
  * @param entry 要追加的最新记录。
  * @param dataDir 数据目录。
  */
-async function appendDailyEntry(date: string, entry: StoredEntry, dataDir: string): Promise<void> {
-    await mkdir(dataDir, { recursive: true })
-    await appendFile(getDataFile(date, dataDir), `${JSON.stringify(entry)}\n`, "utf8")
+async function appendDailyEntry(date: string, server: RaceLotteryServer, entry: StoredEntry, dataDir: string): Promise<void> {
+    const file = getDataFile(date, server, dataDir)
+    await mkdir(resolve(file, ".."), { recursive: true })
+    await appendFile(file, `${JSON.stringify(entry)}\n`, "utf8")
 }
 
 /**
@@ -471,25 +539,138 @@ function getUser(request: Request): JWTUser | null {
 /**
  * 获取单日最终速度的内存缓存，首次读取一次文件。
  * @param date 日期。
+ * @param server 服务器。
  * @param dataDir 数据目录。
  * @param cacheByDate 最终速度缓存表。
  * @returns 单日最终速度（无记录时为空对象）。
  */
 async function getFinalSpeedsCache(
     date: string,
+    server: RaceLotteryServer,
     dataDir: string,
     cacheByDate: Map<string, Promise<StoredFinalSpeeds | null>>
 ): Promise<StoredFinalSpeeds | null> {
-    const cached = cacheByDate.get(date)
+    const cacheKey = `${server}:${date}`
+    const cached = cacheByDate.get(cacheKey)
     if (cached) return cached
 
-    const loading = readStoredFinalSpeeds(date, dataDir)
-    cacheByDate.set(date, loading)
+    const loading = readStoredFinalSpeeds(date, server, dataDir)
+    cacheByDate.set(cacheKey, loading)
     try {
         return await loading
     } catch (error) {
-        if (cacheByDate.get(date) === loading) cacheByDate.delete(date)
+        if (cacheByDate.get(cacheKey) === loading) cacheByDate.delete(cacheKey)
         throw error
+    }
+}
+
+/**
+ * 将聚合词条中的已知词条倍率相乘。
+ * @param buffIds 聚合出的三个词条 ID。
+ * @param baseSpeed 基础速度。
+ * @returns 词条倍率乘积；无已知词条时不变。
+ */
+function multiplyBuffEffects(buffIds: readonly number[], baseSpeed: number): number {
+    let speed = baseSpeed
+    for (const buffId of buffIds) {
+        const effect = OUTSIDE_BUFF_EFFECT[buffId]
+        if (effect !== undefined) speed *= effect
+    }
+    return speed
+}
+
+/**
+ * 按前端相同的逻辑计算某选手的最终速度：基础速度 × 已知外部词条倍率。
+ * 基础速度缺失时回退为静态默认值 1（与前端 defaultSpeed 一致）。
+ * @param playerId 选手 ID。
+ * @param aggregatedEntries 当日各选手聚合词条。
+ * @param baseSpeeds 各选手基础速度。
+ * @returns 该选手最终速度。
+ */
+function computePlayerFinalSpeed(
+    playerId: number,
+    aggregatedEntries: ReadonlyMap<number, AggregatedEntry>,
+    baseSpeeds: RaceLotteryFinalSpeeds
+): number {
+    const baseSpeed = baseSpeeds[String(playerId)] ?? DEFAULT_BASE_SPEED
+    const entry = aggregatedEntries.get(playerId)
+    if (!entry) return baseSpeed
+    return multiplyBuffEffects(entry.buffIds, baseSpeed)
+}
+
+/**
+ * 获取某日期的有效最终速度：管理员手动记录优先，否则由当日提交数据自动计算。
+ * 自动计算与前端一致：基础速度取前一天的有效最终速度（缺失回退 1），再乘以当日已知词条倍率；
+ * 若前一天无任何有效速度，则基础速度整体回退为默认值 1。当日无提交数据时不自动计算。
+ * @param date 日期。
+ * @param dataDir 数据目录。
+ * @param cacheByDate 最终速度缓存表。
+ * @param cacheByDaily 每日缓存表。
+ * @param effectiveCache 有效最终速度缓存表。
+ * @returns 有效最终速度结果。
+ */
+async function getEffectiveFinalSpeeds(
+    date: string,
+    server: RaceLotteryServer,
+    dataDir: string,
+    cacheByDate: Map<string, Promise<StoredFinalSpeeds | null>>,
+    cacheByDaily: Map<string, Promise<DailyCache>>,
+    effectiveCache: Map<string, Promise<EffectiveFinalSpeeds>>
+): Promise<EffectiveFinalSpeeds> {
+    const cacheKey = `${server}:${date}`
+    const cached = effectiveCache.get(cacheKey)
+    if (cached) return cached
+
+    const loading = (async (): Promise<EffectiveFinalSpeeds> => {
+        const stored = await getFinalSpeedsCache(date, server, dataDir, cacheByDate)
+        if (stored) {
+            return {
+                finalSpeeds: stored.finalSpeeds,
+                isAuto: false,
+                updatedAt: stored.updatedAt,
+                updatedBy: stored.updatedBy,
+            }
+        }
+
+        const daily = await getDailyCache(date, server, dataDir, cacheByDaily)
+        if (daily.aggregatedEntries.size === 0) {
+            return { finalSpeeds: {}, isAuto: true, updatedAt: 0, updatedBy: "" }
+        }
+
+        const previousDate = getPreviousDate(date)
+        const previous = await getEffectiveFinalSpeeds(previousDate, server, dataDir, cacheByDate, cacheByDaily, effectiveCache)
+        const finalSpeeds: RaceLotteryFinalSpeeds = {}
+        for (const [playerId] of daily.aggregatedEntries) {
+            finalSpeeds[playerId] = computePlayerFinalSpeed(Number(playerId), daily.aggregatedEntries, previous.finalSpeeds)
+        }
+        return { finalSpeeds, isAuto: true, updatedAt: 0, updatedBy: "" }
+    })()
+
+    effectiveCache.set(cacheKey, loading)
+    try {
+        return await loading
+    } catch (error) {
+        if (effectiveCache.get(cacheKey) === loading) effectiveCache.delete(cacheKey)
+        throw error
+    }
+}
+
+/**
+ * 使受影响的有效最终速度缓存失效。
+ * 自动计算会逐日递推，某天数据变化会影响该日及之后所有日期的结果，
+ * 日期为 YYYY-MM-DD 字符串，可按字典序比较，因此删除该服务器所有 ≥ date 的缓存。
+ * @param date 变更日期。
+ * @param server 服务器。
+ * @param effectiveCache 有效最终速度缓存表。
+ */
+function invalidateEffectiveFinalSpeedsCache(
+    date: string,
+    server: RaceLotteryServer,
+    effectiveCache: Map<string, Promise<EffectiveFinalSpeeds>>
+): void {
+    const prefix = `${server}:`
+    for (const cacheKey of effectiveCache.keys()) {
+        if (cacheKey.startsWith(prefix) && cacheKey.slice(prefix.length) >= date) effectiveCache.delete(cacheKey)
     }
 }
 
@@ -507,63 +688,86 @@ type RaceLotteryPluginOptions = {
 export function raceLotteryPlugin(dataDir = getDataDir(), options: RaceLotteryPluginOptions = {}) {
     const cacheByDate = new Map<string, Promise<DailyCache>>()
     const finalSpeedsCacheByDate = new Map<string, Promise<StoredFinalSpeeds | null>>()
+    const effectiveFinalSpeedsCache = new Map<string, Promise<EffectiveFinalSpeeds>>()
     const isAdmin = options.isAdmin || ((user: JWTUser) => user.roles?.includes("admin"))
 
     return new Elysia({ prefix: "/api/race-lottery" })
         .get(
             "/:date",
-            async ({ params, request, set }) => {
+            async ({ params, request, set, query }) => {
                 const date = normalizeDate(params.date)
                 if (!date) {
                     set.status = 400
                     return { success: false, error: "日期格式无效" }
                 }
+                const server = normalizeServer(query.server)
 
-                const cache = await getDailyCache(date, dataDir, cacheByDate)
+                const cache = await getDailyCache(date, server, dataDir, cacheByDate)
                 const user = getUser(request)
 
-                // 当日基础速度取自前一天记录的最终速度；无记录时为 0。
+                // 当日基础速度取自前一天的有效最终速度（手动记录或自动计算）。
                 const previousDate = getPreviousDate(date)
-                const previousFinalSpeeds = await getFinalSpeedsCache(previousDate, dataDir, finalSpeedsCacheByDate)
+                const previousEffective = await getEffectiveFinalSpeeds(
+                    previousDate,
+                    server,
+                    dataDir,
+                    finalSpeedsCacheByDate,
+                    cacheByDate,
+                    effectiveFinalSpeedsCache
+                )
                 return {
                     date,
-                    baseSpeeds: previousFinalSpeeds?.finalSpeeds || {},
+                    server,
+                    baseSpeeds: previousEffective.finalSpeeds,
                     entries: getPublicAggregatedEntries(cache, user?.id).sort((left, right) => left.playerId - right.playerId),
                 }
             },
             {
                 params: t.Object({ date: t.String() }),
+                query: t.Object({ server: t.Optional(t.String()) }),
             }
         )
         .get(
             "/:date/final-speeds",
-            async ({ params, set }) => {
+            async ({ params, set, query }) => {
                 const date = normalizeDate(params.date)
                 if (!date) {
                     set.status = 400
                     return { success: false, error: "日期格式无效" }
                 }
+                const server = normalizeServer(query.server)
 
-                const stored = await getFinalSpeedsCache(date, dataDir, finalSpeedsCacheByDate)
+                const effective = await getEffectiveFinalSpeeds(
+                    date,
+                    server,
+                    dataDir,
+                    finalSpeedsCacheByDate,
+                    cacheByDate,
+                    effectiveFinalSpeedsCache
+                )
                 return {
                     date,
-                    updatedAt: stored?.updatedAt || 0,
-                    updatedBy: stored?.updatedBy || "",
-                    finalSpeeds: stored?.finalSpeeds || {},
+                    server,
+                    isAuto: effective.isAuto,
+                    updatedAt: effective.updatedAt,
+                    updatedBy: effective.updatedBy,
+                    finalSpeeds: effective.finalSpeeds,
                 }
             },
             {
                 params: t.Object({ date: t.String() }),
+                query: t.Object({ server: t.Optional(t.String()) }),
             }
         )
         .put(
             "/:date/final-speeds",
-            async ({ params, body, request, set }) => {
+            async ({ params, body, request, set, query }) => {
                 const date = normalizeDate(params.date)
                 if (!date) {
                     set.status = 400
                     return { success: false, error: "日期格式无效" }
                 }
+                const server = normalizeServer(query.server)
 
                 const user = getUser(request)
                 if (!user) {
@@ -589,21 +793,24 @@ export function raceLotteryPlugin(dataDir = getDataDir(), options: RaceLotteryPl
                     finalSpeeds[String(playerIdNum)] = speed
                 }
 
-                const stored = await withDateLock(`final-speeds:${date}`, async () => {
-                    await writeStoredFinalSpeeds(date, finalSpeeds, user.name, dataDir)
+                const stored = await withDateLock(`${server}:final-speeds:${date}`, async () => {
+                    await writeStoredFinalSpeeds(date, server, finalSpeeds, user.name, dataDir)
                     const next: StoredFinalSpeeds = {
                         date,
                         updatedAt: Date.now(),
                         updatedBy: user.name,
                         finalSpeeds,
                     }
-                    finalSpeedsCacheByDate.set(date, Promise.resolve(next))
+                    finalSpeedsCacheByDate.set(`${server}:${date}`, Promise.resolve(next))
+                    invalidateEffectiveFinalSpeedsCache(date, server, effectiveFinalSpeedsCache)
                     return next
                 })
 
                 return {
                     success: true,
                     date: stored.date,
+                    server,
+                    isAuto: false,
                     updatedAt: stored.updatedAt,
                     updatedBy: stored.updatedBy,
                     finalSpeeds: stored.finalSpeeds,
@@ -611,6 +818,7 @@ export function raceLotteryPlugin(dataDir = getDataDir(), options: RaceLotteryPl
             },
             {
                 params: t.Object({ date: t.String() }),
+                query: t.Object({ server: t.Optional(t.String()) }),
                 body: t.Object({
                     finalSpeeds: t.Record(t.String(), t.Number()),
                 }),
@@ -618,12 +826,13 @@ export function raceLotteryPlugin(dataDir = getDataDir(), options: RaceLotteryPl
         )
         .post(
             "/:date/entries",
-            async ({ params, body, request, set }) => {
+            async ({ params, body, request, set, query }) => {
                 const date = normalizeDate(params.date)
                 if (!date) {
                     set.status = 400
                     return { success: false, error: "日期格式无效" }
                 }
+                const server = normalizeServer(query.server)
 
                 const user = getUser(request)
                 if (!user) {
@@ -639,8 +848,8 @@ export function raceLotteryPlugin(dataDir = getDataDir(), options: RaceLotteryPl
 
                 const now = Date.now()
                 let aggregatedEntry: AggregatedEntry | undefined
-                await withDateLock(date, async () => {
-                    const cache = await getDailyCache(date, dataDir, cacheByDate)
+                await withDateLock(`${server}:${date}`, async () => {
+                    const cache = await getDailyCache(date, server, dataDir, cacheByDate)
                     const key = getEntryKey(user.id, body.playerId)
                     const existingEntry = cache.entries.get(key)
                     const nextEntry: StoredEntry = existingEntry
@@ -660,8 +869,9 @@ export function raceLotteryPlugin(dataDir = getDataDir(), options: RaceLotteryPl
                               updatedAt: now,
                           }
 
-                    await appendDailyEntry(date, nextEntry, dataDir)
+                    await appendDailyEntry(date, server, nextEntry, dataDir)
                     updateDailyCacheEntry(cache, nextEntry)
+                    invalidateEffectiveFinalSpeedsCache(date, server, effectiveFinalSpeedsCache)
                     const cachedEntry = cache.aggregatedEntries.get(body.playerId)
                     if (cachedEntry) aggregatedEntry = toPublicAggregatedEntry(cachedEntry, cache, user.id)
                 })
@@ -670,6 +880,7 @@ export function raceLotteryPlugin(dataDir = getDataDir(), options: RaceLotteryPl
             },
             {
                 params: t.Object({ date: t.String() }),
+                query: t.Object({ server: t.Optional(t.String()) }),
                 body: t.Object({
                     playerId: t.Number(),
                     buffIds: t.Array(t.Number(), { minItems: 3, maxItems: 3 }),

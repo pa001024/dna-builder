@@ -24,6 +24,7 @@ type DailyResponse = {
 
 type FinalSpeedsResponse = {
     date: string
+    isAuto: boolean
     updatedAt: number
     updatedBy: string
     finalSpeeds: Record<string, number>
@@ -47,7 +48,12 @@ const OCR_SCOPE = "__race_lottery_ocr__"
 const BASE_GAME_WIDTH = 1600
 const BASE_GAME_HEIGHT = 900
 
+/** 支持的服务器，与后端 RACE_LOTTERY_SERVERS 保持一致。 */
+const RACE_LOTTERY_SERVERS = ["CN", "ASIA", "US", "EU", "SEA"] as const
+type RaceLotteryServer = (typeof RACE_LOTTERY_SERVERS)[number]
+
 const user = useUserStore()
+const selectedServer = useLocalStorage<RaceLotteryServer>("rl.server", "CN")
 const selectedDate = ref(getLocalDate())
 const orderedPlayers = raceLotteryPlayersOrder.flatMap(playerId => {
     const player = raceLotteryData.players.find(item => item.playerId === playerId)
@@ -57,6 +63,7 @@ const selectedPlayerId = ref(orderedPlayers[0]?.playerId || 0)
 const dailyEntries = ref<RaceLotteryEntry[]>([])
 const baseSpeeds = ref<Record<string, number>>({})
 const finalSpeeds = ref<Record<string, number>>({})
+const finalSpeedsIsAuto = ref(false)
 const finalSpeedsUpdatedAt = ref(0)
 const finalSpeedsUpdatedBy = ref("")
 const adminSpeedInputs = ref<Record<string, string>>({})
@@ -265,12 +272,21 @@ async function requestRaceLotteryOcr(): Promise<RaceLotteryOcrScriptResponse> {
 }
 
 /**
+ * 构建带服务器参数的 RaceLottery API 地址。
+ * @param path 路径（不含域名）。
+ * @returns 完整请求地址。
+ */
+function buildRaceLotteryUrl(path: string): string {
+    return `${env.apiEndpoint}${path}${path.includes("?") ? "&" : "?"}server=${encodeURIComponent(selectedServer.value)}`
+}
+
+/**
  * 请求指定日期的公开词条。
  * @param date 日期。
  * @returns 单日数据。
  */
 async function requestDailyData(date: string): Promise<DailyResponse> {
-    const response = await fetch(`${env.apiEndpoint}/api/race-lottery/${encodeURIComponent(date)}`, {
+    const response = await fetch(buildRaceLotteryUrl(`/api/race-lottery/${encodeURIComponent(date)}`), {
         headers: { token: user.jwtToken },
     })
     const result = (await response.json()) as DailyResponse & { error?: string }
@@ -301,12 +317,13 @@ async function loadDailyData(): Promise<void> {
  * 加载指定日期的最终速度记录。
  */
 async function loadFinalSpeeds(date = selectedDate.value): Promise<void> {
-    const response = await fetch(`${env.apiEndpoint}/api/race-lottery/${encodeURIComponent(date)}/final-speeds`, {
+    const response = await fetch(buildRaceLotteryUrl(`/api/race-lottery/${encodeURIComponent(date)}/final-speeds`), {
         headers: user.jwtToken ? { token: user.jwtToken } : {},
     })
     const result = (await response.json()) as FinalSpeedsResponse
     if (!response.ok) throw new Error((result as FinalSpeedsResponse & { error?: string }).error || "读取最终速度失败")
     finalSpeeds.value = result.finalSpeeds || {}
+    finalSpeedsIsAuto.value = result.isAuto ?? false
     finalSpeedsUpdatedAt.value = result.updatedAt || 0
     finalSpeedsUpdatedBy.value = result.updatedBy || ""
     syncAdminSpeedInputs()
@@ -361,7 +378,7 @@ async function saveAdminFinalSpeeds(): Promise<void> {
             finalSpeedMap[String(player.playerId)] = value
         }
 
-        const response = await fetch(`${env.apiEndpoint}/api/race-lottery/${encodeURIComponent(selectedDate.value)}/final-speeds`, {
+        const response = await fetch(buildRaceLotteryUrl(`/api/race-lottery/${encodeURIComponent(selectedDate.value)}/final-speeds`), {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -373,6 +390,7 @@ async function saveAdminFinalSpeeds(): Promise<void> {
         if (!response.ok || !result.success) throw new Error(result.error || "保存最终速度失败")
 
         finalSpeeds.value = result.finalSpeeds || {}
+        finalSpeedsIsAuto.value = result.isAuto ?? false
         finalSpeedsUpdatedAt.value = result.updatedAt || 0
         finalSpeedsUpdatedBy.value = result.updatedBy || ""
         adminSpeedEditing.value = false
@@ -406,7 +424,7 @@ async function submitEntry(playerId = selectedPlayerId.value, buffIds = selected
     submitting.value = true
     errorMessage.value = ""
     try {
-        const response = await fetch(`${env.apiEndpoint}/api/race-lottery/${encodeURIComponent(selectedDate.value)}/entries`, {
+        const response = await fetch(buildRaceLotteryUrl(`/api/race-lottery/${encodeURIComponent(selectedDate.value)}/entries`), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -480,6 +498,10 @@ function resetCaptureRegion(): void {
     ocrResultText.value = ""
 }
 
+watch(selectedServer, () => {
+    loadDailyData()
+    loadFinalSpeeds().catch(() => {})
+})
 watch(selectedDate, loadDailyData)
 watch(selectedDate, () => loadFinalSpeeds().catch(() => {}))
 watch(selectedPlayerId, fillOwnEntry)
@@ -508,10 +530,18 @@ onMounted(async () => {
                         <span>{{ communitySubmissionCount }} 条社区记录</span>
                     </div>
                 </div>
-                <label class="form-control w-full sm:w-auto sm:min-w-44">
-                    <span class="label-text mb-1 text-xs">比赛日期</span>
-                    <input v-model="selectedDate" type="date" class="input input-bordered input-sm w-full" />
-                </label>
+                <div class="flex flex-wrap items-end gap-3">
+                    <label class="form-control w-full sm:w-auto sm:min-w-40">
+                        <span class="label-text mb-1 text-xs">服务器</span>
+                        <select v-model="selectedServer" class="select select-bordered select-sm w-full">
+                            <option v-for="server in RACE_LOTTERY_SERVERS" :key="server" :value="server">{{ server }}</option>
+                        </select>
+                    </label>
+                    <label class="form-control w-full sm:w-auto sm:min-w-44">
+                        <span class="label-text mb-1 text-xs">比赛日期</span>
+                        <input v-model="selectedDate" type="date" class="input input-bordered input-sm w-full" />
+                    </label>
+                </div>
             </header>
 
             <section class="rounded-lg border border-warning/40 bg-warning/5 p-3 shadow-sm sm:p-4">
@@ -782,7 +812,8 @@ onMounted(async () => {
                                 <h2 class="text-sm font-bold">最终速度</h2>
                                 <p class="mt-1 text-xs text-base-content/60">
                                     {{ selectedDate }} 的比赛结果，将作为次日基础速度
-                                    <template v-if="finalSpeedsUpdatedBy"> · {{ finalSpeedsUpdatedBy }} 更新</template>
+                                    <template v-if="finalSpeedsIsAuto"> · 自动计算（未手动记录）</template>
+                                    <template v-else-if="finalSpeedsUpdatedBy"> · {{ finalSpeedsUpdatedBy }} 更新</template>
                                 </p>
                             </div>
                             <button
@@ -828,12 +859,7 @@ onMounted(async () => {
                                 <span v-if="adminSpeedSaving" class="loading loading-spinner loading-sm" />
                                 保存最终速度
                             </button>
-                            <button
-                                class="btn btn-ghost btn-sm"
-                                type="button"
-                                :disabled="adminSpeedSaving"
-                                @click="cancelAdminSpeedEdit"
-                            >
+                            <button class="btn btn-ghost btn-sm" type="button" :disabled="adminSpeedSaving" @click="cancelAdminSpeedEdit">
                                 取消
                             </button>
                         </div>
