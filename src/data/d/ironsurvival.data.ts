@@ -1149,7 +1149,7 @@ export const ironSurvivalMonsterSpawnData: SpawnInfo[] = [
 ]
 
 export const monsterLevelDropData: Record<number, MonsterLevelDrop> = {
-    1: {
+    "1": {
         BaseProbability: [10, 20, 40, 60, 80, 100, 120, 160, 200],
         EndTime: 2524622400,
         MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
@@ -1159,7 +1159,7 @@ export const monsterLevelDropData: Record<number, MonsterLevelDrop> = {
         RewardId: [303003, 303003, 303003, 303003, 303003, 303003, 303003, 303003, 303003],
         StartTime: 1704081600,
     },
-    2: {
+    "2": {
         BaseProbability: [10, 20, 40, 60, 80, 100, 120, 160, 200],
         EndTime: 2524622400,
         MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
@@ -1169,7 +1169,7 @@ export const monsterLevelDropData: Record<number, MonsterLevelDrop> = {
         RewardId: [303002, 303002, 303002, 303002, 303002, 303002, 303002, 303002, 303002],
         StartTime: 1704081600,
     },
-    3: {
+    "3": {
         BaseProbability: [10, 20, 40, 60, 80, 100, 120, 160, 200],
         EndTime: 2524622400,
         MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
@@ -1179,7 +1179,7 @@ export const monsterLevelDropData: Record<number, MonsterLevelDrop> = {
         RewardId: [313000, 313000, 313000, 313000, 313000, 313000, 313000, 313000, 313000],
         StartTime: 1787018400,
     },
-    11: {
+    "11": {
         BaseProbability: [25, 50, 100, 150, 200, 250, 300, 400, 500],
         EndTime: 2524622400,
         MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
@@ -1189,7 +1189,7 @@ export const monsterLevelDropData: Record<number, MonsterLevelDrop> = {
         RewardId: [303003, 303003, 303003, 303003, 303003, 303003, 303003, 303003, 303003],
         StartTime: 1704081600,
     },
-    12: {
+    "12": {
         BaseProbability: [25, 50, 100, 150, 200, 250, 300, 400, 500],
         EndTime: 2524622400,
         MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
@@ -1199,7 +1199,7 @@ export const monsterLevelDropData: Record<number, MonsterLevelDrop> = {
         RewardId: [303002, 303002, 303002, 303002, 303002, 303002, 303002, 303002, 303002],
         StartTime: 1704081600,
     },
-    13: {
+    "13": {
         BaseProbability: [25, 50, 100, 150, 200, 250, 300, 400, 500],
         EndTime: 2524622400,
         MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],

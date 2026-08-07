@@ -886,7 +886,9 @@ onMounted(async () => {
                             <div class="py-1 text-secondary text-xs">赛中</div>
                             <div v-for="buff in raceLotteryData.insideBuffs" :key="buff.insideBuffId" class="flex justify-between gap-3">
                                 <span>{{ buff.name }}</span>
-                                <span class="whitespace-nowrap text-base-content/60">第 {{ buff.unlockDay }} 天 · ×{{ buff.effect }}</span>
+                                <span class="whitespace-nowrap text-base-content/60"
+                                    >第 {{ buff.unlockDay }} 天 · 权重{{ buff.randomWeight }} · ×{{ buff.effect }}</span
+                                >
                             </div>
                         </div>
                     </details>
