@@ -1184,14 +1184,22 @@ export class CharBuild {
     }
 
     // 计算技能伤害
-    public calculateSkillDamage(attrs: ReturnType<typeof this.calculateAttributes>, baseName = this.baseName): DamageResult {
+    public calculateSkillDamage(
+        attrs: ReturnType<typeof this.calculateAttributes>,
+        baseName = this.baseName,
+        fieldName?: string
+    ): DamageResult {
         // 计算各种乘区
         const resistancePenetration = Math.max(0, (1 - this.enemyResistance) * (1 + attrs.属性穿透))
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
-        const summonSkill = this.allSkills.find(skill => skill.名称 === baseName)
-        const damageIncrease =
-            1 + attrs.增伤 + attrs.技能伤害 + (summonSkill?.召唤物 || summonSkill?.名称.includes("召唤物") ? attrs.召唤物伤害 : 0)
+        // 召唤物伤害应按字段名判断（如「[召唤物·战车]技能伤害」），而不是技能名
+        const skill = this.allSkills.find(s => s.名称 === baseName)
+        const resolvedFieldName = fieldName
+            ? skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))?.名称 || fieldName
+            : undefined
+        const isSummonDamage = resolvedFieldName ? resolvedFieldName.includes("召唤物") : !!skill?.召唤物
+        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (isSummonDamage ? attrs.召唤物伤害 : 0)
         const independentDamageIncrease = 1 + attrs.独立增伤
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
@@ -1609,7 +1617,8 @@ export class CharBuild {
                               增伤: attrs.增伤 + attackTypeDamageBonus,
                               独立增伤: (1 + attrs.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
                           },
-                          base
+                          base,
+                          fieldName
                       )
             damageCache.set(cacheKey, damage)
             return damage
