@@ -8,6 +8,7 @@ import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { mergeRaceLotteryBuffIds, parseRaceLotteryOcr, type RaceLotteryBuffIds, type RaceLotteryOcrBuff } from "@/utils/race-lottery-ocr"
+import { computeRaceEventDay, estimateTopNRates } from "@/utils/race-lottery-sim"
 
 type RaceLotteryEntry = {
     playerId: number
@@ -51,7 +52,7 @@ const BASE_GAME_WIDTH = 1600
 const BASE_GAME_HEIGHT = 900
 
 /** 支持的服务器，与后端 RACE_LOTTERY_SERVERS 保持一致。 */
-const RACE_LOTTERY_SERVERS = ["CN", "ASIA", "US", "EU", "SEA"] as const
+const RACE_LOTTERY_SERVERS = ["CN", "ASIA", "US", "EU"] as const
 type RaceLotteryServer = (typeof RACE_LOTTERY_SERVERS)[number]
 
 const user = useUserStore()
@@ -198,17 +199,6 @@ function getBuffMapMarks(buffMap: string): Array<"+" | "-"> {
     return Array.from(buffMap).filter((mark): mark is "+" | "-" => mark === "+" || mark === "-")
 }
 
-const fastestPlayers = computed(() =>
-    orderedPlayers
-        .map((player, order) => ({
-            player,
-            order,
-            speed: getPlayerCurrentSpeed(player.playerId),
-        }))
-        .sort((left, right) => right.speed - left.speed || left.order - right.order)
-        .slice(0, 6)
-)
-
 /** 赛跑模拟弹窗是否打开。 */
 const isSimulatorOpen = ref(false)
 
@@ -233,6 +223,69 @@ async function openSimulator() {
     }
     isSimulatorOpen.value = true
 }
+
+/** 精确计算的进入前 6 期望胜率，key 为 playerId。 */
+const playerWinRates = ref<Record<number, number>>({})
+
+/**
+ * 根据选中日期推算赛事第几天（用于赛内词条解锁池）。
+ * @param date YYYY-MM-DD。
+ * @returns 赛事天数。
+ */
+function getEventDayForDate(date: string): number {
+    const [year, month, day] = date.split("-").map(Number)
+    if (!year || !month || !day) return computeRaceEventDay()
+    // 使用本地正午，避免时区导致跨日偏差
+    const sec = Math.floor(new Date(year, month - 1, day, 12).getTime() / 1000)
+    return computeRaceEventDay(sec)
+}
+
+/**
+ * 用当前选手最终速度与赛内词条规则，精确计算进入前 6 的期望胜率。
+ * 算法：枚举全部词条序列得到完赛时间分布，再对 Poisson binomial 求名次 ≤ 6 的概率。
+ */
+function recomputeWinRates(): void {
+    const day = getEventDayForDate(selectedDate.value)
+    const players = orderedPlayers.map(player => ({
+        playerId: player.playerId,
+        speed: getPlayerCurrentSpeed(player.playerId),
+    }))
+    const rates = estimateTopNRates(players, day)
+    const next: Record<number, number> = {}
+    for (const item of rates) next[item.playerId] = item.rate
+    playerWinRates.value = next
+}
+
+/**
+ * 读取选手进入前 6 的期望胜率。
+ * @param playerId 选手 ID。
+ * @returns [0, 1] 胜率；尚未计算时返回 0。
+ */
+function getPlayerWinRate(playerId: number): number {
+    return playerWinRates.value[playerId] ?? 0
+}
+
+/**
+ * 将胜率格式化为百分比文案。
+ * @param rate [0, 1] 胜率。
+ * @returns 如 `42.3%`。
+ */
+function formatWinRate(rate: number): string {
+    return `${(rate * 100).toFixed(1)}%`
+}
+
+/** 按期望胜率排序的前 6 名，用于顶部排名区展示。 */
+const topWinRatePlayers = computed(() =>
+    orderedPlayers
+        .map((player, order) => ({
+            player,
+            order,
+            speed: getPlayerCurrentSpeed(player.playerId),
+            winRate: getPlayerWinRate(player.playerId),
+        }))
+        .sort((left, right) => right.winRate - left.winRate || right.speed - left.speed || left.order - right.order)
+        .slice(0, 6)
+)
 
 /**
  * 获取浏览器本地日期，避免 UTC 日期在东八区跨日时显示错误。
@@ -535,9 +588,13 @@ watch(selectedDate, () => loadFinalSpeeds().catch(() => {}))
 watch(selectedPlayerId, fillOwnEntry)
 watch(dailyEntries, fillOwnEntry)
 
+// 词条 / 基础速度 / 日期变化后重算进入前 6 的期望胜率
+watch([dailyEntries, baseSpeeds, selectedDate], recomputeWinRates, { deep: true })
+
 onMounted(async () => {
     await loadDailyData()
     loadFinalSpeeds().catch(() => {})
+    recomputeWinRates()
 })
 </script>
 
@@ -545,399 +602,435 @@ onMounted(async () => {
     <div class="h-full relative">
         <div class="h-full overflow-auto">
             <main class="mx-auto max-w-375 space-y-3 p-3 sm:p-5">
-            <header
-                class="flex flex-col gap-3 rounded-lg border border-base-300 bg-base-100/80 px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
-            >
-                <div class="min-w-0">
-                    <div class="flex items-baseline gap-3">
-                        <h1 class="truncate text-xl font-bold sm:text-2xl">魔灵竞速</h1>
-                        <span class="hidden text-xs font-semibold uppercase tracking-[0.18em] text-primary sm:inline">Race Lottery</span>
-                    </div>
-                    <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-base-content/60">
-                        <span>{{ raceLotteryData.players.length }} 名选手</span>
-                        <span>{{ coveredPlayerCount }}/{{ raceLotteryData.players.length }} 已有词条</span>
-                        <span>{{ communitySubmissionCount }} 条社区记录</span>
-                    </div>
-                </div>
-                <div class="flex flex-wrap items-end gap-3">
-                    <label class="form-control w-full sm:w-auto sm:min-w-40">
-                        <span class="label-text mb-1 text-xs">服务器</span>
-                        <select v-model="selectedServer" class="select select-bordered select-sm w-full">
-                            <option v-for="server in RACE_LOTTERY_SERVERS" :key="server" :value="server">{{ server }}</option>
-                        </select>
-                    </label>
-                    <label class="form-control w-full sm:w-auto sm:min-w-44">
-                        <span class="label-text mb-1 text-xs">比赛日期</span>
-                        <input v-model="selectedDate" type="date" class="input input-bordered input-sm w-full" />
-                    </label>
-                    <button
-                        class="btn btn-primary btn-sm"
-                        type="button"
-                        title="按当天最终速度与赛内词条模拟一场比赛"
-                        @click="openSimulator"
-                    >
-                        <Icon icon="ri:play-fill" />
-                        模拟
-                    </button>
-                </div>
-            </header>
-
-            <section class="rounded-lg border border-warning/40 bg-warning/5 p-3 shadow-sm sm:p-4">
-                <div class="mb-3 flex items-center justify-between gap-3">
-                    <div>
-                        <h2 class="text-sm font-bold sm:text-base">速度排名</h2>
-                        <p class="text-xs text-base-content/55">排名不代表最终胜负</p>
-                    </div>
-                    <span class="text-xs font-bold uppercase tracking-[0.16em] text-warning">Top 6</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-                    <button
-                        v-for="(item, index) in fastestPlayers"
-                        :key="item.player.playerId"
-                        type="button"
-                        class="flex min-w-0 items-center gap-2 rounded-md border border-base-300 bg-base-100/80 p-2 text-left transition hover:border-warning/70 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
-                        @click="selectedPlayerId = item.player.playerId"
-                    >
-                        <span class="flex w-10 shrink-0 flex-col items-center justify-center leading-none">
-                            <span class="text-sm font-black tabular-nums text-warning">#{{ index + 1 }}</span>
-                            <span class="mt-0.5 whitespace-nowrap text-[0.5rem] font-semibold uppercase tracking-wide text-base-content/50">
-                                NO.{{ String(item.order + 1).padStart(2, "0") }}
-                            </span>
-                        </span>
-                        <img
-                            :src="getPlayerIconUrl(item.player.icon)"
-                            :alt="item.player.name"
-                            loading="lazy"
-                            class="size-10 shrink-0 object-contain"
-                        />
-                        <span class="min-w-0 flex-1">
-                            <span class="block truncate text-xs font-semibold">{{ item.player.name }}</span>
-                            <span class="mt-0.5 block text-sm font-bold tabular-nums text-primary">{{ item.speed.toFixed(2) }}</span>
-                        </span>
-                    </button>
-                </div>
-            </section>
-
-            <div v-if="errorMessage" class="alert alert-error py-2 text-sm">
-                <span>{{ errorMessage }}</span>
-            </div>
-
-            <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,25rem)]">
-                <section class="min-w-0 rounded-lg border border-base-300 bg-base-200/40 p-2 sm:p-3">
-                    <div class="mb-2 flex items-center justify-between gap-3 px-1">
-                        <div>
-                            <h2 class="text-sm font-bold sm:text-base">选手名册</h2>
-                            <p class="text-xs text-base-content/55">点击卡片查看详情</p>
+                <header
+                    class="flex flex-col gap-3 rounded-lg border border-base-300 bg-base-100/80 px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div class="min-w-0">
+                        <div class="flex items-baseline gap-3">
+                            <h1 class="truncate text-xl font-bold sm:text-2xl">魔灵竞速</h1>
+                            <span class="hidden text-xs font-semibold uppercase tracking-[0.18em] text-primary sm:inline"
+                                >Race Lottery</span
+                            >
                         </div>
-                        <span v-if="loading" class="loading loading-spinner loading-sm text-primary" />
+                        <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-base-content/60">
+                            <span>{{ raceLotteryData.players.length }} 名选手</span>
+                            <span>{{ coveredPlayerCount }}/{{ raceLotteryData.players.length }} 已有词条</span>
+                            <span>{{ communitySubmissionCount }} 条社区记录</span>
+                        </div>
                     </div>
+                    <div class="flex flex-wrap items-end gap-3">
+                        <label class="form-control w-full sm:w-auto sm:min-w-40">
+                            <span class="label-text mb-1 text-xs">服务器</span>
+                            <select v-model="selectedServer" class="select select-bordered select-sm w-full">
+                                <option v-for="server in RACE_LOTTERY_SERVERS" :key="server" :value="server">{{ server }}</option>
+                            </select>
+                        </label>
+                        <label class="form-control w-full sm:w-auto sm:min-w-44">
+                            <span class="label-text mb-1 text-xs">比赛日期</span>
+                            <input v-model="selectedDate" type="date" class="input input-bordered input-sm w-full" />
+                        </label>
+                        <button
+                            class="btn btn-primary btn-sm"
+                            type="button"
+                            title="按当天最终速度与赛内词条模拟一场比赛"
+                            @click="openSimulator"
+                        >
+                            <Icon icon="ri:play-fill" />
+                            模拟
+                        </button>
+                    </div>
+                </header>
 
+                <section class="rounded-lg border border-warning/40 bg-warning/5 p-3 shadow-sm sm:p-4">
+                    <div class="mb-3 flex items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-sm font-bold sm:text-base">期望胜率排名</h2>
+                            <p class="text-xs text-base-content/55">按赛中词条规则推断的进入前 6 的概率</p>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-[0.16em] text-warning">Top 6</span>
+                    </div>
                     <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                         <button
-                            v-for="(player, index) in orderedPlayers"
-                            :key="player.playerId"
+                            v-for="(item, index) in topWinRatePlayers"
+                            :key="item.player.playerId"
                             type="button"
-                            class="group relative aspect-3/4 min-w-0 overflow-hidden rounded-sm border-2 bg-base-100 p-1 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-warning/70 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
-                            :class="
-                                selectedPlayerId === player.playerId ? 'border-warning ring-1 ring-warning/70 shadow-md' : 'border-base-300'
-                            "
-                            :aria-label="`${player.name}，编号 ${index + 1}`"
-                            @click="selectedPlayerId = player.playerId"
+                            class="flex min-w-0 items-center gap-2 rounded-md border border-base-300 bg-base-100/80 p-2 text-left transition hover:border-warning/70 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
+                            @click="selectedPlayerId = item.player.playerId"
                         >
-                            <div class="flex h-full min-h-0 flex-col text-base-content">
-                                <div class="flex shrink-0 items-start justify-between px-1 pt-0.5">
-                                    <div class="leading-none">
-                                        <div class="text-[0.55rem] font-semibold uppercase tracking-wider text-base-content/50">No.</div>
-                                        <div class="text-sm font-bold tabular-nums">{{ String(index + 1).padStart(2, "0") }}</div>
-                                    </div>
-                                    <div class="flex flex-wrap items-end gap-0.5 pt-0.5" aria-hidden="true">
-                                        <span
-                                            v-for="(buffMap, buffIndex) in getPlayerBuffMapGroups(player.playerId).negative"
-                                            :key="`negative-${buffMap}-${buffIndex}`"
-                                            class="flex h-3 min-w-3 items-center justify-center rounded-full border border-error/70 bg-error/10 px-0.5 text-[0.5rem] font-black leading-none text-error"
-                                        >
-                                            {{ buffMap }}
-                                        </span>
-                                        <span
-                                            v-for="(buffMap, buffIndex) in getPlayerBuffMapGroups(player.playerId).positive"
-                                            :key="`positive-${buffMap}-${buffIndex}`"
-                                            class="flex h-3 min-w-3 items-center justify-center rounded-full border border-success/70 bg-success/10 px-0.5 text-[0.5rem] font-black leading-none text-success"
-                                        >
-                                            {{ buffMap }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="flex min-h-0 flex-1 items-center justify-center px-1 py-1">
-                                    <img
-                                        :src="getPlayerIconUrl(player.icon)"
-                                        :alt="player.name"
-                                        loading="lazy"
-                                        class="size-full min-h-0 object-contain drop-shadow-[0_5px_4px_rgba(0,0,0,0.18)]"
-                                    />
-                                </div>
-                                <div
-                                    class="flex shrink-0 items-center justify-center gap-1 rounded-sm bg-neutral px-1 py-1 text-neutral-content"
+                            <span class="flex w-10 shrink-0 flex-col items-center justify-center leading-none">
+                                <span class="text-sm font-black tabular-nums text-warning">#{{ index + 1 }}</span>
+                                <span
+                                    class="mt-0.5 whitespace-nowrap text-[0.5rem] font-semibold uppercase tracking-wide text-base-content/50"
                                 >
-                                    <span class="text-[0.68rem]">↗</span>
-                                    <span class="text-xs font-bold tabular-nums sm:text-sm">
-                                        {{ getPlayerCurrentSpeed(player.playerId).toFixed(2) }}
-                                    </span>
-                                </div>
-                                <div class="flex shrink-0 items-center justify-center gap-1 py-0.5 text-[0.55rem] text-base-content/55">
-                                    <span
-                                        class="size-1.5 rounded-full"
-                                        :class="
-                                            getPlayerStatusCount(player.playerId) >= 3
-                                                ? 'bg-success'
-                                                : getPlayerEntryCount(player.playerId)
-                                                  ? 'bg-warning'
-                                                  : 'bg-base-content/25'
-                                        "
-                                    />
-                                    <span>{{ getPlayerStatusCount(player.playerId) >= 3 ? "已知" : "待补充" }}</span>
-                                </div>
-                            </div>
+                                    NO.{{ String(item.order + 1).padStart(2, "0") }}
+                                </span>
+                            </span>
+                            <img
+                                :src="getPlayerIconUrl(item.player.icon)"
+                                :alt="item.player.name"
+                                loading="lazy"
+                                class="size-10 shrink-0 object-contain"
+                            />
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-xs font-semibold">{{ item.player.name }}</span>
+                                <span class="mt-0.5 block text-sm font-bold tabular-nums text-primary">{{
+                                    formatWinRate(item.winRate)
+                                }}</span>
+                                <span class="block text-[0.55rem] tabular-nums text-base-content/50">速 {{ item.speed.toFixed(2) }}</span>
+                            </span>
                         </button>
                     </div>
                 </section>
 
-                <aside class="min-w-0 space-y-3 lg:sticky lg:top-3">
-                    <section v-if="selectedPlayer" class="overflow-hidden rounded-lg border-2 border-base-300 bg-base-100 shadow-md">
-                        <div class="relative aspect-2/3 overflow-hidden bg-base-200/45">
-                            <div class="absolute inset-x-0 top-0 z-10 flex items-start justify-between p-3">
-                                <div class="leading-none">
-                                    <div class="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-base-content/50">No.</div>
-                                    <div class="text-4xl font-bold tabular-nums text-base-content/80">
-                                        {{ String(orderedPlayers.indexOf(selectedPlayer) + 1).padStart(2, "0") }}
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-xs font-semibold text-base-content/55">记录</div>
-                                    <div class="mt-1 text-2xl font-bold tabular-nums text-primary">
-                                        {{ getPlayerStatusCount(selectedPlayer.playerId) }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex h-full flex-col pt-14">
-                                <div class="min-h-0 flex-1 px-5 pb-1">
-                                    <img
-                                        :src="getPlayerIconUrl(selectedPlayer.icon)"
-                                        :alt="selectedPlayer.name"
-                                        class="size-full object-contain drop-shadow-[0_12px_8px_rgba(0,0,0,0.2)]"
-                                    />
-                                </div>
-                                <div class="shrink-0 px-4 pb-3 text-center">
-                                    <h2 class="truncate text-2xl font-bold sm:text-3xl">{{ selectedPlayer.name }}</h2>
-                                    <div class="mt-1 flex items-center justify-center gap-2 text-sm text-base-content/60">
-                                        <span>基础速度</span>
-                                        <span class="text-xl font-bold tabular-nums text-base-content">{{
-                                            getPlayerBaseSpeed(selectedPlayer.playerId).toFixed(2)
-                                        }}</span>
-                                    </div>
-                                </div>
-                                <div class="max-h-52 shrink-0 space-y-1.5 overflow-auto bg-base-300 p-3 text-base-content">
-                                    <div
-                                        v-for="(statusLine, statusIndex) in selectedPlayerStatusLines"
-                                        :key="`status-${statusIndex}`"
-                                        class="flex min-h-9 min-w-0 items-center justify-between gap-2 rounded-sm border border-base-content/10 bg-neutral-content/10 px-2 py-1.5 text-sm"
-                                        :title="statusLine.submissionCount ? `${statusLine.submissionCount} 条社区提交` : undefined"
-                                    >
-                                        <span class="min-w-0 flex-1 truncate font-medium text-base-content/85">
-                                            状态{{ statusIndex + 1 }}：{{ statusLine.name }}
-                                        </span>
-                                        <span class="flex min-w-5 shrink-0 items-center justify-end gap-1" aria-hidden="true">
-                                            <template v-if="statusLine.buffMap">
-                                                <span
-                                                    v-for="(mark, markIndex) in getBuffMapMarks(statusLine.buffMap)"
-                                                    :key="`${statusIndex}-${markIndex}`"
-                                                    class="flex size-5 items-center justify-center rounded-full border text-sm font-bold leading-none"
-                                                    :class="
-                                                        mark === '+'
-                                                            ? 'border-success/80 bg-success/85 text-success-content'
-                                                            : 'border-error/80 bg-error/85 text-error-content'
-                                                    "
-                                                >
-                                                    {{ mark }}
-                                                </span>
-                                            </template>
-                                            <span v-else class="size-5" />
-                                        </span>
-                                    </div>
-                                    <div
-                                        v-if="selectedPlayerSummary?.lastUpdatedBy"
-                                        class="pt-0.5 text-right text-[0.65rem] text-base-content/50"
-                                    >
-                                        最后更新：{{ selectedPlayerSummary.lastUpdatedBy }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                <div v-if="errorMessage" class="alert alert-error py-2 text-sm">
+                    <span>{{ errorMessage }}</span>
+                </div>
 
-                    <section v-if="env.isApp" class="rounded-lg border border-secondary/30 bg-secondary/5 p-3">
-                        <div class="flex items-center justify-between gap-3">
+                <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,25rem)]">
+                    <section class="min-w-0 rounded-lg border border-base-300 bg-base-200/40 p-2 sm:p-3">
+                        <div class="mb-2 flex items-center justify-between gap-3 px-1">
                             <div>
-                                <h2 class="text-sm font-bold">截图识别上传</h2>
-                                <p class="mt-1 text-xs text-base-content/60">
-                                    {{ captureRegion ? "已保存区域" : "首次识别需要框选区域" }}
-                                </p>
+                                <h2 class="text-sm font-bold sm:text-base">选手名册</h2>
+                                <p class="text-xs text-base-content/55">点击卡片查看详情</p>
                             </div>
-                            <Icon icon="ri:screenshot-2-line" class="size-5 shrink-0 text-secondary" />
+                            <span v-if="loading" class="loading loading-spinner loading-sm text-primary" />
                         </div>
-                        <div class="mt-3 flex gap-2">
+
+                        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                             <button
-                                class="btn btn-secondary btn-sm min-w-0 flex-1"
+                                v-for="(player, index) in orderedPlayers"
+                                :key="player.playerId"
                                 type="button"
-                                :disabled="!user.jwtToken || ocrRunning"
-                                @click="runRaceLotteryOcrUpload"
+                                class="group relative aspect-3/4 min-w-0 overflow-hidden rounded-sm border-2 bg-base-100 p-1 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-warning/70 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
+                                :class="
+                                    selectedPlayerId === player.playerId
+                                        ? 'border-warning ring-1 ring-warning/70 shadow-md'
+                                        : 'border-base-300'
+                                "
+                                :aria-label="`${player.name}，编号 ${index + 1}`"
+                                @click="selectedPlayerId = player.playerId"
                             >
-                                <span v-if="ocrRunning" class="loading loading-spinner loading-sm" />
-                                <Icon v-else icon="ri:screenshot-2-line" />
-                                {{ user.jwtToken ? "识别并上传" : "登录后识别上传" }}
+                                <div class="flex h-full min-h-0 flex-col text-base-content">
+                                    <div class="flex shrink-0 items-start justify-between px-1 pt-0.5">
+                                        <div class="leading-none">
+                                            <div class="text-[0.55rem] font-semibold uppercase tracking-wider text-base-content/50">
+                                                No.
+                                            </div>
+                                            <div class="text-sm font-bold tabular-nums">{{ String(index + 1).padStart(2, "0") }}</div>
+                                        </div>
+                                        <div class="flex flex-wrap items-end gap-0.5 pt-0.5" aria-hidden="true">
+                                            <span
+                                                v-for="(buffMap, buffIndex) in getPlayerBuffMapGroups(player.playerId).negative"
+                                                :key="`negative-${buffMap}-${buffIndex}`"
+                                                class="flex h-3 min-w-3 items-center justify-center rounded-full border border-error/70 bg-error/10 px-0.5 text-[0.5rem] font-black leading-none text-error"
+                                            >
+                                                {{ buffMap }}
+                                            </span>
+                                            <span
+                                                v-for="(buffMap, buffIndex) in getPlayerBuffMapGroups(player.playerId).positive"
+                                                :key="`positive-${buffMap}-${buffIndex}`"
+                                                class="flex h-3 min-w-3 items-center justify-center rounded-full border border-success/70 bg-success/10 px-0.5 text-[0.5rem] font-black leading-none text-success"
+                                            >
+                                                {{ buffMap }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex min-h-0 flex-1 items-center justify-center px-1 py-1">
+                                        <img
+                                            :src="getPlayerIconUrl(player.icon)"
+                                            :alt="player.name"
+                                            loading="lazy"
+                                            class="size-full min-h-0 object-contain drop-shadow-[0_5px_4px_rgba(0,0,0,0.18)]"
+                                        />
+                                    </div>
+                                    <div
+                                        class="flex shrink-0 items-center justify-center gap-1 rounded-sm bg-neutral px-1 py-1 text-neutral-content"
+                                    >
+                                        <span class="text-[0.68rem]">↗</span>
+                                        <span class="text-xs font-bold tabular-nums sm:text-sm">
+                                            {{ getPlayerCurrentSpeed(player.playerId).toFixed(2) }}
+                                        </span>
+                                        <span class="text-[0.55rem] text-neutral-content/70">·</span>
+                                        <span class="text-[0.65rem] font-bold tabular-nums text-warning">
+                                            {{ formatWinRate(getPlayerWinRate(player.playerId)) }}
+                                        </span>
+                                    </div>
+                                    <div class="flex shrink-0 items-center justify-center gap-1 py-0.5 text-[0.55rem] text-base-content/55">
+                                        <span
+                                            class="size-1.5 rounded-full"
+                                            :class="
+                                                getPlayerStatusCount(player.playerId) >= 3
+                                                    ? 'bg-success'
+                                                    : getPlayerEntryCount(player.playerId)
+                                                      ? 'bg-warning'
+                                                      : 'bg-base-content/25'
+                                            "
+                                        />
+                                        <span>{{ getPlayerStatusCount(player.playerId) >= 3 ? "已知" : "待补充" }}</span>
+                                    </div>
+                                </div>
                             </button>
-                            <button
-                                v-if="captureRegion"
-                                class="btn btn-ghost btn-sm"
-                                type="button"
-                                title="重新选择截图区域"
-                                aria-label="重新选择截图区域"
-                                @click="resetCaptureRegion"
-                            >
-                                <Icon icon="ri:refresh-line" />
-                            </button>
-                        </div>
-                        <div v-if="ocrResultText" class="mt-2 rounded-md bg-base-200/70 p-2">
-                            <div class="text-xs text-base-content/50">最近一次 OCR</div>
-                            <div class="mt-1 max-h-20 overflow-auto whitespace-pre-wrap wrap-break-word text-xs">{{ ocrResultText }}</div>
                         </div>
                     </section>
 
-                    <section class="rounded-lg border border-primary/30 bg-primary/5 p-3">
-                        <h2 class="text-sm font-bold">提交词条</h2>
-                        <form class="mt-3 space-y-3" @submit.prevent="submitManualEntry">
-                            <label class="form-control">
-                                <span class="label-text mb-1 text-xs">选手</span>
-                                <select v-model="selectedPlayerId" class="select select-bordered select-sm w-full">
-                                    <option v-for="player in orderedPlayers" :key="player.playerId" :value="player.playerId">
-                                        {{ player.name }}
-                                    </option>
-                                </select>
-                            </label>
-                            <div class="space-y-2">
-                                <div class="text-xs text-base-content/70">状态词条（3 个位置，可不选）</div>
-                                <label v-for="slot in 3" :key="slot" class="form-control">
-                                    <span class="label-text mb-1 text-xs">状态{{ slot }}</span>
-                                    <select
-                                        v-model="selectedBuffIds[slot - 1]"
-                                        class="select select-bordered select-sm w-full"
-                                        :aria-label="`状态${slot}`"
-                                    >
-                                        <option :value="0">不选择</option>
-                                        <option v-for="buff in raceLotteryData.outsideBuffs" :key="buff.rumorId" :value="buff.rumorId">
-                                            {{ buff.name }} ({{ buff.buffMap }})
+                    <aside class="min-w-0 space-y-3 lg:sticky lg:top-3">
+                        <section v-if="selectedPlayer" class="overflow-hidden rounded-lg border-2 border-base-300 bg-base-100 shadow-md">
+                            <div class="relative aspect-2/3 overflow-hidden bg-base-200/45">
+                                <div class="absolute inset-x-0 top-0 z-10 flex items-start justify-between p-3">
+                                    <div class="leading-none">
+                                        <div class="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-base-content/50">No.</div>
+                                        <div class="text-4xl font-bold tabular-nums text-base-content/80">
+                                            {{ String(orderedPlayers.indexOf(selectedPlayer) + 1).padStart(2, "0") }}
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs font-semibold text-base-content/55">记录</div>
+                                        <div class="mt-1 text-2xl font-bold tabular-nums text-primary">
+                                            {{ getPlayerStatusCount(selectedPlayer.playerId) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex h-full flex-col pt-14">
+                                    <div class="min-h-0 flex-1 px-5 pb-1">
+                                        <img
+                                            :src="getPlayerIconUrl(selectedPlayer.icon)"
+                                            :alt="selectedPlayer.name"
+                                            class="size-full object-contain drop-shadow-[0_12px_8px_rgba(0,0,0,0.2)]"
+                                        />
+                                    </div>
+                                    <div class="shrink-0 px-4 pb-3 text-center">
+                                        <h2 class="truncate text-2xl font-bold sm:text-3xl">{{ selectedPlayer.name }}</h2>
+                                        <div class="mt-1 flex items-center justify-center gap-3 text-sm text-base-content/60">
+                                            <span class="inline-flex items-center gap-1">
+                                                <span>基础速度</span>
+                                                <span class="text-xl font-bold tabular-nums text-base-content">{{
+                                                    getPlayerBaseSpeed(selectedPlayer.playerId).toFixed(2)
+                                                }}</span>
+                                            </span>
+                                            <span class="inline-flex items-center gap-1">
+                                                <span>期望胜率</span>
+                                                <span class="text-xl font-bold tabular-nums text-warning">{{
+                                                    formatWinRate(getPlayerWinRate(selectedPlayer.playerId))
+                                                }}</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="max-h-52 shrink-0 space-y-1.5 overflow-auto bg-base-300 p-3 text-base-content">
+                                        <div
+                                            v-for="(statusLine, statusIndex) in selectedPlayerStatusLines"
+                                            :key="`status-${statusIndex}`"
+                                            class="flex min-h-9 min-w-0 items-center justify-between gap-2 rounded-sm border border-base-content/10 bg-neutral-content/10 px-2 py-1.5 text-sm"
+                                            :title="statusLine.submissionCount ? `${statusLine.submissionCount} 条社区提交` : undefined"
+                                        >
+                                            <span class="min-w-0 flex-1 truncate font-medium text-base-content/85">
+                                                状态{{ statusIndex + 1 }}：{{ statusLine.name }}
+                                            </span>
+                                            <span class="flex min-w-5 shrink-0 items-center justify-end gap-1" aria-hidden="true">
+                                                <template v-if="statusLine.buffMap">
+                                                    <span
+                                                        v-for="(mark, markIndex) in getBuffMapMarks(statusLine.buffMap)"
+                                                        :key="`${statusIndex}-${markIndex}`"
+                                                        class="flex size-5 items-center justify-center rounded-full border text-sm font-bold leading-none"
+                                                        :class="
+                                                            mark === '+'
+                                                                ? 'border-success/80 bg-success/85 text-success-content'
+                                                                : 'border-error/80 bg-error/85 text-error-content'
+                                                        "
+                                                    >
+                                                        {{ mark }}
+                                                    </span>
+                                                </template>
+                                                <span v-else class="size-5" />
+                                            </span>
+                                        </div>
+                                        <div
+                                            v-if="selectedPlayerSummary?.lastUpdatedBy"
+                                            class="pt-0.5 text-right text-[0.65rem] text-base-content/50"
+                                        >
+                                            最后更新：{{ selectedPlayerSummary.lastUpdatedBy }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section v-if="env.isApp" class="rounded-lg border border-secondary/30 bg-secondary/5 p-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <h2 class="text-sm font-bold">截图识别上传</h2>
+                                    <p class="mt-1 text-xs text-base-content/60">
+                                        {{ captureRegion ? "已保存区域" : "首次识别需要框选区域" }}
+                                    </p>
+                                </div>
+                                <Icon icon="ri:screenshot-2-line" class="size-5 shrink-0 text-secondary" />
+                            </div>
+                            <div class="mt-3 flex gap-2">
+                                <button
+                                    class="btn btn-secondary btn-sm min-w-0 flex-1"
+                                    type="button"
+                                    :disabled="!user.jwtToken || ocrRunning"
+                                    @click="runRaceLotteryOcrUpload"
+                                >
+                                    <span v-if="ocrRunning" class="loading loading-spinner loading-sm" />
+                                    <Icon v-else icon="ri:screenshot-2-line" />
+                                    {{ user.jwtToken ? "识别并上传" : "登录后识别上传" }}
+                                </button>
+                                <button
+                                    v-if="captureRegion"
+                                    class="btn btn-ghost btn-sm"
+                                    type="button"
+                                    title="重新选择截图区域"
+                                    aria-label="重新选择截图区域"
+                                    @click="resetCaptureRegion"
+                                >
+                                    <Icon icon="ri:refresh-line" />
+                                </button>
+                            </div>
+                            <div v-if="ocrResultText" class="mt-2 rounded-md bg-base-200/70 p-2">
+                                <div class="text-xs text-base-content/50">最近一次 OCR</div>
+                                <div class="mt-1 max-h-20 overflow-auto whitespace-pre-wrap wrap-break-word text-xs">
+                                    {{ ocrResultText }}
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                            <h2 class="text-sm font-bold">提交词条</h2>
+                            <form class="mt-3 space-y-3" @submit.prevent="submitManualEntry">
+                                <label class="form-control">
+                                    <span class="label-text mb-1 text-xs">选手</span>
+                                    <select v-model="selectedPlayerId" class="select select-bordered select-sm w-full">
+                                        <option v-for="player in orderedPlayers" :key="player.playerId" :value="player.playerId">
+                                            {{ player.name }}
                                         </option>
                                     </select>
                                 </label>
-                            </div>
-                            <button
-                                class="btn btn-primary btn-sm w-full"
-                                type="submit"
-                                :disabled="!user.jwtToken || submitting || !hasSelectedBuff"
-                            >
-                                <span v-if="submitting" class="loading loading-spinner loading-sm" />
-                                {{ user.jwtToken ? "提交词条" : "登录后提交" }}
-                            </button>
-                        </form>
-                    </section>
-
-                    <section v-if="user.isAdmin" class="rounded-lg border border-error/30 bg-error/5 p-3">
-                        <div class="flex items-center justify-between gap-3">
-                            <div>
-                                <h2 class="text-sm font-bold">最终速度</h2>
-                                <p class="mt-1 text-xs text-base-content/60">
-                                    {{ selectedDate }} 的比赛结果，将作为次日基础速度
-                                    <template v-if="finalSpeedsIsAuto"> · 自动计算（未手动记录）</template>
-                                    <template v-else-if="finalSpeedsUpdatedBy"> · {{ finalSpeedsUpdatedBy }} 更新</template>
-                                </p>
-                            </div>
-                            <button
-                                v-if="!adminSpeedEditing"
-                                class="btn btn-error btn-ghost btn-sm"
-                                type="button"
-                                @click="startAdminSpeedEdit"
-                            >
-                                编辑
-                            </button>
-                        </div>
-                        <div v-if="adminSpeedEditing" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                            <label v-for="player in orderedPlayers" :key="player.playerId" class="form-control">
-                                <span class="label-text mb-0.5 text-[0.7rem]">{{ player.name }}</span>
-                                <input
-                                    v-model="adminSpeedInputs[String(player.playerId)]"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    class="input input-bordered input-sm w-full"
-                                    :aria-label="`${player.name} 最终速度`"
-                                />
-                            </label>
-                        </div>
-                        <div v-else class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-base-content/70">
-                            <span v-for="player in orderedPlayers" :key="player.playerId" class="inline-flex items-center gap-1">
-                                <span class="text-base-content/50">{{ player.name }}</span>
-                                <span class="font-bold tabular-nums">
-                                    {{ finalSpeeds[String(player.playerId)]?.toFixed(2) ?? "—" }}
-                                </span>
-                            </span>
-                        </div>
-                        <div v-if="adminSpeedError" class="alert alert-error mt-3 py-1.5 text-xs">
-                            <span>{{ adminSpeedError }}</span>
-                        </div>
-                        <div v-if="adminSpeedEditing" class="mt-3 flex gap-2">
-                            <button
-                                class="btn btn-error btn-sm flex-1"
-                                type="button"
-                                :disabled="adminSpeedSaving"
-                                @click="saveAdminFinalSpeeds"
-                            >
-                                <span v-if="adminSpeedSaving" class="loading loading-spinner loading-sm" />
-                                保存最终速度
-                            </button>
-                            <button class="btn btn-ghost btn-sm" type="button" :disabled="adminSpeedSaving" @click="cancelAdminSpeedEdit">
-                                取消
-                            </button>
-                        </div>
-                    </section>
-
-                    <section class="rounded-lg border border-base-300 bg-base-200/40 p-3">
-                        <h2 class="text-sm font-bold">每日最高投注</h2>
-                        <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                            <div v-for="item in raceLotteryData.maxStakes" :key="item.EventDay" class="flex justify-between gap-2">
-                                <span class="text-base-content/60">第 {{ item.EventDay }} 天</span>
-                                <span class="font-medium">{{ item.MaxStake.toLocaleString() }}</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    <details class="rounded-lg border border-base-300 bg-base-200/40 p-3">
-                        <summary class="cursor-pointer text-sm font-bold">活动词条参考</summary>
-                        <div class="mt-3 space-y-3 text-sm">
-                            <div v-for="buff in raceLotteryData.outsideBuffs" :key="buff.rumorId" class="flex justify-between gap-3">
-                                <span>{{ buff.name }}</span>
-                                <span class="whitespace-nowrap text-base-content/60">{{ buff.buffMap }} · ×{{ buff.pValueEffect }}</span>
-                            </div>
-                            <div class="divider my-1" />
-                            <div class="py-1 text-secondary text-xs">赛中</div>
-                            <div v-for="buff in raceLotteryData.insideBuffs" :key="buff.insideBuffId" class="flex justify-between gap-3">
-                                <span>{{ buff.name }}</span>
-                                <span class="whitespace-nowrap text-base-content/60"
-                                    >第 {{ buff.unlockDay }} 天 · 权重{{ buff.randomWeight }} · ×{{ buff.effect }}</span
+                                <div class="space-y-2">
+                                    <div class="text-xs text-base-content/70">状态词条（3 个位置，可不选）</div>
+                                    <label v-for="slot in 3" :key="slot" class="form-control">
+                                        <span class="label-text mb-1 text-xs">状态{{ slot }}</span>
+                                        <select
+                                            v-model="selectedBuffIds[slot - 1]"
+                                            class="select select-bordered select-sm w-full"
+                                            :aria-label="`状态${slot}`"
+                                        >
+                                            <option :value="0">不选择</option>
+                                            <option v-for="buff in raceLotteryData.outsideBuffs" :key="buff.rumorId" :value="buff.rumorId">
+                                                {{ buff.name }} ({{ buff.buffMap }})
+                                            </option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <button
+                                    class="btn btn-primary btn-sm w-full"
+                                    type="submit"
+                                    :disabled="!user.jwtToken || submitting || !hasSelectedBuff"
                                 >
+                                    <span v-if="submitting" class="loading loading-spinner loading-sm" />
+                                    {{ user.jwtToken ? "提交词条" : "登录后提交" }}
+                                </button>
+                            </form>
+                        </section>
+
+                        <section v-if="user.isAdmin" class="rounded-lg border border-error/30 bg-error/5 p-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <h2 class="text-sm font-bold">最终速度</h2>
+                                    <p class="mt-1 text-xs text-base-content/60">
+                                        {{ selectedDate }} 的比赛结果，将作为次日基础速度
+                                        <template v-if="finalSpeedsIsAuto"> · 自动计算（未手动记录）</template>
+                                        <template v-else-if="finalSpeedsUpdatedBy"> · {{ finalSpeedsUpdatedBy }} 更新</template>
+                                    </p>
+                                </div>
+                                <button
+                                    v-if="!adminSpeedEditing"
+                                    class="btn btn-error btn-ghost btn-sm"
+                                    type="button"
+                                    @click="startAdminSpeedEdit"
+                                >
+                                    编辑
+                                </button>
                             </div>
-                        </div>
-                    </details>
-                </aside>
-            </div>
+                            <div v-if="adminSpeedEditing" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                <label v-for="player in orderedPlayers" :key="player.playerId" class="form-control">
+                                    <span class="label-text mb-0.5 text-[0.7rem]">{{ player.name }}</span>
+                                    <input
+                                        v-model="adminSpeedInputs[String(player.playerId)]"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        class="input input-bordered input-sm w-full"
+                                        :aria-label="`${player.name} 最终速度`"
+                                    />
+                                </label>
+                            </div>
+                            <div v-else class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-base-content/70">
+                                <span v-for="player in orderedPlayers" :key="player.playerId" class="inline-flex items-center gap-1">
+                                    <span class="text-base-content/50">{{ player.name }}</span>
+                                    <span class="font-bold tabular-nums">
+                                        {{ finalSpeeds[String(player.playerId)]?.toFixed(2) ?? "—" }}
+                                    </span>
+                                </span>
+                            </div>
+                            <div v-if="adminSpeedError" class="alert alert-error mt-3 py-1.5 text-xs">
+                                <span>{{ adminSpeedError }}</span>
+                            </div>
+                            <div v-if="adminSpeedEditing" class="mt-3 flex gap-2">
+                                <button
+                                    class="btn btn-error btn-sm flex-1"
+                                    type="button"
+                                    :disabled="adminSpeedSaving"
+                                    @click="saveAdminFinalSpeeds"
+                                >
+                                    <span v-if="adminSpeedSaving" class="loading loading-spinner loading-sm" />
+                                    保存最终速度
+                                </button>
+                                <button
+                                    class="btn btn-ghost btn-sm"
+                                    type="button"
+                                    :disabled="adminSpeedSaving"
+                                    @click="cancelAdminSpeedEdit"
+                                >
+                                    取消
+                                </button>
+                            </div>
+                        </section>
+
+                        <section class="rounded-lg border border-base-300 bg-base-200/40 p-3">
+                            <h2 class="text-sm font-bold">每日最高投注</h2>
+                            <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                <div v-for="item in raceLotteryData.maxStakes" :key="item.EventDay" class="flex justify-between gap-2">
+                                    <span class="text-base-content/60">第 {{ item.EventDay }} 天</span>
+                                    <span class="font-medium">{{ item.MaxStake.toLocaleString() }}</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <details class="rounded-lg border border-base-300 bg-base-200/40 p-3">
+                            <summary class="cursor-pointer text-sm font-bold">活动词条参考</summary>
+                            <div class="mt-3 space-y-3 text-sm">
+                                <div v-for="buff in raceLotteryData.outsideBuffs" :key="buff.rumorId" class="flex justify-between gap-3">
+                                    <span>{{ buff.name }}</span>
+                                    <span class="whitespace-nowrap text-base-content/60"
+                                        >{{ buff.buffMap }} · ×{{ buff.pValueEffect }}</span
+                                    >
+                                </div>
+                                <div class="divider my-1" />
+                                <div class="py-1 text-secondary text-xs">赛中</div>
+                                <div
+                                    v-for="buff in raceLotteryData.insideBuffs"
+                                    :key="buff.insideBuffId"
+                                    class="flex justify-between gap-3"
+                                >
+                                    <span>{{ buff.name }}</span>
+                                    <span class="whitespace-nowrap text-base-content/60"
+                                        >第 {{ buff.unlockDay }} 天 · 权重{{ buff.randomWeight }} · ×{{ buff.effect }}</span
+                                    >
+                                </div>
+                            </div>
+                        </details>
+                    </aside>
+                </div>
             </main>
         </div>
 

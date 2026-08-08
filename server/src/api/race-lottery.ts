@@ -75,7 +75,7 @@ const OUTSIDE_BUFF_EFFECT: Record<number, number> = {
 const DEFAULT_BASE_SPEED = 1
 
 /** 支持的服务器。 */
-const RACE_LOTTERY_SERVERS = ["CN", "ASIA", "US", "EU", "SEA"] as const
+const RACE_LOTTERY_SERVERS = ["CN", "ASIA", "US", "EU"] as const
 type RaceLotteryServer = (typeof RACE_LOTTERY_SERVERS)[number]
 
 /** 默认服务器。 */

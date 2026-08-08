@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from "vue"
+import { onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { env } from "@/env"
 import type { DNAUser, UDNAUser } from "@/store/db"
 import { db } from "@/store/db"
@@ -18,6 +18,25 @@ const isAddIframeOpen = ref(false)
 const isAddByTokenOpen = ref(false)
 // JSON输入
 const jsonInput = ref("")
+// 登录 iframe，用于同步 UI 缩放
+const iframeRef = ref<HTMLIFrameElement | null>(null)
+
+// 将父页面 UI 缩放同步到 iframe 内部（iframe 是独立文档，不会继承 --uiscale）
+// 同时强制同步父文档字号：iframe 视口较窄会命中 style.css 的
+// @media (max-width: 40rem) → 13px 断点，与父页面 16px 不一致，导致 rem 布局错位
+const applyIframeUiScale = () => {
+    const doc = iframeRef.value?.contentDocument
+    if (!doc) return
+    doc.documentElement.style.setProperty("--uiscale", String(setting.uiScale))
+    doc.documentElement.style.fontSize = getComputedStyle(document.documentElement).fontSize
+}
+
+watch(
+    () => setting.uiScale,
+    () => {
+        if (isAddIframeOpen.value) applyIframeUiScale()
+    }
+)
 
 // 加载皎皎角账号列表
 const loadUsers = async () => {
@@ -265,7 +284,7 @@ onBeforeUnmount(() => {
         <!-- 添加皎皎角账号iframe模态框 -->
         <div class="modal" :class="{ 'modal-open': isAddIframeOpen }">
             <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-114 h-130">
-                <iframe ref="iframeRef" src="/login_jjj.html" class="w-full h-full border-0 rounded-lg" />
+                <iframe ref="iframeRef" src="/login_jjj.html" class="w-full h-full border-0 rounded-lg" @load="applyIframeUiScale" />
             </div>
 
             <!-- 模态框背景 -->
