@@ -201,7 +201,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     </div>
                     <div class="flex justify-between">
                         <span class="text-base-content/70">标签</span>
-                        <span>{{ char.标签?.map(item => $t(item)).join("/") }}</span>
+                        <span>{{ char.标签?.map(item => $t(`tag.${item}`, $t(item))).join("/") }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-base-content/70">版本</span>

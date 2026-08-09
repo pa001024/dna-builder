@@ -331,7 +331,7 @@ useInitialScrollToSelectedItem()
                                                 :key="tag"
                                                 class="px-1.5 py-0.5 rounded bg-base-300 text-base-content/80"
                                             >
-                                                {{ $t(tag) }}
+                                                {{ $t(`tag.${tag}`, $t(tag)) }}
                                             </span>
                                         </div>
                                     </div>

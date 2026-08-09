@@ -1,4 +1,4 @@
-export type ASTNodeType = "binary" | "unary" | "property" | "function" | "member_access" | "number"
+export type ASTNodeType = "binary" | "unary" | "property" | "function" | "member_access" | "temporary_attributes" | "number"
 
 export interface ASTNodeBase {
     type: ASTNodeType
@@ -36,12 +36,18 @@ export interface ASTMemberAccess extends ASTNodeBase {
     property: string // 成员名称
 }
 
+export interface ASTTemporaryAttributes extends ASTNodeBase {
+    type: "temporary_attributes"
+    target: ASTNode
+    attributes: { name: string; value: ASTNode }[]
+}
+
 export interface ASTNumber extends ASTNodeBase {
     type: "number"
     value: number
 }
 
-export type ASTNode = ASTBinary | ASTUnary | ASTProperty | ASTFunction | ASTMemberAccess | ASTNumber
+export type ASTNode = ASTBinary | ASTUnary | ASTProperty | ASTFunction | ASTMemberAccess | ASTTemporaryAttributes | ASTNumber
 
 export enum TokenType {
     NUMBER,
@@ -52,6 +58,9 @@ export enum TokenType {
     LPAREN, // (
     RPAREN, // )
     COMMA, // ,
+    COLON, // :
+    LBRACE, // {
+    RBRACE, // }
     EOF,
 }
 
@@ -152,7 +161,8 @@ class Tokenizer {
                 this.position += 2
                 return { type: TokenType.DOUBLE_COLON, value: "::", position: this.position - 2 }
             }
-            throw new Error(`单个冒号 ':' 不支持,请使用 '::' 进行命名空间访问`)
+            this.position++
+            return { type: TokenType.COLON, value: ":", position: this.position - 1 }
         }
         if (char === "(") {
             this.position++
@@ -165,6 +175,14 @@ class Tokenizer {
         if (char === ",") {
             this.position++
             return { type: TokenType.COMMA, value: ",", position: this.position - 1 }
+        }
+        if (char === "{") {
+            this.position++
+            return { type: TokenType.LBRACE, value: "{", position: this.position - 1 }
+        }
+        if (char === "}") {
+            this.position++
+            return { type: TokenType.RBRACE, value: "}", position: this.position - 1 }
         }
 
         throw new Error(`未知字符 '${char}' 位于位置 ${this.position}`)
@@ -196,6 +214,7 @@ class Parser {
         }
         const ast = this.parseExpression()
         if (this.current < this.tokens.length) {
+            if (this.check(TokenType.COLON)) throw new Error(`单个冒号 ':' 不支持,请使用 '::' 进行命名空间访问`)
             throw new Error(`表达式末尾发现意外的标记 '${this.peek().value}'`)
         }
         return ast
@@ -268,7 +287,7 @@ class Parser {
         return this.parseFactor()
     }
 
-    // 因子: (Expression) | Number | Identifier(Call/Prop) -> (::Identifier| .Identifier)*
+    // 因子: (Expression) | Number | Identifier(Call/Prop) -> (::Identifier| .Identifier| {Attribute:Expression})*
     private parseFactor(): ASTNode {
         let node: ASTNode
 
@@ -341,14 +360,40 @@ class Parser {
             throw new Error(`意外的标记: ${this.peek().value}`)
         }
 
-        // 处理成员访问链 (例如: Obj.Prop.SubProp)
-        while (this.match(TokenType.DOT)) {
-            const propertyToken = this.consume(TokenType.IDENTIFIER, "成员访问 '.' 后缺少属性名称")
-            node = {
-                type: "member_access",
-                object: node,
-                property: propertyToken.value,
+        // 处理成员访问和临时属性后缀链，例如 [攻击]{增伤:0.1}.暴击。
+        while (true) {
+            if (this.match(TokenType.DOT)) {
+                const propertyToken = this.consume(TokenType.IDENTIFIER, "成员访问 '.' 后缺少属性名称")
+                node = {
+                    type: "member_access",
+                    object: node,
+                    property: propertyToken.value,
+                }
+                continue
             }
+            if (this.match(TokenType.LBRACE)) {
+                if (node.type !== "property" && node.type !== "member_access" && node.type !== "temporary_attributes") {
+                    throw new Error("临时属性只能应用于字段")
+                }
+                const attributes: { name: string; value: ASTNode }[] = []
+                const attributeNames = new Set<string>()
+                if (this.check(TokenType.RBRACE)) throw new Error("临时属性不能为空")
+                do {
+                    const attribute = this.consume(TokenType.IDENTIFIER, "临时属性缺少属性名")
+                    this.consume(TokenType.COLON, `临时属性 '${attribute.value}' 后缺少 ':'`)
+                    if (attributeNames.has(attribute.value)) throw new Error(`临时属性 '${attribute.value}' 重复`)
+                    attributeNames.add(attribute.value)
+                    attributes.push({ name: attribute.value, value: this.parseExpression() })
+                } while (this.match(TokenType.COMMA))
+                this.consume(TokenType.RBRACE, "临时属性后缺少 '}'")
+                node = {
+                    type: "temporary_attributes",
+                    target: node,
+                    attributes,
+                }
+                continue
+            }
+            break
         }
 
         return node

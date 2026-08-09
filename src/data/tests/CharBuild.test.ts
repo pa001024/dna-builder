@@ -1102,6 +1102,27 @@ describe("CharBuild类测试", () => {
             expect(damage.expectedDamage).toBeCloseTo(0, 6)
         })
 
+        it("疑星落装备无止无休时应保持纯元素结算", () => {
+            const charBuild = new CharBuild({
+                char: new LeveledChar("煜明"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10299),
+                ranged: new LeveledWeapon(20601),
+                baseName: "疑星落",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+
+            expect(charBuild.skillWeapon?.伤害类型).toBe("灾厄")
+            expect(charBuild.calculate()).toBeGreaterThan(0)
+        })
+
         it("同律武器的 type=下落攻击 应参与下落增伤判断", () => {
             const charBuild = new CharBuild({
                 char: new LeveledChar("煜明"),
