@@ -881,6 +881,48 @@ export const partyTopicData_en: PartyTopic[] = [
                 npc: 790060,
                 next: 80040423,
             },
+            {
+                id: 80040424,
+                content: "Something doesn't add up... why have those Filthoids suddenly gone berserk?",
+                voice: "inv/Heitao/004/C85F7010",
+                npc: 790060,
+                next: 80040425,
+            },
+            {
+                id: 80040425,
+                content: "Maybe you were right. It was naive of me to think staying on Purgatorio Island would keep us safe.",
+                voice: "inv/Heitao/004/C85F703A",
+                npc: 790060,
+                next: 80040426,
+            },
+            {
+                id: 80040426,
+                content: "We can't keep hiding forever. They found us this time, and there'll be a next time.",
+                voice: "inv/Heitao/004/C85F7064",
+                npc: 790060,
+                next: 80040427,
+            },
+            {
+                id: 80040427,
+                content:
+                    "{nickname}, when you wake up tomorrow, let's leave this island. We'll find somewhere vast and free. Like you said—",
+                voice: "inv/Heitao/004/C85F708E",
+                npc: 790060,
+                next: 80040428,
+            },
+            {
+                id: 80040428,
+                content: "\"I'll be your shield, and you'll be my voice.\"",
+                voice: "inv/Heitao/004/C85F70B8",
+                npc: 790060,
+                next: 80040429,
+            },
+            {
+                id: 80040429,
+                content: "There's nothing to fear now — not anymore.",
+                voice: "inv/Heitao/004/C85F70E2",
+                npc: 790060,
+            },
         ],
     },
     {
@@ -1337,7 +1379,13 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "...",
                 voice: "inv/Fuluo/002/C8EC49B8",
                 npc: 790090,
+                speakerName: "???",
                 next: 80260205,
+            },
+            {
+                id: 80260205,
+                voice: "inv/Fuluo/002/C8EC49E2",
+                next: 80260206,
             },
             {
                 id: 80260206,
@@ -1351,6 +1399,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Too slow, Hilda. It seems a daughter still can't outwit her mother. Should I be concerned?",
                 voice: "inv/Fuluo/002/C8EC4A36",
                 npc: 790090,
+                speakerName: "???",
                 next: 80260208,
             },
             {
@@ -1991,6 +2040,11 @@ export const partyTopicData_en: PartyTopic[] = [
                 next: 80260404,
             },
             {
+                id: 80260404,
+                voice: "inv/Fuluo/004/C8EC6A88",
+                next: 80260405,
+            },
+            {
                 id: 80260405,
                 content:
                     "Go to Askard, Flora. Run from that duty, if it can even be called that. It doesn't matter. Run far enough... and you will be free.",
@@ -2252,6 +2306,11 @@ export const partyTopicData_en: PartyTopic[] = [
                 voice: "inv/Fuluo/004/C8EC709A",
                 npc: 790090,
                 next: 80260442,
+            },
+            {
+                id: 80260442,
+                voice: "inv/Fuluo/004/C8EC70C4",
+                next: 80260443,
             },
             {
                 id: 80260443,
@@ -2663,6 +2722,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "A Charon on stage? Have they lost their minds!?",
                 voice: "inv/Tuosi/001/C89F5932",
                 npc: 790034,
+                speakerName: "Shocked Audience Member",
                 next: 80140150,
             },
             {
@@ -2694,6 +2754,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "BOO! Off you go! Beat it!",
                 voice: "inv/Tuosi/001/C89F59DA",
                 npc: 790034,
+                speakerName: "Shocked Audience Member",
                 next: 80140154,
             },
             {
@@ -2722,6 +2783,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "BOO! Away with you! Beat it!",
                 voice: "inv/Tuosi/001/C89F5A82",
                 npc: 790034,
+                speakerName: "Shocked Audience Member",
                 next: 80140158,
             },
             {
@@ -2729,6 +2791,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "You dirty liar! You nasty fraud! <W>Demon's Child!</>",
                 voice: "inv/Tuosi/001/C89F5AAC",
                 npc: 790034,
+                speakerName: "Shocked Audience Member",
                 next: 80140159,
             },
             {
@@ -3319,6 +3382,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Hmm? Are you trying to say something? What is it?",
                 voice: "inv/Tuosi/003/C89F7276",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140304,
             },
             {
@@ -3340,6 +3404,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "What? I can't make out what you're saying.",
                 voice: "inv/Tuosi/003/C89F72F4",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140307,
             },
             {
@@ -3354,6 +3419,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Um, this is the 6th Legion's lab...",
                 voice: "inv/Tuosi/003/C89F7348",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140309,
             },
             {
@@ -3375,6 +3441,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "You... you don't remember? This is the third time you've asked me that. You underwent alchemical augmentation.",
                 voice: "inv/Tuosi/003/C89F73C6",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140312,
             },
             {
@@ -3411,6 +3478,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "W—Well, it's not so bad, is it? Your body's stronger now. For Charons like you, having a chance to serve the Empire in this way is... is the highest... honour...",
                 voice: "inv/Tuosi/003/C89F7498",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140317,
             },
             {
@@ -3418,6 +3486,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "A—And you're lucky. You know, many of the earlier subjects didn't even survive the grafting process...",
                 voice: "inv/Tuosi/003/C89F74C2",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140318,
             },
             {
@@ -3439,6 +3508,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "...Sorry.",
                 voice: "inv/Tuosi/003/C89F7540",
                 npc: 100336,
+                speakerName: "Young Alchemist",
             },
             {
                 id: 80140357,
@@ -3468,6 +3538,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Hmm... The sedative concentration in his blood is dropping. Should I increase the dosage?",
                 voice: "inv/Tuosi/003/C89F75BE",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140324,
             },
             {
@@ -3482,6 +3553,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Ah—! How come you're awake again?",
                 voice: "inv/Tuosi/003/C89F7612",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140326,
             },
             {
@@ -3489,6 +3561,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "What's going on? Why is the sedative concentration so low?",
                 voice: "inv/Tuosi/003/C89F763C",
                 npc: 100337,
+                speakerName: "Senior Alchemist",
                 next: 80140327,
             },
             {
@@ -3496,6 +3569,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "S—Sorry, Professor! I'll increase the dosage right away!",
                 voice: "inv/Tuosi/003/C89F7666",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140328,
             },
             {
@@ -3510,6 +3584,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Hmm? What's that thing mumbling?",
                 voice: "inv/Tuosi/003/C89F76BA",
                 npc: 100337,
+                speakerName: "Senior Alchemist",
                 next: 80140330,
             },
             {
@@ -3525,6 +3600,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Go back? Hahaha! What are you talking about? I don't think we have done anything to your brain. Was it the fire that damaged it, or were you born this stupid?",
                 voice: "inv/Tuosi/003/C89F770E",
                 npc: 100337,
+                speakerName: "Senior Alchemist",
                 next: 80140332,
             },
             {
@@ -3532,6 +3608,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "What we need is a monster, a vessel, a reliable weapon — anything but you. How could we possibly turn you back?",
                 voice: "inv/Tuosi/003/C89F7738",
                 npc: 100337,
+                speakerName: "Senior Alchemist",
                 next: 80140333,
             },
             {
@@ -3546,6 +3623,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: '"Why"?',
                 voice: "inv/Tuosi/003/C89F778C",
                 npc: 100337,
+                speakerName: "Senior Alchemist",
                 next: 80140335,
             },
             {
@@ -3554,6 +3632,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Would you explain to an ant why you're crushing it underfoot? Would you justify to a cherry why you're chewing it to a pulp?",
                 voice: "inv/Tuosi/003/C89F77B6",
                 npc: 100337,
+                speakerName: "Senior Alchemist",
                 next: 80140336,
             },
             {
@@ -3561,6 +3640,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Oh, wait — I forgot. A wretched thing like you has probably never even tasted a cherry.",
                 voice: "inv/Tuosi/003/C89F77E0",
                 npc: 100337,
+                speakerName: "Senior Alchemist",
                 next: 80140337,
             },
             {
@@ -3568,6 +3648,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Why is the injection taking so long? Hurry up and get it done.",
                 voice: "inv/Tuosi/003/C89F780A",
                 npc: 100337,
+                speakerName: "Senior Alchemist",
                 next: 80140338,
             },
             {
@@ -3575,6 +3656,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "It's done, Professor.",
                 voice: "inv/Tuosi/003/C89F7834",
                 npc: 100336,
+                speakerName: "Young Alchemist",
             },
             {
                 id: 80140339,
@@ -3588,6 +3670,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Hmm? You have what?",
                 voice: "inv/Tuosi/003/C89F7888",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140341,
             },
             {
@@ -3643,6 +3726,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "...",
                 voice: "inv/Tuosi/003/C89F79AE",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140348,
             },
             {
@@ -3650,6 +3734,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Is there a problem?",
                 voice: "inv/Tuosi/003/C89F79D8",
                 npc: 100337,
+                speakerName: "Senior Alchemist",
                 next: 80140349,
             },
             {
@@ -3658,6 +3743,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Nothing serious, Professor. The subject's mental state is unstable — he's been rambling nonsense again. I was just about to increase the sedative dosage.",
                 voice: "inv/Tuosi/003/C89F7A02",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140350,
             },
             {
@@ -3665,6 +3751,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Good call. You've shown considerable progress these past few days.",
                 voice: "inv/Tuosi/003/C89F7A2C",
                 npc: 100337,
+                speakerName: "Senior Alchemist",
                 next: 80140351,
             },
             {
@@ -3672,6 +3759,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Thank you, Professor!",
                 voice: "inv/Tuosi/003/C89F7A56",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140352,
             },
             {
@@ -3686,6 +3774,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "That's more like it. Just keep quiet.",
                 voice: "inv/Tuosi/003/C89F7AAA",
                 npc: 100336,
+                speakerName: "Young Alchemist",
                 next: 80140354,
             },
             {
@@ -3730,6 +3819,295 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80140401,
                 content: "Who are you?",
                 voice: "inv/Tuosi/004/C89F828A",
+            },
+            {
+                id: 80140403,
+                content: "Hey! Where are you off to?",
+                voice: "inv/Tuosi/004/C89F82DE",
+                npc: 790026,
+                speakerName: "???",
+                next: 80140404,
+            },
+            {
+                id: 80140404,
+                content: "...!",
+                voice: "inv/Tuosi/004/C89F8308",
+                npc: 790025,
+                speakerName: "Phantasio",
+                next: 80140405,
+            },
+            {
+                id: 80140405,
+                content: "Dennis! Slow down! Wait for me!",
+                voice: "inv/Tuosi/004/C89F8332",
+                npc: 790026,
+                next: 80140406,
+            },
+            {
+                id: 80140406,
+                content: "Ugh... it's freezing out here. I just want to get home and sleep.",
+                voice: "inv/Tuosi/004/C89F835C",
+                npc: 790027,
+                next: 80140407,
+            },
+            {
+                id: 80140407,
+                content:
+                    "Oh, come on, it's not even that late! Practise with me for a bit. I still haven't memorised the lines Ms Violetta taught us today.",
+                voice: "inv/Tuosi/004/C89F8386",
+                npc: 790026,
+                next: 80140408,
+            },
+            {
+                id: 80140408,
+                content: "Ow! Not again... Alright, alright! I'll do it. No need to start throwing punches, just saying...",
+                voice: "inv/Tuosi/004/C89F83B0",
+                npc: 790027,
+                next: 80140409,
+            },
+            {
+                id: 80140409,
+                content: "(Those two... they haven't changed a bit.)",
+                voice: "inv/Tuosi/004/C89F83DA",
+                npc: 790025,
+                speakerName: "Phantasio",
+                next: 80140410,
+            },
+            {
+                id: 80140410,
+                content: "By the way, has the play for next month been decided yet?",
+                voice: "inv/Tuosi/004/C89F8404",
+                npc: 790026,
+                next: 80140411,
+            },
+            {
+                id: 80140411,
+                content: "The director said we'll be performing Rainy Days.",
+                voice: "inv/Tuosi/004/C89F842E",
+                npc: 790027,
+                next: 80140412,
+            },
+            {
+                id: 80140412,
+                content:
+                    "Rainy Days isn't exactly a crowd-pleaser, is it? It's hard to make a name for yourself with that one. *sigh* ...If only we could put on Children From the Snowfield again. That was such a hit in Icelake...",
+                voice: "inv/Tuosi/004/C89F8458",
+                npc: 790026,
+                next: 80140413,
+            },
+            {
+                id: 80140413,
+                content:
+                    "Exactly! I'd love to play the Nameless Fairy again. That was my best role! Sure, the singing parts were tough, but performing it all the way through felt incredible.",
+                voice: "inv/Tuosi/004/C89F8482",
+                npc: 790027,
+                next: 80140414,
+            },
+            {
+                id: 80140414,
+                content: "Really? Personally, I think Fane is the best among us.",
+                voice: "inv/Tuosi/004/C89F84AC",
+                npc: 790026,
+                next: 80140415,
+            },
+            {
+                id: 80140415,
+                content: "No, he is not! Those final arias in the last act? I nailed them better than he did!",
+                voice: "inv/Tuosi/004/C89F84D6",
+                npc: 790027,
+                next: 80140416,
+            },
+            {
+                id: 80140416,
+                content: "...",
+                voice: "inv/Tuosi/004/C89F8500",
+                npc: 790025,
+                speakerName: "Phantasio",
+                next: 80140417,
+            },
+            {
+                id: 80140417,
+                content: "...Actually, neither Fane nor I is the best.",
+                voice: "inv/Tuosi/004/C89F852A",
+                npc: 790027,
+                next: 80140418,
+            },
+            {
+                id: 80140418,
+                content: "...",
+                voice: "inv/Tuosi/004/C89F8554",
+                npc: 790026,
+                next: 80140419,
+            },
+            {
+                id: 80140419,
+                content:
+                    "Yeah, you're right. When it comes to Children From the Snowfield, no one could outshine Parsifal. I just wonder... where is he now?",
+                voice: "inv/Tuosi/004/C89F857E",
+                npc: 790026,
+                next: 80140420,
+            },
+            {
+                id: 80140420,
+                content: "(I'm right here.)",
+                voice: "inv/Tuosi/004/C89F85A8",
+                npc: 790025,
+                speakerName: "Phantasio",
+                next: 80140421,
+            },
+            {
+                id: 80140421,
+                content: "(Right in front of you...)",
+                voice: "inv/Tuosi/004/C89F85D2",
+                npc: 790025,
+                speakerName: "Phantasio",
+                next: 80140422,
+            },
+            {
+                id: 80140422,
+                content: "(I...)",
+                voice: "inv/Tuosi/004/C89F85FC",
+                npc: 790025,
+                speakerName: "Phantasio",
+                next: 80140423,
+            },
+            {
+                id: 80140423,
+                content: "Parsifal...",
+                voice: "inv/Tuosi/004/C89F8626",
+                npc: 790027,
+                next: 80140424,
+            },
+            {
+                id: 80140424,
+                content:
+                    "Oh, right. I shouldn't have mentioned him in front of you. Last time the director brought him up, you got so mad you nearly smashed the props.",
+                voice: "inv/Tuosi/004/C89F8650",
+                npc: 790026,
+                next: 80140425,
+            },
+            {
+                id: 80140425,
+                content:
+                    "Yeah... I was furious back then. If not for him and Ms Violetta deceiving the audience, Children From the Snowfield wouldn't have been cancelled. All those rehearsals wouldn't have gone to waste..",
+                voice: "inv/Tuosi/004/C89F867A",
+                npc: 790027,
+                next: 80140426,
+            },
+            {
+                id: 80140426,
+                content:
+                    " But.. I've asked myself many times since then — was he really wrong for stepping on that stage? Was it his fault for breaking the rule that says \"Charons can't perform,\" or... was the rule itself at fault?",
+                voice: "inv/Tuosi/004/C89F86A4",
+                npc: 790027,
+                next: 80140427,
+            },
+            {
+                id: 80140427,
+                content: "Why do we stand on the stage? To <H>honour the unparalleled value of art</>.",
+                voice: "inv/Tuosi/004/C89F86CE",
+                npc: 790027,
+                next: 80140428,
+            },
+            {
+                id: 80140428,
+                content:
+                    "But why do people care more about whether a performer has horns than about the performance itself? If we all stood behind the curtain, how would Parsifal be any different from the rest of us?",
+                voice: "inv/Tuosi/004/C89F86F8",
+                npc: 790027,
+                next: 80140429,
+            },
+            {
+                id: 80140429,
+                content: "Oh, there is one difference — he sings better than I do.",
+                voice: "inv/Tuosi/004/C89F8722",
+                npc: 790027,
+                next: 80140430,
+            },
+            {
+                id: 80140430,
+                content: "Wow, it's rare to hear you say something like that. Looks like our reckless little Dennis is finally growing up!",
+                voice: "inv/Tuosi/004/C89F874C",
+                npc: 790026,
+                next: 80140431,
+            },
+            {
+                id: 80140431,
+                content: "Hey, don't start acting like the director and giving me lectures, alright?",
+                voice: "inv/Tuosi/004/C89F8776",
+                npc: 790027,
+                next: 80140432,
+            },
+            {
+                id: 80140432,
+                content:
+                    "That wasn't a lecture — it was a compliment! But if Parsifal ever comes back, I'll give him a real telling-off. Vanishing without so much as a note... What was he thinking? *sigh* I really miss him.",
+                voice: "inv/Tuosi/004/C89F87A0",
+                npc: 790026,
+                next: 80140433,
+            },
+            {
+                id: 80140433,
+                content: "(Susanna... Dennis...)",
+                voice: "inv/Tuosi/004/C89F87CA",
+                npc: 790025,
+                speakerName: "Parsifal",
+                next: 80140434,
+            },
+            {
+                id: 80140434,
+                content:
+                    'Do you remember what Ms Violetta used to say? "Someday — not now, but in the future — our art will usher in a purer era, one free of prejudice or discrimination, with no divide between Solas and Charons."',
+                voice: "inv/Tuosi/004/C89F87F4",
+                npc: 790026,
+                next: 80140435,
+            },
+            {
+                id: 80140435,
+                content:
+                    "I believe that even though Ms Violetta and Parsifal were scorned by so many, which brought shame upon the troupe... it's people like them who will bring about that brighter future.",
+                voice: "inv/Tuosi/004/C89F881E",
+                npc: 790026,
+                next: 80140436,
+            },
+            {
+                id: 80140436,
+                content:
+                    'When that day arrives, they won\'t be remembered as "disgraces." They\'ll be seen as "heroes" — visionaries who woke up before the rest of us.',
+                voice: "inv/Tuosi/004/C89F8848",
+                npc: 790026,
+                next: 80140437,
+            },
+            {
+                id: 80140437,
+                content: "...",
+                voice: "inv/Tuosi/004/C89F8872",
+                npc: 790025,
+                speakerName: "Parsifal",
+                next: 80140438,
+            },
+            {
+                id: 80140438,
+                content:
+                    "Let's wish him well, wherever he is! Maybe he's already found somewhere Charons can stand on stage — like Luca or Aethyrie.",
+                voice: "inv/Tuosi/004/C89F889C",
+                npc: 790026,
+                next: 80140439,
+            },
+            {
+                id: 80140439,
+                content:
+                    "Who knows? Next time we tour those countries, we might find he's already become a superstar, just like Ms Violetta!",
+                voice: "inv/Tuosi/004/C89F88C6",
+                npc: 790026,
+                next: 80140440,
+            },
+            {
+                id: 80140440,
+                content: "Yeah. I hope we get to share the stage with him again someday.",
+                voice: "inv/Tuosi/004/C89F88F0",
+                npc: 790027,
+                next: 80140454,
             },
             {
                 id: 80140402,
@@ -7475,6 +7853,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80240204,
                 content: "Meow—",
                 voice: "inv/Suyi/002/C8DF7878",
+                speakerName: "Inky",
                 next: 80240205,
             },
             {
@@ -7777,6 +8156,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80240304,
                 content: "Meow—",
                 voice: "inv/Suyi/003/C8DF88E0",
+                speakerName: "Inky",
                 next: 80240305,
             },
             {
@@ -8338,6 +8718,222 @@ export const partyTopicData_en: PartyTopic[] = [
                 voice: "inv/Feina/001/C865A5AA",
                 npc: 790017,
                 next: 80050114,
+            },
+            {
+                id: 80050115,
+                content: "It's a bit tricky though... Whew, there it is!",
+                voice: "inv/Feina/001/C865A5FE",
+                npc: 790017,
+                next: 80050116,
+            },
+            {
+                id: 80050116,
+                content: "I had no idea that spent casings could be this fun. Let me see it.",
+                voice: "inv/Feina/001/C865A628",
+                npc: 100001,
+                next: 80050117,
+            },
+            {
+                id: 80050118,
+                content: "Um, it collapsed...",
+                voice: "inv/Feina/001/C865A67C",
+                npc: 100001,
+                next: 80050119,
+            },
+            {
+                id: 80050119,
+                content: "Ah...",
+                voice: "inv/Feina/001/C865A6A6",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050120,
+                        content: "Sorry... please don't cry! I'll make it up to you with something else.",
+                        next: 80050121,
+                    },
+                ],
+            },
+            {
+                id: 80050121,
+                content: "Hmm...",
+                voice: "inv/Feina/001/C865A6FA",
+                npc: 790017,
+                next: 80050122,
+            },
+            {
+                id: 80050122,
+                content:
+                    "Then could you grant me four wishes, {性别:Mr|Miss} Unicorn? They say unicorns make people's wishes come true, and I'm sure you can too!",
+                voice: "inv/Feina/001/C865A724",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050123,
+                        content: "Absolutely, anything within my powers.",
+                        next: 80050126,
+                    },
+                    {
+                        id: 80050124,
+                        content: "Am I being ripped off...?",
+                        next: 80050126,
+                    },
+                    {
+                        id: 80050125,
+                        content: "Isn't the standard three wishes? Why do you get four?",
+                        next: 80050126,
+                    },
+                ],
+            },
+            {
+                id: 80050126,
+                content: "Hehe...",
+                voice: "inv/Feina/001/C865A7CC",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050127,
+                        content: "What's your first wish then?",
+                        next: 80050128,
+                    },
+                ],
+            },
+            {
+                id: 80050128,
+                content:
+                    "I want to learn magic! I know a little bit of the basics, but I don't know how to actually use it... {性别:Mr|Miss} Unicorn, can you teach me?",
+                voice: "inv/Feina/001/C865A820",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050129,
+                        content: "Why don't you ask Outsider to teach you?",
+                        next: 80050130,
+                    },
+                    {
+                        id: 80050132,
+                        content: "I usually charge for lessons.",
+                        next: 80050133,
+                    },
+                ],
+            },
+            {
+                id: 80050130,
+                content:
+                    "He wouldn't... and he wouldn't let me read the magic books either — he put them up on a tall shelf, way out of my reach.",
+                voice: "inv/Feina/001/C865A874",
+                npc: 790017,
+                next: 80050131,
+            },
+            {
+                id: 80050133,
+                content: "Huh? Um... would a big jar of marshmallows cover it?",
+                voice: "inv/Feina/001/C865A8F2",
+                npc: 790017,
+                next: 80050134,
+            },
+            {
+                id: 80050131,
+                content: "I sometimes stack chairs to sneak a book when he's not around — oh, please keep this just between us!",
+                voice: "inv/Feina/001/C865A89E",
+                npc: 790017,
+                next: 80050138,
+            },
+            {
+                id: 80050134,
+                content: "But since it's Fina's wish, let's make it free.",
+                voice: "inv/Feina/001/C865A91C",
+                npc: 100001,
+                next: 80050135,
+            },
+            {
+                id: 80050138,
+                content:
+                    "He always says that learning magic means leaving one's cosy home, away from the warm fireplace, to trudge through the barren, harsh wilderness...",
+                voice: "inv/Feina/001/C865A9C4",
+                npc: 790017,
+                next: 80050139,
+            },
+            {
+                id: 80050135,
+                content: "Yay!",
+                voice: "inv/Feina/001/C865A946",
+                npc: 790017,
+                next: 80050136,
+            },
+            {
+                id: 80050139,
+                content:
+                    "And there will be snow wolves with terrifying green eyes, and swamp witches on brooms, their cloaks dripping with poison.",
+                voice: "inv/Feina/001/C865A9EE",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050140,
+                        content: "He was just exaggerating to frighten you. It's not that scary.",
+                        next: 80050141,
+                    },
+                    {
+                        id: 80050143,
+                        content: "Actually, there are things scarier than snow wolves and swamp witches.",
+                        next: 80050144,
+                    },
+                ],
+            },
+            {
+                id: 80050136,
+                content:
+                    "Thank you so much! Outsider wouldn't teach me... and he wouldn't let me read the magic books either — he put them up on a tall shelf, way out of my reach.",
+                voice: "inv/Feina/001/C865A970",
+                npc: 790017,
+                next: 80050137,
+            },
+            {
+                id: 80050141,
+                content:
+                    "Ah... I knew it! He's worried I might get sick or hurt. But what if I never get better...? I don't want to just lie in bed all day, being a burden to him.",
+                voice: "inv/Feina/001/C865AA42",
+                npc: 790017,
+                next: 80050142,
+            },
+            {
+                id: 80050144,
+                content: "If that's the case... I definitely can't let you go by yourselves. I need to master magic to help you.",
+                voice: "inv/Feina/001/C865AAC0",
+                npc: 790017,
+                next: 80050145,
+            },
+            {
+                id: 80050137,
+                content: "I sometimes stack chairs to sneak a book when he's not around — oh, please keep this just between us!",
+                voice: "inv/Feina/001/C865A99A",
+                npc: 790017,
+                next: 80050138,
+            },
+            {
+                id: 80050142,
+                content: "...I want to be helpful. I don't want to be looked down upon anymore.",
+                voice: "inv/Feina/001/C865AA6C",
+                npc: 790017,
+                next: 80050145,
+            },
+            {
+                id: 80050145,
+                content: "So, could you teach me, please? I promise I won't tell anyone!",
+                voice: "inv/Feina/001/C865AAEA",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050146,
+                        content: "Alright, let's start practising now.",
+                        next: 80050147,
+                    },
+                ],
+            },
+            {
+                id: 80050147,
+                content: "Yay! You're the kindest and sweetest {性别:Mr|Miss} Unicorn in the whole world!",
+                voice: "inv/Feina/001/C865AB3E",
+                npc: 790017,
             },
         ],
     },
@@ -10695,12 +11291,14 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090115,
                 content: "I'll make an offer you can't refuse. Think it over before you respond.",
                 npc: 790052,
+                speakerName: "???",
                 next: 80090116,
             },
             {
                 id: 80090116,
                 content: "What wakes me is business; what about you?",
                 npc: 790052,
+                speakerName: "???",
                 options: [
                     {
                         id: 80090117,
@@ -10718,12 +11316,14 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090118,
                 content: "Hehe, you're so sweet — sweeter than this drink you made!",
                 npc: 790052,
+                speakerName: "???",
                 next: 80090144,
             },
             {
                 id: 80090120,
                 content: "I'm not scared of her! No one can catch Demon Tabethe the Red Hand!",
                 npc: 790052,
+                speakerName: "???",
                 next: 80090144,
             },
             {
@@ -11507,24 +12107,28 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090416,
                 content: "They're still breathing. Both of them are fine — just passed out.",
                 npc: 92301,
+                speakerName: "???",
                 next: 80090417,
             },
             {
                 id: 80090417,
                 content: "Waah... I was so scared... I've warned Tabethe not to put just anything in that drink — it's not safe...",
                 npc: 92301,
+                speakerName: "???",
                 next: 80090418,
             },
             {
                 id: 80090418,
                 content: "Hehehe, maybe it'll mess up their brains and cause some weird side effects!",
                 npc: 92301,
+                speakerName: "???",
                 next: 80090419,
             },
             {
                 id: 80090419,
                 content: "Knock it off! You ghoul!",
                 npc: 92301,
+                speakerName: "???",
                 options: [
                     {
                         id: 80090420,
@@ -11542,12 +12146,14 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090422,
                 content: "Did you hear that...? {nickname} is talking to us.",
                 npc: 92301,
+                speakerName: "???",
                 next: 80090423,
             },
             {
                 id: 80090423,
                 content: "To my knowledge, only Tabethe can hear us speak.",
                 npc: 92301,
+                speakerName: "???",
                 next: 80090424,
             },
             {
@@ -11555,6 +12161,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "...Oh no... This is bad, really bad! I knew it — every time 5 says something bad, it always happens for real! Could you zip it next time? I'm begging you!",
                 npc: 92301,
+                speakerName: "???",
                 options: [
                     {
                         id: 80090425,
@@ -11568,6 +12175,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Um... hello? Yes, we're Tabethe's tentacles. Never thought we'd be having a conversation like this! Life's full of surprises, huh? Haha...",
                 npc: 92301,
+                speakerName: "Tentacle #6",
                 next: 80090427,
             },
             {
@@ -11575,6 +12183,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Um... it might be that drink that caused this situation... We're so sorry... didn't mean to make you chug down something weird...",
                 npc: 92301,
+                speakerName: "Tentacle #2",
                 options: [
                     {
                         id: 80090428,
@@ -11592,6 +12201,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090430,
                 content: "Based on my observations, you're both just reacting to some... special ingredients. A good sleep should fix it!",
                 npc: 92301,
+                speakerName: "Tentacle #3",
                 next: 80090431,
             },
             {
@@ -11599,6 +12209,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Ahem, just so you know — it was under my leadership that we concocted this beverage for Tabethe's unprecedented get-together with you!",
                 npc: 92301,
+                speakerName: "Tentacle #3",
                 next: 80090432,
             },
             {
@@ -11606,24 +12217,28 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Hmm? I thought it was because Tabethe knew nothing about making drinks, so she just threw in some pretty mushroom slices, which led to this.",
                 npc: 92301,
+                speakerName: "Tentacle #6",
                 next: 80090433,
             },
             {
                 id: 80090433,
                 content: "Hehe, keep acting all smug, 3, and you might find yourself part of the next drink, hehehe.",
                 npc: 92301,
+                speakerName: "Tentacle #5",
                 next: 80090434,
             },
             {
                 id: 80090434,
                 content: "Ah, that sounds horrible! Waah!",
                 npc: 92301,
+                speakerName: "Tentacle #2",
                 next: 80090435,
             },
             {
                 id: 80090435,
                 content: "Please, you guys are too loud... Aren't you tired? And don't scare {nickname}...",
                 npc: 92301,
+                speakerName: "Tentacle #4",
                 options: [
                     {
                         id: 80090436,
@@ -11637,6 +12252,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "That's one way to see it. Though no one knows how long the drink's effects will last... Actually, there's quite a lot we'd like to talk to you about! Maybe this is the chance... 1, you go first!",
                 npc: 92301,
+                speakerName: "Tentacle #6",
                 next: 80090438,
             },
             {
@@ -11644,6 +12260,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "...My sentience came into being on the ocean, right after the shipwreck. I kept Tabethe company during those dark times in the sea. She got through it by talking to me.",
                 npc: 92301,
+                speakerName: "Tentacle #1",
                 next: 80090439,
             },
             {
@@ -11651,6 +12268,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "I... I woke up when Tabethe had just been taken in by the orphanage. The staff there were mean to her; she was scared, but wouldn't show weakness in front of anyone. At night, she'd cling on to me, shivering...",
                 npc: 92301,
+                speakerName: "Tentacle #2",
                 next: 80090440,
             },
             {
@@ -11658,12 +12276,14 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "I myself joined this esteemed group in the orphanage's kitchen. In a dire moment, it was under my command that we managed to evade the patrolling guards and secure half a loaf of bread!",
                 npc: 92301,
+                speakerName: "Tentacle #3",
                 next: 80090441,
             },
             {
                 id: 80090441,
                 content: "And as for my manner of speaking, it's a perfect impersonation of the head of the orphanage.",
                 npc: 92301,
+                speakerName: "Tentacle #3",
                 next: 80090442,
             },
             {
@@ -11671,6 +12291,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Yawn... I awoke the night we escaped the orphanage. The sense of relief was so heavy... that once we were safe, I fell asleep right away on the grass with her...",
                 npc: 92301,
+                speakerName: "Tentacle #4",
                 next: 80090443,
             },
             {
@@ -11678,6 +12299,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "And then there's me, hehehe! I'm Tabethe's best partner in crime! The thrill of all sorts of heists is just the best! Woo-hoo!",
                 npc: 92301,
+                speakerName: "Tentacle #5",
                 next: 80090444,
             },
             {
@@ -11685,6 +12307,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Get ahold of yourself! Sorry, this kid is a bit of a wild card. Ahem, I'm the youngest, and only recently became sentient.",
                 npc: 92301,
+                speakerName: "Tentacle #6",
                 next: 80090445,
             },
             {
@@ -11692,12 +12315,14 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Actually, I woke up once a long time ago. But then that little fish vendor girl got separated from Tabethe, which made her very sad. She didn't talk about it, but it hit her really hard and even affected me — I fell back into slumber, immersed in those memories.",
                 npc: 92301,
+                speakerName: "Tentacle #6",
                 next: 80090446,
             },
             {
                 id: 80090446,
                 content: "Until she met another person who also truly cherishes her — yes, it was because of you that I woke up again.",
                 npc: 92301,
+                speakerName: "Tentacle #6",
                 next: 80090447,
             },
             {
@@ -11705,6 +12330,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Thank you for taking care of Tabethe. Your kindness woke me from my dream. And it was on my suggestion that she decided to make this drink as a thank you.",
                 npc: 92301,
+                speakerName: "Tentacle #6",
                 next: 80090448,
             },
             {
@@ -11712,12 +12338,14 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "But I didn't expect her to go this overboard! She knows nothing about mixing drinks and just tossed in whatever looked good — and you two, 3 and 5! You two egged her on!",
                 npc: 92301,
+                speakerName: "Tentacle #6",
                 next: 80090449,
             },
             {
                 id: 80090449,
                 content: "We're so sorry...",
                 npc: 92301,
+                speakerName: "Tentacle #6",
                 options: [
                     {
                         id: 80090450,
@@ -11730,18 +12358,21 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80090451,
                 content: "...",
                 npc: 92301,
+                speakerName: "Tentacle #1",
                 next: 80090452,
             },
             {
                 id: 80090452,
                 content: "Tabethe's waking up. How do you feel?",
                 npc: 92301,
+                speakerName: "Tentacle #1",
                 next: 80090453,
             },
             {
                 id: 80090453,
                 content: "Ah, already?! I haven't finished my speech...",
                 npc: 92301,
+                speakerName: "Tentacle #3",
                 options: [
                     {
                         id: 80090454,
@@ -12751,6 +13382,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Ugh... what a nuisance. Truly, what a wretched nuisance!",
                 voice: "inv/Fushu/003/C8C5D208",
                 npc: 790054,
+                speakerName: "???",
                 next: 80200219,
             },
             {
@@ -12759,6 +13391,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Told myself again and again this morning — don't snap, don't prod her. And yet what happened? Didn't even get through our breakfast before I provoked that stubborn mule again!",
                 voice: "inv/Fushu/003/C8C5D232",
                 npc: 790054,
+                speakerName: "???",
                 next: 80200220,
             },
             {
@@ -12767,6 +13400,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Fufeng, honestly... must you always rise to it? Prickly as she is, she's still your little sister. It's not as though you can simply turn your back on her. So why keep needling her?",
                 voice: "inv/Fushu/003/C8C5D25C",
                 npc: 790054,
+                speakerName: "???",
                 next: 80200221,
             },
             {
@@ -13559,6 +14193,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80110111,
                 content: "You've got it wrong. I just saw you and thought I'd invite you for a drink.",
                 voice: "inv/Linen/001/C88C1916",
+                speakerName: "{nickname}",
                 next: 80110112,
             },
             {
@@ -13656,6 +14291,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80110127,
                 content: "I thought bad-mouthing your superiors can be considered as something wrong. Wouldn't that get you zapped?",
                 voice: "inv/Linen/001/C88C1BB6",
+                speakerName: "{nickname}",
                 next: 80110128,
             },
             {
@@ -13690,6 +14326,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80110131,
                 content: "Anyway, I find you quite... different.",
                 voice: "inv/Linen/001/C88C1C5E",
+                speakerName: "{nickname}",
                 next: 80110132,
             },
             {
@@ -13697,6 +14334,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "I thought as a Hyperborean officer, you would have some... belief in the Empire. Like, talk about honour, loyalty, stuff like that...",
                 voice: "inv/Linen/001/C88C1C88",
+                speakerName: "{nickname}",
                 next: 80110133,
             },
             {
@@ -13992,6 +14630,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80110223,
                 content: "......",
                 voice: "inv/Linen/002/C88C2B76",
+                speakerName: "{nickname}",
                 next: 80110224,
             },
             {
@@ -14155,6 +14794,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80110111,
                 content: "You've got it wrong. I just saw you and thought I'd invite you for a drink.",
                 voice: "inv/Linen/001/C88C1916",
+                speakerName: "{nickname}",
                 next: 80110112,
             },
             {
@@ -14252,6 +14892,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80110127,
                 content: "I thought bad-mouthing your superiors can be considered as something wrong. Wouldn't that get you zapped?",
                 voice: "inv/Linen/001/C88C1BB6",
+                speakerName: "{nickname}",
                 next: 80110128,
             },
             {
@@ -14286,6 +14927,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80110131,
                 content: "Anyway, I find you quite... different.",
                 voice: "inv/Linen/001/C88C1C5E",
+                speakerName: "{nickname}",
                 next: 80110132,
             },
             {
@@ -14293,6 +14935,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "I thought as a Hyperborean officer, you would have some... belief in the Empire. Like, talk about honour, loyalty, stuff like that...",
                 voice: "inv/Linen/001/C88C1C88",
+                speakerName: "{nickname}",
                 next: 80110133,
             },
             {
@@ -14698,6 +15341,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "This should be a world where you can return home whenever you want... Perhaps our generation should try to make it one.",
                 voice: "inv/Linen/003/C88C3D2E",
+                speakerName: "{nickname}",
                 next: 80110332,
             },
             {
@@ -14719,12 +15363,14 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80110334,
                 content: "That could happen.",
                 voice: "inv/Linen/003/C88C3DAC",
+                speakerName: "{nickname}",
                 next: 80110335,
             },
             {
                 id: 80110335,
                 content: "Even if you can't stop the snow in Icelake, you can at least shovel it away and make snowmen out of it, right?",
                 voice: "inv/Linen/003/C88C3DD6",
+                speakerName: "{nickname}",
                 next: 80110336,
             },
             {
@@ -14732,6 +15378,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "You can at least go to your friend and tell her you remember your childhood dreams, even if they're broken now. You should be able to knock on the door of your family home and tell your folks that you'll always miss them no matter who you've become. That part of you never changes.",
                 voice: "inv/Linen/003/C88C3E00",
+                speakerName: "{nickname}",
                 next: 80110337,
             },
             {
@@ -15604,6 +16251,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Oh, for crying out loud — move over. Didn't you swear you wouldn't chicken out this time? That you'd pitch our toys to Icelake?",
                 voice: "inv/Yeer/001/C898E9D8",
                 npc: 93103,
+                speakerName: "???",
                 next: 80130109,
             },
             {
@@ -15611,6 +16259,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "And now look at you! Ugh, looks like I'll have to bail you out again.",
                 voice: "inv/Yeer/001/C898EA02",
                 npc: 93103,
+                speakerName: "???",
                 next: 80130110,
             },
             {
@@ -15626,6 +16275,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Don't be a chicken. {性别：He|She}'s not gonna eat you alive. Just talk to {性别：him|her} like you talk to the kids at our shop.",
                 voice: "inv/Yeer/001/C898EA56",
                 npc: 93103,
+                speakerName: "???",
                 options: [
                     {
                         id: 801301111,
@@ -15682,6 +16332,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Let's be real — Yale freezes halfway through his pitch more often than not, so I end up handling the talking too, like today.",
                 voice: "inv/Yeer/001/C898EB52",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130118,
             },
             {
@@ -15690,6 +16341,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "He already mentioned we sell explosive little toys. Last month's top three sellers were: Boom-Blimp, Whizpop Firework, and Kaboom-Spinner.",
                 voice: "inv/Yeer/001/C898EB7C",
                 npc: 93103,
+                speakerName: "Oliver",
                 options: [
                     {
                         id: 801301181,
@@ -15708,6 +16360,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Tsk, hear me out first — I haven't even gotten to the real boom yet!",
                 voice: "inv/Yeer/001/C898EBA6",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130121,
             },
             {
@@ -15715,6 +16368,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Heh... so you're interested, huh? Well, those were just the warm-up. What we really want to show you is this—",
                 voice: "inv/Yeer/001/C898EBD0",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130121,
             },
             {
@@ -15723,6 +16377,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Looks like an ordinary alarm clock, right? But just one of these — and boom, all your troubles go up in smoke. Introducing: the Starshatterer.",
                 voice: "inv/Yeer/001/C898EBFA",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130122,
             },
             {
@@ -15731,6 +16386,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Word about you's even made it to Scarletriver. Bet an awesome Phoxhunter like you could use a little extra firepower.",
                 voice: "inv/Yeer/001/C898EC24",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130123,
             },
             {
@@ -15753,6 +16409,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Ugh. How many times do I have to say it? People who buy bombs just want a good BOOM, not some cutesy nonsense.",
                 voice: "inv/Yeer/001/C898ECA2",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130126,
             },
             {
@@ -15768,6 +16425,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "I... I only did that so you wouldn't botch it, all right? If the logo's ugly, no one's gonna buy them — duh!",
                 voice: "inv/Yeer/001/C898ECF6",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130128,
             },
             {
@@ -15775,6 +16433,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Ahem. Anyway — that's our big sales pitch. If you'd like to place an order, just send us a note.",
                 voice: "inv/Yeer/001/C898ED20",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130129,
             },
             {
@@ -15782,6 +16441,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "But make sure you write Tot Poppers on your order, not Starshatterers. Otherwise... we'll both be in hot water.",
                 voice: "inv/Yeer/001/C898ED4A",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130130,
             },
             {
@@ -16145,6 +16805,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Tch. I'm not that idiot.",
                 voice: "inv/Yeer/003/C89909D6",
                 npc: 93103,
+                speakerName: '"Yale"',
                 next: 80130305,
             },
             {
@@ -16152,6 +16813,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: 'Duh. I\'m done playing "say hello to my talking bomb."',
                 voice: "inv/Yeer/003/C8990A00",
                 npc: 93103,
+                speakerName: '"Yale"',
                 next: 80130305,
             },
             {
@@ -16159,6 +16821,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Name's Oliver. Oliver Kuzka. Not some fantastic creature holed up inside a bomb.",
                 voice: "inv/Yeer/003/C8990A2A",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130306,
             },
             {
@@ -16167,6 +16830,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "You probably haven't heard the name. Doesn't matter. Just remember it. If you ever swing by Dismania, head fifteen kilometres out from the north gate. You'll find a ruined fortress. My signature work.",
                 voice: "inv/Yeer/003/C8990A54",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130307,
             },
             {
@@ -16174,6 +16838,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "As for why I'm here... That depends. Tell me — what did Yale say to you last time he was here?",
                 voice: "inv/Yeer/003/C8990A7E",
                 npc: 93103,
+                speakerName: "Oliver",
                 options: [
                     {
                         id: 801303071,
@@ -16192,6 +16857,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Hah. Tougher than you look — I like that. You only play along when asked nicely, huh? Guess we're the same type.",
                 voice: "inv/Yeer/003/C8990AA8",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130310,
             },
             {
@@ -16199,6 +16865,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Fair enough. I like straight talk.",
                 voice: "inv/Yeer/003/C8990AD2",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130310,
             },
             {
@@ -16206,6 +16873,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "The truth, then. But fair warning — it's a long story.",
                 voice: "inv/Yeer/003/C8990AFC",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130311,
             },
             {
@@ -16213,6 +16881,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Like I said — I'm Oliver Kuzka, the real owner of this body. And the best damn bomb maker you'll ever meet.",
                 voice: "inv/Yeer/003/C8990B26",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130312,
             },
             {
@@ -16221,6 +16890,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Back then, I was barely more than a kid myself. Thought I could blow the whole Empire sky-high with my little toys. Never even stopped to think what'd happen if I got caught... or maybe I just figured it wouldn't happen.",
                 voice: "inv/Yeer/003/C8990B50",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130313,
             },
             {
@@ -16228,6 +16898,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "So when the Legion finally bagged me, I had no clue what was coming.",
                 voice: "inv/Yeer/003/C8990B7A",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130314,
             },
             {
@@ -16235,6 +16906,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "They hauled me off to some Spathatoi lab and sat me in front of this kindly looking old man called Jones.",
                 voice: "inv/Yeer/003/C8990BA4",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130315,
             },
             {
@@ -16243,6 +16915,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     'Spoke real gentle, that one — kept saying crime was just "a mental hiccup" curable with right medication. Rubbish.',
                 voice: "inv/Yeer/003/C8990BCE",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130316,
             },
             {
@@ -16251,6 +16924,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "They didn't starve me, not really. Fed me fine, even. But they did force drugs down my throat and ran endless \"check-ups.\" The stuff didn't taste bad, but after every dose, my thoughts would slow to a crawl... and little by little, my memories started slipping away.",
                 voice: "inv/Yeer/003/C8990BF8",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130317,
             },
             {
@@ -16259,6 +16933,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "At first, I still had enough fire left to cuss that shady codger out — but the more meds I swallowed, the harder it was to remember the curse words.",
                 voice: "inv/Yeer/003/C8990C22",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130318,
             },
             {
@@ -16266,6 +16941,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Someone once said: a man who never swears is a man who's lost his voice.",
                 voice: "inv/Yeer/003/C8990C4C",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130319,
             },
             {
@@ -16274,6 +16950,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "And that was only the beginning. Slowly, I forgot how to walk straight, how to grip things — even how to breathe.",
                 voice: "inv/Yeer/003/C8990C76",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130320,
             },
             {
@@ -16282,6 +16959,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "I knew there was something wrong with those drugs. But every time they poured something down my throat, I couldn't even remember how to spit it out. All I could do was sit there and watch my memories dissolve. I'd have preferred being blown to bits.",
                 voice: "inv/Yeer/003/C8990CA0",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130321,
             },
             {
@@ -16290,6 +16968,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     'In the end, all that was left of me was a shadow — watching some puppet called "Oliver Kuzka" move in the mirror, without a clue who the hell he was anymore.',
                 voice: "inv/Yeer/003/C8990CCA",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130322,
             },
             {
@@ -16297,6 +16976,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: 'Until one day, that old bastard walked in, stared at my body, and said: "Your name is Yale."',
                 voice: "inv/Yeer/003/C8990CF4",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130323,
             },
             {
@@ -16304,6 +16984,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "So he's Yale... then who the hell am I?",
                 voice: "inv/Yeer/003/C8990D1E",
                 npc: 93103,
+                speakerName: "Oliver",
                 options: [
                     {
                         id: 801303231,
@@ -16322,6 +17003,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Figures. Took me a while, too. Jones... he created a new alter ego inside my body.",
                 voice: "inv/Yeer/003/C8990D48",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130326,
             },
             {
@@ -16330,6 +17012,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Too right. He created a new alter ego inside my body — meant to overwrite the Charon criminal named Oliver Kuzka.",
                 voice: "inv/Yeer/003/C8990D72",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130326,
             },
             {
@@ -16338,6 +17021,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "But I'll give it to him — without Yale, I'd have lost control of my body forever. No matter how hard I fought, I couldn't move a finger.",
                 voice: "inv/Yeer/003/C8990D9C",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130327,
             },
             {
@@ -16346,6 +17030,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "But my thoughts could get through to him. Every time I so much as thought \"You're a knock-off,\" he'd flinch like a startled quail — eyes darting, shoulders hunched.",
                 voice: "inv/Yeer/003/C8990DC6",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130328,
             },
             {
@@ -16354,6 +17039,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "You can imagine how much I hated him back then. I spent every waking second hurling every insult I could still remember at him.",
                 voice: "inv/Yeer/003/C8990DF0",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130329,
             },
             {
@@ -16361,6 +17047,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "To him, I must have been just a crazy voice in his head.",
                 voice: "inv/Yeer/003/C8990E1A",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130330,
             },
             {
@@ -16368,6 +17055,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "He tried to shut me out, of course. But how could he? That body was mine.",
                 voice: "inv/Yeer/003/C8990E44",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130331,
             },
             {
@@ -16375,6 +17063,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: 'Then that old bastard caught on. He asked Yale if he\'d ever heard the name "Oliver."',
                 voice: "inv/Yeer/003/C8990E6E",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130332,
             },
             {
@@ -16382,6 +17071,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Yale denied it. But Jones just kept staring into his eyes... like he could see me hiding behind them.",
                 voice: "inv/Yeer/003/C8990E98",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130333,
             },
             {
@@ -16390,6 +17080,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "After that, Jones wheeled in a record player. Each time the needle dropped and the music started, I blacked out— like someone snuffing a candle.",
                 voice: "inv/Yeer/003/C8990EC2",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130334,
             },
             {
@@ -16397,6 +17088,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "I knew the record player and the music was his new trick to wipe me out, so Yale could take the body for good.",
                 voice: "inv/Yeer/003/C8990EEC",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130335,
             },
             {
@@ -16405,6 +17097,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Caught in that endless loop of blackouts and brief flashes of waking, I figured I'd lose everything — memories, thoughts, even the last scraps of who I was. But then, one day, I heard Yale's voice, telling me he didn't want to listen to the music any more.",
                 voice: "inv/Yeer/003/C8990F16",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130336,
             },
             {
@@ -16413,6 +17106,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "That's when it hit me: the \"knock-off\" I kept abusing... was a real person. So we made a deal. Put together a plan. And broke out of that old bastard's lab for good.",
                 voice: "inv/Yeer/003/C8990F40",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130337,
             },
             {
@@ -16421,6 +17115,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "We made it to Scarletriver and opened a toy shop. He named it Snap 'n' Spark — stupid name, if you ask me — and we never spoke of the lab again.",
                 voice: "inv/Yeer/003/C8990F6A",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130338,
             },
             {
@@ -16429,6 +17124,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Couple days ago, I blacked out again — that same old, familiar feeling. Figured he must've dosed himself to shut me down. No idea what he got up to while I was under, so I asked around. Turns out he'd taken a trip to Icelake.",
                 voice: "inv/Yeer/003/C8990F94",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130339,
             },
             {
@@ -16437,6 +17133,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Thing is, I know him better than anyone — timid, shy... but too kind and soft for his own good. Definitely not the type to pull a stunt behind my back — not unless something was eating at him.",
                 voice: "inv/Yeer/003/C8990FBE",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130340,
             },
             {
@@ -16444,6 +17141,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "So I took the meds myself, knocked him out, and came here. I need to know what he said behind my back.",
                 voice: "inv/Yeer/003/C8990FE8",
                 npc: 93103,
+                speakerName: "Oliver",
                 options: [
                     {
                         id: 801303401,
@@ -16464,6 +17162,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "So... he drugged me, came here, and decided to give the body back to me!?",
                 voice: "inv/Yeer/003/C899103C",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130343,
             },
             {
@@ -16471,6 +17170,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "That... that idiot... that hopeless, soft-hearted wimp!",
                 voice: "inv/Yeer/003/C8991066",
                 npc: 93103,
+                speakerName: "Oliver",
                 options: [
                     {
                         id: 801303431,
@@ -16489,6 +17189,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "...Hilarious. What I need to do now is wait for him to wake up, so that we can sort all this out.",
                 voice: "inv/Yeer/003/C8991090",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130346,
             },
             {
@@ -16496,6 +17197,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Maybe. Maybe not. Either way, I'm staying put till he wakes, and we'll sort it out.",
                 voice: "inv/Yeer/003/C89910BA",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130346,
             },
             {
@@ -16504,6 +17206,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Thanks, by the way, for hearing me out. When Yale wakes up... if he turns out to be too stubborn, I might need you to back me up.",
                 voice: "inv/Yeer/003/C89910E4",
                 npc: 93103,
+                speakerName: "Oliver",
                 next: 80130347,
             },
             {
@@ -16567,6 +17270,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Seriously? The jig's up — I already told {性别：him|her} everything, you idiot.",
                 voice: "inv/Yeer/004/C8991ABC",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130407,
             },
             {
@@ -16581,6 +17285,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Yeah. Been here the whole time.",
                 voice: "inv/Yeer/004/C8991B10",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130409,
             },
             {
@@ -16595,6 +17300,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "...",
                 voice: "inv/Yeer/004/C8991B64",
                 npc: 790024,
+                speakerName: "Oliver",
                 options: [
                     {
                         id: 801304101,
@@ -16620,6 +17326,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "I'm good. He's the one choking on words.",
                 voice: "inv/Yeer/004/C8991C0C",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130415,
             },
             {
@@ -16627,6 +17334,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Don't be stupid!",
                 voice: "inv/Yeer/004/C8991BB8",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130413,
             },
             {
@@ -16641,6 +17349,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "...Just waiting for someone to say sorry, that's all.",
                 voice: "inv/Yeer/004/C8991BE2",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130415,
             },
             {
@@ -16717,6 +17426,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Alright, enough.",
                 voice: "inv/Yeer/004/C8991DDA",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130426,
             },
             {
@@ -16725,6 +17435,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Can't believe someone wearing my face could say soppy stuff like that. Maybe that old bastard really was a genius after all.",
                 voice: "inv/Yeer/004/C8991E04",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130427,
             },
             {
@@ -16733,6 +17444,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "I get it. I don't like owing people either. When you asked Jones to remove that damn record player, I figured you'd already paid me back half a life.",
                 voice: "inv/Yeer/004/C8991E2E",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130428,
             },
             {
@@ -16740,6 +17452,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Then we busted out together — call it even.",
                 voice: "inv/Yeer/004/C8991E58",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130429,
             },
             {
@@ -16748,6 +17461,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "But now you're back in my debt. While you were out these last few days, I had to deal with a mob of screeching brats in Snap 'n' Spark.",
                 voice: "inv/Yeer/004/C8991E82",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130430,
             },
             {
@@ -16756,6 +17470,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "They all came asking for you. I had to pretend to be you — kept my voice down, smiled like an idiot, played nice until they left.",
                 voice: "inv/Yeer/004/C8991EAC",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130431,
             },
             {
@@ -16764,6 +17479,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "And after that, I had to come all the way to Icelake, and dig through a pile of painful memories just to bring {nickname} up to speed.",
                 voice: "inv/Yeer/004/C8991ED6",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130432,
             },
             {
@@ -16771,6 +17487,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "That doesn't vanish just because you hand the body over.",
                 voice: "inv/Yeer/004/C8991F00",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130433,
             },
             {
@@ -16778,6 +17495,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Most importantly — you never once asked how I felt.",
                 voice: "inv/Yeer/004/C8991F2A",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130434,
             },
             {
@@ -16786,6 +17504,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "To me, Yale's not just some guy who owes me. He's the idiot who saved my life. He's my best friend. And Snap 'n' Spark belongs to him just as much as it does to me.",
                 voice: "inv/Yeer/004/C8991F54",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130435,
             },
             {
@@ -16794,6 +17513,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "So quit apologising. If you mean it, help me run the shop properly. You'll have plenty of chances to make it up to me.",
                 voice: "inv/Yeer/004/C8991F7E",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130436,
             },
             {
@@ -16823,6 +17543,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Fine by me. We'll go together. But promise me — don't go getting soft again, saying you wanna hand the body over after every pretty view.",
                 voice: "inv/Yeer/004/C8992026",
                 npc: 790024,
+                speakerName: "Oliver",
                 next: 80130440,
             },
             {
@@ -19874,6 +20595,174 @@ export const partyTopicData_en: PartyTopic[] = [
                 next: 80120290,
             },
             {
+                id: 80120210,
+                content:
+                    "...Another music score? Kossak said he'd take all the valuable ones with him. But if this one wasn't important to him, why did he go through the trouble of hiding it so carefully?",
+                voice: "inv/Maer/002/C89291F4",
+                npc: 790019,
+                next: 80120211,
+            },
+            {
+                id: 80120211,
+                content: 'Lemme see what it\'s about... "Demons Broken Loose"? Never heard of this piece before...',
+                voice: "inv/Maer/002/C892921E",
+                npc: 790019,
+                options: [
+                    {
+                        id: 801202111,
+                        content: "There's a note tucked in here. What does it say?",
+                        next: 80120212,
+                    },
+                ],
+            },
+            {
+                id: 80120212,
+                content:
+                    '"Hello there, future me. How are you? Are you happy with your life now? Just a heads up — I\'m about to take a risky leap:"',
+                voice: "inv/Maer/002/C8929248",
+                npc: 790019,
+                next: 80120213,
+            },
+            {
+                id: 80120213,
+                content:
+                    "\"I'm writing a composition about our land's most overlooked community — Charons. Sounds like a great idea, doesn't it?\"",
+                voice: "inv/Maer/002/C8929272",
+                npc: 790019,
+                next: 80120214,
+            },
+            {
+                id: 80120214,
+                content:
+                    "\"I don't know what will come of it after it's published. Hopefully, it'll earn me some recognition and maybe even get people to sympathize with the Charon community. But it's more likely that the old guard will scold me for 'sullying music.'\"",
+                voice: "inv/Maer/002/C892929C",
+                npc: 790019,
+                next: 80120215,
+            },
+            {
+                id: 80120215,
+                content: '"I might regret this decision someday, but at the moment, I believe in what I\'m doing."',
+                voice: "inv/Maer/002/C89292C6",
+                npc: 790019,
+                next: 80120216,
+            },
+            {
+                id: 80120216,
+                content:
+                    '"So, I\'m leaving a copy here, just in case the cold shoulder — or those old guard bigots — end up destroying my hard work."',
+                voice: "inv/Maer/002/C89292F0",
+                npc: 790019,
+                next: 80120217,
+            },
+            {
+                id: 80120217,
+                content:
+                    "\"I really hope that by the time you read this letter, you'll hear Charons singing this song outside your window. And I hope you'll be able to smile at life, like I'm doing right now.\"",
+                voice: "inv/Maer/002/C892931A",
+                npc: 790019,
+                next: 80120218,
+            },
+            {
+                id: 80120218,
+                content: "...",
+                voice: "inv/Maer/002/C8929344",
+                npc: 790019,
+                options: [
+                    {
+                        id: 801202181,
+                        content: "Time has changed him after all.",
+                        next: 80120219,
+                    },
+                    {
+                        id: 801202182,
+                        content: "Maybe he never really changed. That's why he left this score behind on purpose.",
+                        next: 80120220,
+                    },
+                ],
+            },
+            {
+                id: 80120219,
+                content: "That Kossak... he was really a decent fellow back then.",
+                voice: "inv/Maer/002/C892936E",
+                npc: 790019,
+                next: 80120222,
+            },
+            {
+                id: 80120220,
+                content:
+                    'Hmm... You might be right. He didn\'t care about most of his music scores, but he was awfully sure that his most important pieces had been "well secured where they belong"...',
+                voice: "inv/Maer/002/C8929398",
+                npc: 790019,
+                next: 80120221,
+            },
+            {
+                id: 80120222,
+                content: "The lyrics are really something... I wonder what this song will sound like.",
+                voice: "inv/Maer/002/C89293EC",
+                npc: 790019,
+                next: 80120223,
+            },
+            {
+                id: 80120221,
+                content:
+                    'So maybe, just maybe, this score was the one he cherished most. And the "right place" for it was in the hands of a Charon — because it was written for them.',
+                voice: "inv/Maer/002/C89293C2",
+                npc: 790019,
+                next: 80120222,
+            },
+            {
+                id: 80120223,
+                content: "Alright — I've made up my mind!",
+                voice: "inv/Maer/002/C8929416",
+                npc: 790019,
+                next: 80120224,
+            },
+            {
+                id: 80120224,
+                content:
+                    "Whether Kossak forgot about this score or left it behind on purpose, he trusted me to handle his stuff, so I'm going to take it seriously.",
+                voice: "inv/Maer/002/C8929440",
+                npc: 790019,
+                next: 80120225,
+            },
+            {
+                id: 80120225,
+                content:
+                    "Come on, {nickname}, let's head over to Ms Camilla's tavern. I think she can read music. I'm going to ask her to teach me this song.",
+                voice: "inv/Maer/002/C892946A",
+                npc: 790019,
+                next: 80120226,
+            },
+            {
+                id: 80120226,
+                content:
+                    "Once I've learned it, I'll teach it to all the Charons in Icelake. I'll tell them it's a song written especially for us by a respected musician.",
+                voice: "inv/Maer/002/C8929494",
+                npc: 790019,
+                next: 80120227,
+            },
+            {
+                id: 80120227,
+                content: "That way, this song won't end up like his discarded drafts, tossed into the fire and burned to ashes.",
+                voice: "inv/Maer/002/C89294BE",
+                npc: 790019,
+                next: 80120228,
+            },
+            {
+                id: 80120228,
+                content:
+                    "Who knows? Maybe one day, this song will reach the capital, so he'll hear Charons singing it outside his window. But even if that won't happen, it doesn't matter. I'll have done my job—",
+                voice: "inv/Maer/002/C89294E8",
+                npc: 790019,
+                next: 80120229,
+            },
+            {
+                id: 80120229,
+                content: "Bringing forgotten treasures back into the light and letting their value be seen — that's my mission!",
+                voice: "inv/Maer/002/C8929512",
+                npc: 790019,
+            },
+            {
                 id: 80120230,
                 content: 'Later, according to Camilla, "Demons Broken Loose" is indeed a brilliant piece, and quite a challenging one.',
                 voice: "inv/Maer/002/C892953C",
@@ -21909,6 +22798,11 @@ export const partyTopicData_en: PartyTopic[] = [
                 next: 80230102,
             },
             {
+                id: 80230102,
+                voice: "inv/Zhiliu/001/C8D8FF1C",
+                next: 80230103,
+            },
+            {
                 id: 80230103,
                 content:
                     "I am the current High Chancellor of Loongyuan, presently serving with the Ministry of Rites. By Taihao's decree, I am here to examine your spirit, judgment, and resolve.",
@@ -22038,6 +22932,11 @@ export const partyTopicData_en: PartyTopic[] = [
                 voice: "inv/Zhiliu/001/C8D901E6",
                 npc: 240071,
                 next: 80230120,
+            },
+            {
+                id: 80230120,
+                voice: "inv/Zhiliu/001/C8D90210",
+                next: 80230121,
             },
             {
                 id: 80230121,
@@ -22199,6 +23098,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "The Nine Chapters of Dafeng made a mistake — an innocent person was condemned! I demand justice!",
                 voice: "inv/Zhiliu/002/C8D90F5A",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230202,
             },
             {
@@ -22206,6 +23106,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Please, sir, please ma'am — just hear me out... it'll only take a few moments of your time...",
                 voice: "inv/Zhiliu/002/C8D90F84",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230203,
             },
             {
@@ -22213,7 +23114,13 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Please... I'll be concise...",
                 voice: "inv/Zhiliu/002/C8D90FAE",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230204,
+            },
+            {
+                id: 80230204,
+                voice: "inv/Zhiliu/002/C8D90FD8",
+                next: 80230205,
             },
             {
                 id: 80230205,
@@ -22227,6 +23134,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "—!",
                 voice: "inv/Zhiliu/002/C8D9102C",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230207,
             },
             {
@@ -22235,6 +23143,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Ma'am... it started when I fell gravely ill. A physician from Zesheng Pharmacy saved my life — and she didn't even take a single coin. But... she was condemned to death by a Bi'an!",
                 voice: "inv/Zhiliu/002/C8D91056",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230208,
             },
             {
@@ -22243,6 +23152,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "I'm begging you... at least clear her name! She was a good physician who only ever tried to save lives. The Nine Chapters of Dafeng judged that her medicine harmed me, but in truth, it was only a temporary side effect!",
                 voice: "inv/Zhiliu/002/C8D91080",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230209,
             },
             {
@@ -22251,6 +23161,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "My illness was complicated. No one would take my case — every physician I went to turned me away. Only she dared suggest a desperate measure.",
                 voice: "inv/Zhiliu/002/C8D910AA",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230210,
             },
             {
@@ -22259,6 +23170,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "She told me all the possible risks — that there could be convulsions, even brief stoppages of breathing. I told her I was willing to take the risk. I just... never thought it would cost her her life.",
                 voice: "inv/Zhiliu/002/C8D910D4",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230211,
             },
             {
@@ -22274,6 +23186,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Exactly! I'm standing right here, aren't I? The dead don't rise and walk again.",
                 voice: "inv/Zhiliu/002/C8D91128",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230213,
             },
             {
@@ -22281,6 +23194,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "I lived... and the person who saved me died for it. I... I can't accept that.",
                 voice: "inv/Zhiliu/002/C8D91152",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230214,
             },
             {
@@ -22295,6 +23209,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Thank you, ma'am... thank you truly.",
                 voice: "inv/Zhiliu/002/C8D911A6",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230216,
             },
             {
@@ -22303,6 +23218,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "...I know it's almost impossible to right this wrong. There's probably nothing you can do to change it. I've stood here for days, but you're the only one who stopped.",
                 voice: "inv/Zhiliu/002/C8D911D0",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230217,
             },
             {
@@ -22310,6 +23226,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Even if nothing comes of this... thank you for your kindness.",
                 voice: "inv/Zhiliu/002/C8D911FA",
                 npc: 790077,
+                speakerName: "Girl Seeking Justice",
                 next: 80230218,
             },
             {
@@ -22318,6 +23235,11 @@ export const partyTopicData_en: PartyTopic[] = [
                 voice: "inv/Zhiliu/002/C8D91224",
                 npc: 790076,
                 next: 80230219,
+            },
+            {
+                id: 80230219,
+                voice: "inv/Zhiliu/002/C8D9124E",
+                next: 80230220,
             },
             {
                 id: 80230220,
@@ -22415,6 +23337,11 @@ export const partyTopicData_en: PartyTopic[] = [
                 next: 80230233,
             },
             {
+                id: 80230233,
+                voice: "inv/Zhiliu/002/C8D9149A",
+                next: 80230234,
+            },
+            {
                 id: 80230234,
                 content: "Ma'am... you came back!",
                 voice: "inv/Zhiliu/002/C8D914C4",
@@ -22504,6 +23431,11 @@ export const partyTopicData_en: PartyTopic[] = [
                 next: 80230246,
             },
             {
+                id: 80230246,
+                voice: "inv/Zhiliu/002/C8D916BC",
+                next: 80230247,
+            },
+            {
                 id: 80230247,
                 content:
                     "Chancellor Zhiliu! You handled that effortlessly — with just a few words, you even had her withdraw her petition. That was impressive. How did you do it? What's your secret?",
@@ -22527,10 +23459,16 @@ export const partyTopicData_en: PartyTopic[] = [
                 next: 80230250,
             },
             {
+                id: 80230250,
+                voice: "inv/Zhiliu/002/C8D91764",
+                next: 80230251,
+            },
+            {
                 id: 80230251,
                 content: "You know... I heard Miss Zhiliu was once wronged by the Nine Chapters herself.",
                 voice: "inv/Zhiliu/002/C8D9178E",
                 npc: 790080,
+                speakerName: "Whispers from the Crowd",
                 next: 80230252,
             },
             {
@@ -22539,6 +23477,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "She stood down there too, in the square beneath the Hall — just like that girl — asking for justice. It was once the locals' favourite bit of gossip.",
                 voice: "inv/Zhiliu/002/C8D917B8",
                 npc: 790080,
+                speakerName: "Whispers from the Crowd",
                 next: 80230253,
             },
             {
@@ -22547,6 +23486,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "And today... she handled it like it meant nothing. Like she'd never been in that position herself. Is that what it takes to accomplish great things?",
                 voice: "inv/Zhiliu/002/C8D917E2",
                 npc: 790080,
+                speakerName: "Whispers from the Crowd",
                 next: 80230254,
             },
             {
@@ -22555,6 +23495,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "I suppose she'll be the next High Chancellor of Loongyuan. There's little to envy — we simply couldn't do what she does. Perhaps only someone who's learned to strip their heart of all softness can bear the weight of that office.",
                 voice: "inv/Zhiliu/002/C8D9180C",
                 npc: 790080,
+                speakerName: "Whispers from the Crowd",
                 next: 80230255,
             },
             {
@@ -22658,9 +23599,15 @@ export const partyTopicData_en: PartyTopic[] = [
                 next: 80230313,
             },
             {
+                id: 80230313,
+                voice: "inv/Zhiliu/003/C8D921BA",
+                next: 80230314,
+            },
+            {
                 id: 80230314,
                 content: "Why...?",
                 voice: "inv/Zhiliu/003/C8D921E4",
+                speakerName: "Young Zhiliu",
                 next: 80230315,
             },
             {
@@ -22674,6 +23621,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80230316,
                 content: "Have you forgotten... the nights <H>we</> couldn't sleep?",
                 voice: "inv/Zhiliu/003/C8D92238",
+                speakerName: "Young Zhiliu",
                 next: 80230317,
             },
             {
@@ -22681,6 +23629,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Have you forgotten the time in that cave — the hunger gnawing at every inch of our skin, sinking deep into our bones? Our every nerve screaming in agony — I'm hungry... so hungry...",
                 voice: "inv/Zhiliu/003/C8D92262",
+                speakerName: "Young Zhiliu",
                 next: 80230318,
             },
             {
@@ -22688,12 +23637,14 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Have you forgotten... the moment that brute's calloused hand closed around <H>our</> throat? No matter how we struggled, how our arms and legs flailed, it wouldn't loosen, not even a little...",
                 voice: "inv/Zhiliu/003/C8D9228C",
+                speakerName: "Young Zhiliu",
                 next: 80230319,
             },
             {
                 id: 80230319,
                 content: "The air thinning... the world around us dimming... cold death almost drawing us into the fog...",
                 voice: "inv/Zhiliu/003/C8D922B6",
+                speakerName: "Young Zhiliu",
                 next: 80230320,
             },
             {
@@ -22701,6 +23652,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "And... have you forgotten the moment <H>he</> rushed in — drove the brute away — and air rushed back into our lungs all at once?",
                 voice: "inv/Zhiliu/003/C8D922E0",
+                speakerName: "Young Zhiliu",
                 next: 80230321,
             },
             {
@@ -22708,12 +23660,14 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "He saved your life without expecting anything in return... only to end up dead, his name tarnished and forgotten.",
                 voice: "inv/Zhiliu/003/C8D9230A",
+                speakerName: "Young Zhiliu",
                 next: 80230322,
             },
             {
                 id: 80230322,
                 content: "And now — you would turn on him... betray the vow we once swore... and join <H>their</> side?",
                 voice: "inv/Zhiliu/003/C8D92334",
+                speakerName: "Young Zhiliu",
                 next: 80230323,
             },
             {
@@ -22727,6 +23681,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80230324,
                 content: "(Yes... yes... you don't have to remember. It's easier just to forget.)",
                 voice: "inv/Zhiliu/003/C8D92388",
+                speakerName: "Inner Demon",
                 next: 80230325,
             },
             {
@@ -22734,6 +23689,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "(You're about to rise above everyone else. The pain and woes of the past can't touch you anymore. From where you'll stand, it will all seem insignificant.)",
                 voice: "inv/Zhiliu/003/C8D923B2",
+                speakerName: "Inner Demon",
                 next: 80230326,
             },
             {
@@ -22741,6 +23697,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "(Clinging to memory is a form of weakness. The weak let conscience weigh them down. They can't bear the weight — so they bend, and they stay in the dust forever.)",
                 voice: "inv/Zhiliu/003/C8D923DC",
+                speakerName: "Inner Demon",
                 next: 80230327,
             },
             {
@@ -22748,31 +23705,46 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "(They drown in their illusions and fantasies, and nothing ever changes because they're too cowardly to act. But you — you're tougher. Braver. You understand what must be given up for something of greater value. That's why you'll achieve greatness. How many have it in them to strip their hearts of all softness?)",
                 voice: "inv/Zhiliu/003/C8D92406",
+                speakerName: "Inner Demon",
                 next: 80230328,
             },
             {
                 id: 80230328,
                 content: "(Don't listen to him!! Zhiliu — how is it any different from those heartless bystanders?)",
                 voice: "inv/Zhiliu/003/C8D92430",
+                speakerName: "Inner Demon",
                 next: 80230329,
             },
             {
                 id: 80230329,
                 content: "(Do you really want to become an accomplice to those higher-ups?)",
                 voice: "inv/Zhiliu/003/C8D9245A",
+                speakerName: "Inner Demon",
                 next: 80230330,
             },
             {
                 id: 80230330,
                 content: "(If you make that choice... will you still be the same person you were yesterday?)",
                 voice: "inv/Zhiliu/003/C8D92484",
+                speakerName: "Inner Demon",
                 next: 80230331,
+            },
+            {
+                id: 80230331,
+                voice: "inv/Zhiliu/003/C8D924AE",
+                next: 80230332,
             },
             {
                 id: 80230332,
                 content: "Help... someone, please... It's so dark... I'm scared... I—I can't stay here. I can't!",
                 voice: "inv/Zhiliu/003/C8D924D8",
+                speakerName: "Young Zhiliu",
                 next: 80230333,
+            },
+            {
+                id: 80230333,
+                voice: "inv/Zhiliu/003/C8D92502",
+                next: 80230334,
             },
             {
                 id: 80230334,
@@ -22818,6 +23790,11 @@ export const partyTopicData_en: PartyTopic[] = [
                 voice: "inv/Zhiliu/003/C8D925FE",
                 npc: 790076,
                 next: 80230340,
+            },
+            {
+                id: 80230340,
+                voice: "inv/Zhiliu/003/C8D92628",
+                next: 80230341,
             },
             {
                 id: 80230341,
@@ -22985,6 +23962,11 @@ export const partyTopicData_en: PartyTopic[] = [
                 next: 80230419,
             },
             {
+                id: 80230419,
+                voice: "inv/Zhiliu/004/C8D9331E",
+                next: 80230420,
+            },
+            {
                 id: 80230420,
                 content: "Miss Zhiliu, there's a matter at EverSpring they can't resolve. They need you to make the call.",
                 voice: "inv/Zhiliu/004/C8D93348",
@@ -23091,6 +24073,11 @@ export const partyTopicData_en: PartyTopic[] = [
                     "One day, the Nine Chapters of Dafeng will be brought to an end. No matter the cost, I will set things right again. Will you trust me?",
                 voice: "inv/Zhiliu/004/C8D93594",
                 next: 80230435,
+            },
+            {
+                id: 80230435,
+                voice: "inv/Zhiliu/004/C8D935BE",
+                next: 80230436,
             },
             {
                 id: 80230436,
@@ -23625,24 +24612,28 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220202,
                 content: "Wh—What is that!? That's... Buxia!? She's turned into a monster!",
                 voice: "inv/Yuming/002/C8D2A6E4",
+                speakerName: "Drifter",
                 next: 80220203,
             },
             {
                 id: 80220203,
                 content: "N—No... stay back! I don't want to die!",
                 voice: "inv/Yuming/002/C8D2A70E",
+                speakerName: "Drifter",
                 next: 80220204,
             },
             {
                 id: 80220204,
                 content: "Could this be... Lord Argent's punishment? For betraying their grace?",
                 voice: "inv/Yuming/002/C8D2A738",
+                speakerName: "Drifter",
                 next: 80220205,
             },
             {
                 id: 80220205,
                 content: "Dad... Dad! ...Please... wake up! Say something... Dad...",
                 voice: "inv/Yuming/002/C8D2A762",
+                speakerName: "Drifter",
                 next: 80220206,
             },
             {
@@ -23670,6 +24661,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220209,
                 content: "Not I. I have no desire to pry into mortal minds.",
                 voice: "inv/Yuming/002/C8D2A80A",
+                speakerName: "Taihao",
                 next: 80220210,
             },
             {
@@ -23683,6 +24675,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220211,
                 content: "Your heart called, and I answered. You are not one meant for confinement.",
                 voice: "inv/Yuming/002/C8D2A85E",
+                speakerName: "Taihao",
                 next: 80220212,
             },
             {
@@ -23696,6 +24689,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220213,
                 content: "What you beheld was an old nightmare. It yet binds you.",
                 voice: "inv/Yuming/002/C8D2A8B2",
+                speakerName: "Taihao",
                 next: 80220214,
             },
             {
@@ -23709,6 +24703,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220215,
                 content: "Is this the place of her final rest?",
                 voice: "inv/Yuming/002/C8D2A906",
+                speakerName: "Taihao",
                 next: 80220216,
             },
             {
@@ -23739,6 +24734,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "Founding Master Fufeng taught us this: a physician makes no distinction among the sick — not even Drifters. So long as there's a shred of hope, how could I refuse to treat her?",
                 voice: "inv/Yuming/002/C8D2A9AE",
+                speakerName: "Apothecary",
                 next: 80220220,
             },
             {
@@ -23746,6 +24742,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "But Deterioration... is an incurable affliction! Once it takes hold, there's no turning it back. She's about to become something inhuman. Go — while you still can. Run for your lives!",
                 voice: "inv/Yuming/002/C8D2A9D8",
+                speakerName: "Apothecary",
                 next: 80220221,
             },
             {
@@ -23753,6 +24750,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "... If you Drifters hadn't been so set on turning your backs on the Nine Chapters' protection, it wouldn't have come to this...",
                 voice: "inv/Yuming/002/C8D2AA02",
+                speakerName: "Apothecary",
                 next: 80220222,
             },
             {
@@ -23781,6 +24779,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "You Drifters crave freedom, yet you forget this: a kite without its line will fall, and a river without its banks will flood.",
                 voice: "inv/Yuming/002/C8D2AAAA",
+                speakerName: "Taihao",
                 next: 80220226,
             },
             {
@@ -23788,12 +24787,14 @@ export const partyTopicData_en: PartyTopic[] = [
                 content:
                     "What is past cannot be changed. What lies ahead is yet unwritten. To turn back from the wrong road is not too late.",
                 voice: "inv/Yuming/002/C8D2AAD4",
+                speakerName: "Taihao",
                 next: 80220227,
             },
             {
                 id: 80220227,
                 content: "I have spoken. Consider well.",
                 voice: "inv/Yuming/002/C8D2AAFE",
+                speakerName: "Taihao",
                 next: 80220228,
             },
             {
@@ -23806,6 +24807,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220229,
                 content: "Yip...",
                 voice: "inv/Yuming/002/C8D2AB52",
+                speakerName: "Little Tangerine",
                 next: 80220230,
             },
             {
@@ -23819,6 +24821,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220231,
                 content: "Yip... yip...",
                 voice: "inv/Yuming/002/C8D2ABA6",
+                speakerName: "Little Tangerine",
                 next: 80220232,
             },
             {
@@ -23839,6 +24842,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220234,
                 content: "Yip...",
                 voice: "inv/Yuming/002/C8D2AC24",
+                speakerName: "Little Tangerine",
                 next: 80220235,
             },
             {
@@ -23852,6 +24856,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220236,
                 content: "Yip!",
                 voice: "inv/Yuming/002/C8D2AC78",
+                speakerName: "Little Tangerine",
                 next: 80220237,
             },
             {
@@ -24589,6 +25594,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220436,
                 content: "Awooo!",
                 voice: "inv/Yuming/004/C8D2CD48",
+                speakerName: "Little Tangerine",
                 next: 80220437,
             },
             {
@@ -24609,6 +25615,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220439,
                 content: "Awoo! Awooo!",
                 voice: "inv/Yuming/004/C8D2CDC6",
+                speakerName: "Little Tangerine",
                 next: 80220440,
             },
             {
@@ -24622,6 +25629,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220441,
                 content: "Awoo!",
                 voice: "inv/Yuming/004/C8D2CE1A",
+                speakerName: "Little Tangerine",
                 next: 80220442,
             },
             {
@@ -24643,6 +25651,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220444,
                 content: "Awoo! Awooo!",
                 voice: "inv/Yuming/004/C8D2CE98",
+                speakerName: "Little Tangerine",
                 next: 80220445,
             },
             {
@@ -24656,6 +25665,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80220446,
                 content: "Awoo!",
                 voice: "inv/Yuming/004/C8D2CEEC",
+                speakerName: "Little Tangerine",
                 next: 80220447,
             },
             {
@@ -27948,6 +28958,171 @@ export const partyTopicData_en: PartyTopic[] = [
             "19001": 2,
             "19008": 2,
         },
+        dialogues: [
+            {
+                id: 80190102,
+                content: "You've got this big place all to yourself? Not bad — even set up a proper bar, I see.",
+                npc: 95102,
+                next: 80190103,
+            },
+            {
+                id: 80190103,
+                content: "Good for you. You ought to have friends over more often — never hurts to build a few ties in Icelake.",
+                npc: 95102,
+                next: 80190104,
+            },
+            {
+                id: 80190104,
+                content:
+                    "Alright then — what do you want this time? If it's anything too much of a bother, I'm out. Got a big job hanging over me lately.",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901041,
+                        content: "I just missed you.",
+                        next: 80190105,
+                    },
+                    {
+                        id: 801901042,
+                        content: "I just wanted to share a drink with you.",
+                        next: 80190106,
+                    },
+                ],
+            },
+            {
+                id: 80190105,
+                content:
+                    "Oof... That's sweet enough to rot my teeth. I'll let it slide — but if you say that to everyone you drink with, someone's bound to choke on their pint.",
+                npc: 95102,
+                next: 80190107,
+            },
+            {
+                id: 80190106,
+                content: "Now that's more like it. Let's see if your mix is worth the pour.",
+                npc: 95102,
+                next: 80190107,
+            },
+            {
+                id: 80190107,
+                content: "{空格}",
+                next: 80190108,
+            },
+            {
+                id: 80190108,
+                content:
+                    "Hmm... Sweet, with a tangy edge. Served warm, too — not bad at all. I'd say it's on par with the stuff back at The Asphodel, though you've definitely added your own twist.",
+                npc: 95102,
+                next: 80190109,
+            },
+            {
+                id: 80190109,
+                content:
+                    "Bet this one took a fair bit of effort, eh? Didn't expect a drink this good, to be honest. Even just a warm cup of water would've done the trick — I'm easy. No need to pull out all the stops.",
+                npc: 95102,
+                next: 80190110,
+            },
+            {
+                id: 80190110,
+                content:
+                    "You're looking rather chipper though... ah, I get it. Got a bit of coin lying around, huh? Thought you'd splash out — parties, drinks, maybe a new trinket or two. That's what they call \"buying a good time\" these days, right?",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901101,
+                        content: "You're the biggest chatterbox of those I've invited for a drink.",
+                        next: 80190111,
+                    },
+                    {
+                        id: 801901102,
+                        content: "I offer you a drink and all I get is this rude comment? I should be offended.",
+                        next: 80190112,
+                    },
+                ],
+            },
+            {
+                id: 80190111,
+                content:
+                    "Well, isn't that the whole point? You pour someone a drink, you get a proper chat. Just means I know how to read the room — and I've got the decency to play along.",
+                npc: 95102,
+                next: 80190113,
+            },
+            {
+                id: 80190112,
+                content:
+                    "Whoa now, my bad! Your place, your booze — that makes you the boss. Here — throw a punch if it'll help you blow off some steam.",
+                npc: 95102,
+                next: 80190113,
+            },
+            {
+                id: 80190113,
+                content:
+                    "Kidding, obviously. But if you're after a bit of advice from someone who's been around — not everyone's worth the drink or the word \"friend.\"",
+                npc: 95102,
+                next: 80190114,
+            },
+            {
+                id: 80190114,
+                content:
+                    "Especially not in a place like Icelake. Always some grinning bastard eyeing your pockets, buttering you up just to find a way in.",
+                npc: 95102,
+                next: 80190115,
+            },
+            {
+                id: 80190115,
+                content:
+                    "They'll smile, flatter, make you feel like you're the sun — and the second you're in trouble? You'd have better luck counting on a stray dog.",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901151,
+                        content: "How do you know? Are you one of them?",
+                        next: 80190116,
+                    },
+                ],
+            },
+            {
+                id: 80190116,
+                content:
+                    "Ding ding ding — got me! I, Outsider, am the finest freeloader you'll ever meet. Disguised, of course, as a charming drinking buddy. If there's free booze or a hot meal, I'll sniff it out from a mile off.",
+                npc: 95102,
+                next: 80190117,
+            },
+            {
+                id: 80190117,
+                content:
+                    "Anyone wants the title, they'll have to fight me for it. And those who're planning to eat off your plate, they can only wait until I've had my fill.",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901171,
+                        content: "Well then, you should see yourself out.",
+                        next: 80190118,
+                    },
+                    {
+                        id: 801901172,
+                        content: "So you've been chasing off the freeloaders for me?",
+                        next: 80190119,
+                    },
+                ],
+            },
+            {
+                id: 80190118,
+                content: "Oi, oi — no need to be hasty. I've only just got comfy.",
+                npc: 95102,
+                next: 80190120,
+            },
+            {
+                id: 80190119,
+                content: "Hmm? What's that now? No idea what you're talking about.",
+                npc: 95102,
+                next: 80190120,
+            },
+            {
+                id: 80190120,
+                content: "But hey — the drink's good. Pour me another before I drag myself back to the grind.",
+                npc: 95102,
+            },
+        ],
     },
     {
         id: 510202,
@@ -30534,6 +31709,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Daphne... my leg's broken. I can't move...",
                 voice: "inv/Dafu/003/C8B91718",
                 npc: 110029,
+                speakerName: "Wounded Soldier",
                 next: 80180317,
             },
             {
@@ -30541,6 +31717,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Just leave me here... Go help the others...",
                 voice: "inv/Dafu/003/C8B91742",
                 npc: 110029,
+                speakerName: "Wounded Soldier",
                 next: 80180318,
             },
             {
@@ -30568,6 +31745,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "The shelling... The Filthoid growls... I can't hear them anymore...",
                 voice: "inv/Dafu/003/C8B917EA",
                 npc: 110028,
+                speakerName: "Half-Conscious Soldier",
                 next: 80180322,
             },
             {
@@ -30575,6 +31753,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Miss... are we... going home?",
                 voice: "inv/Dafu/003/C8B91814",
                 npc: 110028,
+                speakerName: "Half-Conscious Soldier",
                 next: 80180323,
             },
             {
@@ -30589,6 +31768,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "No... you're lying. There's no way back.",
                 voice: "inv/Dafu/003/C8B91868",
                 npc: 110028,
+                speakerName: "Half-Conscious Soldier",
                 next: 80180325,
             },
             {
@@ -30596,6 +31776,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Dismania's too far... The rain's pouring. The roads are all mud. We'll never make it back...",
                 voice: "inv/Dafu/003/C8B91892",
                 npc: 110028,
+                speakerName: "Half-Conscious Soldier",
                 next: 80180326,
             },
             {
@@ -30603,6 +31784,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Miss... please... Tell my mother...",
                 voice: "inv/Dafu/003/C8B918BC",
                 npc: 110028,
+                speakerName: "Half-Conscious Soldier",
                 next: 80180327,
             },
             {
@@ -30623,6 +31805,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 id: 80180329,
                 content: "Look out! Hostile Magnetix Drones!",
                 voice: "inv/Dafu/003/C8B9193A",
+                speakerName: "Soldier (Distant Voice)",
                 next: 80180330,
             },
             {
@@ -30636,6 +31819,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Feeling better now?",
                 voice: "inv/Dafu/003/C8B9198E",
                 npc: 110025,
+                speakerName: "Stern Soldier",
                 next: 80180332,
             },
             {
@@ -30651,6 +31835,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "Are you out of your mind? Throwing yourself over a dying soldier like that!? He was clearly a goner — were you trying to get yourself killed too? If you'd died, what were the rest of the wounded supposed to do without you?",
                 voice: "inv/Dafu/003/C8B919E2",
                 npc: 110025,
+                speakerName: "Stern Soldier",
                 next: 80180334,
             },
             {
@@ -30672,6 +31857,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "What's so funny?",
                 voice: "inv/Dafu/003/C8B91A60",
                 npc: 110025,
+                speakerName: "Stern Soldier",
                 next: 80180337,
             },
             {
@@ -30717,6 +31903,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "What are you talking about...",
                 voice: "inv/Dafu/003/C8B91B5C",
                 npc: 110025,
+                speakerName: "Stern Soldier",
                 next: 80180343,
             },
             {
@@ -30732,6 +31919,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "...Then you remember this — your life matters too. Don't act like it doesn't. The living can do far more than the dead.",
                 voice: "inv/Dafu/003/C8B91BB0",
                 npc: 110025,
+                speakerName: "Stern Soldier",
                 next: 80180345,
             },
             {
@@ -30740,6 +31928,7 @@ export const partyTopicData_en: PartyTopic[] = [
                     "\"To carry your comrades' will and live — that's as noble as dying for them.\" That's what Commander Avar once told us.",
                 voice: "inv/Dafu/003/C8B91BDA",
                 npc: 110025,
+                speakerName: "Stern Soldier",
                 next: 80180346,
             },
             {
@@ -30768,6 +31957,7 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Where are you going?",
                 voice: "inv/Dafu/003/C8B91C82",
                 npc: 110025,
+                speakerName: "Stern Soldier",
                 next: 80180350,
             },
             {

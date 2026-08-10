@@ -3,14 +3,15 @@ import { type ITourStep, VTour } from "@globalhive/vuejs-tour"
 import { useLocalStorage } from "@vueuse/core"
 import { DNARoleCharsBean, DNARoleShowBean, DNAWeaponBean } from "dna-api"
 import { useTranslation } from "i18next-vue"
-import { cloneDeep, debounce, groupBy } from "lodash-es"
+import { cloneDeep, debounce, groupBy, isEqual } from "lodash-es"
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
 import FullTooltip from "@/components/FullTooltip.vue"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
 import { env } from "@/env"
-import { formatBigNumber, formatProp } from "@/util"
+import { copyText, formatBigNumber, formatProp, pasteText } from "@/util"
+import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 import { CharSettings, createDefaultCharSettings, normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
@@ -39,7 +40,6 @@ import { useSettingStore } from "../store/setting"
 import { useTimeline } from "../store/timeline"
 import { useTourStore } from "../store/tour"
 import { useUIStore } from "../store/ui"
-import { copyText } from "../util"
 
 //#region 角色
 const inv = useInvStore()
@@ -965,6 +965,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+    commitCustomVariableInputs.flush()
     ui.title = ""
 })
 
@@ -995,7 +996,7 @@ function addSkill(skillName: string) {
  * @returns void
  */
 function addCustomVariable() {
-    charSettings.value.customVariables.push(["", ""])
+    customVariableInputs.value.push(["", ""])
 }
 
 /**
@@ -1004,8 +1005,71 @@ function addCustomVariable() {
  * @returns void
  */
 function removeCustomVariable(index: number) {
-    charSettings.value.customVariables.splice(index, 1)
+    customVariableInputs.value.splice(index, 1)
 }
+
+/**
+ * 将当前自定义变量复制到剪贴板。
+ * @returns void
+ */
+async function copyCustomVariables() {
+    try {
+        await copyText(formatCustomVariablesClipboardText(customVariableInputs.value))
+        ui.showSuccessMessage("已复制自定义变量")
+    } catch (error) {
+        ui.showErrorMessage("复制自定义变量失败", error instanceof Error ? error.message : String(error))
+    }
+}
+
+/**
+ * 从剪贴板读取自定义变量并替换当前列表。
+ * @returns void
+ */
+async function pasteCustomVariables() {
+    try {
+        const variables = parseCustomVariablesClipboardText(await pasteText())
+        if (!variables.length) {
+            ui.showErrorMessage("未识别到可粘贴的自定义变量")
+            return
+        }
+        commitCustomVariableInputs.cancel()
+        customVariableInputs.value = variables
+        charSettings.value.customVariables = variables.map(variable => [...variable])
+        updateCharBuild()
+        ui.showSuccessMessage("已粘贴自定义变量")
+    } catch (error) {
+        ui.showErrorMessage("粘贴自定义变量失败", error instanceof Error ? error.message : String(error))
+    }
+}
+
+const customVariableInputs = ref<[string, string][]>(charSettings.value.customVariables.map(variable => [...variable]))
+
+/**
+ * 防抖提交整组自定义变量，避免输入期间反复重建构筑。
+ * @param variables 自定义变量输入值
+ * @returns void
+ */
+const commitCustomVariableInputs = debounce((variables: [string, string][]) => {
+    if (isEqual(charSettings.value.customVariables, variables)) return
+    charSettings.value.customVariables = variables.map(variable => [...variable])
+}, 500)
+
+watch(
+    customVariableInputs,
+    variables => {
+        commitCustomVariableInputs(variables.map(variable => [...variable]))
+    },
+    { deep: true }
+)
+
+watch(
+    () => charSettings.value.customVariables,
+    variables => {
+        if (isEqual(customVariableInputs.value, variables)) return
+        commitCustomVariableInputs.cancel()
+        customVariableInputs.value = variables.map(variable => [...variable])
+    }
+)
 
 const targetFunction = ref(charSettings.value.targetFunction)
 watch(
@@ -1307,8 +1371,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         </div>
                         <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 shadow-sm">
                             <div class="card-body space-y-2">
-                                <h2 class="card-title">{{ $t("char-build.save_project") }}</h2>
-                                <ul v-if="charProject.projects.length > 0">
+                                <ul v-if="charProject.projects.length > 0" class="max-h-[60vh] overflow-y-auto">
                                     <li
                                         v-for="(project, index) in charProject.projects"
                                         :key="project.name"
@@ -1556,38 +1619,45 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             </div>
                             <div v-if="!isTimeline" class="space-y-2">
                                 <div
-                                    v-for="(variable, index) in charSettings.customVariables"
+                                    v-for="(variable, index) in customVariableInputs"
                                     :key="index"
                                     class="grid grid-cols-[1fr_1fr_auto] gap-2"
                                 >
-                                    <input
-                                        v-model="variable[0]"
-                                        type="text"
-                                        class="input input-sm input-bordered"
-                                        placeholder="变量名"
-                                        @change="updateCharBuild"
-                                    />
+                                    <input v-model="variable[0]" type="text" class="input input-sm input-bordered" placeholder="变量名" />
                                     <FullTooltip side="top">
                                         <template #tooltip>
-                                            <span class="font-mono">{{ getCustomVariableResult(variable) }}</span>
+                                            <div class="space-y-1">
+                                                <div class="text-xs text-base-content/80 max-w-60">
+                                                    {{ variable[1] }}
+                                                    <span class="text-primary"> = </span>
+                                                </div>
+                                                <div class="font-mono">{{ getCustomVariableResult(variable) }}</div>
+                                            </div>
                                         </template>
                                         <input
                                             v-model="variable[1]"
                                             type="text"
                                             class="input input-sm input-bordered w-full"
                                             placeholder="表达式"
-                                            @change="updateCharBuild"
                                         />
                                     </FullTooltip>
                                     <button class="btn btn-sm btn-ghost btn-square" @click="removeCustomVariable(index)">
                                         <Icon icon="codicon:chrome-close" />
                                     </button>
                                 </div>
-                                <button class="btn btn-sm btn-primary w-full" @click="addCustomVariable">
-                                    <Icon icon="ri:add-line" />
-                                    变量
-                                </button>
-                                <template v-for="(variable, index) in charSettings.customVariables" :key="`variable-error-${index}`">
+                                <div class="flex gap-2">
+                                    <button class="btn btn-sm btn-primary flex-1" @click="addCustomVariable">
+                                        <Icon icon="ri:add-line" />
+                                        变量
+                                    </button>
+                                    <button class="btn btn-sm btn-square" title="复制自定义变量" @click="copyCustomVariables">
+                                        <Icon icon="ri:file-copy-line" class="size-4" />
+                                    </button>
+                                    <button class="btn btn-sm btn-square" title="粘贴自定义变量" @click="pasteCustomVariables">
+                                        <Icon icon="ri:clipboard-line" class="size-4" />
+                                    </button>
+                                </div>
+                                <template v-for="(variable, index) in customVariableInputs" :key="`variable-error-${index}`">
                                     <div
                                         v-if="
                                             variable[0] || variable[1] ? charBuild.validateCustomVariable(variable[0], variable[1]) : false

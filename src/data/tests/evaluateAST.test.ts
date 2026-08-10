@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest"
-import { type ASTBinary, type ASTFunction, type ASTMemberAccess, type ASTProperty, type ASTUnary, parseAST } from "../ast"
+import {
+    type ASTBinary,
+    type ASTFunction,
+    type ASTMemberAccess,
+    type ASTProperty,
+    type ASTTemporaryAttributes,
+    type ASTUnary,
+    parseAST,
+} from "../ast"
 import { CharBuild } from "../CharBuild"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 
@@ -64,6 +72,111 @@ describe("evaluateAST函数测试", () => {
             const result = charBuild.evaluateAST("10 + 4 * [花刺]层数", testAttrs)
 
             expect(result).toBe(30)
+        })
+
+        it("临时属性应该只影响被修饰的字段", () => {
+            const baseDamage = charBuild.evaluateAST("[攻击]", testAttrs)
+            const temporaryDamage = charBuild.evaluateAST("[攻击]{增伤:0.1}", testAttrs)
+            const expectedDamage = charBuild.evaluateAST("[攻击]", { ...testAttrs, 增伤: testAttrs.增伤 + 0.1 })
+
+            expect(temporaryDamage).toBeCloseTo(expectedDamage, 6)
+            expect(temporaryDamage).toBeGreaterThan(baseDamage)
+            expect(charBuild.evaluateAST("[攻击]", testAttrs)).toBeCloseTo(baseDamage, 6)
+        })
+
+        it("临时属性应该支持伤害成员分支", () => {
+            const temporaryDamage = charBuild.evaluateAST("[攻击]{增伤:0.1}.暴击", testAttrs)
+            const expectedDamage = charBuild.evaluateAST("[攻击].暴击", { ...testAttrs, 增伤: testAttrs.增伤 + 0.1 })
+
+            expect(temporaryDamage).toBeCloseTo(expectedDamage, 6)
+        })
+
+        it("召唤物字段应该在继承缩放后应用临时属性", () => {
+            const summonBuild = new CharBuild({
+                char: new LeveledChar("塔比瑟"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                buffs: [
+                    new LeveledBuff({
+                        名称: "召唤物继承测试",
+                        描述: "测试用召唤物属性继承比例",
+                        召唤物属性继承比例: -0.5,
+                    }),
+                ],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "正义群殴！",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[攻击]",
+            })
+            const attrs = summonBuild.calculateWeaponAttributes()
+            const temporaryDamage = summonBuild.evaluateAST("[攻击]{攻击:100}", attrs)
+            const globallyModifiedDamage = summonBuild.evaluateAST("[攻击]", { ...attrs, 攻击: attrs.攻击 + 100 })
+
+            expect(attrs.召唤物属性继承比例).toBeCloseTo(0.5, 6)
+            expect(temporaryDamage).toBeGreaterThan(globallyModifiedDamage)
+        })
+
+        it("武器关键词应该使用对应装备的武器伤害面板", () => {
+            const meleeDamage = charBuild.evaluateAST("[近战]", testAttrs)
+            const rangedDamage = charBuild.evaluateAST("[远程]", testAttrs)
+
+            expect(meleeDamage).toBeCloseTo(charBuild.evaluateAST("近战::[攻击]", testAttrs), 6)
+            expect(rangedDamage).toBeCloseTo(charBuild.evaluateAST("远程::[攻击]", testAttrs), 6)
+            expect(meleeDamage).not.toBeCloseTo(rangedDamage, 6)
+        })
+
+        it("武器伤害字段的临时属性应该按武器基础值应用加成", () => {
+            const weapon = charBuild.meleeWeapon
+            const weaponAttrs = charBuild.calculateWeaponAttributes(weapon, true, true).weapon!
+            const temporaryWeaponAttrs = {
+                ...weaponAttrs,
+                攻击: weaponAttrs.攻击 + weapon.基础攻击 * 0.1,
+                暴击: weaponAttrs.暴击 + weapon.基础暴击 * 0.2,
+            }
+            const defense = charBuild.calculateDefenseMultiplier(testAttrs, undefined, false)
+            const temporaryDamage = charBuild.calculateWeaponDamage({ ...testAttrs, weapon: temporaryWeaponAttrs }, weapon)
+            const expected =
+                (testAttrs.攻击 + temporaryWeaponAttrs.攻击) *
+                defense *
+                (temporaryDamage.higherCritExpectedTrigger || temporaryDamage.expectedDamage)
+            const directAddedWeaponAttrs = {
+                ...weaponAttrs,
+                攻击: weaponAttrs.攻击 + 0.1,
+                暴击: weaponAttrs.暴击 + 0.2,
+            }
+            const directAddedDamage = charBuild.calculateWeaponDamage({ ...testAttrs, weapon: directAddedWeaponAttrs }, weapon)
+            const directAddedResult =
+                (testAttrs.攻击 + directAddedWeaponAttrs.攻击) *
+                defense *
+                (directAddedDamage.higherCritExpectedTrigger || directAddedDamage.expectedDamage)
+            const result = charBuild.evaluateAST("[近战]{攻击:0.1,暴击:0.2}.暴击", testAttrs)
+
+            expect(result).toBeCloseTo(expected, 6)
+            expect(result).not.toBeCloseTo(directAddedResult, 6)
+        })
+
+        it("同律关键词应该使用角色装备的同律武器面板", () => {
+            const skillWeaponBuild = new CharBuild({
+                char: new LeveledChar("煜明"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                melee: new LeveledWeapon(10299),
+                ranged: new LeveledWeapon(20601),
+                baseName: "疑星落",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[同律]",
+            })
+            const attrs = skillWeaponBuild.calculateWeaponAttributes()
+
+            expect(skillWeaponBuild.skillWeapon).toBeDefined()
+            expect(skillWeaponBuild.evaluateAST("[同律]", attrs)).toBeCloseTo(skillWeaponBuild.evaluateAST("同律::[攻击]", attrs), 6)
         })
 
         it("技能格式表达式应该使用自定义变量", () => {
@@ -432,6 +545,17 @@ describe("evaluateAST函数测试", () => {
                 parseAST("10 & 20")
             }).toThrow()
         })
+
+        it("应该拒绝不存在的临时属性", () => {
+            expect(charBuild.validateAST("[攻击]{不存在:0.1}")).toContain("找不到临时属性")
+            expect(charBuild.validateAST("[近战]{weapon:0.1}")).toContain("找不到临时属性")
+            expect(charBuild.validateAST("[攻击]{暴击:0.1}")).toContain("找不到临时属性")
+            expect(charBuild.validateAST("[近战]{暴击:0.1}")).toBeUndefined()
+        })
+
+        it("应该拒绝给非字段表达式添加临时属性", () => {
+            expect(() => parseAST("1{增伤:0.1}")).toThrow("只能应用于字段")
+        })
     })
 
     describe("实战场景测试", () => {
@@ -721,6 +845,16 @@ describe("evaluateAST函数测试", () => {
         })
 
         describe("命名空间属性验证", () => {
+            it("应该解析字段临时属性", () => {
+                const ast = parseAST("[攻击]{增伤:0.1,独立增伤:0.2}")
+
+                expect(ast.type).toBe("temporary_attributes")
+                const temporaryAttributes = ast as ASTTemporaryAttributes
+                expect(temporaryAttributes.target).toMatchObject({ type: "property", name: "[攻击]" })
+                expect(temporaryAttributes.attributes).toHaveLength(2)
+                expect(temporaryAttributes.attributes[0]).toMatchObject({ name: "增伤", value: { type: "number", value: 0.1 } })
+            })
+
             it("没有命名空间的属性应该namespace为undefined", () => {
                 const ast = parseAST("攻击")
                 expect(ast.type).toBe("property")

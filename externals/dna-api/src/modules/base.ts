@@ -104,7 +104,7 @@ export class DNABaseAPI {
             this.baseHeaders = {
                 countrycode: "CN",
                 version: this.server === "cn" ? "1.3.2" : "1.1.1",
-                versioncode: this.server === "cn" ? "10" : "5",
+                versioncode: this.server === "cn" ? "12" : "5",
                 source: "android",
                 lang: this.lang,
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -114,7 +114,7 @@ export class DNABaseAPI {
             this.baseHeaders = {
                 countrycode: "CN",
                 version: this.server === "cn" ? "1.3.2" : "1.1.1",
-                versioncode: this.server === "cn" ? "10" : "5",
+                versioncode: this.server === "cn" ? "12" : "5",
                 source: "ios",
                 lang: this.lang,
                 "Content-Type": "application/x-www-form-urlencoded",

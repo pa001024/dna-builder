@@ -596,130 +596,15 @@ export async function getLocalQQ(port: number) {
     }[]
 }
 
-// 自定义Headers类，解决浏览器默认Headers无法添加自定义headers的问题
-class TauriHeaders {
-    private headers: Record<string, string[]>
-
-    constructor(init?: HeadersInit) {
-        this.headers = {}
-        if (init) {
-            if (Array.isArray(init)) {
-                // 处理[[name1, value1], [name2, value2]]格式
-                for (const [name, value] of init) {
-                    this.append(name, value)
-                }
-            } else if (typeof init === "object" && init !== null) {
-                try {
-                    // 尝试处理Headers对象格式
-                    const headersObj = init as Headers
-                    for (const [name, value] of headersObj.entries()) {
-                        this.append(name, value)
-                    }
-                } catch {
-                    // 处理{name1: value1, name2: value2}格式
-                    for (const [name, value] of Object.entries(init)) {
-                        this.append(name, value)
-                    }
-                }
-            }
-        }
-    }
-
-    append(name: string, value: string): void {
-        const lowerName = name.toLowerCase()
-        if (!this.headers[lowerName]) {
-            this.headers[lowerName] = []
-        }
-        this.headers[lowerName].push(value)
-    }
-
-    delete(name: string): void {
-        const lowerName = name.toLowerCase()
-        delete this.headers[lowerName]
-    }
-
-    get(name: string): string | null {
-        const lowerName = name.toLowerCase()
-        const values = this.headers[lowerName]
-        return values ? values[0] : null
-    }
-
-    has(name: string): boolean {
-        const lowerName = name.toLowerCase()
-        return lowerName in this.headers
-    }
-
-    set(name: string, value: string): void {
-        const lowerName = name.toLowerCase()
-        this.headers[lowerName] = [value]
-    }
-
-    getSetCookie(): string[] {
-        const setCookie = this.headers["set-cookie"]
-        return setCookie || []
-    }
-
-    forEach(callbackfn: (value: string, key: string, parent: any) => void, thisArg?: any): void {
-        for (const [lowerName, values] of Object.entries(this.headers)) {
-            for (const value of values) {
-                callbackfn.call(thisArg, value, lowerName, this)
-            }
-        }
-    }
-
-    entries(): any {
-        const entries: [string, string][] = []
-        for (const [lowerName, values] of Object.entries(this.headers)) {
-            for (const value of values) {
-                entries.push([lowerName, value])
-            }
-        }
-        return entries[Symbol.iterator]()
-    }
-
-    keys(): any {
-        const keys: string[] = []
-        for (const lowerName of Object.keys(this.headers)) {
-            keys.push(lowerName)
-        }
-        return keys[Symbol.iterator]()
-    }
-
-    values(): any {
-        const values: string[] = []
-        for (const valuesList of Object.values(this.headers)) {
-            for (const value of valuesList) {
-                values.push(value)
-            }
-        }
-        return values[Symbol.iterator]()
-    }
-
-    [Symbol.iterator](): any {
-        return this.entries()
-    }
-}
-
-class TauriResponse {
-    readonly status: number
-    readonly statusText: string
-    readonly headers: TauriHeaders
-    readonly ok: boolean
-    readonly redirected: boolean
-    readonly type: ResponseType
-    readonly url: string
-    readonly body: ReadableStream | null = null
-    readonly bodyUsed: boolean = false
+class TauriResponse extends Response {
     private bodyText: string
 
     constructor(status: number, body: string, headers: [string, string][]) {
-        this.status = status
-        this.statusText = status >= 200 && status < 300 ? "OK" : "Error"
-        this.headers = new TauriHeaders(headers)
-        this.ok = status >= 200 && status < 300
-        this.redirected = false
-        this.type = "basic"
-        this.url = ""
+        super(body, {
+            status,
+            statusText: status >= 200 && status < 300 ? "OK" : "Error",
+            headers,
+        })
         this.bodyText = body
     }
 
@@ -749,7 +634,7 @@ class TauriResponse {
         return encoder.encode(this.bodyText)
     }
 
-    clone(): TauriResponse {
+    override clone(): TauriResponse {
         // 将当前headers转换为数组格式传递给新实例
         const headersArray: [string, string][] = []
         for (const [name, value] of this.headers.entries()) {
@@ -771,19 +656,20 @@ export async function tauriFetch(url: RequestInfo | URL, options?: RequestInit):
     if (options?.body instanceof FormData) {
         multipart = []
         for (const [key, value] of options.body.entries()) {
-            if (value instanceof File) {
-                const arrayBuffer = await value.arrayBuffer()
+            const formDataValue = value as unknown as string | File
+            if (formDataValue instanceof File) {
+                const arrayBuffer = await formDataValue.arrayBuffer()
                 const data = Array.from(new Uint8Array(arrayBuffer))
                 multipart.push([
                     key,
                     {
-                        filename: value.name,
+                        filename: formDataValue.name,
                         data,
-                        mime: value.type || undefined,
+                        mime: formDataValue.type || undefined,
                     },
                 ])
             } else {
-                multipart.push([key, value as string])
+                multipart.push([key, formDataValue])
             }
         }
     } else {
@@ -829,5 +715,5 @@ export async function cleanupTempDir(tempDir: string) {
 }
 
 export const getMapAPI = () => {
-    return new DNAAPI({ fetchFn: tauriFetch })
+    return new DNAAPI({ fetchFn: tauriFetch as typeof fetch })
 }

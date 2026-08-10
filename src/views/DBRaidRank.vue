@@ -10,8 +10,9 @@ import {
     RaidCalculation,
     RaidDungeon,
     RaidSeason,
-} from "../data/d/raid.data"
-import { getDropModeText, getRewardDetails } from "../utils/reward-utils"
+} from "@/data/d/raid.data"
+import { getDropModeText } from "@/utils/i18n-utils"
+import { getRewardDetails } from "@/utils/reward-utils"
 
 // 计算分数函数
 const calculateScore = (baseRaidPoint: number, remainingTime: number, formulaId: number): number => {
@@ -86,14 +87,16 @@ const calculateRemainingTimeByScore = (baseRaidPoint: number, targetScore: numbe
 
 // 状态管理
 const raidDungeons = Object.values(RaidDungeon)
-const defaultSeason = Object.values(RaidSeason)
-    .filter(season => raidDungeons.some(dungeon => dungeon.RaidSeason === season.RaidSeason))
-    .sort((a, b) => a.RaidSeason - b.RaidSeason)
-    .at(-1)?.RaidSeason ?? 0
-const defaultDungeon = raidDungeons
-    .filter(dungeon => dungeon.RaidSeason === defaultSeason)
-    .sort((a, b) => a.DifficultyLevel - b.DifficultyLevel)
-    .at(-1)?.DungeonId ?? 0
+const defaultSeason =
+    Object.values(RaidSeason)
+        .filter(season => raidDungeons.some(dungeon => dungeon.RaidSeason === season.RaidSeason))
+        .sort((a, b) => a.RaidSeason - b.RaidSeason)
+        .at(-1)?.RaidSeason ?? 0
+const defaultDungeon =
+    raidDungeons
+        .filter(dungeon => dungeon.RaidSeason === defaultSeason)
+        .sort((a, b) => a.DifficultyLevel - b.DifficultyLevel)
+        .at(-1)?.DungeonId ?? 0
 
 const selectedSeason = useSearchParam<number>("s", defaultSeason)
 const scoreInput = ref("")

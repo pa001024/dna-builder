@@ -244,7 +244,10 @@ async function redeemProduct(product: ShopProduct): Promise<void> {
         return
     }
 
-    const ok = await ui.showDialog(t("points-mall.confirmRedeem"), t("points-mall.confirmRedeemDesc", { cost: formatPoints(product.pointsCost), name: product.name }))
+    const ok = await ui.showDialog(
+        t("points-mall.confirmRedeem"),
+        t("points-mall.confirmRedeemDesc", { cost: formatPoints(product.pointsCost), name: product.name })
+    )
     if (!ok) return
 
     actionProductId.value = product.id
@@ -378,7 +381,11 @@ watch(
                                             <span class="truncate" :class="selectedNameCard?.displayClass || ''">
                                                 {{ user.name || $t("points-mall.userFallback") }}
                                             </span>
-                                            <span v-if="selectedTitle?.rewardName" :class="selectedTitle?.displayClass || ''">
+                                            <span
+                                                v-if="selectedTitle?.rewardName"
+                                                :class="selectedTitle?.displayClass || ''"
+                                                :data-text="selectedTitle?.rewardName"
+                                            >
                                                 {{ selectedTitle.rewardName }}
                                             </span>
                                         </div>
@@ -417,8 +424,12 @@ watch(
                             <div class="flex items-center gap-2">
                                 <div class="text-sm font-bold">{{ $t("points-mall.productList") }}</div>
                                 <div class="ml-auto tabs tabs-box">
-                                    <a class="tab" :class="{ 'tab-active': tab === 'all' }" @click="tab = 'all'">{{ $t("points-mall.all") }}</a>
-                                    <a class="tab" :class="{ 'tab-active': tab === 'title' }" @click="tab = 'title'">{{ $t("points-mall.rewardType.title") }}</a>
+                                    <a class="tab" :class="{ 'tab-active': tab === 'all' }" @click="tab = 'all'">{{
+                                        $t("points-mall.all")
+                                    }}</a>
+                                    <a class="tab" :class="{ 'tab-active': tab === 'title' }" @click="tab = 'title'">{{
+                                        $t("points-mall.rewardType.title")
+                                    }}</a>
                                     <a class="tab" :class="{ 'tab-active': tab === 'name_card' }" @click="tab = 'name_card'">
                                         {{ $t("points-mall.rewardType.nameCard") }}
                                     </a>
@@ -439,7 +450,9 @@ watch(
                                                 <div class="font-bold text-base truncate">{{ p.name }}</div>
                                                 <div class="mt-1 flex items-center gap-2">
                                                     <span class="badge badge-outline">{{ getRewardTypeLabel(p) }}</span>
-                                                    <span v-if="ownedIdSet.has(p.assetId)" class="badge badge-success">{{ $t("points-mall.owned") }}</span>
+                                                    <span v-if="ownedIdSet.has(p.assetId)" class="badge badge-success">{{
+                                                        $t("points-mall.owned")
+                                                    }}</span>
                                                     <span v-else class="badge badge-ghost">{{ $t("points-mall.notOwned") }}</span>
                                                 </div>
                                             </div>
@@ -447,7 +460,9 @@ watch(
                                                 <div class="text-xs text-base-content/60">{{ $t("points-mall.price") }}</div>
                                                 <div class="font-extrabold">
                                                     {{ formatPoints(p.pointsCost) }}
-                                                    <span class="text-xs font-normal text-base-content/60">{{ $t("points-mall.points") }}</span>
+                                                    <span class="text-xs font-normal text-base-content/60">{{
+                                                        $t("points-mall.points")
+                                                    }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -465,7 +480,11 @@ watch(
                                             <div v-if="isTitleProduct(p)" class="rounded-lg bg-base-200/50 p-3">
                                                 <div class="text-xs opacity-90 mb-2">{{ $t("points-mall.preview") }}</div>
                                                 <div class="flex items-start gap-2">
-                                                    <QQAvatar class="mt-2 size-8" :qq="user.qq || ''" :name="user.name || $t('points-mall.userFallback')" />
+                                                    <QQAvatar
+                                                        class="mt-2 size-8"
+                                                        :qq="user.qq || ''"
+                                                        :name="user.name || $t('points-mall.userFallback')"
+                                                    />
                                                     <div class="min-w-0 flex-1">
                                                         <div class="flex min-h-5 w-full items-center gap-1.5 text-sm text-base-content/80">
                                                             <span
@@ -476,7 +495,7 @@ watch(
                                                             <span class="truncate" :class="selectedNameCard?.displayClass || ''">
                                                                 {{ user.name || $t("points-mall.userFallback") }}
                                                             </span>
-                                                            <span :class="p.displayClass || ''">
+                                                            <span :class="p.displayClass || ''" :data-text="p.rewardName || p.name">
                                                                 {{ p.rewardName || p.name }}
                                                             </span>
                                                         </div>
@@ -491,7 +510,11 @@ watch(
                                             <div v-else-if="isNameCardProduct(p)" class="rounded-lg bg-base-200/50 p-3">
                                                 <div class="text-xs opacity-90 mb-2">{{ $t("points-mall.preview") }}</div>
                                                 <div class="flex items-start gap-2">
-                                                    <QQAvatar class="mt-2 size-8" :qq="user.qq || ''" :name="user.name || $t('points-mall.userFallback')" />
+                                                    <QQAvatar
+                                                        class="mt-2 size-8"
+                                                        :qq="user.qq || ''"
+                                                        :name="user.name || $t('points-mall.userFallback')"
+                                                    />
                                                     <div class="min-w-0 flex-1">
                                                         <div class="flex min-h-5 w-full items-center gap-1.5 text-sm text-base-content/80">
                                                             <span
@@ -562,8 +585,12 @@ watch(
                                             >
                                                 <span v-if="actionProductId === p.id" class="loading loading-spinner loading-xs" />
                                                 <span v-else>
-                                                    <span v-if="isTitleProduct(p) && p.assetId === equippedTitleId">{{ $t("points-mall.used") }}</span>
-                                                    <span v-else-if="isNameCardProduct(p) && p.assetId === equippedNameCardId">{{ $t("points-mall.used") }}</span>
+                                                    <span v-if="isTitleProduct(p) && p.assetId === equippedTitleId">{{
+                                                        $t("points-mall.used")
+                                                    }}</span>
+                                                    <span v-else-if="isNameCardProduct(p) && p.assetId === equippedNameCardId">{{
+                                                        $t("points-mall.used")
+                                                    }}</span>
                                                     <span v-else>{{ $t("points-mall.use") }}</span>
                                                 </span>
                                             </button>

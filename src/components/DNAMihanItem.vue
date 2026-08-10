@@ -11,7 +11,7 @@ defineProps<{
 </script>
 <template>
     <div class="grid grid-cols-3 gap-2">
-        <div v-if="missions.length === 0" class="flex justify-center items-center">
+        <div v-if="missions.length === 0" class="flex justify-center items-center col-span-3 py-5">
             <div class="loading loading-spinner loading-sm"></div>
         </div>
         <div v-for="(item, missionId) in missions" :key="missionId" class="flex flex-col justify-start items-center">

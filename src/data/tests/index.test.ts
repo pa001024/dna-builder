@@ -124,6 +124,16 @@ describe("数据完整性测试", () => {
         // 检查数据
         expect(exports).toContain("achievementData")
     })
+
+    it("魔之楔和图纸的副本来源不应重复", () => {
+        for (const dungeons of dataModule.modDungeonMap.values()) {
+            expect(new Set(dungeons.map(dungeon => dungeon.id)).size).toBe(dungeons.length)
+        }
+
+        for (const dungeons of dataModule.draftDungeonMap.values()) {
+            expect(new Set(dungeons.map(dungeon => dungeon.id)).size).toBe(dungeons.length)
+        }
+    })
 })
 
 // 测试模块使用场景

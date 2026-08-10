@@ -40,6 +40,8 @@ const DATA_PACK_MODULES = new Set([
     "charvoice.kr.data.ts",
     "optreward.data.ts",
     "reward.data.ts",
+    "condition.data.ts",
+    "rouge.data.ts",
     "cutoff.data.ts",
     "reputation.data.ts",
     "resource.data.ts",

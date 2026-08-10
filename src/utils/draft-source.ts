@@ -35,3 +35,25 @@ export function collectResourceDraftSources(resource: Resource): ResourceDraftSo
 
     return sources
 }
+
+/**
+ * 反查深境罗盘对应的图纸来源。
+ * @param ticketId 深境罗盘 ID
+ * @returns 图纸来源列表
+ */
+export function collectIronTicketDraftSources(ticketId: number): ResourceDraftSourceInfo[] {
+    const sources: ResourceDraftSourceInfo[] = []
+
+    for (const draft of draftData) {
+        if (draft.t !== "IronTicket" || draft.p !== ticketId) {
+            continue
+        }
+
+        sources.push({
+            key: `draft-${draft.id}-${ticketId}`,
+            draft,
+        })
+    }
+
+    return sources
+}

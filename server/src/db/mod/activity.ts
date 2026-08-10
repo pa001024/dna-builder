@@ -3,6 +3,7 @@ import { and, desc, eq, gte, inArray, lte } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
 import { db, schema } from ".."
 import type { Context } from "../yoga"
+import { verifyDataSyncAccess } from "./syncAccess"
 
 export const typeDefs = /* GraphQL */ `
     type Query {
@@ -20,7 +21,7 @@ export const typeDefs = /* GraphQL */ `
         "删除活动"
         deleteActivity(server: String!, id: Int!): Boolean!
         "批量上传并覆盖活动"
-        upsertActivitiesIngame(token: String!, server: String!, activities: [ActivityInput!]!): [Activity!]!
+        upsertActivitiesIngame(token: String, server: String!, activities: [ActivityInput!]!): [Activity!]!
     }
 
     type Activity {
@@ -55,15 +56,6 @@ export const typeDefs = /* GraphQL */ `
         desc: String!
     }
 `
-
-/**
- * 校验服务端同步令牌
- */
-function verifyApiToken(token: string) {
-    if (!token || token !== process.env.API_TOKEN) {
-        throw createGraphQLError("need api token")
-    }
-}
 
 /**
  * 校验 JWT 管理员权限
@@ -145,8 +137,8 @@ export const resolvers = {
                 .returning({ id: schema.activitiesIngame.id })
             return deleted.length > 0
         },
-        upsertActivitiesIngame: async (_parent, { token, server, activities }) => {
-            verifyApiToken(token)
+        upsertActivitiesIngame: async (_parent, { token, server, activities }, context) => {
+            verifyDataSyncAccess(token, context)
             return await db.transaction(async tx => {
                 const ids = [...new Set(activities.map((activity: { id: number }) => activity.id))]
                 if (ids.length === 0) {

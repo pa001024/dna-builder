@@ -608,7 +608,7 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 bg-linear-15 rounded"
                 :class="getIronTicketBackgroundById(value[1])"
             />
-            <SRouterLink v-if="!mini" :to="`/db/resource/${value[1]}`" stop class="hover:underline">
+            <SRouterLink v-if="!mini" :to="`/db/iron-ticket/${value[1]}`" stop class="hover:underline">
                 {{ iconticketMap.get(Number(value[1]))?.name || name }}
             </SRouterLink>
         </span>

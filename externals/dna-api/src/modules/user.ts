@@ -109,7 +109,7 @@ export class UserAPI extends DNASubModule {
     }
 
     async login(mobile: string, code: string) {
-        const data = { code: code, devCode: this.dev_code, gameList: DNA_GAME_ID, loginType: 1, mobile: mobile }
+        const data = { code, gameList: DNA_GAME_ID, loginType: 1, mobile }
         const res = await this._dna_request<DNAUserDataBean>("user/sdkLogin", data, { sign: true })
         if (res.is_success && res.data) {
             const data = res.data
@@ -217,7 +217,7 @@ export class UserAPI extends DNASubModule {
     }
 
     async oneTapLoginRestriction() {
-        return await this._dna_request("user/oneTapLoginRestriction")
+        return await this._dna_request<boolean>("user/oneTapLoginRestriction")
     }
 
     async recommendConfig() {
@@ -274,6 +274,10 @@ export class UserAPI extends DNASubModule {
 
     async getGameConfig() {
         return await this._dna_request<DNAGameConfigResponse[]>("config/getGameConfig")
+    }
+
+    async bulletin() {
+        return await this._dna_request<{}>("config/bulletin/get")
     }
 
     async getGameHeadCode() {

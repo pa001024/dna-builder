@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { modMap, resourceMap } from "@/data"
+import { iconticketMap } from "@/data/d/iconticket.data"
 import { LeveledMod } from "@/data/leveled/LeveledMod"
 import type { ResourceQuestSourceInfo } from "@/utils/resource-source"
 import { formatTimeRange } from "@/utils/time"
@@ -9,6 +10,7 @@ const props = defineProps<{
     questSources: ResourceQuestSourceInfo[]
     resourceId?: number
     modId?: number
+    ironTicketId?: number
 }>()
 
 const displayQuestSources = computed(() => props.questSources)
@@ -22,13 +24,20 @@ const totalQuestSourceNum = computed(() => {
 
 const resourceTarget = computed(() => (props.resourceId ? resourceMap.get(props.resourceId) || null : null))
 const modTarget = computed(() => (props.modId ? modMap.get(props.modId) || null : null))
-const sourceName = computed(() => resourceTarget.value?.name || modTarget.value?.名称 || String(props.resourceId ?? props.modId ?? ""))
+const ironTicketTarget = computed(() => (props.ironTicketId ? iconticketMap.get(props.ironTicketId) || null : null))
+const sourceName = computed(
+    () => resourceTarget.value?.name || modTarget.value?.名称 || ironTicketTarget.value?.name || String(props.resourceId ?? props.modId ?? props.ironTicketId ?? "")
+)
 const sourceIconUrl = computed(() => {
     if (resourceTarget.value?.icon) {
         return `/imgs/res/${resourceTarget.value.icon}.webp`
     }
 
-    return modTarget.value ? LeveledMod.url(modTarget.value.icon) : "/imgs/webp/T_Head_Empty.webp"
+    if (modTarget.value) {
+        return LeveledMod.url(modTarget.value.icon)
+    }
+
+    return ironTicketTarget.value?.icon ? `/imgs/res/${ironTicketTarget.value.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
 })
 </script>
 

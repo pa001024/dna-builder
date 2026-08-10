@@ -37,7 +37,7 @@ function extractAbyssIconName(url?: string): string {
         return ""
     }
 
-    const match = url.match(/Head_(.+?)\.png(?:\?.*)?$/i)
+    const match = url.match(/(?:^|\/)(?:T_)?(?:Head_)?([^/]+?)\.png(?:\?.*)?$/i)
     if (!match?.[1]) {
         return ""
     }
@@ -73,6 +73,10 @@ function buildIconIdMap<T extends { id: number; icon?: string }>(items: Iterable
 const charIconIdMap = buildIconIdMap(charMap.values())
 const weaponIconIdMap = buildIconIdMap(weaponMap.values())
 const petIconIdMap = buildIconIdMap(petMap.values())
+
+weaponIconIdMap.set("jicijuexiang", 20599)
+weaponIconIdMap.set("quanhuojiangxi", 10399)
+weaponIconIdMap.set("wuzhiwuxiu", 10299)
 
 /**
  * 反查深渊最佳阵容图片 URL 对应的上传 ID。

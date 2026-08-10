@@ -184,6 +184,50 @@ describe("CharBuild类测试", () => {
         expect(summonResult).toBeCloseTo(normalResult, 6)
     })
 
+    it("字段名含召唤物时应计入召唤物伤害，即使技能名不含召唤物", () => {
+        const baseBuild = new CharBuild({
+            char: new LeveledChar("艾达（？？）"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 0,
+            buffs: [],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "乐园构想",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "[召唤物·战车]技能伤害",
+        })
+        const buffedBuild = new CharBuild({
+            char: new LeveledChar("艾达（？？）"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 0,
+            buffs: [
+                new LeveledBuff({
+                    名称: "召唤物伤害测试",
+                    描述: "测试用召唤物伤害加成",
+                    召唤物伤害: 0.5,
+                }),
+            ],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "乐园构想",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "[召唤物·战车]技能伤害",
+        })
+
+        const baseDamage = baseBuild.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")
+        const buffedDamage = buffedBuild.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")
+
+        expect(baseDamage).toBeGreaterThan(0)
+        expect(buffedDamage).toBeGreaterThan(baseDamage)
+        expect(buffedDamage / baseDamage).toBeCloseTo(1.5, 5)
+    })
+
     it("[降灵]召唤物属性应按比例缩放召唤物伤害", () => {
         const baseBuild = new CharBuild({
             char: new LeveledChar("塔比瑟"),
@@ -1056,6 +1100,27 @@ describe("CharBuild类测试", () => {
 
             expect(damage.lowerCritNoTrigger).toBeCloseTo(0, 6)
             expect(damage.expectedDamage).toBeCloseTo(0, 6)
+        })
+
+        it("疑星落装备无止无休时应保持纯元素结算", () => {
+            const charBuild = new CharBuild({
+                char: new LeveledChar("煜明"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10299),
+                ranged: new LeveledWeapon(20601),
+                baseName: "疑星落",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+
+            expect(charBuild.skillWeapon?.伤害类型).toBe("灾厄")
+            expect(charBuild.calculate()).toBeGreaterThan(0)
         })
 
         it("同律武器的 type=下落攻击 应参与下落增伤判断", () => {

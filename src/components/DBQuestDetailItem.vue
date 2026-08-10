@@ -15,6 +15,17 @@ interface QuestNextOption {
     isContinuous: boolean
 }
 
+interface QuestSearchTarget {
+    nodeId: string
+    dialogueId: number
+    optionId?: number
+}
+
+interface QuestSearchMatch {
+    questId: number
+    target?: QuestSearchTarget
+}
+
 interface QuestDetailItem {
     id: number
     sr?: number
@@ -50,6 +61,7 @@ const highlightedQuestMap = reactive<Record<number, boolean>>({})
 const questElementMap = new Map<number, HTMLElement>()
 const questHighlightTimerMap = new Map<number, ReturnType<typeof setTimeout>>()
 const normalizedSearchKeyword = computed(() => props.searchKeyword?.trim() || "")
+const searchNavigationId = ref(0)
 
 /**
  * 异步加载当前语言的任务剧情数据，并避免过期请求覆盖最新状态。
@@ -218,17 +230,22 @@ function jumpToQuest(questId: number) {
  * @param nextIndex 目标索引
  */
 function jumpToMatchedQuest(nextIndex: number) {
-    if (!matchedQuestIds.value.length) {
+    if (!matchedQuestTargets.value.length) {
         return
     }
 
-    const total = matchedQuestIds.value.length
+    const total = matchedQuestTargets.value.length
     const normalizedIndex = ((nextIndex % total) + total) % total
     activeMatchIndex.value = normalizedIndex
 
-    const questId = matchedQuestIds.value[normalizedIndex]
-    if (questId) {
-        jumpToQuest(questId)
+    const match = matchedQuestTargets.value[normalizedIndex]
+    if (!match) {
+        return
+    }
+
+    searchNavigationId.value += 1
+    if (!match.target) {
+        jumpToQuest(match.questId)
     }
 }
 
@@ -327,16 +344,55 @@ const questDetails = computed<QuestDetailItem[]>(() => {
     })
 })
 
-const matchedQuestIds = computed(() => {
+const matchedQuestTargets = computed<QuestSearchMatch[]>(() => {
     const keyword = normalizedSearchKeyword.value
     if (!keyword) {
         return []
     }
 
-    return questDetails.value.filter(quest => quest.searchText.includes(keyword)).map(quest => quest.id)
+    return questDetails.value.flatMap(quest => {
+        const dialogueMatches = (quest.details?.nodes ?? []).flatMap(node => {
+            return (node.dialogues ?? []).flatMap(dialogue => {
+                const matches: QuestSearchMatch[] = []
+                if (formatStoryText(dialogue.content).includes(keyword)) {
+                    matches.push({
+                        questId: quest.id,
+                        target: {
+                            nodeId: node.id,
+                            dialogueId: dialogue.id,
+                        },
+                    })
+                }
+
+                for (const option of dialogue.options ?? []) {
+                    if (formatStoryText(option.content).includes(keyword)) {
+                        matches.push({
+                            questId: quest.id,
+                            target: {
+                                nodeId: node.id,
+                                dialogueId: dialogue.id,
+                                optionId: option.id,
+                            },
+                        })
+                    }
+                }
+
+                return matches
+            })
+        })
+
+        if (dialogueMatches.length) {
+            return dialogueMatches
+        }
+
+        return quest.searchText.includes(keyword) ? [{ questId: quest.id }] : []
+    })
 })
 
 const activeMatchIndex = ref(0)
+const activeSearchMatch = computed(() => matchedQuestTargets.value[activeMatchIndex.value])
+const activeSearchTarget = computed(() => activeSearchMatch.value?.target)
+const activeSearchQuestId = computed(() => activeSearchMatch.value?.questId)
 
 /**
  * 获取任务链版本号。
@@ -349,22 +405,20 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
 <template>
     <div class="space-y-3">
         <div
-            v-if="matchedQuestIds.length"
+            v-if="matchedQuestTargets.length"
             class="fixed bottom-6 right-6 z-1200 flex items-center gap-2 rounded-box border border-base-300 bg-base-100/95 p-2 shadow-lg backdrop-blur"
         >
             <button
                 type="button"
                 class="btn btn-ghost btn-xs"
-                :disabled="matchedQuestIds.length <= 1"
                 @click="jumpToMatchedQuest(activeMatchIndex - 1)"
             >
                 <Icon icon="ri:arrow-up-s-line" />
             </button>
-            <span class="min-w-12 text-center text-xs text-base-content/70">{{ activeMatchIndex + 1 }}/{{ matchedQuestIds.length }}</span>
+            <span class="min-w-12 text-center text-xs text-base-content/70">{{ activeMatchIndex + 1 }}/{{ matchedQuestTargets.length }}</span>
             <button
                 type="button"
                 class="btn btn-ghost btn-xs"
-                :disabled="matchedQuestIds.length <= 1"
                 @click="jumpToMatchedQuest(activeMatchIndex + 1)"
             >
                 <Icon icon="ri:arrow-down-s-line" />
@@ -507,6 +561,8 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
                         :quest-name="quest.details?.name || questChain.name"
                         :voice-language="selectedVoiceLocale"
                         :search-keyword="normalizedSearchKeyword"
+                        :search-target="activeSearchQuestId === quest.id ? activeSearchTarget : undefined"
+                        :search-target-request="activeSearchQuestId === quest.id ? searchNavigationId : undefined"
                     />
 
                     <div v-if="quest.reward" class="mt-2 pl-2">

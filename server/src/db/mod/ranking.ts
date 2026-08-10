@@ -60,10 +60,14 @@ function normalizeListItem(item: any) {
     }
 }
 
+type RankingListQueryResult = Awaited<ReturnType<typeof db.query.rankingLists.findMany>>[number] & {
+    items?: unknown[]
+}
+
 export const resolvers = {
     Query: {
         rankingLists: async (_parent, _args, _context, info) => {
-            const result = await db.query.rankingLists.findMany({
+            const result = (await db.query.rankingLists.findMany({
                 orderBy: [desc(schema.rankingLists.updateAt), desc(schema.rankingLists.createdAt)],
                 with: getSubSelection(info, "items")
                     ? {
@@ -78,7 +82,7 @@ export const resolvers = {
                           },
                       }
                     : undefined,
-            })
+            })) as RankingListQueryResult[]
 
             return result.map(list => ({
                 ...list,
@@ -88,7 +92,7 @@ export const resolvers = {
             }))
         },
         rankingList: async (_parent, args, _context, info) => {
-            const list = await db.query.rankingLists.findFirst({
+            const list = (await db.query.rankingLists.findFirst({
                 where: eq(schema.rankingLists.id, args.id),
                 with: getSubSelection(info, "items")
                     ? {
@@ -103,7 +107,7 @@ export const resolvers = {
                           },
                       }
                     : undefined,
-            })
+            })) as RankingListQueryResult | undefined
 
             if (!list) return null
 
@@ -163,7 +167,7 @@ export const resolvers = {
                     )
                 }
 
-                const result = await tx.query.rankingLists.findFirst({
+                const result = (await tx.query.rankingLists.findFirst({
                     where: eq(schema.rankingLists.id, list.id),
                     with: getSubSelection(info, "items")
                         ? {
@@ -178,7 +182,7 @@ export const resolvers = {
                               },
                           }
                         : undefined,
-                })
+                })) as RankingListQueryResult | undefined
 
                 if (!result) {
                     throw createGraphQLError("创建失败")
@@ -223,7 +227,7 @@ export const resolvers = {
                     )
                 }
 
-                const result = await tx.query.rankingLists.findFirst({
+                const result = (await tx.query.rankingLists.findFirst({
                     where: eq(schema.rankingLists.id, id),
                     with: getSubSelection(info, "items")
                         ? {
@@ -238,7 +242,7 @@ export const resolvers = {
                               },
                           }
                         : undefined,
-                })
+                })) as RankingListQueryResult | undefined
 
                 if (!result) {
                     throw createGraphQLError("更新失败")

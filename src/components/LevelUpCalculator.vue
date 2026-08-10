@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNARoleEntity } from "dna-api"
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue"
 import {
     charData,
     charMap,
@@ -16,17 +16,18 @@ import {
     weaponData,
     weaponMap,
 } from "@/data"
+import { dataPackBootstrapLoading, dataPackHydrationKey, isDataPackHydrated } from "@/data/data-pack-bridge"
 import {
     type CharLevelUpConfig,
+    LevelUpCalculator,
     type LevelUpResult,
     type ModLevelUpConfig,
     type TimeEstimateConfig,
     type WeaponLevelUpConfig,
 } from "@/data/LevelUpCalculator"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
-import { LevelUpCalculator } from "../data/LevelUpCalculator"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
 
 // 角色数据类型
 interface CharItem {
@@ -328,7 +329,20 @@ const latestRequestId = ref(0)
  * 计算结果
  */
 async function calculateResult() {
-    if (!levelUpCalculator.value) return
+    if (!levelUpCalculator.value || dataPackBootstrapLoading.value) return
+
+    if (!isDataPackHydrated()) {
+        result.value = {
+            ...LevelUpCalculator.mergeResults([]),
+            timeEstimate: {
+                days: 0,
+                hours: 0,
+                mins: 0,
+                dungeonTimes: {},
+            },
+        }
+        return
+    }
 
     // 递增请求ID并保存当前请求ID
     const requestId = ++latestRequestId.value
@@ -423,14 +437,13 @@ async function calculateResult() {
 }
 
 // 监听数据变化，重新计算结果
-import { watch } from "vue"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
 // 防抖函数，避免频繁计算导致UI卡顿
 let debounceTimer: number | null = null
 
 watch(
-    [chars, weapons, mods, excludedResources, timeEstimateConfig],
+    [chars, weapons, mods, excludedResources, timeEstimateConfig, dataPackHydrationKey, dataPackBootstrapLoading],
     () => {
         if (debounceTimer) {
             clearTimeout(debounceTimer)
@@ -504,6 +517,14 @@ const removeMod = (index: number) => {
 
 const clearMods = () => {
     mods.value = []
+}
+
+const clearChars = () => {
+    chars.value = []
+}
+
+const clearWeapons = () => {
+    weapons.value = []
 }
 
 /**
@@ -637,23 +658,83 @@ const handleBatchAddMods = () => {
 }
 
 const isOpenGraph = ref(false)
-const isTimeEstimateConfigOpen = ref(false)
+
+// 养成计划活动页签：角色 / 武器 / 魔之楔 / 估算配置 合并管理
+type PlanTab = "chars" | "weapons" | "mods" | "settings"
+const activePlanTab = ref<PlanTab>("chars")
+
+// 当前页签对应的添加动作
+const planTabAddActions: Partial<Record<PlanTab, () => void>> = {
+    chars: () => {
+        isBatchAddCharsModalOpen.value = true
+    },
+    weapons: () => {
+        isBatchAddWeaponsModalOpen.value = true
+    },
+    mods: () => {
+        isBatchAddModalOpen.value = true
+    },
+}
+
+// 页签徽标样式：仅当前页签使用主色，其余弱化
+const planTabBadgeClass = (tab: PlanTab) => (activePlanTab.value === tab ? "badge-primary" : "badge-ghost opacity-60")
+
+// 页签徽标计数；估算配置页签无计数
+const planTabCount = (tab: PlanTab): number | null => {
+    if (tab === "chars") return chars.value.length
+    if (tab === "weapons") return weapons.value.length
+    if (tab === "mods") return mods.value.length
+    return null
+}
+
+// 副本估算配置项，驱动模板渲染
+const timeEstimateFields = [
+    { key: "dungeonDropRateBonusPercent", label: "掉落率加成(%)", min: -100, max: 1000, step: 1 },
+    { key: "dungeonTimeMultiplier", label: "副本耗时倍率", min: 0.01, max: 20, step: 0.01 },
+] as const
+
+const dungeonTimeFields = [
+    { key: "Defense", label: "扼守", hint: "单次时间(分钟)" },
+    { key: "ExtermPro", label: "驱离", hint: "单次时间(分钟)" },
+    { key: "SurvivalMiniPro", label: "避险", hint: "单次时间(分钟)" },
+] as const
 </script>
 
 <template>
     <div class="h-full relative">
         <ScrollArea class="h-full">
-            <div class="p-4 flex flex-col justify-center items-center gap-4">
-                <!-- 角色养成 -->
-                <section class="w-full">
-                    <div class="flex items-center justify-between mb-2 p-2">
-                        <h3 class="text-xl font-semibold text-base-content flex items-center gap-2">
-                            <Icon icon="ri:user-line" />
-                            角色养成
-                        </h3>
-                        <div class="flex gap-2">
+            <div class="max-w-7xl mx-auto p-4 md:p-6 flex flex-col gap-6">
+                <!-- ============ 输入区：养成计划 ============ -->
+                <section class="rounded-2xl bg-base-100/50 backdrop-blur-sm border border-base-200 shadow-lg overflow-hidden">
+                    <!-- 页签导航 -->
+                    <div class="px-4 pt-2 bg-linear-to-r from-primary/8 to-transparent">
+                        <AniTabs
+                            v-model="activePlanTab"
+                            :tabs="[
+                                { label: '角色', value: 'chars' },
+                                { label: '武器', value: 'weapons' },
+                                { label: '魔之楔', value: 'mods' },
+                                { label: '估算配置', value: 'settings' },
+                            ]"
+                        >
+                            <template #label="{ tab }">
+                                {{ tab.label }}
+                                <span
+                                    v-if="planTabCount(tab.value as PlanTab) !== null"
+                                    class="badge badge-sm ml-1.5 transition-colors"
+                                    :class="planTabBadgeClass(tab.value as PlanTab)"
+                                >
+                                    {{ planTabCount(tab.value as PlanTab) }}
+                                </span>
+                            </template>
+                        </AniTabs>
+                    </div>
+
+                    <!-- 上下文工具栏 -->
+                    <div class="flex items-center gap-2 px-4 py-2.5 border-b border-base-content/10">
+                        <template v-if="activePlanTab === 'chars'">
                             <button
-                                class="btn btn-primary btn-sm gap-2"
+                                class="btn btn-ghost btn-sm gap-1.5"
                                 @click="syncChars"
                                 :disabled="syncing || chars.length === 0"
                                 aria-label="同步角色信息"
@@ -662,112 +743,19 @@ const isTimeEstimateConfigOpen = ref(false)
                                 <Icon v-else icon="ri:refresh-line" />
                                 同步角色
                             </button>
-                            <button class="btn btn-primary btn-sm gap-2" @click="isBatchAddCharsModalOpen = true" aria-label="批量添加角色">
-                                <span class="text-xl font-bold">+</span>
-                                添加角色
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-4">
-                        <div
-                            v-for="(char, index) in chars"
-                            :key="index"
-                            class="card bg-base-200 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg"
-                        >
-                            <div class="card-body p-4">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex-1 max-w-xs">
-                                        <CharSelect v-model="char.id" mainKey="id" class="w-full" />
-                                    </div>
-                                    <button class="btn btn-error btn-sm" @click="removeChar(index)" aria-label="删除角色">删除</button>
-                                </div>
-
-                                <!-- 角色信息卡片 -->
-                                <div v-if="charMap.get(char.id)" class="bg-base-100 rounded-xl p-4 mb-4 flex items-center gap-4">
-                                    <div class="relative bg-linear-15 from-yellow-500/80 to-yellow-700/80 rounded-lg overflow-hidden">
-                                        <img
-                                            :src="LeveledChar.url(charMap.get(char.id)?.icon)"
-                                            alt="角色图片"
-                                            class="w-20 h-20 object-cover"
-                                        />
-                                        <div class="absolute top-1 -left-1">
-                                            <img
-                                                :src="LeveledChar.elementUrl(charMap.get(char.id)!.属性!)"
-                                                alt="角色图片"
-                                                class="w-8 h-4 object-cover rounded-lg"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div class="flex-1">
-                                        <SRouterLink :to="`/db/char/${char.id}`" class="text-md font-semibold hover:underline">
-                                            {{ charMap.get(char.id)?.名称 }}
-                                        </SRouterLink>
-                                        <div class="mt-1">
-                                            <label class="flex flex-col gap-1">
-                                                <span class="text-xs opacity-80">选择等级</span>
-                                                <RangeSelector
-                                                    class="w-40"
-                                                    v-model:from="char.config.currentLevel"
-                                                    v-model:to="char.config.targetLevel"
-                                                    :min="1"
-                                                    :max="80"
-                                                />
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- 技能部分 -->
-                                <div>
-                                    <h5 class="text-md font-semibold mb-3 flex items-center gap-2">
-                                        <span class="text-lg">
-                                            <Icon icon="ri:flashlight-line" />
-                                        </span>
-                                        技能
-                                    </h5>
-                                    <div class="flex flex-col gap-3">
-                                        <div
-                                            v-if="charMap.get(char.id)?.技能"
-                                            v-for="(skill, skillIndex) in charMap.get(char.id)?.技能.slice(0, 3) || []"
-                                            :key="skillIndex"
-                                            class="flex items-center gap-4 bg-base-100 p-3 rounded-lg"
-                                        >
-                                            <div class="shrink-0 rounded-full overflow-hidden">
-                                                <div
-                                                    alt="技能图标"
-                                                    class="size-10 rounded-full bg-base-content"
-                                                    :style="{ mask: `url(${LeveledSkill.url(skill.icon)}) no-repeat center/contain` }"
-                                                />
-                                            </div>
-                                            <div class="flex-1">
-                                                <div class="text-sm font-medium">{{ skill.名称 }}</div>
-                                            </div>
-                                            <RangeSelector
-                                                class="w-40"
-                                                v-model:from="char.config.skills[skillIndex].currentLevel"
-                                                v-model:to="char.config.skills[skillIndex].targetLevel"
-                                                :min="1"
-                                                :max="10"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 武器养成 -->
-                <section class="w-full">
-                    <div class="flex items-center justify-between mb-2 p-2">
-                        <h3 class="text-xl font-semibold text-base-content flex items-center gap-2">
-                            <Icon icon="ri:sword-line" />
-                            武器养成
-                        </h3>
-                        <div class="flex gap-2">
                             <button
-                                class="btn btn-primary btn-sm gap-2"
+                                class="btn btn-ghost btn-sm gap-1.5"
+                                @click="clearChars"
+                                :disabled="chars.length === 0"
+                                aria-label="清空角色"
+                            >
+                                <Icon icon="ri:delete-bin-line" />
+                                清空
+                            </button>
+                        </template>
+                        <template v-else-if="activePlanTab === 'weapons'">
+                            <button
+                                class="btn btn-ghost btn-sm gap-1.5"
                                 @click="syncWeapons"
                                 :disabled="syncing || weapons.length === 0"
                                 aria-label="同步武器信息"
@@ -777,454 +765,528 @@ const isTimeEstimateConfigOpen = ref(false)
                                 同步武器
                             </button>
                             <button
-                                class="btn btn-primary btn-sm gap-2"
-                                @click="isBatchAddWeaponsModalOpen = true"
-                                aria-label="批量添加武器"
+                                class="btn btn-ghost btn-sm gap-1.5"
+                                @click="clearWeapons"
+                                :disabled="weapons.length === 0"
+                                aria-label="清空武器"
                             >
-                                <span class="text-xl font-bold">+</span>
+                                <Icon icon="ri:delete-bin-line" />
+                                清空
+                            </button>
+                        </template>
+                        <template v-else-if="activePlanTab === 'mods'">
+                            <button
+                                class="btn btn-ghost btn-sm gap-1.5"
+                                @click="clearMods"
+                                :disabled="mods.length === 0"
+                                aria-label="清空魔之楔"
+                            >
+                                <Icon icon="ri:delete-bin-line" />
+                                清空
+                            </button>
+                        </template>
+                        <span class="ml-auto text-xs text-base-content/40 hidden sm:block"
+                            >共 {{ chars.length + weapons.length + mods.length }} 项计划</span
+                        >
+                        <button
+                            v-if="planTabAddActions[activePlanTab]"
+                            class="btn btn-primary btn-sm gap-1.5 rounded-full px-4"
+                            @click="planTabAddActions[activePlanTab]?.()"
+                            aria-label="批量添加"
+                        >
+                            <Icon icon="ri:add-line" class="text-base font-bold" />
+                            批量添加
+                        </button>
+                    </div>
+
+                    <!-- ===== 角色面板 ===== -->
+                    <div v-show="activePlanTab === 'chars'" class="p-4">
+                        <div
+                            v-if="chars.length"
+                            class="flex flex-col rounded-xl border border-base-content/10 divide-y divide-base-content/8 overflow-hidden"
+                        >
+                            <div
+                                v-for="(char, index) in chars"
+                                :key="index"
+                                class="group flex items-center gap-3 px-4 py-3 hover:bg-primary/5 transition-colors duration-200"
+                            >
+                                <!-- 左侧：标题行 + range 行 -->
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="relative bg-linear-15 from-yellow-500/80 to-yellow-700/80 rounded-lg overflow-hidden shrink-0"
+                                        >
+                                            <img
+                                                :src="LeveledChar.url(charMap.get(char.id)?.icon)"
+                                                alt="角色图片"
+                                                class="size-11 object-cover"
+                                            />
+                                            <img
+                                                v-if="charMap.get(char.id)?.属性"
+                                                :src="LeveledChar.elementUrl(charMap.get(char.id)!.属性!)"
+                                                alt="角色属性"
+                                                class="absolute top-0.5 left-0.5 w-5 h-2.5 object-cover rounded"
+                                            />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <SRouterLink
+                                                :to="`/db/char/${char.id}`"
+                                                class="block font-semibold truncate hover:text-primary hover:underline transition-colors"
+                                            >
+                                                {{ charMap.get(char.id)?.名称 }}
+                                            </SRouterLink>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+                                        <label class="flex items-center gap-1.5">
+                                            <span class="text-xs text-base-content/50">等级</span>
+                                            <RangeSelector
+                                                class="w-28 sm:w-32"
+                                                v-model:from="char.config.currentLevel"
+                                                v-model:to="char.config.targetLevel"
+                                                :min="1"
+                                                :max="80"
+                                            />
+                                        </label>
+                                        <div
+                                            v-for="(skill, skillIndex) in charMap.get(char.id)?.技能.slice(0, 3) || []"
+                                            :key="skillIndex"
+                                            class="flex items-center gap-2"
+                                        >
+                                            <Tooltip :tooltip="skill.名称">
+                                                <div class="shrink-0 rounded-full overflow-hidden">
+                                                    <div
+                                                        alt="技能图标"
+                                                        class="size-6 rounded-full bg-base-content"
+                                                        :style="{ mask: `url(${LeveledSkill.url(skill.icon)}) no-repeat center/contain` }"
+                                                    />
+                                                </div>
+                                            </Tooltip>
+                                            <RangeSelector
+                                                class="w-28"
+                                                v-model:from="char.config.skills[skillIndex].currentLevel"
+                                                v-model:to="char.config.skills[skillIndex].targetLevel"
+                                                :min="1"
+                                                :max="10"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 右侧独立删除列 -->
+                                <button
+                                    class="btn btn-ghost btn-sm btn-square shrink-0 self-stretch h-auto text-base-content/30 hover:text-error transition-colors"
+                                    @click="removeChar(index)"
+                                    aria-label="删除角色"
+                                >
+                                    <Icon icon="ri:delete-bin-line" />
+                                </button>
+                            </div>
+                        </div>
+                        <div v-else class="flex flex-col items-center justify-center gap-3 py-12">
+                            <Icon icon="ri:user-line" class="text-4xl text-base-content/20" />
+                            <p class="text-sm text-base-content/50">还没有角色养成计划</p>
+                            <button class="btn btn-primary btn-sm gap-1.5 rounded-full px-4" @click="isBatchAddCharsModalOpen = true">
+                                <Icon icon="ri:add-line" class="text-base font-bold" />
+                                添加角色
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ===== 武器面板 ===== -->
+                    <div v-show="activePlanTab === 'weapons'" class="p-4">
+                        <div
+                            v-if="weapons.length"
+                            class="flex flex-col rounded-xl border border-base-content/10 divide-y divide-base-content/8 overflow-hidden"
+                        >
+                            <div
+                                v-for="(weapon, index) in weapons"
+                                :key="index"
+                                class="group flex items-center gap-3 px-4 py-3 hover:bg-primary/5 transition-colors duration-200"
+                            >
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="relative bg-linear-15 from-yellow-500/80 to-yellow-700/80 rounded-lg overflow-hidden shrink-0"
+                                        >
+                                            <img
+                                                :src="LeveledWeapon.url(weaponMap.get(weapon.id)?.icon)"
+                                                alt="武器图片"
+                                                class="size-11 object-cover"
+                                            />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <SRouterLink
+                                                :to="`/db/weapon/${weapon.id}`"
+                                                class="block font-semibold truncate hover:text-primary hover:underline transition-colors"
+                                            >
+                                                {{ weaponMap.get(weapon.id)?.名称 }}
+                                            </SRouterLink>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+                                        <label class="flex items-center gap-1.5">
+                                            <span class="text-xs text-base-content/50">等级</span>
+                                            <RangeSelector
+                                                class="w-28 sm:w-32"
+                                                v-model:from="weapon.config.currentLevel"
+                                                v-model:to="weapon.config.targetLevel"
+                                                :min="1"
+                                                :max="80"
+                                            />
+                                        </label>
+                                        <label class="flex items-center gap-1.5">
+                                            <span class="text-xs text-base-content/50">熔炼</span>
+                                            <RangeSelector
+                                                class="w-24 sm:w-28"
+                                                v-model:from="weapon.config.currentRefine"
+                                                v-model:to="weapon.config.targetRefine"
+                                                :min="0"
+                                                :max="5"
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+                                <button
+                                    class="btn btn-ghost btn-sm btn-square shrink-0 self-stretch h-auto text-base-content/30 hover:text-error transition-colors"
+                                    @click="removeWeapon(index)"
+                                    aria-label="删除武器"
+                                >
+                                    <Icon icon="ri:delete-bin-line" />
+                                </button>
+                            </div>
+                        </div>
+                        <div v-else class="flex flex-col items-center justify-center gap-3 py-12">
+                            <Icon icon="ri:sword-line" class="text-4xl text-base-content/20" />
+                            <p class="text-sm text-base-content/50">还没有武器养成计划</p>
+                            <button class="btn btn-primary btn-sm gap-1.5 rounded-full px-4" @click="isBatchAddWeaponsModalOpen = true">
+                                <Icon icon="ri:add-line" class="text-base font-bold" />
                                 添加武器
                             </button>
                         </div>
                     </div>
 
-                    <div class="flex flex-col gap-4">
-                        <div
-                            v-for="(weapon, index) in weapons"
-                            :key="index"
-                            class="card bg-base-200 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg"
-                        >
-                            <div class="card-body p-4">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex-1 max-w-xs">
-                                        <WeaponSelect mainKey="id" v-model="weapon.id" class="w-full" />
-                                    </div>
-                                    <button class="btn btn-error btn-sm" @click="removeWeapon(index)" aria-label="删除武器">删除</button>
-                                </div>
-
-                                <!-- 武器信息卡片 -->
-                                <div v-if="weaponMap.get(weapon.id)" class="bg-base-100 rounded-xl p-4 flex items-center gap-4">
-                                    <div class="relative bg-linear-15 from-yellow-500/80 to-yellow-700/80 rounded-lg overflow-hidden">
-                                        <img
-                                            :src="LeveledWeapon.url(weaponMap.get(weapon.id)?.icon)"
-                                            alt="武器图片"
-                                            class="w-16 h-16 object-cover"
-                                        />
-                                    </div>
-                                    <div class="flex-1">
-                                        <SRouterLink :to="`/db/weapon/${weapon.id}`" class="text-md font-semibold hover:underline">
-                                            {{ weaponMap.get(weapon.id)?.名称 }}
-                                        </SRouterLink>
-                                        <div class="mt-1 flex gap-4">
-                                            <label class="flex flex-col gap-1">
-                                                <span class="text-xs opacity-80">选择等级</span>
-                                                <RangeSelector
-                                                    class="w-40"
-                                                    v-model:from="weapon.config.currentLevel"
-                                                    v-model:to="weapon.config.targetLevel"
-                                                    :min="1"
-                                                    :max="80"
-                                                />
-                                            </label>
-                                            <label class="flex flex-col gap-1">
-                                                <span class="text-xs opacity-80">熔炼等级</span>
-                                                <RangeSelector
-                                                    class="w-40"
-                                                    v-model:from="weapon.config.currentRefine"
-                                                    v-model:to="weapon.config.targetRefine"
-                                                    :min="0"
-                                                    :max="5"
-                                                />
-                                            </label>
+                    <!-- ===== 魔之楔面板 ===== -->
+                    <div v-show="activePlanTab === 'mods'" class="p-4">
+                        <div v-if="mods.length" class="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-3">
+                            <div
+                                v-for="(mod, index) in mods"
+                                :key="index"
+                                class="group relative flex items-center gap-3 rounded-xl border border-base-content/10 px-3.5 py-3 hover:border-primary/40 hover:bg-primary/5 transition-all duration-200"
+                            >
+                                <span
+                                    class="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-0.5 rounded-full bg-primary/0 group-hover:bg-primary/60 transition-colors"
+                                />
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="relative bg-linear-15 from-yellow-500/80 to-yellow-700/80 rounded-lg overflow-hidden shrink-0"
+                                        >
+                                            <img
+                                                :src="LeveledMod.url(modMap.get(mod.id)?.icon)"
+                                                alt="魔之楔图片"
+                                                class="size-11 object-cover"
+                                            />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <SRouterLink
+                                                :to="`/db/mod/${mod.id}`"
+                                                class="block font-semibold truncate hover:text-primary hover:underline transition-colors"
+                                            >
+                                                {{ modMap.get(mod.id)?.名称 }}
+                                            </SRouterLink>
                                         </div>
                                     </div>
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <RangeSelector
+                                            class="flex-1 min-w-0"
+                                            v-model:from="mod.config.currentLevel"
+                                            v-model:to="mod.config.targetLevel"
+                                            :min="0"
+                                            :max="10"
+                                        />
+                                        <Select class="input input-sm w-16 shrink-0" v-model="mod.config.count" aria-label="数量">
+                                            <SelectItem v-for="i in 8" :key="i" :value="i">×{{ i }}</SelectItem>
+                                        </Select>
+                                    </div>
                                 </div>
+                                <button
+                                    class="btn btn-ghost btn-sm btn-square shrink-0 self-stretch h-auto text-base-content/30 hover:text-error transition-colors"
+                                    @click="removeMod(index)"
+                                    aria-label="删除魔之楔"
+                                >
+                                    <Icon icon="ri:delete-bin-line" />
+                                </button>
                             </div>
                         </div>
-                    </div>
-                </section>
-
-                <!-- 魔之楔养成 -->
-                <section class="w-full">
-                    <div class="flex items-center justify-between mb-2 p-2">
-                        <h3 class="text-xl font-semibold text-base-content flex items-center gap-2">
-                            <Icon icon="po-A" />
-                            魔之楔养成
-                        </h3>
-                        <div class="flex gap-2">
-                            <button class="btn btn-primary btn-sm gap-2" @click="clearMods" aria-label="清空">清空</button>
-                            <button class="btn btn-primary btn-sm gap-2" @click="isBatchAddModalOpen = true" aria-label="批量添加魔之楔">
-                                <span class="text-xl font-bold">+</span>
+                        <div v-else class="flex flex-col items-center justify-center gap-3 py-12">
+                            <Icon icon="po-A" class="text-4xl text-base-content/20" />
+                            <p class="text-sm text-base-content/50">还没有魔之楔养成计划</p>
+                            <button class="btn btn-primary btn-sm gap-1.5 rounded-full px-4" @click="isBatchAddModalOpen = true">
+                                <Icon icon="ri:add-line" class="text-base font-bold" />
                                 添加魔之楔
                             </button>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-[repeat(auto-fill,minmax(450px,1fr))] gap-4">
-                        <div
-                            v-for="(mod, index) in mods"
-                            :key="index"
-                            class="card bg-base-200 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg"
-                        >
-                            <div class="card-body p-2">
-                                <!-- 魔之楔信息卡片 -->
-                                <div v-if="modMap.get(mod.id)" class="rounded-xl p-2 flex items-center gap-4">
-                                    <div class="relative bg-linear-15 from-yellow-500/80 to-yellow-700/80 rounded-lg overflow-hidden">
-                                        <img
-                                            :src="LeveledMod.url(modMap.get(mod.id)?.icon)"
-                                            alt="魔之楔图片"
-                                            class="size-12 object-cover"
-                                        />
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="mt-1 flex items-center gap-4">
-                                            <div class="flex flex-1 justify-between">
-                                                <SRouterLink :to="`/db/mod/${mod.id}`" class="text-md font-semibold hover:underline">
-                                                    {{ modMap.get(mod.id)?.名称 }}
-                                                </SRouterLink>
-                                            </div>
-                                            <label class="flex flex-col gap-1">
-                                                <span class="text-xs opacity-80">选择等级</span>
-                                                <RangeSelector
-                                                    class="w-full"
-                                                    v-model:from="mod.config.currentLevel"
-                                                    v-model:to="mod.config.targetLevel"
-                                                    :min="0"
-                                                    :max="10"
-                                                />
-                                            </label>
-                                            <label class="flex flex-col gap-1">
-                                                <span class="text-xs opacity-80">选择数量</span>
-                                                <Select class="input input-sm w-full" v-model="mod.config.count">
-                                                    <SelectItem v-for="i in 8" :key="i" :value="i">{{ i }}</SelectItem>
-                                                </Select>
-                                            </label>
-                                            <label class="flex flex-col gap-1">
-                                                <span class="text-xs opacity-80">操作</span>
-                                                <button class="btn btn-error btn-sm" @click="removeMod(index)" aria-label="删除魔之楔">
-                                                    <Icon icon="ri:delete-bin-line" />
-                                                </button>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="w-full">
-                    <div
-                        class="collapse bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
-                        :class="{ 'collapse-open': isTimeEstimateConfigOpen }"
-                    >
-                        <div
-                            class="flex items-center justify-between gap-2 p-4 cursor-pointer"
-                            @click="isTimeEstimateConfigOpen = !isTimeEstimateConfigOpen"
-                        >
-                            <div class="flex items-center gap-2">
-                                <Icon icon="ri:settings-3-line" />
-                                <h3 class="text-lg font-semibold">副本估算配置</h3>
-                            </div>
-                            <Icon
-                                icon="radix-icons:chevron-down"
-                                class="transition-transform duration-200"
-                                :class="{ 'rotate-180': isTimeEstimateConfigOpen }"
-                            />
-                        </div>
-                        <div class="collapse-content px-4 pb-4">
-                            <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
-                                <label class="flex flex-col gap-1">
-                                    <span class="text-xs opacity-80">掉落率加成(%)</span>
-                                    <input
-                                        v-model.number="timeEstimateConfig.dungeonDropRateBonusPercent"
-                                        type="number"
-                                        class="input input-sm w-full"
-                                        min="-100"
-                                        max="1000"
-                                        step="1"
-                                    />
-                                </label>
-                                <label class="flex flex-col gap-1">
-                                    <span class="text-xs opacity-80">副本耗时倍率</span>
-                                    <input
-                                        v-model.number="timeEstimateConfig.dungeonTimeMultiplier"
-                                        type="number"
-                                        class="input input-sm w-full"
-                                        min="0.01"
-                                        max="20"
-                                        step="0.01"
-                                    />
-                                </label>
-                                <label class="flex flex-col gap-1">
-                                    <span class="text-xs opacity-80">扼守单次时间(分钟)</span>
-                                    <input
-                                        v-model.number="timeEstimateConfig.dungeonTypeTimes.Defense"
-                                        type="number"
-                                        class="input input-sm w-full"
-                                        min="0.01"
-                                        max="60"
-                                        step="0.1"
-                                    />
-                                </label>
-                                <label class="flex flex-col gap-1">
-                                    <span class="text-xs opacity-80">驱离单次时间(分钟)</span>
-                                    <input
-                                        v-model.number="timeEstimateConfig.dungeonTypeTimes.ExtermPro"
-                                        type="number"
-                                        class="input input-sm w-full"
-                                        min="0.01"
-                                        max="60"
-                                        step="0.1"
-                                    />
-                                </label>
-                                <label class="flex flex-col gap-1">
-                                    <span class="text-xs opacity-80">避险单次时间(分钟)</span>
-                                    <input
-                                        v-model.number="timeEstimateConfig.dungeonTypeTimes.SurvivalMiniPro"
-                                        type="number"
-                                        class="input input-sm w-full"
-                                        min="0.01"
-                                        max="60"
-                                        step="0.1"
-                                    />
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-            <div class="p-4 flex justify-center">
-                <!-- 结果显示 -->
-                <div v-if="result" class="w-full">
-                    <h3 class="text-xl font-bold text-base-content mb-6 flex items-center gap-2">
-                        <div class="flex items-center gap-2">
-                            <Icon icon="ri:bar-chart-line" />
-                            结果
-                        </div>
-                        <div
-                            class="ml-auto cursor-pointer text-primary flex items-center gap-2 hover:underline"
-                            @click="isOpenGraph = true"
-                        >
-                            <Icon icon="ri:git-branch-line" />
-                            点击查看关系图
-                        </div>
-                    </h3>
-
-                    <!-- 时间估算 -->
-                    <div
-                        v-if="result.timeEstimate"
-                        class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
-                    >
-                        <div class="card-body p-6">
-                            <div class="flex text-lg items-center mb-4 gap-2">
-                                <Icon icon="ri:time-line" />
-                                <h4 class="font-semibold">时间估算</h4>
-                            </div>
-                            <div class="text-3xl md:text-4xl font-bold">
-                                {{ result.timeEstimate.days }} 天 {{ result.timeEstimate.hours }} 小时 {{ result.timeEstimate.mins }} 分钟
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 副本次数 -->
-                    <div
-                        v-if="result.timeEstimate"
-                        class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
-                    >
-                        <div class="card-body p-6">
-                            <div class="flex text-lg items-center mb-4 gap-2">
-                                <Icon icon="ri:refresh-line" />
-                                <h4 class="font-semibold">副本次数</h4>
-                            </div>
-                            <SRouterLink
-                                :to="`/db/dungeon/${dungeon.id}`"
-                                v-for="[dungeon, [times, reason]] in Object.entries(result.timeEstimate.dungeonTimes).map(
-                                    v => [dungeonMap.get(+v[0]), v[1]] as [Dungeon, [number, string]]
-                                )"
-                                :key="dungeon.id"
-                                class="p-3 bg-base-200 rounded-xl hover:bg-base-300 transition-colors duration-200"
+                    <!-- ===== 估算配置面板 ===== -->
+                    <div v-show="activePlanTab === 'settings'" class="p-4">
+                        <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+                            <label
+                                v-for="field in timeEstimateFields"
+                                :key="field.key"
+                                class="flex flex-col gap-1.5 rounded-xl border border-base-content/10 px-3.5 py-3 focus-within:border-primary/50 transition-colors"
                             >
-                                <div class="flex items-start justify-between">
-                                    <div>
-                                        <div class="font-medium flex gap-2 items-center">
-                                            <img
-                                                v-if="dungeon.e"
-                                                :src="LeveledChar.elementUrl(dungeon.e)"
-                                                class="h-8 w-4 object-cover inline-block rounded"
-                                            />
-                                            {{ getDungeonName(dungeon) }} * {{ times }}次 ({{ reason }})
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col items-end gap-1">
-                                        <span class="text-xs px-2 py-0.5 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">
-                                            {{ getDungeonType(dungeon.t).label }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                    <span>怪物: {{ (dungeon.m || []).length }}种</span>
-                                    <span v-if="(dungeon.sm || []).length">特殊: {{ (dungeon.sm || []).length }}个</span>
-                                    <span v-if="dungeon.r?.length"> 奖励: {{ getDungeonRewardNames(dungeon) }} </span>
-                                    <span class="ml-auto">ID: {{ dungeon.id }}</span>
-                                    <span class="text-xs opacity-70">Lv.{{ dungeon.lv }}</span>
-                                </div>
-                            </SRouterLink>
+                                <span class="text-xs text-base-content/50">{{ field.label }}</span>
+                                <input
+                                    v-model.number="timeEstimateConfig[field.key]"
+                                    type="number"
+                                    class="w-full bg-transparent font-medium outline-none"
+                                    :min="field.min"
+                                    :max="field.max"
+                                    :step="field.step"
+                                />
+                            </label>
+                            <label
+                                v-for="field in dungeonTimeFields"
+                                :key="field.key"
+                                class="flex flex-col gap-1.5 rounded-xl border border-base-content/10 px-3.5 py-3 focus-within:border-primary/50 transition-colors"
+                            >
+                                <span class="text-xs text-base-content/50">{{ field.label }} · {{ field.hint }}</span>
+                                <input
+                                    v-model.number="timeEstimateConfig.dungeonTypeTimes[field.key]"
+                                    type="number"
+                                    class="w-full bg-transparent font-medium outline-none"
+                                    min="0.01"
+                                    max="60"
+                                    step="0.1"
+                                />
+                            </label>
                         </div>
+                        <p class="mt-3 text-xs text-base-content/40">以上参数仅影响时间估算结果，不影响资源消耗统计</p>
                     </div>
+                </section>
 
-                    <!-- 资源过滤状态 -->
-                    <div
-                        v-if="excludedResources.size > 0"
-                        class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
-                    >
-                        <div class="card-body p-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex text-lg items-center gap-2">
-                                    <Icon icon="ri:filter-line" />
-                                    <h4 class="font-semibold text-base-content">已过滤资源</h4>
+                <!-- ============ 输出区 ============ -->
+                <template v-if="result">
+                    <!-- 概览：时间估算 + 副本次数 -->
+                    <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+                        <section
+                            class="xl:col-span-2 rounded-2xl border border-primary/25 bg-linear-to-br from-primary/15 via-primary/5 to-transparent shadow-lg p-6"
+                        >
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2 text-sm text-base-content/60">
+                                    <Icon icon="ri:time-line" />
+                                    预计养成时间
                                 </div>
-                                <button class="btn btn-sm btn-secondary" @click="clearResourceFilters">
-                                    <Icon icon="codicon:chrome-close" />
-                                    清除过滤
+                                <button
+                                    class="btn btn-ghost btn-xs gap-1 text-primary"
+                                    @click="isOpenGraph = true"
+                                    aria-label="查看资源关系图"
+                                >
+                                    <Icon icon="ri:git-branch-line" />
+                                    资源关系图
                                 </button>
                             </div>
-                            <div class="flex flex-wrap gap-2">
-                                <span
-                                    v-for="resource in excludedResources"
-                                    :key="resource"
-                                    class="px-3 py-1 bg-error/20 text-error rounded-full text-sm flex items-center gap-1"
-                                >
-                                    <span>{{ $t(resource) }}</span>
-                                    <button @click.stop="toggleResourceFilter(resource)" class="text-xs hover:underline">
-                                        <Icon icon="codicon:chrome-close" class="h-3 w-3" />
-                                    </button>
-                                </span>
+                            <div v-if="result.timeEstimate" class="mt-4 flex items-end gap-5">
+                                <div>
+                                    <span class="text-5xl font-black tracking-tight text-primary">{{ result.timeEstimate.days }}</span>
+                                    <span class="ml-1 text-sm text-base-content/60">天</span>
+                                </div>
+                                <div class="pb-1 flex items-baseline gap-3 text-base-content/80">
+                                    <span
+                                        ><b class="text-2xl font-bold">{{ result.timeEstimate.hours }}</b>
+                                        <span class="text-xs text-base-content/50">小时</span></span
+                                    >
+                                    <span
+                                        ><b class="text-2xl font-bold">{{ result.timeEstimate.mins }}</b>
+                                        <span class="text-xs text-base-content/50">分钟</span></span
+                                    >
+                                </div>
                             </div>
-                        </div>
+                            <p v-if="result.timeEstimate" class="mt-4 text-xs text-base-content/40">
+                                需挑战 {{ Object.keys(result.timeEstimate.dungeonTimes).length }} 种副本 · 按当前配置估算
+                            </p>
+                        </section>
+
+                        <section
+                            v-if="result.timeEstimate"
+                            class="xl:col-span-3 rounded-2xl bg-base-100/50 backdrop-blur-sm border border-base-200 shadow-lg"
+                        >
+                            <div class="flex items-center gap-2.5 px-5 pt-4 pb-2">
+                                <Icon icon="ri:refresh-line" class="text-primary" />
+                                <h2 class="font-semibold">副本次数</h2>
+                                <span class="badge badge-sm badge-ghost">{{ Object.keys(result.timeEstimate.dungeonTimes).length }}</span>
+                            </div>
+                            <ScrollArea class="h-[60vh] max-h-[60vh]">
+                                <div class="px-5 pb-4 pt-1 flex flex-col gap-2">
+                                    <SRouterLink
+                                        :to="`/db/dungeon/${dungeon.id}`"
+                                        v-for="[dungeon, [times, reason]] in Object.entries(result.timeEstimate.dungeonTimes).map(
+                                            v => [dungeonMap.get(+v[0]), v[1]] as [Dungeon, [number, string]]
+                                        )"
+                                        :key="dungeon.id"
+                                        class="flex items-center gap-3 rounded-xl border border-base-content/8 px-3.5 py-2.5 hover:border-primary/40 hover:bg-primary/5 transition-all duration-200"
+                                    >
+                                        <img
+                                            v-if="dungeon.e"
+                                            :src="LeveledChar.elementUrl(dungeon.e)"
+                                            class="h-8 w-4 object-cover rounded shrink-0"
+                                        />
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-medium text-sm truncate">{{ getDungeonName(dungeon) }}</div>
+                                            <div class="mt-0.5 text-xs text-base-content/45 flex items-center gap-2">
+                                                <span>Lv.{{ dungeon.lv }}</span>
+                                                <span v-if="dungeon.r?.length" class="truncate"
+                                                    >奖励: {{ getDungeonRewardNames(dungeon) }}</span
+                                                >
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="shrink-0 text-xs px-2 py-0.5 rounded"
+                                            :class="getDungeonType(dungeon.t).color + ' text-white'"
+                                        >
+                                            {{ getDungeonType(dungeon.t).label }}
+                                        </span>
+                                        <div class="shrink-0 text-right">
+                                            <div class="font-bold text-primary">×{{ times }}</div>
+                                            <div class="text-[10px] text-base-content/40">{{ reason }}</div>
+                                        </div>
+                                    </SRouterLink>
+                                </div>
+                            </ScrollArea>
+                        </section>
+                    </div>
+
+                    <!-- 已过滤资源 -->
+                    <div
+                        v-if="excludedResources.size > 0"
+                        class="flex flex-wrap items-center gap-2 rounded-xl border border-error/20 bg-error/5 px-4 py-2.5"
+                    >
+                        <span class="flex items-center gap-1.5 text-xs font-medium text-error/80">
+                            <Icon icon="ri:filter-line" />
+                            已过滤
+                        </span>
+                        <span
+                            v-for="resource in excludedResources"
+                            :key="resource"
+                            class="px-2.5 py-0.5 bg-error/15 text-error rounded-full text-xs flex items-center gap-1"
+                        >
+                            <span>{{ $t(resource) }}</span>
+                            <button @click.stop="toggleResourceFilter(resource)" class="hover:opacity-70">
+                                <Icon icon="codicon:chrome-close" class="h-3 w-3" />
+                            </button>
+                        </span>
+                        <button class="ml-auto btn btn-ghost btn-xs gap-1" @click="clearResourceFilters">清除全部</button>
                     </div>
 
                     <!-- 总消耗 -->
-                    <div
-                        class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg mb-6"
-                    >
-                        <div class="card-body p-6">
-                            <div class="flex text-lg items-center justify-between mb-4 gap-2">
-                                <div class="flex items-center gap-2">
-                                    <Icon icon="ri:file-list-line" />
-                                    <h4 class="font-semibold text-base-content">总消耗</h4>
-                                </div>
-                                <div class="text-xs opacity-70">点击资源可过滤</div>
-                            </div>
-                            <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
-                                <ResourceCostItem
-                                    v-for="(value, key) in result.totalCost"
-                                    :key="key"
-                                    :name="key"
-                                    :value="value!"
-                                    class="bg-base-200 hover:bg-base-300 cursor-pointer"
-                                    @click="toggleResourceFilter(key)"
-                                />
-                            </div>
+                    <section class="rounded-2xl bg-base-100/50 backdrop-blur-sm border border-base-200 shadow-lg">
+                        <div class="flex items-center gap-2.5 px-5 pt-4 pb-2">
+                            <Icon icon="ri:file-list-line" class="text-primary" />
+                            <h2 class="font-semibold">总消耗</h2>
+                            <span class="badge badge-sm badge-ghost">{{ Object.keys(result.totalCost).length }}</span>
+                            <span class="ml-auto text-xs text-base-content/40">点击资源可过滤</span>
                         </div>
-                    </div>
+                        <div class="px-5 pb-5 pt-2 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1">
+                            <ResourceCostItem
+                                v-for="(value, key) in result.totalCost"
+                                :key="key"
+                                :name="key"
+                                :value="value!"
+                                class="bg-base-100/60 hover:bg-primary/10 border border-base-content/8 hover:border-primary/40 rounded-lg cursor-pointer"
+                                @click="toggleResourceFilter(key)"
+                            />
+                        </div>
+                    </section>
 
-                    <!-- 详细消耗 -->
-                    <div class="flex flex-col gap-6">
-                        <!-- 等级升级消耗 -->
-                        <div
-                            class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg"
-                        >
-                            <div class="card-body p-6">
-                                <div class="flex text-lg items-center mb-4 gap-2">
+                    <!-- 消耗明细 -->
+                    <section class="rounded-2xl bg-base-100/50 backdrop-blur-sm border border-base-200 shadow-lg overflow-hidden">
+                        <div class="flex items-center gap-2.5 px-5 pt-4 pb-3">
+                            <Icon icon="ri:list-check-3" class="text-primary" />
+                            <h2 class="font-semibold">消耗明细</h2>
+                        </div>
+                        <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="min-w-0">
+                                <div
+                                    class="flex items-center gap-1.5 text-xs font-semibold text-base-content/60 uppercase tracking-wider pb-2 mb-2.5 border-b border-base-content/10"
+                                >
                                     <Icon icon="ri:lightbulb-line" />
-                                    <h4 class="font-semibold text-base-content">等级升级消耗</h4>
+                                    等级升级
                                 </div>
-                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.levelUp"
                                         :key="key"
                                         :name="key"
                                         :value="value!"
-                                        class="bg-base-200 hover:bg-base-300 cursor-pointer"
+                                        class="bg-base-100/60 hover:bg-primary/10 border border-base-content/8 hover:border-primary/40 rounded-lg cursor-pointer"
                                         @click="toggleResourceFilter(key)"
                                     />
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- 技能升级 -->
-                        <div
-                            class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg"
-                            v-if="result.details.skills && Object.keys(result.details.skills).length > 0"
-                        >
-                            <div class="card-body p-6">
-                                <div class="flex text-lg items-center mb-4 gap-2">
+                            <div v-if="result.details.skills && Object.keys(result.details.skills).length > 0" class="min-w-0">
+                                <div
+                                    class="flex items-center gap-1.5 text-xs font-semibold text-base-content/60 uppercase tracking-wider pb-2 mb-2.5 border-b border-base-content/10"
+                                >
                                     <Icon icon="ri:flashlight-line" />
-                                    <h4 class="font-semibold text-base-content">技能升级消耗</h4>
+                                    技能升级
                                 </div>
-                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.skills"
                                         :key="key"
                                         :name="key"
                                         :value="value!"
-                                        class="bg-base-200 hover:bg-base-300 cursor-pointer"
+                                        class="bg-base-100/60 hover:bg-primary/10 border border-base-content/8 hover:border-primary/40 rounded-lg cursor-pointer"
                                         @click="toggleResourceFilter(key)"
                                     />
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- 突破消耗 -->
-                        <div
-                            class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg"
-                            v-if="result.details.breakthrough && Object.keys(result.details.breakthrough).length > 0"
-                        >
-                            <div class="card-body p-6">
-                                <div class="flex text-lg items-center mb-4 gap-2">
+                            <div v-if="result.details.breakthrough && Object.keys(result.details.breakthrough).length > 0" class="min-w-0">
+                                <div
+                                    class="flex items-center gap-1.5 text-xs font-semibold text-base-content/60 uppercase tracking-wider pb-2 mb-2.5 border-b border-base-content/10"
+                                >
                                     <Icon icon="ri:star-line" />
-                                    <h4 class="font-semibold text-base-content">突破消耗</h4>
+                                    突破
                                 </div>
-                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.breakthrough"
                                         :key="key"
                                         :name="key"
                                         :value="value!"
-                                        class="bg-base-200 hover:bg-base-300 cursor-pointer"
+                                        class="bg-base-100/60 hover:bg-primary/10 border border-base-content/8 hover:border-primary/40 rounded-lg cursor-pointer"
                                         @click="toggleResourceFilter(key)"
                                     />
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- 锻造消耗 -->
-                        <div
-                            class="card bg-base-100 border-2 border-base-300 hover:border-base-content/30 transition-all duration-200 hover:shadow-lg"
-                            v-if="result.details.craft && Object.keys(result.details.craft).length > 0"
-                        >
-                            <div class="card-body p-6">
-                                <div class="flex text-lg items-center mb-4 gap-2">
+                            <div v-if="result.details.craft && Object.keys(result.details.craft).length > 0" class="min-w-0">
+                                <div
+                                    class="flex items-center gap-1.5 text-xs font-semibold text-base-content/60 uppercase tracking-wider pb-2 mb-2.5 border-b border-base-content/10"
+                                >
                                     <Icon icon="ri:hammer-line" />
-                                    <h4 class="font-semibold text-base-content">锻造消耗</h4>
+                                    锻造
                                 </div>
-                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.craft"
                                         :key="key"
                                         :name="key"
                                         :value="value!"
-                                        class="bg-base-200 hover:bg-base-300 cursor-pointer"
+                                        class="bg-base-100/60 hover:bg-primary/10 border border-base-content/8 hover:border-primary/40 rounded-lg cursor-pointer"
                                         @click="toggleResourceFilter(key)"
                                     />
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
+                </template>
+                <div v-else class="flex justify-center py-16">
+                    <div class="loading loading-spinner loading-lg text-primary"></div>
                 </div>
-                <div v-else class="loading loading-spinner mb-4"></div>
             </div>
         </ScrollArea>
+
+        <!-- 资源关系图全屏覆盖层 -->
         <div class="inset-0 absolute bg-base-100" v-if="isOpenGraph && result?.resourceTree">
             <div class="absolute flex justify-center items-center p-2 z-1">
                 <div

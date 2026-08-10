@@ -3,8 +3,6 @@ import { computed, onMounted, onUnmounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { buildsQuery, createGuideMutation, guideQuery, updateGuideMutation } from "@/api/graphql"
 import { useUserStore } from "@/store/user"
-import { dataUrlToFile } from "@/util"
-import { importPic } from "../api/app"
 import { charData } from "../data"
 import { env } from "../env"
 import { useSettingStore } from "../store/setting"
@@ -47,10 +45,6 @@ const charOptions = computed(() => [
 const isDragging = ref(false)
 const fileInputRef = ref<HTMLInputElement>()
 const uploadingImage = ref(false)
-
-let unlistenDragEnter = () => {}
-let unlistenDragLeave = () => {}
-let unlistenDragDrop = () => {}
 
 async function uploadImageToServer(file: File): Promise<string | null> {
     const api = await setting.getDNAAPI()
@@ -107,28 +101,6 @@ async function handleWebDrop(event: DragEvent) {
         const file = event.dataTransfer.files[0]
         if (file.type.startsWith("image/")) {
             await processFile(file)
-        } else {
-            ui.showErrorMessage("只支持图片格式")
-        }
-    }
-}
-
-async function handleTauriDrop(paths: string[]) {
-    isDragging.value = false
-    if (paths.length > 0) {
-        const path = paths[0]
-        if (/\.(?:png|jpg|jpeg|gif|webp)$/i.test(path)) {
-            const imageUrl = await importPic(path)
-            if (imageUrl) {
-                const file = dataUrlToFile(imageUrl, `image_${Date.now()}.png`)
-                if (file) {
-                    await processFile(file)
-                } else {
-                    ui.showErrorMessage("图片转换失败")
-                }
-            } else {
-                ui.showErrorMessage("图片导入失败")
-            }
         } else {
             ui.showErrorMessage("只支持图片格式")
         }
@@ -262,22 +234,6 @@ async function loadGuide() {
 }
 
 onMounted(async () => {
-    if (env.isApp) {
-        const { listen, TauriEvent } = await import("@tauri-apps/api/event")
-
-        unlistenDragEnter = await listen(TauriEvent.DRAG_ENTER, () => {
-            isDragging.value = true
-        })
-
-        unlistenDragLeave = await listen(TauriEvent.DRAG_LEAVE, () => {
-            isDragging.value = false
-        })
-
-        unlistenDragDrop = await listen<{ paths: string[] }>(TauriEvent.DRAG_DROP, async event => {
-            if (!isDragging.value) return
-            await handleTauriDrop(event.payload.paths)
-        })
-    }
     if (isEdit.value) {
         ui.title = "编辑攻略"
         loadGuide()
@@ -287,11 +243,6 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-    if (env.isApp) {
-        unlistenDragEnter()
-        unlistenDragDrop()
-        unlistenDragLeave()
-    }
     ui.title = ""
 })
 </script>

@@ -16,6 +16,16 @@ export interface IronSurvivalDungeon {
     IronTicketId: number[]
     MonsterLevelDrop: number[]
 }
+export interface DefenceCalamity {
+    ButcherMonsterId: number
+    ButcherMonsterSpawnMinWave: number
+    ButcherMonsterSpawnProbability: number[]
+    DungeonId: number
+    EnsureGuideTime: number
+    MonsterSpawnId: number[][]
+    MonsterTotalBaseNum: number
+    WavesPerStage?: number
+}
 export interface MonsterLevelDrop {
     BaseProbability: number[]
     EndTime: number
@@ -433,6 +443,69 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
         },
         IronTicketId: [1002],
         MonsterLevelDrop: [13],
+    },
+}
+
+export const defenceData: Record<number, DefenceCalamity> = {
+    "91701": {
+        ButcherMonsterId: 8501002,
+        ButcherMonsterSpawnMinWave: 2,
+        ButcherMonsterSpawnProbability: [0.9, 0.2],
+        DungeonId: 91701,
+        EnsureGuideTime: -1,
+        MonsterSpawnId: [[9170101, 9170102]],
+        MonsterTotalBaseNum: 120,
+        WavesPerStage: 1,
+    },
+    "91702": {
+        ButcherMonsterId: 8501002,
+        ButcherMonsterSpawnMinWave: 2,
+        ButcherMonsterSpawnProbability: [0.9, 0.2],
+        DungeonId: 91702,
+        EnsureGuideTime: -1,
+        MonsterSpawnId: [[9170101, 9170102]],
+        MonsterTotalBaseNum: 120,
+        WavesPerStage: 1,
+    },
+    "91703": {
+        ButcherMonsterId: 8501002,
+        ButcherMonsterSpawnMinWave: 2,
+        ButcherMonsterSpawnProbability: [0.9, 0.2],
+        DungeonId: 91703,
+        EnsureGuideTime: -1,
+        MonsterSpawnId: [[9170101, 9170102]],
+        MonsterTotalBaseNum: 120,
+        WavesPerStage: 1,
+    },
+    "91704": {
+        ButcherMonsterId: 8501002,
+        ButcherMonsterSpawnMinWave: 2,
+        ButcherMonsterSpawnProbability: [0.9, 0.2],
+        DungeonId: 91704,
+        EnsureGuideTime: -1,
+        MonsterSpawnId: [[9170101, 9170102]],
+        MonsterTotalBaseNum: 120,
+        WavesPerStage: 1,
+    },
+    "91705": {
+        ButcherMonsterId: 8501002,
+        ButcherMonsterSpawnMinWave: 2,
+        ButcherMonsterSpawnProbability: [0.9, 0.2],
+        DungeonId: 91705,
+        EnsureGuideTime: -1,
+        MonsterSpawnId: [[9170101, 9170102]],
+        MonsterTotalBaseNum: 120,
+        WavesPerStage: 1,
+    },
+    "91706": {
+        ButcherMonsterId: 8501002,
+        ButcherMonsterSpawnMinWave: 2,
+        ButcherMonsterSpawnProbability: [0.9, 0.2],
+        DungeonId: 91706,
+        EnsureGuideTime: -1,
+        MonsterSpawnId: [[9170101, 9170102]],
+        MonsterTotalBaseNum: 120,
+        WavesPerStage: 1,
     },
 }
 
@@ -1037,10 +1110,46 @@ export const ironSurvivalMonsterSpawnData: SpawnInfo[] = [
             },
         ],
     },
+    {
+        id: 9170101,
+        time: 6,
+        th: 30,
+        radius: [1000, 4000, 1000, 4000],
+        m: [
+            {
+                id: 7012001,
+                num: 12,
+            },
+            {
+                id: 7014001,
+                num: 3,
+            },
+            {
+                id: 7011001,
+                num: 13,
+            },
+            {
+                id: 7013001,
+                num: 12,
+            },
+        ],
+    },
+    {
+        id: 9170102,
+        time: 1,
+        th: 1,
+        radius: [1000, 4000, 1000, 4000],
+        m: [
+            {
+                id: 8522607,
+                num: 1,
+            },
+        ],
+    },
 ]
 
-export const monsterLevelDropData: MonsterLevelDrop[] = [
-    {
+export const monsterLevelDropData: Record<number, MonsterLevelDrop> = {
+    "1": {
         BaseProbability: [10, 20, 40, 60, 80, 100, 120, 160, 200],
         EndTime: 2524622400,
         MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
@@ -1050,7 +1159,7 @@ export const monsterLevelDropData: MonsterLevelDrop[] = [
         RewardId: [303003, 303003, 303003, 303003, 303003, 303003, 303003, 303003, 303003],
         StartTime: 1704081600,
     },
-    {
+    "2": {
         BaseProbability: [10, 20, 40, 60, 80, 100, 120, 160, 200],
         EndTime: 2524622400,
         MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
@@ -1060,9 +1169,44 @@ export const monsterLevelDropData: MonsterLevelDrop[] = [
         RewardId: [303002, 303002, 303002, 303002, 303002, 303002, 303002, 303002, 303002],
         StartTime: 1704081600,
     },
-]
-
-export const monsterLevelDropMap = new Map<number, MonsterLevelDrop>()
-monsterLevelDropData.forEach(drop => {
-    monsterLevelDropMap.set(drop.MonsterLevelDropId, drop)
-})
+    "3": {
+        BaseProbability: [10, 20, 40, 60, 80, 100, 120, 160, 200],
+        EndTime: 2524622400,
+        MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
+        MonsterLevelDropId: 3,
+        MonsterLevelDropView: 15006,
+        ProbabilityUp: [0, 1, 1, 1, 2, 2, 4, 4, 0],
+        RewardId: [313000, 313000, 313000, 313000, 313000, 313000, 313000, 313000, 313000],
+        StartTime: 1787018400,
+    },
+    "11": {
+        BaseProbability: [25, 50, 100, 150, 200, 250, 300, 400, 500],
+        EndTime: 2524622400,
+        MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
+        MonsterLevelDropId: 11,
+        MonsterLevelDropView: 15003,
+        ProbabilityUp: [0, 1, 2, 2, 5, 5, 10, 10, 0],
+        RewardId: [303003, 303003, 303003, 303003, 303003, 303003, 303003, 303003, 303003],
+        StartTime: 1704081600,
+    },
+    "12": {
+        BaseProbability: [25, 50, 100, 150, 200, 250, 300, 400, 500],
+        EndTime: 2524622400,
+        MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
+        MonsterLevelDropId: 12,
+        MonsterLevelDropView: 15002,
+        ProbabilityUp: [0, 1, 2, 2, 5, 5, 10, 10, 0],
+        RewardId: [303002, 303002, 303002, 303002, 303002, 303002, 303002, 303002, 303002],
+        StartTime: 1704081600,
+    },
+    "13": {
+        BaseProbability: [25, 50, 100, 150, 200, 250, 300, 400, 500],
+        EndTime: 2524622400,
+        MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
+        MonsterLevelDropId: 13,
+        MonsterLevelDropView: 15006,
+        ProbabilityUp: [0, 1, 2, 2, 5, 5, 10, 10, 0],
+        RewardId: [313000, 313000, 313000, 313000, 313000, 313000, 313000, 313000, 313000],
+        StartTime: 1787018400,
+    },
+}

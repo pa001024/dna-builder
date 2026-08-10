@@ -5,9 +5,12 @@ import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useSettingStore } from "../store/setting"
 import { useUIStore } from "../store/ui"
+import { useUserStore } from "../store/user"
+import { uploadAbyssUsageFromPost } from "../utils/admin-data-sync"
 
 const setting = useSettingStore()
 const ui = useUIStore()
+const user = useUserStore()
 const { t } = useTranslation()
 let api: DNAAPI
 const router = useRouter()
@@ -18,6 +21,7 @@ const comments = ref<DNAPostCommentListBean[]>([])
 const loading = ref(true)
 const moreLoading = ref(false)
 const commentLoading = ref(false)
+const abyssUploadLoading = ref(false)
 const commentContent = ref("")
 const commentPageIndex = ref(1)
 const commentHasNext = ref(false)
@@ -123,6 +127,22 @@ async function submitComment() {
         commentLoading.value = false
     }
 }
+
+/**
+ * 上传当前帖子评论区的深渊数据。
+ */
+async function uploadPostAbyssUsage() {
+    if (!user.isAdmin || abyssUploadLoading.value) return
+    abyssUploadLoading.value = true
+    try {
+        const summary = await uploadAbyssUsageFromPost(postId.value)
+        ui.showSuccessMessage(`深渊数据上传完成：成功 ${summary.uploaded}，跳过 ${summary.skipped}，失败 ${summary.failed}`)
+    } catch (error) {
+        ui.showErrorMessage("深渊数据上传失败", error instanceof Error ? error.message : String(error))
+    } finally {
+        abyssUploadLoading.value = false
+    }
+}
 </script>
 <template>
     <div class="w-full h-full flex flex-col">
@@ -133,12 +153,20 @@ async function submitComment() {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
-            <h1 class="text-xl font-bold inline-flex justify-center items-center gap-4">
+            <h1 class="min-w-0 text-xl font-bold inline-flex justify-center items-center gap-4">
                 <img :src="postRes?.postDetail?.gameForumVo.iconUrl" class="size-8" />
-                {{ postRes?.postDetail?.gameForumVo.name || $t("dna-post.postDetailTitle") }}
+                <span class="truncate">{{ postRes?.postDetail?.gameForumVo.name || $t("dna-post.postDetailTitle") }}</span>
             </h1>
-            <div class="w-12" />
-            <!-- Spacer -->
+            <button
+                v-if="user.isAdmin"
+                class="btn btn-sm btn-primary shrink-0"
+                :disabled="abyssUploadLoading"
+                @click="uploadPostAbyssUsage"
+            >
+                <span v-if="abyssUploadLoading" class="loading loading-spinner loading-xs" />
+                <Icon v-else icon="ri:upload-cloud-line" />
+                上传深渊数据
+            </button>
         </div>
 
         <!-- 内容区域 -->

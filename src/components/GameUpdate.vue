@@ -991,6 +991,7 @@ async function fetchVersionList() {
         return
     }
     isLoading.value = true
+    versionList.value = null
     fullPackageInfo.value = null
     preFullPackageInfo.value = null
     try {
@@ -998,7 +999,7 @@ async function fetchVersionList() {
             getFullPackageInfo(selectedCDN.value, activeChannel),
             getPreFullPackageInfo(selectedCDN.value, activeChannel),
         ])
-        const baseVersion = await getBaseVersion(selectedCDN.value, activeChannel, !fullPackage)
+        const baseVersion = fullPackage ? null : await getBaseVersion(selectedCDN.value, activeChannel)
         versionList.value = baseVersion
         fullPackageInfo.value = fullPackage
         preFullPackageInfo.value = preFullPackage
@@ -1015,7 +1016,6 @@ async function fetchVersionList() {
 }
 
 function calculateTotalSize() {
-    if (!versionList.value) return
     if (fullPackageInfo.value) {
         totalSize.value = fullPackageInfo.value.size
         totalFiles.value = 1
@@ -1023,6 +1023,7 @@ function calculateTotalSize() {
         preTotalFiles.value = preFullPackageInfo.value ? 1 : 0
         return
     }
+    if (!versionList.value) return
     let size = 0
     let files = 0
     const gameVersionList = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
@@ -1481,7 +1482,7 @@ async function selectGameDir() {
             saveChannelGamePath(emExePath)
             await refreshGameInstalled()
             ui.showSuccessMessage(`游戏目录设置成功: ${emExePath}`)
-            if (versionList.value) {
+            if (versionList.value || fullPackageInfo.value) {
                 await checkForUpdates()
             }
         }
@@ -1573,12 +1574,13 @@ async function downloadAllFiles() {
         ui.showErrorMessage(t("game-update.select_game_dir_first"))
         return
     }
-    if (!versionList.value) {
-        ui.showErrorMessage(t("game-update.version_list_not_loaded"))
-        return
-    }
     if (fullPackageInfo.value) {
         await downloadAndApplyFullPackage()
+        return
+    }
+    const currentVersionList = versionList.value
+    if (!currentVersionList) {
+        ui.showErrorMessage(t("game-update.version_list_not_loaded"))
         return
     }
     if (tempPreDownloadDir.value) {
@@ -1609,7 +1611,7 @@ async function downloadAllFiles() {
     lastDownloadedBytes = 0
     lastTimestamp = Date.now()
     try {
-        const gameVersionList = versionList.value.gameVersionList.GameVersionList["1"].GameVersionList
+        const gameVersionList = currentVersionList.gameVersionList.GameVersionList["1"].GameVersionList
         const files = Object.entries(gameVersionList)
         const filesToDownload = [...files]
         const pendingHashChecks: Array<() => Promise<void>> = []
@@ -1637,7 +1639,7 @@ async function downloadAllFiles() {
                 assets.ZipSize,
                 previousFilesSize,
                 totalSize.value,
-                getGameAssetUrl(filename, activeChannel, versionList.value.subVersion)
+                getGameAssetUrl(filename, activeChannel, currentVersionList.subVersion)
             )
             if (await canSkipBeforeHashCheck(fullFilePath, progressFilePath, assets.ZipSize)) {
                 pendingHashChecks.push(() =>
@@ -1656,7 +1658,7 @@ async function downloadAllFiles() {
                 selectedCDN.value,
                 filename,
                 activeChannel,
-                versionList.value.subVersion,
+                currentVersionList.subVersion,
                 concurrentThreads.value,
                 undefined,
                 tempDownloadDir.value
@@ -2208,7 +2210,7 @@ const launchGame = async () => {
             <!-- 核心区域 -->
             <main class="flex-1 flex flex-col justify-end pb-8 gap-6">
                 <!-- 状态指示 & 信息卡片 -->
-                <div v-if="versionList" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div v-if="versionList || fullPackageInfo" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <!-- 目录设置卡片 -->
                     <div
                         class="md:col-span-2 bg-base-300/40 backdrop-blur-sm border border-base-content/10 rounded-2xl p-5 hover:bg-base-300/50 transition-colors duration-200 group"
@@ -2246,7 +2248,7 @@ const launchGame = async () => {
                         </button>
                         <span class="text-base-content/40 text-xs font-bold uppercase tracking-wider">{{ t("game-update.version") }}</span>
                         <div class="flex items-end gap-2">
-                            <span class="text-2xl font-bold font-mono">{{ fullPackageInfo?.latestVersion ?? versionList.subVersion }}</span>
+                            <span class="text-2xl font-bold font-mono">{{ fullPackageInfo?.latestVersion ?? versionList?.subVersion }}</span>
                             <span class="text-xs mb-1 px-1.5 py-0.5 rounded bg-base-content/10 opacity-80" v-if="needUpdate">{{
                                 t("game-update.old_version")
                             }}</span>
@@ -2270,7 +2272,7 @@ const launchGame = async () => {
 
                 <!-- 预下载通知条 -->
                 <div
-                    v-if="needPreDownload && versionList"
+                    v-if="needPreDownload && (versionList || preFullPackageInfo)"
                     class="bg-linear-to-r from-info/20 to-transparent border-l-4 border-info backdrop-blur-sm p-4 rounded-r-xl flex items-center justify-between animate-in slide-in-from-left-4 fade-in duration-500"
                 >
                     <div class="flex items-center gap-3">
@@ -2282,7 +2284,7 @@ const launchGame = async () => {
                             <p class="text-xs text-info/80">
                                 {{
                                     t("game-update.pre_download_size", {
-                                        version: preFullPackageInfo?.latestVersion ?? versionList.preVersion,
+                                        version: preFullPackageInfo?.latestVersion ?? versionList?.preVersion,
                                         size: formatSize(preTotalSize),
                                     })
                                 }}

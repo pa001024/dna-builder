@@ -3,6 +3,7 @@ import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reac
 import { npcMap } from "@/data/d/npc.data"
 import { type DetectiveAnswer, type DetectiveQuestion, type Dialogue, type DialogueOption, type QuestNode } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
+import { getDialogueDisplayContent } from "@/utils/dialogue"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
@@ -20,6 +21,12 @@ interface FlattenedQuestDialogueItem {
     nodeId: string
 }
 
+interface DialogueSearchTarget {
+    nodeId: string
+    dialogueId: number
+    optionId?: number
+}
+
 const props = defineProps<{
     questId: number
     nodes: QuestNode[]
@@ -28,6 +35,8 @@ const props = defineProps<{
     questChainIcon?: string
     questName?: string
     searchKeyword?: string
+    searchTarget?: DialogueSearchTarget
+    searchTargetRequest?: number
 }>()
 
 const settingStore = useSettingStore()
@@ -157,6 +166,52 @@ function scrollToDialogue(dialogueKey: string): void {
 
     nextTick(() => {
         targetElement.scrollIntoView({ behavior: "smooth", block: "center" })
+    })
+}
+
+/**
+ * 获取搜索命中的对话正文或选项元素。
+ * @param dialogueKey 对话唯一键
+ * @param optionId 选项 ID
+ * @returns 搜索目标元素
+ */
+function getDialogueSearchElement(dialogueKey: string, optionId?: number): HTMLElement | null {
+    const dialogueElement = dialogueElementMap.get(dialogueKey)
+    if (!dialogueElement) {
+        return null
+    }
+
+    if (optionId === undefined) {
+        return dialogueElement.querySelector<HTMLElement>("[data-dialogue-content='true']")
+    }
+
+    return (
+        Array.from(dialogueElement.querySelectorAll<HTMLElement>("[data-dialogue-option-id]")).find(
+            element => element.dataset.dialogueOptionId === String(optionId)
+        ) ?? null
+    )
+}
+
+/**
+ * 滚动到搜索命中的具体对话内容。
+ * @param target 对话搜索目标
+ */
+function scrollToSearchTarget(target: DialogueSearchTarget): void {
+    nextTick(() => {
+        const node = questNodeChains.value.find(item => item.id === target.nodeId)
+        const dialogueItem = node?.chain.find(item => item.dialogue.id === target.dialogueId)
+        if (!dialogueItem) {
+            return
+        }
+
+        const dialogueKey = getQuestDialogueKey(target.nodeId, dialogueItem.dialogue)
+        const targetElement = getDialogueSearchElement(dialogueKey, target.optionId)
+        const scrollElement = targetElement ?? dialogueElementMap.get(dialogueKey)
+        if (!scrollElement) {
+            return
+        }
+
+        scrollElement.scrollIntoView({ behavior: "smooth", block: "center" })
     })
 }
 
@@ -529,16 +584,20 @@ function getQuestionAnswers(node: QuestNodeWithChain, question: DetectiveQuestio
 }
 
 /**
- * 获取 NPC 名称。
- * @param npcId NPC ID
- * @returns NPC 名称
+ * 获取说话人名称，优先使用导出器提供的 speakerName，无则回退为 NPC 查表。
+ * @param dialogue 对话数据
+ * @returns 说话人名称
  */
-function getNPCName(npcId: number | undefined): string {
-    if (npcId === undefined) {
+function getSpeakerName(dialogue: Dialogue): string {
+    if (dialogue.speakerName) {
+        return dialogue.speakerName
+    }
+
+    if (dialogue.npc === undefined) {
         return ""
     }
 
-    const rawName = npcMap.get(npcId)?.name || `${npcId}`
+    const rawName = npcMap.get(dialogue.npc)?.name || `${dialogue.npc}`
     return formatStoryText(rawName)
 }
 
@@ -560,7 +619,7 @@ function getDialogueVoiceKey(dialogue: Dialogue, nodeId: string): string {
 function getDialogueVoiceUrl(dialogue: Dialogue): string {
     return buildDialogueVoiceUrl({
         voice: dialogue.voice,
-        text: dialogue.content,
+        text: getDialogueDisplayContent(dialogue),
         npcId: dialogue.npc,
         forceGenderNpcIds: nicknameNpcIds,
         language: props.voiceLanguage || settingStore.lang,
@@ -969,6 +1028,15 @@ const nodeDisplayLabelMap = computed(() => {
 })
 
 watch(
+    () => props.searchTargetRequest,
+    () => {
+        if (props.searchTarget) {
+            scrollToSearchTarget(props.searchTarget)
+        }
+    }
+)
+
+watch(
     () => [props.voiceLanguage || settingStore.lang, settingStore.protagonistGender, settingStore.protagonistGender2],
     () => {
         stopAutoPlay()
@@ -1035,7 +1103,9 @@ watch(flattenedDialogueChain, () => {
                     :dialogue="item.dialogue"
                     :selected-option="item.selectedOption"
                     :trigger-key="`${questId}-${node.id}-${item.dialogue.id}`"
-                    :speaker-name="item.dialogue.npc ? `${$t(getNPCName(item.dialogue.npc))}:` : undefined"
+                    :speaker-name="
+                        item.dialogue.npc !== undefined || item.dialogue.speakerName ? `${$t(getSpeakerName(item.dialogue))}:` : undefined
+                    "
                     :show-voice-button="!!item.dialogue.voice"
                     :voice-playing="currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id) && isVoicePlaying"
                     :playing="isVoicePlaying && currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id)"

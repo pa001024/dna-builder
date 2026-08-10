@@ -2,6 +2,7 @@
 import { computed } from "vue"
 import type { Dialogue, DialogueOption } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
+import { getDialogueDisplayContent } from "@/utils/dialogue"
 import { getImprType, getRegionType } from "@/utils/quest-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
@@ -24,6 +25,8 @@ const emit = defineEmits<{
 
 const settingStore = useSettingStore()
 const normalizedSearchKeyword = computed(() => props.searchKeyword?.trim() || "")
+const dialogueContent = computed(() => getDialogueDisplayContent(props.dialogue))
+const formattedDialogueContent = computed(() => formatStoryText(dialogueContent.value))
 
 /**
  * 获取当前剧情文本替换配置。
@@ -121,13 +124,15 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                     <Icon :icon="voicePlaying ? 'ri:pause-circle-line' : 'ri:play-circle-line'" />
                 </button>
             </div>
-            <HighlightText
-                v-if="normalizedSearchKeyword"
-                :text="formatStoryText(dialogue.content)"
-                :keyword="normalizedSearchKeyword"
-                class="block w-full"
-            />
-            <TypewriterText v-else :text="formatStoryText(dialogue.content)" :trigger-key="triggerKey" />
+            <div v-if="dialogueContent" data-dialogue-content="true" class="w-full">
+                <HighlightText
+                    v-if="normalizedSearchKeyword"
+                    :text="formattedDialogueContent"
+                    :keyword="normalizedSearchKeyword"
+                    class="block w-full"
+                />
+                <TypewriterText v-else :text="formattedDialogueContent" :trigger-key="triggerKey" />
+            </div>
             <div v-if="getImpressionEntries(dialogue).length" class="mt-1 flex flex-wrap gap-1.5">
                 <span
                     v-for="impression in getImpressionEntries(dialogue)"
@@ -148,6 +153,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                 v-for="(option, optionIndex) in dialogue.options"
                 :key="option.id"
                 type="button"
+                :data-dialogue-option-id="option.id"
                 class="group w-full rounded px-2.5 py-1.5 text-left text-xs transition-all duration-200"
                 :class="selectedOption?.id === option.id ? 'bg-primary/80 shadow-sm' : 'bg-base-100/60 hover:bg-base-100/80'"
                 @click="emit('select-option', { dialogueId: dialogue.id, optionId: option.id })"

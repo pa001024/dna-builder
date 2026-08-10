@@ -35,9 +35,9 @@ import { eventData } from "./d/event.data"
 export { eventData }
 
 import { forgeLevelData, forgeLevelQuestData } from "./d/forge.data"
-import { ironSurvivalData, ironSurvivalDungeonData, monsterLevelDropData, monsterLevelDropMap } from "./d/ironsurvival.data"
+import { defenceData, ironSurvivalData, ironSurvivalDungeonData, monsterLevelDropData } from "./d/ironsurvival.data"
 
-export { forgeLevelData, forgeLevelQuestData, ironSurvivalData, ironSurvivalDungeonData, monsterLevelDropData, monsterLevelDropMap }
+export { defenceData, forgeLevelData, forgeLevelQuestData, ironSurvivalData, ironSurvivalDungeonData, monsterLevelDropData }
 
 import achievementData from "./d/achievement.data"
 

@@ -4,7 +4,7 @@ import * as dialog from "@tauri-apps/plugin-dialog"
 import type { CSSProperties } from "vue"
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue"
 import { useRouter } from "vue-router"
-import { execScript, importPic, writeTextFile } from "@/api/app"
+import { execScript, writeTextFile } from "@/api/app"
 import { env } from "@/env"
 import type { ScriptColorToolState } from "@/store/db"
 import { db } from "@/store/db"
@@ -144,10 +144,8 @@ const defaultTolerance = ref(10)
 const realtimeTestCloudMode = ref(false)
 const restoringPersistedState = ref(false)
 const realtimeTestScriptPath = ref("")
+let dragDepth = 0
 let pointIdSeed = 1
-let unlistenDragEnter = () => {}
-let unlistenDragLeave = () => {}
-let unlistenDragDrop = () => {}
 let persistStateTimer: ReturnType<typeof setTimeout> | null = null
 
 const REALTIME_TEST_STATUS_RESULT = "result"
@@ -355,23 +353,6 @@ async function readFileAsDataUrl(file: File): Promise<string> {
 }
 
 /**
- * 将 ImageData 转为 PNG data URL，用于持久化原始像素图。
- * @param imageData 图片像素数据
- * @returns PNG data URL
- */
-function imageDataToDataUrl(imageData: ImageData): string {
-    const canvas = document.createElement("canvas")
-    canvas.width = imageData.width
-    canvas.height = imageData.height
-    const ctx = canvas.getContext("2d")
-    if (!ctx) {
-        throw new Error("无法创建 Canvas 上下文")
-    }
-    ctx.putImageData(imageData, 0, 0)
-    return canvas.toDataURL("image/png")
-}
-
-/**
  * 根据图片 URL 读取像素数据。
  * @param url 图片地址
  * @returns ImageData 像素数据
@@ -420,29 +401,6 @@ async function loadImageFile(file: File, index: number): Promise<LoadedImageItem
 }
 
 /**
- * 读取本地路径图片并转换为可采样的像素数据。
- * @param path 本地文件路径
- * @param index 当前序号
- * @returns 已加载图片对象
- */
-async function loadImagePath(path: string, index: number): Promise<LoadedImageItem> {
-    const imageUrl = await importPic(path)
-    const imageData = await readImageDataFromUrl(imageUrl)
-    const sourceDataUrl = imageDataToDataUrl(imageData)
-    const name = path.split(/[\\/]/).pop() || path
-    return {
-        id: `${name}-${index}`,
-        name,
-        url: sourceDataUrl,
-        sourceDataUrl,
-        width: imageData.width,
-        height: imageData.height,
-        data: imageData.data,
-        revokeUrl: false,
-    }
-}
-
-/**
  * 读取 data URL 图片并转换为可采样的像素数据。
  * @param sourceDataUrl 图片 data URL
  * @param name 图片名称
@@ -464,15 +422,6 @@ async function loadImageDataUrl(sourceDataUrl: string, name: string, index: numb
 }
 
 /**
- * 判断路径是否为支持的图片格式。
- * @param path 本地路径
- * @returns 是否支持
- */
-function isSupportedImagePath(path: string): boolean {
-    return /\.(?:png|jpg|jpeg|gif|webp|bmp|tif|tiff|ico)$/i.test(path)
-}
-
-/**
  * 加载多个图片文件并重置采样点。
  * @param files 图片文件数组
  */
@@ -487,36 +436,6 @@ async function loadImages(files: File[]) {
         const items: LoadedImageItem[] = []
         for (const [offset, file] of files.entries()) {
             items.push(await loadImageFile(file, baseIndex + offset))
-        }
-        loadedImages.value = [...loadedImages.value, ...items]
-        appendImageLabels(items)
-        if (loadedImages.value.length > 0 && baseIndex === 0) {
-            activeImageIndex.value = 0
-        }
-        schedulePersistScriptColorToolState()
-    } catch (error) {
-        ui.showErrorMessage(`图片加载失败: ${String(error)}`)
-    } finally {
-        loading.value = false
-    }
-}
-
-/**
- * 从本地路径数组加载图片并重置采样点。
- * @param paths 本地文件路径数组
- */
-async function loadImagesFromPaths(paths: string[]) {
-    const imagePaths = paths.filter(isSupportedImagePath)
-    if (imagePaths.length === 0) {
-        ui.showErrorMessage("拖拽文件中不包含受支持的图片格式")
-        return
-    }
-    loading.value = true
-    try {
-        const baseIndex = loadedImages.value.length
-        const items: LoadedImageItem[] = []
-        for (const [offset, path] of imagePaths.entries()) {
-            items.push(await loadImagePath(path, baseIndex + offset))
         }
         loadedImages.value = [...loadedImages.value, ...items]
         appendImageLabels(items)
@@ -2400,37 +2319,61 @@ function backToScriptPage() {
 }
 
 /**
- * 初始化 Tauri 全局拖拽事件监听，用于桌面端文件拖放导入。
+ * 判断拖拽数据中是否包含图片文件。
+ * @param file 待判断文件
+ * @returns 是否为支持的图片
  */
-async function initTauriDragEvents() {
-    if (!env.isApp) {
+function isSupportedImageFile(file: File): boolean {
+    return file.type.startsWith("image/") || /\.(?:png|jpg|jpeg|gif|webp|bmp|tif|tiff|ico)$/i.test(file.name)
+}
+
+/**
+ * 处理原生 H5 文件拖拽进入页面。
+ * @param event 拖拽事件
+ */
+function handleNativeDragEnter(event: DragEvent) {
+    if (!event.dataTransfer?.types.includes("Files")) return
+    dragDepth += 1
+    isDragging.value = true
+}
+
+/**
+ * 处理原生 H5 文件拖拽经过页面。
+ * @param event 拖拽事件
+ */
+function handleNativeDragOver(event: DragEvent) {
+    if (!event.dataTransfer?.types.includes("Files")) return
+    event.preventDefault()
+    event.dataTransfer.dropEffect = "copy"
+    isDragging.value = true
+}
+
+/**
+ * 处理原生 H5 文件拖拽离开页面。
+ * @param event 拖拽事件
+ */
+function handleNativeDragLeave(event: DragEvent) {
+    if (!event.dataTransfer?.types.includes("Files")) return
+    dragDepth = Math.max(0, dragDepth - 1)
+    if (dragDepth === 0) {
+        isDragging.value = false
+    }
+}
+
+/**
+ * 处理原生 H5 文件拖放并加载图片。
+ * @param event 拖拽事件
+ */
+async function handleNativeDrop(event: DragEvent) {
+    event.preventDefault()
+    dragDepth = 0
+    isDragging.value = false
+    const files = Array.from(event.dataTransfer?.files ?? []).filter(isSupportedImageFile)
+    if (files.length === 0) {
+        ui.showErrorMessage("拖拽文件中不包含受支持的图片格式")
         return
     }
-
-    try {
-        const { listen, TauriEvent } = await import("@tauri-apps/api/event")
-
-        interface TauriDragEvent {
-            paths: string[]
-            position: {
-                x: number
-                y: number
-            }
-        }
-
-        unlistenDragEnter = await listen<TauriDragEvent>(TauriEvent.DRAG_ENTER, () => {
-            isDragging.value = true
-        })
-        unlistenDragLeave = await listen<TauriDragEvent>(TauriEvent.DRAG_LEAVE, () => {
-            isDragging.value = false
-        })
-        unlistenDragDrop = await listen<TauriDragEvent>(TauriEvent.DRAG_DROP, async event => {
-            isDragging.value = false
-            await loadImagesFromPaths(event.payload.paths ?? [])
-        })
-    } catch (error) {
-        console.error("初始化 Tauri 拖拽事件失败", error)
-    }
+    await loadImages(files)
 }
 
 onMounted(async () => {
@@ -2438,7 +2381,6 @@ onMounted(async () => {
         await scriptRuntime.initRuntimeTracking({ includeConfigListeners: false })
     }
     await restoreScriptColorToolState()
-    initTauriDragEvents()
 })
 
 onUnmounted(() => {
@@ -2446,15 +2388,18 @@ onUnmounted(() => {
         clearTimeout(persistStateTimer)
         persistStateTimer = null
     }
-    unlistenDragEnter()
-    unlistenDragLeave()
-    unlistenDragDrop()
     revokeLoadedImageUrls()
 })
 </script>
 
 <template>
-    <div class="h-full flex flex-col p-4 gap-4 overflow-hidden relative">
+    <div
+        class="h-full flex flex-col p-4 gap-4 overflow-hidden relative"
+        @dragenter="handleNativeDragEnter"
+        @dragover="handleNativeDragOver"
+        @dragleave="handleNativeDragLeave"
+        @drop="handleNativeDrop"
+    >
         <div class="flex flex-wrap items-center gap-2">
             <button class="btn btn-sm btn-ghost" @click="backToScriptPage">返回脚本</button>
             <button class="btn btn-sm btn-primary" @click="openFilePicker" :disabled="loading">

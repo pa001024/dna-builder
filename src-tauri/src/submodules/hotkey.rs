@@ -1,4 +1,6 @@
-use crate::submodules::script::{normalize_script_path, run_script_file};
+use crate::submodules::script::{
+    is_script_path_running, normalize_script_path, run_script_file, stop_script_by_path,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -1218,6 +1220,32 @@ fn _trigger_hotkey_scripts(vk: u32, is_key_down: bool, pressed: &HashSet<u32>) {
                 }
             }
             _spawn_toggle_loop(binding, app_handle.clone());
+            continue;
+        }
+
+        if is_script_path_running(&binding.script_path) {
+            let script_path = binding.script_path.clone();
+            let (level, message) = match stop_script_by_path(script_path.clone()) {
+                Ok(()) => (
+                    "info",
+                    format!(
+                        "热键停止正在运行的脚本: {} ({})",
+                        script_path, binding.hotkey
+                    ),
+                ),
+                Err(error) => (
+                    "error",
+                    format!("热键停止脚本失败: {}，错误: {}", script_path, error),
+                ),
+            };
+            let _ = app_handle.emit(
+                "script-console",
+                serde_json::json!({
+                    "scope": script_path,
+                    "level": level,
+                    "message": message,
+                }),
+            );
             continue;
         }
 

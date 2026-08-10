@@ -874,6 +874,48 @@ export const partyTopicData_kr: PartyTopic[] = [
                 npc: 790060,
                 next: 80040423,
             },
+            {
+                id: 80040424,
+                content: "정말 이상해... 대체 왜 필토이드가 갑자기 날뛰는 걸까?",
+                voice: "inv/Heitao/004/C85F7010",
+                npc: 790060,
+                next: 80040425,
+            },
+            {
+                id: 80040425,
+                content:
+                    "어쩌면 네 말이 맞을지도 몰라. 내가 너무 단순하게 생각했어. 연옥도에 남아 있으면 모든 위험을 피할 수 있을 거라고 생각한 거야.",
+                voice: "inv/Heitao/004/C85F703A",
+                npc: 790060,
+                next: 80040426,
+            },
+            {
+                id: 80040426,
+                content: "...계속 여기서 숨어 있는 것도 좋은 생각이 아니네. 그들이 또 찾아오지 않을 거라는 보장은 없으니.",
+                voice: "inv/Heitao/004/C85F7064",
+                npc: 790060,
+                next: 80040427,
+            },
+            {
+                id: 80040427,
+                content: "{nickname}, 내일 깨어나면 우리 함께 떠나자. 자유롭고 더 넓은 먼 곳으로 떠나는 거야. 네가 말한 그런 곳으로...",
+                voice: "inv/Heitao/004/C85F708E",
+                npc: 790060,
+                next: 80040428,
+            },
+            {
+                id: 80040428,
+                content: '"내가 너의 방패가 되어줄 테니, 네가 나의 입이 되어줘."',
+                voice: "inv/Heitao/004/C85F70B8",
+                npc: 790060,
+                next: 80040429,
+            },
+            {
+                id: 80040429,
+                content: "더 이상 두렵지 않아... 더 이상 두려운 건 없어.",
+                voice: "inv/Heitao/004/C85F70E2",
+                npc: 790060,
+            },
         ],
     },
     {
@@ -1330,7 +1372,13 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "......",
                 voice: "inv/Fuluo/002/C8EC49B8",
                 npc: 790090,
+                speakerName: "???",
                 next: 80260205,
+            },
+            {
+                id: 80260205,
+                voice: "inv/Fuluo/002/C8EC49E2",
+                next: 80260206,
             },
             {
                 id: 80260206,
@@ -1344,6 +1392,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "반응이 너무 느려, 힐다. 휴우, 아직 엄마 실력 쫓아오려면 멀었구나. 이러면 엄마가 너무 걱정되잖니.",
                 voice: "inv/Fuluo/002/C8EC4A36",
                 npc: 790090,
+                speakerName: "???",
                 next: 80260208,
             },
             {
@@ -1983,6 +2032,11 @@ export const partyTopicData_kr: PartyTopic[] = [
                 next: 80260404,
             },
             {
+                id: 80260404,
+                voice: "inv/Fuluo/004/C8EC6A88",
+                next: 80260405,
+            },
+            {
                 id: 80260405,
                 content: "플로라 아가씨, 아스카드로 가요. 도망치는 게 뭐 어때서요. 멀리 멀리 도망친다면, 반드시 자유를 얻게 될 거예요.",
                 voice: "inv/Fuluo/004/C8EC6AB2",
@@ -2247,6 +2301,11 @@ export const partyTopicData_kr: PartyTopic[] = [
                 voice: "inv/Fuluo/004/C8EC709A",
                 npc: 790090,
                 next: 80260442,
+            },
+            {
+                id: 80260442,
+                voice: "inv/Fuluo/004/C8EC70C4",
+                next: 80260443,
             },
             {
                 id: 80260443,
@@ -2651,6 +2710,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "카론도 무대에 오를 수 있다고? 이 극단이 미친 거 아니야?",
                 voice: "inv/Tuosi/001/C89F5932",
                 npc: 790034,
+                speakerName: "떠들썩한 관중",
                 next: 80140150,
             },
             {
@@ -2680,6 +2740,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "꺼져라! 꺼져라! 꺼져라!",
                 voice: "inv/Tuosi/001/C89F59DA",
                 npc: 790034,
+                speakerName: "떠들썩한 관중",
                 next: 80140154,
             },
             {
@@ -2708,6 +2769,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "꺼져라! 꺼져라! 꺼져라!",
                 voice: "inv/Tuosi/001/C89F5A82",
                 npc: 790034,
+                speakerName: "떠들썩한 관중",
                 next: 80140158,
             },
             {
@@ -2715,6 +2777,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "사기꾼, 사기꾼... <W>악마의 아이!</>",
                 voice: "inv/Tuosi/001/C89F5AAC",
                 npc: 790034,
+                speakerName: "떠들썩한 관중",
                 next: 80140159,
             },
             {
@@ -3298,6 +3361,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "음? 너 지금 말하고 있는거야...? 뭐라고 했지?",
                 voice: "inv/Tuosi/003/C89F7276",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140304,
             },
             {
@@ -3319,6 +3383,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "뭐라고? 잘 안 들려.",
                 voice: "inv/Tuosi/003/C89F72F4",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140307,
             },
             {
@@ -3333,6 +3398,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "어, 여기는 제6군단 실험실이야...",
                 voice: "inv/Tuosi/003/C89F7348",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140309,
             },
             {
@@ -3354,6 +3420,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "너... 너 잊은 거야? 이게 벌써 세 번째로 물어보는 거야. 네가 연금술 개조를 받은 거잖아.",
                 voice: "inv/Tuosi/003/C89F73C6",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140312,
             },
             {
@@ -3390,6 +3457,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "그, 그렇지만 이렇게 된 것도 나름 괜찮은 거야. 네 몸이 더 강해졌잖아. 너희 카론에게는 이런 방식으로라도 제국에 충성할 기회를 얻는 게 최고의... 은총... 으응.",
                 voice: "inv/Tuosi/003/C89F7498",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140317,
             },
             {
@@ -3398,6 +3466,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "게다가... 게다가 네가 정말 운이 좋은 거야. 알잖아, 이전의 많은 개조체들은 이식 과정을 버티지 못하고 죽었으니까...",
                 voice: "inv/Tuosi/003/C89F74C2",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140318,
             },
             {
@@ -3419,6 +3488,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "...미안해.",
                 voice: "inv/Tuosi/003/C89F7540",
                 npc: 100336,
+                speakerName: "소년 연금술사",
             },
             {
                 id: 80140357,
@@ -3448,6 +3518,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "음... 혈액 속 진정제 농도가 떨어졌네... 조금 더 추가해야 할까?",
                 voice: "inv/Tuosi/003/C89F75BE",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140324,
             },
             {
@@ -3462,6 +3533,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "아...! 또 깨어났어?",
                 voice: "inv/Tuosi/003/C89F7612",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140326,
             },
             {
@@ -3469,6 +3541,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "뭐 하는 거야? 진정제 농도가 왜 이렇게 낮아?",
                 voice: "inv/Tuosi/003/C89F763C",
                 npc: 100337,
+                speakerName: "노인 연금술사",
                 next: 80140327,
             },
             {
@@ -3476,6 +3549,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "죄, 죄송합니다, 선생님! 지금 바로 추가하겠습니다!",
                 voice: "inv/Tuosi/003/C89F7666",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140328,
             },
             {
@@ -3490,6 +3564,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "뭐라고? 저게 지금 웅얼거리는 거야?",
                 voice: "inv/Tuosi/003/C89F76BA",
                 npc: 100337,
+                speakerName: "노인 연금술사",
                 next: 80140330,
             },
             {
@@ -3505,6 +3580,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "하하... 하하하! 무슨 허황한 꿈을 꾸는 거야? 우리가 네 머리를 손대지도 않았는데, 혹시 뇌가 불에 타버렸나? 아니면 원래 그렇게 멍청한 거냐?",
                 voice: "inv/Tuosi/003/C89F770E",
                 npc: 100337,
+                speakerName: "노인 연금술사",
                 next: 80140332,
             },
             {
@@ -3513,6 +3589,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "우리가 원하는 건 괴물, 하나의 그릇, 쓸모 있는 칼이지. 절대로 너 자신이 아니야. 우리가 너를 원래 모습으로 돌려놓을 거로 생각했나?",
                 voice: "inv/Tuosi/003/C89F7738",
                 npc: 100337,
+                speakerName: "노인 연금술사",
                 next: 80140333,
             },
             {
@@ -3527,6 +3604,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "'왜'라고?",
                 voice: "inv/Tuosi/003/C89F778C",
                 npc: 100337,
+                speakerName: "노인 연금술사",
                 next: 80140335,
             },
             {
@@ -3534,6 +3612,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "네가 발밑의 개미를 짓밟을 때 이유를 설명하나? 네가 입에 들어 있는 체리를 씹을 때 이유를 설명하나?",
                 voice: "inv/Tuosi/003/C89F77B6",
                 npc: 100337,
+                speakerName: "노인 연금술사",
                 next: 80140336,
             },
             {
@@ -3541,6 +3620,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "아, 미안, 깜빡했네. 너 같은 천한 것들은 체리가 어떤 맛인지 평생 알 기회도 없겠지.",
                 voice: "inv/Tuosi/003/C89F77E0",
                 npc: 100337,
+                speakerName: "노인 연금술사",
                 next: 80140337,
             },
             {
@@ -3548,6 +3628,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "아직 주사 안 끝났냐? 빨리 움직여라, 시간 낭비하지 말고.",
                 voice: "inv/Tuosi/003/C89F780A",
                 npc: 100337,
+                speakerName: "노인 연금술사",
                 next: 80140338,
             },
             {
@@ -3555,6 +3636,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "네, 선생님. 끝났습니다.",
                 voice: "inv/Tuosi/003/C89F7834",
                 npc: 100336,
+                speakerName: "소년 연금술사",
             },
             {
                 id: 80140339,
@@ -3568,6 +3650,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "음? 뭘 안다는 거지?",
                 voice: "inv/Tuosi/003/C89F7888",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140341,
             },
             {
@@ -3622,6 +3705,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "......",
                 voice: "inv/Tuosi/003/C89F79AE",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140348,
             },
             {
@@ -3629,6 +3713,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "왜, 무슨 이상이라도 있나?",
                 voice: "inv/Tuosi/003/C89F79D8",
                 npc: 100337,
+                speakerName: "노인 연금술사",
                 next: 80140349,
             },
             {
@@ -3637,6 +3722,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "아무것도 아니에요, 선생님. 실험체의 정신 상태가 불안정해서 헛소리 한 것 같습니다. 지금 진정제 용량을 늘리려고 준비 중입니다.",
                 voice: "inv/Tuosi/003/C89F7A02",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140350,
             },
             {
@@ -3644,6 +3730,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "음, 적절한 판단이다. 요즘 꽤 많이 성장했구나.",
                 voice: "inv/Tuosi/003/C89F7A2C",
                 npc: 100337,
+                speakerName: "노인 연금술사",
                 next: 80140351,
             },
             {
@@ -3651,6 +3738,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "감사합니다, 선생님!",
                 voice: "inv/Tuosi/003/C89F7A56",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140352,
             },
             {
@@ -3665,6 +3753,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그렇지, 입 닥치고 있어.",
                 voice: "inv/Tuosi/003/C89F7AAA",
                 npc: 100336,
+                speakerName: "소년 연금술사",
                 next: 80140354,
             },
             {
@@ -3709,6 +3798,293 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80140401,
                 content: "너는 누구지?",
                 voice: "inv/Tuosi/004/C89F828A",
+            },
+            {
+                id: 80140403,
+                content: "어이, 어디 가는 거야?",
+                voice: "inv/Tuosi/004/C89F82DE",
+                npc: 790026,
+                speakerName: "???",
+                next: 80140404,
+            },
+            {
+                id: 80140404,
+                content: "......?!",
+                voice: "inv/Tuosi/004/C89F8308",
+                npc: 790025,
+                speakerName: "환상",
+                next: 80140405,
+            },
+            {
+                id: 80140405,
+                content: "데니스! 나 좀 기다려!",
+                voice: "inv/Tuosi/004/C89F8332",
+                npc: 790026,
+                next: 80140406,
+            },
+            {
+                id: 80140406,
+                content: "어... 날씨가 너무 추워서 빨리 집에 가서 자고 싶어.",
+                voice: "inv/Tuosi/004/C89F835C",
+                npc: 790027,
+                next: 80140407,
+            },
+            {
+                id: 80140407,
+                content:
+                    "뭐야, 이제 몇 시라고 그래? 너무 서두르지 말고, 잠깐만 나랑 연습하자! 오늘 선생님이 가르쳐 주신 대사는 아직 제대로 못 외웠단 말이야.",
+                voice: "inv/Tuosi/004/C89F8386",
+                npc: 790026,
+                next: 80140408,
+            },
+            {
+                id: 80140408,
+                content: "또...? 아, 알겠어, 알겠다고. 연습할게. 그러니까 손은 대지 마!",
+                voice: "inv/Tuosi/004/C89F83B0",
+                npc: 790027,
+                next: 80140409,
+            },
+            {
+                id: 80140409,
+                content: "(둘은 여전히 똑같구나.)",
+                voice: "inv/Tuosi/004/C89F83DA",
+                npc: 790025,
+                speakerName: "환상",
+                next: 80140410,
+            },
+            {
+                id: 80140410,
+                content: "그러고 보니, 다음 달 공연할 작품은 정해졌어?",
+                voice: "inv/Tuosi/004/C89F8404",
+                npc: 790026,
+                next: 80140411,
+            },
+            {
+                id: 80140411,
+                content: "극단장님이 말하기로는 〈비 오는 날〉이래.",
+                voice: "inv/Tuosi/004/C89F842E",
+                npc: 790027,
+                next: 80140412,
+            },
+            {
+                id: 80140412,
+                content:
+                    "〈비 오는 날〉은 인기가 그렇게 대단하지 않잖아? 그걸로 성공하기는 어렵겠다. 아... 〈설국의 아이〉를 다시 공연할 수 있으면 좋을 텐데. 그 연극은 아이스레이크 시티에서 엄청 인기 있잖아...",
+                voice: "inv/Tuosi/004/C89F8458",
+                npc: 790026,
+                next: 80140413,
+            },
+            {
+                id: 80140413,
+                content:
+                    "맞아! 나도 다시 한번 이름 없는 요정을 연기하고 싶어. 그게 내가 제일 자신 있는 역할이거든. 노래도 많고 어려운 대사가 많지만, 다 끝내고 나면 정말 뿌듯했어.",
+                voice: "inv/Tuosi/004/C89F8482",
+                npc: 790027,
+                next: 80140414,
+            },
+            {
+                id: 80140414,
+                content: "에? 진짜야? 내가 보기엔 우리 동기에서는 페온이 제일 잘했던 것 같은데.",
+                voice: "inv/Tuosi/004/C89F84AC",
+                npc: 790026,
+                next: 80140415,
+            },
+            {
+                id: 80140415,
+                content: "무슨 소리야, 종막의 노래는 분명 내가 더 잘 불렀거든!",
+                voice: "inv/Tuosi/004/C89F84D6",
+                npc: 790027,
+                next: 80140416,
+            },
+            {
+                id: 80140416,
+                content: "......",
+                voice: "inv/Tuosi/004/C89F8500",
+                npc: 790025,
+                speakerName: "환상",
+                next: 80140417,
+            },
+            {
+                id: 80140417,
+                content: "...사실 나랑 페온 둘 다 최고는 아니잖아.",
+                voice: "inv/Tuosi/004/C89F852A",
+                npc: 790027,
+                next: 80140418,
+            },
+            {
+                id: 80140418,
+                content: "......",
+                voice: "inv/Tuosi/004/C89F8554",
+                npc: 790026,
+                next: 80140419,
+            },
+            {
+                id: 80140419,
+                content: "그래, 맞아. 〈설국의 아이〉라면, 파르지팔만큼 잘 부른 사람은 없었지. 지금 그는 어디 있는 걸까...",
+                voice: "inv/Tuosi/004/C89F857E",
+                npc: 790026,
+                next: 80140420,
+            },
+            {
+                id: 80140420,
+                content: "(나 여기 있어.)",
+                voice: "inv/Tuosi/004/C89F85A8",
+                npc: 790025,
+                speakerName: "환상",
+                next: 80140421,
+            },
+            {
+                id: 80140421,
+                content: "(난 여기 있다고...)",
+                voice: "inv/Tuosi/004/C89F85D2",
+                npc: 790025,
+                speakerName: "환상",
+                next: 80140422,
+            },
+            {
+                id: 80140422,
+                content: "(나...)",
+                voice: "inv/Tuosi/004/C89F85FC",
+                npc: 790025,
+                speakerName: "환상",
+                next: 80140423,
+            },
+            {
+                id: 80140423,
+                content: "파르지팔...",
+                voice: "inv/Tuosi/004/C89F8626",
+                npc: 790027,
+                next: 80140424,
+            },
+            {
+                id: 80140424,
+                content:
+                    "아, 너 앞에서 그 사람 얘기하면 안 되는 걸 깜빡했네. 저번에 극단장님이 그 얘기했을 때 네가 도구를 던질 뻔할 정도로 화를 냈잖아.",
+                voice: "inv/Tuosi/004/C89F8650",
+                npc: 790026,
+                next: 80140425,
+            },
+            {
+                id: 80140425,
+                content:
+                    "...그땐 정말 화났어. 그와 선생님이 관객들을 속이지 않았더라면, 〈설국의 아이〉가 공연이 중단되지 않았을 거고 우리가 그렇게 오랜 시간 준비했던 게 물거품이 되지도 않았을 거야. 그런데...",
+                voice: "inv/Tuosi/004/C89F867A",
+                npc: 790027,
+                next: 80140426,
+            },
+            {
+                id: 80140426,
+                content:
+                    '하지만 그 후로 여러 번 스스로에게 물었어... 정말 그가 무대에 올라서는 안 되었던 걸까? 잘못된 건 "카론은 배우로 무대에 설 수 없다"는 규칙을 어긴 파르지팔일까, 아니면 애초에 그 규칙 자체였을까?',
+                voice: "inv/Tuosi/004/C89F86A4",
+                npc: 790027,
+                next: 80140427,
+            },
+            {
+                id: 80140427,
+                content: "우리가 무대에 서는 이유는 뭐지? <H>최고의 예술</>을 위한 것이잖아...",
+                voice: "inv/Tuosi/004/C89F86CE",
+                npc: 790027,
+                next: 80140428,
+            },
+            {
+                id: 80140428,
+                content:
+                    "그런데 왜 사람들은 공연 자체를 보지 않고, 공연하는 사람이 뿔이 있는지 없는지에만 집착하는 걸까? 만약 우리 모두 커튼 뒤에 서 있다면, 파르지팔과 우리가 뭐가 다를까?",
+                voice: "inv/Tuosi/004/C89F86F8",
+                npc: 790027,
+                next: 80140429,
+            },
+            {
+                id: 80140429,
+                content: "아, 물론 다르지. 그는 나보다 노래를 잘 하니까.",
+                voice: "inv/Tuosi/004/C89F8722",
+                npc: 790027,
+                next: 80140430,
+            },
+            {
+                id: 80140430,
+                content: "정말 드문 일이네, 네 입에서 이런 말이 나오다니. 우리 덤벙대던 데니스가 드디어 철들었구나.",
+                voice: "inv/Tuosi/004/C89F874C",
+                npc: 790026,
+                next: 80140431,
+            },
+            {
+                id: 80140431,
+                content: "야, 갑자기 극단장님처럼 굴면서 나를 가르치지 마!",
+                voice: "inv/Tuosi/004/C89F8776",
+                npc: 790027,
+                next: 80140432,
+            },
+            {
+                id: 80140432,
+                content:
+                    "칭찬이지, 가르침이 아니야! 만약 파르지팔 그 녀석이 갑자기 돌아온다면, 내가 제일 먼저 혼내줄 거야. 왜냐고? 아무런 편지도 없이 어디론가 사라져 버렸으니까. 나도 그 녀석이 너무 보고 싶다고!",
+                voice: "inv/Tuosi/004/C89F87A0",
+                npc: 790026,
+                next: 80140433,
+            },
+            {
+                id: 80140433,
+                content: "(수잔나, 데니스...)",
+                voice: "inv/Tuosi/004/C89F87CA",
+                npc: 790025,
+                speakerName: "파르지팔",
+                next: 80140434,
+            },
+            {
+                id: 80140434,
+                content:
+                    '그런데 기억나? 선생님이 말씀하신 적 있잖아. "지금은 아니겠지만, 언젠가 예술이 더 순수한 시대로 나아갈 거야. 그때는 솔라와 카론의 구분이 없어지겠지."',
+                voice: "inv/Tuosi/004/C89F87F4",
+                npc: 790026,
+                next: 80140435,
+            },
+            {
+                id: 80140435,
+                content:
+                    "생각해 보면, 선생님과 파르지팔이 한동안 사람들에게 비난받고, 극단이 수치스러워 보였을지 몰라도... 그런 사람들이 있었기 때문에 그 새로운 시대가 올 수 있었던걸 지도 몰라.",
+                voice: "inv/Tuosi/004/C89F881E",
+                npc: 790026,
+                next: 80140436,
+            },
+            {
+                id: 80140436,
+                content: "그때가 되면 그들은 '수치'가 아니라, 누구보다 먼저 깨어난 '영웅'이 되겠지.",
+                voice: "inv/Tuosi/004/C89F8848",
+                npc: 790026,
+                next: 80140437,
+            },
+            {
+                id: 80140437,
+                content: "......",
+                voice: "inv/Tuosi/004/C89F8872",
+                npc: 790025,
+                speakerName: "파르지팔",
+                next: 80140438,
+            },
+            {
+                id: 80140438,
+                content:
+                    "그를 축복하자. 어쩌면 지금쯤 그는 카론도 무대에 설 수 있는 곳... 예를 들어 루카 공화국이나 이스엘 같은 나라로 갔을 수 도 있어.",
+                voice: "inv/Tuosi/004/C89F889C",
+                npc: 790026,
+                next: 80140439,
+            },
+            {
+                id: 80140439,
+                content:
+                    "혹시 다음에 우리가 그 나라들로 공연 투어를 다니게 된다면, 선생님처럼 대스타가 된 파르지팔을 발견하게 될지도 몰라!",
+                voice: "inv/Tuosi/004/C89F88C6",
+                npc: 790026,
+                next: 80140440,
+            },
+            {
+                id: 80140440,
+                content: "응. 언젠가 다시 그와 같은 무대에 설 수 있기를...",
+                voice: "inv/Tuosi/004/C89F88F0",
+                npc: 790027,
+                next: 80140454,
             },
             {
                 id: 80140402,
@@ -7397,6 +7773,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80240204,
                 content: "냐오옹~",
                 voice: "inv/Suyi/002/C8DF7878",
+                speakerName: "까미",
                 next: 80240205,
             },
             {
@@ -7695,6 +8072,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80240304,
                 content: "냐오옹~",
                 voice: "inv/Suyi/003/C8DF88E0",
+                speakerName: "까미",
                 next: 80240305,
             },
             {
@@ -8253,6 +8631,220 @@ export const partyTopicData_kr: PartyTopic[] = [
                 voice: "inv/Feina/001/C865A5AA",
                 npc: 790017,
                 next: 80050114,
+            },
+            {
+                id: 80050115,
+                content: "...휴, 꽤 어렵네... 어쨌든 완성이야!",
+                voice: "inv/Feina/001/C865A5FE",
+                npc: 790017,
+                next: 80050116,
+            },
+            {
+                id: 80050116,
+                content: "탄피로 이렇게까지 놀 수 있다니. 어디 보자...",
+                voice: "inv/Feina/001/C865A628",
+                npc: 100001,
+                next: 80050117,
+            },
+            {
+                id: 80050118,
+                content: "앗! 무너졌다...",
+                voice: "inv/Feina/001/C865A67C",
+                npc: 100001,
+                next: 80050119,
+            },
+            {
+                id: 80050119,
+                content: "...아...",
+                voice: "inv/Feina/001/C865A6A6",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050120,
+                        content: "울지 마! 사과의 뜻으로 다른 걸 줄게.",
+                        next: 80050121,
+                    },
+                ],
+            },
+            {
+                id: 80050121,
+                content: "음... 그렇다면...",
+                voice: "inv/Feina/001/C865A6FA",
+                npc: 790017,
+                next: 80050122,
+            },
+            {
+                id: 80050122,
+                content:
+                    "유니콘 {性别:오빠|언니}가 피나의 소원 네 개를 들어 주는 건 어때? 전설에 의하면 뿔이 하나인 유니콘은 어떤 소원이든 들어준다고 했으니까, {性别:오빠|언니}라면 할 수 있을 거야!",
+                voice: "inv/Feina/001/C865A724",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050123,
+                        content: "물론이지. 내가 할 수 있는 일이라면.",
+                        next: 80050126,
+                    },
+                    {
+                        id: 80050124,
+                        content: "뭔가 당한 느낌이다...",
+                        next: 80050126,
+                    },
+                    {
+                        id: 80050125,
+                        content: "그런데 보통 소원은 세 개잖아! 넌 왜 하나가 더 많은 거야?",
+                        next: 80050126,
+                    },
+                ],
+            },
+            {
+                id: 80050126,
+                content: "헤헤...",
+                voice: "inv/Feina/001/C865A7CC",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050127,
+                        content: "좋아. 그럼 첫 번째 소원은 뭐야?",
+                        next: 80050128,
+                    },
+                ],
+            },
+            {
+                id: 80050128,
+                content:
+                    "피나는 마법을 연습하고 싶어! 아주 조금 알긴 하지만, 어떻게 사용하는지 잘 모르겠어... 유니콘 {性别:오빠|언니}가 가르쳐주면 안 돼?",
+                voice: "inv/Feina/001/C865A820",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050129,
+                        content: "아웃사이더에게 가르쳐달라고 해도 되잖아?",
+                        next: 80050130,
+                    },
+                    {
+                        id: 80050132,
+                        content: "공짜로?",
+                        next: 80050133,
+                    },
+                ],
+            },
+            {
+                id: 80050130,
+                content: "오빠는 알려주지 않아. 마법학 책도 안 보여주려고, 난 아무리 까치발을 들어도 닿지 않는 높은 책장에 두거든.",
+                voice: "inv/Feina/001/C865A874",
+                npc: 790017,
+                next: 80050131,
+            },
+            {
+                id: 80050133,
+                content: "어...? 그, 그럼... 솜사탕 큰 캔이면 될까?",
+                voice: "inv/Feina/001/C865A8F2",
+                npc: 790017,
+                next: 80050134,
+            },
+            {
+                id: 80050131,
+                content: "그래서 오빠가 없을 때 의자 위로 올라가 몰래 꺼내 봐야 해. 아, 참! 이건 비밀이야!",
+                voice: "inv/Feina/001/C865A89E",
+                npc: 790017,
+                next: 80050138,
+            },
+            {
+                id: 80050134,
+                content: "피나의 소원이니 무료로 해줄게.",
+                voice: "inv/Feina/001/C865A91C",
+                npc: 100001,
+                next: 80050135,
+            },
+            {
+                id: 80050138,
+                content: "오빠가 마법을 배우는 사람은 안락한 방과 따뜻한 벽난로가 없는 황폐하고 처참한 황무지로 가야만 한대...",
+                voice: "inv/Feina/001/C865A9C4",
+                npc: 790017,
+                next: 80050139,
+            },
+            {
+                id: 80050135,
+                content: "좋아!",
+                voice: "inv/Feina/001/C865A946",
+                npc: 790017,
+                next: 80050136,
+            },
+            {
+                id: 80050139,
+                content:
+                    "그리고 거기엔 무시무시한 눈빛을 내뿜는 스노우 울프가 득실거리고, 온몸에 독을 바른 늪지 마녀가 빗자루를 타고 있대.",
+                voice: "inv/Feina/001/C865A9EE",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050140,
+                        content: "그 정도는 아니고, 그건 그냥 아웃사이더가 널 겁주려고 한 말이야.",
+                        next: 80050141,
+                    },
+                    {
+                        id: 80050143,
+                        content: "거기엔 스노우 울프와 늪지 마녀보다 더 무서운 것들이 있어.",
+                        next: 80050144,
+                    },
+                ],
+            },
+            {
+                id: 80050136,
+                content:
+                    "가르쳐줘서 고마워. 오빠는 절대 안 알려주려고 해. 마법학 책도 안 보여주려고, 난 아무리 까치발을 들어도 닿지 않는 높은 책장에 두거든.",
+                voice: "inv/Feina/001/C865A970",
+                npc: 790017,
+                next: 80050137,
+            },
+            {
+                id: 80050141,
+                content:
+                    "아... 그럴 줄 알았어! 내가 아프고 다칠까 봐 걱정하는 거겠지. 하지만 내가 계속 낫지 않는다면... 이렇게 집에 누워만 있으면서 걸림돌이 되기는 싫어.",
+                voice: "inv/Feina/001/C865AA42",
+                npc: 790017,
+                next: 80050142,
+            },
+            {
+                id: 80050144,
+                content: "그렇다면... 더욱 날 빼고 가도록 둘 수 없어. 마법을 열심히 배워서 내가 도와야만 해.",
+                voice: "inv/Feina/001/C865AAC0",
+                npc: 790017,
+                next: 80050145,
+            },
+            {
+                id: 80050137,
+                content: "그래서 오빠가 없을 때 의자 위로 올라가 몰래 꺼내 봐야 해. 아, 참! 이건 비밀이야!",
+                voice: "inv/Feina/001/C865A99A",
+                npc: 790017,
+                next: 80050138,
+            },
+            {
+                id: 80050142,
+                content: "...나도 도움이 되는 아이가 되고 싶어. 더 이상 미움 받기 싫다고.",
+                voice: "inv/Feina/001/C865AA6C",
+                npc: 790017,
+                next: 80050145,
+            },
+            {
+                id: 80050145,
+                content: "그러니까... 제발 가르쳐줘! 비밀은 꼭 지킬게.",
+                voice: "inv/Feina/001/C865AAEA",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050146,
+                        content: "알겠어. 그럼 이제부터 연습해 보자.",
+                        next: 80050147,
+                    },
+                ],
+            },
+            {
+                id: 80050147,
+                content: "신난다! 역시 세상에서 가장 착한 유니콘 {性别:오빠|언니}야!",
+                voice: "inv/Feina/001/C865AB3E",
+                npc: 790017,
             },
         ],
     },
@@ -10584,12 +11176,14 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80090115,
                 content: "지금 그쪽이 거절할 수 없는 제안을 할게. 곰곰이 잘 생각해서 대답해.",
                 npc: 790052,
+                speakerName: "???",
                 next: 80090116,
             },
             {
                 id: 80090116,
                 content: "날 깨운 것은 장사인데, 널 깨운 것은 뭐야?",
                 npc: 790052,
+                speakerName: "???",
                 options: [
                     {
                         id: 80090117,
@@ -10607,12 +11201,14 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80090118,
                 content: "히히, 듣기 좋은데? 네가 만든 음료수보다 훨씬 달콤한걸!",
                 npc: 790052,
+                speakerName: "???",
                 next: 80090144,
             },
             {
                 id: 80090120,
                 content: "나는 하나도 안 무섭거든! 그 누구도 악마대도를 막을 수는 없다고!",
                 npc: 790052,
+                speakerName: "???",
                 next: 80090144,
             },
             {
@@ -11383,24 +11979,28 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80090416,
                 content: "아직 숨은 붙어있어, 둘 다 괜찮아. 그냥 잠에 든 것뿐이야.",
                 npc: 92301,
+                speakerName: "???",
                 next: 80090417,
             },
             {
                 id: 80090417,
                 content: "흑흑... 깜짝 놀랐어... 이래서 타비사한테 음식에 아무거나 넣지 말라고, 사고 나면 어쩌냐고 했던 건데... 흑흑...",
                 npc: 92301,
+                speakerName: "???",
                 next: 80090418,
             },
             {
                 id: 80090418,
                 content: "히힛, 머리에 문제 생기거나, 이상한 후유증이 생길지도 몰라!",
                 npc: 92301,
+                speakerName: "???",
                 next: 80090419,
             },
             {
                 id: 80090419,
                 content: "조용히 해! 말이 씨가 될 수 있어.",
                 npc: 92301,
+                speakerName: "???",
                 options: [
                     {
                         id: 80090420,
@@ -11418,12 +12018,14 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80090422,
                 content: "너희도 들었어...? 우리에게 말한 거 같은데?",
                 npc: 92301,
+                speakerName: "???",
                 next: 80090423,
             },
             {
                 id: 80090423,
                 content: "우리의 말소리는 타비사만 들을 수 있지 않나?",
                 npc: 92301,
+                speakerName: "???",
                 next: 80090424,
             },
             {
@@ -11431,6 +12033,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "...이런, 어쩌지! 역시 음료 때문에 문제가 생긴 건가? 5호가 불길한 말만 하면 꼭 현실이 된다니까! 제발, 그 입 좀 다물어!",
                 npc: 92301,
+                speakerName: "???",
                 options: [
                     {
                         id: 80090425,
@@ -11444,6 +12047,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "어... 안녕? 우리는 타비사의 다리야. 이런 상황에서 이야기를 나누게 될 줄은 몰랐네! 인생은 참 한치 앞도 알 수 없다니까~ 하, 하하...",
                 npc: 92301,
+                speakerName: "6번 다리",
                 next: 80090427,
             },
             {
@@ -11451,6 +12055,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "그러니까... 아까 그 음료수 때문에 우리의 말을 듣을 수 있게 된 거 같은데... 이상한 걸 마시게 해서 미안해. 하지만 타비사랑 우리는 일부러 그런 게 아니야. 흑흑...",
                 npc: 92301,
+                speakerName: "2번 다리",
                 options: [
                     {
                         id: 80090428,
@@ -11468,6 +12073,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80090430,
                 content: "제가 보기엔 그저... 식재료가 특별해서 그런 것 같군요. 자고 일어나면 괜찮을 거예요!",
                 npc: 92301,
+                speakerName: "3번 다리",
                 next: 80090431,
             },
             {
@@ -11475,30 +12081,35 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "다만, 크흠... 저의 인도 아래 모든 다리가 함께 완성한 이 음료수는 바로 오늘의 이 특별한 만남을 위해 만들어진 것이랍니다.",
                 npc: 92301,
+                speakerName: "3번 다리",
                 next: 80090432,
             },
             {
                 id: 80090432,
                 content: "그래? 타비사가 음료 만드는 법도 모르면서 예쁜 버섯을 넣어서 이렇게 된 거 아니었어?",
                 npc: 92301,
+                speakerName: "6번 다리",
                 next: 80090433,
             },
             {
                 id: 80090433,
                 content: "히힛... 3호, 자꾸 이상한 소리하면 너도 이 음료수 안에 넣어줄 줄 알아, 히히히힛...",
                 npc: 92301,
+                speakerName: "5번 다리",
                 next: 80090434,
             },
             {
                 id: 80090434,
                 content: "흐엉, 너무 무서워!",
                 npc: 92301,
+                speakerName: "2번 다리",
                 next: 80090435,
             },
             {
                 id: 80090435,
                 content: "조용히 해... 너흰 지치지도 않냐... 그리고, {nickname} 놀라게 하지 마...",
                 npc: 92301,
+                speakerName: "4번 다리",
                 options: [
                     {
                         id: 80090436,
@@ -11512,6 +12123,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "꿈이라고 생각해도 돼. 그나저나 이게 언제까지 지속될지 모르겠네... 사실 우리는 너와 하고 싶은 말이 엄청 많거든! 이번 기회에 다 해볼까... 1호, 너 먼저 해!",
                 npc: 92301,
+                speakerName: "6번 다리",
                 next: 80090438,
             },
             {
@@ -11519,6 +12131,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "...나의 의식은 바다에서 생겨났어. 사고가 일어난 후, 나와 타비사는 바다 위를 표류 중이라 언제 죽어도 이상하지 않았어. 하지만 내가 말동무가 되어주며, 타비사가 그 힘든 시간을 버틸 수 있었지.",
                 npc: 92301,
+                speakerName: "1번 다리",
                 next: 80090439,
             },
             {
@@ -11526,6 +12139,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "나, 나는 보육원에서 깨어났어. 그때 타비사는 그곳에 막 도착한 참이었는데, 어른들은 모두 그 애한테 심술궂게 굴었어. 타비사는 무서워했지만 고집이 세서 누구 앞에서도 약한 모습을 보이기 싫어했어. 하지만 밤만 되면 나를 꼭 껴안고 무서움에 계속 떨곤 했지...",
                 npc: 92301,
+                speakerName: "2번 다리",
                 next: 80090440,
             },
             {
@@ -11533,12 +12147,14 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "저는 보육원 주방에서 이 팀에 합류했습니다. 위기의 순간, 저의 지휘 덕분에 순찰하는 경비를 피해 무사히 빵 반쪽을 전리품으로 얻을 수 있었지요!",
                 npc: 92301,
+                speakerName: "3번 다리",
                 next: 80090441,
             },
             {
                 id: 80090441,
                 content: "제 말투는... 보육원 원장을 완벽하게 재현한 것입니다.",
                 npc: 92301,
+                speakerName: "3번 다리",
                 next: 80090442,
             },
             {
@@ -11546,18 +12162,21 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "흐아암... 졸려... 난 보육원에서 탈출하던 날 밤에 깨어났어. 죽다 살아난 느낌이 얼마나 버겁고... 버겁던지... 너무 버거워서 안전한 곳에 도착하자마자 우리는 잔디 위에서 바로 잠들어 버렸어...",
                 npc: 92301,
+                speakerName: "4번 다리",
                 next: 80090443,
             },
             {
                 id: 80090443,
                 content: "히힛, 이제 내 차례인가! 나는 타비사 최고의 전우! 함께하는 도둑질은 언제나 짜릿해! 와우!",
                 npc: 92301,
+                speakerName: "5번 다리",
                 next: 80090444,
             },
             {
                 id: 80090444,
                 content: "적당히 해! 미안, 얘가 아직 철이 덜 들었어! 크흠, 드디어 내 차례네! 난 막내야. 최근에 의식이 생겼거든.",
                 npc: 92301,
+                speakerName: "6번 다리",
                 next: 80090445,
             },
             {
@@ -11565,12 +12184,14 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "사실 훨씬 전에 한 번 깨어난 적이 있어. 다만 생선을 팔던 아이와 헤어졌을 때 타비사가 말은 안 했지만 정말 힘들어했거든. 심지어 나도 현실을 마주하기 싫을 정도라서 다시 잠에 들었어.",
                 npc: 92301,
+                speakerName: "6번 다리",
                 next: 80090446,
             },
             {
                 id: 80090446,
                 content: "그러다가 타비사가 진심으로 대하는 새로운 사람이 나타났지... 맞아, 난 너 덕분에 깨어난 거야.",
                 npc: 92301,
+                speakerName: "6번 다리",
                 next: 80090447,
             },
             {
@@ -11578,6 +12199,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "그동안 타비사를 보살펴줘서 고마워. 너의 따뜻한 마음 덕분에 내가 깨어날 수 있었어. 고마운 마음을 담아 너에게 음료수를 만들어 주자는 것도 나의 제안이었어.",
                 npc: 92301,
+                speakerName: "6번 다리",
                 next: 80090448,
             },
             {
@@ -11585,12 +12207,14 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "하지만 그래도 음료를 그렇게까지 마구잡이로 만들 줄은 몰랐지, 으아아! 음료 만드는 법도 모르면서, 닥치는 대로 아무거나 넣더라니까... 그리고 3호랑 5호, 너희도 계속 옆에서 부추긴 거 다 알고 있어!",
                 npc: 92301,
+                speakerName: "6번 다리",
                 next: 80090449,
             },
             {
                 id: 80090449,
                 content: "미안해, 정말 미안해...",
                 npc: 92301,
+                speakerName: "6번 다리",
                 options: [
                     {
                         id: 80090450,
@@ -11603,18 +12227,21 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80090451,
                 content: "......",
                 npc: 92301,
+                speakerName: "1번 다리",
                 next: 80090452,
             },
             {
                 id: 80090452,
                 content: "타비사가 곧 깨어날 것 같아. 넌?",
                 npc: 92301,
+                speakerName: "1번 다리",
                 next: 80090453,
             },
             {
                 id: 80090453,
                 content: "벌써?! 저는 아직 이 대화를 끝낼 준비를 못 했는데...",
                 npc: 92301,
+                speakerName: "3번 다리",
                 options: [
                     {
                         id: 80090454,
@@ -12605,6 +13232,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "귀찮아, 진짜 귀찮아, 귀찮아 죽겠어!",
                 voice: "inv/Fushu/003/C8C5D208",
                 npc: 790054,
+                speakerName: "???",
                 next: 80200219,
             },
             {
@@ -12613,6 +13241,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "으, 아침에 일어날 때만 해도, 오늘은 절대 걔 속 긁지 말자고 그렇게 다짐했잖아. 어떻게 아침도 다 먹기 전에 그걸 못 참니!",
                 voice: "inv/Fushu/003/C8C5D232",
                 npc: 790054,
+                speakerName: "???",
                 next: 80200220,
             },
             {
@@ -12621,6 +13250,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "부풍아, 내가 진짜 못 살아! 넌 대체 왜 이렇게 참을성이 없는 거야! 성격이 아무리 나빠도, 걔는 네 친동생이잖아! 어차피 챙겨 줄 거면서, 왜 자꾸 걜 화나게 만드는 건데!",
                 voice: "inv/Fushu/003/C8C5D25C",
                 npc: 790054,
+                speakerName: "???",
                 next: 80200221,
             },
             {
@@ -13399,6 +14029,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80110111,
                 content: "오해한 것 같아. 그냥 너한테 한잔 대접하고 싶어서야.",
                 voice: "inv/Linen/001/C88C1916",
+                speakerName: "{nickname}",
                 next: 80110112,
             },
             {
@@ -13496,6 +14127,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80110127,
                 content: "이렇게 상관을 욕하는 것도 '잘못된 말'에 포함되는 것 아냐? '감전사' 당하는 거 아냐?",
                 voice: "inv/Linen/001/C88C1BB6",
+                speakerName: "{nickname}",
                 next: 80110128,
             },
             {
@@ -13530,6 +14162,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80110131,
                 content: "그런데 생각보단 좀... 의외야.",
                 voice: "inv/Linen/001/C88C1C5E",
+                speakerName: "{nickname}",
                 next: 80110132,
             },
             {
@@ -13537,6 +14170,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "난 린이 휘페르보레아 장교로서 좀 더 '신념' 같은 게 있을 줄 알았거든. 뭐랄까, '명예'라든가 '충성심' 같은 거 말이야.",
                 voice: "inv/Linen/001/C88C1C88",
+                speakerName: "{nickname}",
                 next: 80110133,
             },
             {
@@ -13828,6 +14462,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80110223,
                 content: "......",
                 voice: "inv/Linen/002/C88C2B76",
+                speakerName: "{nickname}",
                 next: 80110224,
             },
             {
@@ -13988,6 +14623,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80110111,
                 content: "오해한 것 같아. 그냥 너한테 한잔 대접하고 싶어서야.",
                 voice: "inv/Linen/001/C88C1916",
+                speakerName: "{nickname}",
                 next: 80110112,
             },
             {
@@ -14085,6 +14721,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80110127,
                 content: "이렇게 상관을 욕하는 것도 '잘못된 말'에 포함되는 것 아냐? '감전사' 당하는 거 아냐?",
                 voice: "inv/Linen/001/C88C1BB6",
+                speakerName: "{nickname}",
                 next: 80110128,
             },
             {
@@ -14119,6 +14756,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80110131,
                 content: "그런데 생각보단 좀... 의외야.",
                 voice: "inv/Linen/001/C88C1C5E",
+                speakerName: "{nickname}",
                 next: 80110132,
             },
             {
@@ -14126,6 +14764,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "난 린이 휘페르보레아 장교로서 좀 더 '신념' 같은 게 있을 줄 알았거든. 뭐랄까, '명예'라든가 '충성심' 같은 거 말이야.",
                 voice: "inv/Linen/001/C88C1C88",
+                speakerName: "{nickname}",
                 next: 80110133,
             },
             {
@@ -14529,6 +15168,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80110331,
                 content: "이건 네가 집에 가고 싶을 때 갈 수 있는 세상이어야 해... 아니, 우리 세대가 그런 세상을 만들어야 한다고 봐.",
                 voice: "inv/Linen/003/C88C3D2E",
+                speakerName: "{nickname}",
                 next: 80110332,
             },
             {
@@ -14550,12 +15190,14 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80110334,
                 content: "그럴지도 모르지.",
                 voice: "inv/Linen/003/C88C3DAC",
+                speakerName: "{nickname}",
                 next: 80110335,
             },
             {
                 id: 80110335,
                 content: "게다가, 네가 아이스레이크 시티에 눈이 안 오게 할 순 없어도, 눈을 치우고 눈사람을 만드는 건 할 수 있잖아.",
                 voice: "inv/Linen/003/C88C3DD6",
+                speakerName: "{nickname}",
                 next: 80110336,
             },
             {
@@ -14563,6 +15205,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "적어도, 네 친구에게 가서 옛날의 꿈을 아직도 기억하고 있다고 말할 수 있어. 그 꿈이 깨져버렸더라도 말이야. 가족들에게 가서 네가 어떤 위치에 있든 그들을 항상 생각하고 있다고, 그건 절대 변하지 않을 거라고 말해줄 수 있잖아.",
                 voice: "inv/Linen/003/C88C3E00",
+                speakerName: "{nickname}",
                 next: 80110337,
             },
             {
@@ -15422,6 +16065,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "아, 됐어, 그냥 내가 할게. 오기 전엔 분명 안 무섭다면서, '우르르쾅쾅' 장난감을 꼭 아이스레이크 시티에 팔겠다고 했잖아. ",
                 voice: "inv/Yeer/001/C898E9D8",
                 npc: 93103,
+                speakerName: "???",
                 next: 80130109,
             },
             {
@@ -15429,6 +16073,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "결국 이 모양이라니, 역시 내가 나서야겠군.",
                 voice: "inv/Yeer/001/C898EA02",
                 npc: 93103,
+                speakerName: "???",
                 next: 80130110,
             },
             {
@@ -15444,6 +16089,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "뭐가 무서워, 쟤가 사람을 잡아먹는 것도 아니고, 그냥 평소에 꼬맹이들 대하듯이 말하면 돼. ",
                 voice: "inv/Yeer/001/C898EA56",
                 npc: 93103,
+                speakerName: "???",
                 options: [
                     {
                         id: 801301111,
@@ -15499,6 +16145,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "하지만 예일은 종종 말을 하다가 막힐 때가 있어서, 내가 대신 손님들을 상대하기도 해. 바로 오늘처럼.",
                 voice: "inv/Yeer/001/C898EB52",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130118,
             },
             {
@@ -15507,6 +16154,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "아까 예일이 말했듯이, '우르르쾅쾅'에서는 폭발하는 작은 장난감을 판매하고 있어. 지난달 우리 가게 제품 중 인기 TOP 3는 폭발 비행선, 하늘높이 폭죽, 그리고 폭발 팽이였지.",
                 voice: "inv/Yeer/001/C898EB7C",
                 npc: 93103,
+                speakerName: "올리버",
                 options: [
                     {
                         id: 801301181,
@@ -15525,6 +16173,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "조급해하지 말라고, 더 폭발적인 상품을 곧 소개할 테니까.",
                 voice: "inv/Yeer/001/C898EBA6",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130121,
             },
             {
@@ -15532,6 +16181,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "오... 이런 거 좋아해? 사실 아까 그것들은 그냥 밑밥일 뿐이었고, 우리가 진짜로 너한테 팔고 싶은 건 이거야.",
                 voice: "inv/Yeer/001/C898EBD0",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130121,
             },
             {
@@ -15540,6 +16190,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "겉보기에는 무해한 알람 시계처럼 보이지만, 사실 위력은 엄청나지. 단 한 발로 눈에 거슬리는 모든 것을 날려버릴 수 있는 초고에너지 폭탄, '샤터드 스타즈'라고.",
                 voice: "inv/Yeer/001/C898EBFA",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130122,
             },
             {
@@ -15547,6 +16198,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "넌 스칼렛에서 꽤 잘나가는 월석 사냥꾼이라고 들었어. 분명히 이런 물건이 필요할 거야.",
                 voice: "inv/Yeer/001/C898EC24",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130123,
             },
             {
@@ -15570,6 +16222,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "휴, 몇 번을 말하는 거야. 폭탄을 사려는 손님들은 그 폭발 순간을 보고 싶어 하는 사람들이야. 폭탄 표면의 무늬 따위엔 관심 없다고.",
                 voice: "inv/Yeer/001/C898ECA2",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130126,
             },
             {
@@ -15585,6 +16238,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그... 그건 어차피 그릴 거면 잘 그려야 하니까 그런 거지. 그림이 너무 엉망이면 안 팔릴 거 아니야!",
                 voice: "inv/Yeer/001/C898ECF6",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130128,
             },
             {
@@ -15592,6 +16246,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "흠흠, 아무튼 할 얘긴 다 했으니 필요하면 연락해. '샤터드 스타즈'를 사고 싶다고 우리한테 편지를 보내면 돼.",
                 voice: "inv/Yeer/001/C898ED20",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130129,
             },
             {
@@ -15599,6 +16254,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "대신 편지에는 '귀요미'라고 쓰는 걸 잊지 마. 안 그러면 발각될 수 있으니까.",
                 voice: "inv/Yeer/001/C898ED4A",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130130,
             },
             {
@@ -15959,6 +16615,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "흥, 난 그 바보가 아니야.",
                 voice: "inv/Yeer/003/C89909D6",
                 npc: 93103,
+                speakerName: "예일(?)",
                 next: 80130305,
             },
             {
@@ -15966,6 +16623,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "당연히 아니지, 폭탄 게임 따윈 이미 질렸다고.",
                 voice: "inv/Yeer/003/C8990A00",
                 npc: 93103,
+                speakerName: "예일(?)",
                 next: 80130305,
             },
             {
@@ -15973,6 +16631,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "난 올리버, 올리버 쿠즈카다. 폭탄 속에 갇힌 이상한 노리개가 아니라.",
                 voice: "inv/Yeer/003/C8990A2A",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130306,
             },
             {
@@ -15981,6 +16640,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "들어본 적 없는 이름이겠지만 뭐, 상관없고, 잘 기억해 둬. 언젠가 황성 디즈마니아에 가게 되면, 북문 밖 15킬로미터 지점에 있는 폐허가 된 요새를 잘 살펴봐. 내가 폭파시킨 곳이니까.",
                 voice: "inv/Yeer/003/C8990A54",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130307,
             },
             {
@@ -15988,6 +16648,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "내가 여기 왜 왔는지는 네 태도에 달려 있어. 말해, 예일이 지난번에 와서 너와 무슨 이야기를 나눴는지.",
                 voice: "inv/Yeer/003/C8990A7E",
                 npc: 93103,
+                speakerName: "올리버",
                 options: [
                     {
                         id: 801303071,
@@ -16006,6 +16667,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "오, 보기보다 세네, 재미있어. 너도 강하게 나가면 반발하는 타입인가 보군.",
                 voice: "inv/Yeer/003/C8990AA8",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130310,
             },
             {
@@ -16013,6 +16675,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "나쁘지 않지, 그 단도직입적인 성격은 마음에 드네.",
                 voice: "inv/Yeer/003/C8990AD2",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130310,
             },
             {
@@ -16020,6 +16683,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그럼 나도 솔직하게 나가지, 처음부터 이야기해 볼까. ",
                 voice: "inv/Yeer/003/C8990AFC",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130311,
             },
             {
@@ -16027,6 +16691,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "아까도 말했듯이, 이 몸은 원래 내 거야. 폭탄의 천재, 올리버 쿠즈카.",
                 voice: "inv/Yeer/003/C8990B26",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130312,
             },
             {
@@ -16035,6 +16700,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "그 시절 난 어렸고, 내가 만든 장난감들로 휘페르보레아 전체를 날려버릴 수 있을 거라고 생각했지. 잡히면 어떻게 될지, 아니, 잡힐 거라는 생각 자체를 하지 않았어.",
                 voice: "inv/Yeer/003/C8990B50",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130313,
             },
             {
@@ -16042,6 +16708,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그래서 군단에 붙잡혔을 때, 나한테 무슨 일이 기다리고 있을지 전혀 몰랐지.",
                 voice: "inv/Yeer/003/C8990B7A",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130314,
             },
             {
@@ -16049,6 +16716,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "난 소드 연금원의 한 연구실로 끌려갔고, 거기서 존스라는 영감탱이를 만났어. 생긴 건 인자하게 생겼더군.",
                 voice: "inv/Yeer/003/C8990BA4",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130315,
             },
             {
@@ -16057,6 +16725,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "존스는 다정하고 부드럽게, 범죄는 심리적인 문제일 뿐이니까, 약을 먹으면 좋아질 거라나 뭐라나 하는 헛소리를 늘어놓았어.",
                 voice: "inv/Yeer/003/C8990BCE",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130316,
             },
             {
@@ -16065,6 +16734,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "뭐, 굶기지는 않았고, 단지 약이랑 신체검사를 강요했지. 쓴 약은 아니었지만, 마시고 나면 머리가 느리게 돌아가는 느낌이 들었고... 점차 많은 것들을 잊어버리게 됐어.",
                 voice: "inv/Yeer/003/C8990BF8",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130317,
             },
             {
@@ -16073,6 +16743,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "처음에는 이 교활한 영감탱이한테 욕이라도 퍼부을 수 있었지만, 약을 계속 먹다 보니 나중엔 욕하는 법도 기억나지 않았어.",
                 voice: "inv/Yeer/003/C8990C22",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130318,
             },
             {
@@ -16080,6 +16751,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "욕할 줄 모르는 사람은 말도 할 줄 모르는 거라는 말도 있잖아. 누가 한 말인지는 까먹었지만.",
                 voice: "inv/Yeer/003/C8990C4C",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130319,
             },
             {
@@ -16088,6 +16760,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "근데 이건 단지 시작일 뿐이었어. 점점 걸어 다니는 법을 잊어버리게 됐고... 손을 어떻게 움직이는지, 심지어는 숨 쉬는 방법도 잊어버렸지.",
                 voice: "inv/Yeer/003/C8990C76",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130320,
             },
             {
@@ -16096,6 +16769,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "존스가 준 약에 문제가 있다는 걸 알았지만, 약을 마실 때가 되면 뱉어내는 방법이 기억나지 않았어. 그래서 그냥 내 기억이 서서히 녹아내리도록 기다릴 수밖에 없었지. 차라리 폭발해서 산산조각 나는 게 더 나았을 거야.",
                 voice: "inv/Yeer/003/C8990CA0",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130321,
             },
             {
@@ -16103,6 +16777,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "마지막엔, 거울 속에 비친 올리버 쿠즈카의 몸을 방관자처럼 바라보면서도, 그게 누구인지조차 알 수 없었어.",
                 voice: "inv/Yeer/003/C8990CCA",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130322,
             },
             {
@@ -16110,6 +16785,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그러던 어느 날, 존스 영감탱이가 방에 들어오더니, 이 몸을 향해 말하더군, 이 몸의 이름은 예일이라고.",
                 voice: "inv/Yeer/003/C8990CF4",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130323,
             },
             {
@@ -16117,6 +16793,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "...그러니까, 걔가 예일이래. 그럼, 나는 누구지?",
                 voice: "inv/Yeer/003/C8990D1E",
                 npc: 93103,
+                speakerName: "올리버",
                 options: [
                     {
                         id: 801303231,
@@ -16135,6 +16812,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "이해가 안 되는 것도 당연해. 나도 한참이 지나서야 존스가 새로운 인격을 만들어 냈다는 걸 깨달았으니까.",
                 voice: "inv/Yeer/003/C8990D48",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130326,
             },
             {
@@ -16142,6 +16820,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그래, 그는 올리버라는 카론 범죄자를 완전히 대체할 새로운 인격을 만들어낸 거야.",
                 voice: "inv/Yeer/003/C8990D72",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130326,
             },
             {
@@ -16150,6 +16829,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "근데 예일의 등장은 나한테 오히려 좋은 일이었어. 그전에는 몸을 완전히 잃어버려서, 아무리 움직이려고 해도 소용이 없었거든.",
                 voice: "inv/Yeer/003/C8990D9C",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130327,
             },
             {
@@ -16158,6 +16838,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     '하지만 내 생각은 예일에게 직접 전달할 수 있었어. 내가 "넌 가짜야"라고 생각하기만 하면, 예일은 놀란 메추라기처럼 좌우를 두리번거리며 고개를 움츠렸지.',
                 voice: "inv/Yeer/003/C8990DC6",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130328,
             },
             {
@@ -16165,6 +16846,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "내가 걜 얼마나 싫어했을지 상상이 되지? 난 기억해 낼 수 있는 가장 악독한 말들로 매일매일 예일을 저주했어.",
                 voice: "inv/Yeer/003/C8990DF0",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130329,
             },
             {
@@ -16172,6 +16854,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "걔 입장에선 아마 머릿속에서 갑자기 이상한 목소리가 들려온다고 생각했겠지.",
                 voice: "inv/Yeer/003/C8990E1A",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130330,
             },
             {
@@ -16179,6 +16862,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "걔도 한때는 날 머릿속에서 몰아내려고 했지만, 내가 질 리가 있어? 애초에 이 몸의 주인은 나였는데.",
                 voice: "inv/Yeer/003/C8990E44",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130331,
             },
             {
@@ -16186,6 +16870,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "열 받는 건, 존스 영감탱이가 예일의 이상 행동을 눈치챘는지 걔한테 올리버를 아냐고 묻더라고.",
                 voice: "inv/Yeer/003/C8990E6E",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130332,
             },
             {
@@ -16194,6 +16879,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "걘 한사코 모른다고 했지만, 존스는 예일의 눈을 꿰뚫어 보는 것처럼 끈질기게 노려봤어. 꼭 내가 보이기라도 하는 것처럼 말이야.",
                 voice: "inv/Yeer/003/C8990E98",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130333,
             },
             {
@@ -16202,6 +16888,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "그 일 이후, 존스는 예일한테 축음기를 하나 가져다줬어. 그 플레이어로 음악을 틀기 시작하면 난 완전히 의식을 잃게 됐지. 누군가 캄캄한 어둠 속에서 촛불을 '훅' 불어 끄는 것처럼 말이야.",
                 voice: "inv/Yeer/003/C8990EC2",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130334,
             },
             {
@@ -16210,6 +16897,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "난 깨달았어. 그 축음기와 음악은 바로 존스가 나를 없애기 위해 사용한 새로운 방법이었어. 존스는 예일이 나를 완전히 대체하길 바랐던 거야.",
                 voice: "inv/Yeer/003/C8990EEC",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130335,
             },
             {
@@ -16218,6 +16906,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "나는 이런 잠과 깨어남의 반복 속에서 모든 기억을 잃어버릴 줄 알았어. 하지만 어느 날 갑자기 잠에서 깨어났을 때, 예일이 말하더군. 더 이상 그 음악을 듣고 싶지 않아졌다는 거야.",
                 voice: "inv/Yeer/003/C8990F16",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130336,
             },
             {
@@ -16226,6 +16915,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "그 순간부터, 난 내가 쭉 '가짜'라고 부르던 녀석이 실제로는 독립적인 존재임을 깨달았어. 그래서 난 걔랑 같이 계획을 세워, 존스 영감탱이의 손아귀에서 성공적으로 탈출했어.",
                 voice: "inv/Yeer/003/C8990F40",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130337,
             },
             {
@@ -16234,6 +16924,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "마침내 우리는 스칼렛에 도착해서 함께 장난감 가게를 열었어. 예일은 가게에 '우르르쾅쾅'이라는 별난 이름을 붙였지. 우리는 연구소에서 있었던 일에 대해 다시는 언급하지 않았어.",
                 voice: "inv/Yeer/003/C8990F6A",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130338,
             },
             {
@@ -16242,6 +16933,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "며칠 전까지만 해도 말이야. 며칠 전 갑자기 익숙한 느낌이 들면서 의식을 잃었어. 예일이 또 약을 먹었다는 걸 짐작했지만 걔가 어디로 갔는지 알 수 없었지. 여기저기 물어본 끝에 아이스레이크 시티를 방문했다는 걸 알게 됐어.",
                 voice: "inv/Yeer/003/C8990F94",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130339,
             },
             {
@@ -16250,6 +16942,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "솔직히 말해서, 예일을 가장 잘 아는 사람은 나야. 예일이 소심하고 낯을 가리긴 해도, 본성은 착한 애야. 걔가 나한테... 숨기고 싶은 일이 있을 것 같지는 않거든.",
                 voice: "inv/Yeer/003/C8990FBE",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130340,
             },
             {
@@ -16258,6 +16951,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "그래서 나도 또 다른 인격을 잠재울 수 있는 약을 삼키고 여기에 온 거야. 걔가 도대체 무슨 이야기를 했는지 알아내기 위해서.",
                 voice: "inv/Yeer/003/C8990FE8",
                 npc: 93103,
+                speakerName: "올리버",
                 options: [
                     {
                         id: 801303401,
@@ -16277,6 +16971,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그러니까... 예일이 나를 잠재우는 약을 먹고 여기 와서, 몸을 나한테 돌려줄 결심을 했다는 거야?",
                 voice: "inv/Yeer/003/C899103C",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130343,
             },
             {
@@ -16284,6 +16979,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "이... 이... 앞뒤 분간도 못하는 빡*가리 같은 놈! ",
                 voice: "inv/Yeer/003/C8991066",
                 npc: 93103,
+                speakerName: "올리버",
                 options: [
                     {
                         id: 801303431,
@@ -16302,6 +16998,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "...빈정거리지 마. 어쨌든 난 여기서 예일이 깨어나기를 기다렸다가, 과거 일들을 제대로 얘기해야겠어.",
                 voice: "inv/Yeer/003/C8991090",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130346,
             },
             {
@@ -16309,6 +17006,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "흠, 글쎄. 어쨌든 여기서 녀석이 깨어나기를 기다렸다가, 과거 일들을 제대로 얘기해야겠어.",
                 voice: "inv/Yeer/003/C89910BA",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130346,
             },
             {
@@ -16316,6 +17014,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "...고마워, 이렇게 예전 일들을 들어줘서. 미안한데 이따가 예일이 깨어나면, 너도 옆에서 몇 마디 좀 거들어 줘.",
                 voice: "inv/Yeer/003/C89910E4",
                 npc: 93103,
+                speakerName: "올리버",
                 next: 80130347,
             },
             {
@@ -16379,6 +17078,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "멍청아... 아직도 과거를 숨기려고 시치미 떼는 거야? 내가 벌써 저 사람한테 다 말했어.",
                 voice: "inv/Yeer/004/C8991ABC",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130407,
             },
             {
@@ -16393,6 +17093,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그래, 계속 있었지.",
                 voice: "inv/Yeer/004/C8991B10",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130409,
             },
             {
@@ -16407,6 +17108,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "......",
                 voice: "inv/Yeer/004/C8991B64",
                 npc: 790024,
+                speakerName: "올리버",
                 options: [
                     {
                         id: 801304101,
@@ -16432,6 +17134,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "난 마음속에 담아둔 거 없어. 근데 예일은 있는 거 같은데.",
                 voice: "inv/Yeer/004/C8991C0C",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130415,
             },
             {
@@ -16439,6 +17142,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "뭔 개소리야!",
                 voice: "inv/Yeer/004/C8991BB8",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130413,
             },
             {
@@ -16453,6 +17157,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "누군가의 사과를 기다리고 있을 뿐이야.",
                 voice: "inv/Yeer/004/C8991BE2",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130415,
             },
             {
@@ -16529,6 +17234,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "알았어, 인제 그만 말해. ",
                 voice: "inv/Yeer/004/C8991DDA",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130426,
             },
             {
@@ -16536,6 +17242,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "누가 내 얼굴을 하고 이런 말을 하는 광경을 목격할 줄이야... 이젠 존스 영감탱이의 연구가 존경스러워질 정도야.",
                 voice: "inv/Yeer/004/C8991E04",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130427,
             },
             {
@@ -16544,6 +17251,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "네 마음은 이해해. 나도 누구한테 빚지고 싶지 않거든. 그래서 네가 존스에게 그 시끄러운 축음기를 가져가라고 했을 때, 마음속으론 이미 목숨을 반쯤은 돌려받았다고 생각했어.",
                 voice: "inv/Yeer/004/C8991E2E",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130428,
             },
             {
@@ -16551,6 +17259,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "나중에 우리가 간신히 탈출했을 때는, 서로에게 더 이상 빚진 게 없게 됐지.",
                 voice: "inv/Yeer/004/C8991E58",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130429,
             },
             {
@@ -16559,6 +17268,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "하지만 넌 또 나한테 또 빚을 졌어. 네가 의식을 잃은 며칠 동안, '우르르쾅쾅'에 와서 장난감을 사겠다고 아우성치는 꼬맹이들 몇 명을 내가 억지로 상대했단 말이야.",
                 voice: "inv/Yeer/004/C8991E82",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130430,
             },
             {
@@ -16567,6 +17277,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "다 널 찾는 꼬맹이들인데, 내가 나오면 안 되잖아. 네 성격을 흉내 내면서, 나오는 욕을 참고, 좋은 말로 달래 보내야 했다고.",
                 voice: "inv/Yeer/004/C8991EAC",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130431,
             },
             {
@@ -16575,6 +17286,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "그 후엔 아이스레이크 시티까지 와서, 고통스러운 옛날 기억을 떠올리며 {nickname}한테 사건의 전말을 입 아프게 설명해야 했지.",
                 voice: "inv/Yeer/004/C8991ED6",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130432,
             },
             {
@@ -16582,6 +17294,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "이 빚은 단순히 몸을 돌려준다고 해서 청산되는 게 아니야. ",
                 voice: "inv/Yeer/004/C8991F00",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130433,
             },
             {
@@ -16589,6 +17302,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그리고 가장 중요한 건, 너는 한 번도 내 의견을 물어본 적이 없다는 거야. ",
                 voice: "inv/Yeer/004/C8991F2A",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130434,
             },
             {
@@ -16597,6 +17311,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "올리버에게 예일은 은인이자, 받아야 할 마음의 빚이 있는 사람이고, 아무도 대신할 수 없는 친구야. '우르르쾅쾅'의 공동 주인이기도 하고.",
                 voice: "inv/Yeer/004/C8991F54",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130435,
             },
             {
@@ -16604,6 +17319,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그러니까 미안하다는 말 이제 하지 마. 정말 미안하면 가게를 계속 함께 운영해. 네가 갚을 기회는 얼마든지 있으니까. ",
                 voice: "inv/Yeer/004/C8991F7E",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130436,
             },
             {
@@ -16633,6 +17349,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "좋아, 그럼 같이 보러 가자. 대신 약속해. 다 보고 난 다음에 또 이번처럼 나한테 몸을 돌려준다느니 하는 바보 같은 생각 하면 안 돼.",
                 voice: "inv/Yeer/004/C8992026",
                 npc: 790024,
+                speakerName: "올리버",
                 next: 80130440,
             },
             {
@@ -19658,6 +20375,172 @@ export const partyTopicData_kr: PartyTopic[] = [
                 next: 80120290,
             },
             {
+                id: 80120210,
+                content: "...악보네요? 그는 소중한 악보는 다 가져갔다고 했잖아요. 하지만 소중하지 않다면, 왜 굳이 숨겨뒀을까요?",
+                voice: "inv/Maer/002/C89291F4",
+                npc: 790019,
+                next: 80120211,
+            },
+            {
+                id: 80120211,
+                content: "도대체 뭐라고 쓴 건지 한번 볼까요... 〈악마가 쇠사슬을 끊고〉? 한 번도 들어본 적 없는 곡이에요...",
+                voice: "inv/Maer/002/C892921E",
+                npc: 790019,
+                options: [
+                    {
+                        id: 801202111,
+                        content: "이 페이지에 쪽지가 끼워져 있네. 뭐라고 쓰여 있어?",
+                        next: 80120212,
+                    },
+                ],
+            },
+            {
+                id: 80120212,
+                content: '"안녕, 먼 미래의 코르삭. 지금 행복하니? 아니면 불행하니? 내가 곧 매우 위험한 일을 하려 한다는 걸 알려주고 싶어.',
+                voice: "inv/Maer/002/C8929248",
+                npc: 790019,
+                next: 80120213,
+            },
+            {
+                id: 80120213,
+                content: "우리나라에서 가장 사람들 눈에 띄지 않는 집단인 카론을 창작의 소재로 삼으려 해. 어때, 좋은 생각 같지 않아?",
+                voice: "inv/Maer/002/C8929272",
+                npc: 790019,
+                next: 80120214,
+            },
+            {
+                id: 80120214,
+                content:
+                    "이게 발표되고 나서 어떤 일이 벌어질지 모르겠어. 최선의 경우엔 명성을 얻고, 사람들이 카론들에게 동정심을 갖게 되겠지. 하지만 더 가능성 있는 건 선배들에게 예술을 더럽혔다고 질책받는 거야.",
+                voice: "inv/Maer/002/C892929C",
+                npc: 790019,
+                next: 80120215,
+            },
+            {
+                id: 80120215,
+                content:
+                    "어쩌면 머지않아 내가 충동적이었다고 후회할지도 몰라. 하지만 적어도 지금 이 순간만큼은, 내가 옳은 일을 하고 있다고 굳게 믿고 있어.",
+                voice: "inv/Maer/002/C89292C6",
+                npc: 790019,
+                next: 80120216,
+            },
+            {
+                id: 80120216,
+                content:
+                    "그래서 여기에 사본을 하나 남겨두려고. 혹시라도 내가 냉대를 받고 좌절해서, 또는 고루한 선배들이 내 작품을 완전히 없애버릴 경우를 대비해서야.",
+                voice: "inv/Maer/002/C89292F0",
+                npc: 790019,
+                next: 80120217,
+            },
+            {
+                id: 80120217,
+                content:
+                    '네가 이 편지를 다시 보게 될 때, 창밖에서 카론들이 이 노래를 부르는 소리가 들리길 바라. 그리고 너도 지금의 나처럼 모든 것을 웃으며 대할 수 있기를 바라."',
+                voice: "inv/Maer/002/C892931A",
+                npc: 790019,
+                next: 80120218,
+            },
+            {
+                id: 80120218,
+                content: "......",
+                voice: "inv/Maer/002/C8929344",
+                npc: 790019,
+                options: [
+                    {
+                        id: 801202181,
+                        content: "결국 코르삭은 시간이 흐르면서 변했군.",
+                        next: 80120219,
+                    },
+                    {
+                        id: 801202182,
+                        content: "어쩌면 코르삭은 변하지 않았을 수도 있어. 그래서 일부러 이 악보를 남겼을지도 모르지.",
+                        next: 80120220,
+                    },
+                ],
+            },
+            {
+                id: 80120219,
+                content: "아, 오래전의 이 코르삭은 사실 좋은 분이셨네요.",
+                voice: "inv/Maer/002/C892936E",
+                npc: 790019,
+                next: 80120222,
+            },
+            {
+                id: 80120220,
+                content:
+                    "음... 그럴 수도 있겠네요. 모든 악보를 무시하는 척 했으면서도 정작 가장 중요한 보물은 '이미 제자리에 뒀다'고 하셨잖아요...",
+                voice: "inv/Maer/002/C8929398",
+                npc: 790019,
+                next: 80120221,
+            },
+            {
+                id: 80120222,
+                content: "가사가 정말 좋네요... 아, 이 노래를 실제로 부르면 어떨지 궁금해요.",
+                voice: "inv/Maer/002/C89293EC",
+                npc: 790019,
+                next: 80120223,
+            },
+            {
+                id: 80120221,
+                content:
+                    "그 말은 즉, 그의 마음속에서 가장 소중한 악보가 바로 이 악보라는 거예요... 그리고 '제자리'라는 건, 카론인 제 손에 맡기는 것을 의미하는 거죠. 원래 카론을 위해 쓴 노래니까요.",
+                voice: "inv/Maer/002/C89293C2",
+                npc: 790019,
+                next: 80120222,
+            },
+            {
+                id: 80120223,
+                content: "좋아요~ 결심했어요!",
+                voice: "inv/Maer/002/C8929416",
+                npc: 790019,
+                next: 80120224,
+            },
+            {
+                id: 80120224,
+                content:
+                    "이 노래를 코르삭 씨가 잊어버리셨든 일부러 남기셨든, 어쨌든 그가 남은 물건들을 처리하라고 저한테 맡기신 거잖아요. 그러니 전 진지하게 생각할 거예요.",
+                voice: "inv/Maer/002/C8929440",
+                npc: 790019,
+                next: 80120225,
+            },
+            {
+                id: 80120225,
+                content:
+                    "자, {nickname} 님, 저랑 카밀라 언니한테 가요. 언니가 악보도 읽을 줄 안다고 들었어요. 노래하는 법을 가르쳐 달라고 하려고요.",
+                voice: "inv/Maer/002/C892946A",
+                npc: 790019,
+                next: 80120226,
+            },
+            {
+                id: 80120226,
+                content:
+                    "제가 배우고 나면, 아이스레이크 시티의 카론들에게 가르쳐 줄 거예요. 그리고 이 노래는 모두에게 존경받는 음악가가 우리 카론을 위해 특별히 작곡한 거라고 말해줄 거고요.",
+                voice: "inv/Maer/002/C8929494",
+                npc: 790019,
+                next: 80120227,
+            },
+            {
+                id: 80120227,
+                content: "이렇게 하면 이 노래가 그 분의 폐기된 악보처럼 난로에 던져져 한순간에 사라지는 일은 없을 거예요.",
+                voice: "inv/Maer/002/C89294BE",
+                npc: 790019,
+                next: 80120228,
+            },
+            {
+                id: 80120228,
+                content:
+                    "어쩌면 언젠가 이 노래가 황성까지 퍼져서 그가 실제로 카론들이 이 노래를 부르는 걸 들을 수 있을지도 몰라요. 하지만 듣지 못해도 상관없어요. 어쨌든 전 제가 해야 할 일을 한 거니까...",
+                voice: "inv/Maer/002/C89294E8",
+                npc: 790019,
+                next: 80120229,
+            },
+            {
+                id: 80120229,
+                content: "버려져서는 안 될 것들을 다시 세상에 나오게 하고, 쓸모없는 걸 유용한 걸로 바꾸는 게 바로 제 책임이에요!",
+                voice: "inv/Maer/002/C8929512",
+                npc: 790019,
+            },
+            {
                 id: 80120230,
                 content:
                     "(후에 카밀라의 말에 따르면, 이 〈악마가 쇠사슬을 끊고〉라는 곡은 정말 뛰어난 곡이었지만, 난이도가 매우 높았다고 한다.)",
@@ -21681,6 +22564,11 @@ export const partyTopicData_kr: PartyTopic[] = [
                 next: 80230102,
             },
             {
+                id: 80230102,
+                voice: "inv/Zhiliu/001/C8D8FF1C",
+                next: 80230103,
+            },
+            {
                 id: 80230103,
                 content:
                     "나, 용연상경은 천례사의 사무 또한 겸하고 있다. 오늘은 태호님을 대신하여, 너희들의 기량과 지혜, 그리고 각오를 시험하겠다.",
@@ -21803,6 +22691,11 @@ export const partyTopicData_kr: PartyTopic[] = [
                 voice: "inv/Zhiliu/001/C8D901E6",
                 npc: 240071,
                 next: 80230120,
+            },
+            {
+                id: 80230120,
+                voice: "inv/Zhiliu/001/C8D90210",
+                next: 80230121,
             },
             {
                 id: 80230121,
@@ -21962,6 +22855,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "대풍구장에 오해가 있었어요! 제발 제 사정 좀 들어 주세요!",
                 voice: "inv/Zhiliu/002/C8D90F5A",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230202,
             },
             {
@@ -21969,6 +22863,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "여러분, 제발요! 제 말 좀 들어주세요! 정말 잠깐이면 돼요...",
                 voice: "inv/Zhiliu/002/C8D90F84",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230203,
             },
             {
@@ -21976,7 +22871,13 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "제발 그냥 가지 마세요...",
                 voice: "inv/Zhiliu/002/C8D90FAE",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230204,
+            },
+            {
+                id: 80230204,
+                voice: "inv/Zhiliu/002/C8D90FD8",
+                next: 80230205,
             },
             {
                 id: 80230205,
@@ -21990,6 +22891,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "......!",
                 voice: "inv/Zhiliu/002/C8D9102C",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230207,
             },
             {
@@ -21998,6 +22900,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "전 원래 큰 병에 걸렸었는데, 택생각의 의사 언니가 낫게 해 줬어요. 돈도 한 푼 안 받고요! 근데 그 언니가 폐안한테 벌을 받아 목숨을 잃었어요!",
                 voice: "inv/Zhiliu/002/C8D91056",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230208,
             },
             {
@@ -22006,6 +22909,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "제발... 언니가 명예라도 되찾을 수 있게 도와주세요! 대풍구장은 의사 언니가 약으로 저를 해쳤다고 하지만, 그건 약효 때문에 잠깐 그랬던 거예요.",
                 voice: "inv/Zhiliu/002/C8D91080",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230209,
             },
             {
@@ -22014,6 +22918,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "어려운 병이라서, 다른 의사들은 도저히 못 고친다고 포기했었는데, 그 언니만 독한 약을 써서 병을 치료하는 방법도 있으니까, 위험해도 한번 해 보자고 한 거예요.",
                 voice: "inv/Zhiliu/002/C8D910AA",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230210,
             },
             {
@@ -22022,6 +22927,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "약을 먹으면 정신을 잃거나, 잠깐 숨이 멈출 수도 있다고 설명도 해 줬어요. 다 제가 하겠다고 한 거예요. 저 때문에 의사 언니가 그렇게 돼 버릴 줄은 정말 몰랐어요!",
                 voice: "inv/Zhiliu/002/C8D910D4",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230211,
             },
             {
@@ -22036,6 +22942,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "맞아요! 전 여기 멀쩡히 서 있잖아요. 언닌 절 해친 게 아니에요.",
                 voice: "inv/Zhiliu/002/C8D91128",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230213,
             },
             {
@@ -22043,6 +22950,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "전 살았는데, 절 살려 준 사람은 목숨을 잃었어요... 이건 말도 안 돼요...",
                 voice: "inv/Zhiliu/002/C8D91152",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230214,
             },
             {
@@ -22057,6 +22965,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "정말 감사해요!",
                 voice: "inv/Zhiliu/002/C8D911A6",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230216,
             },
             {
@@ -22065,6 +22974,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "...사실 어쩔 수 없는 일이란 건 저도 잘 알아요. 굉장히 어려운 일이라는 것도요. 며칠 동안 여기 서 있었지만, 제 말을 들어 준 건 소저뿐이거든요...",
                 voice: "inv/Zhiliu/002/C8D911D0",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230217,
             },
             {
@@ -22072,6 +22982,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "그러니까 마음만으로도, 정말 감사드려요...",
                 voice: "inv/Zhiliu/002/C8D911FA",
                 npc: 790077,
+                speakerName: "호소하는 소녀",
                 next: 80230218,
             },
             {
@@ -22080,6 +22991,11 @@ export const partyTopicData_kr: PartyTopic[] = [
                 voice: "inv/Zhiliu/002/C8D91224",
                 npc: 790076,
                 next: 80230219,
+            },
+            {
+                id: 80230219,
+                voice: "inv/Zhiliu/002/C8D9124E",
+                next: 80230220,
             },
             {
                 id: 80230220,
@@ -22175,6 +23091,11 @@ export const partyTopicData_kr: PartyTopic[] = [
                 next: 80230233,
             },
             {
+                id: 80230233,
+                voice: "inv/Zhiliu/002/C8D9149A",
+                next: 80230234,
+            },
+            {
                 id: 80230234,
                 content: "마음씨 좋은 언니... 절 만나러 와 주셨네요!",
                 voice: "inv/Zhiliu/002/C8D914C4",
@@ -22262,6 +23183,11 @@ export const partyTopicData_kr: PartyTopic[] = [
                 next: 80230246,
             },
             {
+                id: 80230246,
+                voice: "inv/Zhiliu/002/C8D916BC",
+                next: 80230247,
+            },
+            {
                 id: 80230247,
                 content:
                     "지류 소경님, 대체 무슨 수를 쓰셨길래 그 꼬마가 단번에 상고를 포기하겠다는 각서를 쓴 겁니까? 비결을 좀 알려 주시지요!",
@@ -22285,10 +23211,16 @@ export const partyTopicData_kr: PartyTopic[] = [
                 next: 80230250,
             },
             {
+                id: 80230250,
+                voice: "inv/Zhiliu/002/C8D91764",
+                next: 80230251,
+            },
+            {
                 id: 80230251,
                 content: "이보게들, 그거 아나? 저 지류라는 사람도, 대풍구장 때문에 불합리한 일을 겪었다던데?",
                 voice: "inv/Zhiliu/002/C8D9178E",
                 npc: 790080,
+                speakerName: "관중들이 수군대는 소리",
                 next: 80230252,
             },
             {
@@ -22296,6 +23228,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "집률각 아래, 바로 저기서 백방으로 뛰어다녔었지. 이 근처 주민들은 심심하면 그 얘길 했었다니까.",
                 voice: "inv/Zhiliu/002/C8D917B8",
                 npc: 790080,
+                speakerName: "관중들이 수군대는 소리",
                 next: 80230253,
             },
             {
@@ -22303,6 +23236,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "자기도 같은 일을 겪어 봤으면서, 어떻게 눈 하나 깜짝 안 하고 그러지? 큰일 하는 양반들은 저러나?",
                 voice: "inv/Zhiliu/002/C8D917E2",
                 npc: 790080,
+                speakerName: "관중들이 수군대는 소리",
                 next: 80230254,
             },
             {
@@ -22311,6 +23245,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "아이고... 저렇게 독해서야, 다음 용연상경 자리는 따 놓은 당상이겠어. 그 자리에 오르려면, 피도 눈물도 없어야 하는 모양인데, 우린 죽었다 깨도 무리야.",
                 voice: "inv/Zhiliu/002/C8D9180C",
                 npc: 790080,
+                speakerName: "관중들이 수군대는 소리",
                 next: 80230255,
             },
             {
@@ -22412,9 +23347,15 @@ export const partyTopicData_kr: PartyTopic[] = [
                 next: 80230313,
             },
             {
+                id: 80230313,
+                voice: "inv/Zhiliu/003/C8D921BA",
+                next: 80230314,
+            },
+            {
                 id: 80230314,
                 content: "으흑... 으흐흑... 어째서...",
                 voice: "inv/Zhiliu/003/C8D921E4",
+                speakerName: "어린 지류",
                 next: 80230315,
             },
             {
@@ -22428,12 +23369,14 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80230316,
                 content: "<H>우리</>가 뜬눈으로 지새운 그 밤들을... 다 잊은 거야?",
                 voice: "inv/Zhiliu/003/C8D92238",
+                speakerName: "어린 지류",
                 next: 80230317,
             },
             {
                 id: 80230317,
                 content: "동굴 속에서 느꼈던 그 끔찍한 허기를... 온몸의 세포가 굶주림에 미쳐 날뛰던 그때를... 잊은 거야?",
                 voice: "inv/Zhiliu/003/C8D92262",
+                speakerName: "어린 지류",
                 next: 80230318,
             },
             {
@@ -22441,30 +23384,35 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "그 악당이 거친 손아귀로 <H>우리</> 목을 틀어쥐던 그 순간을... 아무리 발버둥 쳐도 손가락 하나 까딱할 수 없었던 그 절망을... 이젠 잊은 거야?",
                 voice: "inv/Zhiliu/003/C8D9228C",
+                speakerName: "어린 지류",
                 next: 80230319,
             },
             {
                 id: 80230319,
                 content: "숨은 막혀 오고, 빛은 꺼져가고, 차가운 죽음이 안개처럼 우리를 덮쳐 오던 그 느낌을...",
                 voice: "inv/Zhiliu/003/C8D922B6",
+                speakerName: "어린 지류",
                 next: 80230320,
             },
             {
                 id: 80230320,
                 content: "그리고... <H>그 사람이</> 달려와 녀석을 밀쳐 냈을 때, 막혔던 숨통이 트이던 그 순간을 잊은 거야...?",
                 voice: "inv/Zhiliu/003/C8D922E0",
+                speakerName: "어린 지류",
                 next: 80230321,
             },
             {
                 id: 80230321,
                 content: "그 사람은 아무런 대가도 없이 널 구했지만, 명예를 잃고 목숨까지 잃었어.",
                 voice: "inv/Zhiliu/003/C8D9230A",
+                speakerName: "어린 지류",
                 next: 80230322,
             },
             {
                 id: 80230322,
                 content: "그런데 이제 와서 그 사람을 배신하고, 우리가 했던 맹세를 저버리면서까지, <H>저들</> 편에 서겠다는 거야?",
                 voice: "inv/Zhiliu/003/C8D92334",
+                speakerName: "어린 지류",
                 next: 80230323,
             },
             {
@@ -22478,6 +23426,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80230324,
                 content: "(그래... 맞아... 굳이 기억할 필요 없어. 망각이야말로 더 달콤하니까.)",
                 voice: "inv/Zhiliu/003/C8D92388",
+                speakerName: "내면의 어둠",
                 next: 80230325,
             },
             {
@@ -22485,6 +23434,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "(이제 곧 모두가 우러러보는 자리에 오를 거야! 다 지나간 소란 따위가 널 뒤흔들 순 없어. 네가 얻게 될 지위에 비하면, 그런 건 먼지보다도 하찮은 과거야.)",
                 voice: "inv/Zhiliu/003/C8D923B2",
+                speakerName: "내면의 어둠",
                 next: 80230326,
             },
             {
@@ -22492,6 +23442,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "(기억에 매달리는 건 약하다는 증거야. 약자들이나 양심이라는 쓸데없는 족쇄에 얽매이지. 현실의 무게에 짓눌려, 평생 진창 속을 허우적대면서 말이야.)",
                 voice: "inv/Zhiliu/003/C8D923DC",
+                speakerName: "내면의 어둠",
                 next: 80230327,
             },
             {
@@ -22499,31 +23450,46 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "(약자들은 꿈에 젖어 살지만, 세상은 변하지 않아. 그렇지만 넌 뭘 버리고 뭘 취해야 할지 알 만큼 강인하지. 그래서 네가 큰 그릇인 거야. 피도 눈물도 없는 독종이 될 수 있는 사람이 몇이나 있겠어?)",
                 voice: "inv/Zhiliu/003/C8D92406",
+                speakerName: "내면의 어둠",
                 next: 80230328,
             },
             {
                 id: 80230328,
                 content: "(귀담아듣지 마! 그래 버리면, 네가 그 방관자들과 다를 게 없잖아?)",
                 voice: "inv/Zhiliu/003/C8D92430",
+                speakerName: "내면의 어둠",
                 next: 80230329,
             },
             {
                 id: 80230329,
                 content: "(잘 생각해! 정말 저들과 같은 부류가 될 셈이야?!)",
                 voice: "inv/Zhiliu/003/C8D9245A",
+                speakerName: "내면의 어둠",
                 next: 80230330,
             },
             {
                 id: 80230330,
                 content: "(그 선을 넘어 버린다면, 네가 예전의 너와 같다고 할 수 있을까?)",
                 voice: "inv/Zhiliu/003/C8D92484",
+                speakerName: "내면의 어둠",
                 next: 80230331,
+            },
+            {
+                id: 80230331,
+                voice: "inv/Zhiliu/003/C8D924AE",
+                next: 80230332,
             },
             {
                 id: 80230332,
                 content: "누가 좀 도와주세요... 너무 어두워요... 무서워요.... 여, 여기서 나갈래요!",
                 voice: "inv/Zhiliu/003/C8D924D8",
+                speakerName: "어린 지류",
                 next: 80230333,
+            },
+            {
+                id: 80230333,
+                voice: "inv/Zhiliu/003/C8D92502",
+                next: 80230334,
             },
             {
                 id: 80230334,
@@ -22567,6 +23533,11 @@ export const partyTopicData_kr: PartyTopic[] = [
                 voice: "inv/Zhiliu/003/C8D925FE",
                 npc: 790076,
                 next: 80230340,
+            },
+            {
+                id: 80230340,
+                voice: "inv/Zhiliu/003/C8D92628",
+                next: 80230341,
             },
             {
                 id: 80230341,
@@ -22726,6 +23697,11 @@ export const partyTopicData_kr: PartyTopic[] = [
                 next: 80230419,
             },
             {
+                id: 80230419,
+                voice: "inv/Zhiliu/004/C8D9331E",
+                next: 80230420,
+            },
+            {
                 id: 80230420,
                 content: "지류 대방님, 백년춘 쪽에 복잡한 안건들이 있어서, 좀 살펴봐 주셔야 할 것 같습니다.",
                 voice: "inv/Zhiliu/004/C8D93348",
@@ -22828,6 +23804,11 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "머지않아 대풍구장이 끝을 고할 날이 올 거야. 어떤 대가를 치르더라도, 내 손으로 잘못된 이 세상을 바로잡을 거니까... 날, 믿어 줄 수 있겠어?",
                 voice: "inv/Zhiliu/004/C8D93594",
                 next: 80230435,
+            },
+            {
+                id: 80230435,
+                voice: "inv/Zhiliu/004/C8D935BE",
+                next: 80230436,
             },
             {
                 id: 80230436,
@@ -23353,24 +24334,28 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220202,
                 content: "저게 뭐야? 불하가... 요괴로 변한 거야?",
                 voice: "inv/Yuming/002/C8D2A6E4",
+                speakerName: "나그네",
                 next: 80220203,
             },
             {
                 id: 80220203,
                 content: "...안 돼... 오지 마! 난 죽기 싫어!",
                 voice: "inv/Yuming/002/C8D2A70E",
+                speakerName: "나그네",
                 next: 80220204,
             },
             {
                 id: 80220204,
                 content: "설마... 신군님이 우리에게... 은혜도 모른다고 벌을 내리시는 건가?!",
                 voice: "inv/Yuming/002/C8D2A738",
+                speakerName: "나그네",
                 next: 80220205,
             },
             {
                 id: 80220205,
                 content: "아빠, 아빠! 흑흑... 제발 눈 뜨고 뭐라고 말 좀 해 보세요...",
                 voice: "inv/Yuming/002/C8D2A762",
+                speakerName: "나그네",
                 next: 80220206,
             },
             {
@@ -23398,6 +24383,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220209,
                 content: "내게 범부의 마음 따위를 엿보는 취미는 없다.",
                 voice: "inv/Yuming/002/C8D2A80A",
+                speakerName: "태호",
                 next: 80220210,
             },
             {
@@ -23411,6 +24397,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220211,
                 content: "그대가 답을 바라며 나를 불렀고, 나는 그대에게 포부가 있어 보여 부름에 응했을 뿐이다.",
                 voice: "inv/Yuming/002/C8D2A85E",
+                speakerName: "태호",
                 next: 80220212,
             },
             {
@@ -23424,6 +24411,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220213,
                 content: "눈앞의 환영들이, 과거의 굴레가 되어 그대를 옭아매고 있구나.",
                 voice: "inv/Yuming/002/C8D2A8B2",
+                speakerName: "태호",
                 next: 80220214,
             },
             {
@@ -23437,6 +24425,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220215,
                 content: "이게 그 아이의 무덤인가?",
                 voice: "inv/Yuming/002/C8D2A906",
+                speakerName: "태호",
                 next: 80220216,
             },
             {
@@ -23465,18 +24454,21 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content:
                     "부풍 님의 가르침에 따라, 환자는 모두 똑같이 대하고 있습니다. 나그네라 할지라도 가망이 있다면, 제가 왜 손 놓고 있겠습니까!",
                 voice: "inv/Yuming/002/C8D2A9AE",
+                speakerName: "약사",
                 next: 80220220,
             },
             {
                 id: 80220220,
                 content: "이건 침식입니다, 불치병이라고요! 발병한 이상 나을 방법은 없어요! 요괴로 변하기 전에 얼른 도망치세요!",
                 voice: "inv/Yuming/002/C8D2A9D8",
+                speakerName: "약사",
                 next: 80220221,
             },
             {
                 id: 80220221,
                 content: "하아, 당신들이 대풍구장의 보살핌을 저버리지만 않았어도, 이런 일은 안 생겼을 겁니다!",
                 voice: "inv/Yuming/002/C8D2AA02",
+                speakerName: "약사",
                 next: 80220222,
             },
             {
@@ -23504,18 +24496,21 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220225,
                 content: "나그네는 속박 없는 삶을 갈망하지만, 줄 없는 연은 날지 못하고, 둑 없는 강은 바다에 닿지 못하는 법이다.",
                 voice: "inv/Yuming/002/C8D2AAAA",
+                speakerName: "태호",
                 next: 80220226,
             },
             {
                 id: 80220226,
                 content: "과거는 돌이킬 수 없어도, 훗날은 기약할 수 있지. 바른길로 되돌아오기 늦은 때란 없느니라.",
                 voice: "inv/Yuming/002/C8D2AAD4",
+                speakerName: "태호",
                 next: 80220227,
             },
             {
                 id: 80220227,
                 content: "더 할 말은 없다. 잘 생각해 보거라.",
                 voice: "inv/Yuming/002/C8D2AAFE",
+                speakerName: "태호",
                 next: 80220228,
             },
             {
@@ -23528,6 +24523,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220229,
                 content: "끼잉...",
                 voice: "inv/Yuming/002/C8D2AB52",
+                speakerName: "귤이",
                 next: 80220230,
             },
             {
@@ -23541,6 +24537,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220231,
                 content: "끼잉... 끼이이잉...",
                 voice: "inv/Yuming/002/C8D2ABA6",
+                speakerName: "귤이",
                 next: 80220232,
             },
             {
@@ -23561,6 +24558,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220234,
                 content: "끼이이잉...",
                 voice: "inv/Yuming/002/C8D2AC24",
+                speakerName: "귤이",
                 next: 80220235,
             },
             {
@@ -23574,6 +24572,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220236,
                 content: "캥캥!",
                 voice: "inv/Yuming/002/C8D2AC78",
+                speakerName: "귤이",
                 next: 80220237,
             },
             {
@@ -24300,6 +25299,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220436,
                 content: "캥캥——",
                 voice: "inv/Yuming/004/C8D2CD48",
+                speakerName: "귤이",
                 next: 80220437,
             },
             {
@@ -24320,6 +25320,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220439,
                 content: "캥캥—— 캥캥!",
                 voice: "inv/Yuming/004/C8D2CDC6",
+                speakerName: "귤이",
                 next: 80220440,
             },
             {
@@ -24333,6 +25334,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220441,
                 content: "캥캥!",
                 voice: "inv/Yuming/004/C8D2CE1A",
+                speakerName: "귤이",
                 next: 80220442,
             },
             {
@@ -24354,6 +25356,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220444,
                 content: "캥캥! 캥캥!",
                 voice: "inv/Yuming/004/C8D2CE98",
+                speakerName: "귤이",
                 next: 80220445,
             },
             {
@@ -24367,6 +25370,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80220446,
                 content: "캥캥!",
                 voice: "inv/Yuming/004/C8D2CEEC",
+                speakerName: "귤이",
                 next: 80220447,
             },
             {
@@ -27624,6 +28628,166 @@ export const partyTopicData_kr: PartyTopic[] = [
             "19001": 2,
             "19008": 2,
         },
+        dialogues: [
+            {
+                id: 80190102,
+                content: "이렇게 큰 집에 혼자 살아? 분위기도 괜찮네. 심지어 바까지 잘 꾸며놨잖아?",
+                npc: 95102,
+                next: 80190103,
+            },
+            {
+                id: 80190103,
+                content: "괜찮은데? 친구들도 좀 자주 초대해봐. 그래야 이 아이스레이크 시티에서 네 인맥들을 만들 수 있잖아.",
+                npc: 95102,
+                next: 80190104,
+            },
+            {
+                id: 80190104,
+                content: "그래서, 이번엔 또 무슨 일인데? 너무 골치 아픈 거라면 사양할게. 나 요즘 꽤 큰 건 맡고 있거든.",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901041,
+                        content: "그냥, 네 얼굴이 보고 싶었을 뿐이야.",
+                        next: 80190105,
+                    },
+                    {
+                        id: 801901042,
+                        content: "그냥... 너한테 한 잔 대접하고 싶었을 뿐이야.",
+                        next: 80190106,
+                    },
+                ],
+            },
+            {
+                id: 80190105,
+                content: "으윽... 닭살 돋았어. 난 참을 수 있다 쳐도, 다른 사람한테도 이런 말 하면? 감당 못하고 튀어버릴지도 몰라?",
+                npc: 95102,
+                next: 80190107,
+            },
+            {
+                id: 80190106,
+                content: "좋아, 그럼 사양 안 할게. 네 솜씨, 내가 직접 맛 좀 봐야겠네?",
+                npc: 95102,
+                next: 80190107,
+            },
+            {
+                id: 80190107,
+                content: "{空格}",
+                next: 80190108,
+            },
+            {
+                id: 80190108,
+                content: "쯧쯧... 음, 달콤한데 살짝 신맛도 도네. 일부러 따뜻하게 데웠구나? '아스포델'술이랑 비슷한데, 너만의 맛도 있어.",
+                npc: 95102,
+                next: 80190109,
+            },
+            {
+                id: 80190109,
+                content:
+                    "이 한 잔 만들기 꽤 번거로웠겠네. 솔직히 내 기대를 넘었어. 사실 뜨거운 물 한 잔도 기쁘게 마실 수 있는데, 이렇게까지 할 필요는 없었어.",
+                npc: 95102,
+                next: 80190110,
+            },
+            {
+                id: 80190110,
+                content:
+                    "근데 네가 이렇게 들떠 있는 걸 보니까... 아하, 알겠다. 돈 좀 모았겠다 싶어서, 술도 사고 새 물건도 사고! 요즘 말로 하자면, '돈으로 행복 사기'?",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901101,
+                        content: "초대한 사람 중에 네가 제일 수다스럽다니까.",
+                        next: 80190111,
+                    },
+                    {
+                        id: 801901102,
+                        content: "좋은 마음으로 술 한잔 사줬더니, 엉뚱한 소리만 하네. 나 진짜 화내버린다?",
+                        next: 80190112,
+                    },
+                ],
+            },
+            {
+                id: 80190111,
+                content: "한 잔 하자고 부른 것도 결국 말 좀 해보자는 거잖아? 난 네 마음 잘 읽는 편이니까, 그만큼 내가 특별한 손님인 거지.",
+                npc: 95102,
+                next: 80190113,
+            },
+            {
+                id: 80190112,
+                content: "알았어, 알았어! 내가 잘못했어. 오늘 돈 낸 건 너잖아, 네가 짱이지. 기분 풀리게 나 한 대 때려.",
+                npc: 95102,
+                next: 80190113,
+            },
+            {
+                id: 80190113,
+                content:
+                    "농담은 농담이고, 반쯤 경험자로서 한마디 하자면— 모든 사람이 네가 '친구'라 여겨 술을 살 만큼의 가치는 있는 건 아니야.",
+                npc: 95102,
+                next: 80190114,
+            },
+            {
+                id: 80190114,
+                content:
+                    "특히 이 아이스레이크 시티 같은 데선 말이지, 네가 가진 걸 탐내면서 스스로 술친구랍시고 들러붙는 수상한 사람들 꼭 있기 마련이거든.",
+                npc: 95102,
+                next: 80190115,
+            },
+            {
+                id: 80190115,
+                content:
+                    "그들은 겉으론 싱글벙글 웃고, 별 수단 다 써서 네 기분 맞춰주겠지만, 막상 일이 터지면? 차라리 길가에 앉은 개한테 기대는 게 나을걸.",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901151,
+                        content: "잠깐, 너 지금 너 자신 얘기하는 거 아냐?",
+                        next: 80190116,
+                    },
+                ],
+            },
+            {
+                id: 80190116,
+                content:
+                    "하하 맞아, 맞아. 나 아웃사이더야 네 곁에서 제일 물불 안 가리는 술친구지. 어딘가에 이득이 있다 싶으면, 냄새만으로도 달려올 수 있어.",
+                npc: 95102,
+                next: 80190117,
+            },
+            {
+                id: 80190117,
+                content:
+                    "이 자리를 노리는 사람들이 있다면, 먼저 자기 실력부터 따져봐야지. 내가 '실컷 얻어먹고 만족'한 다음에나, 그때쯤 한 입 얻어갈 수 있을 걸?",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901171,
+                        content: "잘 가라~ 배웅은 생략이다.",
+                        next: 80190118,
+                    },
+                    {
+                        id: 801901172,
+                        content: "그 귀찮은 일들 네가 처리해준 거였구나.",
+                        next: 80190119,
+                    },
+                ],
+            },
+            {
+                id: 80190118,
+                content: "아, 그러지 마. 난 아직 더 있고 싶은걸.",
+                npc: 95102,
+                next: 80190120,
+            },
+            {
+                id: 80190119,
+                content: "어? 무슨 일이었지? 난 전혀 몰랐는데?",
+                npc: 95102,
+                next: 80190120,
+            },
+            {
+                id: 80190120,
+                content: "술맛 괜찮은데? 한 잔만 더 줘. 이거 마시고 바로 다시 일하러 갈게.",
+                npc: 95102,
+            },
+        ],
     },
     {
         id: 510202,
@@ -30179,6 +31343,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "다프네, 나 다리가 부러져서, 도저히 못 걷겠어.",
                 voice: "inv/Dafu/003/C8B91718",
                 npc: 110029,
+                speakerName: "부상당한 병사",
                 next: 80180317,
             },
             {
@@ -30186,6 +31351,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "난 됐으니까, 빨리 가서... 다른 사람들을 구해 줘...",
                 voice: "inv/Dafu/003/C8B91742",
                 npc: 110029,
+                speakerName: "부상당한 병사",
                 next: 80180318,
             },
             {
@@ -30213,6 +31379,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "총소리도... 필토이드 소리도... 아무것도 안 들려...",
                 voice: "inv/Dafu/003/C8B917EA",
                 npc: 110028,
+                speakerName: "의식이 희미한 병사",
                 next: 80180322,
             },
             {
@@ -30220,6 +31387,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "의무관님, 우리... 집에 돌아온 건가요...?",
                 voice: "inv/Dafu/003/C8B91814",
                 npc: 110028,
+                speakerName: "의식이 희미한 병사",
                 next: 80180323,
             },
             {
@@ -30234,6 +31402,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "아니, 아니에요, 거짓말이죠... 우린 못 돌아가요.",
                 voice: "inv/Dafu/003/C8B91868",
                 npc: 110028,
+                speakerName: "의식이 희미한 병사",
                 next: 80180325,
             },
             {
@@ -30241,6 +31410,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "디즈마니아는 여기서 너무 멀어요. 비도 퍼부어서 길까지 진창이잖아요. 우린 못 돌아가요...",
                 voice: "inv/Dafu/003/C8B91892",
                 npc: 110028,
+                speakerName: "의식이 희미한 병사",
                 next: 80180326,
             },
             {
@@ -30248,6 +31418,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "의무관님, 우리 엄마한테 말 좀 전해 주세요...",
                 voice: "inv/Dafu/003/C8B918BC",
                 npc: 110028,
+                speakerName: "의식이 희미한 병사",
                 next: 80180327,
             },
             {
@@ -30268,6 +31439,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 id: 80180329,
                 content: "조심해! 적의 자기 폭풍 드론이야!",
                 voice: "inv/Dafu/003/C8B9193A",
+                speakerName: "먼 곳에 있는 병사",
                 next: 80180330,
             },
             {
@@ -30281,6 +31453,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "이제 좀 낫네요.",
                 voice: "inv/Dafu/003/C8B9198E",
                 npc: 110025,
+                speakerName: "진지한 병사",
                 next: 80180332,
             },
             {
@@ -30296,6 +31469,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                     "바보예요? 막무가내로 부상병 위로 몸을 던지면 어쩌자는 거예요! 딱 봐도 가망이 없던데, 같이 죽으려고 환장했어요? 의무병이 죽으면, 다른 부상병들은 어떡하라고요?",
                 voice: "inv/Dafu/003/C8B919E2",
                 npc: 110025,
+                speakerName: "진지한 병사",
                 next: 80180334,
             },
             {
@@ -30317,6 +31491,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "지금 웃음이 나와요?",
                 voice: "inv/Dafu/003/C8B91A60",
                 npc: 110025,
+                speakerName: "진지한 병사",
                 next: 80180337,
             },
             {
@@ -30361,6 +31536,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "갑자기 무슨 엉뚱한 소리를...",
                 voice: "inv/Dafu/003/C8B91B5C",
                 npc: 110025,
+                speakerName: "진지한 병사",
                 next: 80180343,
             },
             {
@@ -30376,6 +31552,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "...그럼 내 말도 기억해요. 목숨을 좀 소중히 여겨요. 죽은 사람보단 산 사람이 할 수 있는 일이 더 많은 법이에요.",
                 voice: "inv/Dafu/003/C8B91BB0",
                 npc: 110025,
+                speakerName: "진지한 병사",
                 next: 80180345,
             },
             {
@@ -30383,6 +31560,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: '"전우의 의지를 짊어지고 살아가는 건 희생만큼이나 위대한 일이다." 아바르 님이 해 준 말이에요.',
                 voice: "inv/Dafu/003/C8B91BDA",
                 npc: 110025,
+                speakerName: "진지한 병사",
                 next: 80180346,
             },
             {
@@ -30411,6 +31589,7 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "어딜 가는데요?",
                 voice: "inv/Dafu/003/C8B91C82",
                 npc: 110025,
+                speakerName: "진지한 병사",
                 next: 80180350,
             },
             {

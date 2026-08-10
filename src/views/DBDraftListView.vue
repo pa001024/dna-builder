@@ -2,9 +2,10 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { parseNumberOrEmptySearchParam, useSearchParam } from "@/composables/useSearchParam"
-import { draftMap } from "../data/d"
-import draftData from "../data/d/draft.data"
-import { matchPinyin } from "../utils/pinyin-utils"
+import { draftMap } from "@/data/d"
+import draftData from "@/data/d/draft.data"
+import { getRewardTypeText } from "@/utils/i18n-utils"
+import { matchPinyin } from "@/utils/pinyin-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDraftId = useSearchParam<number>("id", 0)
@@ -77,17 +78,6 @@ function formatDuration(minutes: number): string {
     return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`
 }
 
-// 获取类型名称
-function getTypeName(type: string): string {
-    const typeMap: Record<string, string> = {
-        Mod: "魔之楔",
-        Resource: "资源",
-        CharAccessory: "角色配件",
-        Weapon: "武器",
-    }
-    return typeMap[type] || type
-}
-
 useInitialScrollToSelectedItem()
 </script>
 
@@ -126,7 +116,7 @@ useInitialScrollToSelectedItem()
                                 :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
                                 @click="selectedType = type"
                             >
-                                {{ getTypeName(type) }}
+                                {{ $t(getRewardTypeText(type)) }}
                             </button>
                         </div>
                     </div>
@@ -176,7 +166,7 @@ useInitialScrollToSelectedItem()
                                         </span>
                                     </div>
                                     <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                        <span>{{ getTypeName(draft.t) }}</span>
+                                        <span>{{ $t(getRewardTypeText(draft.t)) }}</span>
                                         <span v-if="draft.v">v{{ draft.v }}</span>
                                     </div>
                                 </div>

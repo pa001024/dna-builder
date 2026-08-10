@@ -39,6 +39,12 @@ const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(900, 700),
     },
     {
+        name: "race-lottery",
+        path: "/race-lottery",
+        component: () => import("./views/RaceLottery.vue"),
+        beforeEnter: () => setMinSize(900, 700),
+    },
+    {
         path: "/char",
         children: [
             { name: "char-build-list", path: "", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
@@ -359,6 +365,20 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
+                name: "iron-ticket-list",
+                path: "iron-ticket",
+                component: () => import("./views/DBIronTicketListView.vue"),
+                meta: { title: "iron-ticket-list.title" },
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "iron-ticket-detail",
+                path: "iron-ticket/:id",
+                component: () => import("./views/DBIronTicketDetailView.vue"),
+                meta: { title: "iron-ticket-detail.title" },
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
                 name: "accessory-list",
                 path: "accessory",
                 component: () => import("./views/DBAccessoryListView.vue"),
@@ -547,6 +567,20 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "npc/:npcId",
                 component: () => import("./views/DBNpcDetailView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "rouge-list",
+                path: "rouge",
+                component: () => import("./views/DBRougeView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+                meta: { title: "database.rouge" },
+            },
+            {
+                name: "rouge-detail",
+                path: "rouge/:mode/:kind/:id",
+                component: () => import("./views/DBRougeDetailView.vue"),
+                beforeEnter: () => setMinSize(600, 600),
+                meta: { title: "database.rouge" },
             },
         ],
     },

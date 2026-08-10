@@ -19,7 +19,7 @@ use boa_engine::builtins::promise::PromiseState;
 use boa_engine::context::ContextBuilder;
 use boa_engine::job::JobExecutor;
 use boa_engine::object::builtins::JsPromise;
-use boa_engine::{JsError, JsNativeError, JsResult, JsValue, Module, Script, Source};
+use boa_engine::{JsError, JsNativeError, JsResult, JsValue, Module, Script, Source, js_string};
 use boa_gc::{Finalize, Trace};
 use mcp_server::{ScriptConsoleEntry, ScriptExecConsoleEntry};
 use std::cell::RefCell;
@@ -286,7 +286,11 @@ fn evaluate_script_program(
             module.link(context)?;
             let evaluate_promise = module.evaluate(context);
             job_executor.clone().run_jobs(context)?;
-            settled_promise_result(&evaluate_promise, "evaluate")
+            settled_promise_result(&evaluate_promise, "evaluate")?;
+            // ESM 没有经典脚本的表达式完成值，使用标准 default 导出作为脚本返回值。
+            module
+                .namespace(context)
+                .get(js_string!("default"), context)
         }
     }
 }
@@ -333,6 +337,30 @@ mod program_tests {
             .expect("执行 ESM 根脚本失败");
 
         assert!(result.is_undefined());
+    }
+
+    #[test]
+    fn esm_root_returns_default_export_result_after_await() {
+        let job_executor = std::rc::Rc::new(TokioJobExecutor::new());
+        let mut context = test_context(job_executor.clone());
+        let source = br##"
+            const output = await Promise.resolve(JSON.stringify({ value: 42 }));
+            export default output;
+        "##;
+        let program = parse_script_program(source, Some(Path::new("memory-main.js")), &mut context)
+            .expect("解析带返回值的 ESM 根脚本失败");
+
+        assert!(matches!(program, ScriptProgram::Module(_)));
+        let result = evaluate_script_program(program, &job_executor, &mut context)
+            .expect("执行带返回值的 ESM 根脚本失败");
+
+        assert_eq!(
+            result
+                .to_string(&mut context)
+                .expect("转换 ESM 返回值失败")
+                .to_std_string_escaped(),
+            r#"{"value":42}"#
+        );
     }
 }
 
@@ -773,6 +801,14 @@ pub fn is_script_running() -> bool {
     SCRIPT_RUNNING.load(Ordering::Acquire)
 }
 
+/// 判断指定规范化脚本路径是否存在运行实例。
+pub fn is_script_path_running(script_path: &str) -> bool {
+    SCRIPT_RUNNING_PATH_COUNTS
+        .lock()
+        .map(|guard| guard.get(script_path).copied().unwrap_or(0) > 0)
+        .unwrap_or(false)
+}
+
 /// 获取脚本运行信息（运行状态 + 正在执行的脚本路径列表 + 总运行实例数）。
 pub fn get_script_runtime_info() -> (bool, Vec<String>, usize) {
     let running = SCRIPT_RUNNING.load(Ordering::Acquire);
@@ -856,4 +892,28 @@ pub fn stop_script_by_path(script_path: String) -> Result<(), String> {
     let entry = guard.entry(normalized_path).or_insert(0);
     *entry += 1;
     Ok(())
+}
+
+#[cfg(test)]
+mod runtime_state_tests {
+    use super::*;
+
+    #[test]
+    /// 验证脚本运行态仅按完整路径精确匹配。
+    fn detects_running_script_by_exact_path() {
+        let script_path = "runtime-state-test-script.js";
+        assert!(!is_script_path_running(script_path));
+
+        SCRIPT_RUNNING_PATH_COUNTS
+            .lock()
+            .expect("获取脚本运行映射锁失败")
+            .insert(script_path.to_string(), 1);
+        assert!(is_script_path_running(script_path));
+        assert!(!is_script_path_running("other-script.js"));
+
+        SCRIPT_RUNNING_PATH_COUNTS
+            .lock()
+            .expect("获取脚本运行映射锁失败")
+            .remove(script_path);
+    }
 }

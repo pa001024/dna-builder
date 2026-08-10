@@ -83,7 +83,7 @@ const getAnimationDelay = (index: number) => {
                         :class="activeTab === tab ? 'btn-primary shadow-lg scale-105' : 'btn-ghost hover:bg-base-200'"
                         @click="activeTab = tab"
                     >
-                        {{ $t(tab) }}
+                        {{ $t(`tag.${tab}`, $t(tab)) }}
                     </button>
                 </div>
             </ScrollArea>
@@ -153,7 +153,7 @@ const getAnimationDelay = (index: number) => {
                                 :key="tag"
                                 class="badge badge-ghost badge-xs opacity-70 group-hover:opacity-100 transition-opacity duration-200"
                             >
-                                {{ $t(tag) }}
+                                {{ $t(`tag.${tag}`, $t(tag)) }}
                             </span>
                         </div>
 

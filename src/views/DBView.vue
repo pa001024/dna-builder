@@ -39,6 +39,13 @@ const databaseItems = [
         color: "from-slate-500/20 to-zinc-600/20 text-slate-500",
     },
     {
+        name: "database.ironTicket",
+        path: "/db/iron-ticket",
+        desc: "database.ironTicket_desc",
+        icon: "M4 5C4 3.89543 4.89543 3 6 3H18C19.1046 3 20 3.89543 20 5V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V5ZM7 7V9H17V7H7ZM7 11V13H17V11H7ZM7 15V17H13V15H7Z",
+        color: "from-cyan-500/20 to-blue-600/20 text-cyan-500",
+    },
+    {
         name: "database.mod",
         path: "/db/mod",
         desc: "database.mod_desc",
@@ -186,6 +193,13 @@ const databaseItems = [
         color: "from-green-500/20 to-emerald-600/20 text-green-500",
     },
     {
+        name: "database.rouge",
+        path: "/db/rouge",
+        desc: "database.rouge_desc",
+        icon: "M11.817 0.456c1.125 1.111 1.99 2.517 2.25 4.094 0.335 1.626-0.14 3.375 0.527 4.936 0.034-1.222 0.057-2.703 1.248-3.413 0.023 3.627 4.735 4.432 4.962 7.933-0.177 2.156-2.053 3.771-3.919 4.609-2.265 0.856-4.907 1.5-7.252 0.593-1.46-0.63-1.661-2.411-1.36-3.791 0.951 2.153 3.639 3.307 5.729 2.010 1.609-0.847 2.061-3.052 1.139-4.564-1.288-2.313-4.36-2.625-5.843-4.753-0.687-1.034-0.667-2.531 0.252-3.421 1.137-1.174 2.193-2.528 2.267-4.234zM3.211 13.766c0.358-2.903 3.499-4.060 4.858-6.41 0.209 1.42 0.627 3.006 2.036 3.688 2.033 1.088 3.421 3.753 2.13 5.898-0.713-1.93-2.222-3.421-3.917-4.521-1.606 1.706-1.815 4.303-0.79 6.362-2.004-0.945-4.481-2.482-4.317-5.016zM3.457 20.789c-0.089-1.308 1.526-1.609 2.459-2.016-0.286 1.154 0.993 1.5 1.838 1.752 2.691 0.647 5.548 0.641 8.248 0.063 0.902-0.263 2.373-0.561 2.079-1.821 1.025 0.312 3.35 1.202 2.058 2.514-3.166 1.921-7.157 1.746-10.736 1.578-2.030-0.329-4.549-0.341-5.946-2.070z",
+        color: "from-fuchsia-500/20 to-purple-600/20 text-fuchsia-500",
+    },
+    {
         name: "database.hardboss",
         path: "/db/hardboss",
         desc: "database.hardboss_desc",
@@ -257,7 +271,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: t("view.section.build.description"),
         badge: t("view.section.build.badge"),
         accentClass: "bg-violet-500",
-        paths: ["/db/char", "/db/weapon", "/db/resource", "/db/mod", "/db/forge", "/db/damage", "/db/pet"],
+        paths: ["/db/char", "/db/weapon", "/db/mod", "/db/forge", "/db/damage", "/db/pet", "/db/draft", "/db/iron-ticket"],
     },
     {
         id: "explore",
@@ -265,7 +279,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: t("view.section.explore.description"),
         badge: t("view.section.explore.badge"),
         accentClass: "bg-emerald-500",
-        paths: ["/db/shop", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/event", "/db/solotreasure"],
+        paths: ["/db/resource", "/db/rouge", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/event"],
     },
     {
         id: "world",
@@ -273,7 +287,8 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: t("view.section.world.description"),
         badge: t("view.section.world.badge"),
         accentClass: "bg-sky-500",
-        paths: ["/db/impr", "/db/npc", "/db/draft", "/db/reputation", "/db/rank", "/db/questchain", "/db/dynquest", "/db/partytopic"],
+
+        paths: ["/db/questchain", "/db/partytopic", "/db/shop", "/db/impr", "/db/npc", "/db/reputation", "/db/rank", "/db/dynquest"],
     },
     {
         id: "challenge",
@@ -281,7 +296,16 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         description: t("view.section.challenge.description"),
         badge: t("view.section.challenge.badge"),
         accentClass: "bg-amber-500",
-        paths: ["/db/monster", "/db/hardboss", "/db/achievement", "/db/title", "/db/book", "/db/walnut", "/db/accessory"],
+        paths: [
+            "/db/monster",
+            "/db/hardboss",
+            "/db/achievement",
+            "/db/title",
+            "/db/book",
+            "/db/walnut",
+            "/db/accessory",
+            "/db/solotreasure",
+        ],
     },
 ]
 
@@ -597,7 +621,7 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                                 </div>
 
                                 <div class="mt-3 flex items-end justify-between gap-3 text-sm text-base-content/62">
-                                    <span class="block min-w-0 flex-1 leading-6">
+                                    <span class="block min-w-0 flex-1 leading-6 truncate">
                                         {{ $t(item.desc) }}
                                     </span>
                                     <span

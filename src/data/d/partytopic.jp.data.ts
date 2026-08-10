@@ -890,6 +890,49 @@ export const partyTopicData_jp: PartyTopic[] = [
                 npc: 790060,
                 next: 80040423,
             },
+            {
+                id: 80040424,
+                content: 'それにしても……<Default note="text:エジュウ">穢獣</>が前ぶれもなく暴れ出したのはおかしい。',
+                voice: "inv/Heitao/004/C85F7010",
+                npc: 790060,
+                next: 80040425,
+            },
+            {
+                id: 80040425,
+                content:
+                    "島を出たがるあなたが正しくて、私の考えが甘かったのかもしれない。パーガトリー島にさえいれば、危険を回避できるって思っていた。",
+                voice: "inv/Heitao/004/C85F703A",
+                npc: 790060,
+                next: 80040426,
+            },
+            {
+                id: 80040426,
+                content: "……ヤツらが嗅ぎつけてきた以上は、ここにずっと隠れていてもまた見つかるかもしれない。",
+                voice: "inv/Heitao/004/C85F7064",
+                npc: 790060,
+                next: 80040427,
+            },
+            {
+                id: 80040427,
+                content:
+                    "{nickname}、一緒にここから出ようか。{nickname}が目を覚ましたら、自由で、広大な、遥か遠くへ。あなたが前に言ってくれたみたいな旅を――",
+                voice: "inv/Heitao/004/C85F708E",
+                npc: 790060,
+                next: 80040428,
+            },
+            {
+                id: 80040428,
+                content: "「私があなたの盾となり、あなたが私の口となる」",
+                voice: "inv/Heitao/004/C85F70B8",
+                npc: 790060,
+                next: 80040429,
+            },
+            {
+                id: 80040429,
+                content: "恐れることは何もない――もう、なにも恐くない。",
+                voice: "inv/Heitao/004/C85F70E2",
+                npc: 790060,
+            },
         ],
     },
     {
@@ -1347,7 +1390,13 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "…………",
                 voice: "inv/Fuluo/002/C8EC49B8",
                 npc: 790090,
+                speakerName: "？？？",
                 next: 80260205,
+            },
+            {
+                id: 80260205,
+                voice: "inv/Fuluo/002/C8EC49E2",
+                next: 80260206,
             },
             {
                 id: 80260206,
@@ -1361,6 +1410,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "ヒルダ、あなた遅すぎるわ。はあ、やっぱり娘は母親には勝てないのね。このままだと心配だわ。",
                 voice: "inv/Fuluo/002/C8EC4A36",
                 npc: 790090,
+                speakerName: "？？？",
                 next: 80260208,
             },
             {
@@ -2005,6 +2055,11 @@ export const partyTopicData_jp: PartyTopic[] = [
                 next: 80260404,
             },
             {
+                id: 80260404,
+                voice: "inv/Fuluo/004/C8EC6A88",
+                next: 80260405,
+            },
+            {
                 id: 80260405,
                 content: "フローラ、アースガルドへ行って。逃げるのでもかまわない。ただ、十分に遠くまで逃げれば、きっと自由を手にできる。",
                 voice: "inv/Fuluo/004/C8EC6AB2",
@@ -2271,6 +2326,11 @@ export const partyTopicData_jp: PartyTopic[] = [
                 voice: "inv/Fuluo/004/C8EC709A",
                 npc: 790090,
                 next: 80260442,
+            },
+            {
+                id: 80260442,
+                voice: "inv/Fuluo/004/C8EC70C4",
+                next: 80260443,
             },
             {
                 id: 80260443,
@@ -2675,6 +2735,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "カロンが舞台に上がるなど、劇団は何を考えている？！",
                 voice: "inv/Tuosi/001/C89F5932",
                 npc: 790034,
+                speakerName: "ざわめく観客",
                 next: 80140150,
             },
             {
@@ -2704,6 +2765,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "降りろ！降りろ！降りろ！",
                 voice: "inv/Tuosi/001/C89F59DA",
                 npc: 790034,
+                speakerName: "ざわめく観客",
                 next: 80140154,
             },
             {
@@ -2732,6 +2794,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "降りろ！降りろ！降りろ！",
                 voice: "inv/Tuosi/001/C89F5A82",
                 npc: 790034,
+                speakerName: "ざわめく観客",
                 next: 80140158,
             },
             {
@@ -2739,6 +2802,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "嘘つき、嘘つき……<W>悪魔の子め！</>",
                 voice: "inv/Tuosi/001/C89F5AAC",
                 npc: 790034,
+                speakerName: "ざわめく観客",
                 next: 80140159,
             },
             {
@@ -3322,6 +3386,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "えっ？何か言った……？",
                 voice: "inv/Tuosi/003/C89F7276",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140304,
             },
             {
@@ -3343,6 +3408,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "え、何？聞こえないよ。",
                 voice: "inv/Tuosi/003/C89F72F4",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140307,
             },
             {
@@ -3357,6 +3423,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "えっと、ここは第六軍団の実験室だよ……",
                 voice: "inv/Tuosi/003/C89F7348",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140309,
             },
             {
@@ -3378,6 +3445,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "き……君、何も覚えてないの？その質問、もう3回目だよ……君は錬金術の改造を受けたんだ。",
                 voice: "inv/Tuosi/003/C89F73C6",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140312,
             },
             {
@@ -3414,6 +3482,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "そ、そんな悪いことじゃないよ。君の体はもっと強くなったんだし、カロンにとっては帝国に尽くすまたとない機会だ。とても……光栄なこと……だと思うよ……うん。",
                 voice: "inv/Tuosi/003/C89F7498",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140317,
             },
             {
@@ -3421,6 +3490,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "それに――それに君は幸運なほうだよ。被検体のほとんどは移植の段階で息絶えちゃうから……",
                 voice: "inv/Tuosi/003/C89F74C2",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140318,
             },
             {
@@ -3442,6 +3512,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……ごめんなさい。",
                 voice: "inv/Tuosi/003/C89F7540",
                 npc: 100336,
+                speakerName: "若い錬金術師",
             },
             {
                 id: 80140357,
@@ -3471,6 +3542,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "うーん……血液中の鎮静剤の濃度が下がってきた……もう少し足した方がいいかな……？",
                 voice: "inv/Tuosi/003/C89F75BE",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140324,
             },
             {
@@ -3485,6 +3557,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "あっ……また目を覚ましちゃった。",
                 voice: "inv/Tuosi/003/C89F7612",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140326,
             },
             {
@@ -3492,6 +3565,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "何をしておる？鎮静剤の濃度が低すぎるではないか！",
                 voice: "inv/Tuosi/003/C89F763C",
                 npc: 100337,
+                speakerName: "年配の錬金術師",
                 next: 80140327,
             },
             {
@@ -3499,6 +3573,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "ご、ごめんなさい、先生、すぐに追加します！",
                 voice: "inv/Tuosi/003/C89F7666",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140328,
             },
             {
@@ -3513,6 +3588,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "ん？何をブツブツ呟いておる？",
                 voice: "inv/Tuosi/003/C89F76BA",
                 npc: 100337,
+                speakerName: "年配の錬金術師",
                 next: 80140330,
             },
             {
@@ -3528,6 +3604,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "はっ……はははは！何を馬鹿げたことを――脳を改造した覚えはないのじゃがな？炎に焼かれて壊れたか、それともその愚鈍は生まれつきか？",
                 voice: "inv/Tuosi/003/C89F770E",
                 npc: 100337,
+                speakerName: "年配の錬金術師",
                 next: 80140332,
             },
             {
@@ -3535,6 +3612,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "我々が求めているのは化け物、器、使い勝手の良い刃であって、お前の意志ではない。今更元に戻すわけなかろう！",
                 voice: "inv/Tuosi/003/C89F7738",
                 npc: 100337,
+                speakerName: "年配の錬金術師",
                 next: 80140333,
             },
             {
@@ -3549,6 +3627,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "「なぜ」……だと？",
                 voice: "inv/Tuosi/003/C89F778C",
                 npc: 100337,
+                speakerName: "年配の錬金術師",
                 next: 80140335,
             },
             {
@@ -3556,6 +3635,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "足元のアリを踏み潰すのにいちいち説明するか？口にいれたサクランボを噛み砕くのに、理由など必要あると思うか？",
                 voice: "inv/Tuosi/003/C89F77B6",
                 npc: 100337,
+                speakerName: "年配の錬金術師",
                 next: 80140336,
             },
             {
@@ -3563,6 +3643,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "おっと、すまんな――お前のような卑しい存在が、サクランボの味など知るはずもあるまいに。",
                 voice: "inv/Tuosi/003/C89F77E0",
                 npc: 100337,
+                speakerName: "年配の錬金術師",
                 next: 80140337,
             },
             {
@@ -3570,6 +3651,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "鎮静剤はまだか？もたもたするな！",
                 voice: "inv/Tuosi/003/C89F780A",
                 npc: 100337,
+                speakerName: "年配の錬金術師",
                 next: 80140338,
             },
             {
@@ -3577,6 +3659,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "終わりました、先生。",
                 voice: "inv/Tuosi/003/C89F7834",
                 npc: 100336,
+                speakerName: "若い錬金術師",
             },
             {
                 id: 80140339,
@@ -3590,6 +3673,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "え、何を？",
                 voice: "inv/Tuosi/003/C89F7888",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140341,
             },
             {
@@ -3645,6 +3729,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……",
                 voice: "inv/Tuosi/003/C89F79AE",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140348,
             },
             {
@@ -3652,6 +3737,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "どうした、何か異常か？",
                 voice: "inv/Tuosi/003/C89F79D8",
                 npc: 100337,
+                speakerName: "年配の錬金術師",
                 next: 80140349,
             },
             {
@@ -3660,6 +3746,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "いえ、先生。ただ被検体の精神状態がやや不安定なようです。また訳の分からないことを呟き始めました。鎮静剤の量を増やします。",
                 voice: "inv/Tuosi/003/C89F7A02",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140350,
             },
             {
@@ -3667,6 +3754,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "うむ、正しい判断だ。ここ数日で随分成長したな。",
                 voice: "inv/Tuosi/003/C89F7A2C",
                 npc: 100337,
+                speakerName: "年配の錬金術師",
                 next: 80140351,
             },
             {
@@ -3674,6 +3762,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "ありがとうございます、先生！",
                 voice: "inv/Tuosi/003/C89F7A56",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140352,
             },
             {
@@ -3688,6 +3777,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "そう、それでいいんだ。何も話すな。",
                 voice: "inv/Tuosi/003/C89F7AAA",
                 npc: 100336,
+                speakerName: "若い錬金術師",
                 next: 80140354,
             },
             {
@@ -3731,6 +3821,291 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80140401,
                 content: "君は誰……？",
                 voice: "inv/Tuosi/004/C89F828A",
+            },
+            {
+                id: 80140403,
+                content: "ねえ、どこに行くの？",
+                voice: "inv/Tuosi/004/C89F82DE",
+                npc: 790026,
+                speakerName: "？？？",
+                next: 80140404,
+            },
+            {
+                id: 80140404,
+                content: "――？！",
+                voice: "inv/Tuosi/004/C89F8308",
+                npc: 790025,
+                speakerName: "ファンタジオ",
+                next: 80140405,
+            },
+            {
+                id: 80140405,
+                content: "ダニス！待ってよ！",
+                voice: "inv/Tuosi/004/C89F8332",
+                npc: 790026,
+                next: 80140406,
+            },
+            {
+                id: 80140406,
+                content: "うぅ……寒すぎる、早く帰ろうよ。",
+                voice: "inv/Tuosi/004/C89F835C",
+                npc: 790027,
+                next: 80140407,
+            },
+            {
+                id: 80140407,
+                content:
+                    "えー、まだ早いって！もう少しだけ一緒に練習しようよ！今日先生が教えてくれたセリフ、まだちゃんと覚えられてないのよ……",
+                voice: "inv/Tuosi/004/C89F8386",
+                npc: 790026,
+                next: 80140408,
+            },
+            {
+                id: 80140408,
+                content: "また……？あー、わかったわかった、付き合うよ。手を出すなよ！",
+                voice: "inv/Tuosi/004/C89F83B0",
+                npc: 790027,
+                next: 80140409,
+            },
+            {
+                id: 80140409,
+                content: "（二人とも、全然変わってないや。）",
+                voice: "inv/Tuosi/004/C89F83DA",
+                npc: 790025,
+                speakerName: "ファンタジオ",
+                next: 80140410,
+            },
+            {
+                id: 80140410,
+                content: "そういえば、来月公演する演目、もう決まったの？",
+                voice: "inv/Tuosi/004/C89F8404",
+                npc: 790026,
+                next: 80140411,
+            },
+            {
+                id: 80140411,
+                content: "団長が言ってたじゃん、『雨の日』だって。",
+                voice: "inv/Tuosi/004/C89F842E",
+                npc: 790027,
+                next: 80140412,
+            },
+            {
+                id: 80140412,
+                content:
+                    "『雨の日』って、それほど人気じゃないよね？名声もそんなに立たないんじゃ……ああ、もう一度『雪国の幼子』を演じたいな。あの劇、アイスレイク城ですごく人気だったよね……",
+                voice: "inv/Tuosi/004/C89F8458",
+                npc: 790026,
+                next: 80140413,
+            },
+            {
+                id: 80140413,
+                content:
+                    "そうそう！僕も無名の妖精、もう一度演じたい！あの役、すごく自信があるんだ。歌は多くて難しいけど、最後まで演じきった時の達成感が最高だったな。",
+                voice: "inv/Tuosi/004/C89F8482",
+                npc: 790027,
+                next: 80140414,
+            },
+            {
+                id: 80140414,
+                content: "えぇ――ほんとに？私たちの代で一番上手いって言ったらやっぱりフェインじゃない！？",
+                voice: "inv/Tuosi/004/C89F84AC",
+                npc: 790026,
+                next: 80140415,
+            },
+            {
+                id: 80140415,
+                content: "いやいや、クライマックスの部分は、明らかに僕の方が上手かったね！",
+                voice: "inv/Tuosi/004/C89F84D6",
+                npc: 790027,
+                next: 80140416,
+            },
+            {
+                id: 80140416,
+                content: "……",
+                voice: "inv/Tuosi/004/C89F8500",
+                npc: 790025,
+                speakerName: "ファンタジオ",
+                next: 80140417,
+            },
+            {
+                id: 80140417,
+                content: "……実際のところ、一番うまいのは僕でもフェインでもない。",
+                voice: "inv/Tuosi/004/C89F852A",
+                npc: 790027,
+                next: 80140418,
+            },
+            {
+                id: 80140418,
+                content: "……",
+                voice: "inv/Tuosi/004/C89F8554",
+                npc: 790026,
+                next: 80140419,
+            },
+            {
+                id: 80140419,
+                content: "……そうだね。『雪国の幼子』と言えば、パシファルより上手く歌える人なんていないわ。彼、どこにいるんだろう……",
+                voice: "inv/Tuosi/004/C89F857E",
+                npc: 790026,
+                next: 80140420,
+            },
+            {
+                id: 80140420,
+                content: "（僕はここにいるよ。）",
+                voice: "inv/Tuosi/004/C89F85A8",
+                npc: 790025,
+                speakerName: "ファンタジオ",
+                next: 80140421,
+            },
+            {
+                id: 80140421,
+                content: "（ここにいるよ……）",
+                voice: "inv/Tuosi/004/C89F85D2",
+                npc: 790025,
+                speakerName: "ファンタジオ",
+                next: 80140422,
+            },
+            {
+                id: 80140422,
+                content: "（僕は……）",
+                voice: "inv/Tuosi/004/C89F85FC",
+                npc: 790025,
+                speakerName: "ファンタジオ",
+                next: 80140423,
+            },
+            {
+                id: 80140423,
+                content: "パシファル……",
+                voice: "inv/Tuosi/004/C89F8626",
+                npc: 790027,
+                next: 80140424,
+            },
+            {
+                id: 80140424,
+                content: "あっ、ごめん！以前団長があの子の話をした時、あなたってばブチ切れて、道具を壊しかけたんだよね。",
+                voice: "inv/Tuosi/004/C89F8650",
+                npc: 790026,
+                next: 80140425,
+            },
+            {
+                id: 80140425,
+                content:
+                    "……あの時は、つい頭がカッとなったんだ。もしもあいつと先生が観客を騙さなければ、『雪国の幼子』は上演中止にはならなかったし、僕たちが長い間練習してきたものが無駄になることもなかった。だけど……",
+                voice: "inv/Tuosi/004/C89F867A",
+                npc: 790027,
+                next: 80140426,
+            },
+            {
+                id: 80140426,
+                content:
+                    "その後、僕は何度も自分に聞いたんだ――彼の行為は本当に「悪」なのか？間違っていたのは、「カロンは舞台に上がれない」という規則を破ったパシファルなのか、それとも規則自体なのか……",
+                voice: "inv/Tuosi/004/C89F86A4",
+                npc: 790027,
+                next: 80140427,
+            },
+            {
+                id: 80140427,
+                content: "僕たちが舞台に立つ理由――それは<H>至高の芸術</>のためだ……",
+                voice: "inv/Tuosi/004/C89F86CE",
+                npc: 790027,
+                next: 80140428,
+            },
+            {
+                id: 80140428,
+                content:
+                    "しかし、なぜ彼らは公演そのものを見ようとせず、演者の角に注目するんだ？僕たちが全員幕の裏側にいたら、パシファルと僕たちの間に違いはあるか？",
+                voice: "inv/Tuosi/004/C89F86F8",
+                npc: 790027,
+                next: 80140429,
+            },
+            {
+                id: 80140429,
+                content: "いや、あったな。彼は僕よりずっと歌が上手い。",
+                voice: "inv/Tuosi/004/C89F8722",
+                npc: 790027,
+                next: 80140430,
+            },
+            {
+                id: 80140430,
+                content: "あなたがそんなことを言うなんて珍しい。無鉄砲なダニスも、ようやく成長したのね。",
+                voice: "inv/Tuosi/004/C89F874C",
+                npc: 790026,
+                next: 80140431,
+            },
+            {
+                id: 80140431,
+                content: "おい、急に団長みたいな説教はやめろ。",
+                voice: "inv/Tuosi/004/C89F8776",
+                npc: 790027,
+                next: 80140432,
+            },
+            {
+                id: 80140432,
+                content:
+                    "褒めてるのよ！でももしパシファルが戻ってきたら、思いっきり叱ってやるわ。手紙の一つも残さず、行方をくらますなんて……彼に会いたいなぁ。",
+                voice: "inv/Tuosi/004/C89F87A0",
+                npc: 790026,
+                next: 80140433,
+            },
+            {
+                id: 80140433,
+                content: "（スザンナ、ダニス……）",
+                voice: "inv/Tuosi/004/C89F87CA",
+                npc: 790025,
+                speakerName: "パシファル",
+                next: 80140434,
+            },
+            {
+                id: 80140434,
+                content:
+                    "ところで、先生が言ったこと覚えてる？「今は無理でも、いずれ、私たちの芸術はもっと純粋な時代を迎える。その時にはソラとカロンの違いもなくなるでしょう」って。",
+                voice: "inv/Tuosi/004/C89F87F4",
+                npc: 790026,
+                next: 80140435,
+            },
+            {
+                id: 80140435,
+                content:
+                    "先生とパシファルはみんなに罵られて、劇団に恥をかかせたけど……でも、彼らみたいな人がいるからこそ、新しい時代がやってくるんだと思う。",
+                voice: "inv/Tuosi/004/C89F881E",
+                npc: 790026,
+                next: 80140436,
+            },
+            {
+                id: 80140436,
+                content: "その時が来たら、彼らは「恥」ではなくなる――誰よりも早くに目覚めた「英雄」になるんだよ。",
+                voice: "inv/Tuosi/004/C89F8848",
+                npc: 790026,
+                next: 80140437,
+            },
+            {
+                id: 80140437,
+                content: "…………",
+                voice: "inv/Tuosi/004/C89F8872",
+                npc: 790025,
+                speakerName: "パシファル",
+                next: 80140438,
+            },
+            {
+                id: 80140438,
+                content:
+                    "彼を祝福しよう！もしかしたら、もうカロン族でも舞台に立てる場所、例えばルッカ共和国やイーザーに行っているのかもしれないしね。",
+                voice: "inv/Tuosi/004/C89F889C",
+                npc: 790026,
+                next: 80140439,
+            },
+            {
+                id: 80140439,
+                content: "もしかしたら、次にこれらの国で巡回公演をするとき、彼はとっくに、先生のような大スターになっているかもしれないよ！",
+                voice: "inv/Tuosi/004/C89F88C6",
+                npc: 790026,
+                next: 80140440,
+            },
+            {
+                id: 80140440,
+                content: "うん、そうだね。また彼と同じ舞台に立つチャンスがあるといいな。",
+                voice: "inv/Tuosi/004/C89F88F0",
+                npc: 790027,
+                next: 80140454,
             },
             {
                 id: 80140402,
@@ -7422,6 +7797,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80240204,
                 content: "にゃ～",
                 voice: "inv/Suyi/002/C8DF7878",
+                speakerName: "クロ",
                 next: 80240205,
             },
             {
@@ -7723,6 +8099,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80240304,
                 content: "にゃ～",
                 voice: "inv/Suyi/003/C8DF88E0",
+                speakerName: "クロ",
                 next: 80240305,
             },
             {
@@ -8281,6 +8658,222 @@ export const partyTopicData_jp: PartyTopic[] = [
                 voice: "inv/Feina/001/C865A5AA",
                 npc: 790017,
                 next: 80050114,
+            },
+            {
+                id: 80050115,
+                content: "……ふぅ、難しかったけど……やっと大成功！",
+                voice: "inv/Feina/001/C865A5FE",
+                npc: 790017,
+                next: 80050116,
+            },
+            {
+                id: 80050116,
+                content: "まさか薬莢でこんな風に遊べるなんて……ちょっと見せて？",
+                voice: "inv/Feina/001/C865A628",
+                npc: 100001,
+                next: 80050117,
+            },
+            {
+                id: 80050118,
+                content: "あ！崩れ、ちゃった……",
+                voice: "inv/Feina/001/C865A67C",
+                npc: 100001,
+                next: 80050119,
+            },
+            {
+                id: 80050119,
+                content: "……あぁ……",
+                voice: "inv/Feina/001/C865A6A6",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050120,
+                        content: "な、泣かないで！お詫びに別のプレゼントを贈るから！",
+                        next: 80050121,
+                    },
+                ],
+            },
+            {
+                id: 80050121,
+                content: "わぁ……少しだけ考えさせて……",
+                voice: "inv/Feina/001/C865A6FA",
+                npc: 790017,
+                next: 80050122,
+            },
+            {
+                id: 80050122,
+                content:
+                    "ユニコーンの{性别:お兄さん|お姉さん}、どうかフィーナの4つお願いを叶えてくれる？一角獣のユニコーンさんは、どんなお願いでも叶えられるって言い伝えられているの。だからきっと{性别:お兄さん|お姉さん}にもできるはず！",
+                voice: "inv/Feina/001/C865A724",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050123,
+                        content: "もちろん{性别:僕|私}にできることなら。",
+                        next: 80050126,
+                    },
+                    {
+                        id: 80050124,
+                        content: "なんだか、都合よく解釈されている気が……",
+                        next: 80050126,
+                    },
+                    {
+                        id: 80050125,
+                        content: "願い事って普通は3つじゃない！？1つ多いんですけど！",
+                        next: 80050126,
+                    },
+                ],
+            },
+            {
+                id: 80050126,
+                content: "えへへ……",
+                voice: "inv/Feina/001/C865A7CC",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050127,
+                        content: "最初のお願いは何かな？",
+                        next: 80050128,
+                    },
+                ],
+            },
+            {
+                id: 80050128,
+                content:
+                    "フィーナね、魔法を練習したい！フィーナも魔法を使えるけど、少しだけ。使い方がよくわからなくて……だからユニコーンの{性别:お兄さん|お姉さん}から教わりたいな。",
+                voice: "inv/Feina/001/C865A820",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050129,
+                        content: "なんでアウトサイダーに教えてもらわない{性别:んだ|の}？",
+                        next: 80050130,
+                    },
+                    {
+                        id: 80050132,
+                        content: "うーん、だったら授業料をもらわなきゃ。",
+                        next: 80050133,
+                    },
+                ],
+            },
+            {
+                id: 80050130,
+                content: "アウトサイダーは教えてくれないもの。魔法の本も読んじゃダメだって、高い棚の上に置くから。背伸びしても届かないの。",
+                voice: "inv/Feina/001/C865A874",
+                npc: 790017,
+                next: 80050131,
+            },
+            {
+                id: 80050133,
+                content: "え……？待ってて、うーんと……マシュマロはダメかしら？缶の中にいっぱいの。",
+                voice: "inv/Feina/001/C865A8F2",
+                npc: 790017,
+                next: 80050134,
+            },
+            {
+                id: 80050131,
+                content: "だからアウトサイダーがいないあいだに、椅子を積んでこっそり取っちゃうしか――あわ、これは内緒、誰にも言わないでね？",
+                voice: "inv/Feina/001/C865A89E",
+                npc: 790017,
+                next: 80050138,
+            },
+            {
+                id: 80050134,
+                content: "でもフィーナの願い事を叶えるために無料してあげちゃう。",
+                voice: "inv/Feina/001/C865A91C",
+                npc: 100001,
+                next: 80050135,
+            },
+            {
+                id: 80050138,
+                content:
+                    "アウトサイダーはいつもこう言うの。魔法を学ぶのはすごーく大変なんだって。暖かいストーブから離れて、気持ちいいお部屋から出て、荒野へ――過酷な不毛の地に行かないといけないって……",
+                voice: "inv/Feina/001/C865A9C4",
+                npc: 790017,
+                next: 80050139,
+            },
+            {
+                id: 80050135,
+                content: "やった！",
+                voice: "inv/Feina/001/C865A946",
+                npc: 790017,
+                next: 80050136,
+            },
+            {
+                id: 80050139,
+                content:
+                    "そこにはたくさんの雪狼がいて、その目は緑色にギラギラと光ってるの。箒に乗っている、全身に毒を塗った沼地の魔女もいるらしいわ。",
+                voice: "inv/Feina/001/C865A9EE",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050140,
+                        content: "そんな大げさな。アウトサイダーはフィーナを脅しているだけだよ。",
+                        next: 80050141,
+                    },
+                    {
+                        id: 80050143,
+                        content: "雪狼や沼地の魔女より、もっと恐ろしい存在もいるよ。",
+                        next: 80050144,
+                    },
+                ],
+            },
+            {
+                id: 80050136,
+                content:
+                    "お願い聞いてくれありがとう。だってアウトサイダーは教えてくれないもの。魔法の本も読んじゃダメだって、高い棚の上に置くから。背伸びしても届かないの。",
+                voice: "inv/Feina/001/C865A970",
+                npc: 790017,
+                next: 80050137,
+            },
+            {
+                id: 80050141,
+                content:
+                    "うん……私だってわかっているもん。フィーナは病気になりやすいし、怪我するから、アウトサイダーは心配してくれている。だけどフィーナの身体の調子がずっとよくならなかったら……家でずっと寝たきりでお荷物になるのだけは嫌なの。",
+                voice: "inv/Feina/001/C865AA42",
+                npc: 790017,
+                next: 80050142,
+            },
+            {
+                id: 80050144,
+                content:
+                    "それなら……フィーナはもっともっと魔法の勉強を頑張って、アウトサイダーや{性别:お兄さん|お姉さん}を手伝わなくちゃ。ただ待っているだけなんて嫌なの。",
+                voice: "inv/Feina/001/C865AAC0",
+                npc: 790017,
+                next: 80050145,
+            },
+            {
+                id: 80050137,
+                content: "だからアウトサイダーがいないあいだに、椅子を積んでこっそり取っちゃうしか――あわ、これは内緒、誰にも言わないでね？",
+                voice: "inv/Feina/001/C865A99A",
+                npc: 790017,
+                next: 80050138,
+            },
+            {
+                id: 80050142,
+                content: "……フィーナも役に立つ子になりたいな。もう嫌われたくない。",
+                voice: "inv/Feina/001/C865AA6C",
+                npc: 790017,
+                next: 80050145,
+            },
+            {
+                id: 80050145,
+                content: "だから――お願い、教えて！フィーナ、絶対ちゃんと内緒にするから！",
+                voice: "inv/Feina/001/C865AAEA",
+                npc: 790017,
+                options: [
+                    {
+                        id: 80050146,
+                        content: "わかったよ、じゃあ今から練習しようね。",
+                        next: 80050147,
+                    },
+                ],
+            },
+            {
+                id: 80050147,
+                content: "やった～～！素敵な素敵なユニコーンの{性别:お兄さん|お姉さん}は、世界最高のユニコーンさんだわ！",
+                voice: "inv/Feina/001/C865AB3E",
+                npc: 790017,
             },
         ],
     },
@@ -10621,12 +11214,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80090115,
                 content: "私から提示するのは、あなたが断れない条件よ。しっかりと考えたうえで返答しなさいな。",
                 npc: 790052,
+                speakerName: "？？？",
                 next: 80090116,
             },
             {
                 id: 80090116,
                 content: "私を目覚めさせるものはビジネスだけど、あなたを目覚めさせるものは、何かしら？",
                 npc: 790052,
+                speakerName: "？？？",
                 options: [
                     {
                         id: 80090117,
@@ -10645,12 +11240,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80090118,
                 content: "ふふ、ほんと、あなたって口がうまいんだから。あなたの作った飲み物よりも甘々ね？",
                 npc: 790052,
+                speakerName: "？？？",
                 next: 80090144,
             },
             {
                 id: 80090120,
                 content: "あいつなんて怖くねえし！悪魔の大泥棒は誰にだって捕まらないからなぁ！",
                 npc: 790052,
+                speakerName: "？？？",
                 next: 80090144,
             },
             {
@@ -11436,6 +12033,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80090416,
                 content: "息はある。寝てるだけっぽいし大丈夫かな、知らんけど。",
                 npc: 92301,
+                speakerName: "？？？",
                 next: 80090417,
             },
             {
@@ -11443,18 +12041,21 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "ふぎぃ……びび、びっくりした……なんでも全部いれちゃうのはヤバいってタビテに言ったじゃんか……このまま何事かが、起きちゃったら……ちゃったら……ひいぃ……",
                 npc: 92301,
+                speakerName: "？？？",
                 next: 80090418,
             },
             {
                 id: 80090418,
                 content: "キキキ、頭ブッ壊れたんじゃね？変な後遺症が残っちまうかもな！かもな！",
                 npc: 92301,
+                speakerName: "？？？",
                 next: 80090419,
             },
             {
                 id: 80090419,
                 content: "縁起でもない！",
                 npc: 92301,
+                speakerName: "？？？",
                 options: [
                     {
                         id: 80090420,
@@ -11472,12 +12073,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80090422,
                 content: "んぇー聞こえたー？{nickname}、私たちに話しかけてるよー？",
                 npc: 92301,
+                speakerName: "？？？",
                 next: 80090423,
             },
             {
                 id: 80090423,
                 content: "吾輩の知る限りでは、吾輩たちの声を傾聴できるのはタビテだけのはずだが？",
                 npc: 92301,
+                speakerName: "？？？",
                 next: 80090424,
             },
             {
@@ -11485,6 +12088,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "……大変です大変です、不味いですよ！本当に何事かが起きちゃいました！やっぱりですね、5号が余計なことを言うと絶対その通りになっちゃうんです！もうお願いだから絶対に口を開かないでくださいね！",
                 npc: 92301,
+                speakerName: "？？？",
                 options: [
                     {
                         id: 80090425,
@@ -11498,6 +12102,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "えっと……こんにちは、でよろしいのですかね？私たちはタビテの触手ですよ。こんな状況でお話することになるなんて夢にも思いませんでしたね！人生やっぱり何が起きるかわかりませんね！アハ、アハハハハ……",
                 npc: 92301,
+                speakerName: "触腕6号",
                 next: 80090427,
             },
             {
@@ -11505,6 +12110,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "ああ……わ、私らの声が聞こえるのは……多分あの飲み物のせい……変なの飲ませてごめんなさいなんだけど……わざとじゃないの……タビテも私らもわざとじゃ……うううう……",
                 npc: 92301,
+                speakerName: "触腕2号",
                 options: [
                     {
                         id: 80090428,
@@ -11523,6 +12129,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "吾輩の所見では、貴君らの現在の状況は、何点かの――特別な食材により生じた顛末かと。少し眠れば差し当たっての問題はなかろう。",
                 npc: 92301,
+                speakerName: "触腕3号",
                 next: 80090431,
             },
             {
@@ -11530,6 +12137,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "しかし、ウォッホン――このように貴君との出会いを果たしたのは偶然でなく計画通り！全触手が吾輩の指揮下で協力して、この大泥棒の飲み物を調合したが故である！",
                 npc: 92301,
+                speakerName: "触腕3号",
                 next: 80090432,
             },
             {
@@ -11537,24 +12145,28 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "えぇ？飲み物の調合なんてタビテは全然わかりませんし、適当にキレイなキノコをスライスして放り込んだからではありませんかね……？",
                 npc: 92301,
+                speakerName: "触腕6号",
                 next: 80090433,
             },
             {
                 id: 80090433,
                 content: "キキキ、3号が偉そうに宣ってら。あんまり偉そうにすると、次はこの飲み物の食材になっちまうぜ。キキキ……",
                 npc: 92301,
+                speakerName: "触腕5号",
                 next: 80090434,
             },
             {
                 id: 80090434,
                 content: "ひひぃー、恐ろしやぁぁー！",
                 npc: 92301,
+                speakerName: "触腕2号",
                 next: 80090435,
             },
             {
                 id: 80090435,
                 content: "騒ぐとー……みんな疲れるってー……というかー……{nickname}、怖がってるしー……",
                 npc: 92301,
+                speakerName: "触腕4号",
                 options: [
                     {
                         id: 80090436,
@@ -11568,6 +12180,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "夢と思ってくださっても構いませんが……飲み物の効果がどこまで続くかも不明ですし……あの、せっかくですので……私たちあなたに伝えたいことがたくさんあるんです！この機会にえっとあの……ほら1号から！",
                 npc: 92301,
+                speakerName: "触腕6号",
                 next: 80090438,
             },
             {
@@ -11575,6 +12188,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "……俺の意識は海で生まれた。海難事故の最中だったかな。いつ死んでもおかしくない状況でふたり漂流してた。タビテは俺と話すことで、あの状況に堪えたんだ。",
                 npc: 92301,
+                speakerName: "触腕1号",
                 next: 80090439,
             },
             {
@@ -11582,6 +12196,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "わ、わ、私は孤児院で目覚めた……新しい場所で慣れてないのもあったけど……大人たちが酷い態度で……た、た、タビテは、ほんと、怖かったはずなのに……弱みを見せたくないからって誰の前でも強気で……なのに……夜になるたび、私を抱き締めて震えてた……",
                 npc: 92301,
+                speakerName: "触腕2号",
                 next: 80090440,
             },
             {
@@ -11589,12 +12204,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "吾輩は孤児院の厨房にてこの寄り合いに加入した。危急の際は吾輩が適切な采配を振るって警備網をあざむき、パンを半かけ収集する大戦果を得たこともある！",
                 npc: 92301,
+                speakerName: "触腕3号",
                 next: 80090441,
             },
             {
                 id: 80090441,
                 content: "吾輩の口調に関しては、孤児院院長の完コピでもあるのだ。",
                 npc: 92301,
+                speakerName: "触腕3号",
                 next: 80090442,
             },
             {
@@ -11602,6 +12219,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "くはぁ……ねむー……私は孤児院を脱出した夜に目覚めたねー……生き延びたのはいいけど、もう疲れたしんどいマジ無理って感じでー……だから安全な場所まで逃げ切ってから、すぐタビテと一緒に原っぱで寝たっけなー……",
                 npc: 92301,
+                speakerName: "触腕4号",
                 next: 80090443,
             },
             {
@@ -11609,6 +12227,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "キキキ、お次はオレ様だ！オレ様はタビテの最高のダチって感じだな！一緒んなって、略奪したんだよ！最高に爽快なんだぜ！キャッホー！",
                 npc: 92301,
+                speakerName: "触腕5号",
                 next: 80090444,
             },
             {
@@ -11616,6 +12235,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "あなた本当いい加減にしてくださいね！すみません、この子はまだ分別がついてなくて……！えぇっと、ゴホン、次は私ですね！私はみんなの中で一番新しい存在でして、意識を持ち始めたのはまだ最近なんです。",
                 npc: 92301,
+                speakerName: "触腕6号",
                 next: 80090445,
             },
             {
@@ -11623,12 +12243,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "実はずっと前に一度だけ目覚めたことはあるんですが……タビテはあの魚屋の子と離ればなれになってから、口にはしませんが悲しくて仕方がなかったようで……私もあの頃に囚われてますから、逃げるように眠ってしまいました。",
                 npc: 92301,
+                speakerName: "触腕6号",
                 next: 80090446,
             },
             {
                 id: 80090446,
                 content: "彼女が再び心を通じ合える人と出会うまでは——間違いないですね。私はあなたのお陰で目覚めたんです。",
                 npc: 92301,
+                speakerName: "触腕6号",
                 next: 80090447,
             },
             {
@@ -11636,6 +12258,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "ありがとうございます、タビテに優しく接してくれて。あなたの暖かい心が、私をまどろみから引き上げてくれました。感謝の気持ちを贈りたいと思いまして、私の提案でタビテは飲み物を作ったのですが……",
                 npc: 92301,
+                speakerName: "触腕6号",
                 next: 80090448,
             },
             {
@@ -11643,12 +12266,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "まさかここまで加減を知らない子だとは私も予想してなかったんです！アハハ……飲み物の作り方なんてなにもわからないものでして、タビテったらなんでも手当たり次第に放り込んじゃいましたから――それにみんなも！特に3号と5号なんて酷すぎます！もっとやれってタビテを煽ったんです！",
                 npc: 92301,
+                speakerName: "触腕6号",
                 next: 80090449,
             },
             {
                 id: 80090449,
                 content: "ごめんなさい、申し開きのしようも……",
                 npc: 92301,
+                speakerName: "触腕6号",
                 options: [
                     {
                         id: 80090450,
@@ -11661,18 +12286,21 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80090451,
                 content: "……",
                 npc: 92301,
+                speakerName: "触腕1号",
                 next: 80090452,
             },
             {
                 id: 80090452,
                 content: "タビテ、目を覚ますかも。お前はどうだ？",
                 npc: 92301,
+                speakerName: "触腕1号",
                 next: 80090453,
             },
             {
                 id: 80090453,
                 content: "性急すぎるではないか！吾輩まだ全然話せておらんぞ……",
                 npc: 92301,
+                speakerName: "触腕3号",
                 options: [
                     {
                         id: 80090454,
@@ -12657,6 +13285,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "めんどくさい、めんどくさい、めんどくさいっ！",
                 voice: "inv/Fushu/003/C8C5D208",
                 npc: 790054,
+                speakerName: "？？？",
                 next: 80200219,
             },
             {
@@ -12664,6 +13293,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "朝起きたとき、今日は絶対に妹にキレないって決めたのに！なんで朝ごはんすら終わってないのに破ってんのよ、私！",
                 voice: "inv/Fushu/003/C8C5D232",
                 npc: 790054,
+                speakerName: "？？？",
                 next: 80200220,
             },
             {
@@ -12672,6 +13302,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "ったく……どれだけせっかちなんだよ私！どんなに無愛想でも、結局あの子は私の妹だから。放っておくわけにはいかないし……いつも彼女を怒らせてどうする気なのよ。",
                 voice: "inv/Fushu/003/C8C5D25C",
                 npc: 790054,
+                speakerName: "？？？",
                 next: 80200221,
             },
             {
@@ -13448,6 +14079,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80110111,
                 content: "誤解だって。リーンを見かけたから、一緒に一杯どうかなって思っただけだよ。",
                 voice: "inv/Linen/001/C88C1916",
+                speakerName: "{nickname}",
                 next: 80110112,
             },
             {
@@ -13545,6 +14177,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80110127,
                 content: "長官のことをそんな風に話したら失言じゃない？「感電死」したりしないかな？",
                 voice: "inv/Linen/001/C88C1BB6",
+                speakerName: "{nickname}",
                 next: 80110128,
             },
             {
@@ -13579,12 +14212,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80110131,
                 content: "でも意外{性别:だな|ね}。実際に話してみるとリーンってイメージと全然違うんだね。",
                 voice: "inv/Linen/001/C88C1C5E",
+                speakerName: "{nickname}",
                 next: 80110132,
             },
             {
                 id: 80110132,
                 content: "ヒュペリアの将校として――「信念」とか？「栄光」やら「忠誠心」やらを持っている人だと思っていたけど……",
                 voice: "inv/Linen/001/C88C1C88",
+                speakerName: "{nickname}",
                 next: 80110133,
             },
             {
@@ -13880,6 +14515,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80110223,
                 content: "…………",
                 voice: "inv/Linen/002/C88C2B76",
+                speakerName: "{nickname}",
                 next: 80110224,
             },
             {
@@ -14040,6 +14676,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80110111,
                 content: "誤解だって。リーンを見かけたから、一緒に一杯どうかなって思っただけだよ。",
                 voice: "inv/Linen/001/C88C1916",
+                speakerName: "{nickname}",
                 next: 80110112,
             },
             {
@@ -14137,6 +14774,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80110127,
                 content: "長官のことをそんな風に話したら失言じゃない？「感電死」したりしないかな？",
                 voice: "inv/Linen/001/C88C1BB6",
+                speakerName: "{nickname}",
                 next: 80110128,
             },
             {
@@ -14171,12 +14809,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80110131,
                 content: "でも意外{性别:だな|ね}。実際に話してみるとリーンってイメージと全然違うんだね。",
                 voice: "inv/Linen/001/C88C1C5E",
+                speakerName: "{nickname}",
                 next: 80110132,
             },
             {
                 id: 80110132,
                 content: "ヒュペリアの将校として――「信念」とか？「栄光」やら「忠誠心」やらを持っている人だと思っていたけど……",
                 voice: "inv/Linen/001/C88C1C88",
+                speakerName: "{nickname}",
                 next: 80110133,
             },
             {
@@ -14583,6 +15223,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "家に帰りたいと思ったら帰っていいのが普通で……というか、それが常識だって世界に、{性别:僕|私}たちで変えていかなきゃダメだと思う。",
                 voice: "inv/Linen/003/C88C3D2E",
+                speakerName: "{nickname}",
                 next: 80110332,
             },
             {
@@ -14604,6 +15245,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80110334,
                 content: "いつかそうなるかも。",
                 voice: "inv/Linen/003/C88C3DAC",
+                speakerName: "{nickname}",
                 next: 80110335,
             },
             {
@@ -14611,6 +15253,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "アイスレイク城に雪が降らないようにするのは無理かもだけど、雪をかき集めて雪だるまを作るくらいなら、{性别:僕|私}たちだってできるはず。",
                 voice: "inv/Linen/003/C88C3DD6",
+                speakerName: "{nickname}",
                 next: 80110336,
             },
             {
@@ -14618,6 +15261,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "夢は砕けてしまったかもしれないけど、友達を訪ねて、あの頃の夢をまだ覚えているって伝えることはできるよ。実家のドアをノックして、「どんな立場になってもみんなことをずっと想っている」って言えるはず。気持ちはずっと変わらないって。",
                 voice: "inv/Linen/003/C88C3E00",
+                speakerName: "{nickname}",
                 next: 80110337,
             },
             {
@@ -15494,6 +16138,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "はぁ、ったく――変われ。さっきまで全然怖くねぇだの、「ドンパチ」のおもちゃをアイスレイク城で売るだの吹いてたのはどこのどいつだよ！",
                 voice: "inv/Yeer/001/C898E9D8",
                 npc: 93103,
+                speakerName: "？？？",
                 next: 80130109,
             },
             {
@@ -15501,6 +16146,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "結局このザマじゃねぇか。やっぱり俺がいないとな。",
                 voice: "inv/Yeer/001/C898EA02",
                 npc: 93103,
+                speakerName: "？？？",
                 next: 80130110,
             },
             {
@@ -15515,6 +16161,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "何も取って食われるわけじゃあるまいし、ガキと接する時みたく話しゃあいいだろ。",
                 voice: "inv/Yeer/001/C898EA56",
                 npc: 93103,
+                speakerName: "？？？",
                 options: [
                     {
                         id: 801301111,
@@ -15571,6 +16218,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "だが、イェールが毎回毎回言葉を詰まらせるもんだから、俺が途中で客に商品を紹介する羽目になるんだよ――今みたいにな。",
                 voice: "inv/Yeer/001/C898EB52",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130118,
             },
             {
@@ -15579,6 +16227,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "さっきこいつが言ってた「ドンパチ」は、爆発するおもちゃを取り扱ってる店だ。先月の売上トップ3は、それぞれ「爆発飛行船」、「ビュンビュン花火」、「ボムこま」だったぜ。",
                 voice: "inv/Yeer/001/C898EB7C",
                 npc: 93103,
+                speakerName: "オリバー",
                 options: [
                     {
                         id: 801301181,
@@ -15597,6 +16246,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "まあ、そう焦るなって。もっとすごいのがあるんだぜ。",
                 voice: "inv/Yeer/001/C898EBA6",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130121,
             },
             {
@@ -15604,6 +16254,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "あ？……お前なぁ、こんなのまだ序の口だっての。とっておきの商品があるんだ。ほれ、これだ。",
                 voice: "inv/Yeer/001/C898EBD0",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130121,
             },
             {
@@ -15612,6 +16263,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "一見、ただの目覚まし時計に見えるだろ？だが、その威力は半端ねぇんだ。お前が気に食わねぇものを一発で吹き飛ばす、その名も――「流星アラシ」だ。",
                 voice: "inv/Yeer/001/C898EBFA",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130122,
             },
             {
@@ -15619,6 +16271,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "あんたのことはレッドバリー城にいた時から聞いてるぜ。最近大活躍してるっていう月狩り人の新入りだろ。",
                 voice: "inv/Yeer/001/C898EC24",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130123,
             },
             {
@@ -15642,6 +16295,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "はぁ、何度言えばわかる！こんなもんを買いに来る時点で、客が見たいのは爆発する瞬間だけだ。外面なんざ、気にするやつはいねぇよ！",
                 voice: "inv/Yeer/001/C898ECA2",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130126,
             },
             {
@@ -15657,6 +16311,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "そ、それは……描くからには完璧に仕上げないとだろ！見た目が悪いと売上に影響するからな！",
                 voice: "inv/Yeer/001/C898ECF6",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130128,
             },
             {
@@ -15664,6 +16319,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "ゴホン、とにかく、話は以上だ。俺らの商品を買いたい時には手紙をくれ。",
                 voice: "inv/Yeer/001/C898ED20",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130129,
             },
             {
@@ -15671,6 +16327,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "あ、手紙には「キュートちゃん」って書いとけよ。帝国軍にバレると厄介だからな。",
                 voice: "inv/Yeer/001/C898ED4A",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130130,
             },
             {
@@ -16028,6 +16685,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "はっ、あの間抜けと一緒にすんな。",
                 voice: "inv/Yeer/003/C89909D6",
                 npc: 93103,
+                speakerName: "イェール（？）",
                 next: 80130305,
             },
             {
@@ -16035,6 +16693,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "違うに決まってるだろ。もう爆弾ごっこにはうんざりだ。",
                 voice: "inv/Yeer/003/C8990A00",
                 npc: 93103,
+                speakerName: "イェール（？）",
                 next: 80130305,
             },
             {
@@ -16042,6 +16701,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "俺はオリバー・グスカだ。爆弾に閉じ込められてる哀れなガキじゃねぇ。",
                 voice: "inv/Yeer/003/C8990A2A",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130306,
             },
             {
@@ -16050,6 +16710,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "……知らないのか？まあいい、覚えとけ。いつかディズマニアに行くことがあったらな、北門から15キロ先にある廃墟を見てみな。あれを吹き飛ばしたの、俺だから。",
                 voice: "inv/Yeer/003/C8990A54",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130307,
             },
             {
@@ -16058,6 +16719,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "で、俺がここに来た理由だけど……それはお前の出方次第だ。イェールが前にここで、何を話していったのか――教えてもらおうか？",
                 voice: "inv/Yeer/003/C8990A7E",
                 npc: 93103,
+                speakerName: "オリバー",
                 options: [
                     {
                         id: 801303071,
@@ -16076,6 +16738,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "へえ、案外口が硬いタイプか。気に入った……お前も「強引な手口の方が効かない」やつだな。",
                 voice: "inv/Yeer/003/C8990AA8",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130310,
             },
             {
@@ -16083,6 +16746,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……そういうストレートなやつは嫌いじゃない。いいだろう、教えてやるよ。",
                 voice: "inv/Yeer/003/C8990AD2",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130310,
             },
             {
@@ -16090,6 +16754,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "じゃあ話してやる。最初から、全部な。",
                 voice: "inv/Yeer/003/C8990AFC",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130311,
             },
             {
@@ -16097,6 +16762,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "さっきも言ったが、この身体は元々俺のもんだった。オリバー・グスカ――爆弾の天才のな。",
                 voice: "inv/Yeer/003/C8990B26",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130312,
             },
             {
@@ -16105,6 +16771,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "あの頃の俺はな……まだガキだったが、自分の作ったオモチャで世界ひっくり返せるって本気で思ってた。ヒュペリアを丸ごと、吹き飛ばしてやるってな。捕まった後のことなんて想像もしなかった。ってか、そもそも捕まるなんて考えてなかった。",
                 voice: "inv/Yeer/003/C8990B50",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130313,
             },
             {
@@ -16112,6 +16779,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "で、いざ軍に捕まった時……何が起きるのかすら、サッパリだった。",
                 voice: "inv/Yeer/003/C8990B7A",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130314,
             },
             {
@@ -16120,6 +16788,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "俺は「サーベル錬金院」って研究所に連行された。そこで待ってたのは、ジョーンズって名の、妙に優しげな顔したジジイだった。",
                 voice: "inv/Yeer/003/C8990BA4",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130315,
             },
             {
@@ -16128,6 +16797,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "そいつはずっとニコニコしててな、「犯罪は心の病気ですからね、治療すればよくなりますよ」とか……そんなクソみたいな寝言を延々聞かされた。",
                 voice: "inv/Yeer/003/C8990BCE",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130316,
             },
             {
@@ -16136,6 +16806,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "メシはちゃんと出た。けど、薬と検査は毎日続いた。薬は苦くなかったが、飲むたびに……頭が回らなくなっていくのを感じたよ。",
                 voice: "inv/Yeer/003/C8990BF8",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130317,
             },
             {
@@ -16143,6 +16814,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "最初はさ、あのジジイの顔見るたびに罵ってやったよ。けど、ある日気づいた。罵り方を思い出せなくなってたんだ。",
                 voice: "inv/Yeer/003/C8990C22",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130318,
             },
             {
@@ -16151,6 +16823,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "誰かが言ってた言葉を思い出したよ――「暴言すら吐けない奴は、言語能力を失ってるのと同じだ」ってな。ああ……今ならよくわかる。",
                 voice: "inv/Yeer/003/C8990C4C",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130319,
             },
             {
@@ -16159,6 +16832,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "だが、地獄はそこからだった。歩き方が分からなくなったんだ。そして、手が動かせなくなった。最後には……息の仕方まで、わかんなくなった。",
                 voice: "inv/Yeer/003/C8990C76",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130320,
             },
             {
@@ -16167,6 +16841,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "頭のどっかで、「薬がおかしい」ってわかってたよ。でも飲んでる時は……その思考すら浮かばねぇんだ。記憶が、じわじわ溶けてくだけでな。いっそ爆弾で吹き飛ばされた方がマシだった。",
                 voice: "inv/Yeer/003/C8990CA0",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130321,
             },
             {
@@ -16174,6 +16849,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "気づいたら俺は、鏡の中の自分を見てるような気分になってた。見えるのは俺の身体……でも、誰だよこれって感じでさ。 ",
                 voice: "inv/Yeer/003/C8990CCA",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130322,
             },
             {
@@ -16181,6 +16857,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "そしてある日、あのジジイが言ったんだ――「君の名前はイェールだ」って。",
                 voice: "inv/Yeer/003/C8990CF4",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130323,
             },
             {
@@ -16188,6 +16865,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……なるほど、イェールね。じゃあ、俺は一体誰なんだ？",
                 voice: "inv/Yeer/003/C8990D1E",
                 npc: 93103,
+                speakerName: "オリバー",
                 options: [
                     {
                         id: 801303231,
@@ -16206,6 +16884,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……まあ、それも無理ないさ。俺だって、自分の身に何が起きたのか理解するまで、だいぶ時間かかったからな。",
                 voice: "inv/Yeer/003/C8990D48",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130326,
             },
             {
@@ -16214,6 +16893,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "――ああ、あいつは、俺の中に「新しい人格」を作ったんだ。そう、オリバーって「犯罪者」を完全に消し去るための、まっさらな代替品をな。",
                 voice: "inv/Yeer/003/C8990D72",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130326,
             },
             {
@@ -16222,6 +16902,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "……でもな、イェールが現れたこと自体は、俺にとっちゃ悪い話じゃなかったんだ。だってこれまでの俺はさ――この身体に完全に閉じ込められてて、どれだけ「動け」って念じても、指一本ピクリとも動かせなかったんだよ。",
                 voice: "inv/Yeer/003/C8990D9C",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130327,
             },
             {
@@ -16230,6 +16911,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "けどな、不思議なことに――俺の「考え」は、イェールにだけは伝わるんだよ。「お前なんか偽物だ」って強く念じるだけで、あいつはビクッて怯えて、キョロキョロしながら首すくめて……まるで驚いたウズラみたいにな。",
                 voice: "inv/Yeer/003/C8990DC6",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130328,
             },
             {
@@ -16237,6 +16919,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "あの頃の俺がどれほど奴を憎んだか、わかるだろ？知る限りの汚い言葉を、毎日毎日ぶつけてやったよ。",
                 voice: "inv/Yeer/003/C8990DF0",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130329,
             },
             {
@@ -16244,6 +16927,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "あいつにとっての俺は、きっと頭の中に突然湧いてきた妙な声って感じだったんだろうな。",
                 voice: "inv/Yeer/003/C8990E1A",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130330,
             },
             {
@@ -16252,6 +16936,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "あいつも、俺を頭の中から追い出そうとしたことがある。だが、俺が負けるわけないだろ？もともとこの身体の持ち主は俺だったんだから。",
                 voice: "inv/Yeer/003/C8990E44",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130331,
             },
             {
@@ -16260,6 +16945,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "だが、腹立たしいことに、ジョーンズは奴の異変に気付いてしまった。あのくそジジイはイェールに「オリバーを知ってるか」って聞きやがったんだ。",
                 voice: "inv/Yeer/003/C8990E6E",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130332,
             },
             {
@@ -16268,6 +16954,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "イェールは「知らない」と答えた。だが、ジョーンズはずっと、ずーっとイェールから目を離さなかった。まるで……俺のことまで見透かしてるみたいな気分だったよ。",
                 voice: "inv/Yeer/003/C8990E98",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130333,
             },
             {
@@ -16276,6 +16963,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "\n ――それから間もなくして、ジョーンズはイェールに一台の蓄音機を持ってきた。その蓄音機が音楽を流す瞬間、俺の意識はプツンと消える。まるで闇の中の蝋燭が、誰かに吹き消されたみたいにな。",
                 voice: "inv/Yeer/003/C8990EC2",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130334,
             },
             {
@@ -16284,6 +16972,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "\n わかってたよ。あの蓄音機と音楽はジョーンズが俺を消すために用意した新しい「薬」だ。やつは、俺の意識を完全に「イェール」にしようとしていたんだ。",
                 voice: "inv/Yeer/003/C8990EEC",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130335,
             },
             {
@@ -16292,6 +16981,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "\n こんなふうに意識の浮き沈みを繰り返してるうちに、いずれはすべての記憶を失ってしまうんじゃないか――ずっとそう思ってた。でもある日突然、目を覚ました俺にイェールがこう言ったんだ。「もう、あの音楽は聞きたくない」って。",
                 voice: "inv/Yeer/003/C8990F16",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130336,
             },
             {
@@ -16300,6 +16990,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "\n ……その時、ふと気づいたんだ。ずっと「偽物」呼ばわりしてたこいつは、確かに俺とは違う、別の存在なんだって。それから俺たちは一緒に計画を立てた。ジョーンズの目を欺いて、うまく逃げ出す作戦をな。",
                 voice: "inv/Yeer/003/C8990F40",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130337,
             },
             {
@@ -16308,6 +16999,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "こうして、最終的に辿り着いたのがレッドバリー城だ。俺たちは小さなおもちゃ屋を開いた。店の名前は……「ドンパチ」。イェールが付けた、なんともセンスがわりぃ名だろ。あの日から、研究所のことは――ふたりとも、一度も口にしてない。",
                 voice: "inv/Yeer/003/C8990F6A",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130338,
             },
             {
@@ -16316,6 +17008,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "それからずっと何事もなく過ごしてきたけど……数日前、あの懐かしい感覚がまた俺を襲った。意識がふっと途切れて、ああ、こいつまた薬を飲んだなってすぐにわかった。だが、あいつがどこに行ったのかはまるで見当もつかなかった。いろいろ聞き回って、やっと分かったんだ――あいつはアイスレイク城に来たんだってな。",
                 voice: "inv/Yeer/003/C8990F94",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130339,
             },
             {
@@ -16324,6 +17017,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "俺はあいつを一番理解しているつもりだ。臆病で、人見知りで……でも、それ以上に優しいやつ。だからさ……俺に隠しごとなんて、するはずがないって思ってたんだよ。",
                 voice: "inv/Yeer/003/C8990FBE",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130340,
             },
             {
@@ -16332,6 +17026,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "そこで、俺もあいつが飲んだのと同じ、もう一つの人格を眠らせる薬を飲んだ。何があったのか、あいつがここで何を話したのか――それを確かめるためにな。",
                 voice: "inv/Yeer/003/C8990FE8",
                 npc: 93103,
+                speakerName: "オリバー",
                 options: [
                     {
                         id: 801303401,
@@ -16352,6 +17047,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "――つまり、あいつが薬を飲んだのは、この身体を……俺に返すって、覚悟を決めたから、だったのか？",
                 voice: "inv/Yeer/003/C899103C",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130343,
             },
             {
@@ -16359,6 +17055,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "あ、あんの……バカ野郎が！！",
                 voice: "inv/Yeer/003/C8991066",
                 npc: 93103,
+                speakerName: "オリバー",
                 options: [
                     {
                         id: 801303431,
@@ -16377,6 +17074,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……冷やかすな。俺はここであいつの目覚めるのを待つ。そんで、ちゃんと話すんだ。過去のことを、全部な。",
                 voice: "inv/Yeer/003/C8991090",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130346,
             },
             {
@@ -16384,6 +17082,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……さぁな。だが、ここであいつが目覚めるのを待つつもりだ。そして――ちゃんと話すよ。過去のことをすべてな。",
                 voice: "inv/Yeer/003/C89910BA",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130346,
             },
             {
@@ -16392,6 +17091,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "……ああ、それと――ありがとうな。こんな昔話に付き合ってくれて。あとでイェールが目を覚ましたら……きっと、また一悶着あるだろうし、そのときは、そばであいつを少しなだめてやってくれ。頼んだぜ。",
                 voice: "inv/Yeer/003/C89910E4",
                 npc: 93103,
+                speakerName: "オリバー",
                 next: 80130347,
             },
             {
@@ -16457,6 +17157,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "バカが……今さらとぼけても無駄だ。過去のことは全部、こいつに話したぜ。",
                 voice: "inv/Yeer/004/C8991ABC",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130407,
             },
             {
@@ -16471,6 +17172,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "ああ、ずっとな。",
                 voice: "inv/Yeer/004/C8991B10",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130409,
             },
             {
@@ -16485,6 +17187,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……",
                 voice: "inv/Yeer/004/C8991B64",
                 npc: 790024,
+                speakerName: "オリバー",
                 options: [
                     {
                         id: 801304101,
@@ -16510,6 +17213,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "俺はないぜ。だが、イェールの方はどうなんだ？",
                 voice: "inv/Yeer/004/C8991C0C",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130415,
             },
             {
@@ -16517,6 +17221,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "何言ってんだ！？",
                 voice: "inv/Yeer/004/C8991BB8",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130413,
             },
             {
@@ -16531,6 +17236,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "誰かさんの謝罪を待ってるんだよ。",
                 voice: "inv/Yeer/004/C8991BE2",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130415,
             },
             {
@@ -16606,6 +17312,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "わかったから、もう何も言うな。",
                 voice: "inv/Yeer/004/C8991DDA",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130426,
             },
             {
@@ -16614,6 +17321,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "俺の顔でそんな甘っちょろいこと言うんじゃねぇよ。気持ち悪いだろーが！ここまでくると、ジョーンズの研究に感服してきたぜ。",
                 voice: "inv/Yeer/004/C8991E04",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130427,
             },
             {
@@ -16622,6 +17330,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "まあ、その気持ちは分かるぜ。俺も誰かに借りを作りたくないからな。お前がジョーンズにあのうるさい蓄音機を押し返した時から、この命を半分お前にくれてやると決めたんだ。",
                 voice: "inv/Yeer/004/C8991E2E",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130428,
             },
             {
@@ -16629,6 +17338,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "あの部屋から逃げ出せた時点で、お互いチャラだったよ。",
                 voice: "inv/Yeer/004/C8991E58",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130429,
             },
             {
@@ -16637,6 +17347,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "だが、今回の件でまた俺に借りができちまったな。お前がいない間、「ドンパチ」でギャーギャー騒ぐガキをなだめるのにどれほど苦労したか、知ってるか？",
                 voice: "inv/Yeer/004/C8991E82",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130430,
             },
             {
@@ -16644,6 +17355,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "あいつら、お前がいいって泣きわめくんだ。この俺が、お前みたいに猫撫で声でガキに話すとこ、想像がつくか？",
                 voice: "inv/Yeer/004/C8991EAC",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130431,
             },
             {
@@ -16651,6 +17363,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "その上、アイスレイク城まで駆けつけて、{nickname}に経緯を理解させるために、昔のつらい思い出を全部掘り返したんだ。",
                 voice: "inv/Yeer/004/C8991ED6",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130432,
             },
             {
@@ -16658,6 +17371,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "身体の所有権程度で返せる借りじゃねぇって、分かるよな？",
                 voice: "inv/Yeer/004/C8991F00",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130433,
             },
             {
@@ -16665,6 +17379,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "それに何よりも、一度でも俺の意見を聞いたか？",
                 voice: "inv/Yeer/004/C8991F2A",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130434,
             },
             {
@@ -16673,6 +17388,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     '<Default note="text:お前">イェール</>は<Default note="text:俺">オリバー</>にとっての恩人であり、借りがある存在であり、そして――「ドンパチ」のもう一人の店主だ。',
                 voice: "inv/Yeer/004/C8991F54",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130435,
             },
             {
@@ -16680,6 +17396,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "だから、もう謝るな。申し訳ないって思うんなら、一緒に店を手伝え。償いの機会など、いやって言うほどくれてやるから。",
                 voice: "inv/Yeer/004/C8991F7E",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130436,
             },
             {
@@ -16708,6 +17425,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "へぇ、いいじゃん。今度一緒に行こうぜ。だが、見終わった後でまた身体を返すなんて、なしだからな。",
                 voice: "inv/Yeer/004/C8992026",
                 npc: 790024,
+                speakerName: "オリバー",
                 next: 80130440,
             },
             {
@@ -19741,6 +20459,170 @@ export const partyTopicData_jp: PartyTopic[] = [
                 next: 80120290,
             },
             {
+                id: 80120210,
+                content:
+                    "……ふぇ？……楽譜？でも、貴重な楽譜は然るべき場所に保管したって……置いてっちゃったのかな？それとも、これもボツ作品とか？",
+                voice: "inv/Maer/002/C89291F4",
+                npc: 790019,
+                next: 80120211,
+            },
+            {
+                id: 80120211,
+                content: "どれどれ……『悪魔の解放曲』……？こんなタイトル聞いたことないや……",
+                voice: "inv/Maer/002/C892921E",
+                npc: 790019,
+                options: [
+                    {
+                        id: 801202111,
+                        content: "このページにメモが挟んであるみたい。なんて書いてあるの？",
+                        next: 80120212,
+                    },
+                ],
+            },
+            {
+                id: 80120212,
+                content:
+                    "「未来のコルサックへ。あなたは今幸せですか？それとも不幸せですか？あなたに伝えたいことがあります。今の私は、とても大胆な挑戦をするつもりです」",
+                voice: "inv/Maer/002/C8929248",
+                npc: 790019,
+                next: 80120213,
+            },
+            {
+                id: 80120213,
+                content: "「それは、この国で虐げられている種族――カロン族を曲の題材にすること。どうです？良きアイデアだと思いませんか？」",
+                voice: "inv/Maer/002/C8929272",
+                npc: 790019,
+                next: 80120214,
+            },
+            {
+                id: 80120214,
+                content:
+                    "「この作品の発表が、私に何をもたらすのかはわかりません。もしこれを機に、カロン族への同情心を誘うことができれば、それ以上に喜ばしいことはないでしょう。まあ、先代たちに芸術を汚したと批難される可能性の方が高そうですが――」",
+                voice: "inv/Maer/002/C892929C",
+                npc: 790019,
+                next: 80120215,
+            },
+            {
+                id: 80120215,
+                content:
+                    "「いつか、この衝動に駆られた行いを後悔する日が来るかもしれません。ですが、少なくとも今の私は、これが正しい行為だと確信しています」",
+                voice: "inv/Maer/002/C89292C6",
+                npc: 790019,
+                next: 80120216,
+            },
+            {
+                id: 80120216,
+                content:
+                    "「それから、曲の写しをここに残します。非難の目を向けられたあなたや、頭の固い古株たちに、私の想いを踏みにじられないために」",
+                voice: "inv/Maer/002/C89292F0",
+                npc: 790019,
+                next: 80120217,
+            },
+            {
+                id: 80120217,
+                content:
+                    "「願わくば、再びこの手紙を読んでいる時、窓の外からカロンたちがこの歌を歌っている声が聞こえますように。そして、今の私と同じように、あなたもすべてに笑顔で立ち向かえるようになっていますように」",
+                voice: "inv/Maer/002/C892931A",
+                npc: 790019,
+                next: 80120218,
+            },
+            {
+                id: 80120218,
+                content: "…………",
+                voice: "inv/Maer/002/C8929344",
+                npc: 790019,
+                options: [
+                    {
+                        id: 801202181,
+                        content: "{性别:結局は時間が彼を変えてしまったのね。|結局は時間が彼を変えてしまったようだね。}",
+                        next: 80120219,
+                    },
+                    {
+                        id: 801202182,
+                        content: "彼がこの楽譜を残したのはワザとだったのかも。彼の想いは変わっていないんじゃないかな……",
+                        next: 80120220,
+                    },
+                ],
+            },
+            {
+                id: 80120219,
+                content: "はぁ、大昔のコルサックさん、ウルトラいいヤツじゃん",
+                voice: "inv/Maer/002/C892936E",
+                npc: 790019,
+                next: 80120222,
+            },
+            {
+                id: 80120220,
+                content: "確かに……大量の楽譜をゴミ扱いしていながら、重要な宝物は「然るべき場所に保管してある」って言ってたし……",
+                voice: "inv/Maer/002/C8929398",
+                npc: 790019,
+                next: 80120221,
+            },
+            {
+                id: 80120222,
+                content: "とってもいい歌詞……まっ、実際に歌ってみないとわかんないけど。",
+                voice: "inv/Maer/002/C89293EC",
+                npc: 790019,
+                next: 80120223,
+            },
+            {
+                id: 80120221,
+                content:
+                    "もしかして、これが……「然るべき場所」って、カロン族に渡すことだったんだよ。だってこれは、カロンのために書いた曲だから。",
+                voice: "inv/Maer/002/C89293C2",
+                npc: 790019,
+                next: 80120222,
+            },
+            {
+                id: 80120223,
+                content: "よぉーし――決めた！",
+                voice: "inv/Maer/002/C8929416",
+                npc: 790019,
+                next: 80120224,
+            },
+            {
+                id: 80120224,
+                content: "忘れただけなのか、ワザと置いていったのかはミステリーのまんまだけど、任せられたからには、ちゃんと対処しなきゃね！",
+                voice: "inv/Maer/002/C8929440",
+                npc: 790019,
+                next: 80120225,
+            },
+            {
+                id: 80120225,
+                content: "さあ、{nickname}！カミラお姉様のとこまでレッツゴー！あの人なら楽譜にも詳しいはずだし、歌い方を教えてくれるはず！",
+                voice: "inv/Maer/002/C892946A",
+                npc: 790019,
+                next: 80120226,
+            },
+            {
+                id: 80120226,
+                content: "曲を覚えたら、アイスレイク城のカロンに広めるんだ！すっごい音楽家が私たちカロンのために書いてくれた曲だってね！",
+                voice: "inv/Maer/002/C8929494",
+                npc: 790019,
+                next: 80120227,
+            },
+            {
+                id: 80120227,
+                content: "そうすれば、他の楽譜みたいに、ストーブに投げ込まれたりしないよね！",
+                voice: "inv/Maer/002/C89294BE",
+                npc: 790019,
+                next: 80120228,
+            },
+            {
+                id: 80120228,
+                content:
+                    "いつか帝都まで広まって、彼にカロン族がこの歌を歌う姿を見せられたら――いや、見えなくてもいい！私は私のやるべきことをするだけよ――",
+                voice: "inv/Maer/002/C89294E8",
+                npc: 790019,
+                next: 80120229,
+            },
+            {
+                id: 80120229,
+                content: "不当にゴミ扱いされてる品々を、宝にすんのが私の責務ってもんよ――！",
+                voice: "inv/Maer/002/C8929512",
+                npc: 790019,
+            },
+            {
                 id: 80120230,
                 content: "後にカミラに聞いてみてると、この『悪魔の解放曲』は確かに素晴らしい曲だが、非常に難易度が高い曲だと告げられた。",
                 voice: "inv/Maer/002/C892953C",
@@ -21766,6 +22648,11 @@ export const partyTopicData_jp: PartyTopic[] = [
                 next: 80230102,
             },
             {
+                id: 80230102,
+                voice: "inv/Zhiliu/001/C8D8FF1C",
+                next: 80230103,
+            },
+            {
                 id: 80230103,
                 content:
                     '私は、現任の<Default note="text:りょうえんのしょうけい">龍淵の上卿</>にして、<Default note="text:てんれいし">天礼司</>を補佐する身——本日は<Default note="text:たいこう">太皓</>の<Default note="text:ぎょし">御旨</>を預かり、そなたらの器量、叡智、そして覚悟を見定めに参じた。',
@@ -21896,6 +22783,11 @@ export const partyTopicData_jp: PartyTopic[] = [
                 voice: "inv/Zhiliu/001/C8D901E6",
                 npc: 240071,
                 next: 80230120,
+            },
+            {
+                id: 80230120,
+                voice: "inv/Zhiliu/001/C8D90210",
+                next: 80230121,
             },
             {
                 id: 80230121,
@@ -22060,6 +22952,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: '<Default note="text:たいふうきゅうしょう">大風九章</>の裁きに、間違いがあるんです……お願い、話を聞いてください！',
                 voice: "inv/Zhiliu/002/C8D90F5A",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230202,
             },
             {
@@ -22067,6 +22960,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "ほんの少しだけでいいんです……どうか！",
                 voice: "inv/Zhiliu/002/C8D90F84",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230203,
             },
             {
@@ -22074,7 +22968,13 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "聞いてください！",
                 voice: "inv/Zhiliu/002/C8D90FAE",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230204,
+            },
+            {
+                id: 80230204,
+                voice: "inv/Zhiliu/002/C8D90FD8",
+                next: 80230205,
             },
             {
                 id: 80230205,
@@ -22088,6 +22988,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……っ！",
                 voice: "inv/Zhiliu/002/C8D9102C",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230207,
             },
             {
@@ -22096,6 +22997,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     '私、重い病を患っていたんです。もう治らないって言われて……でも、<Default note="text:たくせいかく">澤生閣</>のある女医さんが救ってくれました。お金も取らずに、命を……助けてくれたんです。',
                 voice: "inv/Zhiliu/002/C8D91056",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230208,
             },
             {
@@ -22104,6 +23006,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     'でも、その人は「薬害の罪」って──<Default note="text:ビーアン">狴犴</>に裁かれて、処刑されました……！お願いです……せめて……せめて、名誉だけでも返してあげてください！あの人は、ただ人を救いたいって、それだけだったんです……！',
                 voice: "inv/Zhiliu/002/C8D91080",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230209,
             },
             {
@@ -22112,6 +23015,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "私の病は気難しくて、他の医者はみんな「手に負えない」と匙を投げたんです。でも彼女だけが、「毒をもって毒を制す」って、危険を承知で治療法を示してくれて……",
                 voice: "inv/Zhiliu/002/C8D910AA",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230210,
             },
             {
@@ -22120,6 +23024,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "飲んだ薬で、痙攣や呼吸の一時停止が起こるかもしれない、そう言われていました。私は納得して、命を預けたんです。……なのに、助けてくれた人が死ぬなんて……そんなのおかしいです！",
                 voice: "inv/Zhiliu/002/C8D910D4",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230211,
             },
             {
@@ -22135,6 +23040,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "そうです！私はこうしてちゃんと生きています！これはまぎれもない事実です！",
                 voice: "inv/Zhiliu/002/C8D91128",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230213,
             },
             {
@@ -22142,6 +23048,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "私はこうして生きているのに──救ってくれた人は、もうどこにもいない。どうしても、納得できないんです。",
                 voice: "inv/Zhiliu/002/C8D91152",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230214,
             },
             {
@@ -22156,6 +23063,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……ありがとう、ございます……！ほんとうに……！",
                 voice: "inv/Zhiliu/002/C8D911A6",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230216,
             },
             {
@@ -22164,6 +23072,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "……無理を言ってるのは、わかってるんです。たぶん、あなたにもどうにもできないってことも。何日もここに立ってましたが……話を聞いてくれたの、あなただけでした。",
                 voice: "inv/Zhiliu/002/C8D911D0",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230217,
             },
             {
@@ -22171,6 +23080,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "それでも……救われた気になれました。ありがとうございます……",
                 voice: "inv/Zhiliu/002/C8D911FA",
                 npc: 790077,
+                speakerName: "無実を訴える少女",
                 next: 80230218,
             },
             {
@@ -22179,6 +23089,11 @@ export const partyTopicData_jp: PartyTopic[] = [
                 voice: "inv/Zhiliu/002/C8D91224",
                 npc: 790076,
                 next: 80230219,
+            },
+            {
+                id: 80230219,
+                voice: "inv/Zhiliu/002/C8D9124E",
+                next: 80230220,
             },
             {
                 id: 80230220,
@@ -22277,6 +23192,11 @@ export const partyTopicData_jp: PartyTopic[] = [
                 next: 80230233,
             },
             {
+                id: 80230233,
+                voice: "inv/Zhiliu/002/C8D9149A",
+                next: 80230234,
+            },
+            {
                 id: 80230234,
                 content: "……あなた、来てくれたんですね……！",
                 voice: "inv/Zhiliu/002/C8D914C4",
@@ -22366,6 +23286,11 @@ export const partyTopicData_jp: PartyTopic[] = [
                 next: 80230246,
             },
             {
+                id: 80230246,
+                voice: "inv/Zhiliu/002/C8D916BC",
+                next: 80230247,
+            },
+            {
                 id: 80230247,
                 content: "こんな容易くあの娘を引き下がらせるとは！何か秘訣でも？ぜひ私たちにもご教授を！",
                 voice: "inv/Zhiliu/002/C8D916E6",
@@ -22387,11 +23312,17 @@ export const partyTopicData_jp: PartyTopic[] = [
                 next: 80230250,
             },
             {
+                id: 80230250,
+                voice: "inv/Zhiliu/002/C8D91764",
+                next: 80230251,
+            },
+            {
                 id: 80230251,
                 content:
                     '……知ってるか？あのシリュウって女、<Default note="text:たいふうきゅうしょう">大風九章</>の誤審で裁かれたことがあるらしいぞ。',
                 voice: "inv/Zhiliu/002/C8D9178E",
                 npc: 790080,
+                speakerName: "群衆のひそひそ話",
                 next: 80230252,
             },
             {
@@ -22400,6 +23331,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     'なんでも、<Default note="text:しつりつかく">執律閣</>の下で叫んでたんだって。この辺の住人の酒のつまみになったくらいだ。',
                 voice: "inv/Zhiliu/002/C8D917B8",
                 npc: 790080,
+                speakerName: "群衆のひそひそ話",
                 next: 80230253,
             },
             {
@@ -22407,6 +23339,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "それが今日じゃ、自分と同じ境遇の子を、なんの迷いもなく黙らせたんだ。……やっぱり、出世できる奴は違うね。",
                 voice: "inv/Zhiliu/002/C8D917E2",
                 npc: 790080,
+                speakerName: "群衆のひそひそ話",
                 next: 80230254,
             },
             {
@@ -22415,6 +23348,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     'はぁ……きっと、次の<Default note="text:りょうえんのしょうけい">龍淵の上卿</>は彼女なんだろうな。真似できないよ──あそこまで心を切り捨てられなきゃ、無理だ。',
                 voice: "inv/Zhiliu/002/C8D9180C",
                 npc: 790080,
+                speakerName: "群衆のひそひそ話",
                 next: 80230255,
             },
             {
@@ -22519,9 +23453,15 @@ export const partyTopicData_jp: PartyTopic[] = [
                 next: 80230313,
             },
             {
+                id: 80230313,
+                voice: "inv/Zhiliu/003/C8D921BA",
+                next: 80230314,
+            },
+            {
                 id: 80230314,
                 content: "うっ……ひっく……どうして……どうしてなの……",
                 voice: "inv/Zhiliu/003/C8D921E4",
+                speakerName: "幼い頃のシリュウ",
                 next: 80230315,
             },
             {
@@ -22535,12 +23475,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80230316,
                 content: "忘れたの……？<H>私たち</>が越えた幾晩もの眠れぬ夜を……",
                 voice: "inv/Zhiliu/003/C8D92238",
+                speakerName: "幼い頃のシリュウ",
                 next: 80230317,
             },
             {
                 id: 80230317,
                 content: "忘れたの……？洞穴の奥で、お腹を空かせ、体の隅々まで空腹を嘆いた、あの感覚を……",
                 voice: "inv/Zhiliu/003/C8D92262",
+                speakerName: "幼い頃のシリュウ",
                 next: 80230318,
             },
             {
@@ -22548,30 +23490,35 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "忘れたの……？あの男の、マメだらけの手が<H>私たち</>の首を締めた瞬間を……どれほど足掻いても、何ひとつ変わらなかった……",
                 voice: "inv/Zhiliu/003/C8D9228C",
+                speakerName: "幼い頃のシリュウ",
                 next: 80230319,
             },
             {
                 id: 80230319,
                 content: "空気が薄れ……光ある景色が薄れ……冷たい死が、霧の向こうから手を伸ばしてきた、あの時を……",
                 voice: "inv/Zhiliu/003/C8D922B6",
+                speakerName: "幼い頃のシリュウ",
                 next: 80230320,
             },
             {
                 id: 80230320,
                 content: "それから……その男を吹き飛ばし、あなたに再び空気を与えた……<H>彼</>を……",
                 voice: "inv/Zhiliu/003/C8D922E0",
+                speakerName: "幼い頃のシリュウ",
                 next: 80230321,
             },
             {
                 id: 80230321,
                 content: "あの人は、何も求めず、あなたを助けた。なのに残ったのは、死と、忘却だけ……",
                 voice: "inv/Zhiliu/003/C8D9230A",
+                speakerName: "幼い頃のシリュウ",
                 next: 80230322,
             },
             {
                 id: 80230322,
                 content: "あなたまで……彼を裏切るの？私たちの誓いを捨てて、<H>あちら</>へ行くの？",
                 voice: "inv/Zhiliu/003/C8D92334",
+                speakerName: "幼い頃のシリュウ",
                 next: 80230323,
             },
             {
@@ -22585,6 +23532,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80230324,
                 content: "（そうだ……そうだ……覚えている必要などない。忘却こそが、何より楽にしてくれる。）",
                 voice: "inv/Zhiliu/003/C8D92388",
+                speakerName: "心の悪魔",
                 next: 80230325,
             },
             {
@@ -22592,12 +23540,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "（お前は、万民の上にに立つシリュウ様となる。この程度の過去が、未来を揺らすはずもない。得られる地位に比べれば、羽よりも軽い。）",
                 voice: "inv/Zhiliu/003/C8D923B2",
+                speakerName: "心の悪魔",
                 next: 80230326,
             },
             {
                 id: 80230326,
                 content: "（そもそもこの記憶自体が、弱さの証だ。弱き者は、無用な良心に縛られ、膝を折り、塵に伏す。）",
                 voice: "inv/Zhiliu/003/C8D923DC",
+                speakerName: "心の悪魔",
                 next: 80230327,
             },
             {
@@ -22605,31 +23555,46 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "（夢に沈む者が、世を変えることはない。だが、お前は違う。選び、捨てることを知っている。修羅となる覚悟を持つ者が、どれほどいる？）",
                 voice: "inv/Zhiliu/003/C8D92406",
+                speakerName: "心の悪魔",
                 next: 80230328,
             },
             {
                 id: 80230328,
                 content: "（聞くな！！シリュウ、それでは見て見ぬふりをした者たちと、何が違う！）",
                 voice: "inv/Zhiliu/003/C8D92430",
+                speakerName: "心の悪魔",
                 next: 80230329,
             },
             {
                 id: 80230329,
                 content: "（考え直せ！これでは、あいつらと同じだ！）",
                 voice: "inv/Zhiliu/003/C8D9245A",
+                speakerName: "心の悪魔",
                 next: 80230330,
             },
             {
                 id: 80230330,
                 content: "（この一歩を踏み出した先に、もはや昨日までのお前はいない！）",
                 voice: "inv/Zhiliu/003/C8D92484",
+                speakerName: "心の悪魔",
                 next: 80230331,
+            },
+            {
+                id: 80230331,
+                voice: "inv/Zhiliu/003/C8D924AE",
+                next: 80230332,
             },
             {
                 id: 80230332,
                 content: "たすけて……だれか……ここ、真っ暗で……こわい……ここにいたくない……！",
                 voice: "inv/Zhiliu/003/C8D924D8",
+                speakerName: "幼い頃のシリュウ",
                 next: 80230333,
+            },
+            {
+                id: 80230333,
+                voice: "inv/Zhiliu/003/C8D92502",
+                next: 80230334,
             },
             {
                 id: 80230334,
@@ -22672,6 +23637,11 @@ export const partyTopicData_jp: PartyTopic[] = [
                 voice: "inv/Zhiliu/003/C8D925FE",
                 npc: 790076,
                 next: 80230340,
+            },
+            {
+                id: 80230340,
+                voice: "inv/Zhiliu/003/C8D92628",
+                next: 80230341,
             },
             {
                 id: 80230341,
@@ -22836,6 +23806,11 @@ export const partyTopicData_jp: PartyTopic[] = [
                 next: 80230419,
             },
             {
+                id: 80230419,
+                voice: "inv/Zhiliu/004/C8D9331E",
+                next: 80230420,
+            },
+            {
                 id: 80230420,
                 content:
                     'シリュウ当主、<Default note="text:ももとき">百年春</>の件ですが……少し意見が分かれいます。ご判断を仰ぎたいのですが……',
@@ -22942,6 +23917,11 @@ export const partyTopicData_jp: PartyTopic[] = [
                     '<Default note="text:たいふうきゅうしょう">大風九章</>が終わりを迎える日が、必ず来る。その日までに、私はすべてをあるべき形に戻してみせる。……信じてくれるかしら？',
                 voice: "inv/Zhiliu/004/C8D93594",
                 next: 80230435,
+            },
+            {
+                id: 80230435,
+                voice: "inv/Zhiliu/004/C8D935BE",
+                next: 80230436,
             },
             {
                 id: 80230436,
@@ -23468,24 +24448,28 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220202,
                 content: "これは…一体？あのフウカさんが......妖怪になったのか？！",
                 voice: "inv/Yuming/002/C8D2A6E4",
+                speakerName: "流れ者",
                 next: 80220203,
             },
             {
                 id: 80220203,
                 content: "く、来るな…死にたくないぃ！",
                 voice: "inv/Yuming/002/C8D2A70E",
+                speakerName: "流れ者",
                 next: 80220204,
             },
             {
                 id: 80220204,
                 content: 'これは…<Default note="text:しんくん">神君</>から下される罰なのか......我々は、神の恵みに背いたからか？',
                 voice: "inv/Yuming/002/C8D2A738",
+                speakerName: "流れ者",
                 next: 80220205,
             },
             {
                 id: 80220205,
                 content: "父さん、父さん！ああ......お願い…起きて、何か言ってよ.....",
                 voice: "inv/Yuming/002/C8D2A762",
+                speakerName: "流れ者",
                 next: 80220206,
             },
             {
@@ -23513,6 +24497,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220209,
                 content: "それは吾の仕業ではない。定命の者の心を、あえて詮索するつもりもない。",
                 voice: "inv/Yuming/002/C8D2A80A",
+                speakerName: "太皓（たいこう）",
                 next: 80220210,
             },
             {
@@ -23527,6 +24512,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     '汝の胸には、求める答えがすでに在る。汝――どうやら……<Default note="text:ぼんよう">凡庸</>の徒にあらぬ。ゆえに、汝の疑問に答えよう。',
                 voice: "inv/Yuming/002/C8D2A85E",
+                speakerName: "太皓（たいこう）",
                 next: 80220212,
             },
             {
@@ -23540,6 +24526,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220213,
                 content: "汝の目の前にあるのは、古き悪夢。忘れられしと思うたものが、なお汝を縛る。汝は未だ、そこより解き放たれておらぬ。",
                 voice: "inv/Yuming/002/C8D2A8B2",
+                speakerName: "太皓（たいこう）",
                 next: 80220214,
             },
             {
@@ -23553,6 +24540,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220215,
                 content: "……ここが、彼女の墓であるか。",
                 voice: "inv/Yuming/002/C8D2A906",
+                speakerName: "太皓（たいこう）",
                 next: 80220216,
             },
             {
@@ -23583,6 +24571,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "たとえ流れ者であっても、医者はすべての患者を平等に扱うべきだと祖師・フーフォン様は教えてた。助かる可能性がある以上、彼女を救わないわけにはいかない！",
                 voice: "inv/Yuming/002/C8D2A9AE",
+                speakerName: "薬師",
                 next: 80220220,
             },
             {
@@ -23590,6 +24579,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "しかし、これは穢蝕だ！不治の病だ！ 一度始まったら後戻りはできない！もはや万策尽きた！彼女はまもなく妖怪になる。 今のうち逃げよう！",
                 voice: "inv/Yuming/002/C8D2A9D8",
+                speakerName: "薬師",
                 next: 80220221,
             },
             {
@@ -23597,6 +24587,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     'はぁ、もしあなたたち流れ者が<Default note="text:たいふうきゅうしょう">大風九章</>の祝福から離れなかったら、こんなことにならないのに。',
                 voice: "inv/Yuming/002/C8D2AA02",
+                speakerName: "薬師",
                 next: 80220222,
             },
             {
@@ -23626,6 +24617,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     '流れ者よ。汝は自由を求めて流れ、鎖を<Default note="text:いと">厭</>うてきた。されど、凧は糸なくして天に留まらず。川は<Default note="text:つつみ">堤</>なくして流れを保てぬ。',
                 voice: "inv/Yuming/002/C8D2AAAA",
+                speakerName: "太皓（たいこう）",
                 next: 80220226,
             },
             {
@@ -23633,12 +24625,14 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content:
                     "すべては過ぎ去った。この先がどうなるかは、未だ定まらぬ。\n  たとえ一度道を踏み外そうと、引き返すに遅きことはない。",
                 voice: "inv/Yuming/002/C8D2AAD4",
+                speakerName: "太皓（たいこう）",
                 next: 80220227,
             },
             {
                 id: 80220227,
                 content: "吾が言いたいことは、それだけだ。くれぐれも、よく考えよう。",
                 voice: "inv/Yuming/002/C8D2AAFE",
+                speakerName: "太皓（たいこう）",
                 next: 80220228,
             },
             {
@@ -23651,6 +24645,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220229,
                 content: "こんー......。",
                 voice: "inv/Yuming/002/C8D2AB52",
+                speakerName: "ミカン",
                 next: 80220230,
             },
             {
@@ -23664,6 +24659,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220231,
                 content: "こん……こんこん……。",
                 voice: "inv/Yuming/002/C8D2ABA6",
+                speakerName: "ミカン",
                 next: 80220232,
             },
             {
@@ -23685,6 +24681,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220234,
                 content: "こん......。",
                 voice: "inv/Yuming/002/C8D2AC24",
+                speakerName: "ミカン",
                 next: 80220235,
             },
             {
@@ -23698,6 +24695,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220236,
                 content: "こんこん！",
                 voice: "inv/Yuming/002/C8D2AC78",
+                speakerName: "ミカン",
                 next: 80220237,
             },
             {
@@ -24432,6 +25430,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220436,
                 content: "こん――",
                 voice: "inv/Yuming/004/C8D2CD48",
+                speakerName: "ミカン",
                 next: 80220437,
             },
             {
@@ -24452,6 +25451,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220439,
                 content: "こんこん！",
                 voice: "inv/Yuming/004/C8D2CDC6",
+                speakerName: "ミカン",
                 next: 80220440,
             },
             {
@@ -24465,6 +25465,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220441,
                 content: "こんこん！",
                 voice: "inv/Yuming/004/C8D2CE1A",
+                speakerName: "ミカン",
                 next: 80220442,
             },
             {
@@ -24486,6 +25487,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220444,
                 content: "こん……こんこん……。",
                 voice: "inv/Yuming/004/C8D2CE98",
+                speakerName: "ミカン",
                 next: 80220445,
             },
             {
@@ -24499,6 +25501,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80220446,
                 content: "こんこん！",
                 voice: "inv/Yuming/004/C8D2CEEC",
+                speakerName: "ミカン",
                 next: 80220447,
             },
             {
@@ -27784,6 +28787,166 @@ export const partyTopicData_jp: PartyTopic[] = [
             "19001": 2,
             "19008": 2,
         },
+        dialogues: [
+            {
+                id: 80190102,
+                content: "お前、一人でこんなデカい屋敷に住んでんのかよ？見た目ちゃんとしてるし、バーカウンターまであんのな。",
+                npc: 95102,
+                next: 80190103,
+            },
+            {
+                id: 80190103,
+                content: "いいねぇ、もっと友達呼べって。そうすりゃお前もアイスレイク城で人脈ってやつができるかもだろ？",
+                npc: 95102,
+                next: 80190104,
+            },
+            {
+                id: 80190104,
+                content: "で、何か用？どうせまた頼み事だろ？面倒なやつなら断るぞ、今けっこうデカい仕事抱えてるからな。",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901041,
+                        content: "ただ会いたいだけだよ。",
+                        next: 80190105,
+                    },
+                    {
+                        id: 801901042,
+                        content: "ただ一杯飲みたいだけだよ。",
+                        next: 80190106,
+                    },
+                ],
+            },
+            {
+                id: 80190105,
+                content: "うわっ……鳥肌立ったんだけど。ま、俺だからまだしも、他のやつにもそんなセリフで酒誘ったらドン引きされっぞ？",
+                npc: 95102,
+                next: 80190107,
+            },
+            {
+                id: 80190106,
+                content: "おっ、そんじゃ遠慮なく。お前の腕前、味見させてもらおうか。",
+                npc: 95102,
+                next: 80190107,
+            },
+            {
+                id: 80190107,
+                content: "{空格}",
+                next: 80190108,
+            },
+            {
+                id: 80190108,
+                content:
+                    "ぷはぁ、ん、甘みの中に酸味があるし、そのうえ暖め酒ときた。アスフォデロスで飲んだやつに似てるが、どこかお前らしい味わいを感じるぜ。",
+                npc: 95102,
+                next: 80190109,
+            },
+            {
+                id: 80190109,
+                content:
+                    "これ、けっこう手間かかったろ？正直、期待以上だった。俺なんて熱湯でさえテンションが上がるやつだから、そこまで気合入れんでもよかったのによ。",
+                npc: 95102,
+                next: 80190110,
+            },
+            {
+                id: 80190110,
+                content:
+                    "ま、でもお前がノリノリだったのは分かったわ。あーなるほどな、ちょっと金入ったからパーッと使いたくなったんだろ？ご馳走して、新しいモン買ってさ。最近よくあるじゃん「金で気分を買う」みたいなやつ。",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901101,
+                        content: "アウトサイダーは招待した人の中で一番おしゃべりだね。",
+                        next: 80190111,
+                    },
+                    {
+                        id: 801901102,
+                        content: "せっかくお酒を奢ったのに、何その態度？怒るよ？",
+                        next: 80190112,
+                    },
+                ],
+            },
+            {
+                id: 80190111,
+                content:
+                    "だろ？一杯やるってことは、話したいってことだ。つまり俺が、他のやつらよりお前の気持ち分かってるってわけ。ありがたく思えよ？",
+                npc: 95102,
+                next: 80190113,
+            },
+            {
+                id: 80190112,
+                content: "わーったわーった、俺が悪かった！金出してんのお前様だもんな？一発殴って気が済むなら、好きにやれ。",
+                npc: 95102,
+                next: 80190113,
+            },
+            {
+                id: 80190113,
+                content: "……っと冗談はさておき、先輩からひとつ忠告な。「全員が友達」って思うな。酒おごる相手は選べ。",
+                npc: 95102,
+                next: 80190114,
+            },
+            {
+                id: 80190114,
+                content:
+                    "特にこのアイスレイク城じゃ、ロクでもねえ奴らが、お前の持ちもん狙ってすり寄ってくるからな。最初はいい顔して、やたら持ち上げてくる。",
+                npc: 95102,
+                next: 80190115,
+            },
+            {
+                id: 80190115,
+                content:
+                    "表向きはへつらっていやがるが、いざってときには、なんの役にも立たねぇ。そいつらに比べたら、道端の野良犬のがマシだ。",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901151,
+                        content: "それって……自分のこと？",
+                        next: 80190116,
+                    },
+                ],
+            },
+            {
+                id: 80190116,
+                content: "はいはい、そうでーす。俺こそ最高にいい例ってやつだ。得さえあれば、どこだろうが、鼻利かせて飛んでくっつーの。",
+                npc: 95102,
+                next: 80190117,
+            },
+            {
+                id: 80190117,
+                content:
+                    "他のやつらがそのポジション欲しがったら、まずは自分の格をわきまえろってこったな。俺が腹いっぱいになるまで、他の誰かにうまい思いはさせないぜ？",
+                npc: 95102,
+                options: [
+                    {
+                        id: 801901171,
+                        content: "さようなら。",
+                        next: 80190118,
+                    },
+                    {
+                        id: 801901172,
+                        content: "つまり、厄介者払いをしてくれてたってこと？",
+                        next: 80190119,
+                    },
+                ],
+            },
+            {
+                id: 80190118,
+                content: "えぇ！？ ちょっと待てよ、まだ帰りたくねぇんだけど！",
+                npc: 95102,
+                next: 80190120,
+            },
+            {
+                id: 80190119,
+                content: "ん？……さあ？何の話だか、さっぱり分かんねぇな〜？",
+                npc: 95102,
+                next: 80190120,
+            },
+            {
+                id: 80190120,
+                content: "……酒、うまかった。もう一杯くれ。それ飲んだら、ちゃんと仕事戻るからさ。",
+                npc: 95102,
+            },
+        ],
     },
     {
         id: 510202,
@@ -30346,6 +31509,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "ダフネ……もう無理……足が折れて……動けないの……",
                 voice: "inv/Dafu/003/C8B91718",
                 npc: 110029,
+                speakerName: "負傷した兵士",
                 next: 80180317,
             },
             {
@@ -30353,6 +31517,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "お願い、私のことは放って、他の人を――",
                 voice: "inv/Dafu/003/C8B91742",
                 npc: 110029,
+                speakerName: "負傷した兵士",
                 next: 80180318,
             },
             {
@@ -30380,6 +31545,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……砲声も……穢獣の声も……聞こえなくなった……",
                 voice: "inv/Dafu/003/C8B917EA",
                 npc: 110028,
+                speakerName: "意識が朦朧としている兵士",
                 next: 80180322,
             },
             {
@@ -30387,6 +31553,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "先生、ここは……もう帰って来たのか……？",
                 voice: "inv/Dafu/003/C8B91814",
                 npc: 110028,
+                speakerName: "意識が朦朧としている兵士",
                 next: 80180323,
             },
             {
@@ -30402,6 +31569,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "いや……嘘、なのだろう……もう帰れない……",
                 voice: "inv/Dafu/003/C8B91868",
                 npc: 110028,
+                speakerName: "意識が朦朧としている兵士",
                 next: 80180325,
             },
             {
@@ -30409,6 +31577,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "ディズマニアは遠すぎる……雨は激しいし、道はぬかるんでる……もう帰れない……",
                 voice: "inv/Dafu/003/C8B91892",
                 npc: 110028,
+                speakerName: "意識が朦朧としている兵士",
                 next: 80180326,
             },
             {
@@ -30416,6 +31585,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "先生……頼みがあるんだ……",
                 voice: "inv/Dafu/003/C8B918BC",
                 npc: 110028,
+                speakerName: "意識が朦朧としている兵士",
                 next: 80180327,
             },
             {
@@ -30436,6 +31606,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 id: 80180329,
                 content: "危ない！敵の磁気ドローンだ！！",
                 voice: "inv/Dafu/003/C8B9193A",
+                speakerName: "遠くにいる兵士",
                 next: 80180330,
             },
             {
@@ -30449,6 +31620,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "少しは落ち着いた？",
                 voice: "inv/Dafu/003/C8B9198E",
                 npc: 110025,
+                speakerName: "厳格な兵士",
                 next: 80180332,
             },
             {
@@ -30464,6 +31636,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                     "馬鹿じゃないの！？死にかけの負傷兵に覆い被さるなんて……あいつはもう助からなかったのに！あんたまで死んだら、他の負傷者はどうするの！？",
                 voice: "inv/Dafu/003/C8B919E2",
                 npc: 110025,
+                speakerName: "厳格な兵士",
                 next: 80180334,
             },
             {
@@ -30485,6 +31658,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……何笑ってんのよ。",
                 voice: "inv/Dafu/003/C8B91A60",
                 npc: 110025,
+                speakerName: "厳格な兵士",
                 next: 80180337,
             },
             {
@@ -30528,6 +31702,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……なにそれ。意味わかんない。",
                 voice: "inv/Dafu/003/C8B91B5C",
                 npc: 110025,
+                speakerName: "厳格な兵士",
                 next: 80180343,
             },
             {
@@ -30543,6 +31718,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "……なら、あんたも覚えときなさい。命を粗末にしないで。生者にできることは、死者よりずっと多いのよ。",
                 voice: "inv/Dafu/003/C8B91BB0",
                 npc: 110025,
+                speakerName: "厳格な兵士",
                 next: 80180345,
             },
             {
@@ -30550,6 +31726,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "「仲間の想いを背負って生きることは、命を落とすことと同じくらい尊い」――かつて、アヴァール長官が言ってた言葉よ。",
                 voice: "inv/Dafu/003/C8B91BDA",
                 npc: 110025,
+                speakerName: "厳格な兵士",
                 next: 80180346,
             },
             {
@@ -30578,6 +31755,7 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "どこへ？",
                 voice: "inv/Dafu/003/C8B91C82",
                 npc: 110025,
+                speakerName: "厳格な兵士",
                 next: 80180350,
             },
             {

@@ -49,7 +49,9 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
 <template>
     <div class="flex items-center gap-2 mb-3">
         <div class="ml-auto flex items-center gap-2">
-            <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, buff.value.mx))">全部最大</div>
+            <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, buff.value.mx || 1))">
+                全部最大
+            </div>
             <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, 0))">全部关闭</div>
         </div>
     </div>

@@ -66,6 +66,20 @@ describe("parseAbyssBestTimeVo1", () => {
         })
     })
 
+    it("应该映射三把灾厄武器的特殊图片标识", () => {
+        expect(
+            parseAbyssBestTimeVo1({
+                closeWeaponIcon: "https://herobox-img.yingxiong.com/role/config/weapon/quanhuojiangxi.png",
+                langRangeWeaponIcon: "https://herobox-img.yingxiong.com/role/config/weapon/jicijuexiang.png",
+                phantomWeaponIcon1: "https://herobox-img.yingxiong.com/role/config/weapon/wuzhiwuxiu.png",
+            })
+        ).toMatchObject({
+            meleeId: 10399,
+            rangedId: 20599,
+            supportWeapon1: 10299,
+        })
+    })
+
     it("应该把 Nanzhu 反解成 160101", () => {
         expect(
             parseAbyssBestTimeVo1({

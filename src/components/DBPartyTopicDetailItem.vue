@@ -8,6 +8,7 @@ import { type Dialogue, type DialogueOption } from "@/data/d/quest.data"
 import { questChainMap } from "@/data/d/questchain.data"
 import { resourceMap } from "@/data/d/resource.data"
 import { useSettingStore } from "@/store/setting"
+import { getDialogueDisplayContent } from "@/utils/dialogue"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
 import { getImprType, getRegionType } from "@/utils/quest-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
@@ -327,16 +328,20 @@ function getCharacterName(charId: number): string {
 }
 
 /**
- * 获取说话 NPC 名称。
- * @param npcId NPC ID
- * @returns NPC 名称
+ * 获取说话人名称，优先使用导出器提供的 speakerName，无则回退为 NPC 查表。
+ * @param dialogue 对话数据
+ * @returns 说话人名称
  */
-function getSpeakerName(npcId: number | undefined): string {
-    if (npcId === undefined) {
-        return "旁白"
+function getSpeakerName(dialogue: Dialogue): string {
+    if (dialogue.speakerName) {
+        return dialogue.speakerName
     }
 
-    const rawName = npcMap.get(npcId)?.name || `${npcId}`
+    if (dialogue.npc === undefined) {
+        return ""
+    }
+
+    const rawName = npcMap.get(dialogue.npc)?.name || `${dialogue.npc}`
     return formatStoryText(rawName)
 }
 
@@ -387,7 +392,7 @@ function getDialogueVoiceKey(dialogue: Dialogue): string {
 function getDialogueVoiceUrl(dialogue: Dialogue): string {
     return buildDialogueVoiceUrl({
         voice: dialogue.voice,
-        text: dialogue.content,
+        text: getDialogueDisplayContent(dialogue),
         npcId: dialogue.npc,
         forceGenderNpcIds: nicknameNpcIds,
         language: selectedVoiceLocale.value,
@@ -997,7 +1002,7 @@ onBeforeUnmount(() => {
                 >
                     <div class="flex items-start gap-2">
                         <img
-                            v-if="item.dialogue.npc"
+                            v-if="item.dialogue.npc !== undefined || item.dialogue.speakerName"
                             :src="getSpeakerAvatar(item.dialogue.npc)"
                             :alt="`${item.dialogue.npc}`"
                             class="size-8 rounded object-cover bg-base-100"
@@ -1006,8 +1011,11 @@ onBeforeUnmount(() => {
 
                         <div class="min-w-0 flex-1 text-xs">
                             <div class="mb-1 flex items-center gap-2">
-                                <div class="font-medium text-primary min-w-0 truncate" v-if="item.dialogue.npc">
-                                    {{ $t(getSpeakerName(item.dialogue.npc)) }}
+                                <div
+                                    class="font-medium text-primary min-w-0 truncate"
+                                    v-if="item.dialogue.npc !== undefined || item.dialogue.speakerName"
+                                >
+                                    {{ $t(getSpeakerName(item.dialogue)) }}
                                 </div>
                                 <button
                                     v-if="item.dialogue.voice"
@@ -1025,7 +1033,8 @@ onBeforeUnmount(() => {
                                 </button>
                             </div>
                             <TypewriterText
-                                :text="formatStoryText(item.dialogue.content)"
+                                v-if="getDialogueDisplayContent(item.dialogue)"
+                                :text="formatStoryText(getDialogueDisplayContent(item.dialogue))"
                                 :trigger-key="`${partyTopic.id}-${item.dialogue.id}`"
                             />
                         </div>

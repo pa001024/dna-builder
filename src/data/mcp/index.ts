@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import Fuse from "fuse.js"
 import { z } from "zod"
+import { getDropModeText, getRewardTypeText } from "@/utils/i18n-utils"
 import * as abyssModule from "../d/abyss.data"
 import * as accessoryModule from "../d/accessory.data"
 import * as achievementModule from "../d/achievement.data"
@@ -610,54 +611,6 @@ function collectSearchText(value: unknown, depth = 0, visited: Set<unknown> = ne
 function toNumberArray(value: unknown): number[] {
     if (!Array.isArray(value)) return []
     return value.map(item => (typeof item === "number" ? item : Number(item))).filter(item => Number.isFinite(item))
-}
-
-/**
- * 获取奖励类型的中文文本。
- * @param type 奖励类型
- * @returns 中文类型文本
- */
-function getRewardTypeText(type: string): string {
-    const typeMap: Record<string, string> = {
-        Char: "角色",
-        CharAccessory: "角色饰品",
-        Drop: "掉落物",
-        HeadFrame: "头像框",
-        HeadSculpture: "头像",
-        Hair: "发型",
-        Mod: "魔之楔",
-        Mount: "载具",
-        Draft: "图纸",
-        Pet: "魔灵",
-        Resource: "资源",
-        Reward: "奖励组",
-        Skin: "角色皮肤",
-        Title: "称号",
-        TitleFrame: "称号框",
-        Walnut: "密函",
-        Weapon: "武器",
-        WeaponAccessory: "武器饰品",
-        WeaponSkin: "武器皮肤",
-    }
-    return typeMap[type] || type
-}
-
-/**
- * 获取掉落模式的中文文本。
- * @param mode 掉落模式
- * @returns 中文模式文本
- */
-function getDropModeText(mode: string): string {
-    const modeMap: Record<string, string> = {
-        Independent: "独立",
-        Weight: "权重",
-        Fixed: "固定",
-        Gender: "性别",
-        Level: "等级",
-        Once: "一次",
-        Sequence: "序列",
-    }
-    return modeMap[mode] || mode
 }
 
 /**

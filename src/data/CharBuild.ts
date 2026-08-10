@@ -86,6 +86,23 @@ const weaponAttackTypeMap = [
     { prefix: "滑行", patterns: ["滑行攻击"] },
 ] as const
 
+const weaponDamageFieldBaseMap = {
+    "[近战]": "近战",
+    "[远程]": "远程",
+    "[同律]": "同律",
+} as const
+
+const weaponAttributeBaseMap = {
+    攻击: "基础攻击",
+    暴击: "基础暴击",
+    暴伤: "基础暴伤",
+    触发: "基础触发",
+    攻速: "射速",
+    装填: "基础装填",
+    弹匣: "基础弹匣",
+    弹药: "基础弹药",
+} as const
+
 export class CharBuildTimeline {
     totalTime: number = 0
     hp: [number, number][] = []
@@ -1184,14 +1201,22 @@ export class CharBuild {
     }
 
     // 计算技能伤害
-    public calculateSkillDamage(attrs: ReturnType<typeof this.calculateAttributes>, baseName = this.baseName): DamageResult {
+    public calculateSkillDamage(
+        attrs: ReturnType<typeof this.calculateAttributes>,
+        baseName = this.baseName,
+        fieldName?: string
+    ): DamageResult {
         // 计算各种乘区
         const resistancePenetration = Math.max(0, (1 - this.enemyResistance) * (1 + attrs.属性穿透))
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
-        const summonSkill = this.allSkills.find(skill => skill.名称 === baseName)
-        const damageIncrease =
-            1 + attrs.增伤 + attrs.技能伤害 + (summonSkill?.召唤物 || summonSkill?.名称.includes("召唤物") ? attrs.召唤物伤害 : 0)
+        // 召唤物伤害应按字段名判断（如「[召唤物·战车]技能伤害」），而不是技能名
+        const skill = this.allSkills.find(s => s.名称 === baseName)
+        const resolvedFieldName = fieldName
+            ? skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))?.名称 || fieldName
+            : undefined
+        const isSummonDamage = resolvedFieldName ? resolvedFieldName.includes("召唤物") : !!skill?.召唤物
+        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (isSummonDamage ? attrs.召唤物伤害 : 0)
         const independentDamageIncrease = 1 + attrs.独立增伤
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
@@ -1216,7 +1241,8 @@ export class CharBuild {
         const weaponAttackMultiplier = 1 // 倍率 这里设为1 使用动态计算
         const totalWeaponDamage = attrs.攻击 + weaponAttrs.攻击
         const inheritAllSkillWeapon = weapon instanceof LeveledSkillWeapon && !!weapon.inherit && weapon.atk === "all"
-        const convertElementalToPhysical = damageType === "灾厄"
+        // inherit + atk=all 的同律武器保持纯元素结算，不能被继承的灾厄类型转为物理分量。
+        const convertElementalToPhysical = damageType === "灾厄" && !inheritAllSkillWeapon
         const weaponDamagePhysical = convertElementalToPhysical
             ? 1
             : inheritAllSkillWeapon
@@ -1379,6 +1405,11 @@ export class CharBuild {
                     collectIdentifiers(node.right)
                 } else if (node.type === "unary") {
                     collectIdentifiers(node.argument)
+                } else if (node.type === "temporary_attributes") {
+                    collectIdentifiers(node.target)
+                    for (const attribute of node.attributes) {
+                        collectIdentifiers(attribute.value)
+                    }
                 }
             }
             collectIdentifiers(ast)
@@ -1408,12 +1439,40 @@ export class CharBuild {
             const getSkillAttr = (fieldName: string, base?: string) =>
                 skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
 
+            /**
+             * 获取伤害字段实际使用的武器面板键。
+             * @param fieldName 字段名
+             * @param base 字段命名空间
+             * @returns 武器面板键；非武器伤害字段返回 undefined
+             */
+            const getWeaponDamageBase = (fieldName: string, base?: string) => {
+                const keywordBase = weaponDamageFieldBaseMap[fieldName as keyof typeof weaponDamageFieldBaseMap]
+                if (keywordBase) return keywordBase
+                const key = base || this.baseName
+                if (!weaponAttrs.has(key)) return undefined
+                if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) return key
+                const field = getSkillAttr(fieldName, base)
+                return field && (field.名称.endsWith("伤害") || field.名称.endsWith("伤害倍率")) ? key : undefined
+            }
+
+            /**
+             * 从临时属性目标中提取被修饰的字段。
+             * @param node 临时属性目标节点
+             * @returns 被修饰的字段节点；无法提取时返回 undefined
+             */
+            const getTargetProperty = (node: ASTNode): Extract<ASTNode, { type: "property" }> | undefined => {
+                if (node.type === "property") return node
+                if (node.type === "member_access") return getTargetProperty(node.object)
+                if (node.type === "temporary_attributes") return getTargetProperty(node.target)
+                return undefined
+            }
+
             // 递归验证AST节点
             const validateNode = (node: ASTNode): string | undefined => {
                 switch (node.type) {
                     case "property": {
                         const fieldName = node.name
-                        if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) break
+                        if (["[攻击]", "[防御]", "[生命]", "[近战]", "[远程]", "[同律]"].includes(fieldName)) break
                         if (!node.namespace && customVariableNames.has(fieldName)) break
                         // 检查是否是技能字段、属性或武器属性
                         const isSkillField = getSkillAttr(fieldName, node.namespace)
@@ -1449,6 +1508,23 @@ export class CharBuild {
                     case "member_access": {
                         const memberError = validateNode(node.object)
                         if (memberError) return memberError
+                        break
+                    }
+                    case "temporary_attributes": {
+                        const targetError = validateNode(node.target)
+                        if (targetError) return targetError
+                        const targetProperty = getTargetProperty(node.target)
+                        const weaponBase = targetProperty ? getWeaponDamageBase(targetProperty.name, targetProperty.namespace) : undefined
+                        const temporaryWeaponAttrs = weaponBase ? weaponAttrs.get(weaponBase) : undefined
+                        for (const attribute of node.attributes) {
+                            const isWeaponAttribute = typeof temporaryWeaponAttrs?.[attribute.name as keyof WeaponAttr] === "number"
+                            const isCharAttribute = typeof attrs[attribute.name as keyof typeof attrs] === "number"
+                            if (!isWeaponAttribute && !isCharAttribute) {
+                                return `找不到临时属性: "${attribute.name}"`
+                            }
+                            const valueError = validateNode(attribute.value)
+                            if (valueError) return valueError
+                        }
                         break
                     }
                 }
@@ -1555,21 +1631,109 @@ export class CharBuild {
         const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
         const getSkillAttr = (fieldName: string, base?: string) =>
             skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
-        const getSummonAttrs = (base?: string) => {
+        type TemporaryAttributes = Record<string, number>
+        /**
+         * 获取武器伤害关键词对应的装备类型。
+         * @param fieldName AST字段名
+         * @returns 对应装备类型；普通字段返回 undefined
+         */
+        const getWeaponFieldBase = (fieldName?: string) =>
+            fieldName ? weaponDamageFieldBaseMap[fieldName as keyof typeof weaponDamageFieldBaseMap] : undefined
+        /**
+         * 获取伤害字段实际使用的武器面板键。
+         * @param base 字段命名空间
+         * @param fieldName 字段名
+         * @returns 武器面板键；非武器伤害字段返回 undefined
+         */
+        const getWeaponDamageBase = (base?: string, fieldName?: string) => {
+            const keywordBase = getWeaponFieldBase(fieldName)
+            if (keywordBase) return keywordBase
+            const key = base || this.baseName
+            if (!weaponsMap.has(key) || !fieldName) return undefined
+            if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) return key
+            const field = getSkillAttr(fieldName, base)
+            return field && (field.名称.endsWith("伤害") || field.名称.endsWith("伤害倍率")) ? key : undefined
+        }
+        /**
+         * 获取武器面板对应的实际基础武器，同律继承时返回被继承武器。
+         * @param base 武器面板键
+         * @returns 用于读取基础值的实际武器
+         */
+        const getEffectiveWeapon = (base: string) => {
+            const weapon = weaponsMap.get(base)
+            if (weapon instanceof LeveledSkillWeapon && weapon.inherit) {
+                return weapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
+            }
+            return weapon
+        }
+        /**
+         * 获取武器临时加成使用的基础值。
+         * @param weapon 实际基础武器
+         * @param attribute 武器面板属性名
+         * @returns 对应基础值；无独立基础字段的属性以1为基准
+         */
+        const getWeaponAttributeBase = (weapon: LeveledWeapon | LeveledSkillWeapon, attribute: keyof WeaponAttr) => {
+            const baseAttribute = weaponAttributeBaseMap[attribute as keyof typeof weaponAttributeBaseMap]
+            if (!baseAttribute) return 1
+            const baseValue = weapon[baseAttribute as keyof typeof weapon]
+            return typeof baseValue === "number" ? baseValue : 0
+        }
+        /**
+         * 生成当前武器伤害字段使用的临时武器面板。
+         * @param base 字段命名空间
+         * @param fieldName 字段名
+         * @param temporaryAttributes 临时加成值
+         * @returns 应用 y += base * x 后的武器面板
+         */
+        const getTemporaryWeaponAttr = (base?: string, fieldName?: string, temporaryAttributes?: TemporaryAttributes) => {
+            const weaponBase = getWeaponDamageBase(base, fieldName)
+            const weaponAttr = getCalculatedWeaponAttr(weaponBase || base)
+            if (!weaponBase || !weaponAttr || !temporaryAttributes) return weaponAttr
+            const weapon = getEffectiveWeapon(weaponBase)
+            if (!weapon) return weaponAttr
+            const fieldWeaponAttr = { ...weaponAttr }
+            const writableWeaponAttr = fieldWeaponAttr as unknown as Record<string, number>
+            for (const [attribute, value] of Object.entries(temporaryAttributes)) {
+                const currentValue = weaponAttr[attribute as keyof WeaponAttr]
+                if (typeof currentValue !== "number") continue
+                writableWeaponAttr[attribute] = currentValue + getWeaponAttributeBase(weapon, attribute as keyof WeaponAttr) * value
+            }
+            return fieldWeaponAttr
+        }
+        /**
+         * 获取当前字段使用的角色属性，并依次应用召唤物继承与字段临时属性。
+         * @param base 字段所属技能或武器
+         * @param temporaryAttributes 仅对当前字段生效的属性增量
+         * @param fieldName 字段名
+         * @returns 当前字段的独立属性上下文
+         */
+        const getSummonAttrs = (base?: string, temporaryAttributes?: TemporaryAttributes, fieldName?: string) => {
             const key = base || this.baseName
             const summonSkill = this.allSkills.find(skill => skill.名称 === key)
-            if (!summonSkill?.召唤物) return attrs
-            const summonRatio = attrs.召唤物属性继承比例
-            if (summonRatio === 1) return attrs
-            return {
-                ...attrs,
-                攻击: attrs.攻击 * summonRatio,
-                昂扬: attrs.昂扬 * summonRatio,
-                背水: attrs.背水 * summonRatio,
+            const summonRatio = summonSkill?.召唤物 ? attrs.召唤物属性继承比例 : 1
+            const currentAttrs =
+                summonRatio === 1
+                    ? attrs
+                    : {
+                          ...attrs,
+                          攻击: attrs.攻击 * summonRatio,
+                          昂扬: attrs.昂扬 * summonRatio,
+                          背水: attrs.背水 * summonRatio,
+                      }
+            if (!temporaryAttributes) return currentAttrs
+            const fieldAttrs = { ...currentAttrs }
+            const writableAttrs = fieldAttrs as unknown as Record<string, number>
+            const temporaryWeaponAttr = getTemporaryWeaponAttr(base, fieldName, temporaryAttributes)
+            for (const [attribute, value] of Object.entries(temporaryAttributes)) {
+                if (getWeaponDamageBase(base, fieldName) && typeof temporaryWeaponAttr?.[attribute as keyof WeaponAttr] === "number")
+                    continue
+                if (typeof attrs[attribute as keyof typeof attrs] !== "number") throw new Error(`找不到临时属性: "${attribute}"`)
+                writableAttrs[attribute] = (writableAttrs[attribute] || 0) + value
             }
+            return fieldAttrs
         }
         const isDamageSkillField = (fieldName: string, base?: string) => {
-            if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) return true
+            if (["[攻击]", "[防御]", "[生命]"].includes(fieldName) || getWeaponFieldBase(fieldName)) return true
             const field = getSkillAttr(fieldName, base)
             return !!field && (field.名称.endsWith("伤害") || field.名称.endsWith("伤害倍率"))
         }
@@ -1579,21 +1743,22 @@ export class CharBuild {
             const weapon = weaponsMap.get(key) || this.selectedWeapon || this.meleeWeapon
             return this.getWeaponAttackTypeBonus(weapon.类型, key, fieldName, attribute, weapon)
         }
-        const getDamage = (base?: string, fieldName?: string) => {
-            const key = base || this.baseName
+        const getDamage = (base?: string, fieldName?: string, temporaryAttributes?: TemporaryAttributes) => {
+            const weaponFieldBase = getWeaponFieldBase(fieldName)
+            const key = weaponFieldBase || base || this.baseName
             const cacheKey = fieldName ? `${key}::${fieldName}` : key
-            if (damageCache.has(cacheKey)) return damageCache.get(cacheKey)!
+            if (!temporaryAttributes && damageCache.has(cacheKey)) return damageCache.get(cacheKey)!
             const weapon = weaponsMap.get(key)
-            const weaponAttr = getCalculatedWeaponAttr(base)
-            const skillAttrsContext = getSummonAttrs(base)
+            const weaponAttr = getTemporaryWeaponAttr(key, fieldName, temporaryAttributes)
+            const skillAttrsContext = getSummonAttrs(key, temporaryAttributes, fieldName)
             const fieldDamageType = fieldName ? getSkillAttr(fieldName, base)?.伤害类型 : undefined
-            const attackTypeDamageBonus = getWeaponAttackTypeBonus(base, fieldName, "增伤")
-            const attackTypeIndependentDamageBonus = getWeaponAttackTypeBonus(base, fieldName, "独立增伤")
+            const attackTypeDamageBonus = getWeaponAttackTypeBonus(key, fieldName, "增伤")
+            const attackTypeIndependentDamageBonus = getWeaponAttackTypeBonus(key, fieldName, "独立增伤")
             const damage =
                 weapon && weaponAttr
                     ? this.calculateWeaponDamage(
                           {
-                              ...attrs,
+                              ...(temporaryAttributes ? skillAttrsContext : attrs),
                               weapon: {
                                   ...weaponAttr,
                                   增伤: weaponAttr.增伤 + attackTypeDamageBonus,
@@ -1606,21 +1771,26 @@ export class CharBuild {
                     : this.calculateSkillDamage(
                           {
                               ...skillAttrsContext,
-                              增伤: attrs.增伤 + attackTypeDamageBonus,
-                              独立增伤: (1 + attrs.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
+                              增伤: skillAttrsContext.增伤 + attackTypeDamageBonus,
+                              独立增伤: (1 + skillAttrsContext.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
                           },
-                          base
+                          base,
+                          fieldName
                       )
-            damageCache.set(cacheKey, damage)
+            if (!temporaryAttributes) damageCache.set(cacheKey, damage)
             return damage
         }
         const defCache = new Map<boolean, number>()
-        const getDef = (base?: string) => {
+        const getDef = (base?: string, fieldName?: string, temporaryAttributes?: TemporaryAttributes) => {
             const key = base || this.baseName
             const isWeapon = !!(weaponsMap.get(key) && getCalculatedWeaponAttr(base))
-            if (defCache.has(isWeapon)) return defCache.get(isWeapon)!
-            const def = this.calculateDefenseMultiplier(attrs, undefined, !isWeapon)
-            defCache.set(isWeapon, def)
+            if (!temporaryAttributes && defCache.has(isWeapon)) return defCache.get(isWeapon)!
+            const def = this.calculateDefenseMultiplier(
+                temporaryAttributes ? getSummonAttrs(key, temporaryAttributes, fieldName) : attrs,
+                undefined,
+                !isWeapon
+            )
+            if (!temporaryAttributes) defCache.set(isWeapon, def)
             return def
         }
         /**
@@ -1684,17 +1854,29 @@ export class CharBuild {
             return safeValue
         }
 
-        const evaluateIdentity = (fieldName: string, ns?: string) => {
+        const evaluateIdentity = (fieldName: string, ns?: string, temporaryAttributes?: TemporaryAttributes) => {
             if (!ns) {
                 const customValue = evaluateCustomVariable(fieldName)
                 if (customValue !== undefined) return customValue
             }
-            if (ns) return evaluateSkill(fieldName, ns) || evaluateWeaponAttr(fieldName, ns) || evaluateAttr(fieldName) || 0
-            else return evaluateSkill(fieldName, ns) || evaluateAttr(fieldName) || evaluateWeaponAttr(fieldName, ns) || 0
+            if (ns)
+                return (
+                    evaluateSkill(fieldName, ns, temporaryAttributes) ||
+                    evaluateWeaponAttr(fieldName, ns) ||
+                    evaluateAttr(fieldName, ns, temporaryAttributes) ||
+                    0
+                )
+            else
+                return (
+                    evaluateSkill(fieldName, ns, temporaryAttributes) ||
+                    evaluateAttr(fieldName, ns, temporaryAttributes) ||
+                    evaluateWeaponAttr(fieldName, ns) ||
+                    0
+                )
         }
 
-        function evaluateMember(memberName?: string, ns?: string, fieldName?: string) {
-            const damage = getDamage(ns, fieldName)
+        function evaluateMember(memberName?: string, ns?: string, fieldName?: string, temporaryAttributes?: TemporaryAttributes) {
+            const damage = getDamage(ns, fieldName, temporaryAttributes)
             if (memberName === "N") return damage.noHpDamage
             if (memberName === "暴击") return damage.higherCritExpectedTrigger || damage.expectedDamage
             if (memberName === "未暴击") return damage.lowerCritExpectedTrigger || damage.expectedDamage
@@ -1713,11 +1895,20 @@ export class CharBuild {
          * @param ns 命名空间
          * @returns 计算结果
          */
-        function evaluateSkill(fieldName: string, ns?: string) {
-            const currentAttrs = getSummonAttrs(ns)
-            if (fieldName === "[攻击]") return (currentAttrs.攻击 + getWeaponAttr("攻击", ns)) * getDef(ns)
-            else if (fieldName === "[防御]") return currentAttrs.防御 * getDef(ns)
-            else if (fieldName === "[生命]") return currentAttrs.生命 * getDef(ns)
+        function evaluateSkill(fieldName: string, ns?: string, temporaryAttributes?: TemporaryAttributes) {
+            const weaponFieldBase = getWeaponFieldBase(fieldName)
+            const fieldBase = weaponFieldBase || ns
+            const currentAttrs = getSummonAttrs(fieldBase, temporaryAttributes, fieldName)
+            if (weaponFieldBase) {
+                if (!weaponsMap.has(weaponFieldBase)) return 0
+                const fieldWeaponAttr = getTemporaryWeaponAttr(weaponFieldBase, fieldName, temporaryAttributes)
+                return (currentAttrs.攻击 + (fieldWeaponAttr?.攻击 || 0)) * getDef(weaponFieldBase, fieldName, temporaryAttributes)
+            }
+            if (fieldName === "[攻击]") {
+                const fieldWeaponAttr = getTemporaryWeaponAttr(ns, fieldName, temporaryAttributes)
+                return (currentAttrs.攻击 + (fieldWeaponAttr?.攻击 || 0)) * getDef(ns, fieldName, temporaryAttributes)
+            } else if (fieldName === "[防御]") return currentAttrs.防御 * getDef(ns, fieldName, temporaryAttributes)
+            else if (fieldName === "[生命]") return currentAttrs.生命 * getDef(ns, fieldName, temporaryAttributes)
             const field = getSkillAttr(fieldName, ns)
 
             if (!field) return 0
@@ -1730,7 +1921,7 @@ export class CharBuild {
                 // 计算基础属性值
                 let baseValue = 0
                 if (!field.基础) {
-                    const patk = getWeaponAttr("攻击", ns) || 0
+                    const patk = getTemporaryWeaponAttr(ns, fieldName, temporaryAttributes)?.攻击 || 0
                     baseValue = currentAttrs.攻击 + patk
                 } else if (field.基础 === "生命") {
                     baseValue = currentAttrs.生命
@@ -1749,26 +1940,57 @@ export class CharBuild {
 
                 if (field.名称.endsWith("治疗"))
                     return baseDamage // 治疗不考虑防御
-                else return baseDamage * getDef(ns)
+                else return baseDamage * getDef(ns, fieldName, temporaryAttributes)
             }
             return typeof field.值 === "number" ? field.值 : 0
         }
-        function evaluateAttr(fieldName: string) {
-            return fieldName in attrs ? attrs[fieldName as keyof CharAttr] : 0
+        function evaluateAttr(fieldName: string, ns?: string, temporaryAttributes?: TemporaryAttributes) {
+            const currentAttrs = temporaryAttributes ? getSummonAttrs(ns, temporaryAttributes, fieldName) : attrs
+            return fieldName in currentAttrs ? currentAttrs[fieldName as keyof CharAttr] : 0
         }
         function evaluateWeaponAttr(fieldName: string, ns?: string) {
             if (fieldName === "武器攻击") fieldName = "攻击"
             return getWeaponAttr(fieldName, ns)
         }
+        /**
+         * 合并字段后缀声明的临时属性，同名属性按增量累加。
+         * @param attributes AST中的临时属性声明
+         * @param inheritedAttributes 外层已经生效的临时属性
+         * @returns 合并后的临时属性
+         */
+        const mergeTemporaryAttributes = (
+            attributes: Extract<ASTNode, { type: "temporary_attributes" }>["attributes"],
+            inheritedAttributes?: TemporaryAttributes
+        ) => {
+            const mergedAttributes = { ...inheritedAttributes }
+            for (const attribute of attributes) {
+                mergedAttributes[attribute.name] = (mergedAttributes[attribute.name] || 0) + evaluate(attribute.value, inheritedAttributes)
+            }
+            return mergedAttributes
+        }
+        /**
+         * 从成员访问对象中提取原始字段及其临时属性。
+         * @param node 成员访问的对象节点
+         * @param temporaryAttributes 外层已经生效的临时属性
+         * @returns 字段节点与合并后的临时属性；非字段对象返回 undefined
+         */
+        const getPropertyContext = (
+            node: ASTNode,
+            temporaryAttributes?: TemporaryAttributes
+        ): { property: Extract<ASTNode, { type: "property" }>; temporaryAttributes?: TemporaryAttributes } | undefined => {
+            if (node.type === "property") return { property: node, temporaryAttributes }
+            if (node.type !== "temporary_attributes") return undefined
+            return getPropertyContext(node.target, mergeTemporaryAttributes(node.attributes, temporaryAttributes))
+        }
         // AST求值函数
-        const evaluate = (node: ASTNode): number => {
+        const evaluate = (node: ASTNode, temporaryAttributes?: TemporaryAttributes): number => {
             switch (node.type) {
                 case "number":
                     return node.value
 
                 case "binary": {
-                    const left = evaluate(node.left)
-                    const right = evaluate(node.right)
+                    const left = evaluate(node.left, temporaryAttributes)
+                    const right = evaluate(node.right, temporaryAttributes)
                     switch (node.operator) {
                         case "+":
                             return left + right
@@ -1788,7 +2010,7 @@ export class CharBuild {
                 }
 
                 case "unary": {
-                    const argument = evaluate(node.argument)
+                    const argument = evaluate(node.argument, temporaryAttributes)
                     switch (node.operator) {
                         case "+":
                             return +argument
@@ -1800,18 +2022,18 @@ export class CharBuild {
                 }
 
                 case "property": {
-                    const value = evaluateIdentity(node.name, node.namespace)
+                    const value = evaluateIdentity(node.name, node.namespace, temporaryAttributes)
                     if (!node.namespace && customVariableExpressions.has(node.name)) return value
                     // 只有真正的伤害字段才需要乘以默认的伤害系数
-                    const skillValue = evaluateSkill(node.name, node.namespace)
+                    const skillValue = evaluateSkill(node.name, node.namespace, temporaryAttributes)
                     if (skillValue && isDamageSkillField(node.name, node.namespace)) {
-                        return value * evaluateMember(undefined, node.namespace, node.name)
+                        return value * evaluateMember(undefined, node.namespace, node.name, temporaryAttributes)
                     }
                     return value
                 }
 
                 case "function": {
-                    const args = node.args.map(arg => evaluate(arg))
+                    const args = node.args.map(arg => evaluate(arg, temporaryAttributes))
                     switch (node.name) {
                         case "min":
                             return Math.min(...args)
@@ -1838,17 +2060,22 @@ export class CharBuild {
                     // 对于成员访问，object部分不应该乘以默认伤害系数
                     // 所以我们需要重新计算object，但跳过默认伤害系数的乘法
                     const objectNode = node.object
+                    const propertyContext = getPropertyContext(objectNode, temporaryAttributes)
 
                     // 如果object是property节点，直接调用evaluateIdentity而不乘以evaluateMember()
                     let objectValue: number
-                    if (objectNode.type === "property") {
-                        objectValue = evaluateIdentity(objectNode.name, objectNode.namespace)
+                    if (propertyContext) {
+                        objectValue = evaluateIdentity(
+                            propertyContext.property.name,
+                            propertyContext.property.namespace,
+                            propertyContext.temporaryAttributes
+                        )
                     } else {
-                        objectValue = evaluate(objectNode)
+                        objectValue = evaluate(objectNode, temporaryAttributes)
                     }
 
                     const memberName = node.property
-                    if (objectNode.type === "property" && !isDamageSkillField(objectNode.name, objectNode.namespace)) {
+                    if (propertyContext && !isDamageSkillField(propertyContext.property.name, propertyContext.property.namespace)) {
                         return objectValue
                     }
                     // 成员访问用于修改伤害计算方式
@@ -1856,11 +2083,15 @@ export class CharBuild {
                         objectValue *
                         evaluateMember(
                             memberName,
-                            objectNode.type === "property" ? objectNode.namespace : undefined,
-                            objectNode.type === "property" ? objectNode.name : undefined
+                            propertyContext?.property.namespace,
+                            propertyContext?.property.name,
+                            propertyContext?.temporaryAttributes
                         )
                     )
                 }
+
+                case "temporary_attributes":
+                    return evaluate(node.target, mergeTemporaryAttributes(node.attributes, temporaryAttributes))
 
                 default:
                     throw new Error(`未知的AST节点类型: ${(node as ASTNode).type}`)

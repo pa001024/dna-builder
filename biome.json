@@ -23,7 +23,8 @@
                 "noExplicitAny": "off",
                 "useIterableCallbackReturn": "off",
                 "noAssignInExpressions": "off",
-                "noConfusingVoidType": "off"
+                "noConfusingVoidType": "off",
+                "noApproximativeNumericConstant": "off"
             },
             "style": {
                 "noNonNullAssertion": "off"
