@@ -8,7 +8,7 @@ import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { mergeRaceLotteryBuffIds, parseRaceLotteryOcr, type RaceLotteryBuffIds, type RaceLotteryOcrBuff } from "@/utils/race-lottery-ocr"
-import { computeRaceEventDay, estimateTopNRates } from "@/utils/race-lottery-sim"
+import { computeRaceEventDay, estimateTopNRates, RACE_TOP_N } from "@/utils/race-lottery-sim"
 
 type RaceLotteryEntry = {
     playerId: number
@@ -268,13 +268,15 @@ function getPlayerWinRate(playerId: number): number {
 /**
  * 将胜率格式化为百分比文案。
  * @param rate [0, 1] 胜率。
- * @returns 如 `42.3%`。
+ * @returns 如 `42.3%`；正数但小于 0.1% 时返回 `<0.1%`。
  */
 function formatWinRate(rate: number): string {
+    if (rate === 0) return "0.0%"
+    if (rate > 0 && rate < 0.001) return "<0.1%"
     return `${(rate * 100).toFixed(1)}%`
 }
 
-/** 按期望胜率排序的前 6 名，用于顶部排名区展示。 */
+/** 按期望胜率排序的前 6 名，用于顶部排名区和投注统计。 */
 const topWinRatePlayers = computed(() =>
     orderedPlayers
         .map((player, order) => ({
@@ -284,8 +286,94 @@ const topWinRatePlayers = computed(() =>
             winRate: getPlayerWinRate(player.playerId),
         }))
         .sort((left, right) => right.winRate - left.winRate || right.speed - left.speed || left.order - right.order)
-        .slice(0, 6)
+        .slice(0, RACE_TOP_N)
 )
+
+/** 未命中任何一位投注选手时的返还倍率。 */
+const NO_HIT_REWARD_RATE = 0.2
+
+type RaceLotteryHitStat = {
+    hitCount: number
+    probability: number
+    rewardRate: number
+}
+
+/** 胜率是否已经为全部选手计算完成。 */
+const hasComputedWinRates = computed(() => orderedPlayers.every(player => playerWinRates.value[player.playerId] !== undefined))
+
+/** 是否显示前 6 名高亮。 */
+const showTopWinRateHighlight = ref(true)
+
+/** 是否显示其他可能胜利选手高亮。 */
+const showOtherWinRateHighlight = ref(true)
+
+/** 当前用于投注的前 6 名选手 ID。 */
+const topWinRatePlayerIds = computed(() =>
+    hasComputedWinRates.value ? new Set(topWinRatePlayers.value.map(item => item.player.playerId)) : new Set<number>()
+)
+
+/**
+ * 获取命中数量对应的返还倍率。
+ * @param hitCount 命中的投注选手数量。
+ * @returns 游戏配置中的返还倍率。
+ */
+function getRewardRate(hitCount: number): number {
+    if (hitCount === 0) return NO_HIT_REWARD_RATE
+    return raceLotteryData.rewardRates.find(item => item.TargetHitNum === hitCount)?.RewardRate ?? 0
+}
+
+/**
+ * 根据前 6 名选手各自的期望胜率，计算中 0 到中 6 的综合概率。
+ * 这里把各选手的期望胜率作为独立命中概率，保持统计口径与页面已有胜率一致。
+ * @returns 每种命中数量的概率与返还倍率。
+ */
+const topSixHitStats = computed<RaceLotteryHitStat[]>(() => {
+    if (!hasComputedWinRates.value) return []
+
+    const hitProbabilities = topWinRatePlayers.value.map(item => Math.min(1, Math.max(0, item.winRate)))
+    const probabilities = Array.from({ length: RACE_TOP_N + 1 }, () => 0)
+    probabilities[0] = 1
+
+    for (const hitProbability of hitProbabilities) {
+        for (let hitCount = RACE_TOP_N; hitCount >= 0; hitCount -= 1) {
+            probabilities[hitCount] =
+                probabilities[hitCount] * (1 - hitProbability) + (hitCount > 0 ? probabilities[hitCount - 1] * hitProbability : 0)
+        }
+    }
+
+    return probabilities.map((probability, hitCount) => ({
+        hitCount,
+        probability,
+        rewardRate: getRewardRate(hitCount),
+    }))
+})
+
+/** 按各命中数量的奖励倍率加权，得到投注 1 份时的期望收益倍率。 */
+const expectedRewardRate = computed(() => topSixHitStats.value.reduce((total, stat) => total + stat.probability * stat.rewardRate, 0))
+
+/**
+ * 获取选手卡片的胜率高亮样式。
+ * @param playerId 选手 ID。
+ * @returns 当前高亮开关对应的卡片样式。
+ */
+function getPlayerHighlightClass(playerId: number): string {
+    if (topWinRatePlayerIds.value.has(playerId)) {
+        return showTopWinRateHighlight.value ? "border-success bg-success/10" : "border-base-300"
+    }
+    if (showOtherWinRateHighlight.value && hasComputedWinRates.value && getPlayerWinRate(playerId) > 0) {
+        return "border-info bg-info/10"
+    }
+    return "border-base-300"
+}
+
+/**
+ * 格式化返还倍率。
+ * @param rate 返还倍率。
+ * @returns 去掉不必要的小数位的倍率文案。
+ */
+function formatRewardRate(rate: number): string {
+    return Number.isInteger(rate) ? rate.toFixed(0) : rate.toFixed(1)
+}
 
 /**
  * 获取浏览器本地日期，避免 UTC 日期在东八区跨日时显示错误。
@@ -687,91 +775,149 @@ onMounted(async () => {
                 </div>
 
                 <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,25rem)]">
-                    <section class="min-w-0 rounded-lg border border-base-300 bg-base-200/40 p-2 sm:p-3">
-                        <div class="mb-2 flex items-center justify-between gap-3 px-1">
-                            <div>
-                                <h2 class="text-sm font-bold sm:text-base">选手名册</h2>
-                                <p class="text-xs text-base-content/55">点击卡片查看详情</p>
-                            </div>
-                            <span v-if="loading" class="loading loading-spinner loading-sm text-primary" />
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-                            <button
-                                v-for="(player, index) in orderedPlayers"
-                                :key="player.playerId"
-                                type="button"
-                                class="group relative aspect-3/4 min-w-0 overflow-hidden rounded-sm border-2 bg-base-100 p-1 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-warning/70 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
-                                :class="
-                                    selectedPlayerId === player.playerId
-                                        ? 'border-warning ring-1 ring-warning/70 shadow-md'
-                                        : 'border-base-300'
-                                "
-                                :aria-label="`${player.name}，编号 ${index + 1}`"
-                                @click="selectedPlayerId = player.playerId"
-                            >
-                                <div class="flex h-full min-h-0 flex-col text-base-content">
-                                    <div class="flex shrink-0 items-start justify-between px-1 pt-0.5">
-                                        <div class="leading-none">
-                                            <div class="text-[0.55rem] font-semibold uppercase tracking-wider text-base-content/50">
-                                                No.
-                                            </div>
-                                            <div class="text-sm font-bold tabular-nums">{{ String(index + 1).padStart(2, "0") }}</div>
-                                        </div>
-                                        <div class="flex flex-wrap items-end gap-0.5 pt-0.5" aria-hidden="true">
-                                            <span
-                                                v-for="(buffMap, buffIndex) in getPlayerBuffMapGroups(player.playerId).negative"
-                                                :key="`negative-${buffMap}-${buffIndex}`"
-                                                class="flex h-3 min-w-3 items-center justify-center rounded-full border border-error/70 bg-error/10 px-0.5 text-[0.5rem] font-black leading-none text-error"
-                                            >
-                                                {{ buffMap }}
-                                            </span>
-                                            <span
-                                                v-for="(buffMap, buffIndex) in getPlayerBuffMapGroups(player.playerId).positive"
-                                                :key="`positive-${buffMap}-${buffIndex}`"
-                                                class="flex h-3 min-w-3 items-center justify-center rounded-full border border-success/70 bg-success/10 px-0.5 text-[0.5rem] font-black leading-none text-success"
-                                            >
-                                                {{ buffMap }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="flex min-h-0 flex-1 items-center justify-center px-1 py-1">
-                                        <img
-                                            :src="getPlayerIconUrl(player.icon)"
-                                            :alt="player.name"
-                                            loading="lazy"
-                                            class="size-full min-h-0 object-contain drop-shadow-[0_5px_4px_rgba(0,0,0,0.18)]"
-                                        />
-                                    </div>
-                                    <div
-                                        class="flex shrink-0 items-center justify-center gap-1 rounded-sm bg-neutral px-1 py-1 text-neutral-content"
+                    <div class="min-w-0 space-y-4">
+                        <section class="rounded-lg border border-base-300 bg-base-200/40 p-2 sm:p-3">
+                            <div class="mb-2 flex items-center justify-between gap-3 px-1">
+                                <div>
+                                    <h2 class="text-sm font-bold sm:text-base">选手名册</h2>
+                                    <p class="text-xs text-base-content/55">点击卡片查看详情</p>
+                                </div>
+                                <div class="flex shrink-0 flex-wrap justify-end gap-x-2 gap-y-1 text-[0.65rem] text-base-content/60">
+                                    <button
+                                        class="inline-flex cursor-pointer items-center gap-1 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-success"
+                                        :class="showTopWinRateHighlight ? '' : 'opacity-40'"
+                                        type="button"
+                                        :aria-pressed="showTopWinRateHighlight"
+                                        aria-label="切换前 6 高亮"
+                                        title="切换前 6 高亮"
+                                        @click="showTopWinRateHighlight = !showTopWinRateHighlight"
                                     >
-                                        <span class="text-[0.68rem]">↗</span>
-                                        <span class="text-xs font-bold tabular-nums sm:text-sm">
-                                            {{ getPlayerCurrentSpeed(player.playerId).toFixed(2) }}
-                                        </span>
-                                        <span class="text-[0.55rem] text-neutral-content/70">·</span>
-                                        <span class="text-[0.65rem] font-bold tabular-nums text-warning">
-                                            {{ formatWinRate(getPlayerWinRate(player.playerId)) }}
-                                        </span>
+                                        <span class="size-2 rounded-full bg-success" />
+                                        前 6
+                                    </button>
+                                    <button
+                                        class="inline-flex cursor-pointer items-center gap-1 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-info"
+                                        :class="showOtherWinRateHighlight ? '' : 'opacity-40'"
+                                        type="button"
+                                        :aria-pressed="showOtherWinRateHighlight"
+                                        aria-label="切换其他可能胜利高亮"
+                                        title="切换其他可能胜利高亮"
+                                        @click="showOtherWinRateHighlight = !showOtherWinRateHighlight"
+                                    >
+                                        <span class="size-2 rounded-full bg-info" />
+                                        其他可能胜利
+                                    </button>
+                                </div>
+                                <span v-if="loading" class="loading loading-spinner loading-sm text-primary" />
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                                <button
+                                    v-for="(player, index) in orderedPlayers"
+                                    :key="player.playerId"
+                                    type="button"
+                                    class="group relative aspect-3/4 min-w-0 overflow-hidden rounded-sm border-2 bg-base-100 p-1 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-warning/70 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
+                                    :class="[
+                                        getPlayerHighlightClass(player.playerId),
+                                        selectedPlayerId === player.playerId ? 'ring-1 ring-warning/70 shadow-md' : '',
+                                    ]"
+                                    :aria-label="`${player.name}，编号 ${index + 1}`"
+                                    @click="selectedPlayerId = player.playerId"
+                                >
+                                    <div class="flex h-full min-h-0 flex-col text-base-content">
+                                        <div class="flex shrink-0 items-start justify-between px-1 pt-0.5">
+                                            <div class="leading-none">
+                                                <div class="text-[0.55rem] font-semibold uppercase tracking-wider text-base-content/50">
+                                                    No.
+                                                </div>
+                                                <div class="text-sm font-bold tabular-nums">{{ String(index + 1).padStart(2, "0") }}</div>
+                                            </div>
+                                            <div class="flex flex-wrap items-end gap-0.5 pt-0.5" aria-hidden="true">
+                                                <span
+                                                    v-for="(buffMap, buffIndex) in getPlayerBuffMapGroups(player.playerId).negative"
+                                                    :key="`negative-${buffMap}-${buffIndex}`"
+                                                    class="flex h-3 min-w-3 items-center justify-center rounded-full border border-error/70 bg-error/10 px-0.5 text-[0.5rem] font-black leading-none text-error"
+                                                >
+                                                    {{ buffMap }}
+                                                </span>
+                                                <span
+                                                    v-for="(buffMap, buffIndex) in getPlayerBuffMapGroups(player.playerId).positive"
+                                                    :key="`positive-${buffMap}-${buffIndex}`"
+                                                    class="flex h-3 min-w-3 items-center justify-center rounded-full border border-success/70 bg-success/10 px-0.5 text-[0.5rem] font-black leading-none text-success"
+                                                >
+                                                    {{ buffMap }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex min-h-0 flex-1 items-center justify-center px-1 py-1">
+                                            <img
+                                                :src="getPlayerIconUrl(player.icon)"
+                                                :alt="player.name"
+                                                loading="lazy"
+                                                class="size-full min-h-0 object-contain drop-shadow-[0_5px_4px_rgba(0,0,0,0.18)]"
+                                            />
+                                        </div>
+                                        <div
+                                            class="flex shrink-0 items-center justify-center gap-1 rounded-sm bg-neutral px-1 py-1 text-neutral-content"
+                                        >
+                                            <span class="text-[0.68rem]">↗</span>
+                                            <span class="text-xs font-bold tabular-nums sm:text-sm">
+                                                {{ getPlayerCurrentSpeed(player.playerId).toFixed(2) }}
+                                            </span>
+                                            <span class="text-[0.55rem] text-neutral-content/70">·</span>
+                                            <span class="text-[0.65rem] font-bold tabular-nums text-warning">
+                                                {{ formatWinRate(getPlayerWinRate(player.playerId)) }}
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="flex shrink-0 items-center justify-center gap-1 py-0.5 text-[0.55rem] text-base-content/55"
+                                        >
+                                            <span
+                                                class="size-1.5 rounded-full"
+                                                :class="
+                                                    getPlayerStatusCount(player.playerId) >= 3
+                                                        ? 'bg-success'
+                                                        : getPlayerEntryCount(player.playerId)
+                                                          ? 'bg-warning'
+                                                          : 'bg-base-content/25'
+                                                "
+                                            />
+                                            <span>{{ getPlayerStatusCount(player.playerId) >= 3 ? "已知" : "待补充" }}</span>
+                                        </div>
                                     </div>
-                                    <div class="flex shrink-0 items-center justify-center gap-1 py-0.5 text-[0.55rem] text-base-content/55">
-                                        <span
-                                            class="size-1.5 rounded-full"
-                                            :class="
-                                                getPlayerStatusCount(player.playerId) >= 3
-                                                    ? 'bg-success'
-                                                    : getPlayerEntryCount(player.playerId)
-                                                      ? 'bg-warning'
-                                                      : 'bg-base-content/25'
-                                            "
-                                        />
-                                        <span>{{ getPlayerStatusCount(player.playerId) >= 3 ? "已知" : "待补充" }}</span>
+                                </button>
+                            </div>
+                        </section>
+
+                        <section v-if="hasComputedWinRates" class="rounded-lg border border-base-300 bg-base-200/40 p-2 sm:p-3">
+                            <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <h2 class="text-sm font-bold sm:text-base">期望收益</h2>
+                                    <p class="text-xs text-base-content/55">投注前6名获得的平均倍率</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-black tabular-nums text-primary">
+                                        ×{{ formatRewardRate(expectedRewardRate) }}
                                     </div>
                                 </div>
-                            </button>
-                        </div>
-                    </section>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2 sm:grid-cols-7">
+                                <div
+                                    v-for="stat in topSixHitStats"
+                                    :key="stat.hitCount"
+                                    class="rounded-md border border-base-300 bg-base-100/70 px-1.5 py-2 text-center"
+                                >
+                                    <div class="text-xs font-semibold text-base-content/70">中 {{ stat.hitCount }} 个</div>
+                                    <div class="mt-1 text-sm font-bold tabular-nums text-primary">
+                                        {{ formatWinRate(stat.probability) }}
+                                    </div>
+                                    <div class="mt-0.5 text-[0.65rem] tabular-nums text-base-content/50">
+                                        ×{{ formatRewardRate(stat.rewardRate) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
 
                     <aside class="min-w-0 space-y-3 lg:sticky lg:top-3">
                         <section v-if="selectedPlayer" class="overflow-hidden rounded-lg border-2 border-base-300 bg-base-100 shadow-md">

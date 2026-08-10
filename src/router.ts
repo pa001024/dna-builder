@@ -42,7 +42,7 @@ const routes: readonly RouteRecordRaw[] = [
         name: "race-lottery",
         path: "/race-lottery",
         component: () => import("./views/RaceLottery.vue"),
-        beforeEnter: () => setMinSize(900, 700),
+        beforeEnter: () => setMinSize(367, 430),
     },
     {
         path: "/char",
