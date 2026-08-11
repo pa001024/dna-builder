@@ -143,7 +143,7 @@ Query real-time missions:
 5. `buff`：Buff 配置
 6. `char`：角色基础与战斗配置
 7. `convert`：魔之楔转换关系
-8. `draft`：角色/武器/魔之楔/锻造/铸造/图纸数据
+8. `draft`：角色/武器/魔之楔/锻造/铸造/设计稿数据
 9. `dungeon`：副本、怪物、奖励解压
 10. `dynquest`：派遣委托/突发任务/含任务剧情文本
 11. `effect`：效果/词条定义

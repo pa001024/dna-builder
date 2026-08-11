@@ -894,7 +894,7 @@
         "materials": "消耗资源",
         "product": "产物",
         "rarity": "稀有度",
-        "title": "设计图",
+        "title": "设计稿",
         "type": "类型",
         "unlimitedCrafting": "无限制造",
         "version": "版本"
@@ -1967,6 +1967,7 @@
         "top_actions": "使用顶部按钮分享配置、自动构筑、保存项目等",
         "weapon_select": "点击这里更换武器/设置精炼"
     },
+    "UI_FORGING_BLUEPRINT": "设计稿:",
     "unpack": {
         "desc": "读取并导出 pak 文件",
         "title": "解包"

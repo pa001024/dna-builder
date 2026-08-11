@@ -550,7 +550,7 @@ export interface RewardChild {
     id: number
     t: string
     c: number
-    d?: 1 // 是否是图纸
+    d?: 1 // 是否是设计稿
     dp?: 1 //是否是Drop类型
     p?: number
     n?: string

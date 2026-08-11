@@ -119,7 +119,7 @@ describe("getRewardDetails", () => {
         validateStructure(result)
     })
 
-    it("应该正确找到图纸掉落信息", () => {
+    it("应该正确找到设计稿掉落信息", () => {
         const dungeon = getRewardDetails(138012)
         expect(dungeon).not.toBeNull()
 

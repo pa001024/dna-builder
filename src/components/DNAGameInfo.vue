@@ -36,7 +36,7 @@ const shortNoteInfo = useLocalStorage<DNAShortNoteEntity>("dna.shortNoteInfo", {
  * 计算铸造的真实结束时间
  * @param startTime 开始时间（秒数时间戳）
  * @param doingNum 进行中数量
- * @param draft 图纸信息
+ * @param draft 设计稿信息
  * @returns 结束时间字符串
  */
 function calculateRealEndTime(startTime: string | number, doingNum: number, draft?: Draft): string {
@@ -63,7 +63,7 @@ function calculateRealEndTime(startTime: string | number, doingNum: number, draf
 
 /**
  * 获取产物图片URL
- * @param draft 图纸信息
+ * @param draft 设计稿信息
  * @returns 图片URL
  */
 function getProductImageUrl(draft?: Draft): string {
@@ -89,9 +89,9 @@ function getProductImageUrl(draft?: Draft): string {
 }
 
 /**
- * 获取图纸信息
+ * 获取设计稿信息
  * @param productId 产物ID
- * @returns 图纸信息
+ * @returns 设计稿信息
  */
 function getDraftInfo(productId: number) {
     if (modDraftMap.has(productId)) {
@@ -292,7 +292,7 @@ const isScreenshotLoading = ref(false)
 /**
  * 计算锻造进度百分比
  * @param draft 锻造信息
- * @param draftInfo 图纸信息
+ * @param draftInfo 设计稿信息
  * @returns 进度百分比（0-100）
  */
 function calculateProgress(draft: any, draftInfo?: Draft): number {
@@ -331,7 +331,7 @@ function calculateProgress(draft: any, draftInfo?: Draft): number {
 /**
  * 计算已完成的锻造数量
  * @param draft 锻造信息
- * @param draftInfo 图纸信息
+ * @param draftInfo 设计稿信息
  * @returns 已完成的数量
  */
 function calculateCompletedNum(draft: any, draftInfo?: Draft): number {

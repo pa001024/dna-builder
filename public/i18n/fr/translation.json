@@ -6515,7 +6515,7 @@
         "materials": "Ressources consommées",
         "product": "Produit",
         "rarity": "Rareté",
-        "title": "Plan",
+        "title": "Planos",
         "type": "Type",
         "unlimitedCrafting": "Fabrication illimitée",
         "version": "Version"
@@ -7590,6 +7590,7 @@
         "top_actions": "Utilisez les boutons en haut pour partager la configuration, construire automatiquement, sauvegarder le projet, etc.",
         "weapon_select": "Cliquez ici pour changer d'arme/définir le raffinement"
     },
+    "UI_FORGING_BLUEPRINT": "Plan de fabrication :",
     "unpack": {
         "desc": "Lire et exporter les fichiers pak",
         "title": "Dépaqueter"

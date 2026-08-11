@@ -12,7 +12,7 @@ const selectedDraftId = useSearchParam<number>("id", 0)
 const selectedType = useSearchParam<string | "">("tp", "")
 const selectedRarity = useSearchParam<number | "">("rar", "", { parse: parseNumberOrEmptySearchParam })
 
-// 根据 ID 获取选中的图纸
+// 根据 ID 获取选中的设计稿
 const selectedDraft = computed(() => {
     return selectedDraftId.value ? draftMap.get(selectedDraftId.value) || null : null
 })
@@ -35,7 +35,7 @@ const rarities = computed(() => {
     return Array.from(raritySet).sort((a, b) => b - a)
 })
 
-// 过滤图纸列表
+// 过滤设计稿列表
 const filteredDrafts = computed(() => {
     return draftData.filter(d => {
         // 搜索筛选
@@ -91,7 +91,7 @@ useInitialScrollToSelectedItem()
                     <input
                         v-model="searchKeyword"
                         type="text"
-                        placeholder="搜索图纸名称（支持拼音）..."
+                        placeholder="搜索设计稿名称（支持拼音）..."
                         class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
                     />
                 </div>
@@ -147,7 +147,7 @@ useInitialScrollToSelectedItem()
                     </div>
                 </div>
 
-                <!-- 图纸列表 -->
+                <!-- 设计稿列表 -->
                 <ScrollArea class="flex-1">
                     <div class="p-2 space-y-2">
                         <div
@@ -189,7 +189,7 @@ useInitialScrollToSelectedItem()
 
                 <!-- 底部统计 -->
                 <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredDrafts.length }} 个图纸
+                    共 {{ filteredDrafts.length }} 个设计稿
                 </div>
             </div>
             <div

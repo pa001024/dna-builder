@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { t } from "i18next"
+import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { LeveledMod, LeveledWeaponHelper, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
 import { Walnut } from "../data/d/walnut.data"
@@ -15,9 +17,9 @@ interface RewardLinkInfo {
 }
 
 /**
- * 根据奖励项反查对应图纸。
+ * 根据奖励项反查对应设计稿。
  * @param reward 奖励项
- * @returns 图纸数据或 null
+ * @returns 设计稿数据或 null
  */
 function getDraftByReward(reward: Walnut["奖励"][number]) {
     if (!reward.d) {
@@ -134,7 +136,7 @@ function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
         if (draft) {
             links.push({
                 icon: "/imgs/webp/T_Head_Empty.webp",
-                text: `图纸: ${draft.n}`,
+                text: `${t("UI_FORGING_BLUEPRINT")}${t(draft.n)}`,
                 to: `/db/draft/${draft.id}`,
             })
             return links
@@ -457,7 +459,7 @@ function getRewardTypeColor(index: number): string {
                                             <span v-if="linkIndex < item.links.length - 1" class="mx-1 text-base-content/50">/</span>
                                         </span>
                                     </template>
-                                    <span v-else>{{ item.reward.d ? `图纸: ${item.reward.name}` : $t(item.reward.name) }}</span>
+                                    <span v-else>{{ item.reward.d ? `设计稿: ${item.reward.name}` : $t(item.reward.name) }}</span>
                                 </div>
                             </td>
                             <td class="py-2 px-3 text-sm">{{ item.reward.count }}</td>
@@ -472,7 +474,7 @@ function getRewardTypeColor(index: number): string {
         </div>
 
         <div v-if="draft" class="bg-base-200 rounded mb-3">
-            <!-- 图纸 -->
+            <!-- 设计稿 -->
             <DBDraftDetailItem :draft="draft" />
         </div>
 

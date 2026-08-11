@@ -26,7 +26,11 @@ const resourceTarget = computed(() => (props.resourceId ? resourceMap.get(props.
 const modTarget = computed(() => (props.modId ? modMap.get(props.modId) || null : null))
 const ironTicketTarget = computed(() => (props.ironTicketId ? iconticketMap.get(props.ironTicketId) || null : null))
 const sourceName = computed(
-    () => resourceTarget.value?.name || modTarget.value?.名称 || ironTicketTarget.value?.name || String(props.resourceId ?? props.modId ?? props.ironTicketId ?? "")
+    () =>
+        resourceTarget.value?.name ||
+        modTarget.value?.名称 ||
+        ironTicketTarget.value?.name ||
+        String(props.resourceId ?? props.modId ?? props.ironTicketId ?? "")
 )
 const sourceIconUrl = computed(() => {
     if (resourceTarget.value?.icon) {
@@ -56,7 +60,9 @@ const sourceIconUrl = computed(() => {
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
                             <img :src="sourceIconUrl" class="w-4 h-4 object-cover rounded" :alt="sourceName" />
-                            <span class="text-xs text-base-content/70">{{ source.d ? `图纸: ${sourceName}` : sourceName }}</span>
+                            <span class="text-xs text-base-content/70">{{
+                                source.d ? `${$t("UI_FORGING_BLUEPRINT")}${sourceName}` : sourceName
+                            }}</span>
                             <span class="text-sm text-base-content/70">{{ source.num ?? 1 }}</span>
                         </div>
                     </div>

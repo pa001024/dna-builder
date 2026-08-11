@@ -373,7 +373,7 @@ export class GlobalSearchService {
                     {
                         id: `draft:${draft.id}`,
                         title: draft.n,
-                        subtitle: `图纸 ID: ${draft.id}`,
+                        subtitle: `设计稿 ID: ${draft.id}`,
                         typeLabel: t("database.draft"),
                         path: `/db/draft/${draft.id}`,
                     },

@@ -228,7 +228,7 @@ function getHeadFrameCategoryText(headFrame: HeadFrameItem): string {
 /**
  * 收集满足条件的商店来源信息。
  * @param matcher 条目匹配函数
- * @param draft 关联的图纸信息（可选）
+ * @param draft 关联的设计稿信息（可选）
  * @returns 商店来源列表
  */
 function collectShopSources(
@@ -293,7 +293,7 @@ const relatedShopSources = computed<ShopSourceInfo[]>(() => {
 })
 
 /**
- * 当饰品本体没有商店来源时，通过图纸反查商店来源。
+ * 当饰品本体没有商店来源时，通过设计稿反查商店来源。
  */
 const relatedDraftSources = computed<ResourceDraftSourceInfo[]>(() => {
     if (relatedShopSources.value.length > 0 || props.accessory.accessoryType !== "char") {
@@ -309,7 +309,7 @@ const relatedDraftSources = computed<ResourceDraftSourceInfo[]>(() => {
 })
 
 /**
- * 当饰品本体没有商店来源时，通过图纸反查商店来源。
+ * 当饰品本体没有商店来源时，通过设计稿反查商店来源。
  */
 const relatedDraftShopSources = computed<ShopSourceInfo[]>(() => {
     if (relatedShopSources.value.length > 0 || props.accessory.accessoryType !== "char") {
@@ -347,7 +347,7 @@ const accessoryCategoryText = computed(() => {
 })
 
 /**
- * 供页面最终展示的商店来源（优先饰品本体，找不到时使用图纸来源）。
+ * 供页面最终展示的商店来源（优先饰品本体，找不到时使用设计稿来源）。
  */
 const displayShopSources = computed<ShopSourceInfo[]>(() => {
     if (relatedShopSources.value.length > 0) {

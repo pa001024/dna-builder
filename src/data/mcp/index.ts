@@ -440,7 +440,7 @@ const DATA_TYPE_DEFINITION_META: Record<DataTypeName, DataTypeDefinitionMeta> = 
         filePath: "src/data/d/draft.data.ts",
         interfaceName: "Draft",
         moduleIds: ["/local/draft"],
-        description: "图纸数据结构定义",
+        description: "设计稿数据结构定义",
     },
     Dungeon: {
         filePath: "src/data/d/dungeon.data.ts",

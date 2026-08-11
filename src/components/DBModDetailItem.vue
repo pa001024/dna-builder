@@ -58,7 +58,7 @@ const formatEffDesc = (desc: string) => {
     return [parts[0], po[1], parts[1]]
 }
 
-// 获取当前mod的图纸信息
+// 获取当前mod的设计稿信息
 const modDraft = computed<Draft | undefined>(() => {
     return modDraftMap.get(props.mod.id)
 })
@@ -434,9 +434,9 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
             </div>
         </div>
 
-        <!-- 图纸信息 -->
+        <!-- 设计稿信息 -->
         <div v-if="modDraft" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">图纸信息</div>
+            <div class="text-xs text-base-content/70 mb-2">设计稿信息</div>
             <DBDraftDetailItem :draft="modDraft" />
         </div>
 

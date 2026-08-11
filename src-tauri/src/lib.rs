@@ -64,6 +64,13 @@ enum FormDataValue {
     },
 }
 
+/// 通过 HTML5 拖放传入的 MOD 文件内容。
+#[derive(Debug, Clone, Deserialize)]
+struct ModImportFile {
+    name: String,
+    data: Vec<u8>,
+}
+
 /// 下载分块进度信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct ChunkProgress {
@@ -1021,6 +1028,59 @@ fn import_mod(gamebase: String, paths: Vec<String>) -> String {
     serde_json::to_string(&output).unwrap_or_else(|_| "[]".to_string())
 }
 
+/// 将 HTML5 拖放的文件内容临时写入磁盘，再复用现有 MOD 导入流程。
+#[tauri::command]
+fn import_mod_files(gamebase: String, files: Vec<ModImportFile>) -> Result<String, String> {
+    if files.is_empty() {
+        return Ok("[]".to_string());
+    }
+
+    let stamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|error| format!("获取临时目录时间失败: {error}"))?
+        .as_nanos();
+    let temp_dir = std::env::temp_dir().join(format!(
+        "dna-builder-mod-import-{}-{stamp}",
+        std::process::id()
+    ));
+    fs::create_dir_all(&temp_dir).map_err(|error| format!("创建 MOD 临时目录失败: {error}"))?;
+
+    let result = (|| {
+        let mut paths = Vec::with_capacity(files.len());
+        for (index, file) in files.iter().enumerate() {
+            let source_name = file.name.rsplit(['\\', '/']).next().unwrap_or("drop-file");
+            let safe_name: String = source_name
+                .chars()
+                .map(|character| {
+                    if matches!(
+                        character,
+                        '<' | '>' | ':' | '"' | '/' | '\\' | '|' | '?' | '*'
+                    ) {
+                        '_'
+                    } else {
+                        character
+                    }
+                })
+                .collect();
+            let file_name = if safe_name.is_empty() {
+                format!("drop-file-{index}")
+            } else {
+                safe_name
+            };
+            let path = temp_dir.join(format!("{index:04}-{file_name}"));
+            fs::write(&path, &file.data)
+                .map_err(|error| format!("写入 MOD 临时文件失败: {error}"))?;
+            paths.push(path.to_string_lossy().to_string());
+        }
+        Ok(import_mod(gamebase, paths))
+    })();
+
+    if let Err(error) = fs::remove_dir_all(&temp_dir) {
+        eprintln!("删除 MOD 临时目录失败: {error}");
+    }
+    result
+}
+
 #[tauri::command]
 fn enable_mod(srcdir: String, dstdir: String, files: Vec<String>) -> String {
     let base_path = PathBuf::from(dstdir.clone());
@@ -1060,6 +1120,26 @@ fn import_pic(path: String) -> Result<String, String> {
         base64::Engine::encode(&base64::engine::general_purpose::STANDARD, buffer)
     );
     Ok(data_url)
+}
+
+/// 将拖放的图片字节转换为预览图 Data URL。
+#[tauri::command]
+fn import_pic_data(data: Vec<u8>, mime: String) -> Result<String, String> {
+    let mime = match mime.to_ascii_lowercase().as_str() {
+        "image/bmp" => "image/bmp",
+        "image/gif" => "image/gif",
+        "image/jpeg" | "image/jpg" => "image/jpeg",
+        "image/png" => "image/png",
+        "image/tiff" => "image/tiff",
+        "image/webp" => "image/webp",
+        "image/x-icon" | "image/vnd.microsoft.icon" => "image/x-icon",
+        _ => return Err("不支持的图片格式".to_string()),
+    };
+
+    Ok(format!(
+        "data:{mime};base64,{}",
+        base64::Engine::encode(&base64::engine::general_purpose::STANDARD, data)
+    ))
 }
 
 #[tauri::command]
@@ -3435,8 +3515,10 @@ pub fn run() {
         run_as_admin,
         check_is_admin,
         import_mod,
+        import_mod_files,
         enable_mod,
         import_pic,
+        import_pic_data,
         fetch,
         get_local_qq,
         list_script_files,

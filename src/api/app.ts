@@ -77,12 +77,37 @@ export async function importMod(gamebase: string, paths: string[]) {
     return JSON.parse(data) as [string, number][]
 }
 
+export interface ModImportFile {
+    name: string
+    data: Uint8Array
+}
+
+/**
+ * 通过文件内容导入 MOD，适用于 HTML5 拖放无法提供本地路径的场景。
+ * @param gamebase MOD 临时资源目录
+ * @param files 待导入文件
+ * @returns 导入后的文件路径和大小
+ */
+export async function importModFiles(gamebase: string, files: ModImportFile[]) {
+    const data = await invoke<string>("import_mod_files", { gamebase, files })
+    return JSON.parse(data) as [string, number][]
+}
+
 export async function enableMod(srcdir: string, dstdir: string, files: string[]) {
     return await invoke<string>("enable_mod", { srcdir, dstdir, files })
 }
 
 export async function importPic(path: string) {
     return await invoke<string>("import_pic", { path })
+}
+
+/**
+ * 通过文件内容生成 MOD 预览图 Data URL。
+ * @param data 图片字节
+ * @param mime 图片 MIME 类型
+ */
+export async function importPicData(data: Uint8Array, mime: string) {
+    return await invoke<string>("import_pic_data", { data, mime })
 }
 
 /**

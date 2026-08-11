@@ -8,9 +8,9 @@ export interface ResourceDraftSourceInfo {
 }
 
 /**
- * 反查资源对应的图纸来源。
+ * 反查资源对应的设计稿来源。
  * @param resource 资源数据
- * @returns 图纸来源列表
+ * @returns 设计稿来源列表
  */
 export function collectResourceDraftSources(resource: Resource): ResourceDraftSourceInfo[] {
     const sources: ResourceDraftSourceInfo[] = []
@@ -37,9 +37,9 @@ export function collectResourceDraftSources(resource: Resource): ResourceDraftSo
 }
 
 /**
- * 反查深境罗盘对应的图纸来源。
+ * 反查深境罗盘对应的设计稿来源。
  * @param ticketId 深境罗盘 ID
- * @returns 图纸来源列表
+ * @returns 设计稿来源列表
  */
 export function collectIronTicketDraftSources(ticketId: number): ResourceDraftSourceInfo[] {
     const sources: ResourceDraftSourceInfo[] = []

@@ -126,8 +126,8 @@ function getIronTicketBackgroundById(ticketId: number | string): string {
 }
 
 /**
- * 获取图纸条目的展示图标。
- * @param draftId 图纸ID或产物ID
+ * 获取设计稿条目的展示图标。
+ * @param draftId 设计稿ID或产物ID
  * @returns 图标路径
  */
 function getDraftIcon(draftId: number | string) {
@@ -143,8 +143,8 @@ function getDraftIcon(draftId: number | string) {
 }
 
 /**
- * 获取图纸条目的背景色。
- * @param draftId 图纸ID或产物ID
+ * 获取设计稿条目的背景色。
+ * @param draftId 设计稿ID或产物ID
  * @returns 背景色类名
  */
 function getDraftBackgroundColor(draftId: number | string): string {
@@ -211,9 +211,9 @@ function getWalnutBackgroundColor(_walnutId: number | string): string {
 }
 
 /**
- * 通过图纸ID或产物ID查找图纸。
- * @param draftId 图纸ID或产物ID
- * @returns 图纸数据
+ * 通过设计稿ID或产物ID查找设计稿。
+ * @param draftId 设计稿ID或产物ID
+ * @returns 设计稿数据
  */
 function getDraftByIdOrProductId(draftId: number | string): Draft | undefined {
     const normalizedId = Number(draftId)
@@ -461,7 +461,11 @@ function handleCardClick() {
     >
         <div
             v-bind="$attrs"
-            :class="mini ? 'flex items-center transition-colors duration-200' : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'"
+            :class="
+                mini
+                    ? 'flex items-center transition-colors duration-200'
+                    : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+            "
             @click="handleCardClick"
         >
             <span class="font-medium truncate">
@@ -472,7 +476,7 @@ function handleCardClick() {
                     :class="getRarityGradientClass(mod.品质)"
                 />
                 <SRouterLink v-if="!mini" :to="`/db/mod/${mod.id}`" stop class="hover:underline">
-                    {{ value[2] === "Mod" ? $t(mod.名称) : `图纸: ${mod.名称}` }}
+                    {{ value[2] === "Mod" ? $t(mod.名称) : `${$t("UI_FORGING_BLUEPRINT")}${mod.名称}` }}
                 </SRouterLink>
             </span>
             <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
@@ -490,7 +494,11 @@ function handleCardClick() {
     >
         <div
             v-bind="$attrs"
-            :class="mini ? 'flex items-center transition-colors duration-200' : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'"
+            :class="
+                mini
+                    ? 'flex items-center transition-colors duration-200'
+                    : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+            "
             @click="handleCardClick"
         >
             <span class="font-medium truncate">
@@ -517,7 +525,11 @@ function handleCardClick() {
     >
         <div
             v-bind="$attrs"
-            :class="mini ? 'flex items-center transition-colors duration-200' : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'"
+            :class="
+                mini
+                    ? 'flex items-center transition-colors duration-200'
+                    : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+            "
             @click="handleCardClick"
         >
             <span class="font-medium truncate">
@@ -536,7 +548,11 @@ function handleCardClick() {
     </ShowProps>
     <div
         v-else-if="Array.isArray(value) && value[2] === 'Draft' && getDraftByIdOrProductId(value[1])"
-        :class="mini ? 'flex items-center transition-colors duration-200' : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'"
+        :class="
+            mini
+                ? 'flex items-center transition-colors duration-200'
+                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+        "
         v-bind="$attrs"
         @click="$emit('click')"
     >
@@ -548,14 +564,18 @@ function handleCardClick() {
                 :class="getDraftBackgroundColor(value[1])"
             />
             <SRouterLink v-if="!mini" :to="`/db/draft/${getDraftByIdOrProductId(value[1])!.id}`" stop class="hover:underline">
-                {{ `图纸: ${Array.isArray(name) ? name.join(" / ") : getDraftByIdOrProductId(value[1])!.n}` }}
+                {{ `设计稿: ${Array.isArray(name) ? name.join(" / ") : getDraftByIdOrProductId(value[1])!.n}` }}
             </SRouterLink>
         </span>
         <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && value[2] === 'Walnut' && getWalnutReward(value[1]).walnut"
-        :class="mini ? 'flex items-center transition-colors duration-200' : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'"
+        :class="
+            mini
+                ? 'flex items-center transition-colors duration-200'
+                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+        "
         v-bind="$attrs"
         @click="$emit('click')"
     >
@@ -574,7 +594,11 @@ function handleCardClick() {
     </div>
     <div
         v-else-if="Array.isArray(value) && value[2] === 'Resource' && getResourceById(value[1])"
-        :class="mini ? 'flex items-center transition-colors duration-200' : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'"
+        :class="
+            mini
+                ? 'flex items-center transition-colors duration-200'
+                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+        "
         v-bind="$attrs"
         @click="$emit('click')"
     >
@@ -597,7 +621,11 @@ function handleCardClick() {
             (value[2] === 'IronTicket' || nameString.startsWith('IronTicket_')) &&
             iconticketMap.get(Number(value[1]))
         "
-        :class="mini ? 'flex items-center transition-colors duration-200' : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'"
+        :class="
+            mini
+                ? 'flex items-center transition-colors duration-200'
+                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+        "
         v-bind="$attrs"
         @click="$emit('click')"
     >
@@ -616,7 +644,11 @@ function handleCardClick() {
     </div>
     <div
         v-else-if="Array.isArray(value) && isFashionCostType(value[2])"
-        :class="mini ? 'flex items-center transition-colors duration-200' : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'"
+        :class="
+            mini
+                ? 'flex items-center transition-colors duration-200'
+                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+        "
         v-bind="$attrs"
         @click="$emit('click')"
     >
@@ -627,7 +659,12 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 bg-linear-15 rounded"
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
-            <SRouterLink v-if="!mini && getFashionLink(value[2], value[1])" :to="getFashionLink(value[2], value[1])" stop class="hover:underline">
+            <SRouterLink
+                v-if="!mini && getFashionLink(value[2], value[1])"
+                :to="getFashionLink(value[2], value[1])"
+                stop
+                class="hover:underline"
+            >
                 {{ value[2] === "Skin" ? getSkinDisplayName(value[1], nameString) : nameString }}
             </SRouterLink>
             <span v-else-if="!mini">{{ name }}</span>
@@ -636,7 +673,11 @@ function handleCardClick() {
     </div>
     <div
         v-else-if="Array.isArray(value) && isAccessoryCostType(value[2]) && getAccessoryByType(value[2], value[1])"
-        :class="mini ? 'flex items-center transition-colors duration-200' : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'"
+        :class="
+            mini
+                ? 'flex items-center transition-colors duration-200'
+                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+        "
         v-bind="$attrs"
         @click="$emit('click')"
     >
@@ -647,7 +688,12 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 bg-linear-15 rounded"
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
-            <SRouterLink v-if="!mini" :to="`/db/accessory/${value[2] === 'CharAccessory' ? 'char' : 'weapon'}/${value[1]}`" stop class="hover:underline">
+            <SRouterLink
+                v-if="!mini"
+                :to="`/db/accessory/${value[2] === 'CharAccessory' ? 'char' : 'weapon'}/${value[1]}`"
+                stop
+                class="hover:underline"
+            >
                 {{ getAccessoryByType(value[2], value[1])?.name || name }}
             </SRouterLink>
         </span>
@@ -656,7 +702,11 @@ function handleCardClick() {
     <div
         v-else
         v-bind="$attrs"
-        :class="mini ? 'flex items-center transition-colors duration-200' : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'"
+        :class="
+            mini
+                ? 'flex items-center transition-colors duration-200'
+                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+        "
         @click="$emit('click')"
     >
         <span class="font-medium truncate">

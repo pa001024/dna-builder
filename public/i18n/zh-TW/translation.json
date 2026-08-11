@@ -5621,7 +5621,7 @@
         "materials": "消耗資源",
         "product": "產物",
         "rarity": "稀有度",
-        "title": "設計圖",
+        "title": "設計稿",
         "type": "類型",
         "unlimitedCrafting": "無限製造",
         "version": "版本"
@@ -6696,6 +6696,7 @@
         "top_actions": "使用頂部按鈕分享配置、自動構築、保存項目等",
         "weapon_select": "點擊這裡更換武器/設定精煉"
     },
+    "UI_FORGING_BLUEPRINT": "設計稿：",
     "unpack": {
         "desc": "讀取並匯出 pak 檔案",
         "title": "解包"

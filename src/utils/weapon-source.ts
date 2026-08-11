@@ -89,9 +89,9 @@ function findWalnutIdsByWeaponId(weaponId: number): number[] {
 }
 
 /**
- * 通过图纸 ID 获取对应的武器 ID。
- * @param draftId 图纸 ID
- * @returns 武器 ID；若图纸不是武器图纸则返回 null
+ * 通过设计稿 ID 获取对应的武器 ID。
+ * @param draftId 设计稿 ID
+ * @returns 武器 ID；若设计稿不是武器设计稿则返回 null
  */
 function findWeaponIdByDraftId(draftId: number): number | null {
     const draft = draftMap.get(draftId)

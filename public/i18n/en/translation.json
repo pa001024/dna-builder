@@ -6133,6 +6133,7 @@
         "tag": "Tag",
         "target_function": "Target Function",
         "team": "Team",
+        "timeline": "Timeline",
         "title": "Build",
         "title1": "{{charName}} - Build",
         "tour": "Newbie Guide",
@@ -6480,7 +6481,7 @@
         "materials": "Materials",
         "product": "Product",
         "rarity": "Rarity",
-        "title": "Blueprint",
+        "title": "Blueprints",
         "type": "Type",
         "unlimitedCrafting": "Unlimited Crafting",
         "version": "Version"
@@ -6669,11 +6670,13 @@
         "title": "Guide List"
     },
     "guides": {
+        "all": "All",
         "all_characters": "All roles",
         "associated_character": "associated role",
         "build_info": "Build infor",
         "build_info_tip": "This guide contains equipment information, click the button below to view the complete equipment",
         "desc": "View character guides",
+        "edit": "Edit",
         "guide_content": "Strategy content",
         "guide_title": "Guide title",
         "guide_type": "Strategy type",
@@ -7367,6 +7370,7 @@
         "aiTestConnection": "Test Connection",
         "appearance": "Appearance",
         "cancel": "Cancel",
+        "confirm": "Confirm",
         "current": "Current",
         "customSource": "Custom",
         "darkTheme": "Dark Theme",
@@ -7551,6 +7555,7 @@
         "top_actions": "Use top buttons to share configuration, auto-build, save project, etc.",
         "weapon_select": "Click here to change weapon/set refinement"
     },
+    "UI_FORGING_BLUEPRINT": "Blueprint: ",
     "unpack": {
         "desc": "Read and export pak files",
         "title": "Unpack"

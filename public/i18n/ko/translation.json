@@ -7557,6 +7557,7 @@
         "top_actions": "상단 버튼으로 설정 공유, 자동 구축, 프로젝트 저장 등을 수행하세요",
         "weapon_select": "여기를 클릭하여 무기 변경/정련 설정"
     },
+    "UI_FORGING_BLUEPRINT": "설계도: ",
     "unpack": {
         "desc": "pak 파일을 읽고 내보냅니다",
         "title": "언팩"

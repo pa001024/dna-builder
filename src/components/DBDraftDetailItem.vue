@@ -35,7 +35,7 @@ const product = computed(() => {
     return null
 })
 
-// 获取当前图纸的掉落来源
+// 获取当前设计稿的掉落来源
 const draftDungeons = computed(() => {
     return (draftDungeonMap.get(props.draft.p) || []).map(dungeon => {
         const dropInfo = getDraftDropInfo(dungeon, props.draft.p)
@@ -53,8 +53,8 @@ const draftDungeons = computed(() => {
 })
 
 /**
- * 收集当前图纸的商店来源信息。
- * @param draft 图纸数据
+ * 收集当前设计稿的商店来源信息。
+ * @param draft 设计稿数据
  * @returns 商店来源列表
  */
 function collectDraftShopSources(draft: Draft): ShopSourceInfo[] {
@@ -124,7 +124,7 @@ const productDisplay = computed(() => {
     <div class="space-y-3">
         <div class="p-3 flex items-center gap-3">
             <SRouterLink :to="`/db/draft/${draft.id}`" class="text-lg font-bold link link-primary"
-                >{{ $t("draft-detail.title") }}: {{ $t(draft.n) }}</SRouterLink
+                >{{ $t("UI_FORGING_BLUEPRINT") }}{{ $t(draft.n) }}</SRouterLink
             >
             <CopyID :id="draft.id" />
         </div>

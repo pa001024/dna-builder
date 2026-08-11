@@ -140,8 +140,8 @@ function calculateSingleWeaponLevelUp(
 /**
  * 生成资源依赖树
  * @param mod 魔之楔数据
- * @param modDraftMap 魔之楔图纸映射
- * @param resourceDraftMap 资源图纸映射
+ * @param modDraftMap 魔之楔设计稿映射
+ * @param resourceDraftMap 资源设计稿映射
  * @param config 魔之楔养成配置
  * @returns 资源依赖树
  */
@@ -198,14 +198,14 @@ function generateResourceTree(
         })
     }
 
-    // 处理图纸和材料
+    // 处理设计稿和材料
     const draft = mod.draft
     const costDraft = mod.costDraft
     if (costDraft) {
         const processDraft = (d: Draft, multiplier: number, parent: ResourceTreeNode) => {
-            // 添加图纸信息
+            // 添加设计稿信息
             if (d.t === "Mod") {
-                const draftNames = mod.消耗?.length ? mod.消耗.map(id => modDraftMap.get(id)?.n || String(id)) : `图纸: ${d.n}`
+                const draftNames = mod.消耗?.length ? mod.消耗.map(id => modDraftMap.get(id)?.n || String(id)) : `设计稿: ${d.n}`
                 if (draftNames.length > 1) console.log(draftNames)
                 parent.children!.push({
                     id: `mod-${d.p}-draft-${d.id}`,
@@ -298,7 +298,7 @@ function generateResourceTree(
             // 直接赠送的 mod 没有本体制造需求，不能把 count 再加进去。
             if (draft) {
                 if (costDraft.id !== draft.id) {
-                    const draftName = `图纸: ${draft.n}`
+                    const draftName = `设计稿: ${draft.n}`
                     root.children!.push({
                         id: `mod-${mod.id}-draft-${draft.id}`,
                         cid: draft.p,
@@ -334,7 +334,7 @@ function generateResourceTree(
             }
         }
 
-        // 处理图纸
+        // 处理设计稿
         processDraft(costDraft, totalGold, root)
     }
 
@@ -699,7 +699,7 @@ function calculateWeaponCraft(
     const cost: ResourceCost = {}
     const needRefine = Math.max(0, targetRefine - currentRefine)
 
-    // 查找武器图纸
+    // 查找武器设计稿
     const draft = weapon.draft
     const hasForge = !!(weapon.熔炉 && weapon.熔炉.length > 0)
     if (weapon.walnut && !hasForge) {
@@ -790,7 +790,7 @@ function calculateModLevelUpCost(
     const draft = mod.draft
     const costDraft = mod.costDraft
     function calcDraftCost(d: Draft, n = 1, sub: boolean = false) {
-        const name = `图纸: ${d.n}-${d.id}`
+        const name = `设计稿: ${d.n}-${d.id}`
         let selfGold = n
         let totalGold = 0
         if (mod.品质 === "金" && targetLevel > 5 && !sub) {
@@ -806,7 +806,7 @@ function calculateModLevelUpCost(
             // 直接赠送的 mod 没有本体制造需求，这里不能把 count 再加 1。
             if (draft) {
                 if (d.id !== draft.id) {
-                    const self = `图纸: ${draft.n}-${draft.id}`
+                    const self = `设计稿: ${draft.n}-${draft.id}`
                     cost[self] = [n, draft.p, "Draft"]
                 } else {
                     selfGold = totalGold = totalGold + n
@@ -1186,7 +1186,7 @@ export function estimateTime(totalCost: ResourceCost, modMap: Record<number, Mod
         totalMinutes += minutesNeeded
         const res = Object.keys(items).map(k => {
             const [type, name] = k.split("-")
-            return type === "Mod" ? modMap[+name]?.名称 || name : `图纸: ${modMap[+name]?.名称 || name}`
+            return type === "Mod" ? modMap[+name]?.名称 || name : `设计稿: ${modMap[+name]?.名称 || name}`
         })
         dungeonTimes[id] = [(dungeonTimes[id]?.[0] || 0) + (count || 0), [...(dungeonTimes[id]?.[1] || []), ...res]]
     }

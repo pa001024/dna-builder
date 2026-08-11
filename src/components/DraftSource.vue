@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { t } from "i18next"
 import type { Draft } from "@/data/d/draft.data"
 import { type ResourceDraftSourceInfo } from "@/utils/draft-source"
 
@@ -7,12 +8,12 @@ const props = defineProps<{
 }>()
 
 /**
- * 格式化图纸名称展示。
- * @param draft 图纸数据
- * @returns 图纸展示名称
+ * 格式化设计稿名称展示。
+ * @param draft 设计稿数据
+ * @returns 设计稿展示名称
  */
 function getDraftLabel(draft: Draft): string {
-    return `图纸: ${draft.n}`
+    return `${t("UI_FORGING_BLUEPRINT")}${t(draft.n)}`
 }
 
 /**

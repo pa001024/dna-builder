@@ -125,7 +125,7 @@ describe("数据完整性测试", () => {
         expect(exports).toContain("achievementData")
     })
 
-    it("魔之楔和图纸的副本来源不应重复", () => {
+    it("魔之楔和设计稿的副本来源不应重复", () => {
         for (const dungeons of dataModule.modDungeonMap.values()) {
             expect(new Set(dungeons.map(dungeon => dungeon.id)).size).toBe(dungeons.length)
         }

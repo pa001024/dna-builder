@@ -45,8 +45,8 @@ function getResourceIcon(id?: number | string) {
 }
 
 /**
- * 获取图纸展示图标。
- * @param id 图纸ID
+ * 获取设计稿展示图标。
+ * @param id 设计稿ID
  * @returns 图标路径
  */
 function getDraftIcon(id: number) {
@@ -349,7 +349,7 @@ function getRewardDisplayName(item: RewardItemType) {
     }
     if (item.t === "Draft") {
         const draft = draftMap.get(item.id)
-        return draft ? `图纸: ${draft.n}` : `ID: ${item.id}`
+        return draft ? `${t("UI_FORGING_BLUEPRINT")}${t(draft.n)}` : `ID: ${item.id}`
     }
     if (item.t === "Resource") {
         return item.n ? t(item.n) : `ID: ${item.id}`
@@ -458,12 +458,12 @@ function getCharacterFragmentIcon(name?: string): string {
                                 />
                                 <SRouterLink v-if="hasRewardLink(item)" :to="getRewardLink(item)" class="min-w-0 truncate hover:underline">
                                     {{ item.dp ? "掉落物: " : "" }}
-                                    {{ item.d ? "图纸: " : "" }}
+                                    {{ item.d ? $t("UI_FORGING_BLUEPRINT") : "" }}
                                     {{ getRewardDisplayName(item) }}
                                 </SRouterLink>
                                 <span v-else>
                                     {{ item.dp ? "掉落物: " : "" }}
-                                    {{ item.d ? "图纸: " : "" }}
+                                    {{ item.d ? $t("UI_FORGING_BLUEPRINT") : "" }}
                                     {{ getRewardDisplayName(item) }}
                                 </span>
                                 <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
