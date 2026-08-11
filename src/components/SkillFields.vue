@@ -31,10 +31,10 @@ const isIdentifierUsed = (fieldName: string) => {
     return props.selectedIdentifiers.includes(fieldName)
 }
 
-const skillFieldExtraKeys = ["削韧", "延迟", "卡肉", "取消", "连段"] as const
+const skillFieldExtraKeys = ["削韧", "Boss削韧", "延迟", "卡肉", "取消", "连段"] as const
 
 interface SkillFieldExtraItem {
-    key: "削韧" | "延迟" | "卡肉" | "取消" | "连段"
+    key: "削韧" | "Boss削韧" | "延迟" | "卡肉" | "取消" | "连段"
     value: number
 }
 
@@ -63,7 +63,7 @@ function getFieldExpandKey(field: SkillField, index: number) {
 }
 
 /**
- * 获取技能字段的额外信息（削韧/延迟/卡肉/取消/连段/段数）
+ * 获取技能字段的额外信息（削韧/Boss削韧/延迟/卡肉/取消/连段）
  * @param field 技能字段
  * @returns 可展示的额外字段列表
  */

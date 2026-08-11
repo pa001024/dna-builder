@@ -9218,6 +9218,12 @@ const data = t.map((item: Mod) => {
     if (item.名称.startsWith("羽翼·鼓舞·")) {
         item.减伤 = [0.5]
     }
+
+    // TODO: 临时patch 请于1.6版本之后移除
+    if (item.名称.endsWith("·精炼")) {
+        item.增伤 = item.技能伤害
+        delete item.技能伤害
+    }
     return item
 })
 

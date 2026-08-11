@@ -418,6 +418,7 @@ export interface SkillField {
     格式?: string
     值2?: number[] | number
     削韧?: number[] | number
+    Boss削韧?: number[] | number
     延迟?: number[] | number
     卡肉?: number[] | number
     取消?: number[] | number

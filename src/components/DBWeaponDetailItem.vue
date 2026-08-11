@@ -30,6 +30,7 @@ interface MeleeSkillComboSummary {
     comboTime: number
     totalMultiplier: number
     multiplierPerSecond: number
+    totalBossStagger: number
 }
 
 interface WeaponSkillReplaceInfo {
@@ -201,7 +202,7 @@ function getFieldMultiplier(field: SkillField) {
 }
 
 /**
- * 计算单个近战技能（如普通攻击一套）的连段时间、总倍率与秒均倍率（基于取消时间）
+ * 计算单个近战技能（如普通攻击一套）的连段时间、倍率与削韧汇总（基于取消时间）
  */
 const singleSkillComboSummaryByName = computed<Record<string, MeleeSkillComboSummary>>(() => {
     const result: Record<string, MeleeSkillComboSummary> = {}
@@ -220,10 +221,12 @@ const singleSkillComboSummaryByName = computed<Record<string, MeleeSkillComboSum
         if (comboTime <= 0) continue
 
         const totalMultiplier = fields.reduce((sum, field) => sum + getFieldMultiplier(field as SkillField), 0)
+        const totalBossStagger = fields.reduce((sum, field) => sum + (pickFieldValue((field as SkillField).Boss削韧) || 0), 0)
         result[skill.名称] = {
             comboTime,
             totalMultiplier,
             multiplierPerSecond: totalMultiplier / comboTime,
+            totalBossStagger,
         }
     }
 
@@ -375,6 +378,7 @@ watch(
                         <span>
                             {{ $t("总倍率") }}: {{ +(singleSkillComboSummaryByName[skill.名称].totalMultiplier * 100).toFixed(1) }}%
                         </span>
+                        <span>{{ $t("Boss削韧") }}: {{ +singleSkillComboSummaryByName[skill.名称].totalBossStagger.toFixed(2) }}</span>
                     </div>
                     <SkillFields :skill="skill" />
                     <div v-if="skill.skillData.实体 && skill.skillData.实体.length > 0" class="mt-2">
