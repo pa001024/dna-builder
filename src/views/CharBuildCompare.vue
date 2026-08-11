@@ -2,7 +2,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import { cloneDeep } from "lodash-es"
 import { computed, reactive, ref } from "vue"
-import { normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
+import { type CharSettings, normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
     Buff,
     buffData,
@@ -18,11 +18,18 @@ import {
     modData,
     WeaponAttr,
 } from "../data"
+import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "../data/effectLv"
 import { useInvStore } from "../store/inv"
 import { useTimeline } from "../store/timeline"
 
 // Initialize stores and data
 const inv = useInvStore()
+
+// 按配置的 useGlobal/effectConfig 分流特效等级
+const getSettingsBuffLv = (settings: CharSettings, modId: number) =>
+    settings.useGlobal ? inv.getBuffLv(modId) : getModBuffLvFromSetting(settings.effectConfig, modId)
+const getSettingsWBuffLv = (settings: CharSettings, weaponId: number, elm: string) =>
+    settings.useGlobal ? inv.getWBuffLv(weaponId, elm) : getWBuffLvFromSetting(settings.effectConfig, weaponId, elm)
 
 // MOD options (same as CharBuildView)
 const modOptions = modData
@@ -195,20 +202,22 @@ const baseCharBuilds = computed(() => {
 
         // Create character build from project settings
         const char = LeveledCharHelper.fromId(config.selectedChar, settings.charLevel)
+        const getBuffLv = (modId: number) => getSettingsBuffLv(settings, modId)
+        const getWBuffLv = (weaponId: number) => getSettingsWBuffLv(settings, weaponId, char.属性)
         return new CharBuild({
             char,
             auraMod: LeveledModHelper.fromId(settings.auraMod),
             charMods: settings.charMods
-                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             meleeMods: settings.meleeMods
-                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             rangedMods: settings.rangedMods
-                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             skillMods: settings.skillWeaponMods
-                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             skillLevel: settings.charSkillLevel,
             buffs: settings.buffs.map((v: any) => createLeveledBuff(v[0], v[1], settings.customBuff)),
@@ -216,13 +225,13 @@ const baseCharBuilds = computed(() => {
                 settings.meleeWeapon,
                 settings.meleeWeaponRefine,
                 settings.meleeWeaponLevel,
-                inv.getWBuffLv(settings.meleeWeapon, char.属性)
+                getWBuffLv(settings.meleeWeapon)
             ),
             ranged: LeveledWeaponHelper.fromId(
                 settings.rangedWeapon,
                 settings.rangedWeaponRefine,
                 settings.rangedWeaponLevel,
-                inv.getWBuffLv(settings.rangedWeapon, char.属性)
+                getWBuffLv(settings.rangedWeapon)
             ),
             baseName: settings.baseName,
             imbalance: settings.imbalance,
@@ -275,25 +284,25 @@ const charBuilds = computed(() => {
         // Add additional MODs for this configuration, ensuring we don't exceed 8 slots for each type
         config.additionalMods[0].forEach(mod => {
             if (mod && combinedCharMods.length < 8) {
-                combinedCharMods.push(LeveledModHelper.fromId(mod[0], mod[1], inv.getBuffLv(mod[0])))
+                combinedCharMods.push(LeveledModHelper.fromId(mod[0], mod[1], getSettingsBuffLv(config.charSettings, mod[0])))
             }
         })
 
         config.additionalMods[1].forEach(mod => {
             if (mod && combinedMeleeMods.length < 8) {
-                combinedMeleeMods.push(LeveledModHelper.fromId(mod[0], mod[1], inv.getBuffLv(mod[0])))
+                combinedMeleeMods.push(LeveledModHelper.fromId(mod[0], mod[1], getSettingsBuffLv(config.charSettings, mod[0])))
             }
         })
 
         config.additionalMods[2].forEach(mod => {
             if (mod && combinedRangedMods.length < 8) {
-                combinedRangedMods.push(LeveledModHelper.fromId(mod[0], mod[1], inv.getBuffLv(mod[0])))
+                combinedRangedMods.push(LeveledModHelper.fromId(mod[0], mod[1], getSettingsBuffLv(config.charSettings, mod[0])))
             }
         })
 
         config.additionalMods[3].forEach(mod => {
             if (mod && combinedSkillWeaponMods.length < 4) {
-                combinedSkillWeaponMods.push(LeveledModHelper.fromId(mod[0], mod[1], inv.getBuffLv(mod[0])))
+                combinedSkillWeaponMods.push(LeveledModHelper.fromId(mod[0], mod[1], getSettingsBuffLv(config.charSettings, mod[0])))
             }
         })
 

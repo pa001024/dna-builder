@@ -34,6 +34,7 @@ import {
 import { createBuffFromSettings } from "../data/CharBuildHelper"
 import { dataPackHydrationKey, isDataPackHydrated } from "../data/data-pack-bridge"
 import type { SkillWeapon, Weapon } from "../data/data-types"
+import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "../data/effectLv"
 import { waitForInitialLoad } from "../i18n"
 import { useInvStore } from "../store/inv"
 import { useSettingStore } from "../store/setting"
@@ -120,7 +121,7 @@ const modOptions = computed(() => {
             limit: mod.属性 || mod.限定,
             ser: mod.系列,
             count: Math.min(inv.getModCount(mod.id, mod.品质), mod.系列 !== "契约者" ? 8 : 1),
-            bufflv: inv.getBuffLv(mod.id),
+            bufflv: getBuffLv(mod.id),
             lv: inv.getModLv(mod.id, mod.品质),
         }))
         .filter(mod => mod.count)
@@ -192,21 +193,27 @@ const rangedWeaponOptions = computed(() => {
 })
 
 // 状态变量
+const useGlobalEffects = () => charSettings.value.useGlobal
+const effectConfig = () => charSettings.value.effectConfig || {}
+const getBuffLv = (modId: number) =>
+    useGlobalEffects() ? inv.getBuffLv(modId) : getModBuffLvFromSetting(effectConfig(), modId)
+const getWBuffLv = (weaponId: number, elm: string) =>
+    useGlobalEffects() ? inv.getWBuffLv(weaponId, elm) : getWBuffLvFromSetting(effectConfig(), weaponId, elm)
 const selectedCharMods = computed(() => {
     dataPackTick.value
-    return charSettings.value.charMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+    return charSettings.value.charMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], getBuffLv(v[0])) : null))
 })
 const selectedMeleeMods = computed(() => {
     dataPackTick.value
-    return charSettings.value.meleeMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+    return charSettings.value.meleeMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], getBuffLv(v[0])) : null))
 })
 const selectedRangedMods = computed(() => {
     dataPackTick.value
-    return charSettings.value.rangedMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+    return charSettings.value.rangedMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], getBuffLv(v[0])) : null))
 })
 const selectedSkillWeaponMods = computed(() => {
     dataPackTick.value
-    return charSettings.value.skillWeaponMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], inv.getBuffLv(v[0])) : null))
+    return charSettings.value.skillWeaponMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], getBuffLv(v[0])) : null))
 })
 const selectedBuffs = computed(() => {
     dataPackTick.value
@@ -261,13 +268,13 @@ const charBuild = computed(() => {
             charSettings.value.meleeWeapon,
             charSettings.value.meleeWeaponRefine,
             charSettings.value.meleeWeaponLevel,
-            inv.getWBuffLv(charSettings.value.meleeWeapon, char.属性)
+            getWBuffLv(charSettings.value.meleeWeapon, char.属性)
         )
         const ranged = LeveledWeaponHelper.fromId(
             charSettings.value.rangedWeapon,
             charSettings.value.rangedWeaponRefine,
             charSettings.value.rangedWeaponLevel,
-            inv.getWBuffLv(charSettings.value.rangedWeapon, char.属性)
+            getWBuffLv(charSettings.value.rangedWeapon, char.属性)
         )
         const b = new CharBuild({
             char,
@@ -1274,6 +1281,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 :default-tab="weaponDefaultTab"
                 :melee="charSettings.meleeWeapon"
                 :ranged="charSettings.rangedWeapon"
+                :use-global="charSettings.useGlobal"
+                :char-settings="charSettings"
                 @change="handleWeaponSelection"
             />
             <div class="modal-action">
@@ -1974,7 +1983,13 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         @toggle="toggleSection('effects')"
                     >
                         <div class="mt-2">
-                            <EffectSettings :mods="charBuild.modsWithWeapons" :char-build="charBuild" />
+                            <EffectSettings
+                                :mods="charBuild.modsWithWeapons"
+                                :char-build="charBuild"
+                                :use-global="charSettings.useGlobal"
+                                :char-settings="charSettings"
+                                @update:use-global="charSettings.useGlobal = $event"
+                            />
                         </div>
                     </CollapsibleSection>
 

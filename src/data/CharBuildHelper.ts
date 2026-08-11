@@ -1,5 +1,6 @@
 import type { CharSettings } from "../composables/useCharSettings"
 import { CharBuild, CharBuildTimeline } from "./CharBuild"
+import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "./effectLv"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import {
     type CharBuildInvSnapshot,
@@ -27,21 +28,18 @@ export function createCharBuildFromSettings(
 ) {
     const char = LeveledCharHelper.fromId(selectedChar, charSettings.charLevel)
     const hydratedTimeline = timeline ? hydrateCharBuildTimeline(timeline) : undefined
+    const useGlobal = charSettings.useGlobal
+    const effectConfig = charSettings.effectConfig || {}
+    const getBuffLv = (modId: number) => (useGlobal ? getBuffLvFromSnapshot(inv, modId) : getModBuffLvFromSetting(effectConfig, modId))
+    const getWBuffLv = (weaponId: number) =>
+        useGlobal ? getWBuffLvFromSnapshot(inv, weaponId, char.属性) : getWBuffLvFromSetting(effectConfig, weaponId, char.属性)
     return new CharBuild({
         char,
         auraMod: LeveledModHelper.fromId(charSettings.auraMod),
-        charMods: charSettings.charMods
-            .filter(mod => mod !== null)
-            .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLvFromSnapshot(inv, v[0]))),
-        meleeMods: charSettings.meleeMods
-            .filter(mod => mod !== null)
-            .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLvFromSnapshot(inv, v[0]))),
-        rangedMods: charSettings.rangedMods
-            .filter(mod => mod !== null)
-            .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLvFromSnapshot(inv, v[0]))),
-        skillMods: charSettings.skillWeaponMods
-            .filter(mod => mod !== null)
-            .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLvFromSnapshot(inv, v[0]))),
+        charMods: charSettings.charMods.filter(mod => mod !== null).map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
+        meleeMods: charSettings.meleeMods.filter(mod => mod !== null).map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
+        rangedMods: charSettings.rangedMods.filter(mod => mod !== null).map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
+        skillMods: charSettings.skillWeaponMods.filter(mod => mod !== null).map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
         skillLevel: charSettings.charSkillLevel,
         buffs: charSettings.buffs
             .map(v => {
@@ -58,13 +56,13 @@ export function createCharBuildFromSettings(
             charSettings.meleeWeapon,
             charSettings.meleeWeaponRefine,
             charSettings.meleeWeaponLevel,
-            getWBuffLvFromSnapshot(inv, charSettings.meleeWeapon, char.属性)
+            getWBuffLv(charSettings.meleeWeapon)
         ),
         ranged: LeveledWeaponHelper.fromId(
             charSettings.rangedWeapon,
             charSettings.rangedWeaponRefine,
             charSettings.rangedWeaponLevel,
-            getWBuffLvFromSnapshot(inv, charSettings.rangedWeapon, char.属性)
+            getWBuffLv(charSettings.rangedWeapon)
         ),
         baseName: charSettings.baseName,
         imbalance: charSettings.imbalance,

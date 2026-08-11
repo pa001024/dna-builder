@@ -1263,6 +1263,7 @@ import {
     LeveledModHelper,
     LeveledWeaponHelper,
 } from "../data"
+import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "../data/effectLv"
 import { useInvStore } from "../store/inv"
 import { useTimeline } from "../store/timeline"
 import { formatProp, formatSkillProp } from "../util"
@@ -1275,13 +1276,17 @@ const baseName = ref(charSettings.value.baseName)
 const targetFunction = ref("")
 const charBuild = computed(() => {
     const char = LeveledCharHelper.fromId(selectedChar.value, charSettings.value.charLevel)
+    const getBuffLv = (modId: number) =>
+        charSettings.value.useGlobal ? inv.getBuffLv(modId) : getModBuffLvFromSetting(charSettings.value.effectConfig, modId)
+    const getWBuffLv = (weaponId: number) =>
+        charSettings.value.useGlobal ? inv.getWBuffLv(weaponId, char.属性) : getWBuffLvFromSetting(charSettings.value.effectConfig, weaponId, char.属性)
     return new CharBuild({
         char,
         auraMod: LeveledModHelper.fromId(charSettings.value.auraMod),
-        charMods: charSettings.value.charMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], inv.getBuffLv(m[0]))),
-        meleeMods: charSettings.value.meleeMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], inv.getBuffLv(m[0]))),
-        rangedMods: charSettings.value.rangedMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], inv.getBuffLv(m[0]))),
-        skillMods: charSettings.value.skillWeaponMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], inv.getBuffLv(m[0]))),
+        charMods: charSettings.value.charMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
+        meleeMods: charSettings.value.meleeMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
+        rangedMods: charSettings.value.rangedMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
+        skillMods: charSettings.value.skillWeaponMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
         skillLevel: charSettings.value.charSkillLevel,
         buffs: charSettings.value.buffs
             .map(v => {
@@ -1299,13 +1304,13 @@ const charBuild = computed(() => {
             charSettings.value.meleeWeapon,
             charSettings.value.meleeWeaponRefine,
             charSettings.value.meleeWeaponLevel,
-            inv.getWBuffLv(charSettings.value.meleeWeapon, char.属性)
+            getWBuffLv(charSettings.value.meleeWeapon)
         ),
         ranged: LeveledWeaponHelper.fromId(
             charSettings.value.rangedWeapon,
             charSettings.value.rangedWeaponRefine,
             charSettings.value.rangedWeaponLevel,
-            inv.getWBuffLv(charSettings.value.rangedWeapon, char.属性)
+            getWBuffLv(charSettings.value.rangedWeapon)
         ),
         baseName: charSettings.value.baseName,
         imbalance: charSettings.value.imbalance,

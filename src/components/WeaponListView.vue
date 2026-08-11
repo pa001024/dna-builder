@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
+import type { CharSettings } from "../composables/useCharSettings"
 import { CharBuild, LeveledWeapon, weaponData } from "../data"
 import type { Weapon } from "../data/data-types"
+import { getWBuffLvFromSetting } from "../data/effectLv"
 import { useInvStore } from "../store/inv"
 import { format100, format100r } from "../util"
 import { matchPinyin } from "../utils/pinyin-utils"
@@ -11,9 +13,13 @@ const props = defineProps<{
     melee?: number
     ranged?: number
     defaultTab?: string
+    useGlobal?: boolean
+    charSettings?: CharSettings
 }>()
 
 const inv = useInvStore()
+const getWBuffLv = (weaponId: number, elm: string) =>
+    props.useGlobal || !props.charSettings ? inv.getWBuffLv(weaponId, elm) : getWBuffLvFromSetting(props.charSettings.effectConfig, weaponId, elm)
 const tabs = ["全部", "近战", "远程", "单手剑", "长柄", "重剑", "双刀", "鞭刃", "太刀", "手枪", "双枪", "榴炮", "霰弹枪", "突击枪", "弓"]
 const activeTab = ref(props.defaultTab || tabs[0])
 const searchQuery = ref("")
@@ -64,7 +70,7 @@ const displayedWeapons = computed(() => {
 
     return [...filteredWeapons.value]
         .map(weapon => {
-            const effectLv = inv.getWBuffLv(weapon.id, charBuild.char.属性)
+            const effectLv = getWBuffLv(weapon.id, charBuild.char.属性)
             const income = charBuild.calcIncome(new LeveledWeapon(weapon, undefined, undefined, effectLv)) || 0
             return { weapon, income }
         })
@@ -213,7 +219,7 @@ function selectWeapon(weapon: Weapon) {
                                 {{
                                     format100r(
                                         charBuild.calcIncome(
-                                            new LeveledWeapon(weapon, undefined, undefined, inv.getWBuffLv(weapon.id, charBuild.char.属性))
+                                            new LeveledWeapon(weapon, undefined, undefined, getWBuffLv(weapon.id, charBuild.char.属性))
                                         )
                                     )
                                 }}

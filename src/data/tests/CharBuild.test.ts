@@ -1721,6 +1721,8 @@ describe("CharBuild类测试", () => {
                 team2: "-",
                 team2Weapon: "-",
                 timelineDPS: false,
+                useGlobal: false,
+                effectConfig: {},
                 actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
             })
             const cloned = build.clone()

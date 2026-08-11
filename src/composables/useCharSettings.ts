@@ -75,6 +75,10 @@ export function createDefaultCharSettings() {
         team2: "-",
         team2Weapon: "-" as number | "-",
         timelineDPS: false,
+        /** 是否使用全局背包特效等级（true 时忽略 effectConfig，行为同旧版） */
+        useGlobal: false,
+        /** 构筑本地特效等级配置（key: `m:<modId>` / `w:<weaponId>`，缺省为最大） */
+        effectConfig: {} as Record<string, number>,
         actions: {
             enable: false,
             i: [],

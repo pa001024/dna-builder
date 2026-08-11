@@ -23,6 +23,7 @@ import {
     weaponData,
 } from "@/data"
 import { createBuffFromSettings } from "@/data/CharBuildHelper"
+import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
 import { LeveledSkill } from "@/data/leveled/LeveledSkill"
 import { env } from "@/env"
 import { useInvStore } from "@/store/inv"
@@ -102,17 +103,21 @@ const buffOptions = computed(() =>
         })
 )
 
+const getBuffLv = (modId: number) =>
+    charSettings.value.useGlobal ? inv.getBuffLv(modId) : getModBuffLvFromSetting(charSettings.value.effectConfig, modId)
+const getWBuffLv = (weaponId: number, elm: string) =>
+    charSettings.value.useGlobal ? inv.getWBuffLv(weaponId, elm) : getWBuffLvFromSetting(charSettings.value.effectConfig, weaponId, elm)
 const selectedCharMods = computed(() =>
-    charSettings.value.charMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], inv.getBuffLv(item[0])) : null))
+    charSettings.value.charMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], getBuffLv(item[0])) : null))
 )
 const selectedMeleeMods = computed(() =>
-    charSettings.value.meleeMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], inv.getBuffLv(item[0])) : null))
+    charSettings.value.meleeMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], getBuffLv(item[0])) : null))
 )
 const selectedRangedMods = computed(() =>
-    charSettings.value.rangedMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], inv.getBuffLv(item[0])) : null))
+    charSettings.value.rangedMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], getBuffLv(item[0])) : null))
 )
 const selectedSkillWeaponMods = computed(() =>
-    charSettings.value.skillWeaponMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], inv.getBuffLv(item[0])) : null))
+    charSettings.value.skillWeaponMods.map(item => (item ? LeveledModHelper.optionalFromId(item[0], item[1], getBuffLv(item[0])) : null))
 )
 const selectedBuffs = computed(() =>
     charSettings.value.buffs
@@ -186,13 +191,13 @@ const charBuild = computed(() => {
         charSettings.value.meleeWeapon,
         charSettings.value.meleeWeaponRefine,
         charSettings.value.meleeWeaponLevel,
-        inv.getWBuffLv(charSettings.value.meleeWeapon, char.属性)
+        getWBuffLv(charSettings.value.meleeWeapon, char.属性)
     )
     const ranged = LeveledWeaponHelper.fromId(
         charSettings.value.rangedWeapon,
         charSettings.value.rangedWeaponRefine,
         charSettings.value.rangedWeaponLevel,
-        inv.getWBuffLv(charSettings.value.rangedWeapon, char.属性)
+        getWBuffLv(charSettings.value.rangedWeapon, char.属性)
     )
 
     return new CharBuild({
@@ -478,9 +483,9 @@ const effectEntries = computed<EffectEntry[]>(() =>
         .filter(item => item.buff)
         .map(item => {
             const buff = item.buff!
-            const enabled = buff.pt === "Weapon" ? inv.getWBuffLv(item.id, charBuild.value.char.属性) > 0 : inv.getBuffLv(item.id) > 0
+            const enabled = buff.pt === "Weapon" ? getWBuffLv(item.id, charBuild.value.char.属性) > 0 : getBuffLv(item.id) > 0
             const level =
-                buff.pt === "Weapon" ? inv.getWBuffLv(item.id, charBuild.value.char.属性) || buff.等级 : inv.getBuffLv(item.id) || buff.等级
+                buff.pt === "Weapon" ? getWBuffLv(item.id, charBuild.value.char.属性) || buff.等级 : getBuffLv(item.id) || buff.等级
             return {
                 id: item.id,
                 label: buff.名称 || item.名称,
@@ -562,7 +567,7 @@ const auraMod = computed(() => {
         return new LeveledMod(
             charSettings.value.auraMod,
             inv.getModLv(charSettings.value.auraMod) ?? 10,
-            inv.getBuffLv(charSettings.value.auraMod)
+            getBuffLv(charSettings.value.auraMod)
         )
     } catch {
         return undefined
@@ -591,7 +596,7 @@ const filteredWeaponChoices = computed(() => {
                 weapon.id,
                 weapon.类型[0] === "近战" ? charSettings.value.meleeWeaponRefine : charSettings.value.rangedWeaponRefine,
                 weapon.类型[0] === "近战" ? charSettings.value.meleeWeaponLevel : charSettings.value.rangedWeaponLevel,
-                inv.getWBuffLv(weapon.id, charBuild.value.char.属性)
+                getWBuffLv(weapon.id, charBuild.value.char.属性)
             )
             return {
                 weapon,
@@ -814,7 +819,7 @@ const availableModChoices = computed(() => {
             return true
         })
         .map(mod => {
-            const leveled = LeveledModHelper.fromId(mod.id, inv.getModLv(mod.id, mod.品质) ?? 10, inv.getBuffLv(mod.id))
+            const leveled = LeveledModHelper.fromId(mod.id, inv.getModLv(mod.id, mod.品质) ?? 10, getBuffLv(mod.id))
             return {
                 mod: leveled,
                 income: charBuild.value.calcIncome(leveled),
@@ -1110,19 +1115,31 @@ function adjustBuffLevel(buff: LeveledBuff, delta: number) {
  * @returns void
  */
 function toggleEffect(effect: EffectEntry) {
+    const mx = effect.maxLevel
     if (effect.enabled) {
-        if (effect.isWeapon) {
-            inv.setWBuffLv(effect.id, 0)
-        } else {
-            inv.setBuffLv(effect.id, 0)
-        }
+        setEffectLocal(effect, 0)
         return
     }
-    if (effect.isWeapon) {
-        inv.setWBuffLv(effect.id, effect.maxLevel)
-    } else {
-        inv.setBuffLv(effect.id, effect.maxLevel)
+    setEffectLocal(effect, mx)
+}
+
+/**
+ * 将特效等级写入当前生效的配置来源（全局背包或构筑本地）。
+ * @param effect 目标特效
+ * @param lv 新等级
+ * @returns void
+ */
+function setEffectLocal(effect: EffectEntry, lv: number) {
+    const key = effect.isWeapon ? `w:${effect.id}` : `m:${effect.id}`
+    if (charSettings.value.useGlobal) {
+        if (effect.isWeapon) inv.setWBuffLv(effect.id, lv)
+        else inv.setBuffLv(effect.id, lv)
+        return
     }
+    const config = charSettings.value.effectConfig
+    // 本地模式：等于最大值即默认态，删除键；否则写入配置
+    if (lv >= effect.maxLevel) delete config[key]
+    else config[key] = lv
 }
 
 /**
@@ -1133,11 +1150,7 @@ function toggleEffect(effect: EffectEntry) {
  */
 function setEffectLevel(effect: EffectEntry, lv: number) {
     const nextLevel = Math.max(effect.minLevel, Math.min(effect.maxLevel, lv))
-    if (effect.isWeapon) {
-        inv.setWBuffLv(effect.id, nextLevel)
-        return
-    }
-    inv.setBuffLv(effect.id, nextLevel)
+    setEffectLocal(effect, nextLevel)
 }
 
 /**
@@ -1335,7 +1348,7 @@ onMounted(() => {
                                 v-if="editingModId"
                                 class="pointer-events-none absolute inset-0 opacity-20"
                                 :style="{
-                                    backgroundImage: `url(${LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).url})`,
+                                    backgroundImage: `url(${LeveledModHelper.fromId(editingModId, editingModLv, getBuffLv(editingModId)).url})`,
                                     backgroundSize: 'cover',
                                     backgroundPosition: 'center',
                                 }"
@@ -1349,17 +1362,17 @@ onMounted(() => {
                             <template v-if="editingModId">
                                 <div class="relative z-10 mt-3 flex items-start gap-4">
                                     <img
-                                        :src="LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).url"
-                                        :alt="LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).名称"
+                                        :src="LeveledModHelper.fromId(editingModId, editingModLv, getBuffLv(editingModId)).url"
+                                        :alt="LeveledModHelper.fromId(editingModId, editingModLv, getBuffLv(editingModId)).名称"
                                         class="h-20 w-20 rounded-md border border-white/10 object-cover"
                                     />
                                     <div>
                                         <div class="text-2xl font-['Cormorant_Garamond',serif]">
-                                            {{ LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).名称 }}
+                                            {{ LeveledModHelper.fromId(editingModId, editingModLv, getBuffLv(editingModId)).名称 }}
                                         </div>
                                         <div class="mt-2 text-sm text-white/65">
-                                            {{ LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).系列 }} /
-                                            {{ LeveledModHelper.fromId(editingModId, editingModLv, inv.getBuffLv(editingModId)).品质 }}
+                                            {{ LeveledModHelper.fromId(editingModId, editingModLv, getBuffLv(editingModId)).系列 }} /
+                                            {{ LeveledModHelper.fromId(editingModId, editingModLv, getBuffLv(editingModId)).品质 }}
                                         </div>
                                     </div>
                                 </div>
