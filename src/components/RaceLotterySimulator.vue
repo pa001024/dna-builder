@@ -18,6 +18,7 @@ function computeCurrentDay(): number {
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { type RaceLotteryInsideBuff, type RaceLotteryPlayer } from "@/data/d/race-lottery.data"
+import { RACE_BUFF_MARKS, RACE_SPRINT_TIME } from "@/utils/race-lottery-sim"
 import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments, type StoryTextSegment } from "@/utils/story-text"
 
 interface RaceLotterySimPlayer {
@@ -38,9 +39,7 @@ const props = withDefaults(
 const emit = defineEmits<{ close: [] }>()
 
 const TRACK_LENGTH = 100
-const SPRINT_TIME = 30
-const BUFF_MARKS = [5, 10, 15, 20, 25]
-const ALL_MARKS = [...BUFF_MARKS, SPRINT_TIME]
+const ALL_MARKS = [...RACE_BUFF_MARKS, RACE_SPRINT_TIME]
 const SPRINT_BUFF_ID = 3002
 const SPEED_OPTIONS = [1, 2, 4, 8]
 const MAX_LOG_ENTRIES = 200
@@ -141,12 +140,12 @@ function applyBuff(runner: SimRunner, buff: RaceLotteryInsideBuff, time: number)
 }
 
 /**
- * 在时间节点上为所有未完赛选手重抽词条，30 秒时切换为冲刺词条。
+ * 在时间节点上为所有未完赛选手重抽词条，RaceTimeOutTime 时切换为冲刺词条。
  */
 function applyBuffsAt(mark: number) {
     for (const runner of runners.value) {
         if (runner.finished) continue
-        const buff = mark === SPRINT_TIME && sprintBuff.value ? sprintBuff.value : pickBuff()
+        const buff = mark === RACE_SPRINT_TIME && sprintBuff.value ? sprintBuff.value : pickBuff()
         applyBuff(runner, buff, mark)
     }
 }

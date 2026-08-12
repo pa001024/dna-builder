@@ -5,6 +5,7 @@ import {
     buildInsideBuffPool,
     estimateTopNRates,
     poissonBinomialCdfAtMost,
+    RACE_BUFF_MARKS,
     RACE_SPRINT_TIME,
     RACE_TRACK_LENGTH,
     simulateRace,
@@ -39,17 +40,31 @@ describe("race-lottery-sim", () => {
         expect(pool.some(buff => buff.insideBuffId === 3002)).toBe(false)
     })
 
-    it("匀速选手在 30 秒前按初始速度前进，冲刺后加速完赛", () => {
+    it("冲刺前每 5 秒重抽词条", () => {
+        expect(RACE_BUFF_MARKS).toEqual(
+            Array.from({ length: Math.max(0, Math.ceil(RACE_SPRINT_TIME / 5) - 1) }, (_, index) => (index + 1) * 5)
+        )
+
+        let drawCount = 0
+        simulateRace([{ playerId: 1, speed: 0.5 }], 1, () => {
+            drawCount += 1
+            return 0
+        })
+        expect(drawCount).toBe(RACE_BUFF_MARKS.length + 1)
+    })
+
+    it("匀速选手在超时前按初始速度前进，冲刺后加速完赛", () => {
         const constantBuff = raceLotteryData.insideBuffs.find(buff => buff.insideBuffId === 1001)!
         const sprintBuff = raceLotteryData.insideBuffs.find(buff => buff.insideBuffId === 3002)!
         const random = () => 0 // 始终抽到权重池第一个（匀速）
         const pool = buildInsideBuffPool(1)
         expect(pool[0]?.insideBuffId).toBe(constantBuff.insideBuffId)
 
-        const result = simulateRace([{ playerId: 1, speed: 2.5 }], 1, random)
-        // 0-30s 以 2.5 跑 75m，冲刺 effect=2 → 5 m/s，剩 25m 需 5s，总 35s
+        const speed = 0.5
+        const result = simulateRace([{ playerId: 1, speed }], 1, random)
+        // RaceTimeOutTime 前以基础速度跑，冲刺后按冲刺倍率完赛。
         expect(result[0].finishTime).toBeCloseTo(
-            RACE_SPRINT_TIME + (RACE_TRACK_LENGTH - 2.5 * RACE_SPRINT_TIME) / (2.5 * sprintBuff.effect),
+            RACE_SPRINT_TIME + (RACE_TRACK_LENGTH - speed * RACE_SPRINT_TIME) / (speed * sprintBuff.effect),
             5
         )
         expect(result[0].rank).toBe(1)
@@ -60,11 +75,12 @@ describe("race-lottery-sim", () => {
         const pool = buildInsideBuffPool(1)
         const totalWeight = pool.reduce((sum, buff) => sum + buff.randomWeight, 0)
         const weighted = pool.map(buff => ({ effect: buff.effect, probability: buff.randomWeight / totalWeight }))
-        const masses = buildFinishTimeDistribution(2.5, weighted, sprintBuff.effect)
+        const speed = 0.5
+        const masses = buildFinishTimeDistribution(speed, weighted, sprintBuff.effect)
         const sum = masses.reduce((total, item) => total + item.probability, 0)
         expect(sum).toBeCloseTo(1, 10)
 
-        const uniformFinish = RACE_SPRINT_TIME + (RACE_TRACK_LENGTH - 2.5 * RACE_SPRINT_TIME) / (2.5 * sprintBuff.effect)
+        const uniformFinish = RACE_SPRINT_TIME + (RACE_TRACK_LENGTH - speed * RACE_SPRINT_TIME) / (speed * sprintBuff.effect)
         const hit = masses.find(item => Math.abs(item.time - uniformFinish) < 1e-6)
         expect(hit).toBeTruthy()
         expect(hit!.probability).toBeGreaterThan(0)

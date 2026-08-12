@@ -305,7 +305,7 @@ const hasComputedWinRates = computed(() => orderedPlayers.every(player => player
 const showTopWinRateHighlight = ref(true)
 
 /** 是否显示其他可能胜利选手高亮。 */
-const showOtherWinRateHighlight = ref(true)
+const showOtherWinRateHighlight = ref(false)
 
 /** 当前用于投注的前 6 名选手 ID。 */
 const topWinRatePlayerIds = computed(() =>
@@ -1156,7 +1156,15 @@ onMounted(async () => {
                             <summary class="cursor-pointer text-sm font-bold">活动词条参考</summary>
                             <div class="mt-3 space-y-3 text-sm">
                                 <div v-for="buff in raceLotteryData.outsideBuffs" :key="buff.rumorId" class="flex justify-between gap-3">
-                                    <span>{{ buff.name }}</span>
+                                    <span>
+                                        {{ buff.name }}
+                                        <span v-if="buff.bannedWhenValueLowerThan !== undefined" class="text-base-content/60">
+                                            (速度≥{{ buff.bannedWhenValueLowerThan }})
+                                        </span>
+                                        <span v-if="buff.bannedWhenValueHigherThan !== undefined" class="text-base-content/60">
+                                            (速度≤{{ buff.bannedWhenValueHigherThan }})
+                                        </span>
+                                    </span>
                                     <span class="whitespace-nowrap text-base-content/60"
                                         >{{ buff.buffMap }} · ×{{ buff.pValueEffect }}</span
                                     >

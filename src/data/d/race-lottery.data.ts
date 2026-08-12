@@ -225,6 +225,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "+",
         pValueEffect: 1.05,
         randomWeight: 50,
+        bannedWhenValueHigherThan: 1.4,
         name: "完美热身",
     },
     {
@@ -232,6 +233,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "+",
         pValueEffect: 1.1,
         randomWeight: 50,
+        bannedWhenValueHigherThan: 1.33,
         name: "赛前特供餐",
     },
     {
@@ -239,6 +241,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "+",
         pValueEffect: 1.15,
         randomWeight: 50,
+        bannedWhenValueHigherThan: 1.26,
         name: "注意力集中",
     },
     {
@@ -246,7 +249,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "++",
         pValueEffect: 1.2,
         randomWeight: 30,
-        bannedWhenValueHigherThan: 3,
+        bannedWhenValueHigherThan: 1.19,
         name: "全新装备",
     },
     {
@@ -254,7 +257,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "++",
         pValueEffect: 1.3,
         randomWeight: 30,
-        bannedWhenValueHigherThan: 2,
+        bannedWhenValueHigherThan: 1.12,
         name: "全身心投入",
     },
     {
@@ -262,7 +265,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "+++",
         pValueEffect: 2,
         randomWeight: 10,
-        bannedWhenValueHigherThan: 2.5,
+        bannedWhenValueHigherThan: 1.05,
         name: "大师特训",
     },
     {
@@ -270,6 +273,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "-",
         pValueEffect: 0.95,
         randomWeight: 50,
+        bannedWhenValueLowerThan: 0.6,
         name: "小有压力",
     },
     {
@@ -277,6 +281,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "-",
         pValueEffect: 0.91,
         randomWeight: 50,
+        bannedWhenValueLowerThan: 0.67,
         name: "习惯性崴脚",
     },
     {
@@ -284,6 +289,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "-",
         pValueEffect: 0.87,
         randomWeight: 50,
+        bannedWhenValueLowerThan: 0.74,
         name: "紧张焦虑",
     },
     {
@@ -291,7 +297,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "--",
         pValueEffect: 0.83,
         randomWeight: 30,
-        bannedWhenValueLowerThan: 0.3,
+        bannedWhenValueLowerThan: 0.81,
         name: "浴室误滑倒",
     },
     {
@@ -299,7 +305,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "--",
         pValueEffect: 0.77,
         randomWeight: 30,
-        bannedWhenValueLowerThan: 0.5,
+        bannedWhenValueLowerThan: 0.88,
         name: "错食过期罐",
     },
     {
@@ -307,7 +313,7 @@ export const raceLotteryOutsideBuffs: RaceLotteryOutsideBuff[] = [
         buffMap: "---",
         pValueEffect: 0.5,
         randomWeight: 10,
-        bannedWhenValueLowerThan: 0.4,
+        bannedWhenValueLowerThan: 0.95,
         name: "情绪失控",
     },
 ]
@@ -426,7 +432,7 @@ export const raceLotteryConstants: Record<string, number | string> = {
     RaceLotteryStartpointid: 22,
     RaceLotterySubregionid: 106001,
     RacePlayerNum: 18,
-    RaceTimeOutTime: 30,
+    RaceTimeOutTime: 100,
     RaceTimeOutTimeBuff: 3002,
     RaceTrackLength: 100,
     RaceTrackNumSamples_Max: 200,

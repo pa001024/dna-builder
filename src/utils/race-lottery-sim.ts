@@ -8,14 +8,15 @@ export const RACE_SPRINT_TIME = Number(raceLotteryData.constants.RaceTimeOutTime
 export const RACE_SPRINT_BUFF_ID = Number(raceLotteryData.constants.RaceTimeOutTimeBuff) || 3002
 /** 前 N 名视为胜出，与 `ShortListedPlayerNum` 常量一致。 */
 export const RACE_TOP_N = Number(raceLotteryData.constants.ShortListedPlayerNum) || 6
-/** 途中重抽词条的时间节点（秒）。用户规则为每 5 秒，与动画模拟保持一致。 */
-export const RACE_BUFF_MARKS = [5, 10, 15, 20, 25] as const
+/** 赛内词条重抽间隔（秒），与 `RaceInsideBuffInterval` 的实际 5 秒规则一致。 */
+const RACE_BUFF_INTERVAL = 5
+/** 冲刺前的词条重抽时间节点（秒）。 */
+export const RACE_BUFF_MARKS = Array.from(
+    { length: Math.max(0, Math.ceil(RACE_SPRINT_TIME / RACE_BUFF_INTERVAL) - 1) },
+    (_, index) => (index + 1) * RACE_BUFF_INTERVAL
+)
 /** 魔灵竞速活动开始时间（黄金旅途·魔灵竞速 EventId 103025）。 */
 export const RACE_EVENT_START = 1785945600
-/** 冲刺前的分段时长（秒）。 */
-const SEGMENT_DURATION = 5
-/** 冲刺前分段数：初始 + 5 次重抽。 */
-const PRE_SPRINT_SEGMENTS = RACE_BUFF_MARKS.length + 1
 /** 时间分桶精度，合并浮点误差。 */
 const TIME_EPS = 1e-9
 
@@ -189,7 +190,7 @@ function advanceSprintToFinish(runners: RunnerState[], startTime: number): void 
 
 /**
  * 按赛中词条规则模拟一整场比赛，返回精确完赛时间与名次。
- * 规则：初始抽 buff → 每 5 秒重抽 → 30 秒强制冲刺 → 100m 冲线。
+ * 规则：初始抽 buff → 每 5 秒重抽 → RaceTimeOutTime 秒强制冲刺 → 100m 冲线。
  * @param players 选手及其当天最终速度。
  * @param day 赛事天数，决定词条解锁池。
  * @param random 随机数发生器。
@@ -300,7 +301,7 @@ function advanceOneSegment(
 }
 
 /**
- * 枚举全部赛内词条序列，得到该速度下的精确完赛时间分布。
+ * 通过逐段合并相同路程的概率质量，得到该速度下的精确完赛时间分布。
  * @param initialSpeed 当天最终速度。
  * @param weightedBuffs 规范化后的词条池。
  * @param sprintEffect 冲刺倍率。
@@ -330,39 +331,31 @@ export function buildFinishTimeDistribution(
         return [{ time: Number.POSITIVE_INFINITY, probability: 1 }]
     }
 
-    /**
-     * DFS 展开 PRE_SPRINT_SEGMENTS 段词条。
-     * @param depth 已完成段数。
-     * @param distance 当前路程。
-     * @param time 当前时间。
-     * @param probability 路径概率。
-     */
-    function dfs(depth: number, distance: number, time: number, probability: number): void {
-        if (depth >= PRE_SPRINT_SEGMENTS) {
-            const sprintSpeed = speed * sprintEffect
-            if (sprintSpeed <= 0) {
-                addMass(Number.POSITIVE_INFINITY, probability)
-                return
+    let activeDistances = new Map<number, number>([[0, 1]])
+    let segmentStart = 0
+    for (const segmentEnd of [...RACE_BUFF_MARKS, RACE_SPRINT_TIME]) {
+        const nextDistances = new Map<number, number>()
+        for (const [distance, probability] of activeDistances) {
+            for (const buff of weightedBuffs) {
+                const branchProbability = probability * buff.probability
+                if (branchProbability <= 0) continue
+                const advanced = advanceOneSegment(distance, segmentStart, segmentEnd - segmentStart, speed * buff.effect)
+                if (advanced.finished) {
+                    addMass(advanced.finishTime, branchProbability)
+                    continue
+                }
+                const key = quantizeTime(advanced.distance)
+                nextDistances.set(key, (nextDistances.get(key) || 0) + branchProbability)
             }
-            const remaining = RACE_TRACK_LENGTH - distance
-            addMass(RACE_SPRINT_TIME + remaining / sprintSpeed, probability)
-            return
         }
-
-        for (const buff of weightedBuffs) {
-            const branchProbability = probability * buff.probability
-            if (branchProbability <= 0) continue
-            const segmentSpeed = speed * buff.effect
-            const advanced = advanceOneSegment(distance, time, SEGMENT_DURATION, segmentSpeed)
-            if (advanced.finished) {
-                addMass(advanced.finishTime, branchProbability)
-                continue
-            }
-            dfs(depth + 1, advanced.distance, time + SEGMENT_DURATION, branchProbability)
-        }
+        activeDistances = nextDistances
+        segmentStart = segmentEnd
     }
 
-    dfs(0, 0, 0, 1)
+    const sprintSpeed = speed * sprintEffect
+    for (const [distance, probability] of activeDistances) {
+        addMass(sprintSpeed > 0 ? RACE_SPRINT_TIME + (RACE_TRACK_LENGTH - distance) / sprintSpeed : Number.POSITIVE_INFINITY, probability)
+    }
 
     return [...mass.entries()].map(([time, probability]) => ({ time, probability })).sort((left, right) => left.time - right.time)
 }
