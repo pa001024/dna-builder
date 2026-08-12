@@ -7572,6 +7572,7 @@
         "noUpdateAvailable": "사용 가능한 업데이트가 없습니다"
     },
     "updater": {
+        "downloadUpdate": "지금 업데이트",
         "newVersionFound": "새 버전 v{{version}}이(가) 발견되었습니다",
         "newVersionMessage": "\n\n{{body}}\n\n업데이트를 자동으로 다운로드하여 설치하시겠습니까?",
         "newVersionTitle": "새 버전",

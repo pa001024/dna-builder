@@ -7570,6 +7570,7 @@
         "noUpdateAvailable": "No updates available"
     },
     "updater": {
+        "downloadUpdate": "Update Now",
         "newVersionFound": "New version v{{version}} found",
         "newVersionMessage": "\n\n{{body}}\n\nDo you want to automatically download and install the update?",
         "newVersionTitle": "New Version Available",

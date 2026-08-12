@@ -7490,6 +7490,7 @@
         "noUpdateAvailable": "利用可能な更新はありません"
     },
     "updater": {
+        "downloadUpdate": "今すぐ更新",
         "newVersionFound": "新しいバージョン v{{version}}が見つかりました",
         "newVersionMessage": "\n\n{{body}}\n\n更新を自動的にダウンロードしてインストールしますか？",
         "newVersionTitle": "新しいバージョン",

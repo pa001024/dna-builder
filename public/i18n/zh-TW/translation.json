@@ -6711,6 +6711,7 @@
         "noUpdateAvailable": "沒有可用的更新"
     },
     "updater": {
+        "downloadUpdate": "立即更新",
         "newVersionFound": "發現新版本 v{{version}}",
         "newVersionMessage": "\n\n{{body}}\n\n是否自動下載並安裝更新？",
         "newVersionTitle": "有新版本",

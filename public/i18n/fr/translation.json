@@ -7605,6 +7605,7 @@
         "noUpdateAvailable": "Aucune mise à jour disponible"
     },
     "updater": {
+        "downloadUpdate": "Mettre à jour",
         "newVersionFound": "Nouvelle version v{{version}} trouvée",
         "newVersionMessage": "\n\n{{body}}\n\nVoulez-vous télécharger et installer automatiquement la mise à jour ?",
         "newVersionTitle": "Nouvelle version disponible",

@@ -320,8 +320,7 @@ onBeforeUnmount(() => {
 
 <template>
     <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
-    <Updater />
-    <DataPackLanding />
+    <StartupModal />
     <ScriptRuntimeFloatingBar v-if="isMainWindow" />
     <ResizeableWindow
         id="main-window"
