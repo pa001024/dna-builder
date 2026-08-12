@@ -67,7 +67,7 @@ http = "1.1.0"
 scopeguard = "1.2.0"
 regex = "1.11.1"
 md5 = "0.8.0"
-sha2 = "0.10.9"
+minisign-verify = "0.2"
 repak = { git = "https://github.com/trumank/repak", features = ["oodle"] }
 
 [profile.dev]

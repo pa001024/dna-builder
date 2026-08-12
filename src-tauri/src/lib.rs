@@ -7,12 +7,13 @@ use std::{
     time::{Duration, Instant},
 };
 
+use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 use hotwatch::{Event, EventKind, Hotwatch};
 use lazy_static::lazy_static;
 use md5::Context;
+use minisign_verify::{PublicKey, Signature};
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
 
 use tauri::{Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 use zip::ZipArchive;
@@ -27,8 +28,6 @@ const DOWNLOAD_CHUNK_SIZE: u64 = 8 * 1024 * 1024;
 const MULTITHREAD_THRESHOLD: u64 = 10 * 1024 * 1024;
 const PROGRESS_MAGIC: &[u8; 2] = b"PA";
 const PROGRESS_HEADER_SIZE: usize = 6;
-const UPDATE_MANIFEST_URL: &str = "https://cdn.dna-builder.cn/latest.json";
-const UPDATE_DIFF_ENDPOINT: &str = "https://api.dna-builder.cn/api/download/diff";
 
 /// 创建带系统代理配置的 HTTP 客户端。
 ///
@@ -1691,6 +1690,24 @@ mod download_progress_tests {
     }
 }
 
+#[cfg(test)]
+mod update_signature_tests {
+    use super::verify_update_signature_with_public_key;
+
+    const PUBLIC_KEY: &str = "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXkgRTc2MjBGMTg0MkI0RTgxRgpSV1FmNkxSQ0dBOWk1M21sWWVjTzRJelQ1MVRHUHB2V3VjTlNDaDFDQk0wUVRhTG43M1k3R0ZPMw==";
+    const SIGNATURE: &str = "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIG1pbmlzaWduIHNlY3JldCBrZXkKUldRZjZMUkNHQTlpNTlTTE9GeHo2Tnh2QVNYREplUnR1Wnlrd1FlcGJERUd0ODdpZzFCTnBXYVZXdU5ybTczWWlJaUpicTcxV2krZFA5ZUtMOE9DMzUxdndJYXNTU2JYeHdBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNTU1Nzc5OTY2CWZpbGU6dGVzdApRdEtNWFd5WWN3ZHBaQWxQRjd0RTJFTkprUmQxdWp2S2psajFtOVJ0SFRCblpQYTVXS1U1dVdSczVHb1A1TS9WcUU4MVFGdU1LSTVrL1NmTlFVYU9BQT09";
+
+    /// 验证与 Tauri updater 一致的 minisign 签名校验能拒绝被篡改的安装包。
+    #[test]
+    fn update_signature_verification_matches_tauri_updater() {
+        assert!(verify_update_signature_with_public_key(b"test", SIGNATURE, PUBLIC_KEY).is_ok());
+        assert!(verify_update_signature_with_public_key(b"Test", SIGNATURE, PUBLIC_KEY).is_err());
+        assert!(
+            verify_update_signature_with_public_key(b"test", "not-base64", PUBLIC_KEY).is_err()
+        );
+    }
+}
+
 /// 将内存中的完成状态编码为位图。
 fn encode_progress_mask(progress: &DownloadProgress) -> Vec<u8> {
     let mut progress_mask = vec![0; progress_mask_size(progress.num_chunks)];
@@ -2438,6 +2455,16 @@ struct UpdateManifest {
 #[derive(Debug, Deserialize)]
 struct UpdatePlatform {
     url: String,
+    signature: String,
+}
+
+/// Tauri 配置中 updater 插件所需的最小配置。
+#[derive(Debug, Deserialize)]
+struct UpdaterPluginConfig {
+    pubkey: String,
+    endpoints: Vec<String>,
+    #[serde(rename = "diffEndpoint")]
+    diff_endpoint: String,
 }
 
 /// 提供给前端的应用更新信息。
@@ -2457,23 +2484,84 @@ struct AppUpdateProgress {
     progress: u8,
 }
 
-/// 读取并校验文件 SHA-256。
-/// @param file_path 待校验的文件路径。
-/// @returns 小写十六进制 SHA-256 摘要。
-fn calculate_sha256(file_path: &Path) -> Result<String, String> {
-    let mut file = File::open(file_path).map_err(|error| format!("打开更新文件失败: {error}"))?;
-    let mut hasher = Sha256::new();
-    let mut buffer = [0_u8; 64 * 1024];
-    loop {
-        let read = file
-            .read(&mut buffer)
-            .map_err(|error| format!("读取更新文件失败: {error}"))?;
-        if read == 0 {
-            break;
+/// 读取与官方 updater 插件共用的 Tauri 配置。
+/// @param app_handle Tauri 应用句柄。
+/// @returns updater 插件配置。
+fn updater_config(app_handle: &tauri::AppHandle) -> Result<UpdaterPluginConfig, String> {
+    let config = app_handle
+        .config()
+        .plugins
+        .0
+        .get("updater")
+        .ok_or_else(|| "Tauri 配置中未找到 updater 插件".to_string())?
+        .clone();
+    serde_json::from_value::<UpdaterPluginConfig>(config)
+        .map_err(|error| format!("Tauri updater 配置无效: {error}"))
+}
+
+/// 使用 Tauri 配置中的 updater 公钥验证安装包签名。
+/// @param data 待验证的安装包原始字节。
+/// @param release_signature latest.json 中的 Base64 签名内容。
+/// @param public_key_base64 Tauri updater 配置中的 Base64 公钥。
+/// @returns 签名验证成功时返回 Ok。
+fn verify_update_signature(
+    data: &[u8],
+    release_signature: &str,
+    public_key_base64: &str,
+) -> Result<(), String> {
+    verify_update_signature_with_public_key(data, release_signature, public_key_base64)
+}
+
+/// 使用 Tauri updater 格式的公钥和签名验证安装包字节。
+/// @param data 待验证的安装包原始字节。
+/// @param release_signature latest.json 中的 Base64 签名内容。
+/// @param public_key_base64 Base64 编码的 minisign 公钥内容。
+/// @returns 签名验证成功时返回 Ok。
+fn verify_update_signature_with_public_key(
+    data: &[u8],
+    release_signature: &str,
+    public_key_base64: &str,
+) -> Result<(), String> {
+    let public_key = String::from_utf8(
+        BASE64
+            .decode(public_key_base64)
+            .map_err(|error| format!("更新公钥 Base64 解码失败: {error}"))?,
+    )
+    .map_err(|error| format!("更新公钥 UTF-8 解码失败: {error}"))?;
+    let public_key =
+        PublicKey::decode(&public_key).map_err(|error| format!("更新公钥格式无效: {error}"))?;
+    let signature = String::from_utf8(
+        BASE64
+            .decode(release_signature)
+            .map_err(|error| format!("更新签名 Base64 解码失败: {error}"))?,
+    )
+    .map_err(|error| format!("更新签名 UTF-8 解码失败: {error}"))?;
+    let signature =
+        Signature::decode(&signature).map_err(|error| format!("更新签名格式无效: {error}"))?;
+
+    public_key
+        .verify(data, &signature, true)
+        .map_err(|error| format!("更新安装包签名验证失败: {error}"))
+}
+
+/// 按顺序读取 updater 配置中的更新清单，匹配官方插件的 endpoint 回退行为。
+/// @param endpoints Tauri updater 配置中的更新清单地址。
+/// @returns 更新清单和实际使用的地址。
+async fn fetch_update_manifest(endpoints: &[String]) -> Result<(UpdateManifest, String), String> {
+    let mut last_error = None;
+    for endpoint in endpoints {
+        match HTTP_CLIENT.get(endpoint).send().await {
+            Ok(response) => match response.error_for_status() {
+                Ok(response) => match response.json::<UpdateManifest>().await {
+                    Ok(manifest) => return Ok((manifest, endpoint.clone())),
+                    Err(error) => last_error = Some(format!("解析更新信息失败: {error}")),
+                },
+                Err(error) => last_error = Some(format!("请求更新信息失败: {error}")),
+            },
+            Err(error) => last_error = Some(format!("请求更新信息失败: {error}")),
         }
-        hasher.update(&buffer[..read]);
     }
-    Ok(format!("{:x}", hasher.finalize()))
+    Err(last_error.unwrap_or_else(|| "Tauri updater 配置中未找到更新清单地址".to_string()))
 }
 
 /// 将语义版本转换为可比较的数字段。
@@ -2572,17 +2660,9 @@ async fn download_update_file(
 
 /// 获取已安装应用是否存在新版本。
 #[tauri::command]
-async fn check_app_update() -> Result<Option<AppUpdateInfo>, String> {
-    let manifest = HTTP_CLIENT
-        .get(UPDATE_MANIFEST_URL)
-        .send()
-        .await
-        .map_err(|error| format!("检查更新失败: {error}"))?
-        .error_for_status()
-        .map_err(|error| format!("检查更新失败: {error}"))?
-        .json::<UpdateManifest>()
-        .await
-        .map_err(|error| format!("解析更新信息失败: {error}"))?;
+async fn check_app_update(app_handle: tauri::AppHandle) -> Result<Option<AppUpdateInfo>, String> {
+    let config = updater_config(&app_handle)?;
+    let (manifest, _) = fetch_update_manifest(&config.endpoints).await?;
     if !manifest.platforms.contains_key("windows-x86_64-msi") {
         return Err("更新信息中未找到 Windows MSI 安装包".to_string());
     }
@@ -2598,24 +2678,22 @@ async fn check_app_update() -> Result<Option<AppUpdateInfo>, String> {
     }))
 }
 
-/// 下载差分或完整安装包，校验目标 SHA-256 后启动 MSI 安装程序。
+/// 下载差分或完整安装包，验证 minisign 签名后启动 MSI 安装程序。
 #[tauri::command]
 async fn download_and_install_app_update(app_handle: tauri::AppHandle) -> Result<(), String> {
-    let manifest = HTTP_CLIENT
-        .get(UPDATE_MANIFEST_URL)
-        .send()
-        .await
-        .map_err(|error| format!("获取更新信息失败: {error}"))?
-        .error_for_status()
-        .map_err(|error| format!("获取更新信息失败: {error}"))?
-        .json::<UpdateManifest>()
-        .await
-        .map_err(|error| format!("解析更新信息失败: {error}"))?;
+    let config = updater_config(&app_handle)?;
+    let (manifest, _) = fetch_update_manifest(&config.endpoints).await?;
     let target_url = manifest
         .platforms
         .get("windows-x86_64-msi")
         .ok_or_else(|| "更新信息中未找到 Windows MSI 安装包".to_string())?
         .url
+        .clone();
+    let target_signature = manifest
+        .platforms
+        .get("windows-x86_64-msi")
+        .ok_or_else(|| "更新信息中未找到 Windows MSI 安装包".to_string())?
+        .signature
         .clone();
     let target_name = target_url
         .rsplit('/')
@@ -2633,7 +2711,7 @@ async fn download_and_install_app_update(app_handle: tauri::AppHandle) -> Result
         .and_then(|name| name.to_str())
         .unwrap_or(target_name);
     {
-        let diff_url = Url::parse(&format!("{UPDATE_DIFF_ENDPOINT}/"))
+        let diff_url = Url::parse(&format!("{}/", config.diff_endpoint.trim_end_matches('/')))
             .map_err(|error| format!("更新差分地址无效: {error}"))?
             .join(source_name)
             .map_err(|error| format!("更新差分地址无效: {error}"))?;
@@ -2650,12 +2728,6 @@ async fn download_and_install_app_update(app_handle: tauri::AppHandle) -> Result
             .get("X-Download-Mode")
             .and_then(|value| value.to_str().ok())
             .unwrap_or("full");
-        let expected_sha256 = response
-            .headers()
-            .get("X-Target-SHA256")
-            .and_then(|value| value.to_str().ok())
-            .ok_or_else(|| "更新服务未返回目标文件校验值".to_string())?
-            .to_string();
         if mode == "patch" {
             let old_file =
                 previous_installer.ok_or_else(|| "缺少更新差分所需的旧安装包".to_string())?;
@@ -2705,9 +2777,13 @@ async fn download_and_install_app_update(app_handle: tauri::AppHandle) -> Result
                 .to_string();
             download_update_file(&app_handle, &full_url, &target_file).await?;
         }
-        if calculate_sha256(&target_file)? != expected_sha256 {
+        let target_bytes =
+            fs::read(&target_file).map_err(|error| format!("读取更新安装包失败: {error}"))?;
+        if let Err(error) =
+            verify_update_signature(&target_bytes, &target_signature, &config.pubkey)
+        {
             let _ = fs::remove_file(&target_file);
-            return Err("更新安装包 SHA-256 校验失败".to_string());
+            return Err(error);
         }
     }
     let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 100 });
