@@ -32,6 +32,7 @@ export { effectData }
 
 import { eventData } from "./d/event.data"
 
+export { weaponVerifyData } from "./d/weapon-verify.data"
 export { eventData }
 
 import { forgeLevelData, forgeLevelQuestData } from "./d/forge.data"

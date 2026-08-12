@@ -70,6 +70,8 @@ function parseEventText(text?: string): StoryTextSegment[] {
 
         <LimitedPrizeSimulator v-if="event.id in limitedPrizePools" :event-id="event.id" />
 
+        <WeaponVerifyEvent v-if="event.id === 103026" />
+
         <div v-if="event.boxDrop" class="rounded-md bg-base-200 p-3">
             <BoxDropItem :box-drop="event.boxDrop" />
         </div>

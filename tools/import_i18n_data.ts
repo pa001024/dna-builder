@@ -527,6 +527,47 @@ const MAPPINGS: Mapping[] = [
     },
 ]
 
+/**
+ * 解析指定导出的 i18n 源模块。
+ *
+ * @returns 未指定时返回 null，指定时返回模块名集合
+ */
+function parseFileTypes(): Set<string> | null {
+    const fileTypeIndex = Bun.argv.findIndex(arg => arg === "-f" || arg === "--file-types")
+    if (fileTypeIndex < 0) {
+        return null
+    }
+
+    const fileTypes: string[] = []
+    for (const arg of Bun.argv.slice(fileTypeIndex + 1)) {
+        if (arg.startsWith("-")) {
+            break
+        }
+        fileTypes.push(arg)
+    }
+    if (fileTypes.length === 0) {
+        throw new Error("-f 需要至少指定一个模块名，例如：-f Weapon")
+    }
+
+    const availableFileTypes = new Set(MAPPINGS.flatMap(mapping => (typeof mapping.source === "string" ? [mapping.source] : [])))
+    const unknownFileTypes = fileTypes.filter(fileType => !availableFileTypes.has(fileType))
+    if (unknownFileTypes.length > 0) {
+        throw new Error(`未知模块：${unknownFileTypes.join(", ")}`)
+    }
+    return new Set(fileTypes)
+}
+
+/**
+ * 判断映射是否命中指定的源模块。
+ *
+ * @param mapping 数据映射
+ * @param fileTypes 指定的模块名集合
+ * @returns 是否应执行该映射
+ */
+function shouldProcessMapping(mapping: Mapping, fileTypes: Set<string> | null): boolean {
+    return fileTypes === null || (typeof mapping.source === "string" && fileTypes.has(mapping.source))
+}
+
 type MonsterLevelDropRow = {
     BaseProbability: number[]
     EndTime: number
@@ -788,9 +829,10 @@ function isAbyssLevelRow(value: unknown): value is AbyssLevelRow {
  * 执行导入。
  */
 async function main() {
+    const fileTypes = parseFileTypes()
     const grouped = new Map<string, Mapping[]>()
     for (const mapping of MAPPINGS) {
-        if (typeof mapping.source === "function") {
+        if (typeof mapping.source === "function" || !shouldProcessMapping(mapping, fileTypes)) {
             continue
         }
         const list = grouped.get(mapping.targetStem) ?? []
@@ -846,7 +888,7 @@ async function main() {
     }
 
     for (const mapping of MAPPINGS) {
-        if (typeof mapping.source !== "function") {
+        if (typeof mapping.source !== "function" || !shouldProcessMapping(mapping, fileTypes)) {
             continue
         }
 

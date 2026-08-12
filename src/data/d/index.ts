@@ -9,6 +9,7 @@ import effectData from "./effect.data"
 import optRewardData from "./optreward.data"
 
 export { eventData } from "./event.data"
+export { weaponVerifyData } from "./weapon-verify.data"
 
 import { isDataPackHydrated, registerDataPackHydrationCallback } from "../data-pack-bridge"
 import { skinData } from "./accessory.data"
