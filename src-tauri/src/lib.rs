@@ -12,6 +12,7 @@ use lazy_static::lazy_static;
 use md5::Context;
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 use tauri::{Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 use zip::ZipArchive;
@@ -26,6 +27,8 @@ const DOWNLOAD_CHUNK_SIZE: u64 = 8 * 1024 * 1024;
 const MULTITHREAD_THRESHOLD: u64 = 10 * 1024 * 1024;
 const PROGRESS_MAGIC: &[u8; 2] = b"PA";
 const PROGRESS_HEADER_SIZE: usize = 6;
+const UPDATE_MANIFEST_URL: &str = "https://cdn.dna-builder.cn/latest.json";
+const UPDATE_DIFF_ENDPOINT: &str = "https://api.dna-builder.cn/api/download/diff";
 
 /// 创建带系统代理配置的 HTTP 客户端。
 ///
@@ -2423,6 +2426,310 @@ async fn apply_game_patch(diff_path: String, target_dir: String) -> Result<Strin
     .map_err(|e| format!("hpatchz 任务执行失败: {}", e))?
 }
 
+/// 更新服务器返回的最新版本清单。
+#[derive(Debug, Deserialize)]
+struct UpdateManifest {
+    version: String,
+    notes: Option<String>,
+    platforms: std::collections::HashMap<String, UpdatePlatform>,
+}
+
+/// Windows 更新安装包信息。
+#[derive(Debug, Deserialize)]
+struct UpdatePlatform {
+    url: String,
+}
+
+/// 提供给前端的应用更新信息。
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AppUpdateInfo {
+    available: bool,
+    current_version: String,
+    latest_version: String,
+    body: Option<String>,
+}
+
+/// 更新下载阶段事件。
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AppUpdateProgress {
+    progress: u8,
+}
+
+/// 读取并校验文件 SHA-256。
+/// @param file_path 待校验的文件路径。
+/// @returns 小写十六进制 SHA-256 摘要。
+fn calculate_sha256(file_path: &Path) -> Result<String, String> {
+    let mut file = File::open(file_path).map_err(|error| format!("打开更新文件失败: {error}"))?;
+    let mut hasher = Sha256::new();
+    let mut buffer = [0_u8; 64 * 1024];
+    loop {
+        let read = file
+            .read(&mut buffer)
+            .map_err(|error| format!("读取更新文件失败: {error}"))?;
+        if read == 0 {
+            break;
+        }
+        hasher.update(&buffer[..read]);
+    }
+    Ok(format!("{:x}", hasher.finalize()))
+}
+
+/// 将语义版本转换为可比较的数字段。
+/// @param version 待比较的版本字符串。
+/// @returns 主、次、修订版本号。
+fn parse_version(version: &str) -> Result<[u64; 3], String> {
+    let parts = version
+        .trim_start_matches('v')
+        .split('.')
+        .collect::<Vec<_>>();
+    if parts.len() != 3 {
+        return Err(format!("更新版本格式无效: {version}"));
+    }
+    let mut parsed = [0_u64; 3];
+    for (index, part) in parts.iter().enumerate() {
+        parsed[index] = part
+            .parse()
+            .map_err(|_| format!("更新版本格式无效: {version}"))?;
+    }
+    Ok(parsed)
+}
+
+/// 获取应用数据目录下的更新缓存路径，避免依赖用户名或硬编码安装位置。
+/// @param app_handle Tauri 应用句柄。
+/// @returns 更新缓存目录。
+fn update_cache_dir(app_handle: &tauri::AppHandle) -> Result<PathBuf, String> {
+    let cache_dir = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|error| format!("获取应用数据目录失败: {error}"))?
+        .join("cache");
+    fs::create_dir_all(&cache_dir).map_err(|error| format!("创建更新缓存目录失败: {error}"))?;
+    Ok(cache_dir)
+}
+
+/// 获取当前缓存的 MSI 安装包。缓存只保留一个已校验的完整包作为下次差分的旧文件。
+/// @param cache_dir 更新缓存目录。
+/// @returns 缓存 MSI 路径，不存在时返回 None。
+fn cached_installer(cache_dir: &Path) -> Result<Option<PathBuf>, String> {
+    let entries = fs::read_dir(cache_dir).map_err(|error| format!("读取更新缓存失败: {error}"))?;
+    for entry in entries {
+        let path = entry
+            .map_err(|error| format!("读取更新缓存项失败: {error}"))?
+            .path();
+        if path.is_file()
+            && path
+                .extension()
+                .is_some_and(|extension| extension.eq_ignore_ascii_case("msi"))
+        {
+            return Ok(Some(path));
+        }
+    }
+    Ok(None)
+}
+
+/// 下载更新文件并向前端发送进度。
+/// @param app_handle Tauri 应用句柄。
+/// @param url 下载 URL。
+/// @param target_file 输出文件路径。
+async fn download_update_file(
+    app_handle: &tauri::AppHandle,
+    url: &str,
+    target_file: &Path,
+) -> Result<(), String> {
+    let response = HTTP_CLIENT
+        .get(url)
+        .send()
+        .await
+        .map_err(|error| format!("下载更新失败: {error}"))?
+        .error_for_status()
+        .map_err(|error| format!("下载更新失败: {error}"))?;
+    let total = response.content_length().unwrap_or(0);
+    let temporary_file = target_file.with_extension("download");
+    let mut file =
+        File::create(&temporary_file).map_err(|error| format!("创建更新临时文件失败: {error}"))?;
+    let mut downloaded = 0_u64;
+    let mut stream = response.bytes_stream();
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk.map_err(|error| format!("读取更新数据失败: {error}"))?;
+        file.write_all(&chunk)
+            .map_err(|error| format!("写入更新文件失败: {error}"))?;
+        downloaded += chunk.len() as u64;
+        let progress = if total == 0 {
+            0
+        } else {
+            ((downloaded * 80 / total).min(80)) as u8
+        };
+        let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress });
+    }
+    file.flush()
+        .map_err(|error| format!("写入更新文件失败: {error}"))?;
+    fs::rename(&temporary_file, target_file)
+        .map_err(|error| format!("保存更新文件失败: {error}"))?;
+    Ok(())
+}
+
+/// 获取已安装应用是否存在新版本。
+#[tauri::command]
+async fn check_app_update() -> Result<Option<AppUpdateInfo>, String> {
+    let manifest = HTTP_CLIENT
+        .get(UPDATE_MANIFEST_URL)
+        .send()
+        .await
+        .map_err(|error| format!("检查更新失败: {error}"))?
+        .error_for_status()
+        .map_err(|error| format!("检查更新失败: {error}"))?
+        .json::<UpdateManifest>()
+        .await
+        .map_err(|error| format!("解析更新信息失败: {error}"))?;
+    if !manifest.platforms.contains_key("windows-x86_64-msi") {
+        return Err("更新信息中未找到 Windows MSI 安装包".to_string());
+    }
+    let current_version = env!("CARGO_PKG_VERSION").to_string();
+    if parse_version(&manifest.version)? <= parse_version(&current_version)? {
+        return Ok(None);
+    }
+    Ok(Some(AppUpdateInfo {
+        available: true,
+        current_version,
+        latest_version: manifest.version.trim_start_matches('v').to_string(),
+        body: manifest.notes,
+    }))
+}
+
+/// 下载差分或完整安装包，校验目标 SHA-256 后启动 MSI 安装程序。
+#[tauri::command]
+async fn download_and_install_app_update(app_handle: tauri::AppHandle) -> Result<(), String> {
+    let manifest = HTTP_CLIENT
+        .get(UPDATE_MANIFEST_URL)
+        .send()
+        .await
+        .map_err(|error| format!("获取更新信息失败: {error}"))?
+        .error_for_status()
+        .map_err(|error| format!("获取更新信息失败: {error}"))?
+        .json::<UpdateManifest>()
+        .await
+        .map_err(|error| format!("解析更新信息失败: {error}"))?;
+    let target_url = manifest
+        .platforms
+        .get("windows-x86_64-msi")
+        .ok_or_else(|| "更新信息中未找到 Windows MSI 安装包".to_string())?
+        .url
+        .clone();
+    let target_name = target_url
+        .rsplit('/')
+        .next()
+        .filter(|name| name.ends_with(".msi"))
+        .ok_or_else(|| "更新 MSI 文件名无效".to_string())?;
+    let cache_dir = update_cache_dir(&app_handle)?;
+    let previous_installer = cached_installer(&cache_dir)?;
+    let mut target_file = cache_dir.join(target_name);
+    let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 0 });
+
+    let source_name = previous_installer
+        .as_ref()
+        .and_then(|file| file.file_name())
+        .and_then(|name| name.to_str())
+        .unwrap_or(target_name);
+    {
+        let diff_url = Url::parse(&format!("{UPDATE_DIFF_ENDPOINT}/"))
+            .map_err(|error| format!("更新差分地址无效: {error}"))?
+            .join(source_name)
+            .map_err(|error| format!("更新差分地址无效: {error}"))?;
+        let response = reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::none())
+            .build()
+            .map_err(|error| format!("创建更新请求失败: {error}"))?
+            .get(diff_url)
+            .send()
+            .await
+            .map_err(|error| format!("请求更新差分失败: {error}"))?;
+        let mode = response
+            .headers()
+            .get("X-Download-Mode")
+            .and_then(|value| value.to_str().ok())
+            .unwrap_or("full");
+        let expected_sha256 = response
+            .headers()
+            .get("X-Target-SHA256")
+            .and_then(|value| value.to_str().ok())
+            .ok_or_else(|| "更新服务未返回目标文件校验值".to_string())?
+            .to_string();
+        if mode == "patch" {
+            let old_file =
+                previous_installer.ok_or_else(|| "缺少更新差分所需的旧安装包".to_string())?;
+            let patch_file = cache_dir.join("update.hdiff");
+            let patch_bytes = response
+                .bytes()
+                .await
+                .map_err(|error| format!("下载更新差分失败: {error}"))?;
+            fs::write(&patch_file, patch_bytes)
+                .map_err(|error| format!("保存更新差分失败: {error}"))?;
+            let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 80 });
+            tokio::task::spawn_blocking({
+                let patch_file = patch_file.clone();
+                let target_file = target_file.clone();
+                move || {
+                    let executable = std::env::temp_dir()
+                        .join(format!("dna-builder-hpatchz-{}.exe", std::process::id()));
+                    fs::write(&executable, HPATCHZ_BYTES)
+                        .map_err(|error| format!("释放内嵌 hpatchz 失败: {error}"))?;
+                    let output = std::process::Command::new(&executable)
+                        .arg("-f")
+                        .arg(old_file)
+                        .arg(patch_file)
+                        .arg(target_file)
+                        .output()
+                        .map_err(|error| format!("启动 hpatchz 失败: {error}"))?;
+                    let _ = fs::remove_file(executable);
+                    if output.status.success() {
+                        Ok(())
+                    } else {
+                        Err(format!(
+                            "hpatchz 执行失败: {}",
+                            String::from_utf8_lossy(&output.stderr)
+                        ))
+                    }
+                }
+            })
+            .await
+            .map_err(|error| format!("hpatchz 任务执行失败: {error}"))??;
+            let _ = fs::remove_file(patch_file);
+        } else {
+            let full_url = response
+                .headers()
+                .get(reqwest::header::LOCATION)
+                .and_then(|value| value.to_str().ok())
+                .ok_or_else(|| "更新服务未返回完整安装包地址".to_string())?
+                .to_string();
+            download_update_file(&app_handle, &full_url, &target_file).await?;
+        }
+        if calculate_sha256(&target_file)? != expected_sha256 {
+            let _ = fs::remove_file(&target_file);
+            return Err("更新安装包 SHA-256 校验失败".to_string());
+        }
+    }
+    let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 100 });
+
+    if let Some(old_file) = cached_installer(&cache_dir)? {
+        if old_file != target_file {
+            let _ = fs::remove_file(old_file);
+        }
+    }
+    target_file =
+        fs::canonicalize(target_file).map_err(|error| format!("定位更新安装包失败: {error}"))?;
+    let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 100 });
+    std::process::Command::new("msiexec.exe")
+        .args(["/i"])
+        .arg(&target_file)
+        .args(["/passive", "/promptrestart", "AUTOLAUNCHAPP=True"])
+        .spawn()
+        .map_err(|error| format!("启动 MSI 安装程序失败: {error}"))?;
+    app_handle.exit(0);
+    Ok(())
+}
+
 /// 获取文件大小
 #[tauri::command]
 async fn get_file_size(file_path: String) -> Result<u64, String> {
@@ -3376,7 +3683,6 @@ pub fn run() {
     {
         app = app
             .plugin(tauri_plugin_autostart::Builder::new().build())
-            .plugin(tauri_plugin_updater::Builder::new().build())
             .plugin(tauri_plugin_window_state::Builder::default().build());
     }
     app.setup(|app| {
@@ -3537,6 +3843,8 @@ pub fn run() {
         pause_download,
         extract_game_assets,
         apply_game_patch,
+        check_app_update,
+        download_and_install_app_update,
         get_file_size,
         get_file_hash,
         cleanup_temp_dir,

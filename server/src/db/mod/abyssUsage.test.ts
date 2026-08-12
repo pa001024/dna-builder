@@ -2,16 +2,16 @@ import { describe, expect, it } from "bun:test"
 import { createHash } from "node:crypto"
 import { existsSync } from "node:fs"
 import { eq } from "drizzle-orm"
+import Elysia from "elysia"
 import jwt from "jsonwebtoken"
 import charData from "../../../../src/data/d/char.data"
 import petData from "../../../../src/data/d/pet.data"
 import weaponData from "../../../../src/data/d/weapon.data"
 import { db, schema } from ".."
-import { jwtToken } from "../yoga"
+import { jwtToken, yogaPlugin } from "../yoga"
 import { getCurrentSeasonId } from "./abyssUsage"
 import { USER_EXPERIENCE_SOURCES } from "./userExperience"
 
-const GRAPHQL_URL = "http://localhost:8887/graphql"
 const SMOKE_SUBMISSION_COUNT = 100
 
 /**
@@ -26,6 +26,8 @@ function assertServerDbContext() {
 
 assertServerDbContext()
 
+const testApp = new Elysia().use(yogaPlugin())
+
 /**
  * 发送 GraphQL 请求。
  * @param query GraphQL 文本。
@@ -34,14 +36,16 @@ assertServerDbContext()
  * @returns GraphQL 响应 JSON。
  */
 async function graphqlRequest<T>(query: string, variables?: Record<string, unknown>, token?: string): Promise<T> {
-    const response = await fetch(GRAPHQL_URL, {
-        method: "POST",
-        headers: {
-            "content-type": "application/json",
-            ...(token ? { token } : {}),
-        },
-        body: JSON.stringify({ query, variables }),
-    })
+    const response = await testApp.handle(
+        new Request("http://localhost/graphql", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json",
+                ...(token ? { token } : {}),
+            },
+            body: JSON.stringify({ query, variables }),
+        })
+    )
     return (await response.json()) as T
 }
 
@@ -774,7 +778,7 @@ describe("abyssUsage", () => {
                     submissionCount
                 }
                 abyssUsageSubmissionsCount(seasonId: $seasonId)
-                abyssUsageSubmissions(limit: 200, offset: 0) {
+                abyssUsageSubmissions(limit: 200, offset: 0, seasonId: $seasonId) {
                     seasonId
                 }
             }

@@ -73,7 +73,7 @@ function closeModal() {
 
 async function updateApp() {
     const updateInfo = await checkUpdate()
-    if (updateInfo) {
+    if (updateInfo?.available) {
         const message = t("updater.newVersionMessage", { version: updateInfo.latestVersion, body: updateInfo.body || "" })
         if (await ui.showDialog(t("updater.newVersionTitle"), message)) {
             try {

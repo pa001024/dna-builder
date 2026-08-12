@@ -202,19 +202,33 @@ export class LeveledMod implements Mod {
                 this[prop] = currentValue
             }
         })
+        // 效果层属性与词条基础属性使用相同的等级倍率。
         this.buff?.properties.forEach(prop => {
             const lv = this._等级
             const buff = this.buff!
             const maxValue = buff[prop] || 0
             let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
             if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
-            this[prop] = this[prop] ? this[prop] + currentValue : currentValue
+            const modProperty = this.resolveEffectProperty(prop)
+            if (!modProperty) return
+            this[modProperty] = this[modProperty] ? this[modProperty] + currentValue : currentValue
             if (buff.描述.includes(`{%}`)) {
                 const stackCount = buff.等级 > 0 ? buff.等级 : 1
                 const perStackValue = currentValue / stackCount
                 buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(perStackValue * 100).toFixed(1)}%`)
             }
         })
+    }
+
+    /**
+     * 将效果表中的武器作用域属性归一化为依附 MOD 的自身属性。
+     * @param property 效果表属性名。
+     * @returns MOD 属性名；作用域不匹配时返回 undefined。
+     */
+    private resolveEffectProperty(property: string): string | undefined {
+        if (property.startsWith(this.类型)) return property.slice(this.类型.length)
+        if (property === "近战" || property === "远程" || property.startsWith("同律")) return undefined
+        return property
     }
 
     /**

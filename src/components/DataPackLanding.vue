@@ -12,7 +12,6 @@ const dataPack = useDataPackStore()
 
 const showModal = ref(false)
 const hasChecked = ref(false)
-const isDownloading = ref(false)
 const lastApply = useLocalStorage("datapack.lastApply", 0)
 
 const latestVersionInfo = computed(() => dataPack.status?.remote || dataPack.status?.versions[0] || null)
@@ -64,7 +63,7 @@ const statusHint = computed(() => {
 })
 
 const actionLabel = computed(() => {
-    if (isDownloading.value) {
+    if (dataPack.isDownloading) {
         return "下载中"
     }
 
@@ -112,16 +111,13 @@ async function downloadLatest() {
         return
     }
 
-    isDownloading.value = true
     try {
-        await router.push({ name: "setting" })
         await dataPack.downloadVersion(version)
         lastApply.value = Date.now()
         showModal.value = false
     } catch (error) {
         ui.showErrorMessage(error instanceof Error ? error.message : String(error))
     } finally {
-        isDownloading.value = false
     }
 }
 
@@ -151,7 +147,7 @@ watch(
     <Teleport to="body">
         <dialog class="modal" :class="{ 'modal-open': showModal }">
             <div
-                class="modal-box w-[calc(100vw-2rem)] max-w-[40rem] max-h-[calc(100vh-2rem)] overflow-x-hidden overflow-y-auto border border-base-content/10 bg-base-100/95 p-0 shadow-2xl backdrop-blur-xl sm:w-[calc(100vw-3rem)] sm:max-h-[calc(100vh-3rem)]"
+                class="modal-box w-[calc(100vw-2rem)] max-w-160 max-h-[calc(100vh-2rem)] overflow-x-hidden overflow-y-auto border border-base-content/10 bg-base-100/95 p-0 shadow-2xl backdrop-blur-xl sm:w-[calc(100vw-3rem)] sm:max-h-[calc(100vh-3rem)]"
             >
                 <div class="relative overflow-hidden">
                     <div class="absolute inset-0 bg-linear-to-br from-primary/20 via-base-100 to-secondary/15" />
@@ -187,23 +183,33 @@ watch(
                                 </div>
                                 <div class="rounded-2xl border border-base-content/10 bg-base-100/60 p-4 shadow-sm sm:col-span-2">
                                     <div class="text-xs text-base-content/50">描述</div>
-                                    <div class="mt-2 whitespace-pre-wrap break-words text-sm font-semibold text-base-content">{{ latestNotes }}</div>
+                                    <div class="mt-2 whitespace-pre-wrap wrap-break-word text-sm font-semibold text-base-content">
+                                        {{ latestNotes }}
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                                 <button
                                     class="btn btn-primary w-full min-w-40 sm:w-auto"
-                                    :disabled="!latestVersion || isDownloading"
+                                    :disabled="!latestVersion || dataPack.isDownloading"
                                     @click="downloadLatest"
                                 >
                                     {{ actionLabel }}
-                                    <span class="loading loading-dots" v-if="isDownloading"></span>
+                                    <span class="loading loading-dots" v-if="dataPack.isDownloading"></span>
                                 </button>
-                                <button class="btn btn-ghost w-full min-w-28 sm:w-auto" :disabled="isDownloading" @click="goSetting">
+                                <button
+                                    class="btn btn-ghost w-full min-w-28 sm:w-auto"
+                                    :disabled="dataPack.isDownloading"
+                                    @click="goSetting"
+                                >
                                     打开设置
                                 </button>
-                                <button class="btn btn-ghost w-full min-w-24 sm:w-auto" :disabled="isDownloading" @click="closeModal">
+                                <button
+                                    class="btn btn-ghost w-full min-w-24 sm:w-auto"
+                                    :disabled="dataPack.isDownloading"
+                                    @click="closeModal"
+                                >
                                     关闭
                                 </button>
                             </div>

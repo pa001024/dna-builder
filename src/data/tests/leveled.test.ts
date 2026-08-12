@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import type { CharAttr } from "../CharBuild"
+import { type CharAttr, CharBuild } from "../CharBuild"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledMonster, LeveledWeapon } from "../leveled"
 
 // 测试LeveledMod类
@@ -254,10 +254,34 @@ describe("LeveledBuff类测试", () => {
         expect(fullProps.攻击).toBeDefined()
     })
 
-    it("倾力在蓝色满级时应按4层累计到80%暴击", () => {
-        const 倾力 = new LeveledMod(32301)
+    it("倾力仅提高依附的近战MOD，不影响同律近战", () => {
+        const createBuild = (meleeMods: LeveledMod[]) =>
+            new CharBuild({
+                char: new LeveledChar("贝蕾妮卡"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                meleeMods,
+                buffs: [],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "普通攻击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+        const baseline = createBuild([])
+        const with倾力 = createBuild([new LeveledMod(32301)])
 
-        expect(倾力.暴击).toBeCloseTo(0.8, 10)
+        expect(with倾力.meleeMods[0]?.暴击).toBeCloseTo(0.8, 10)
+        expect(with倾力.calculateWeaponAttributes(with倾力.meleeWeapon).weapon?.暴击).toBeGreaterThan(
+            baseline.calculateWeaponAttributes(baseline.meleeWeapon).weapon?.暴击 || 0
+        )
+        expect(with倾力.calculateWeaponAttributes(with倾力.skillWeapon).weapon?.暴击).toBe(
+            baseline.calculateWeaponAttributes(baseline.skillWeapon).weapon?.暴击
+        )
     })
 
     it("乘算BUFF的minusAttr应返回逆向倍率", () => {
@@ -522,10 +546,10 @@ describe("LeveledWeapon类测试", () => {
         expect(weapon.getSimpleProperties().近战攻速).toBeCloseTo(0.3, 10)
     })
 
-    it("MOD effect的近战攻速应可作为武器面板来源读取", () => {
+    it("MOD effect的近战攻速应归一化为MOD自身属性", () => {
         const 暴虐mod = new LeveledMod(42311)
-        expect(暴虐mod.近战攻速).toBeCloseTo(0.6, 10)
-        expect(暴虐mod.攻速).toBeUndefined()
+        expect(暴虐mod.攻速).toBeCloseTo(0.6, 10)
+        expect(暴虐mod.近战攻速).toBeUndefined()
     })
 
     // 测试11：测试不存在的武器名称

@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { t } from "i18next"
-import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { LeveledMod, LeveledWeaponHelper, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
 import { Walnut } from "../data/d/walnut.data"

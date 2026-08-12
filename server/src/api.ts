@@ -1,5 +1,6 @@
 import { fetch } from "bun"
 import { Elysia, t } from "elysia"
+import { getOfficialPackageDiff, getPackageDiff, type PackageDiffConfig } from "./api/package-diff"
 import { uploadImage } from "./upload"
 import { getCachedNameEffectStylesheet } from "./util/name-effect-style"
 
@@ -74,7 +75,34 @@ async function getMsiDownloadUrl(): Promise<string | null> {
     }
 }
 
-export const apiPlugin = () => {
+/**
+ * 根据差分结果构造 HTTP 响应。
+ * @param result 差分查询结果。
+ * @param set Elysia 响应设置对象。
+ * @returns 补丁文件或完整包重定向。
+ */
+function createPackageDiffResponse(
+    result: Awaited<ReturnType<typeof getPackageDiff>>,
+    set: { status?: number | string; headers: Record<string, string | number> }
+) {
+    if (result.mode === "full") {
+        set.status = 302
+        set.headers.Location = result.targetUrl
+        set.headers["X-Download-Mode"] = "full"
+        set.headers["X-Target-Package"] = result.targetPackageName
+        set.headers["X-Target-SHA256"] = result.targetSha256
+        return new Response(null, { status: 302 })
+    }
+
+    set.headers["Content-Type"] = "application/octet-stream"
+    set.headers["Content-Disposition"] = `attachment; filename="${result.patchName}"`
+    set.headers["X-Download-Mode"] = "patch"
+    set.headers["X-Target-Package"] = result.targetPackageName
+    set.headers["X-Target-SHA256"] = result.targetSha256
+    return Bun.file(result.patchFile)
+}
+
+export const apiPlugin = (packageDiffConfig: PackageDiffConfig = {}) => {
     const app = new Elysia({
         prefix: "/api",
     })
@@ -127,6 +155,34 @@ export const apiPlugin = () => {
         set.headers.Location = downloadUrl
         return new Response(null, { status: 302, headers: { Location: downloadUrl } })
     })
+
+    /**
+     * 下载客户端已有官方安装包到最新官方安装包的 HDiffPatch 差分。
+     * 差分大于 2 MB 时重定向到官方完整包，避免无收益的客户端补丁。
+     */
+    app.get(
+        "/download/diff/:packageName",
+        async ({ params: { packageName }, set }) => {
+            try {
+                const result = packageDiffConfig.latestPackageUrl
+                    ? await getPackageDiff(packageName, packageDiffConfig)
+                    : await getOfficialPackageDiff(
+                          packageName.toLowerCase().endsWith(".msi") ? "update" : "data",
+                          packageName,
+                          packageDiffConfig
+                      )
+                return createPackageDiffResponse(result, set)
+            } catch (error) {
+                set.status = 400
+                return { success: false, error: error instanceof Error ? error.message : "生成差分失败" }
+            }
+        },
+        {
+            params: t.Object({
+                packageName: t.String(),
+            }),
+        }
+    )
 
     /**
      * 聊天名字特效样式表

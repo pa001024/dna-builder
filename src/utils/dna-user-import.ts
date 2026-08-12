@@ -76,7 +76,7 @@ export function parseDnaUserImportJson(json: string): UDNAUser {
     const userData: UDNAUser = {
         uid,
         name: readText(data, "name", "userName") || uid,
-        dev_code: readText(data, "dev_code", "devCode", "devcode") || DNAAPI.generateDeviceCode(),
+        dev_code: readText(data, "dev_code", "devCode", "devcode", "dNum") || DNAAPI.generateDeviceCode(),
         token,
         server: server === "global" || (!server && !!readText(data, "registerLang")) ? "global" : "cn",
         kf_token: readText(data, "kf_token", "kfToken") || "",
