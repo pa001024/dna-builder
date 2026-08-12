@@ -24,12 +24,22 @@ const props = withDefaults(
 
 const recording = ref(false)
 const pendingKey = ref("")
+const inputFocused = ref(false)
 let pendingTimer: number | null = null
 
 /**
  * 生成 kbd 尺寸类。
  */
-const previewSizeClass = computed(() => (props.size === "md" ? "" : `kbd-${props.size}`))
+const kbdSizeClass = computed(() => {
+    const widthMap: Record<string, string> = {
+        xs: "min-w-4",
+        sm: "min-w-4",
+        md: "min-w-5",
+        lg: "min-w-6",
+        xl: "min-w-8",
+    }
+    return `kbd-${props.size} ${widthMap[props.size] ?? ""}`
+})
 
 /**
  * 生成 input 容器尺寸类。
@@ -50,7 +60,7 @@ const inputSizeClass = computed(() => {
 })
 
 /**
- * 生成预览片段。
+ * 生成快捷键预览片段。
  */
 const previewTokens = computed(() => tokenizeHotkeyDisplay(recording.value && pendingKey.value ? pendingKey.value : model.value))
 
@@ -86,7 +96,7 @@ function stopRecording() {
     clearPendingTimer()
     window.removeEventListener("keydown", handleKeyDown, true)
     window.removeEventListener("mousedown", handleMouseDown, true)
-    window.removeEventListener("blur", stopRecording)
+    window.removeEventListener("blur", finishRecordingOnBlur)
 }
 
 /**
@@ -95,6 +105,20 @@ function stopRecording() {
  */
 function commitHotkey(hotkey: string) {
     model.value = hotkey.trim()
+    stopRecording()
+}
+
+/**
+ * 失焦时提交已经捕获的单键，并停止录制。
+ */
+function finishRecordingOnBlur() {
+    if (!recording.value) {
+        return
+    }
+    if (pendingKey.value) {
+        commitHotkey(pendingKey.value)
+        return
+    }
     stopRecording()
 }
 
@@ -161,13 +185,23 @@ function handleMouseDown(event: MouseEvent) {
         return
     }
 
+    window.setTimeout(() => {
+        if (!recording.value || props.disabled) {
+            return
+        }
+        recordMouseButton(event)
+    })
+}
+
+/**
+ * 录入已通过焦点切换校验的鼠标按键。
+ * @param event 鼠标事件。
+ */
+function recordMouseButton(event: MouseEvent) {
     const button = normalizeRecordedMouseButton(event.button)
     if (!button) {
         return
     }
-
-    event.preventDefault()
-    event.stopPropagation()
 
     const hasModifiers = event.ctrlKey || event.altKey || event.shiftKey || event.metaKey
     if (!hasModifiers) {
@@ -210,7 +244,7 @@ function startRecording() {
     recording.value = true
     window.addEventListener("keydown", handleKeyDown, true)
     window.addEventListener("mousedown", handleMouseDown, true)
-    window.addEventListener("blur", stopRecording)
+    window.addEventListener("blur", finishRecordingOnBlur)
 }
 
 /**
@@ -220,56 +254,99 @@ function clearHotkey() {
     model.value = ""
 }
 
+/**
+ * 清除按钮的辅助说明文案。
+ */
+const clearAriaLabel = computed(() => "清除热键")
+
+/**
+ * 取消录制按钮的辅助说明文案。
+ */
+const cancelAriaLabel = computed(() => "取消录制")
+
+/**
+ * 取消录制按钮文案。
+ */
+const cancelLabel = computed(() => "取消")
+
 onBeforeUnmount(() => {
     stopRecording()
 })
 </script>
 
 <template>
-    <div class="input input-bordered flex w-full items-center px-0 py-0" :class="[inputSizeClass, recording ? 'input-primary' : '']">
+    <div
+        class="input input-bordered relative flex w-full items-center px-0 py-0 transition-all"
+        :class="[
+            inputSizeClass,
+            recording ? 'input-primary shadow-lg shadow-primary/20' : inputFocused ? 'shadow-sm' : 'hover:border-base-content/30',
+        ]"
+    >
         <div
-            class="flex min-h-full flex-1 items-center gap-1 px-3"
+            class="flex min-h-full flex-1 items-center gap-1 px-3 outline-none"
             role="button"
             tabindex="0"
             :aria-disabled="disabled ? 'true' : 'false'"
             :aria-label="placeholder"
             @click="startRecording"
+            @focus="inputFocused = true"
+            @blur="finishRecordingOnBlur"
             @keydown.enter.prevent="startRecording"
             @keydown.space.prevent="startRecording"
         >
+            <span v-if="recording" class="size-1.5 shrink-0 animate-pulse rounded-full bg-primary ring-2 ring-primary/40" />
             <template v-if="previewTokens.length">
                 <template v-for="(token, index) in previewTokens" :key="`${token.type}-${index}-${token.text}`">
-                    <kbd v-if="token.type === 'key'" class="kbd" :class="previewSizeClass">{{ token.text }}</kbd>
-                    <span v-else class="px-0.5 text-base-content/50">{{ token.text }}</span>
+                    <kbd
+                        v-if="token.type === 'key'"
+                        class="kbd justify-center border-base-300/60 bg-base-200 text-base-content"
+                        :class="[kbdSizeClass, recording ? 'border-primary/50 text-primary' : '']"
+                    >
+                        {{ token.text }}
+                    </kbd>
+                    <span v-else class="px-0.5 font-bold text-base-content/40">{{ token.text }}</span>
                 </template>
             </template>
-            <span v-else class="text-sm text-base-content/50">{{ statusText }}</span>
+            <span v-else class="text-base-content/50">
+                {{ statusText }}
+            </span>
         </div>
         <button
-            v-if="model"
+            v-if="model && !recording"
             type="button"
-            class="mr-2 inline-flex shrink-0 items-center justify-center rounded text-error/80 cursor-pointer transition-colors hover:bg-error/20 hover:text-error disabled:cursor-not-allowed disabled:opacity-40"
+            class="mr-2 inline-flex shrink-0 items-center justify-center rounded-full text-error/80 opacity-70 transition-all hover:bg-error/15 hover:text-error hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
             :class="{
                 'size-5': props.size === 'xs',
                 'size-6': props.size === 'sm',
-                'size-8': props.size === 'md',
-                'size-9': props.size === 'lg',
-                'size-10': props.size === 'xl',
+                'size-7': props.size === 'md',
+                'size-8': props.size === 'lg',
+                'size-9': props.size === 'xl',
             }"
             :disabled="disabled"
-            aria-label="清除热键"
+            :aria-label="clearAriaLabel"
             @click.stop="clearHotkey"
         >
             <Icon
                 icon="radix-icons:cross2"
                 :class="{
                     'w-3 h-3': props.size === 'xs',
-                    'w-3.5 h-3.5': props.size === 'sm',
-                    'w-4 h-4': props.size === 'md',
-                    'w-4.5 h-4.5': props.size === 'lg',
+                    'w-3.5 h-3.5': props.size === 'sm' || props.size === 'md',
+                    'w-4 h-4': props.size === 'lg',
                     'w-5 h-5': props.size === 'xl',
                 }"
             />
+        </button>
+        <button
+            v-if="recording"
+            type="button"
+            class="mr-2 inline-flex shrink-0 items-center gap-1 rounded-full border border-error/30 bg-error/10 px-2.5 py-0.5 text-xs font-medium text-error transition-colors hover:bg-error/20 disabled:cursor-not-allowed disabled:opacity-40"
+            :disabled="disabled"
+            :aria-label="cancelAriaLabel"
+            @mousedown.prevent="stopRecording"
+            @click.stop
+        >
+            <Icon icon="radix-icons:cross2" class="h-3 w-3" />
+            <span>{{ cancelLabel }}</span>
         </button>
     </div>
 </template>

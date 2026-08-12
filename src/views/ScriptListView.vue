@@ -4342,22 +4342,39 @@ onUnmounted(async () => {
 
         <dialog :open="showScriptHotkeyDialog" class="modal">
             <div class="modal-box max-w-lg">
-                <h3 class="font-bold text-lg mb-4">{{ $t("script-list.save_hotkey") }}</h3>
-                <div class="space-y-3">
-                    <div class="text-sm">
-                        <span class="text-base-content/70">{{ $t("script-list.script_name") }}：</span>
-                        <span class="font-mono">{{ editingHotkeyScriptName }}</span>
+                <button
+                    type="button"
+                    class="btn btn-ghost btn-sm btn-circle absolute right-2 top-2"
+                    :aria-label="$t('setting.close')"
+                    @click="showScriptHotkeyDialog = false"
+                >
+                    <Icon icon="radix-icons:cross2" class="h-4 w-4" />
+                </button>
+                <div class="flex items-center gap-3">
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Icon icon="ri:keyboard-line" class="h-5 w-5" />
                     </div>
-                    <div class="block">
-                        <div class="mb-2 flex items-center justify-between gap-3 text-sm">
-                            <span>{{ $t("script-list.ahk_hotkey") }}</span>
+                    <div>
+                        <h3 class="font-bold text-lg leading-tight">{{ $t("script-list.save_hotkey") }}</h3>
+                        <p class="text-xs text-base-content/60">
+                            {{ $t("script-list.script_name") }}：<span class="font-mono">{{ editingHotkeyScriptName }}</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="space-y-4 mt-5">
+                    <div class="rounded-xl border border-base-300/70 bg-base-200/40 p-4">
+                        <div class="mb-2 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2 text-sm font-medium">
+                                <Icon icon="ri:keyboard-line" class="h-4 w-4 text-primary" />
+                                <span>{{ $t("script-list.ahk_hotkey") }}</span>
+                            </div>
                             <label class="label cursor-pointer gap-2 py-0">
-                                <span class="label-text text-xs text-base-content/60">录制</span>
+                                <span class="label-text text-xs text-base-content/60">{{ $t("script-list.record") }}</span>
                                 <input v-model="useHotkeyRecorder" type="checkbox" class="toggle toggle-sm toggle-primary" />
                             </label>
                         </div>
                         <template v-if="useHotkeyRecorder">
-                            <HotkeyInput v-model="editingHotkeyValue" size="sm" :placeholder="$t('script-list.hotkey_example')" />
+                            <HotkeyInput v-model="editingHotkeyValue" size="md" :placeholder="$t('script-list.hotkey_example')" />
                         </template>
                         <template v-else>
                             <input
@@ -4368,18 +4385,19 @@ onUnmounted(async () => {
                             />
                         </template>
                     </div>
-                    <div class="block">
-                        <div class="mb-2 flex items-center justify-between gap-3 text-sm">
+                    <div class="rounded-xl border border-base-300/70 bg-base-200/40 p-4 space-y-3">
+                        <div class="flex items-center gap-2 text-sm font-medium">
+                            <Icon icon="ri:crosshair-2-line" class="h-4 w-4 text-primary" />
                             <span>{{ $t("script-list.hotif_condition") }}</span>
-                            <label class="label cursor-pointer gap-2 py-0">
-                                <span class="label-text text-xs text-base-content/60">游戏内</span>
-                                <input
-                                    v-model="useGameWinActive"
-                                    type="checkbox"
-                                    class="toggle toggle-sm toggle-primary"
-                                    @change="editingHotkeyWinActive = useGameWinActive ? 'ahk_exe EM-Win64-Shipping.exe' : ''"
-                                />
-                            </label>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="label-text text-xs text-base-content/60">{{ $t("script-list.game_only") }}</span>
+                            <input
+                                v-model="useGameWinActive"
+                                type="checkbox"
+                                class="toggle toggle-sm toggle-primary"
+                                @change="editingHotkeyWinActive = useGameWinActive ? 'ahk_exe EM-Win64-Shipping.exe' : ''"
+                            />
                         </div>
                         <input
                             v-model="editingHotkeyWinActive"
@@ -4389,29 +4407,36 @@ onUnmounted(async () => {
                             :placeholder="$t('script-list.hotif_example')"
                         />
                     </div>
-                    <label class="label cursor-pointer justify-start gap-3">
-                        <input
-                            :checked="editingHotkeyHoldToLoop"
-                            type="checkbox"
-                            class="checkbox checkbox-sm"
-                            @change="setEditingHotkeyHoldToLoop(($event.target as HTMLInputElement).checked)"
-                        />
-                        <span class="label-text text-sm">{{ $t("script-list.hold_to_loop") }}</span>
-                    </label>
-                    <label class="label cursor-pointer justify-start gap-3">
-                        <input
-                            :checked="editingHotkeyToggleToLoop"
-                            type="checkbox"
-                            class="checkbox checkbox-sm"
-                            @change="setEditingHotkeyToggleToLoop(($event.target as HTMLInputElement).checked)"
-                        />
-                        <span class="label-text text-sm">切换循环</span>
-                    </label>
-                    <div class="text-xs text-base-content/60 select-text">
+                    <div class="rounded-xl border border-base-300/70 bg-base-200/40 p-4 space-y-2">
+                        <div class="flex items-center gap-2 text-sm font-medium">
+                            <Icon icon="ri:loop-left-line" class="h-4 w-4 text-primary" />
+                            <span>{{ $t("script-list.loop_mode") }}</span>
+                        </div>
+                        <label class="label cursor-pointer justify-start gap-3 py-1">
+                            <input
+                                :checked="editingHotkeyHoldToLoop"
+                                type="checkbox"
+                                class="checkbox checkbox-sm"
+                                @change="setEditingHotkeyHoldToLoop(($event.target as HTMLInputElement).checked)"
+                            />
+                            <span class="label-text text-sm">{{ $t("script-list.hold_to_loop") }}</span>
+                        </label>
+                        <label class="label cursor-pointer justify-start gap-3 py-1">
+                            <input
+                                :checked="editingHotkeyToggleToLoop"
+                                type="checkbox"
+                                class="checkbox checkbox-sm"
+                                @change="setEditingHotkeyToggleToLoop(($event.target as HTMLInputElement).checked)"
+                            />
+                            <span class="label-text text-sm">{{ $t("script-list.toggle_loop") }}</span>
+                        </label>
+                    </div>
+                    <div class="rounded-lg bg-base-200/60 px-3 py-2.5 text-xs text-base-content/60 leading-relaxed select-text">
+                        <Icon icon="ri:information-line" class="mr-1 inline h-3.5 w-3.5 align-[-2px] text-base-content/40" />
                         {{ $t("script-list.hotkey_help") }}
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 mt-4">
+                <div class="flex justify-end gap-2 mt-5">
                     <button class="btn btn-ghost" @click="showScriptHotkeyDialog = false">{{ $t("setting.cancel") }}</button>
                     <button
                         v-if="scriptRuntime.scriptHotkeyStore[editingHotkeyScriptName]"
