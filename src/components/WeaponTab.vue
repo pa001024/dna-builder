@@ -83,6 +83,29 @@ interface ModAttrSource {
 }
 
 /**
+ * 将动态 BUFF 造成的基础属性差值转换为等效 MOD 加成。
+ * @param key 武器属性键名
+ * @param value 动态 BUFF 造成的面板差值
+ * @returns 用于 tooltip 展示的等效 MOD 值
+ */
+function getDynamicBuffDisplayValue(key: string, value: number) {
+    const baseAttributeMap = {
+        攻击: "基础攻击",
+        暴击: "基础暴击",
+        暴伤: "基础暴伤",
+        触发: "基础触发",
+        攻速: "射速",
+        装填: "基础装填",
+        弹匣: "基础弹匣",
+        弹药: "基础弹药",
+    } as const
+    const baseAttribute = baseAttributeMap[key as keyof typeof baseAttributeMap]
+    const baseValue = baseAttribute ? (baseWeapon.value as Record<string, unknown>)[baseAttribute] : undefined
+
+    return typeof baseValue === "number" && baseValue !== 0 ? value / baseValue : value
+}
+
+/**
  * 获取当前武器面板对应的BUFF属性前缀。
  * @returns BUFF属性前缀
  */
@@ -123,7 +146,7 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
             sourceMap[attrKey] ||= []
             sourceMap[attrKey].push({
                 sourceName: buff.名称,
-                value: delta,
+                value: getDynamicBuffDisplayValue(attrKey, delta),
             })
         })
     })
