@@ -5882,7 +5882,8 @@
             "expectedDamage": "Expected Damage",
             "functions": "Function Usage",
             "namespace": "Namespace",
-            "specialValue": "Special Values"
+            "specialValue": "Special Values",
+            "temporaryAttrs": "Temporary Attributes"
         },
         "examplesTitle": "Example Expressions",
         "functions": {
@@ -5955,6 +5956,10 @@
             "special": {
                 "desc": "Fixed at 100% and not affected by power. Used for custom skill multipliers, such as [Attack] * 1.2 to simulate 120%, as well as [Defense] and [HP].",
                 "label": "Special Values"
+            },
+            "temporary": {
+                "desc": "Use { } to append temporary attributes to a field (applies only to that field), such as [Attack]{增伤:0.1} to temporarily add 10% damage dealt. Same-named attributes accumulate incrementally.",
+                "label": "Temporary Attributes"
             }
         },
         "syntaxTitle": "Expression Syntax",

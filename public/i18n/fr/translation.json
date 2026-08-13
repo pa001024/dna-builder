@@ -5882,7 +5882,8 @@
             "expectedDamage": "Dégâts attendus",
             "functions": "Utilisation des fonctions",
             "namespace": "Espace de noms",
-            "specialValue": "Valeurs spéciales"
+            "specialValue": "Valeurs spéciales",
+            "temporaryAttrs": "Attributs temporaires"
         },
         "examplesTitle": "Exemples d’expressions",
         "functions": {
@@ -5955,6 +5956,10 @@
             "special": {
                 "desc": "Fixé à 100 % et non प्रभावितé par la puissance. Utilisé pour les multiplicateurs de compétence personnalisés, par exemple [Attaque] * 1,2 pour simuler 120 %, ainsi que [Défense] et [PV].",
                 "label": "Valeurs spéciales"
+            },
+            "temporary": {
+                "desc": "Utilisez { } pour ajouter des attributs temporaires à un champ (ne s'applique qu'à ce champ), par exemple [Attaque]{增伤:0.1} pour ajouter temporairement 10 % de dégâts infligés. Les attributs du même nom s'accumulent.",
+                "label": "Attributs temporaires"
             }
         },
         "syntaxTitle": "Syntaxe de l’expression",

@@ -303,7 +303,8 @@
             "expectedDamage": "期望伤害",
             "functions": "函数使用",
             "namespace": "命名空间",
-            "specialValue": "特殊值"
+            "specialValue": "特殊值",
+            "temporaryAttrs": "临时属性"
         },
         "examplesTitle": "示例表达式",
         "functions": {
@@ -376,6 +377,10 @@
             "special": {
                 "desc": "倍率固定为100%(不受威力影响)，用于自定义技能倍率，如 [攻击]*1.2 模拟120%倍率、以及[防御]、[生命]等",
                 "label": "特殊值"
+            },
+            "temporary": {
+                "desc": "使用 { } 为字段追加临时属性(仅对该字段生效)，如 [攻击]{增伤:0.1} 临时增加 10% 增伤，同名属性按增量累加",
+                "label": "临时属性"
             }
         },
         "syntaxTitle": "表达式语法",

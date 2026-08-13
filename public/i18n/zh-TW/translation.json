@@ -5022,7 +5022,8 @@
             "expectedDamage": "期望傷害",
             "functions": "函數使用",
             "namespace": "命名空間",
-            "specialValue": "特殊值"
+            "specialValue": "特殊值",
+            "temporaryAttrs": "臨時屬性"
         },
         "examplesTitle": "範例表達式",
         "functions": {
@@ -5095,6 +5096,10 @@
             "special": {
                 "desc": "倍率固定為100%(不受威力影響)，用於自訂技能倍率，例如 [攻擊]*1.2 模擬120%倍率，以及[防禦]、[生命]等",
                 "label": "特殊值"
+            },
+            "temporary": {
+                "desc": "使用 { } 為欄位附加臨時屬性(僅對該欄位生效)，例如 [攻擊]{增傷:0.1} 臨時增加 10% 增傷，同名屬性按增量累加",
+                "label": "臨時屬性"
             }
         },
         "syntaxTitle": "表達式語法",

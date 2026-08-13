@@ -5882,7 +5882,8 @@
             "expectedDamage": "기대 피해",
             "functions": "함수 사용",
             "namespace": "네임스페이스",
-            "specialValue": "특수 값"
+            "specialValue": "특수 값",
+            "temporaryAttrs": "임시 속성"
         },
         "examplesTitle": "예시 식",
         "functions": {
@@ -5955,6 +5956,10 @@
             "special": {
                 "desc": "배율은 100%로 고정되며 위력의 영향을 받지 않습니다. [공격]*1.2처럼 사용자 정의 스킬 배율을 설정하거나 [방어], [체력] 등에 사용됩니다.",
                 "label": "특수 값"
+            },
+            "temporary": {
+                "desc": "{ } 를 사용해 필드에 임시 속성을 추가합니다(해당 필드에만 적용). 예: [공격]{增伤:0.1} 은 피해 증가를 임시로 10% 추가하며, 같은 이름의 속성은 증가량이 누적됩니다.",
+                "label": "임시 속성"
             }
         },
         "syntaxTitle": "표현식 문법",

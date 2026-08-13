@@ -5800,7 +5800,8 @@
             "expectedDamage": "期待ダメージ",
             "functions": "関数の使い方",
             "namespace": "名前空間",
-            "specialValue": "特殊値"
+            "specialValue": "特殊値",
+            "temporaryAttrs": "一時属性"
         },
         "examplesTitle": "式の例",
         "functions": {
@@ -5873,6 +5874,10 @@
             "special": {
                 "desc": "特殊値",
                 "label": "特殊値"
+            },
+            "temporary": {
+                "desc": "{ } を使ってフィールドに一時属性を追加します(そのフィールドにのみ有効)。例: [攻撃]{增伤:0.1} で一時的にダメージ増加を10%追加。同名属性は加算されます。",
+                "label": "一時属性"
             }
         },
         "syntaxTitle": "式の構文",
