@@ -1,6 +1,6 @@
 [package]
 name = "dna-builder"
-version = "1.1.2"
+version = "1.1.3"
 description = "A DNA Builder"
 authors = ["pa001024"]
 edition = "2024"
