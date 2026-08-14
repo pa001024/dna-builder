@@ -1,6 +1,7 @@
 import { groupBy } from "lodash-es"
 import type { RawTimelineData } from "../store/timeline"
 import { type ASTNode, parseAST } from "./ast"
+import { sumCharBuildBonusContributions } from "./charbuild-simd"
 import type { AbstractMod, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import type { LeveledChar } from "./leveled/LeveledChar"
@@ -102,6 +103,39 @@ const weaponAttributeBaseMap = {
     弹匣: "基础弹匣",
     弹药: "基础弹药",
 } as const
+
+const characterBonusAttributes = [
+    "攻击",
+    "固定攻击",
+    "生命",
+    "护盾",
+    "防御",
+    "神智",
+    "属性伤",
+    "技能威力",
+    "技能耐久",
+    "技能效益",
+    "技能范围",
+    "昂扬",
+    "背水",
+    "增伤",
+    "武器伤害",
+    "技能伤害",
+    "技能速度",
+    "属性穿透",
+    "失衡易伤",
+    "技能倍率加数",
+    "召唤物属性继承比例",
+    "召唤物攻击速度",
+    "召唤物范围",
+    "召唤物伤害",
+    "技能倍率赋值",
+] as const
+
+const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((attribute, index) => [attribute, index])) as Record<
+    (typeof characterBonusAttributes)[number],
+    number
+>
 
 export class CharBuildTimeline {
     totalTime: number = 0
@@ -543,40 +577,41 @@ export class CharBuild {
     // 计算角色所有属性（基础属性和其他属性）
     public calculateAttributes(nocode = false, attrApplied = false): CharAttr {
         const char = this.char
+        const bonuses = this.getCharacterBonusVector()
 
         // 计算各种加成
-        let attackBonus = this.getTotalBonus("攻击")
-        const attackAdd = this.getTotalBonus("固定攻击")
-        let healthBonus = this.getTotalBonus("生命")
-        let shieldBonus = this.getTotalBonus("护盾")
-        let defenseBonus = this.getTotalBonus("防御")
-        let sanityBonus = this.getTotalBonus("神智")
-        let elemDamageBonus = this.getTotalBonus("属性伤")
+        let attackBonus = bonuses[characterBonusIndex.攻击]
+        const attackAdd = bonuses[characterBonusIndex.固定攻击]
+        let healthBonus = bonuses[characterBonusIndex.生命]
+        let shieldBonus = bonuses[characterBonusIndex.护盾]
+        let defenseBonus = bonuses[characterBonusIndex.防御]
+        let sanityBonus = bonuses[characterBonusIndex.神智]
+        let elemDamageBonus = bonuses[characterBonusIndex.属性伤]
         // 计算基础值为1的属性
-        let power = 1 + this.getTotalBonus("技能威力")
-        let durability = 1 + this.getTotalBonus("技能耐久")
-        let efficiency = 1 + this.getTotalBonus("技能效益")
-        let range = 1 + this.getTotalBonus("技能范围")
+        let power = 1 + bonuses[characterBonusIndex.技能威力]
+        let durability = 1 + bonuses[characterBonusIndex.技能耐久]
+        let efficiency = 1 + bonuses[characterBonusIndex.技能效益]
+        let range = 1 + bonuses[characterBonusIndex.技能范围]
 
         // 计算基础值为0的属性
-        let boost = this.getTotalBonus("昂扬")
-        let desperate = this.getTotalBonus("背水")
-        let damageIncrease = this.getTotalBonus("增伤")
-        let weaponDamage = this.getTotalBonus("武器伤害")
-        let skillDamage = this.getTotalBonus("技能伤害")
-        let skillSpeed = this.getTotalBonus("技能速度")
-        let penetration = this.getTotalBonus("属性穿透")
-        let imbalanceDamageBonus = this.getTotalBonus("失衡易伤")
-        let skillAdd = this.getTotalBonus("技能倍率加数")
-        let summonAttrInheritRatio = 1 + this.getTotalBonus("召唤物属性继承比例")
-        let summonAttackSpeed = this.getTotalBonus("召唤物攻击速度")
-        let summonRange = this.getTotalBonus("召唤物范围")
-        let summonDamage = this.getTotalBonus("召唤物伤害")
+        let boost = bonuses[characterBonusIndex.昂扬]
+        let desperate = bonuses[characterBonusIndex.背水]
+        let damageIncrease = bonuses[characterBonusIndex.增伤]
+        let weaponDamage = bonuses[characterBonusIndex.武器伤害]
+        let skillDamage = bonuses[characterBonusIndex.技能伤害]
+        let skillSpeed = bonuses[characterBonusIndex.技能速度]
+        let penetration = bonuses[characterBonusIndex.属性穿透]
+        let imbalanceDamageBonus = bonuses[characterBonusIndex.失衡易伤]
+        let skillAdd = bonuses[characterBonusIndex.技能倍率加数]
+        let summonAttrInheritRatio = 1 + bonuses[characterBonusIndex.召唤物属性继承比例]
+        let summonAttackSpeed = bonuses[characterBonusIndex.召唤物攻击速度]
+        let summonRange = bonuses[characterBonusIndex.召唤物范围]
+        let summonDamage = bonuses[characterBonusIndex.召唤物伤害]
         const ignoreDefense = this.getTotalBonusMul("无视防御")
         const skillIgnoreDefense = this.getTotalBonusMul("技能无视防御")
         const independentDamageIncrease = this.getTotalBonusMul("独立增伤")
         const damageReduce = this.getTotalBonusReduce("减伤")
-        const skillMultiplierSet = this.getTotalBonus("技能倍率赋值")
+        const skillMultiplierSet = bonuses[characterBonusIndex.技能倍率赋值]
         const skillMultiplier = this.getTotalBonusMul("技能倍率乘数")
 
         // 应用MOD属性加成
@@ -1084,6 +1119,48 @@ export class CharBuild {
         })
 
         return bonus
+    }
+
+    /**
+     * 归约角色公共加成；SIMD 模块就绪后使用连续 f64 矩阵，否则严格回退到既有逐属性求和。
+     * @returns 顺序与 characterBonusAttributes 对齐的公共属性加成向量
+     */
+    private getCharacterBonusVector(): Float64Array {
+        const attributeCount = characterBonusAttributes.length
+        const sourceCount = 5 + this.mods.length + this.buffs.length
+        const contributions = new Float64Array(sourceCount * attributeCount)
+        let sourceIndex = 0
+
+        /** 将一组记录的数值属性写入一行连续的 f64 贡献。 */
+        const addSource = (source: Record<string, unknown> | undefined, readKey = (attribute: string) => attribute) => {
+            if (source) {
+                for (let index = 0; index < attributeCount; index++) {
+                    const value = source[readKey(characterBonusAttributes[index])]
+                    if (typeof value === "number") {
+                        contributions[sourceIndex * attributeCount + index] = value
+                    }
+                }
+            }
+            sourceIndex++
+        }
+
+        addSource(this.char.加成)
+        addSource(this.isWeaponForgeEffective(this.meleeWeapon) ? (this.meleeWeapon as unknown as Record<string, unknown>) : undefined)
+        addSource(this.isWeaponForgeEffective(this.rangedWeapon) ? (this.rangedWeapon as unknown as Record<string, unknown>) : undefined)
+
+        for (const mod of this.mods) {
+            addSource(mod.attrType === "角色" ? mod.addAttr : undefined)
+        }
+        for (const buff of this.buffs) {
+            addSource(buff as unknown as Record<string, unknown>)
+        }
+        addSource(this.rangedWeapon.buffProps)
+        addSource(this.meleeWeapon.buffProps)
+
+        const simdBonuses = sumCharBuildBonusContributions(contributions, sourceCount, attributeCount)
+        if (simdBonuses) return simdBonuses
+
+        return Float64Array.from(characterBonusAttributes, attribute => this.getTotalBonus(attribute))
     }
 
     public getModsBonus(mods: LeveledMod[], attribute: string, prefix = "角色"): number {

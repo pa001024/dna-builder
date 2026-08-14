@@ -383,6 +383,7 @@ const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
                             <li
                                 v-if="
                                     charBuild.getTotalBonus(`${charBuild.char.属性}MOD属性`) > 0 &&
+                                    baseWeapon.伤害类型 === charBuild.char.属性 &&
                                     modAttributeBonusSources.some(v => v.addAttr[key])
                                 "
                                 v-for="(buff, index) in charBuild.buffs.filter(b => b[`${charBuild.char.属性}MOD属性`])"
