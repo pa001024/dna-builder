@@ -24,7 +24,7 @@ async function createCacheDir() {
  */
 function createOfficialFetch(packages: Record<string, string | object>) {
     return async (input: string | URL | Request, _init?: RequestInit) => {
-        const packageName = new URL(input.toString()).pathname.split("/").at(-1) || ""
+        const packageName = decodeURIComponent(new URL(input.toString()).pathname.split("/").at(-1) || "")
         const content = packages[packageName]
         return content === undefined
             ? new Response(null, { status: 404 })
@@ -127,6 +127,32 @@ describe("ZIP 差分下载 API", () => {
 
         expect(response.status).toBe(400)
         expect((await response.json()).error).toBe("包名必须是 ZIP 或 MSI 文件名")
+    })
+
+    it("接受含空格的官方 MSI 包名", async () => {
+        const cacheDir = await createCacheDir()
+        const app = apiPlugin({
+            cacheDir,
+            updateManifestUrl: "https://official.example.com/latest.json",
+            updatePackageBaseUrl: "https://official.example.com/releases/",
+            fetch: createOfficialFetch({
+                "latest.json": {
+                    platforms: { "windows-x86_64-msi": { url: "https://official.example.com/releases/DNA Builder_1.1.3_x64_zh-CN.msi" } },
+                },
+                "DNA Builder_1.1.2_x64_zh-CN.msi": "old",
+                "DNA Builder_1.1.3_x64_zh-CN.msi": "new",
+            }),
+            createDiff: async (_oldFile, _newFile, patchFile) => writeFile(patchFile, "patch"),
+        })
+
+        const response = await app.handle(
+            new Request("http://localhost/api/download/diff/DNA%20Builder_1.1.2_x64_zh-CN.msi", { redirect: "manual" })
+        )
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get("X-Download-Mode")).toBe("patch")
+        expect(response.headers.get("X-Target-Package")).toBe("DNA Builder_1.1.3_x64_zh-CN.msi")
+        expect(await response.text()).toBe("patch")
     })
 
     it("复用已缓存的差分结果", async () => {

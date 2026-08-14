@@ -432,7 +432,7 @@ export const raceLotteryConstants: Record<string, number | string> = {
     RaceLotteryStartpointid: 22,
     RaceLotterySubregionid: 106001,
     RacePlayerNum: 18,
-    RaceTimeOutTime: 100,
+    RaceTimeOutTime: 30,
     RaceTimeOutTimeBuff: 3002,
     RaceTrackLength: 100,
     RaceTrackNumSamples_Max: 200,

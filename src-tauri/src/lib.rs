@@ -2773,8 +2773,9 @@ async fn download_and_install_app_update(app_handle: tauri::AppHandle) -> Result
                 .headers()
                 .get(reqwest::header::LOCATION)
                 .and_then(|value| value.to_str().ok())
-                .ok_or_else(|| "更新服务未返回完整安装包地址".to_string())?
-                .to_string();
+                .map(ToString::to_string)
+                // 差分服务未返回完整包重定向时（如服务端拒绝请求），回退到清单中的官方安装包地址。
+                .unwrap_or_else(|| target_url.clone());
             download_update_file(&app_handle, &full_url, &target_file).await?;
         }
         let target_bytes =

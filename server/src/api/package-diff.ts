@@ -116,7 +116,7 @@ async function resolveUpdatePackageSource(config: PackageDiffConfig, requestFetc
             }
 
             const latestPackageUrl = new URL(packageUrl, manifestUrl).href
-            normalizePackageName(basename(new URL(latestPackageUrl).pathname), "msi")
+            normalizePackageName(decodeURIComponent(basename(new URL(latestPackageUrl).pathname)), "msi")
             return {
                 officialPackageBaseUrl:
                     config.updatePackageBaseUrl || process.env.OFFICIAL_UPDATE_PACKAGE_BASE_URL || `${dirname(latestPackageUrl)}/`,
@@ -225,7 +225,7 @@ export async function getPackageDiff(packageName: string, config: PackageDiffCon
     }
 
     const sourcePackageName = normalizePackageName(packageName)
-    const targetPackageName = normalizePackageName(basename(targetUrl.pathname))
+    const targetPackageName = normalizePackageName(decodeURIComponent(basename(targetUrl.pathname)))
     const sourceUrl = new URL(sourcePackageName, officialBaseUrl.href.endsWith("/") ? officialBaseUrl : `${officialBaseUrl}/`).href
     const cacheDir = config.cacheDir || process.env.PACKAGE_DIFF_CACHE_DIR || resolve(import.meta.dir, "../../data/package-diff")
     const requestFetch = config.fetch || fetch
