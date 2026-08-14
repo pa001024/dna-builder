@@ -53,8 +53,7 @@
             "dialog": false,
             "windows": {
                 "installMode": "passive"
-            },
-            "diffEndpoint": "https://api.dna-builder.cn/api/download/diff"
+            }
         }
     }
 }

@@ -1,12 +1,14 @@
 import { decode } from "@msgpack/msgpack"
 import { unzipSync } from "fflate"
 import { tauriFetch } from "../api/app"
+import { env } from "../env"
 import {
     getRegisteredDataPackModuleKeys,
     hydrateRegisteredDataPackBindings,
     markDataPackHydrated,
     resetRegisteredDataPackBindings,
 } from "./data-pack-bridge"
+import { applyHdiff } from "./hpatchz-wasm"
 import { mountImgsToVirtualPath } from "./imgs-runtime"
 
 export type DataPackModuleRecord = Record<string, unknown>
@@ -900,6 +902,71 @@ export async function removeInstalledDataPackVersion(version: string): Promise<v
 }
 
 /**
+ * 通过服务端差分接口下载新数据包字节。
+ *
+ * 差分接口 `POST /api/download/diff` 接收 `{ old, new }` 两个官方包名，由后端
+ * 生成 HDiffPatch 补丁（超 2MB 时回退整包 302）。这里把旧包与补丁都留在浏览器内，
+ * 用 hpatchz wasm 就地应用，避免把整包字节在前端与后端间搬运。
+ *
+ * @param targetVersion 目标版本号
+ * @param targetPackageFile 目标版本对应的官方 ZIP 文件名
+ * @returns 新数据包字节；任一环节不可用（未安装旧包、差分回退整包、wasm 不可用、
+ *          应用失败、版本不符）时返回 null，调用方回退整包下载。
+ */
+async function tryDownloadDataPackViaDiff(targetVersion: string, targetPackageFile: string): Promise<Uint8Array | null> {
+    const installed = await readInstalledInfo()
+    const oldVersion = installed?.version
+    if (!oldVersion || oldVersion === targetVersion) return null
+    const oldInfo = await readInstalledVersionInfo(oldVersion)
+    const oldPackageFile = oldInfo?.packageFile
+    if (!oldPackageFile) return null
+
+    const oldBytes = await readPackBytes(oldVersion)
+    if (!oldBytes) return null
+
+    const diffUrl = `${env.apiEndpoint.replace(/\/$/, "")}/api/download/diff`
+    let response: Response
+    try {
+        // redirect: manual 以便识别后端回退整包的 302；差分本身应直接返回 200。
+        response = await fetch(diffUrl, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ old: oldPackageFile, new: targetPackageFile }),
+            cache: "no-store",
+            redirect: "manual",
+        })
+    } catch {
+        return null
+    }
+    if (!response.ok || response.status === 302 || response.status === 303 || response.status === 307 || response.status === 308) {
+        return null
+    }
+    if (response.headers.get("X-Download-Mode") !== "patch") {
+        return null
+    }
+
+    const diffBytes = new Uint8Array(await response.arrayBuffer())
+    if (!diffBytes.length) return null
+
+    const applied = await applyHdiff(oldBytes, diffBytes)
+    if (!applied.ok) {
+        console.warn("数据包差分应用失败", applied.code)
+        return null
+    }
+
+    try {
+        const pack = decodePack(applied.bytes)
+        if (pack.manifest.version !== targetVersion) {
+            console.warn(`数据包差分版本不符: 目标 ${targetVersion}, 实际 ${pack.manifest.version}`)
+            return null
+        }
+        return applied.bytes
+    } catch {
+        return null
+    }
+}
+
+/**
  * 下载并安装数据包。
  * @param version 目标版本；不传时下载远端列表中的最新版本
  * @returns 安装状态
@@ -917,13 +984,16 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
         throw new Error("无法获取数据包版本信息")
     }
 
-    const source = await getDataPackSourceInfo()
-    const response = await fetch(getDataPackPackageUrl(source.baseUrl, remote.version), { cache: "no-store" })
-    if (!response.ok) {
-        throw new Error(`下载数据包失败: ${response.status} ${response.statusText}`)
+    // 优先走差分路径；不可用时回退整包下载。
+    let bytes = await tryDownloadDataPackViaDiff(remote.version, remote.packageFile)
+    if (!bytes) {
+        const source = await getDataPackSourceInfo()
+        const response = await fetch(getDataPackPackageUrl(source.baseUrl, remote.version), { cache: "no-store" })
+        if (!response.ok) {
+            throw new Error(`下载数据包失败: ${response.status} ${response.statusText}`)
+        }
+        bytes = await readResponseBytes(response, onProgress)
     }
-
-    const bytes = await readResponseBytes(response, onProgress)
     const pack = decodePack(bytes)
     await writePackBytes(remote.version, bytes, pack)
     await writeInstalledInfo(remote)

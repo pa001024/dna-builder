@@ -37,57 +37,49 @@ afterEach(async () => {
 })
 
 describe("ZIP 差分下载 API", () => {
-    it("从官方数据包版本列表解析最新 ZIP", async () => {
+    it("按指定 old/new 生成 ZIP 差分", async () => {
         const cacheDir = await createCacheDir()
         const app = apiPlugin({
             cacheDir,
             dataPackageBaseUrl: "https://official.example.com/data-pack/",
-            dataVersionsUrl: "https://official.example.com/data-pack/versions.json",
             fetch: createOfficialFetch({
-                "versions.json": [{ packageFile: "v1.2.zip" }],
                 "v1.1.zip": "old",
                 "v1.2.zip": "new",
             }),
             createDiff: async (_oldFile, _newFile, patchFile) => writeFile(patchFile, "patch"),
         })
 
-        const response = await app.handle(new Request("http://localhost/api/download/diff/v1.1.zip"))
+        const response = await app.handle(
+            new Request("http://localhost/api/download/diff", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ old: "v1.1.zip", new: "v1.2.zip" }),
+            })
+        )
 
         expect(response.status).toBe(200)
         expect(response.headers.get("X-Target-Package")).toBe("v1.2.zip")
-    })
-
-    it("从官方更新清单解析最新 MSI", async () => {
-        const cacheDir = await createCacheDir()
-        const app = apiPlugin({
-            cacheDir,
-            updateManifestUrl: "https://official.example.com/latest.json",
-            updatePackageBaseUrl: "https://official.example.com/releases/",
-            fetch: createOfficialFetch({
-                "latest.json": { platforms: { "windows-x86_64-msi": { url: "https://official.example.com/releases/v1.2.msi" } } },
-                "v1.1.msi": "old",
-                "v1.2.msi": "new",
-            }),
-            createDiff: async (_oldFile, _newFile, patchFile) => writeFile(patchFile, "patch"),
-        })
-
-        const response = await app.handle(new Request("http://localhost/api/download/diff/v1.1.msi"))
-
-        expect(response.status).toBe(200)
-        expect(response.headers.get("X-Target-Package")).toBe("v1.2.msi")
     })
 
     it("返回不超过 2 MB 的缓存差分", async () => {
         const cacheDir = await createCacheDir()
         const app = apiPlugin({
             cacheDir,
-            officialPackageBaseUrl: "https://official.example.com/packages/",
-            latestPackageUrl: "https://official.example.com/packages/v1.2.zip",
-            fetch: createOfficialFetch({ "v1.1.zip": "old", "v1.2.zip": "new" }),
+            dataPackageBaseUrl: "https://official.example.com/packages/",
+            fetch: createOfficialFetch({
+                "v1.1.zip": "old",
+                "v1.2.zip": "new",
+            }),
             createDiff: async (_oldFile, _newFile, patchFile) => writeFile(patchFile, "patch"),
         })
 
-        const response = await app.handle(new Request("http://localhost/api/download/diff/v1.1.zip"))
+        const response = await app.handle(
+            new Request("http://localhost/api/download/diff", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ old: "v1.1.zip", new: "v1.2.zip" }),
+            })
+        )
 
         expect(response.status).toBe(200)
         expect(response.headers.get("X-Download-Mode")).toBe("patch")
@@ -101,13 +93,22 @@ describe("ZIP 差分下载 API", () => {
         const cacheDir = await createCacheDir()
         const app = apiPlugin({
             cacheDir,
-            officialPackageBaseUrl: "https://official.example.com/packages/",
-            latestPackageUrl: "https://official.example.com/packages/v1.2.zip",
-            fetch: createOfficialFetch({ "v1.1.zip": "old", "v1.2.zip": "new" }),
+            dataPackageBaseUrl: "https://official.example.com/packages/",
+            fetch: createOfficialFetch({
+                "v1.1.zip": "old",
+                "v1.2.zip": "new",
+            }),
             createDiff: async (_oldFile, _newFile, patchFile) => writeFile(patchFile, Buffer.alloc(packageDiffMaxSize + 1)),
         })
 
-        const response = await app.handle(new Request("http://localhost/api/download/diff/v1.1.zip", { redirect: "manual" }))
+        const response = await app.handle(
+            new Request("http://localhost/api/download/diff", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ old: "v1.1.zip", new: "v1.2.zip" }),
+                redirect: "manual",
+            })
+        )
 
         expect(response.status).toBe(302)
         expect(response.headers.get("X-Download-Mode")).toBe("full")
@@ -118,41 +119,20 @@ describe("ZIP 差分下载 API", () => {
         const cacheDir = await createCacheDir()
         const app = apiPlugin({
             cacheDir,
-            officialPackageBaseUrl: "https://official.example.com/packages/",
-            latestPackageUrl: "https://official.example.com/packages/v1.2.zip",
+            dataPackageBaseUrl: "https://official.example.com/packages/",
             fetch: createOfficialFetch({}),
         })
 
-        const response = await app.handle(new Request("http://localhost/api/download/diff/..%2Fsecret.txt"))
-
-        expect(response.status).toBe(400)
-        expect((await response.json()).error).toBe("包名必须是 ZIP 或 MSI 文件名")
-    })
-
-    it("接受含空格的官方 MSI 包名", async () => {
-        const cacheDir = await createCacheDir()
-        const app = apiPlugin({
-            cacheDir,
-            updateManifestUrl: "https://official.example.com/latest.json",
-            updatePackageBaseUrl: "https://official.example.com/releases/",
-            fetch: createOfficialFetch({
-                "latest.json": {
-                    platforms: { "windows-x86_64-msi": { url: "https://official.example.com/releases/DNA Builder_1.1.3_x64_zh-CN.msi" } },
-                },
-                "DNA Builder_1.1.2_x64_zh-CN.msi": "old",
-                "DNA Builder_1.1.3_x64_zh-CN.msi": "new",
-            }),
-            createDiff: async (_oldFile, _newFile, patchFile) => writeFile(patchFile, "patch"),
-        })
-
         const response = await app.handle(
-            new Request("http://localhost/api/download/diff/DNA%20Builder_1.1.2_x64_zh-CN.msi", { redirect: "manual" })
+            new Request("http://localhost/api/download/diff", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ old: "..%2Fsecret.txt", new: "v1.2.zip" }),
+            })
         )
 
-        expect(response.status).toBe(200)
-        expect(response.headers.get("X-Download-Mode")).toBe("patch")
-        expect(response.headers.get("X-Target-Package")).toBe("DNA Builder_1.1.3_x64_zh-CN.msi")
-        expect(await response.text()).toBe("patch")
+        expect(response.status).toBe(400)
+        expect((await response.json()).error).toBe("包名必须是 ZIP 文件名")
     })
 
     it("复用已缓存的差分结果", async () => {
@@ -160,17 +140,25 @@ describe("ZIP 差分下载 API", () => {
         let createCount = 0
         const app = apiPlugin({
             cacheDir,
-            officialPackageBaseUrl: "https://official.example.com/packages/",
-            latestPackageUrl: "https://official.example.com/packages/v1.2.zip",
-            fetch: createOfficialFetch({ "v1.1.zip": "old", "v1.2.zip": "new" }),
+            dataPackageBaseUrl: "https://official.example.com/packages/",
+            fetch: createOfficialFetch({
+                "v1.1.zip": "old",
+                "v1.2.zip": "new",
+            }),
             createDiff: async (_oldFile, _newFile, patchFile) => {
                 createCount += 1
                 await writeFile(patchFile, "patch")
             },
         })
 
-        await app.handle(new Request("http://localhost/api/download/diff/v1.1.zip"))
-        await app.handle(new Request("http://localhost/api/download/diff/v1.1.zip"))
+        const diffRequest = () =>
+            new Request("http://localhost/api/download/diff", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ old: "v1.1.zip", new: "v1.2.zip" }),
+            })
+        await app.handle(diffRequest())
+        await app.handle(diffRequest())
 
         expect(createCount).toBe(1)
         expect(await readFile(join(cacheDir, "features", "v1.1.zip.json"), "utf8")).toContain("sha256")

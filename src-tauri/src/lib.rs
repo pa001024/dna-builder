@@ -2463,8 +2463,6 @@ struct UpdatePlatform {
 struct UpdaterPluginConfig {
     pubkey: String,
     endpoints: Vec<String>,
-    #[serde(rename = "diffEndpoint")]
-    diff_endpoint: String,
 }
 
 /// 提供给前端的应用更新信息。
@@ -2597,26 +2595,6 @@ fn update_cache_dir(app_handle: &tauri::AppHandle) -> Result<PathBuf, String> {
     Ok(cache_dir)
 }
 
-/// 获取当前缓存的 MSI 安装包。缓存只保留一个已校验的完整包作为下次差分的旧文件。
-/// @param cache_dir 更新缓存目录。
-/// @returns 缓存 MSI 路径，不存在时返回 None。
-fn cached_installer(cache_dir: &Path) -> Result<Option<PathBuf>, String> {
-    let entries = fs::read_dir(cache_dir).map_err(|error| format!("读取更新缓存失败: {error}"))?;
-    for entry in entries {
-        let path = entry
-            .map_err(|error| format!("读取更新缓存项失败: {error}"))?
-            .path();
-        if path.is_file()
-            && path
-                .extension()
-                .is_some_and(|extension| extension.eq_ignore_ascii_case("msi"))
-        {
-            return Ok(Some(path));
-        }
-    }
-    Ok(None)
-}
-
 /// 下载更新文件并向前端发送进度。
 /// @param app_handle Tauri 应用句柄。
 /// @param url 下载 URL。
@@ -2678,133 +2656,91 @@ async fn check_app_update(app_handle: tauri::AppHandle) -> Result<Option<AppUpda
     }))
 }
 
-/// 下载差分或完整安装包，验证 minisign 签名后启动 MSI 安装程序。
+/// 下载最新 MSI 安装包，验证 minisign 签名后启动 MSI 安装程序。
 #[tauri::command]
 async fn download_and_install_app_update(app_handle: tauri::AppHandle) -> Result<(), String> {
     let config = updater_config(&app_handle)?;
     let (manifest, _) = fetch_update_manifest(&config.endpoints).await?;
-    let target_url = manifest
+    let platform = manifest
         .platforms
         .get("windows-x86_64-msi")
-        .ok_or_else(|| "更新信息中未找到 Windows MSI 安装包".to_string())?
-        .url
-        .clone();
-    let target_signature = manifest
-        .platforms
-        .get("windows-x86_64-msi")
-        .ok_or_else(|| "更新信息中未找到 Windows MSI 安装包".to_string())?
-        .signature
-        .clone();
+        .ok_or_else(|| "更新信息中未找到 Windows MSI 安装包".to_string())?;
+    let target_url = platform.url.clone();
+    let target_signature = platform.signature.clone();
     let target_name = target_url
         .rsplit('/')
         .next()
         .filter(|name| name.ends_with(".msi"))
         .ok_or_else(|| "更新 MSI 文件名无效".to_string())?;
     let cache_dir = update_cache_dir(&app_handle)?;
-    let previous_installer = cached_installer(&cache_dir)?;
     let mut target_file = cache_dir.join(target_name);
     let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 0 });
 
-    let source_name = previous_installer
-        .as_ref()
-        .and_then(|file| file.file_name())
-        .and_then(|name| name.to_str())
-        .unwrap_or(target_name);
+    download_update_file(&app_handle, &target_url, &target_file).await?;
+    let target_bytes =
+        fs::read(&target_file).map_err(|error| format!("读取更新安装包失败: {error}"))?;
+    if let Err(error) =
+        verify_update_signature(&target_bytes, &target_signature, &config.pubkey)
     {
-        let diff_url = Url::parse(&format!("{}/", config.diff_endpoint.trim_end_matches('/')))
-            .map_err(|error| format!("更新差分地址无效: {error}"))?
-            .join(source_name)
-            .map_err(|error| format!("更新差分地址无效: {error}"))?;
-        let response = reqwest::Client::builder()
-            .redirect(reqwest::redirect::Policy::none())
-            .build()
-            .map_err(|error| format!("创建更新请求失败: {error}"))?
-            .get(diff_url)
-            .send()
-            .await
-            .map_err(|error| format!("请求更新差分失败: {error}"))?;
-        let mode = response
-            .headers()
-            .get("X-Download-Mode")
-            .and_then(|value| value.to_str().ok())
-            .unwrap_or("full");
-        if mode == "patch" {
-            let old_file =
-                previous_installer.ok_or_else(|| "缺少更新差分所需的旧安装包".to_string())?;
-            let patch_file = cache_dir.join("update.hdiff");
-            let patch_bytes = response
-                .bytes()
-                .await
-                .map_err(|error| format!("下载更新差分失败: {error}"))?;
-            fs::write(&patch_file, patch_bytes)
-                .map_err(|error| format!("保存更新差分失败: {error}"))?;
-            let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 80 });
-            tokio::task::spawn_blocking({
-                let patch_file = patch_file.clone();
-                let target_file = target_file.clone();
-                move || {
-                    let executable = std::env::temp_dir()
-                        .join(format!("dna-builder-hpatchz-{}.exe", std::process::id()));
-                    fs::write(&executable, HPATCHZ_BYTES)
-                        .map_err(|error| format!("释放内嵌 hpatchz 失败: {error}"))?;
-                    let output = std::process::Command::new(&executable)
-                        .arg("-f")
-                        .arg(old_file)
-                        .arg(patch_file)
-                        .arg(target_file)
-                        .output()
-                        .map_err(|error| format!("启动 hpatchz 失败: {error}"))?;
-                    let _ = fs::remove_file(executable);
-                    if output.status.success() {
-                        Ok(())
-                    } else {
-                        Err(format!(
-                            "hpatchz 执行失败: {}",
-                            String::from_utf8_lossy(&output.stderr)
-                        ))
-                    }
-                }
-            })
-            .await
-            .map_err(|error| format!("hpatchz 任务执行失败: {error}"))??;
-            let _ = fs::remove_file(patch_file);
-        } else {
-            let full_url = response
-                .headers()
-                .get(reqwest::header::LOCATION)
-                .and_then(|value| value.to_str().ok())
-                .map(ToString::to_string)
-                // 差分服务未返回完整包重定向时（如服务端拒绝请求），回退到清单中的官方安装包地址。
-                .unwrap_or_else(|| target_url.clone());
-            download_update_file(&app_handle, &full_url, &target_file).await?;
-        }
-        let target_bytes =
-            fs::read(&target_file).map_err(|error| format!("读取更新安装包失败: {error}"))?;
-        if let Err(error) =
-            verify_update_signature(&target_bytes, &target_signature, &config.pubkey)
-        {
-            let _ = fs::remove_file(&target_file);
-            return Err(error);
-        }
+        let _ = fs::remove_file(&target_file);
+        return Err(error);
     }
     let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 100 });
 
-    if let Some(old_file) = cached_installer(&cache_dir)? {
-        if old_file != target_file {
-            let _ = fs::remove_file(old_file);
-        }
-    }
     target_file =
         fs::canonicalize(target_file).map_err(|error| format!("定位更新安装包失败: {error}"))?;
     let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 100 });
-    std::process::Command::new("msiexec.exe")
-        .args(["/i"])
-        .arg(&target_file)
-        .args(["/passive", "/promptrestart", "AUTOLAUNCHAPP=True"])
-        .spawn()
-        .map_err(|error| format!("启动 MSI 安装程序失败: {error}"))?;
-    app_handle.exit(0);
+    // 与官方 updater 插件保持一致：通过 ShellExecuteW 以独立进程方式启动 MSI 安装程序，
+    // 随后立即硬退出应用，避免优雅退出时的事件循环回收正在运行的安装子进程。
+    launch_msi_installer(&target_file)?;
+    std::process::exit(0);
+    #[allow(unreachable_code)]
     Ok(())
+}
+
+/// 通过 ShellExecuteW 启动 MSI 安装程序（静默/被动模式）。
+fn launch_msi_installer(target_file: &Path) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        use windows::Win32::UI::Shell::ShellExecuteW;
+        use windows::Win32::UI::WindowsAndMessaging::SW_SHOW;
+        use windows::core::PCWSTR;
+
+        let msiexec = std::env::var("SYSTEMROOT").map_or_else(
+            |_| "msiexec.exe".to_string(),
+            |system_root| format!("{system_root}\\System32\\msiexec.exe"),
+        );
+        if !std::path::Path::is_file(target_file) {
+            return Err("更新安装包文件不存在".to_string());
+        }
+        let mut parameters = format!("/i \"{}\" /passive /promptrestart", target_file.display());
+        parameters.push_str(" AUTOLAUNCHAPP=True");
+        let verb_wide = "open".encode_utf16().chain(std::iter::once(0)).collect::<Vec<u16>>();
+        let file_wide = msiexec.encode_utf16().chain(std::iter::once(0)).collect::<Vec<u16>>();
+        let parameters_wide = parameters
+            .encode_utf16()
+            .chain(std::iter::once(0))
+            .collect::<Vec<u16>>();
+        let result = unsafe {
+            ShellExecuteW(
+                None,
+                PCWSTR(verb_wide.as_ptr()),
+                PCWSTR(file_wide.as_ptr()),
+                PCWSTR(parameters_wide.as_ptr()),
+                PCWSTR::null(),
+                SW_SHOW,
+            )
+        };
+        if result.0 as isize <= 32 {
+            return Err(format!("启动 MSI 安装程序失败: 错误码 {}", result.0 as isize));
+        }
+        Ok(())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = target_file;
+        Err("当前平台不支持 MSI 安装".to_string())
+    }
 }
 
 /// 获取文件大小

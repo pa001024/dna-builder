@@ -1,14 +1,10 @@
 import { createHash } from "node:crypto"
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises"
-import { basename, dirname, join, parse, resolve } from "node:path"
+import { basename, join, parse, resolve } from "node:path"
 
 const MAX_PATCH_SIZE = 2 * 1024 * 1024
-const PACKAGE_FILE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._ -]*\.(?:zip|msi)$/i
+const PACKAGE_FILE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._ -]*\.zip$/i
 const DEFAULT_DATA_PACKAGE_BASE_URL = "https://cdn.dna-builder.cn/data-pack/"
-const DEFAULT_UPDATE_MANIFEST_URLS = [
-    "https://cdn.dna-builder.cn/latest.json",
-    "https://github.com/pa001024/dna-builder/releases/latest/download/latest.json",
-]
 
 type PackageFetch = (input: string | URL | Request, init?: RequestInit) => Promise<Response>
 
@@ -22,25 +18,11 @@ type PackageFeature = {
 export type PackageDiffConfig = {
     /** 数据包官方基址。 */
     dataPackageBaseUrl?: string
-    /** 数据包版本列表地址。 */
-    dataVersionsUrl?: string
-    /** 更新包官方基址。 */
-    updatePackageBaseUrl?: string
-    /** 更新版本清单地址。 */
-    updateManifestUrl?: string
-    /** 更新版本清单地址列表。 */
-    updateManifestUrls?: string[]
     cacheDir?: string
     createDiff?: (oldFile: string, newFile: string, patchFile: string) => Promise<void>
     fetch?: PackageFetch
     hdiffzPath?: string
-    /** @deprecated 使用 dataPackageBaseUrl 或 updatePackageBaseUrl。 */
-    officialPackageBaseUrl?: string
-    /** @deprecated 使用 dataVersionsUrl 或 updateManifestUrl。 */
-    latestPackageUrl?: string
 }
-
-export type PackageDiffKind = "data" | "update"
 
 export type PackageDiffResult =
     | { mode: "patch"; patchFile: string; patchName: string; targetPackageName: string; targetSha256: string }
@@ -51,81 +33,21 @@ export type PackageDiffResult =
  * @param packageName 客户端已有的安装包名。
  * @returns 安全的安装包名。
  */
-export function normalizePackageName(packageName: string, extension?: "zip" | "msi") {
+export function normalizePackageName(packageName: string) {
     const normalized = basename(packageName)
-    const expectedExtension = extension ? new RegExp(`\\.${extension}$`, "i") : PACKAGE_FILE_PATTERN
-    if (normalized !== packageName || !expectedExtension.test(normalized)) {
-        throw new Error(extension ? `包名必须是 ${extension.toUpperCase()} 文件名` : "包名必须是 ZIP 或 MSI 文件名")
+    if (normalized !== packageName || !PACKAGE_FILE_PATTERN.test(normalized)) {
+        throw new Error("包名必须是 ZIP 文件名")
     }
     return normalized
 }
 
 /**
- * 读取官方数据包版本列表，定位最新 ZIP 的下载地址。
+ * 读取官方数据包基址。显式传入了 old/new 后，无需再请求版本列表定位最新包。
  * @param config 差分服务配置。
- * @param requestFetch 可替换的 fetch，便于测试。
- * @returns 官方基址与最新数据包地址。
+ * @returns 官方基址。
  */
-async function resolveDataPackageSource(config: PackageDiffConfig, requestFetch: PackageFetch) {
-    const baseUrl = config.dataPackageBaseUrl || process.env.OFFICIAL_DATA_PACK_BASE_URL || DEFAULT_DATA_PACKAGE_BASE_URL
-    const versionsUrl = config.dataVersionsUrl || process.env.OFFICIAL_DATA_PACK_VERSIONS_URL || new URL("versions.json", baseUrl).href
-    const response = await requestFetch(versionsUrl)
-    if (!response.ok) {
-        throw new Error(`获取官方数据包版本失败: ${response.status}`)
-    }
-
-    const versions = (await response.json()) as { packageFile?: string }[]
-    const packageFile = versions.find(item => typeof item.packageFile === "string")?.packageFile
-    if (!packageFile) {
-        throw new Error("官方数据包版本列表中未找到 ZIP 文件")
-    }
-
-    return {
-        officialPackageBaseUrl: baseUrl,
-        latestPackageUrl: new URL(normalizePackageName(packageFile, "zip"), baseUrl).href,
-    }
-}
-
-/**
- * 读取官方更新清单，定位 Windows MSI 的下载地址。
- * @param config 差分服务配置。
- * @param requestFetch 可替换的 fetch，便于测试。
- * @returns 官方基址与最新更新包地址。
- */
-async function resolveUpdatePackageSource(config: PackageDiffConfig, requestFetch: PackageFetch) {
-    const manifestUrls =
-        config.updateManifestUrls ||
-        process.env.OFFICIAL_UPDATE_MANIFEST_URLS?.split(",")
-            .map(url => url.trim())
-            .filter(Boolean) ||
-        (config.updateManifestUrl || process.env.OFFICIAL_UPDATE_MANIFEST_URL
-            ? [config.updateManifestUrl || process.env.OFFICIAL_UPDATE_MANIFEST_URL!]
-            : DEFAULT_UPDATE_MANIFEST_URLS)
-
-    for (const manifestUrl of manifestUrls) {
-        try {
-            const response = await requestFetch(manifestUrl)
-            if (!response.ok) {
-                continue
-            }
-
-            const manifest = (await response.json()) as { platforms?: Record<string, { url?: string }> }
-            const packageUrl = manifest.platforms?.["windows-x86_64-msi"]?.url || manifest.platforms?.["windows-x86_64"]?.url
-            if (!packageUrl) {
-                continue
-            }
-
-            const latestPackageUrl = new URL(packageUrl, manifestUrl).href
-            normalizePackageName(decodeURIComponent(basename(new URL(latestPackageUrl).pathname)), "msi")
-            return {
-                officialPackageBaseUrl:
-                    config.updatePackageBaseUrl || process.env.OFFICIAL_UPDATE_PACKAGE_BASE_URL || `${dirname(latestPackageUrl)}/`,
-                latestPackageUrl,
-            }
-        } catch {}
-    }
-
-    throw new Error("官方更新清单中未找到 Windows MSI 文件")
+async function resolveDataPackageBaseUrl(config: PackageDiffConfig): Promise<string> {
+    return config.dataPackageBaseUrl || process.env.OFFICIAL_DATA_PACK_BASE_URL || DEFAULT_DATA_PACKAGE_BASE_URL
 }
 
 /**
@@ -206,29 +128,31 @@ async function createHdiff(oldFile: string, newFile: string, patchFile: string, 
 }
 
 /**
- * 为客户端已有的官方安装包生成到当前官方安装包的差分下载结果。
- * @param packageName 客户端已有的官方安装包名。
+ * 为客户端已有的旧官方数据包生成到指定新官方数据包的差分下载结果。
+ * @param oldPackageName 客户端已有的旧官方数据包名。
+ * @param newPackageName 目标新官方数据包名。
  * @param config 差分服务配置。
  * @returns 差分文件或完整下载回退信息。
  */
-export async function getPackageDiff(packageName: string, config: PackageDiffConfig = {}): Promise<PackageDiffResult> {
-    const officialPackageBaseUrl = config.officialPackageBaseUrl || process.env.OFFICIAL_ZIP_BASE_URL
-    const latestPackageUrl = config.latestPackageUrl || process.env.OFFICIAL_ZIP_LATEST_URL
-    if (!officialPackageBaseUrl || !latestPackageUrl) {
-        throw new Error("未配置官方 ZIP 下载地址")
-    }
+export async function getPackageDiff(
+    oldPackageName: string,
+    newPackageName: string,
+    config: PackageDiffConfig = {}
+): Promise<PackageDiffResult> {
+    const requestFetch = config.fetch || fetch
+    normalizePackageName(oldPackageName)
+    normalizePackageName(newPackageName)
+    const officialPackageBaseUrl = await resolveDataPackageBaseUrl(config)
 
     const officialBaseUrl = new URL(officialPackageBaseUrl)
-    const targetUrl = new URL(latestPackageUrl)
-    if (targetUrl.origin !== officialBaseUrl.origin) {
-        throw new Error("最新 ZIP 必须来自官方源")
-    }
-
-    const sourcePackageName = normalizePackageName(packageName)
-    const targetPackageName = normalizePackageName(decodeURIComponent(basename(targetUrl.pathname)))
+    const sourcePackageName = normalizePackageName(oldPackageName)
+    const targetPackageName = normalizePackageName(newPackageName)
     const sourceUrl = new URL(sourcePackageName, officialBaseUrl.href.endsWith("/") ? officialBaseUrl : `${officialBaseUrl}/`).href
+    const targetUrl = new URL(targetPackageName, officialBaseUrl.href.endsWith("/") ? officialBaseUrl : `${officialBaseUrl}/`).href
+    if (new URL(targetUrl).origin !== officialBaseUrl.origin) {
+        throw new Error("目标 ZIP 必须来自官方源")
+    }
     const cacheDir = config.cacheDir || process.env.PACKAGE_DIFF_CACHE_DIR || resolve(import.meta.dir, "../../data/package-diff")
-    const requestFetch = config.fetch || fetch
     const { feature: sourceFeature, packageFile: sourceFile } = await cacheOfficialPackage(
         sourcePackageName,
         sourceUrl,
@@ -237,13 +161,14 @@ export async function getPackageDiff(packageName: string, config: PackageDiffCon
     )
     const { feature: targetFeature, packageFile: targetFile } = await cacheOfficialPackage(
         targetPackageName,
-        targetUrl.href,
+        targetUrl,
         cacheDir,
         requestFetch
     )
+    const timestamp = () => new Date().toLocaleString()
 
     if (sourceFeature.sha256 === targetFeature.sha256) {
-        return { mode: "full", targetPackageName, targetUrl: targetUrl.href, targetSha256: targetFeature.sha256 }
+        return { mode: "full", targetPackageName, targetUrl, targetSha256: targetFeature.sha256 }
     }
 
     const patchName = `${parse(sourcePackageName).name}-${parse(targetPackageName).name}.hdiff`
@@ -253,7 +178,7 @@ export async function getPackageDiff(packageName: string, config: PackageDiffCon
         if (patchSize <= MAX_PATCH_SIZE) {
             return { mode: "patch", patchFile, patchName, targetPackageName, targetSha256: targetFeature.sha256 }
         }
-        return { mode: "full", targetPackageName, targetUrl: targetUrl.href, targetSha256: targetFeature.sha256 }
+        return { mode: "full", targetPackageName, targetUrl, targetSha256: targetFeature.sha256 }
     } catch {}
 
     await mkdir(join(cacheDir, "patches"), { recursive: true })
@@ -261,30 +186,15 @@ export async function getPackageDiff(packageName: string, config: PackageDiffCon
         config.createDiff ||
         ((oldFile: string, newFile: string, outputFile: string) =>
             createHdiff(oldFile, newFile, outputFile, config.hdiffzPath || process.env.HDIFFZ_PATH || "hdiffz"))
+    console.log(`${timestamp()} 开始生成差分 - ${sourcePackageName} -> ${targetPackageName}`)
     await createDiff(sourceFile, targetFile, patchFile)
-    if ((await stat(patchFile)).size > MAX_PATCH_SIZE) {
-        return { mode: "full", targetPackageName, targetUrl: targetUrl.href, targetSha256: targetFeature.sha256 }
+    const newPatchSize = (await stat(patchFile)).size
+    console.log(`${timestamp()} 差分生成完成 - ${patchName}, 大小: ${newPatchSize} 字节`)
+    if (newPatchSize > MAX_PATCH_SIZE) {
+        console.log(`${timestamp()} 新差分过大回退完整包 - ${patchName}, 大小: ${newPatchSize} 字节`)
+        return { mode: "full", targetPackageName, targetUrl, targetSha256: targetFeature.sha256 }
     }
     return { mode: "patch", patchFile, patchName, targetPackageName, targetSha256: targetFeature.sha256 }
-}
-
-/**
- * 为数据包或桌面更新包生成差分下载结果。
- * @param kind 包类型。
- * @param packageName 客户端已有的官方包名。
- * @param config 差分服务配置。
- * @returns 差分文件或完整下载回退信息。
- */
-export async function getOfficialPackageDiff(kind: PackageDiffKind, packageName: string, config: PackageDiffConfig = {}) {
-    const requestFetch = config.fetch || fetch
-    const source =
-        kind === "data" ? await resolveDataPackageSource(config, requestFetch) : await resolveUpdatePackageSource(config, requestFetch)
-    const extension = kind === "data" ? "zip" : "msi"
-    normalizePackageName(packageName, extension)
-    return getPackageDiff(packageName, {
-        ...config,
-        ...source,
-    })
 }
 
 export const packageDiffMaxSize = MAX_PATCH_SIZE

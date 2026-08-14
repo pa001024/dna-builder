@@ -13,6 +13,7 @@
         "build:app": "cross-env DNA_BUILDER_APP_BUILD=1 NODE_ENV=production pnpm build",
         "debug:mcp": "npx -y @modelcontextprotocol/inspector npx -y tsx ./src/data/mcp/index.ts",
         "build:dob-script": "cargo build --manifest-path src-tauri/Cargo.toml --release --features dob-script-cli --example dob-script && node tools/prepare-dob-script.mjs",
+        "build:hpatchz-wasm": "cargo build --manifest-path crates/hpatchz-wasm/Cargo.toml --target wasm32-unknown-unknown --release && node tools/prepare-hpatchz-wasm.mjs",
         "build:all": "pnpm build:app",
         "build:api": "cd externals/dna-api && bun run build && cd ../.. && pnpm install",
         "preview": "vite preview",

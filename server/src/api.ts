@@ -1,6 +1,6 @@
 import { fetch } from "bun"
 import { Elysia, t } from "elysia"
-import { getOfficialPackageDiff, getPackageDiff, type PackageDiffConfig } from "./api/package-diff"
+import { getPackageDiff, type PackageDiffConfig } from "./api/package-diff"
 import { uploadImage } from "./upload"
 import { getCachedNameEffectStylesheet } from "./util/name-effect-style"
 
@@ -157,20 +157,14 @@ export const apiPlugin = (packageDiffConfig: PackageDiffConfig = {}) => {
     })
 
     /**
-     * 下载客户端已有官方安装包到最新官方安装包的 HDiffPatch 差分。
+     * 下载客户端旧官方数据包到指定新官方数据包的 HDiffPatch 差分。
      * 差分大于 2 MB 时重定向到官方完整包，避免无收益的客户端补丁。
      */
-    app.get(
-        "/download/diff/:packageName",
-        async ({ params: { packageName }, set }) => {
+    app.post(
+        "/download/diff",
+        async ({ body, set }) => {
             try {
-                const result = packageDiffConfig.latestPackageUrl
-                    ? await getPackageDiff(packageName, packageDiffConfig)
-                    : await getOfficialPackageDiff(
-                          packageName.toLowerCase().endsWith(".msi") ? "update" : "data",
-                          packageName,
-                          packageDiffConfig
-                      )
+                const result = await getPackageDiff(body.old, body.new, packageDiffConfig)
                 return createPackageDiffResponse(result, set)
             } catch (error) {
                 set.status = 400
@@ -178,8 +172,9 @@ export const apiPlugin = (packageDiffConfig: PackageDiffConfig = {}) => {
             }
         },
         {
-            params: t.Object({
-                packageName: t.String(),
+            body: t.Object({
+                old: t.String(),
+                new: t.String(),
             }),
         }
     )

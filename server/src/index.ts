@@ -1,3 +1,6 @@
+// 防呆: 必须最先 import, 在创建 data.db 等副作用发生前校验运行目录
+import "./guard"
+
 import { cors } from "@elysiajs/cors"
 import { Elysia } from "elysia"
 import { aiPlugin } from "./ai"
