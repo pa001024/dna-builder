@@ -7,11 +7,9 @@ use std::{
     time::{Duration, Instant},
 };
 
-use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 use hotwatch::{Event, EventKind, Hotwatch};
 use lazy_static::lazy_static;
 use md5::Context;
-use minisign_verify::{PublicKey, Signature};
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
 
@@ -1690,24 +1688,6 @@ mod download_progress_tests {
     }
 }
 
-#[cfg(test)]
-mod update_signature_tests {
-    use super::verify_update_signature_with_public_key;
-
-    const PUBLIC_KEY: &str = "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXkgRTc2MjBGMTg0MkI0RTgxRgpSV1FmNkxSQ0dBOWk1M21sWWVjTzRJelQ1MVRHUHB2V3VjTlNDaDFDQk0wUVRhTG43M1k3R0ZPMw==";
-    const SIGNATURE: &str = "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIG1pbmlzaWduIHNlY3JldCBrZXkKUldRZjZMUkNHQTlpNTlTTE9GeHo2Tnh2QVNYREplUnR1Wnlrd1FlcGJERUd0ODdpZzFCTnBXYVZXdU5ybTczWWlJaUpicTcxV2krZFA5ZUtMOE9DMzUxdndJYXNTU2JYeHdBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNTU1Nzc5OTY2CWZpbGU6dGVzdApRdEtNWFd5WWN3ZHBaQWxQRjd0RTJFTkprUmQxdWp2S2psajFtOVJ0SFRCblpQYTVXS1U1dVdSczVHb1A1TS9WcUU4MVFGdU1LSTVrL1NmTlFVYU9BQT09";
-
-    /// 验证与 Tauri updater 一致的 minisign 签名校验能拒绝被篡改的安装包。
-    #[test]
-    fn update_signature_verification_matches_tauri_updater() {
-        assert!(verify_update_signature_with_public_key(b"test", SIGNATURE, PUBLIC_KEY).is_ok());
-        assert!(verify_update_signature_with_public_key(b"Test", SIGNATURE, PUBLIC_KEY).is_err());
-        assert!(
-            verify_update_signature_with_public_key(b"test", "not-base64", PUBLIC_KEY).is_err()
-        );
-    }
-}
-
 /// 将内存中的完成状态编码为位图。
 fn encode_progress_mask(progress: &DownloadProgress) -> Vec<u8> {
     let mut progress_mask = vec![0; progress_mask_size(progress.num_chunks)];
@@ -2441,306 +2421,6 @@ async fn apply_game_patch(diff_path: String, target_dir: String) -> Result<Strin
     })
     .await
     .map_err(|e| format!("hpatchz 任务执行失败: {}", e))?
-}
-
-/// 更新服务器返回的最新版本清单。
-#[derive(Debug, Deserialize)]
-struct UpdateManifest {
-    version: String,
-    notes: Option<String>,
-    platforms: std::collections::HashMap<String, UpdatePlatform>,
-}
-
-/// Windows 更新安装包信息。
-#[derive(Debug, Deserialize)]
-struct UpdatePlatform {
-    url: String,
-    signature: String,
-}
-
-/// Tauri 配置中 updater 插件所需的最小配置。
-#[derive(Debug, Deserialize)]
-struct UpdaterPluginConfig {
-    pubkey: String,
-    endpoints: Vec<String>,
-}
-
-/// 提供给前端的应用更新信息。
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct AppUpdateInfo {
-    available: bool,
-    current_version: String,
-    latest_version: String,
-    body: Option<String>,
-}
-
-/// 更新下载阶段事件。
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct AppUpdateProgress {
-    progress: u8,
-}
-
-/// 读取与官方 updater 插件共用的 Tauri 配置。
-/// @param app_handle Tauri 应用句柄。
-/// @returns updater 插件配置。
-fn updater_config(app_handle: &tauri::AppHandle) -> Result<UpdaterPluginConfig, String> {
-    let config = app_handle
-        .config()
-        .plugins
-        .0
-        .get("updater")
-        .ok_or_else(|| "Tauri 配置中未找到 updater 插件".to_string())?
-        .clone();
-    serde_json::from_value::<UpdaterPluginConfig>(config)
-        .map_err(|error| format!("Tauri updater 配置无效: {error}"))
-}
-
-/// 使用 Tauri 配置中的 updater 公钥验证安装包签名。
-/// @param data 待验证的安装包原始字节。
-/// @param release_signature latest.json 中的 Base64 签名内容。
-/// @param public_key_base64 Tauri updater 配置中的 Base64 公钥。
-/// @returns 签名验证成功时返回 Ok。
-fn verify_update_signature(
-    data: &[u8],
-    release_signature: &str,
-    public_key_base64: &str,
-) -> Result<(), String> {
-    verify_update_signature_with_public_key(data, release_signature, public_key_base64)
-}
-
-/// 使用 Tauri updater 格式的公钥和签名验证安装包字节。
-/// @param data 待验证的安装包原始字节。
-/// @param release_signature latest.json 中的 Base64 签名内容。
-/// @param public_key_base64 Base64 编码的 minisign 公钥内容。
-/// @returns 签名验证成功时返回 Ok。
-fn verify_update_signature_with_public_key(
-    data: &[u8],
-    release_signature: &str,
-    public_key_base64: &str,
-) -> Result<(), String> {
-    let public_key = String::from_utf8(
-        BASE64
-            .decode(public_key_base64)
-            .map_err(|error| format!("更新公钥 Base64 解码失败: {error}"))?,
-    )
-    .map_err(|error| format!("更新公钥 UTF-8 解码失败: {error}"))?;
-    let public_key =
-        PublicKey::decode(&public_key).map_err(|error| format!("更新公钥格式无效: {error}"))?;
-    let signature = String::from_utf8(
-        BASE64
-            .decode(release_signature)
-            .map_err(|error| format!("更新签名 Base64 解码失败: {error}"))?,
-    )
-    .map_err(|error| format!("更新签名 UTF-8 解码失败: {error}"))?;
-    let signature =
-        Signature::decode(&signature).map_err(|error| format!("更新签名格式无效: {error}"))?;
-
-    public_key
-        .verify(data, &signature, true)
-        .map_err(|error| format!("更新安装包签名验证失败: {error}"))
-}
-
-/// 按顺序读取 updater 配置中的更新清单，匹配官方插件的 endpoint 回退行为。
-/// @param endpoints Tauri updater 配置中的更新清单地址。
-/// @returns 更新清单和实际使用的地址。
-async fn fetch_update_manifest(endpoints: &[String]) -> Result<(UpdateManifest, String), String> {
-    let mut last_error = None;
-    for endpoint in endpoints {
-        match HTTP_CLIENT.get(endpoint).send().await {
-            Ok(response) => match response.error_for_status() {
-                Ok(response) => match response.json::<UpdateManifest>().await {
-                    Ok(manifest) => return Ok((manifest, endpoint.clone())),
-                    Err(error) => last_error = Some(format!("解析更新信息失败: {error}")),
-                },
-                Err(error) => last_error = Some(format!("请求更新信息失败: {error}")),
-            },
-            Err(error) => last_error = Some(format!("请求更新信息失败: {error}")),
-        }
-    }
-    Err(last_error.unwrap_or_else(|| "Tauri updater 配置中未找到更新清单地址".to_string()))
-}
-
-/// 将语义版本转换为可比较的数字段。
-/// @param version 待比较的版本字符串。
-/// @returns 主、次、修订版本号。
-fn parse_version(version: &str) -> Result<[u64; 3], String> {
-    let parts = version
-        .trim_start_matches('v')
-        .split('.')
-        .collect::<Vec<_>>();
-    if parts.len() != 3 {
-        return Err(format!("更新版本格式无效: {version}"));
-    }
-    let mut parsed = [0_u64; 3];
-    for (index, part) in parts.iter().enumerate() {
-        parsed[index] = part
-            .parse()
-            .map_err(|_| format!("更新版本格式无效: {version}"))?;
-    }
-    Ok(parsed)
-}
-
-/// 获取应用数据目录下的更新缓存路径，避免依赖用户名或硬编码安装位置。
-/// @param app_handle Tauri 应用句柄。
-/// @returns 更新缓存目录。
-fn update_cache_dir(app_handle: &tauri::AppHandle) -> Result<PathBuf, String> {
-    let cache_dir = app_handle
-        .path()
-        .app_data_dir()
-        .map_err(|error| format!("获取应用数据目录失败: {error}"))?
-        .join("cache");
-    fs::create_dir_all(&cache_dir).map_err(|error| format!("创建更新缓存目录失败: {error}"))?;
-    Ok(cache_dir)
-}
-
-/// 下载更新文件并向前端发送进度。
-/// @param app_handle Tauri 应用句柄。
-/// @param url 下载 URL。
-/// @param target_file 输出文件路径。
-async fn download_update_file(
-    app_handle: &tauri::AppHandle,
-    url: &str,
-    target_file: &Path,
-) -> Result<(), String> {
-    let response = HTTP_CLIENT
-        .get(url)
-        .send()
-        .await
-        .map_err(|error| format!("下载更新失败: {error}"))?
-        .error_for_status()
-        .map_err(|error| format!("下载更新失败: {error}"))?;
-    let total = response.content_length().unwrap_or(0);
-    let temporary_file = target_file.with_extension("download");
-    let mut file =
-        File::create(&temporary_file).map_err(|error| format!("创建更新临时文件失败: {error}"))?;
-    let mut downloaded = 0_u64;
-    let mut stream = response.bytes_stream();
-    while let Some(chunk) = stream.next().await {
-        let chunk = chunk.map_err(|error| format!("读取更新数据失败: {error}"))?;
-        file.write_all(&chunk)
-            .map_err(|error| format!("写入更新文件失败: {error}"))?;
-        downloaded += chunk.len() as u64;
-        let progress = if total == 0 {
-            0
-        } else {
-            ((downloaded * 80 / total).min(80)) as u8
-        };
-        let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress });
-    }
-    file.flush()
-        .map_err(|error| format!("写入更新文件失败: {error}"))?;
-    fs::rename(&temporary_file, target_file)
-        .map_err(|error| format!("保存更新文件失败: {error}"))?;
-    Ok(())
-}
-
-/// 获取已安装应用是否存在新版本。
-#[tauri::command]
-async fn check_app_update(app_handle: tauri::AppHandle) -> Result<Option<AppUpdateInfo>, String> {
-    let config = updater_config(&app_handle)?;
-    let (manifest, _) = fetch_update_manifest(&config.endpoints).await?;
-    if !manifest.platforms.contains_key("windows-x86_64-msi") {
-        return Err("更新信息中未找到 Windows MSI 安装包".to_string());
-    }
-    let current_version = env!("CARGO_PKG_VERSION").to_string();
-    if parse_version(&manifest.version)? <= parse_version(&current_version)? {
-        return Ok(None);
-    }
-    Ok(Some(AppUpdateInfo {
-        available: true,
-        current_version,
-        latest_version: manifest.version.trim_start_matches('v').to_string(),
-        body: manifest.notes,
-    }))
-}
-
-/// 下载最新 MSI 安装包，验证 minisign 签名后启动 MSI 安装程序。
-#[tauri::command]
-async fn download_and_install_app_update(app_handle: tauri::AppHandle) -> Result<(), String> {
-    let config = updater_config(&app_handle)?;
-    let (manifest, _) = fetch_update_manifest(&config.endpoints).await?;
-    let platform = manifest
-        .platforms
-        .get("windows-x86_64-msi")
-        .ok_or_else(|| "更新信息中未找到 Windows MSI 安装包".to_string())?;
-    let target_url = platform.url.clone();
-    let target_signature = platform.signature.clone();
-    let target_name = target_url
-        .rsplit('/')
-        .next()
-        .filter(|name| name.ends_with(".msi"))
-        .ok_or_else(|| "更新 MSI 文件名无效".to_string())?;
-    let cache_dir = update_cache_dir(&app_handle)?;
-    let mut target_file = cache_dir.join(target_name);
-    let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 0 });
-
-    download_update_file(&app_handle, &target_url, &target_file).await?;
-    let target_bytes =
-        fs::read(&target_file).map_err(|error| format!("读取更新安装包失败: {error}"))?;
-    if let Err(error) =
-        verify_update_signature(&target_bytes, &target_signature, &config.pubkey)
-    {
-        let _ = fs::remove_file(&target_file);
-        return Err(error);
-    }
-    let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 100 });
-
-    target_file =
-        fs::canonicalize(target_file).map_err(|error| format!("定位更新安装包失败: {error}"))?;
-    let _ = app_handle.emit("app-update-progress", AppUpdateProgress { progress: 100 });
-    // 与官方 updater 插件保持一致：通过 ShellExecuteW 以独立进程方式启动 MSI 安装程序，
-    // 随后立即硬退出应用，避免优雅退出时的事件循环回收正在运行的安装子进程。
-    launch_msi_installer(&target_file)?;
-    std::process::exit(0);
-    #[allow(unreachable_code)]
-    Ok(())
-}
-
-/// 通过 ShellExecuteW 启动 MSI 安装程序（静默/被动模式）。
-fn launch_msi_installer(target_file: &Path) -> Result<(), String> {
-    #[cfg(target_os = "windows")]
-    {
-        use windows::Win32::UI::Shell::ShellExecuteW;
-        use windows::Win32::UI::WindowsAndMessaging::SW_SHOW;
-        use windows::core::PCWSTR;
-
-        let msiexec = std::env::var("SYSTEMROOT").map_or_else(
-            |_| "msiexec.exe".to_string(),
-            |system_root| format!("{system_root}\\System32\\msiexec.exe"),
-        );
-        if !std::path::Path::is_file(target_file) {
-            return Err("更新安装包文件不存在".to_string());
-        }
-        let mut parameters = format!("/i \"{}\" /passive /promptrestart", target_file.display());
-        parameters.push_str(" AUTOLAUNCHAPP=True");
-        let verb_wide = "open".encode_utf16().chain(std::iter::once(0)).collect::<Vec<u16>>();
-        let file_wide = msiexec.encode_utf16().chain(std::iter::once(0)).collect::<Vec<u16>>();
-        let parameters_wide = parameters
-            .encode_utf16()
-            .chain(std::iter::once(0))
-            .collect::<Vec<u16>>();
-        let result = unsafe {
-            ShellExecuteW(
-                None,
-                PCWSTR(verb_wide.as_ptr()),
-                PCWSTR(file_wide.as_ptr()),
-                PCWSTR(parameters_wide.as_ptr()),
-                PCWSTR::null(),
-                SW_SHOW,
-            )
-        };
-        if result.0 as isize <= 32 {
-            return Err(format!("启动 MSI 安装程序失败: 错误码 {}", result.0 as isize));
-        }
-        Ok(())
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        let _ = target_file;
-        Err("当前平台不支持 MSI 安装".to_string())
-    }
 }
 
 /// 获取文件大小
@@ -3691,7 +3371,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_clipboard_manager::init());
+        .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_updater::Builder::new().build());
     #[cfg(target_os = "windows")]
     {
         app = app
@@ -3856,8 +3537,6 @@ pub fn run() {
         pause_download,
         extract_game_assets,
         apply_game_patch,
-        check_app_update,
-        download_and_install_app_update,
         get_file_size,
         get_file_hash,
         cleanup_temp_dir,

@@ -37,6 +37,7 @@ tauri-plugin-window-state = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-http = "2"
+tauri-plugin-updater = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sysinfo = "0.37.2"
@@ -67,7 +68,6 @@ http = "1.1.0"
 scopeguard = "1.2.0"
 regex = "1.11.1"
 md5 = "0.8.0"
-minisign-verify = "0.2"
 repak = { git = "https://github.com/trumank/repak", features = ["oodle"] }
 
 [profile.dev]
