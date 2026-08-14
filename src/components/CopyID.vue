@@ -22,7 +22,7 @@ defineProps<{
         v-else
         type="button"
         class="px-1.5 py-0.5 cursor-pointer rounded bg-base-200/50 text-xs hover:bg-primary/20 transition-colors duration-200 whitespace-nowrap"
-        title="点击复制ID"
+        :title="`点击复制${name ?? 'ID'}`"
         @click.stop="copyText(`${id}`)"
     >
         {{ name ?? "ID" }} {{ id }}

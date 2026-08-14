@@ -360,7 +360,7 @@ function getPlayerHighlightClass(playerId: number): string {
     if (topWinRatePlayerIds.value.has(playerId)) {
         return showTopWinRateHighlight.value ? "border-success bg-success/10" : "border-base-300"
     }
-    if (showOtherWinRateHighlight.value && hasComputedWinRates.value && getPlayerWinRate(playerId) > 0) {
+    if (showOtherWinRateHighlight.value && hasComputedWinRates.value && getPlayerWinRate(playerId) > 0.01) {
         return "border-info bg-info/10"
     }
     return "border-base-300"
@@ -696,9 +696,6 @@ onMounted(async () => {
                     <div class="min-w-0">
                         <div class="flex items-baseline gap-3">
                             <h1 class="truncate text-xl font-bold sm:text-2xl">魔灵竞速</h1>
-                            <span class="hidden text-xs font-semibold uppercase tracking-[0.18em] text-primary sm:inline"
-                                >Race Lottery</span
-                            >
                         </div>
                         <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-base-content/60">
                             <span>{{ raceLotteryData.players.length }} 名选手</span>
@@ -730,12 +727,23 @@ onMounted(async () => {
                 </header>
 
                 <section class="rounded-lg border border-warning/40 bg-warning/5 p-3 shadow-sm sm:p-4">
-                    <div class="mb-3 flex items-center justify-between gap-3">
+                    <div class="mb-2 flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-sm font-bold sm:text-base">期望胜率排名</h2>
-                            <p class="text-xs text-base-content/55">按赛中词条规则推断的进入前 6 的概率</p>
+                            <p class="text-xs text-base-content/55 py-1">按赛中词条规则推断的进入前 6 的概率</p>
                         </div>
-                        <span class="text-xs font-bold uppercase tracking-[0.16em] text-warning">Top 6</span>
+                        <div>
+                            <p class="text-xs text-right font-bold uppercase tracking-[0.16em] text-warning">Top 6</p>
+                            <CopyID
+                                name="助记码"
+                                :id="
+                                    topWinRatePlayers
+                                        .map(v => v.order + 1)
+                                        .sort((a, b) => a - b)
+                                        .join(' ')
+                                "
+                            />
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                         <button
@@ -927,12 +935,6 @@ onMounted(async () => {
                                         <div class="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-base-content/50">No.</div>
                                         <div class="text-4xl font-bold tabular-nums text-base-content/80">
                                             {{ String(orderedPlayers.indexOf(selectedPlayer) + 1).padStart(2, "0") }}
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-xs font-semibold text-base-content/55">记录</div>
-                                        <div class="mt-1 text-2xl font-bold tabular-nums text-primary">
-                                            {{ getPlayerStatusCount(selectedPlayer.playerId) }}
                                         </div>
                                     </div>
                                 </div>
