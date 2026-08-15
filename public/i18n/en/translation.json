@@ -6334,6 +6334,8 @@
         "monster": "Monster",
         "monster_desc": "View monster information and attributes",
         "monstertag": "Commander",
+        "music": "Sheet Music",
+        "music_desc": "Browse sheet music and albums",
         "npc": "NPC",
         "npc_desc": "View NPC information and dialogues",
         "partytopic": "Party Topic",
@@ -6892,6 +6894,12 @@
     "more": {
         "desc": "More features",
         "title": "More"
+    },
+    "music-detail": {
+        "title": "Sheet Music Details"
+    },
+    "music-list": {
+        "title": "Sheet Music List"
     },
     "node-editor": {
         "addCalc": {

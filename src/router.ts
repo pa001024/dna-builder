@@ -5,7 +5,6 @@ import { env } from "./env"
 const AchievementList = () => import("./views/AchievementList.vue")
 const CharBuildCompare = () => import("./views/CharBuildCompare.vue")
 const CharBuildView = () => import("./views/CharBuildView.vue")
-const CharBuildViewNew = () => import("./views/CharBuildViewNew.vue")
 const CharListView = () => import("./views/CharListView.vue")
 const CounterView = () => import("./views/CounterView.vue")
 const GuideDetailView = () => import("./views/GuideDetailView.vue")
@@ -28,6 +27,7 @@ let setMinSize = async (_w: number, _h: number) => {}
     }
 })()
 
+// NOTE: every router must have i18n key like xx.title it will be used by ResizeableWindow.vue
 const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(360, 430) },
     { name: "counter", path: "/counter", component: CounterView, beforeEnter: () => setMinSize(360, 430) },
@@ -50,13 +50,6 @@ const routes: readonly RouteRecordRaw[] = [
             { name: "char-build-list", path: "", component: CharListView, beforeEnter: () => setMinSize(600, 600) },
             { name: "char-build", path: ":charId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
             { name: "char-build-code", path: ":charId/:buildId", component: CharBuildView, beforeEnter: () => setMinSize(360, 600) },
-            { name: "char-build-new", path: ":charId/new", component: CharBuildViewNew, beforeEnter: () => setMinSize(900, 700) },
-            {
-                name: "char-build-new-code",
-                path: ":charId/new/:buildId",
-                component: CharBuildViewNew,
-                beforeEnter: () => setMinSize(900, 700),
-            },
         ],
     },
     { name: "build-compare", path: "/char-build-compare", component: CharBuildCompare, beforeEnter: () => setMinSize(600, 600) },
@@ -246,6 +239,18 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "book/:id",
                 component: () => import("./views/DBBookDetailView.vue"),
                 beforeEnter: () => setMinSize(600, 600),
+            },
+            {
+                name: "music-list",
+                path: "music",
+                component: () => import("./views/DBMusicListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "music-detail",
+                path: "music/:id",
+                component: () => import("./views/DBMusicDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
             },
             {
                 name: "raid-rank",

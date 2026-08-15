@@ -172,6 +172,13 @@ const databaseItems = [
         color: "from-orange-500/20 to-amber-600/20 text-orange-500",
     },
     {
+        name: "database.music",
+        path: "/db/music",
+        desc: "database.music_desc",
+        icon: "M9 18V5l12-2v13M9 18a3 3 0 1 0-6 0 3 3 0 0 0 6 0zm12-2a3 3 0 1 0-6 0 3 3 0 0 0 6 0z",
+        color: "from-fuchsia-500/20 to-pink-600/20 text-fuchsia-500",
+    },
+    {
         name: "database.fish",
         path: "/db/fish",
         desc: "database.fish_desc",
@@ -288,7 +295,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         badge: t("view.section.world.badge"),
         accentClass: "bg-sky-500",
 
-        paths: ["/db/questchain", "/db/partytopic", "/db/shop", "/db/impr", "/db/npc", "/db/reputation", "/db/rank", "/db/dynquest"],
+        paths: ["/db/questchain", "/db/partytopic", "/db/music", "/db/shop", "/db/impr", "/db/npc", "/db/reputation", "/db/rank", "/db/dynquest"],
     },
     {
         id: "challenge",

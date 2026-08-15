@@ -44,6 +44,7 @@ const DATA_PACK_MODULES = [
     "jargon.data",
     "levelup.data",
     "limitedprize.data",
+    "music.data",
     "map.data",
     "mount.data",
     "monstertag.data",

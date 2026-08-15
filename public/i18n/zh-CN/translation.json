@@ -755,6 +755,8 @@
         "monster": "怪物",
         "monster_desc": "查看怪物信息和属性",
         "monstertag": "号令者",
+        "music": "乐谱",
+        "music_desc": "查看乐谱与专辑信息",
         "npc": "NPC",
         "npc_desc": "查看NPC信息和对话",
         "partytopic": "光阴集",
@@ -1305,6 +1307,12 @@
     "more": {
         "desc": "更多功能",
         "title": "更多"
+    },
+    "music-detail": {
+        "title": "乐谱详情"
+    },
+    "music-list": {
+        "title": "乐谱列表"
     },
     "node-editor": {
         "addCalc": {

@@ -28,6 +28,7 @@ const DATA_PACK_MODULES = new Set([
     "jargon.data.ts",
     "levelup.data.ts",
     "limitedprize.data.ts",
+    "music.data.ts",
     "charext.data.ts",
     "charext.en.data.ts",
     "charext.fr.data.ts",

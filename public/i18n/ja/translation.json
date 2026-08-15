@@ -6252,6 +6252,8 @@
         "monster": "モンスター",
         "monster_desc": "モンスター情報と属性を確認",
         "monstertag": "号令者",
+        "music": "楽譜",
+        "music_desc": "楽譜とアルバムを確認",
         "npc": "NPC",
         "npc_desc": "NPCの情報と会話を確認",
         "partytopic": "追憶録",
@@ -6812,6 +6814,12 @@
     "more": {
         "desc": "その他の機能",
         "title": "もっと"
+    },
+    "music-detail": {
+        "title": "楽譜詳細"
+    },
+    "music-list": {
+        "title": "楽譜一覧"
     },
     "node-editor": {
         "addCalc": {

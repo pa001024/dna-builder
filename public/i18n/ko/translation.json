@@ -6334,6 +6334,8 @@
         "monster": "몬스터",
         "monster_desc": "몬스터 정보와 속성 확인",
         "monstertag": "지휘자",
+        "music": "악보",
+        "music_desc": "악보와 앨범 정보 보기",
         "npc": "NPC",
         "npc_desc": "NPC 정보와 대화 보기",
         "partytopic": "추억집",
@@ -6894,6 +6896,12 @@
     "more": {
         "desc": "기타 기능",
         "title": "더보기"
+    },
+    "music-detail": {
+        "title": "악보 상세"
+    },
+    "music-list": {
+        "title": "악보 목록"
     },
     "node-editor": {
         "addCalc": {

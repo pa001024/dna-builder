@@ -43619,7 +43619,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11011542,
-                                content: "Je vous écoute. Simon, où êtes‑vous ?",
+                                content: "Je vous écoute. Simon, où êtes-vous ?",
                                 voice: "story/1002/110115/1B90F51C",
                                 npc: 110022,
                                 next: 11011543,
@@ -43648,7 +43648,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11011546,
                                 content:
-                                    "J’ai reçu le signal d’une autre escouade juste après ton appel avec Fulvis. {nickname2}, que proposes‑tu ?",
+                                    "J’ai reçu le signal d’une autre escouade juste après ton appel avec Fulvis. {nickname2}, que proposes-tu ?",
                                 voice: "story/1002/110115/1B90F5C4",
                                 npc: 110010,
                                 options: [
@@ -43735,7 +43735,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11011558,
-                                content: "C’est décidé. Si tout se passe bien pour toi, rejoins‑moi à la tourelle 4.",
+                                content: "C’est décidé. Si tout se passe bien pour toi, rejoins-moi à la tourelle 4.",
                                 voice: "story/1002/110115/1B90F76A",
                                 npc: 110010,
                             },
@@ -44584,7 +44584,7 @@ export const questData_fr: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 11012005,
-                                content: "当心秽兽！",
+                                content: "Attention aux Souillés !",
                                 voice: "story/1002/110120/1B914112",
                                 npc: 110010,
                             },
@@ -51542,7 +51542,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001339,
                                 content:
-                                    "Qui es‑tu ? Et pourquoi ce ton si sec... C’est ainsi qu’on traite le Grand Roi Démon de la Lumière ?",
+                                    "Qui es-tu ? Et pourquoi ce ton si sec... C’est ainsi qu’on traite le Grand Roi Démon de la Lumière ?",
                                 voice: "story/1200/120013/1E0B49AE",
                                 npc: 200002,
                                 next: 12001340,
@@ -52305,7 +52305,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 12001553,
                                 content:
-                                    "Ce soir à minuit... Comment l’auteur de cette annonce a‑t‑il pu être si bête ? Si personne ne la voit, cette personne risque de rester à la cabine toute la nuit. J’ai raison, petit larbin ?",
+                                    "Ce soir à minuit... Comment l’auteur de cette annonce a-t-il pu être si bête ? Si personne ne la voit, cette personne risque de rester à la cabine toute la nuit. J’ai raison, petit larbin ?",
                                 voice: "story/1200/120015/1E0B6CCA",
                                 npc: 200002,
                                 next: 12001554,
@@ -52367,7 +52367,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 12001702,
-                                content: "... Snow, que fais‑tu ici ?",
+                                content: "... Snow, que fais-tu ici ?",
                                 voice: "story/1200/120017/1E0B853C",
                                 npc: 100001,
                                 next: 12001703,
@@ -101285,7 +101285,7 @@ export const questData_fr: QuestStory[] = [
                                     },
                                     {
                                         id: 510051113,
-                                        content: "<I>Où as‑tu trouvé ça ? Je veux voir !</>",
+                                        content: "<I>Où as-tu trouvé ça ? Je veux voir !</>",
                                         next: 51005114,
                                         impr: [1011, "Chaos", 3],
                                     },

@@ -118,6 +118,8 @@ const MAPPINGS: Mapping[] = [
     { source: "Monster", targetStem: "monster", targetVar: "monsterData", locales: ["cn"] },
     { source: "MonsterStrongAffixes", targetStem: "monstertag", targetVar: "monsterTagData", locales: ["cn"] },
     { source: "Mount", targetStem: "mount", targetVar: "mountData", locales: ["cn"] },
+    { source: "Music", targetStem: "music", targetVar: "musicData", locales: ["cn"] },
+    { source: "MusicScore", targetStem: "music", targetVar: "musicScoreData", locales: ["cn"] },
     { source: "Npc", targetStem: "npc", targetVar: "npcData", locales: ["cn"] },
     { source: "OptReward", targetStem: "optreward", targetVar: "optRewardData", locales: ["cn"] },
     { source: "ExtractionTreasureMechanism", targetStem: "solotreasure", targetVar: "extractionTreasureMechanismData", locales: ["cn"] },
