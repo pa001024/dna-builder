@@ -17,6 +17,16 @@ const DEFAULT_DSL_WORD_KEYS = Object.freeze([
     "tab",
     "capslock",
     "numlock",
+    "num0",
+    "num1",
+    "num2",
+    "num3",
+    "num4",
+    "num5",
+    "num6",
+    "num7",
+    "num8",
+    "num9",
     "scrolllock",
     "printscreen",
     "insert",
@@ -62,7 +72,7 @@ export class DslParser {
     /**
      * 创建 DSL 解析器。
      * @param {string} dsl DSL 源码
-     * @param {readonly string[]} [wordKeys] 可识别的多字符按键名
+     * @param {readonly string[]} [wordKeys] 大括号语法 `{name}` 中可识别的多字符按键名
      */
     constructor(dsl, wordKeys = DEFAULT_DSL_WORD_KEYS) {
         if (typeof dsl !== "string") throw new TypeError("dsl must be a string")
@@ -167,6 +177,7 @@ export class DslParser {
         if (ch === "+") return this.parseLoop()
         if (ch === "(") return this.parseGroup()
         if (ch === "L" || ch === "R" || ch === "M" || ch === "X") return this.parseMouse()
+        if (ch === "{") return this.parseBraceKey()
         return this.parseKey()
     }
 
@@ -242,19 +253,69 @@ export class DslParser {
         }
     }
 
-    /** @returns {{ type: "key", key: string, duration: number | undefined }} 按键节点 */
+    /**
+     * 解析按键节点。简单键直接写单字符（如 `a`、`1`），后接数字为按住时长（秒），
+     * 后接 `0` 表示按下（如 `a0`），后接 `^` 表示弹起（如 `a^`）。
+     * @returns {{ type: "key", key: string, duration?: number, action?: "down" | "up" }} 按键节点
+     */
     parseKey() {
         const key = this.readKeyToken()
         if (!key) this.error(`unexpected token: ${this.peek() ?? "EOF"}`)
         const duration = this.readNumber()
+        let action
+        if (duration == null && this.peek() === "^") {
+            this.i++
+            action = "up"
+        }
         return {
             type: "key",
             key,
             duration: duration == null ? undefined : Math.round(duration * 1000),
+            action,
         }
     }
 
-    /** @returns {string | null} 按键名称 */
+    /**
+     * 解析大括号按键节点，用于非简单键：`{esc}`、`{esc down}`、`{esc up}`、
+     * `{1}`、`{num1}`、`{esc 1.5}`（数字为按住秒数）。括号内容大小写不敏感，
+     * 如 `{ESC}`、`{W Down}`、`{Num1 Up}` 均合法。
+     * @returns {{ type: "key", key: string, duration?: number, action?: "down" | "up" }} 按键节点
+     */
+    parseBraceKey() {
+        this.i++
+        const end = this.src.indexOf("}", this.i)
+        if (end < 0) this.error("missing closing brace")
+        const raw = this.src.slice(this.i, end)
+        this.i = end + 1
+        const parts = raw.trim().split(/\s+/).filter(Boolean)
+        if (parts.length === 0) this.error("empty key braces")
+        const name = parts[0].toLowerCase()
+        const isSimple = name.length === 1 && /[a-z0-9]/.test(name)
+        if (!isSimple && !this.wordKeys.includes(name)) this.error(`unsupported key: ${name}`)
+        const key = name
+        let duration
+        let action
+        if (parts.length > 2) this.error(`invalid key modifiers: ${parts.slice(1).join(" ")}`)
+        if (parts.length === 2) {
+            const modifier = parts[1].toLowerCase()
+            if (modifier === "down") {
+                action = "down"
+            } else if (modifier === "up") {
+                action = "up"
+            } else {
+                const seconds = Number(modifier)
+                if (!Number.isFinite(seconds)) this.error(`invalid key modifier: ${modifier}`)
+                duration = Math.round(seconds * 1000)
+            }
+        }
+        return { type: "key", key, duration, action }
+    }
+
+    /**
+     * 读取按键名称。仅支持简单键（单个字母/数字）与 `_`（空格）、`>`（左 Shift）、
+     * `C`（左 Ctrl）；多字符按键必须使用大括号语法 `{name}`。
+     * @returns {string | null} 按键名称
+     */
     readKeyToken() {
         this.skipWs()
         if (this.eof()) return null
@@ -269,8 +330,7 @@ export class DslParser {
             const raw = this.src.slice(this.i, end)
             this.i = end + 1
             if (raw.length === 1 && /[a-z0-9]/i.test(raw)) return raw.toLowerCase()
-            if (this.wordKeys.includes(raw)) return raw
-            this.error(`unsupported quoted key: ${raw}`)
+            this.error(`unsupported quoted key: ${raw} (use {${raw}})`)
         }
 
         if (ch === "_") {
@@ -284,13 +344,6 @@ export class DslParser {
         if (ch === "C") {
             this.i++
             return "lctrl"
-        }
-
-        for (const key of this.wordKeys) {
-            if (this.src.startsWith(key, this.i)) {
-                this.i += key.length
-                return key
-            }
         }
 
         if (/[a-z0-9]/i.test(ch)) {
@@ -329,25 +382,37 @@ export class Cap {
     /**
      * 创建游戏窗口操作实例。
      * @param {number} hwnd 游戏窗口句柄
-     * @param {{ frameless?: boolean }} [options] 初始化参数
+     * @param {{ resize?: false | [number, number], yOffset?: number }} [options] 初始化参数
      */
     constructor(hwnd, options = {}) {
         if (typeof hwnd !== "number" || !Number.isFinite(hwnd) || hwnd === 0) throw new TypeError("Cap hwnd must be a non-zero number")
         if (options == null || typeof options !== "object") throw new TypeError("Cap options must be an object")
-        if (options.frameless != null && typeof options.frameless !== "boolean") {
-            throw new TypeError("Cap options.frameless must be a boolean")
+        if (options.yOffset != null && (typeof options.yOffset !== "number" || !Number.isFinite(options.yOffset))) {
+            throw new TypeError("Cap options.yOffset must be a number")
         }
-        this.frameless = options.frameless ?? false
+        if (options.resize != null && options.resize !== false && !(Array.isArray(options.resize) && options.resize.length === 2)) {
+            throw new TypeError("Cap options.resize must be false or [w, h]")
+        }
         this.hwnd = hwnd
+        this.yof = options.yOffset ?? 30
+        this.resize = options.resize ?? [1600, 900]
         if (!isElevated()) throw new Error("非管理员权限")
-        this.yof = this.frameless ? 0 : 30
-        checkSize(this.hwnd, 1600, 900 + this.yof)
+        if (options.resize === false) {
+            // 不检查/调整窗口大小
+        } else if (Array.isArray(options.resize)) {
+            // 按指定宽高检查并调整窗口大小
+            checkSize(this.hwnd, options.resize[0], options.resize[1])
+        } else {
+            // 默认按 1600 x (900 + yOffset) 检查并调整窗口大小
+            checkSize(this.hwnd, 1600, 900 + this.yof)
+        }
         this.frame = this.cap()
     }
 
     /** @returns {object | undefined} 最新窗口截图 */
     cap() {
-        this.frame = this.frameless ? captureWindowWGC(this.hwnd) : captureWindowWGC(this.hwnd, 0, 30, 1600, 900)
+        this.frame =
+            this.resize === false ? captureWindowWGC(this.hwnd) : captureWindowWGC(this.hwnd, 0, this.yof, this.resize[0], this.resize[1])
         return this.frame
     }
 
@@ -475,7 +540,8 @@ export class Cap {
      */
     async #play(dsl, token) {
         try {
-            await this.#runDslNodes(new DslParser(dsl).parse(), token)
+            // 每次播放使用独立的 Timer：其 sleep 按绝对时间链推进，避免多次等待的累积漂移
+            await this.#runDslNodes(new DslParser(dsl).parse(), token, new Timer())
         } catch (error) {
             if (error instanceof PlayInterruptedError) return
             throw error
@@ -512,49 +578,58 @@ export class Cap {
     }
 
     /**
-     * 顺序执行 DSL 节点。
+     * 顺序执行 DSL 节点。时间推进统一使用 Timer（链式绝对时间目标），保证播放节奏精确。
      * @param {Array<object>} nodes DSL 节点
      * @param {number} token 播放令牌
+     * @param {Timer} timer 播放计时器
      * @returns {Promise<void>}
      */
-    async #runDslNodes(nodes, token) {
+    async #runDslNodes(nodes, token, timer) {
         for (const node of nodes) {
             this.#assertPlayActive(token)
             switch (node.type) {
                 case "wait":
-                    await sleep(node.ms)
+                    await timer.sleep(node.ms)
                     break
                 case "key":
-                    if (node.duration === 0) this.kd(node.key)
+                    if (node.action === "up") this.ku(node.key)
+                    else if (node.action === "down" || node.duration === 0) this.kd(node.key)
                     else if (node.duration == null) await this.kb(node.key)
-                    else await this.kb(node.key, node.duration)
+                    else {
+                        this.kd(node.key)
+                        try {
+                            await timer.sleep(node.duration)
+                        } finally {
+                            this.ku(node.key)
+                        }
+                    }
                     break
                 case "mouse":
                     if (node.button === "middle") {
                         this.mt(node.x, node.y)
-                        if (node.waitMs > 0) await sleep(node.waitMs)
+                        if (node.waitMs > 0) await timer.sleep(node.waitMs)
                         break
                     }
                     this.md(node.x, node.y, node.button)
                     try {
-                        if (node.waitMs > 0) await sleep(node.waitMs)
+                        if (node.waitMs > 0) await timer.sleep(node.waitMs)
                     } finally {
                         this.mu(node.x, node.y, node.button)
                     }
                     break
                 case "group":
-                    await this.#runDslNodes(node.body, token)
+                    await this.#runDslNodes(node.body, token, timer)
                     break
                 case "loop":
                     if (node.count === 0) {
                         while (true) {
                             this.#assertPlayActive(token)
-                            await this.#runDslNodes(node.body, token)
+                            await this.#runDslNodes(node.body, token, timer)
                         }
                     } else {
                         for (let i = 0; i < node.count; i++) {
                             this.#assertPlayActive(token)
-                            await this.#runDslNodes(node.body, token)
+                            await this.#runDslNodes(node.body, token, timer)
                         }
                     }
                     break

@@ -21,6 +21,7 @@
         "tauri": "tauri",
         "tb": "pnpm tauri build",
         "dd": "tauri dev",
+        "dd2": "cross-env DISABLE_REWRITE=1 tauri dev",
         "test": "vitest run",
         "bench:charbuild": "bun tools/benchmark-charbuild-simd.ts",
         "test:e2e": "playwright test",

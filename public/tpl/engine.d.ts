@@ -62,6 +62,16 @@ type KeyEnum =
     | "tab"
     | "capslock"
     | "numlock"
+    | "num0"
+    | "num1"
+    | "num2"
+    | "num3"
+    | "num4"
+    | "num5"
+    | "num6"
+    | "num7"
+    | "num8"
+    | "num9"
     | "scrolllock"
     | "printscreen"
     | "insert"
@@ -319,8 +329,15 @@ declare class Timer {
 declare module "cap" {
     /** Cap 初始化参数 */
     export interface CapOptions {
-        /** 游戏窗口是否为无边框模式 */
-        frameless?: boolean
+        /**
+         * 窗口尺寸调整策略：
+         * - 不传：按 1600 x (900 + yOffset) 检查并调整窗口大小（默认）
+         * - `false`：不检查窗口大小
+         * - `[w, h]`：按指定宽高检查并调整窗口大小
+         */
+        resize?: false | [number, number]
+        /** 客户区 Y 坐标偏移（标题栏等高度），默认 30，可传 0 */
+        yOffset?: number
     }
 
     /** DSL 等待节点 */
@@ -336,6 +353,8 @@ declare module "cap" {
         key: KeyEnum
         /** 按键持续时间（毫秒） */
         duration?: number
+        /** 按键动作：down 按下 / up 弹起（duration 为 0 也表示按下） */
+        action?: "down" | "up"
     }
 
     /** DSL 鼠标节点 */
@@ -375,7 +394,7 @@ declare module "cap" {
         /**
          * 创建 DSL 解析器
          * @param dsl DSL 源码
-         * @param wordKeys 可选的多字符按键名，省略时使用引擎默认按键名
+         * @param wordKeys 可选的大括号按键名（如 esc/f1/num1），省略时使用引擎默认按键名
          */
         constructor(dsl: string, wordKeys?: readonly KeyEnum[])
         /** 解析完整 DSL 源码 */
@@ -387,10 +406,11 @@ declare module "cap" {
         /**
          * 创建游戏窗口操作实例
          * @param hwnd 游戏窗口句柄
-         * @param options 可选初始化参数，frameless 默认为 false
+         * @param options 可选初始化参数，yOffset 默认为 30
          */
         constructor(hwnd: number, options?: CapOptions)
-        readonly frameless: boolean
+        /** 窗口尺寸调整策略（false 表示不调整；[w, h] 为指定宽高） */
+        readonly resize: false | [number, number]
         readonly hwnd: number
         readonly yof: number
         frame: Mat

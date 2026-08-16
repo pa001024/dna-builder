@@ -145,7 +145,7 @@ async function pickRegionFeature(apply: (selection: RoiSelection) => void, optio
         const script = `import { Cap } from "cap"
 const hwnd = getWindowByProcessName(${JSON.stringify(processName)})
 if (!hwnd) throw new Error("未找到目标窗口")
-const c = new Cap(hwnd${store.doc.frameless ? ', { frameless: true }' : ""})
+const c = new Cap(hwnd${store.doc.frameless ? ', { resize: false, yOffset: 0 }' : ""})
 const frame = c.cap()
 const selected = await selectroi("AutoScript ROI", frame)
 let output = ""

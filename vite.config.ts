@@ -14,6 +14,7 @@ import { dataPackRewritePlugin } from "./src/data/data-pack-rewrite-plugin"
 const host = process.env.TAURI_DEV_HOST
 const mockDataPackDir = resolve(__dirname, "mock/data-pack")
 const isAppBuild = process.env.DNA_BUILDER_APP_BUILD === "1"
+const isDisableRewrite = process.env.DISABLE_REWRITE === "1"
 
 /**
  * 从构建产物中剔除 public/imgs 资源。
@@ -33,7 +34,7 @@ function stripPublicImgsPlugin(): import("vite").Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig(async ({ command }) => ({
     test: {
         includeSource: ["src/**/*.{js,ts}"],
     },
@@ -52,19 +53,14 @@ export default defineConfig(async () => ({
     },
     plugins: [
         ...(isAppBuild ? [stripPublicImgsPlugin()] : []),
-        dataPackRewritePlugin(),
+        // 仅在构建时启用数据包重写插件，dev 启动（command 为 serve）时直接使用源码数据模块
+        ...(!isDisableRewrite ? [dataPackRewritePlugin()] : []),
         vue(),
         vueJsx(),
         tailwindcss(),
         Component({
             dts: "./src/components.d.ts",
-            resolvers: [
-                RekaResolver(),
-
-                // RadixVueResolver({
-                //   prefix: '' // use the prefix option to add Prefix to the imported components
-                // })
-            ],
+            resolvers: [RekaResolver()],
         }),
         chunkSplitPlugin({
             strategy: "default",

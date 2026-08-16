@@ -79,10 +79,15 @@ mod tests {
 
     /// 创建带脚本模块加载器的测试上下文。
     fn test_context() -> Context {
-        Context::builder()
+        let mut context = Context::builder()
             .module_loader(Rc::new(ScriptModuleLoader::default()))
             .build()
-            .expect("创建 ESM 测试上下文失败")
+            .expect("创建 ESM 测试上下文失败");
+        // DSL 播放（Cap.play）依赖全局 Timer 类，测试上下文需注册
+        context
+            .register_global_class::<crate::submodules::jstimer::JsTimer>()
+            .expect("注册 JsTimer 失败");
+        context
     }
 
     /// 完成模块的 load、link 与 evaluate 生命周期。

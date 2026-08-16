@@ -115,7 +115,7 @@ export interface ConfigVar {
 export interface AutoScriptDoc {
     /** 目标进程名（getWindowByProcessName 参数） */
     processName: string
-    /** 是否无边框模式（Cap frameless，影响坐标偏移） */
+    /** 是否无边框模式（Cap resize: false + yOffset: 0，影响坐标偏移） */
     frameless: boolean
     configVars: ConfigVar[]
     main: FlowNode[]

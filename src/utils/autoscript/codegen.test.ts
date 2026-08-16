@@ -31,7 +31,7 @@ describe("generateCode", () => {
 
     it("emits frameless option", () => {
         const { code } = generateCode(doc([], { frameless: true, processName: "game.exe" }))
-        expect(code).toContain('new Cap(getWindowByProcessName("game.exe"), { frameless: true })')
+        expect(code).toContain('new Cap(getWindowByProcessName("game.exe"), { resize: false, yOffset: 0 })')
     })
 
     it("emits config vars", () => {

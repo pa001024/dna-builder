@@ -347,7 +347,7 @@ export function generateCode(doc: AutoScriptDoc): CodegenResult {
     lines.push('import { Cap } from "cap"')
     lines.push("")
     lines.push(
-        `const c = new Cap(getWindowByProcessName(${jsString(doc.processName || "EM-Win64-Shipping.exe")})${doc.frameless ? ", { frameless: true }" : ""})`
+        `const c = new Cap(getWindowByProcessName(${jsString(doc.processName || "EM-Win64-Shipping.exe")})${doc.frameless ? ", { resize: false, yOffset: 0 }" : ""})`
     )
 
     if (doc.configVars.length > 0) {
