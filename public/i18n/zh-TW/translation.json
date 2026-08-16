@@ -6740,13 +6740,16 @@
     "view": {
         "all": "全部",
         "allModules": "全部模組",
+        "collapse": "收合",
         "contentAuthorizationDesc": "除特別註明的內容外，本站文字內容遵循 CC BY-SA 3.0 協議，圖片等媒體內容則遵循其原有協議。",
         "contentAuthorizationDesc2": "使用本站內容時，您必須提供適當署名，並提供指向本授權協議的連結，同時標明是否對原始作品作了修改；不得以任何方式暗示本站為您或您的使用背書。",
         "contentAuthorizationTitle": "內容授權說明",
         "contentCount": "內容分區",
         "databaseEntryCount": "資料入口",
+        "expand": "展開",
         "featuredEntry": "推薦入口",
         "globalSearchEntry": "全域檢索入口",
+        "latestItems": "本期新增",
         "matchCount": "已命中 {{count}} 個結果",
         "moduleCount": "已選 {{count}} 個模組",
         "noResult": "沒有找到符合內容，試試角色、地圖、任務、副本或怪物等關鍵字",
@@ -6756,22 +6759,27 @@
         "section": {
             "build": {
                 "badge": "Build",
-                "description": "圍繞角色培養、裝備搭配與養成素材，適合從 Build 視角快速定位核心資料。",
+                "description": "圍繞成長養成與裝備構築的 Build 視角，集中呈現核心資料。",
                 "title": "構築與養成"
             },
             "challenge": {
                 "badge": "挑戰",
-                "description": "面向首領、怪物、成就與稱號等目標型內容，方便圍繞挑戰目標進行連續檢索。",
-                "title": "挑戰與收藏"
+                "description": "面向強敵與目標型內容，方便圍繞高難挑戰進行連續檢索。",
+                "title": "挑戰與強敵"
+            },
+            "collect": {
+                "badge": "Collection",
+                "description": "收納散落的收集型內容，方便圖鑑查閱與查漏補缺。",
+                "title": "收藏與風物"
             },
             "explore": {
                 "badge": "Explore",
-                "description": "聚合區域、副本、刷新點位與採集相關資料，優先服務跑圖、採集和副本路線查詢。",
+                "description": "聚合跑圖、刷新與採集相關的空間資料，服務路線規劃與探索查詢。",
                 "title": "地圖與探索"
             },
             "world": {
                 "badge": "World",
-                "description": "把 NPC、動態任務、話題、聲名與圖鑑類內容整理到同一層，降低世界觀檢索成本。",
+                "description": "把劇情敘事、互動內容與世界觀資料整理到同一層，降低世界檢索成本。",
                 "title": "任務與世界"
             }
         }

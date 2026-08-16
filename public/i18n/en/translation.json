@@ -7599,13 +7599,16 @@
     "view": {
         "all": "All",
         "allModules": "All modules",
+        "collapse": "Collapse",
         "contentAuthorizationDesc": "Unless otherwise noted, the site's text content is licensed under CC BY-SA 3.0, and images and other media follow their original licenses.",
         "contentAuthorizationDesc2": "When using this site's content, you must provide appropriate attribution, link to this license, and indicate whether changes were made to the original work; you must not imply endorsement by this site.",
         "contentAuthorizationTitle": "Content licensing",
         "contentCount": "Content sections",
         "databaseEntryCount": "Database entries",
+        "expand": "Expand",
         "featuredEntry": "Featured entry",
         "globalSearchEntry": "Global search entry",
+        "latestItems": "New This Patch",
         "matchCount": "{{count}} results matched",
         "moduleCount": "{{count}} modules selected",
         "noResult": "No matching content found. Try keywords like characters, maps, quests, dungeons, or monsters.",
@@ -7615,22 +7618,27 @@
         "section": {
             "build": {
                 "badge": "Build",
-                "description": "Focus on character growth, equipment combinations, and upgrade materials to quickly find core build resources.",
+                "description": "Character growth and equipment setups from a build perspective — core references in one place.",
                 "title": "Build & Growth"
             },
             "challenge": {
                 "badge": "Challenge",
-                "description": "For boss, monster, achievement, and title targets, making it easy to search continuously around challenge goals.",
-                "title": "Challenge & Collection"
+                "description": "Foes and goal-oriented content, for consecutive research around high-difficulty challenges.",
+                "title": "Challenges & Foes"
+            },
+            "collect": {
+                "badge": "Collection",
+                "description": "Scattered collectible entries gathered in one place for catalog browsing and gap-filling.",
+                "title": "Collection & Curios"
             },
             "explore": {
                 "badge": "Explore",
-                "description": "Aggregates region, dungeon, respawn point, and gathering info, prioritizing route planning for exploration, gathering, and dungeon runs.",
-                "title": "Maps & Exploration"
+                "description": "Spatial references for routing, spawn points and gathering, serving route planning and exploration.",
+                "title": "Map & Explore"
             },
             "world": {
                 "badge": "World",
-                "description": "Groups NPCs, dynamic quests, topics, reputation, and codex-style content into one layer to reduce worldbuilding search overhead.",
+                "description": "Story, interactions and worldbuilding gathered on one layer for low-friction browsing.",
                 "title": "Quests & World"
             }
         }

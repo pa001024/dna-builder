@@ -2011,13 +2011,16 @@
     "view": {
         "all": "全部",
         "allModules": "全部模块",
+        "collapse": "收起",
         "contentAuthorizationDesc": "除特别注明的内容外，本站文字内容遵循 CC BY-SA 3.0 协议，图片等媒体内容则遵循其原有协议。",
         "contentAuthorizationDesc2": "利用本站内容时，您必须给出适当署名，并提供指向本许可协议的链接，同时标明是否对原始作品作了修改；不得以任何方式暗示本站为您或您的使用背书。",
         "contentAuthorizationTitle": "内容授权说明",
         "contentCount": "内容分区",
         "databaseEntryCount": "资料入口",
+        "expand": "展开",
         "featuredEntry": "推荐入口",
         "globalSearchEntry": "全局检索入口",
+        "latestItems": "本期新增",
         "matchCount": "已命中 {{count}} 个结果",
         "moduleCount": "已选 {{count}} 个模块",
         "noResult": "没有找到匹配内容，试试角色、地图、任务、副本或怪物等关键词",
@@ -2027,22 +2030,27 @@
         "section": {
             "build": {
                 "badge": "Build",
-                "description": "围绕角色培养、装备搭配与养成素材，适合从 Build 视角快速定位核心资料。",
+                "description": "围绕成长养成与装备构筑的 Build 视角，集中呈现核心资料。",
                 "title": "构筑与养成"
             },
             "challenge": {
                 "badge": "Challenge",
-                "description": "面向首领、怪物、成就与称号等目标型内容，方便围绕挑战目标进行连续检索。",
-                "title": "挑战与收藏"
+                "description": "面向强敌与目标型内容，方便围绕高难挑战进行连续检索。",
+                "title": "挑战与强敌"
+            },
+            "collect": {
+                "badge": "Collection",
+                "description": "收纳散落的收集型内容，方便图鉴查阅与查漏补缺。",
+                "title": "收藏与风物"
             },
             "explore": {
                 "badge": "Explore",
-                "description": "聚合区域、副本、刷新点位与采集相关资料，优先服务跑图、采集和副本路线查询。",
+                "description": "聚合跑图、刷新与采集相关的空间资料，服务路线规划与探索查询。",
                 "title": "地图与探索"
             },
             "world": {
                 "badge": "World",
-                "description": "把 NPC、动态任务、话题、声名与图鉴类内容整理到同一层，降低世界观检索成本。",
+                "description": "把剧情叙事、交互内容与世界观资料整理到同一层，降低世界检索成本。",
                 "title": "任务与世界"
             }
         }

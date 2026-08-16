@@ -7601,13 +7601,16 @@
     "view": {
         "all": "전체",
         "allModules": "모든 모듈",
+        "collapse": "접기",
         "contentAuthorizationDesc": "별도 표기가 없는 한, 사이트의 텍스트 콘텐츠는 CC BY-SA 3.0 라이선스를 따르며 이미지 및 기타 미디어는 원래 라이선스를 따릅니다.",
         "contentAuthorizationDesc2": "이 사이트의 콘텐츠를 사용할 때는 적절한 출처 표기, 이 라이선스로의 링크 제공, 원본 작품을 수정했는지 여부의 명시가 필요하며, 이 사이트가 귀하 또는 귀하의 사용을 보증하는 것으로 암시해서는 안 됩니다.",
         "contentAuthorizationTitle": "콘텐츠 라이선스",
         "contentCount": "콘텐츠 구역",
         "databaseEntryCount": "데이터베이스 항목",
+        "expand": "펼치기",
         "featuredEntry": "추천 항목",
         "globalSearchEntry": "전역 검색 항목",
+        "latestItems": "최신 버전 신규 추가",
         "matchCount": "{{count}}개 결과 일치",
         "moduleCount": "{{count}}개 모듈 선택됨",
         "noResult": "일치하는 내용을 찾을 수 없습니다. 캐릭터, 지도, 퀘스트, 던전, 몬스터 같은 키워드를 사용해 보세요.",
@@ -7617,23 +7620,28 @@
         "section": {
             "build": {
                 "badge": "빌드",
-                "description": "캐릭터 성장, 장비 조합, 육성 재료를 중심으로 Build 관점에서 핵심 자료를 빠르게 찾을 수 있습니다.",
-                "title": "빌드와 성장"
+                "description": "육성과 장비 세팅의 빌드 관점에서 핵심 자료를 한곳에 모았습니다.",
+                "title": "육성과 세팅"
             },
             "challenge": {
                 "badge": "도전",
-                "description": "보스, 몬스터, 업적, 칭호 등 목표형 콘텐츠를 대상으로 하며 도전 목표 중심의 연속 검색을 돕습니다.",
-                "title": "도전과 수집"
+                "description": "강적과 목표형 콘텐츠를 대상으로 고난이도 도전을 연속 검색하기 좋습니다.",
+                "title": "도전과 강적"
+            },
+            "collect": {
+                "badge": "Collection",
+                "description": "흩어진 수집형 항목을 한곳에 모아 도감 열람과 빠짐 확인에 유용합니다.",
+                "title": "수집과 풍물"
             },
             "explore": {
                 "badge": "탐험",
-                "description": "지역, 던전, 리스폰 지점, 채집 관련 정보를 모아 탐색, 채집, 던전 루트 검색을 우선 지원합니다.",
-                "title": "지도와 탐험"
+                "description": "순회 루트, 출현 지점, 채집 등 탐색 관련 자료를 모아 루트 계획에 도움을 줍니다.",
+                "title": "지도와 탐색"
             },
             "world": {
                 "badge": "월드",
-                "description": "NPC, 동적 퀘스트, 화제, 명성, 도감류 콘텐츠를 한 층에 모아 세계관 검색 비용을 줄입니다.",
-                "title": "퀘스트와 월드"
+                "description": "스토리, 교류, 세계관 등 세계에 관한 정보를 한 층에 정리해 검색 비용을 낮춥니다.",
+                "title": "임무와 세계"
             }
         }
     },

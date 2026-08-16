@@ -7634,13 +7634,16 @@
     "view": {
         "all": "Tout",
         "allModules": "Tous les modules",
+        "collapse": "Replier",
         "contentAuthorizationDesc": "Sauf indication contraire, le contenu textuel du site est sous licence CC BY-SA 3.0, et les images et autres médias suivent leurs licences d’origine.",
         "contentAuthorizationDesc2": "Lorsque vous utilisez le contenu de ce site, vous devez fournir une attribution appropriée, inclure un lien vers cette licence et indiquer si vous avez modifié l’œuvre originale ; vous ne devez pas laisser entendre que ce site vous approuve ou approuve votre utilisation.",
         "contentAuthorizationTitle": "Licence du contenu",
         "contentCount": "Sections de contenu",
         "databaseEntryCount": "Entrées de la base de données",
+        "expand": "Déplier",
         "featuredEntry": "Entrée en vedette",
         "globalSearchEntry": "Entrée de recherche globale",
+        "latestItems": "Nouveautés",
         "matchCount": "{{count}} résultats correspondants",
         "moduleCount": "{{count}} modules sélectionnés",
         "noResult": "Aucun contenu correspondant trouvé. Essayez des mots-clés comme personnages, cartes, quêtes, donjons ou monstres.",
@@ -7650,23 +7653,28 @@
         "section": {
             "build": {
                 "badge": "Build",
-                "description": "Concentrez-vous sur la progression des personnages, les combinaisons d’équipement et les matériaux d’amélioration pour trouver rapidement les ressources clés du build.",
-                "title": "Build et progression"
+                "description": "Progression et configurations d'équipement vues côté build — les références clés au même endroit.",
+                "title": "Build & Progression"
             },
             "challenge": {
                 "badge": "Défi",
-                "description": "Pour les contenus ciblés comme les boss, monstres, succès et titres, afin de faciliter les recherches continues autour des objectifs de défi.",
-                "title": "Défi et collection"
+                "description": "Ennemis redoutables et contenus à objectif, pour des recherches enchaînées autour des défis difficiles.",
+                "title": "Défis & Ennemis"
+            },
+            "collect": {
+                "badge": "Collection",
+                "description": "Les entrées de collection dispersées, réunies pour la consultation du catalogue et le complément.",
+                "title": "Collection & Curiosités"
             },
             "explore": {
                 "badge": "Explorer",
-                "description": "Regroupe les informations de région, donjon, points d’apparition et collecte, en priorité pour les parcours d’exploration, de récolte et de donjons.",
-                "title": "Carte et exploration"
+                "description": "Références spatiales pour itinéraires, points d'apparition et collecte, au service de l'exploration.",
+                "title": "Carte & Exploration"
             },
             "world": {
                 "badge": "Monde",
-                "description": "Regroupe les PNJ, quêtes dynamiques, sujets, réputation et contenu de codex sur une seule couche pour réduire le coût de recherche lié à l’univers.",
-                "title": "Quêtes et monde"
+                "description": "Histoires, interactions et univers regroupés en une seule couche pour une consultation fluide.",
+                "title": "Quêtes & Monde"
             }
         }
     },

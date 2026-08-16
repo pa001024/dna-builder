@@ -2,6 +2,11 @@
 import { useTranslation } from "i18next-vue"
 import { computed, ref } from "vue"
 import { useRouter } from "vue-router"
+import { type DBLatestItem } from "@/components/DBLatestItemCard.vue"
+import charData from "@/data/d/char.data"
+import modData from "@/data/d/mod.data"
+import weaponData from "@/data/d/weapon.data"
+import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
 import { type DBGlobalSearchOption, GlobalSearchService } from "@/utils/global-search"
 
 const router = useRouter()
@@ -219,47 +224,35 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         title: t("view.section.build.title"),
         description: t("view.section.build.description"),
         badge: t("view.section.build.badge"),
-        paths: ["/db/char", "/db/weapon", "/db/mod", "/db/forge", "/db/damage", "/db/pet", "/db/draft", "/db/iron-ticket"],
+        paths: ["/db/char", "/db/weapon", "/db/mod", "/db/forge", "/db/damage", "/db/pet", "/db/draft", "/db/resource"],
     },
     {
         id: "explore",
         title: t("view.section.explore.title"),
         description: t("view.section.explore.description"),
         badge: t("view.section.explore.badge"),
-        paths: ["/db/resource", "/db/rouge", "/db/fish", "/db/map-local", "/db/dungeon", "/db/abyss", "/db/map", "/db/event"],
+        paths: ["/db/event", "/db/map-local", "/db/rouge", "/db/fish", "/db/dungeon", "/db/abyss", "/db/map"],
     },
     {
         id: "world",
         title: t("view.section.world.title"),
         description: t("view.section.world.description"),
         badge: t("view.section.world.badge"),
-        paths: [
-            "/db/questchain",
-            "/db/partytopic",
-            "/db/music",
-            "/db/shop",
-            "/db/impr",
-            "/db/npc",
-            "/db/reputation",
-            "/db/rank",
-            "/db/dynquest",
-        ],
+        paths: ["/db/questchain", "/db/partytopic", "/db/shop", "/db/impr", "/db/npc", "/db/reputation", "/db/dynquest"],
     },
     {
         id: "challenge",
         title: t("view.section.challenge.title"),
         description: t("view.section.challenge.description"),
         badge: t("view.section.challenge.badge"),
-        paths: [
-            "/db/monster",
-            "/db/hardboss",
-            "/db/achievement",
-            "/db/title",
-            "/db/book",
-            "/db/walnut",
-            "/db/accessory",
-            "/db/solotreasure",
-        ],
+        paths: ["/db/rank", "/db/monster", "/db/hardboss", "/db/solotreasure", "/db/iron-ticket"],
+    },
+    {
+        id: "collect",
+        title: t("view.section.collect.title"),
+        description: t("view.section.collect.description"),
+        badge: t("view.section.collect.badge"),
+        paths: ["/db/achievement", "/db/title", "/db/music", "/db/book", "/db/walnut", "/db/accessory"],
     },
 ]
 
@@ -348,6 +341,34 @@ const databaseSections = computed(() => {
         ...section,
         items: section.paths.map(path => databaseItemMap.get(path)).filter((item): item is DatabaseItem => item !== undefined),
     }))
+})
+
+/**
+ * “本期新增”分组：角色/武器/魔之楔各自展示最后版本（versionGate 定义的
+ * DNA_SAFE_VERSION_LIMIT）新增的物品；占位版本（9.9 / 99.9）与预发布版本天然被排除。
+ */
+const latestGroups = computed(() => {
+    const definitions = [
+        { kind: "char", label: t("database.char"), source: charData },
+        { kind: "weapon", label: t("database.weapon"), source: weaponData },
+        { kind: "mod", label: t("database.mod"), source: modData },
+    ] as const
+
+    return definitions.flatMap(def => {
+        const items = def.source.filter(item => item.版本 && Number(item.版本) === DNA_SAFE_VERSION_LIMIT)
+        if (!items.length) {
+            return []
+        }
+
+        return [
+            {
+                kind: def.kind,
+                label: def.label,
+                version: String(DNA_SAFE_VERSION_LIMIT),
+                entries: items.map(item => ({ kind: def.kind, item })) as DBLatestItem[],
+            },
+        ]
+    })
 })
 
 /**
@@ -473,6 +494,22 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                 </template>
             </div>
 
+            <!-- 本期新增：最后版本新增的角色/武器/魔之楔 -->
+            <section class="db-rise border-b border-base-content/15 py-9 md:py-11" style="animation-delay: 0.16s">
+                <div class="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
+                    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                        <h2 class="text-xl font-bold tracking-tight text-base-content md:text-2xl">{{ $t("view.latestItems") }}</h2>
+                        <p class="font-mono text-[10px] uppercase tracking-[0.35em] text-base-content/45">
+                            New In v{{ DNA_SAFE_VERSION_LIMIT }}
+                        </p>
+                    </div>
+                </div>
+
+                <div v-for="group in latestGroups" :key="group.kind" class="mt-8">
+                    <DBLatestGroup :label="group.label" :version="group.version" :entries="group.entries" />
+                </div>
+            </section>
+
             <!-- 章节索引：01–04 幽灵序号横带 -->
             <main class="flex-1">
                 <section
@@ -522,8 +559,8 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                 :style="{ animationDelay: `${0.18 + 0.07 * databaseSections.length}s` }"
             >
                 <p class="font-semibold text-base-content/70">{{ $t("view.contentAuthorizationTitle") }}</p>
-                <p class="mt-2 max-w-3xl">{{ $t("view.contentAuthorizationDesc") }}</p>
-                <p class="mt-1.5 max-w-3xl">{{ $t("view.contentAuthorizationDesc2") }}</p>
+                <p class="mt-2">{{ $t("view.contentAuthorizationDesc") }}</p>
+                <p class="mt-1.5">{{ $t("view.contentAuthorizationDesc2") }}</p>
             </footer>
         </div>
     </ScrollArea>
