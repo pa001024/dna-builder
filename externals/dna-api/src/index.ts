@@ -353,7 +353,7 @@ export class DNAAPI extends DNABaseAPI {
     }
 
     async login(mobile: string, code: string) {
-        return await this.user.login(mobile, code)
+        return await this.h5.login(mobile, code)
     }
 
     async getSmsCode(mobile: string, vJson: string) {

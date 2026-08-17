@@ -1,4 +1,6 @@
+import type { DNAUserDataBean } from "../type-generated"
 import { DNASubModule } from "./base"
+import { DNA_GAME_ID } from "./types"
 
 export interface DNAMapMatterCategorizeOption {
     icon: string
@@ -103,6 +105,20 @@ export interface DNAEmoji {
 }
 
 export class H5API extends DNASubModule {
+    /**
+     * 使用 H5 协议通过手机号和短信验证码登录。
+     * @param mobile 手机号
+     * @param code 短信验证码
+     * @returns 登录响应
+     */
+    async login(mobile: string, code: string) {
+        const res = await this._dna_request_h5<DNAUserDataBean>("user/sdkLogin", { mobile, code, gameList: DNA_GAME_ID }, { sign: true })
+        if (res.is_success && typeof res.data?.token === "string") {
+            this.token = res.data.token
+        }
+        return res
+    }
+
     /**
      * 发送 H5 版短信验证码。
      * @param mobile 手机号
