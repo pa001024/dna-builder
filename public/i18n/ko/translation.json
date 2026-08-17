@@ -7455,6 +7455,16 @@
     "shop-list": {
         "title": "상점"
     },
+    "skin-colorize": {
+        "desc": "캐릭터 스킨 염색 미리보기 및 공유",
+        "title": "염색 플랜"
+    },
+    "skin-colorize-create": {
+        "title": "염색 플랜 게시"
+    },
+    "skin-colorize-share": {
+        "title": "염색 플랜 상세"
+    },
     "tag": {
         "防御": "방어",
         "辅助": "서포터",
@@ -7468,6 +7478,12 @@
         "召唤物": "소환물",
         "治疗": "치료",
         "最大生命": "최대 HP"
+    },
+    "time": {
+        "daysAgo": "{{count}}일 전",
+        "hoursAgo": "{{count}}시간 전",
+        "justNow": "방금",
+        "minutesAgo": "{{count}}분 전"
     },
     "timeline": {
         "addTrack": "트랙 추가",

@@ -667,6 +667,126 @@ export const timeOffsetQuery = typedQuery(
     ` as const
 )<number, { t: number }>()
 
+export const rankingListsQuery = typedQuery(
+    /* GraphQL */ `
+        query {
+            rankingLists {
+                id
+                name
+                desc
+                createdAt
+                updateAt
+            }
+        }
+    ` as const
+)<Types.RankingList[]>()
+
+export const rankingListQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: String!) {
+            rankingList(id: $id) {
+                id
+                name
+                desc
+                createdAt
+                updateAt
+                items {
+                    id
+                    rankingListId
+                    charId
+                    buildId
+                    sortOrder
+                    createdAt
+                    updateAt
+                    build {
+                        id
+                        title
+                        desc
+                        charId
+                        charSettings
+                        userId
+                        views
+                        likes
+                        isRecommended
+                        isPinned
+                        createdAt
+                        updateAt
+                        user {
+                            id
+                            name
+                            qq
+                        }
+                    }
+                }
+            }
+        }
+    ` as const
+)<Types.RankingList, { id: string }>()
+
+export const rankingListItemsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($rankingListId: String!) {
+            rankingListItems(rankingListId: $rankingListId) {
+                id
+                rankingListId
+                charId
+                buildId
+                sortOrder
+                createdAt
+                updateAt
+                build {
+                    id
+                    title
+                    desc
+                    charId
+                    charSettings
+                    userId
+                    views
+                    likes
+                    isRecommended
+                    isPinned
+                    createdAt
+                    updateAt
+                    user {
+                        id
+                        name
+                        email
+                        qq
+                        pic
+                        uid
+                        roles
+                        experience
+                        points
+                        level
+                        selectedTitleAssetId
+                        selectedNameCardAssetId
+                        currentTitleText
+                        currentTitleClass
+                        nameEffectClass
+                        dailyExperienceStatus {
+                            todayAwardedExp
+                            totalAvailableExp
+                            dailyLaunchProgress
+                            dailyLaunchLimit
+                            dailyOnlineHourProgress
+                            dailyOnlineHourLimit
+                            dailyMessageProgress
+                            dailyMessageLimit
+                            dailyOnlineHourRetryAfterMs
+                        }
+                        abyssUsageUploadStatus {
+                            uploadedThisSeason
+                        }
+                        createdAt
+                        updateAt
+                    }
+                    isLiked
+                }
+            }
+        }
+    ` as const
+)<Types.RankingListItem[], { rankingListId: string }>()
+
 export const missionsIngameQuery = typedQuery(
     /* GraphQL */ `
         query ($server: String!) {
@@ -840,6 +960,108 @@ export const guideQuery = typedQuery(
     ` as const
 )<Types.Guide, { id: string }>()
 
+export const dyePlansQuery = typedQuery(
+    /* GraphQL */ `
+        query (
+            $search: String
+            $type: String
+            $skinId: Int
+            $skinIds: [Int!]
+            $userId: String
+            $limit: Int
+            $offset: Int
+            $sortBy: String
+        ) {
+            dyePlans(
+                search: $search
+                type: $type
+                skinId: $skinId
+                skinIds: $skinIds
+                userId: $userId
+                limit: $limit
+                offset: $offset
+                sortBy: $sortBy
+            ) {
+                id
+                title
+                desc
+                type
+                skinId
+                colorIds
+                imageUrl
+                isOriginal
+                source
+                userId
+                views
+                likes
+                commentsCount
+                isRecommended
+                isPinned
+                createdAt
+                updateAt
+                user {
+                    id
+                    name
+                    qq
+                }
+                isLiked
+            }
+        }
+    ` as const
+)<
+    Types.DyePlan[],
+    {
+        search?: string
+        type?: string
+        skinId?: number
+        skinIds?: number[]
+        userId?: string
+        limit?: number
+        offset?: number
+        sortBy?: string
+    }
+>()
+
+export const dyePlansCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($search: String, $type: String, $skinId: Int, $skinIds: [Int!]) {
+            dyePlansCount(search: $search, type: $type, skinId: $skinId, skinIds: $skinIds)
+        }
+    ` as const
+)<number, { search?: string; type?: string; skinId?: number; skinIds?: number[] }>()
+
+export const dyePlanQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: String!) {
+            dyePlan(id: $id) {
+                id
+                title
+                desc
+                type
+                skinId
+                colorIds
+                imageUrl
+                isOriginal
+                source
+                userId
+                views
+                likes
+                commentsCount
+                isRecommended
+                isPinned
+                createdAt
+                updateAt
+                user {
+                    id
+                    name
+                    qq
+                }
+                isLiked
+            }
+        }
+    ` as const
+)<Types.DyePlan, { id: string }>()
+
 export const dpsListQuery = typedQuery(
     /* GraphQL */ `
         query ($charId: Int, $buildId: String, $timelineId: String, $limit: Int, $offset: Int, $sortBy: String) {
@@ -884,6 +1106,60 @@ export const charDPSQuery = typedQuery(
     ` as const
 )<Types.DPS[], { charId: number; limit?: number }>()
 
+export const commentsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($targetId: String!, $limit: Int, $offset: Int) {
+            comments(targetId: $targetId, limit: $limit, offset: $offset) {
+                id
+                targetId
+                content
+                createdAt
+                user {
+                    id
+                    name
+                    email
+                    qq
+                    pic
+                    uid
+                    roles
+                    experience
+                    points
+                    level
+                    selectedTitleAssetId
+                    selectedNameCardAssetId
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
+                    dailyExperienceStatus {
+                        todayAwardedExp
+                        totalAvailableExp
+                        dailyLaunchProgress
+                        dailyLaunchLimit
+                        dailyOnlineHourProgress
+                        dailyOnlineHourLimit
+                        dailyMessageProgress
+                        dailyMessageLimit
+                        dailyOnlineHourRetryAfterMs
+                    }
+                    abyssUsageUploadStatus {
+                        uploadedThisSeason
+                    }
+                    createdAt
+                    updateAt
+                }
+            }
+        }
+    ` as const
+)<Types.Comment[], { targetId: string; limit?: number; offset?: number }>()
+
+export const commentsCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($targetId: String!) {
+            commentsCount(targetId: $targetId)
+        }
+    ` as const
+)<number, { targetId: string }>()
+
 export const buildsQuery = typedQuery(
     /* GraphQL */ `
         query ($search: String, $charId: Int, $userId: String, $limit: Int, $offset: Int, $sortBy: String) {
@@ -917,62 +1193,6 @@ export const buildsCountQuery = typedQuery(
         }
     ` as const
 )<number, { search?: string; charId?: number }>()
-
-export const rankingListsQuery = typedQuery(
-    /* GraphQL */ `
-        query {
-            rankingLists {
-                id
-                name
-                desc
-                createdAt
-                updateAt
-            }
-        }
-    ` as const
-)<Types.RankingList[], Record<string, never>>()
-
-export const rankingListQuery = typedQuery(
-    /* GraphQL */ `
-        query ($id: String!) {
-            rankingList(id: $id) {
-                id
-                name
-                desc
-                createdAt
-                updateAt
-                items {
-                    id
-                    rankingListId
-                    charId
-                    buildId
-                    sortOrder
-                    createdAt
-                    updateAt
-                    build {
-                        id
-                        title
-                        desc
-                        charId
-                        charSettings
-                        userId
-                        views
-                        likes
-                        isRecommended
-                        isPinned
-                        createdAt
-                        updateAt
-                        user {
-                            id
-                            name
-                            qq
-                        }
-                    }
-                }
-            }
-        }
-    ` as const
-)<Types.RankingList, { id: string }>()
 
 export const recommendedBuildsQuery = typedQuery(
     /* GraphQL */ `

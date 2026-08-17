@@ -504,6 +504,73 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async () => {
+            const [swatchText, specialSwatchText, textMapText, resourceText, globalConstantText] = await Promise.all([
+                readFile(path.join(OUT_ROOT, "Swatch.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "SpecialSwatch.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "TextMap_I18n.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "Resource.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "GlobalConstant.json"), "utf8"),
+            ])
+            const textMap = JSON.parse(textMapText) as Record<string, { TextMapContent?: string }>
+            const resources = recordValues(JSON.parse(resourceText))
+            const resourceNames = new Map(
+                resources.map(resource => [String(resource.ResourceId ?? resource.id), String(resource.ResourceName ?? "")])
+            )
+            const swatches = recordValues(JSON.parse(swatchText))
+                .filter(swatch => Array.isArray(swatch.ColorNumber))
+                .map(swatch => {
+                    const resourceId = Number(swatch.ResourceID)
+                    const hairResourceId = Number(swatch.HairResourceID)
+                    return {
+                        id: Number(swatch.ColorID),
+                        name: translateTextMap(textMap, resourceNames.get(String(resourceId)) || ""),
+                        rgb: swatch.ColorNumber,
+                        resourceId,
+                        hairResourceId,
+                        hairResourceName: translateTextMap(textMap, resourceNames.get(String(hairResourceId)) || ""),
+                        sort: Number(swatch.Sort) || 0,
+                    }
+                })
+                .sort((left, right) => left.sort - right.sort)
+            const specialSwatches = recordValues(JSON.parse(specialSwatchText))
+                .map(swatch => {
+                    const resourceId = Number(swatch.ResourceID)
+                    return {
+                        id: Number(swatch.SepcialColorID),
+                        name: translateTextMap(textMap, resourceNames.get(String(resourceId)) || ""),
+                        resourceId,
+                        materialName: String(swatch.LinkedMaterial ?? ""),
+                        materialPath: String(swatch.MaterialPath ?? ""),
+                    }
+                })
+                .sort((left, right) => left.id - right.id)
+            const globalConstant = JSON.parse(globalConstantText) as Record<string, { ConstantValue?: unknown }>
+            const maxColorParts = Number(globalConstant.CharColorPart?.ConstantValue) || 0
+            const defaultColorId = Number(globalConstant.CharDefaultColor?.ConstantValue) || 0
+            return [
+                {
+                    targetVar: "skinColorizeSwatches",
+                    text: formatTsValue(swatches, 0),
+                },
+                {
+                    targetVar: "skinColorizeSpecialSwatches",
+                    text: formatTsValue(specialSwatches, 0),
+                },
+                {
+                    targetVar: "skinColorizeMaxColorParts",
+                    text: String(maxColorParts),
+                },
+                {
+                    targetVar: "skinColorizeDefaultColorId",
+                    text: String(defaultColorId),
+                },
+            ]
+        },
+        targetStem: "skin-colorize",
+        targetVar: "skinColorizeSwatches",
+    },
+    {
+        source: async () => {
             const [defenceText, ironSurvivalDungeonText] = await Promise.all([
                 readFile(path.join(OUT_ROOT, "Defence.json"), "utf8"),
                 readFile(path.join(OUT_ROOT, "IronSurvivalDungeon.json"), "utf8"),
@@ -654,6 +721,26 @@ function formatTsValue(value: unknown, indent = 0): string {
  */
 function isRecord(value: unknown): value is Record<string, unknown> {
     return Boolean(value) && typeof value === "object" && !Array.isArray(value)
+}
+
+/**
+ * 将游戏导出的对象索引或对象数组统一为行数组。
+ * @param value 游戏导出的 JSON 值。
+ * @returns 对象行数组。
+ */
+function recordValues(value: unknown): Record<string, unknown>[] {
+    if (Array.isArray(value)) return value.filter(isRecord)
+    return isRecord(value) ? Object.values(value).filter(isRecord) : []
+}
+
+/**
+ * 读取本地化文本，缺失时保留原始 key。
+ * @param textMap 本地化文本表。
+ * @param key 文本 key。
+ * @returns 本地化文本。
+ */
+function translateTextMap(textMap: Record<string, { TextMapContent?: string }>, key: string): string {
+    return textMap[key]?.TextMapContent || key
 }
 
 /**

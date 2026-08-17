@@ -27,7 +27,7 @@ let setMinSize = async (_w: number, _h: number) => {}
     }
 })()
 
-// NOTE: every router must have i18n key like xx.title it will be used by ResizeableWindow.vue
+// NOTE: every router must have i18n key like xx.title it will be used by ResizeableWindow.vue by default
 const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(360, 430) },
     { name: "counter", path: "/counter", component: CounterView, beforeEnter: () => setMinSize(360, 430) },
@@ -76,6 +76,24 @@ const routes: readonly RouteRecordRaw[] = [
     },
     { name: "game-accounts", path: "/game-accounts", component: UserManager, beforeEnter: () => setMinSize(600, 600) },
     { name: "unpack", path: "/unpack", component: () => import("./views/UnpackView.vue"), beforeEnter: () => setMinSize(900, 700) },
+    {
+        name: "skin-colorize",
+        path: "/skin-colorize",
+        component: () => import("./views/SkinColorizeGalleryView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
+    {
+        name: "skin-colorize-create",
+        path: "/skin-colorize/new",
+        component: () => import("./views/SkinColorizeView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
+    {
+        name: "skin-colorize-share",
+        path: "/skin-colorize/:planId",
+        component: () => import("./views/SkinColorizeView.vue"),
+        beforeEnter: () => setMinSize(600, 600),
+    },
     {
         name: "more",
         path: "/more",

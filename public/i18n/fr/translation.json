@@ -7488,6 +7488,16 @@
     "shop-list": {
         "title": "Boutique"
     },
+    "skin-colorize": {
+        "desc": "Previsualiser et partager les teintures de skin",
+        "title": "Plans de teinture"
+    },
+    "skin-colorize-create": {
+        "title": "Publier un plan de teinture"
+    },
+    "skin-colorize-share": {
+        "title": "Détails du plan de teinture"
+    },
     "tag": {
         "防御": "DÉF",
         "辅助": "Soutien",
@@ -7501,6 +7511,15 @@
         "召唤物": "Invocation",
         "治疗": "Soin",
         "最大生命": "PV max"
+    },
+    "time": {
+        "daysAgo_one": "il y a {{count}} jour",
+        "daysAgo_other": "il y a {{count}} jours",
+        "hoursAgo_one": "il y a {{count}} heure",
+        "hoursAgo_other": "il y a {{count}} heures",
+        "justNow": "À l'instant",
+        "minutesAgo_one": "il y a {{count}} minute",
+        "minutesAgo_other": "il y a {{count}} minutes"
     },
     "timeline": {
         "addTrack": "Ajouter une piste",

@@ -3,7 +3,9 @@ import { resolvers as abyssUsageResolvers, typeDefs as abyssUsageSchema } from "
 import { resolvers as activityResolvers, typeDefs as activitySchema } from "./activity"
 import { resolvers as adminResolvers, typeDefs as adminSchema } from "./admin"
 import { resolvers as buildResolvers, typeDefs as buildSchema } from "./build"
+import { resolvers as commentResolvers, typeDefs as commentSchema } from "./comment"
 import { resolvers as dpsResolvers, typeDefs as dpsSchema } from "./dps"
+import { resolvers as dyePlanResolvers, typeDefs as dyePlanSchema } from "./dyePlan"
 import { resolvers as guideResolvers, typeDefs as guideSchema } from "./guide"
 import { resolvers as messageResolvers, typeDefs as messageSchema } from "./message"
 import { resolvers as missionsIngameResolvers, typeDefs as missionsIngameSchema } from "./missionsIngame"
@@ -32,6 +34,8 @@ export function schemaWith(ctx: any) {
         abyssUsageSchema,
         todoSchema,
         buildSchema,
+        dyePlanSchema,
+        commentSchema,
         timelineSchema,
         dpsSchema,
         rankingSchema,
@@ -52,6 +56,8 @@ export function schemaWith(ctx: any) {
         abyssUsageResolvers,
         todoResolvers,
         buildResolvers,
+        dyePlanResolvers,
+        commentResolvers,
         timelineResolvers,
         dpsResolvers,
         rankingResolvers,

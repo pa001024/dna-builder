@@ -7373,6 +7373,16 @@
     "shop-list": {
         "title": "ショップ"
     },
+    "skin-colorize": {
+        "desc": "キャラクタースキンの染色をプレビューして共有",
+        "title": "染色プラン"
+    },
+    "skin-colorize-create": {
+        "title": "染色プランを公開"
+    },
+    "skin-colorize-share": {
+        "title": "染色プラン詳細"
+    },
     "tag": {
         "防御": "防御",
         "辅助": "サポート",
@@ -7386,6 +7396,12 @@
         "召唤物": "召喚ユニット",
         "治疗": "回復",
         "最大生命": "最大HP"
+    },
+    "time": {
+        "daysAgo": "{{count}} 日前",
+        "hoursAgo": "{{count}} 時間前",
+        "justNow": "たった今",
+        "minutesAgo": "{{count}} 分前"
     },
     "timeline": {
         "addTrack": "トラックを追加",

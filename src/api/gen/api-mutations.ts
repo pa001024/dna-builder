@@ -713,6 +713,54 @@ export const updateRoomMutation = typedMutation<Types.Room, { id: string; data: 
     }
 `)
 
+export const createRankingListMutation = typedMutation<Types.RankingList, { input: Types.RankingListInput }>(/* GraphQL */ `
+    mutation ($input: RankingListInput!) {
+        createRankingList(input: $input) {
+            id
+            name
+            desc
+            createdAt
+            updateAt
+            items {
+                id
+                rankingListId
+                charId
+                buildId
+                sortOrder
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const updateRankingListMutation = typedMutation<Types.RankingList, { id: string; input: Types.RankingListInput }>(/* GraphQL */ `
+    mutation ($id: String!, $input: RankingListInput!) {
+        updateRankingList(id: $id, input: $input) {
+            id
+            name
+            desc
+            createdAt
+            updateAt
+            items {
+                id
+                rankingListId
+                charId
+                buildId
+                sortOrder
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const deleteRankingListMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteRankingList(id: $id)
+    }
+`)
+
 export const addMissionsIngameMutation = typedMutation<Types.MissionsIngame, { token?: string; server: string; missions: string[][] }>(
     /* GraphQL */ `
         mutation ($token: String, $server: String!, $missions: [[String!]!]!) {
@@ -848,6 +896,66 @@ export const pinGuideMutation = typedMutation<Types.Guide, { id: string; pinned:
     }
 `)
 
+export const createDyePlanMutation = typedMutation<Types.DyePlan, { input: Types.DyePlanInput }>(/* GraphQL */ `
+    mutation ($input: DyePlanInput!) {
+        createDyePlan(input: $input) {
+            id
+        }
+    }
+`)
+
+export const updateDyePlanMutation = typedMutation<Types.DyePlan, { id: string; input: Types.DyePlanInput }>(/* GraphQL */ `
+    mutation ($id: String!, $input: DyePlanInput!) {
+        updateDyePlan(id: $id, input: $input) {
+            id
+        }
+    }
+`)
+
+export const deleteDyePlanMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteDyePlan(id: $id)
+    }
+`)
+
+export const likeDyePlanMutation = typedMutation<Types.DyePlan, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        likeDyePlan(id: $id) {
+            id
+            isLiked
+            likes
+        }
+    }
+`)
+
+export const unlikeDyePlanMutation = typedMutation<Types.DyePlan, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        unlikeDyePlan(id: $id) {
+            id
+            isLiked
+            likes
+        }
+    }
+`)
+
+export const recommendDyePlanMutation = typedMutation<Types.DyePlan, { id: string; recommended: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $recommended: Boolean!) {
+        recommendDyePlan(id: $id, recommended: $recommended) {
+            id
+            isRecommended
+        }
+    }
+`)
+
+export const pinDyePlanMutation = typedMutation<Types.DyePlan, { id: string; pinned: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $pinned: Boolean!) {
+        pinDyePlan(id: $id, pinned: $pinned) {
+            id
+            isPinned
+        }
+    }
+`)
+
 export const createDPSMutation = typedMutation<Types.DPS, { input: Types.DPSInput }>(/* GraphQL */ `
     mutation ($input: DPSInput!) {
         createDPS(input: $input) {
@@ -867,6 +975,56 @@ export const updateDPSMutation = typedMutation<Types.DPS, { id: string; input: T
 export const deleteDPSMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
     mutation ($id: String!) {
         deleteDPS(id: $id)
+    }
+`)
+
+export const createCommentMutation = typedMutation<Types.Comment, { targetId: string; content: string }>(/* GraphQL */ `
+    mutation ($targetId: String!, $content: String!) {
+        createComment(targetId: $targetId, content: $content) {
+            id
+            targetId
+            content
+            createdAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const deleteCommentMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteComment(id: $id)
     }
 `)
 
@@ -1013,51 +1171,3 @@ export const submitAbyssUsageMutation = typedMutation<Types.AbyssUsageSubmission
         }
     `
 )
-
-export const createRankingListMutation = typedMutation<Types.RankingList, { input: Types.RankingListInput }>(/* GraphQL */ `
-    mutation ($input: RankingListInput!) {
-        createRankingList(input: $input) {
-            id
-            name
-            desc
-            createdAt
-            updateAt
-            items {
-                id
-                rankingListId
-                charId
-                buildId
-                sortOrder
-                createdAt
-                updateAt
-            }
-        }
-    }
-`)
-
-export const updateRankingListMutation = typedMutation<Types.RankingList, { id: string; input: Types.RankingListInput }>(/* GraphQL */ `
-    mutation ($id: String!, $input: RankingListInput!) {
-        updateRankingList(id: $id, input: $input) {
-            id
-            name
-            desc
-            createdAt
-            updateAt
-            items {
-                id
-                rankingListId
-                charId
-                buildId
-                sortOrder
-                createdAt
-                updateAt
-            }
-        }
-    }
-`)
-
-export const deleteRankingListMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
-    mutation ($id: String!) {
-        deleteRankingList(id: $id)
-    }
-`)

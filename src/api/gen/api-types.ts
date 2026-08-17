@@ -259,6 +259,26 @@ export interface Room {
     onlineUsers?: TinyUser[]
 }
 
+export interface RankingList {
+    id: string
+    name: string
+    desc?: string
+    createdAt: number
+    updateAt: number
+    items: RankingListItem[]
+}
+
+export interface RankingListItem {
+    id: string
+    rankingListId: string
+    charId: number
+    buildId: string
+    sortOrder: number
+    createdAt: number
+    updateAt: number
+    build?: Build
+}
+
 export interface MissionsIngame {
     id: number
     server: string
@@ -308,6 +328,28 @@ export interface Guide {
     isLiked?: boolean
 }
 
+export interface DyePlan {
+    id: string
+    title: string
+    desc?: string
+    type: string
+    skinId: number
+    colorIds: number[]
+    imageUrl?: string
+    isOriginal: boolean
+    source?: string
+    userId: string
+    views: number
+    likes: number
+    commentsCount: number
+    isRecommended?: boolean
+    isPinned?: boolean
+    createdAt: number
+    updateAt: number
+    user?: User
+    isLiked?: boolean
+}
+
 export interface DPS {
     id: string
     charId: number
@@ -321,6 +363,14 @@ export interface DPS {
     user?: User
     build?: Build
     timeline?: Timeline
+}
+
+export interface Comment {
+    id: string
+    targetId: string
+    content: string
+    createdAt: number
+    user?: User
 }
 
 export interface Build {
@@ -503,13 +553,36 @@ export interface RoomInput {
     maxUsers?: number
 }
 
+export interface RankingListItemInput {
+    charId: number
+    buildId: string
+    sortOrder?: number
+}
+
+export interface RankingListInput {
+    name: string
+    desc?: string
+    items: RankingListItemInput[]
+}
+
 export interface GuideInput {
     title: string
-    type: "image" | "text"
+    type: string
     content: string
     images: string[]
     charId?: number
     buildId?: string
+}
+
+export interface DyePlanInput {
+    title: string
+    desc?: string
+    type: string
+    skinId: number
+    colorIds: number[]
+    imageUrl?: string
+    isOriginal: boolean
+    source?: string
 }
 
 export interface DPSInput {
@@ -525,38 +598,6 @@ export interface BuildInput {
     desc?: string
     charId: number
     charSettings: string
-}
-
-export interface RankingListItem {
-    id: string
-    rankingListId: string
-    charId: number
-    buildId: string
-    sortOrder: number
-    createdAt: number
-    updateAt: number
-    build?: Build
-}
-
-export interface RankingList {
-    id: string
-    name: string
-    desc?: string
-    createdAt: number
-    updateAt: number
-    items: RankingListItem[]
-}
-
-export interface RankingListItemInput {
-    charId: number
-    buildId: string
-    sortOrder?: number
-}
-
-export interface RankingListInput {
-    name: string
-    desc?: string
-    items: RankingListItemInput[]
 }
 
 export interface ActivityInput {

@@ -7453,6 +7453,16 @@
     "shop-list": {
         "title": "Shop"
     },
+    "skin-colorize": {
+        "desc": "Preview and share character skin dyes",
+        "title": "Dye Plans"
+    },
+    "skin-colorize-create": {
+        "title": "Create Dye Plan"
+    },
+    "skin-colorize-share": {
+        "title": "Dye Plan Details"
+    },
     "tag": {
         "防御": "DEF",
         "辅助": "Support",
@@ -7466,6 +7476,15 @@
         "召唤物": "Summon",
         "治疗": "Healing",
         "最大生命": "Max HP"
+    },
+    "time": {
+        "daysAgo_one": "{{count}} day ago",
+        "daysAgo_other": "{{count}} days ago",
+        "hoursAgo_one": "{{count}} hour ago",
+        "hoursAgo_other": "{{count}} hours ago",
+        "justNow": "Just now",
+        "minutesAgo_one": "{{count}} minute ago",
+        "minutesAgo_other": "{{count}} minutes ago"
     },
     "timeline": {
         "addTrack": "Add track",

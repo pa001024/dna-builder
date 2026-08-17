@@ -108,6 +108,11 @@ const itemsRaw = [
         show: env.isApp && !setting.safeMode,
     },
     {
+        name: "skin-colorize",
+        path: "/skin-colorize",
+        icon: "ri:palette-line",
+    },
+    {
         name: "race-lottery",
         path: "/race-lottery",
         icon: "ri:run-line",

@@ -174,7 +174,11 @@ export default defineConfig(async ({ command }) => ({
             allow: ["."],
         },
         middlewareMode: false,
-        configureServer(server) {
+        configureServer(server: {
+            middlewares: {
+                use: (arg0: string, arg1: { (req: any, res: any, next: any): void; (req: any, res: any, next: any): void }) => void
+            }
+        }) {
             server.middlewares.use("/mock/data-pack", (req, res, next) => {
                 const url = req.url || "/"
                 const filePath = url === "/" ? "latest.json" : url.replace(/^\//, "")

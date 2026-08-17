@@ -1865,6 +1865,16 @@
     "shop-list": {
         "title": "商店"
     },
+    "skin-colorize": {
+        "desc": "预览和分享角色皮肤染色",
+        "title": "染色方案"
+    },
+    "skin-colorize-create": {
+        "title": "发布染色方案"
+    },
+    "skin-colorize-share": {
+        "title": "染色方案详情"
+    },
     "tag": {
         "防御": "防御",
         "辅助": "辅助",
@@ -1878,6 +1888,12 @@
         "召唤物": "召唤物",
         "治疗": "治疗",
         "最大生命": "最大生命"
+    },
+    "time": {
+        "daysAgo": "{{count}} 天前",
+        "hoursAgo": "{{count}} 小时前",
+        "justNow": "刚刚",
+        "minutesAgo": "{{count}} 分钟前"
     },
     "timeline": {
         "addTrack": "添加轨道",

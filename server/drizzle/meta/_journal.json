@@ -183,6 +183,20 @@
             "when": 1781717595671,
             "tag": "0025_lowly_silvermane",
             "breakpoints": true
+        },
+        {
+            "idx": 26,
+            "version": "6",
+            "when": 1786966047462,
+            "tag": "0026_flawless_kat_farrell",
+            "breakpoints": true
+        },
+        {
+            "idx": 27,
+            "version": "6",
+            "when": 1786972244162,
+            "tag": "0027_moaning_catseye",
+            "breakpoints": true
         }
     ]
 }

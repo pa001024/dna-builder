@@ -619,7 +619,9 @@ async function downloadOptionalPackTask(sign: string) {
     lastDownloadedBytes = 0
     lastTimestamp = Date.now()
     try {
-        const optionalFiles = entry.versions.flatMap(versionEntry => versionEntry.files.map(file => ({ version: versionEntry.version, file })))
+        const optionalFiles = entry.versions.flatMap(versionEntry =>
+            versionEntry.files.map(file => ({ version: versionEntry.version, file }))
+        )
         const totalSizeVal = optionalFiles.reduce((sum, item) => sum + item.file.fileSize, 0)
         activeDownloadTotal.value = totalSizeVal
         let fileBytesBefore = 0
@@ -2127,11 +2129,13 @@ const launchGame = async () => {
 <template>
     <!-- 主容器：深色背景，全屏 -->
     <div class="relative w-full h-full overflow-hidden select-none bg-base-100 font-sans">
-        <img
-            class="absolute top-0 left-0 w-full h-full object-cover pointer-events-none opacity-60"
-            src="https://cdnstatic.yingxiong.com/dna/hd/imgs/home/pc/bg.webp"
-            alt="bg"
-        />
+        <video
+            src="http://cdn.dna-builder.cn/bg.mp4"
+            muted
+            autoplay
+            loop
+            class="absolute top-0 left-0 w-full h-full object-cover pointer-events-none opacity-80"
+        ></video>
         <div class="flex flex-col h-full p-8 max-w-7xl mx-auto gap-8">
             <!-- 顶部 HUD：服务器配置 -->
             <header
@@ -2248,7 +2252,9 @@ const launchGame = async () => {
                         </button>
                         <span class="text-base-content/40 text-xs font-bold uppercase tracking-wider">{{ t("game-update.version") }}</span>
                         <div class="flex items-end gap-2">
-                            <span class="text-2xl font-bold font-mono">{{ fullPackageInfo?.latestVersion ?? versionList?.subVersion }}</span>
+                            <span class="text-2xl font-bold font-mono">{{
+                                fullPackageInfo?.latestVersion ?? versionList?.subVersion
+                            }}</span>
                             <span class="text-xs mb-1 px-1.5 py-0.5 rounded bg-base-content/10 opacity-80" v-if="needUpdate">{{
                                 t("game-update.old_version")
                             }}</span>

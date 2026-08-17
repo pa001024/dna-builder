@@ -594,6 +594,9 @@ export const userRelations = relations(users, ({ one, many }) => ({
     dnaBinding: one(dnaUserBindings, { fields: [users.id], references: [dnaUserBindings.userId] }),
     builds: many(builds),
     buildLikes: many(buildLikes),
+    dyePlans: many(dyePlans),
+    dyePlanLikes: many(dyePlanLikes),
+    comments: many(comments),
     timelines: many(timelines),
     timelineLikes: many(timelineLikes),
     scripts: many(scripts),
@@ -707,6 +710,92 @@ export const buildLikes = sqliteTable(
 export const buildLikesRelations = relations(buildLikes, ({ one }) => ({
     build: one(builds, { fields: [buildLikes.buildId], references: [builds.id] }),
     user: one(users, { fields: [buildLikes.userId], references: [users.id] }),
+}))
+
+/** 染色方案分享 */
+export const dyePlans = sqliteTable(
+    "dye_plans",
+    {
+        id: text("id").$default(id).primaryKey(),
+        title: text("title").notNull(),
+        desc: text("desc"),
+        type: text("type").notNull().default("Char"),
+        skinId: integer("skin_id").notNull(),
+        colorIds: text("color_ids").notNull(),
+        imageUrl: text("image_url"),
+        /** 是否原创，false 表示转载。 */
+        isOriginal: integer("is_original", { mode: "boolean" }).notNull().default(true),
+        /** 转载来源链接或作者名称，转载时必填。 */
+        source: text("source"),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        views: integer("views").default(0),
+        likes: integer("likes").default(0),
+        isRecommended: integer("is_recommended", { mode: "boolean" }).default(false),
+        isPinned: integer("is_pinned", { mode: "boolean" }).default(false),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at"),
+    },
+    dyePlans => [
+        index("dye_plans_user_id_idx").on(dyePlans.userId),
+        index("dye_plans_skin_id_idx").on(dyePlans.skinId),
+        index("dye_plans_type_idx").on(dyePlans.type),
+        index("dye_plans_update_at_idx").on(dyePlans.updateAt),
+        index("dye_plans_views_idx").on(dyePlans.views),
+    ]
+)
+
+export const dyePlansRelations = relations(dyePlans, ({ one, many }) => ({
+    user: one(users, { fields: [dyePlans.userId], references: [users.id] }),
+    likes: many(dyePlanLikes),
+}))
+
+/** 染色方案点赞 */
+export const dyePlanLikes = sqliteTable(
+    "dye_plan_likes",
+    {
+        id: text("id").$default(id).primaryKey(),
+        dyePlanId: text("dye_plan_id")
+            .notNull()
+            .references(() => dyePlans.id, { onDelete: "cascade" }),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        createdAt: integer("created_at").$default(now),
+    },
+    dyePlanLikes => [
+        uniqueIndex("dye_plan_like_idx").on(dyePlanLikes.userId, dyePlanLikes.dyePlanId),
+        index("dye_plan_like_plan_idx").on(dyePlanLikes.dyePlanId),
+    ]
+)
+
+export const dyePlanLikesRelations = relations(dyePlanLikes, ({ one }) => ({
+    dyePlan: one(dyePlans, { fields: [dyePlanLikes.dyePlanId], references: [dyePlans.id] }),
+    user: one(users, { fields: [dyePlanLikes.userId], references: [users.id] }),
+}))
+
+/** 通用评论，targetId 为评论目标唯一 ID（如染色方案使用 dp_<planId>）。 */
+export const comments = sqliteTable(
+    "comments",
+    {
+        id: text("id").$default(id).primaryKey(),
+        /** 评论目标唯一 ID，不同业务模块使用不同前缀，如染色方案 dp_<planId>。 */
+        targetId: text("target_id").notNull(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        content: text("content").notNull(),
+        createdAt: integer("created_at").$default(now),
+    },
+    comments => [
+        index("comments_target_id_idx").on(comments.targetId, comments.createdAt),
+        index("comments_user_id_idx").on(comments.userId),
+    ]
+)
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+    user: one(users, { fields: [comments.userId], references: [users.id] }),
 }))
 
 /** 时间线 */

@@ -6594,6 +6594,16 @@
     "shop-list": {
         "title": "商店"
     },
+    "skin-colorize": {
+        "desc": "預覽及分享角色皮膚染色",
+        "title": "染色方案"
+    },
+    "skin-colorize-create": {
+        "title": "發佈染色方案"
+    },
+    "skin-colorize-share": {
+        "title": "染色方案詳情"
+    },
     "tag": {
         "防御": "防禦",
         "辅助": "輔助",
@@ -6607,6 +6617,12 @@
         "召唤物": "召喚物",
         "治疗": "治療",
         "最大生命": "最大生命"
+    },
+    "time": {
+        "daysAgo": "{{count}} 天前",
+        "hoursAgo": "{{count}} 小時前",
+        "justNow": "剛剛",
+        "minutesAgo": "{{count}} 分鐘前"
     },
     "timeline": {
         "addTrack": "新增軌道",
