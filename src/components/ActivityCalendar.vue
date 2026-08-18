@@ -332,9 +332,7 @@ const sortedActivities = computed(() => {
     // 添加当前周期的魔灵刷新活动
     const currentMolingActivity: Activity = {
         title: t("activity-calendar.moling_refresh"),
-        description: isMolingCompleted.value
-            ? t("activity-calendar.moling_completed")
-            : t("activity-calendar.moling_desc"),
+        description: isMolingCompleted.value ? t("activity-calendar.moling_completed") : t("activity-calendar.moling_desc"),
         begin_at: molingTimes.current.begin_at,
         end_at: molingTimes.current.end_at,
         isMoling: true,
@@ -635,7 +633,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="w-full max-w-6xl mx-auto p-2 sm:p-4">
+    <div class="w-full">
         <div class="card bg-base-100 shadow-md">
             <div class="card-body p-3 sm:p-4">
                 <h2 class="card-title text-lg sm:text-xl mb-6 text-primary flex items-center gap-3">

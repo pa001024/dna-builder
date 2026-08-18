@@ -1180,10 +1180,15 @@
         "workflow": "使用流程"
     },
     "home": {
+        "changelog": "更新日志",
         "checkUpdate": "检查更新",
         "cureent_version": "当前版本:",
         "download": "下载 Windows 应用",
+        "modules": "快捷导航",
         "noupdate": "当前版本无更新内容",
+        "recentBuilds": "最近构筑",
+        "recentBuildsCount": "最新 {{count}} 个",
+        "recentBuildsEmpty": "暂无推荐构筑",
         "starme": "去Github点个星",
         "title": "主页",
         "understand": "了解了",
@@ -1305,7 +1310,32 @@
         "title": "号令者详情"
     },
     "more": {
+        "badge": "More",
+        "count": "共 {{count}} 个功能",
         "desc": "更多功能",
+        "entryCount": "个功能",
+        "section": {
+            "build": {
+                "badge": "Build",
+                "description": "围绕角色成长与装备构筑的工具，覆盖养成资源计算与外观方案。",
+                "title": "构筑与养成"
+            },
+            "data": {
+                "badge": "Data",
+                "description": "集中呈现游戏数据与统计信息，服务查询、排榜与成就统计。",
+                "title": "数据与统计"
+            },
+            "system": {
+                "badge": "System",
+                "description": "应用设置、账号与社区入口，以及官方工具集成。",
+                "title": "系统与社区"
+            },
+            "tools": {
+                "badge": "Tools",
+                "description": "面向计算、编辑与自动化的小工具，提升日常使用效率。",
+                "title": "工具与创作"
+            }
+        },
         "title": "更多"
     },
     "music-detail": {
@@ -1984,7 +2014,17 @@
         "system": "系统",
         "title": "待办",
         "titlePlaceholder": "待办事项标题",
-        "updateFailed": "更新待办事项失败"
+        "updateFailed": "更新待办事项失败",
+        "weekly": "周常",
+        "weeklyBait": "鱼饵",
+        "weeklyDungeonMoling": "副本魔灵",
+        "weeklyFishMoling": "钓鱼魔灵",
+        "weeklyGuildReputation": "协会声望",
+        "weeklyGuildShop": "协会商店",
+        "weeklyHint": "每周一 5:00 刷新",
+        "weeklyNightmare": "梦魇",
+        "weeklyRace": "竞逐",
+        "weeklyRouge": "迷津"
     },
     "tour": {
         "back": "上一步",

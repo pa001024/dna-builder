@@ -6803,10 +6803,15 @@
         "workflow": "Workflow d'utilisation"
     },
     "home": {
+        "changelog": "Journal de versions",
         "checkUpdate": "Vérifier les mises à jour",
         "cureent_version": "Version actuelle :",
         "download": "Télécharger l'application Windows",
+        "modules": "Navigation rapide",
         "noupdate": "Aucune mise à jour disponible",
+        "recentBuilds": "Constructions récentes",
+        "recentBuildsCount": "Dernières {{count}}",
+        "recentBuildsEmpty": "Aucune construction recommandée pour le moment",
         "starme": "Aller sur Github et mettre une étoile",
         "title": "Accueil",
         "understand": "Compris",
@@ -6928,7 +6933,32 @@
         "title": "Détails du commandant"
     },
     "more": {
+        "badge": "More",
+        "count": "{{count}} modules",
         "desc": "Plus de fonctionnalités",
+        "entryCount": "modules",
+        "section": {
+            "build": {
+                "badge": "Build",
+                "description": "Outils pour la progression des personnages et la construction d'équipement, avec calcul des ressources et réglages cosmétiques.",
+                "title": "Construction & Progression"
+            },
+            "data": {
+                "badge": "Data",
+                "description": "Données et statistiques du jeu réunies en un seul endroit : recherche, classements et suivi des succès.",
+                "title": "Données & Statistiques"
+            },
+            "system": {
+                "badge": "System",
+                "description": "Paramètres de l'application, comptes, accès communautaire et intégrations d'outils officiels.",
+                "title": "Système & Communauté"
+            },
+            "tools": {
+                "badge": "Tools",
+                "description": "Petits utilitaires de calcul, d'édition et d'automatisation pour accélérer l'usage quotidien.",
+                "title": "Outils & Création"
+            }
+        },
         "title": "Plus"
     },
     "music-detail": {
@@ -7610,7 +7640,17 @@
         "system": "Systeme",
         "title": "Taches",
         "titlePlaceholder": "Titre de la tache",
-        "updateFailed": "Echec de la mise a jour de la tache"
+        "updateFailed": "Echec de la mise a jour de la tache",
+        "weekly": "Hebdomadaire",
+        "weeklyBait": "Appât",
+        "weeklyDungeonMoling": "Géniemon de donjon",
+        "weeklyFishMoling": "Géniemon de pêche",
+        "weeklyGuildReputation": "Réputation de l'association",
+        "weeklyGuildShop": "Boutique de l'association",
+        "weeklyHint": "Réinitialisation lundi 5:00",
+        "weeklyNightmare": "Cauchemar",
+        "weeklyRace": "Compétition",
+        "weeklyRouge": "Labyrinthe"
     },
     "tour": {
         "back": "Précédent",

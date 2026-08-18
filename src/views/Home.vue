@@ -1,32 +1,21 @@
 <script lang="tsx" setup>
-import { computed, onMounted } from "vue"
+import { computed } from "vue"
 import { useUIStore } from "@/store/ui"
 import pg from "../../package.json"
 import type { IconTypes } from "../components/Icon.vue"
 import { env } from "../env"
 
-const items = [
-    {
-        name: "char-build",
-        path: "/char",
-        icon: "ri:hammer-line",
-    },
-    {
-        name: "database",
-        path: "/db",
-        icon: "ri:book-line",
-    },
-    {
-        name: "achievement",
-        path: "/achievement",
-        icon: "ri:trophy-line",
-    },
-    {
-        name: "more",
-        path: "/more",
-        icon: "ri:more-line",
-    },
-] satisfies { name: string; path: string; icon: IconTypes }[]
+// 快捷导航：小图标 + 标题，宽屏 2 行 4 列 / 窄屏 4 行 2 列
+const quickNav = [
+    { path: "/char", icon: "ri:hammer-line", titleKey: "char-build.title" },
+    { path: "/db", icon: "ri:book-line", titleKey: "database.title" },
+    { path: "/levelup", icon: "ri:calculator-line", titleKey: "levelup.title" },
+    { path: "/db/resource", icon: "ri:box-1-line", titleKey: "database.resource" },
+    { path: "/ranking", icon: "ri:bar-chart-line", titleKey: "ranking.title" },
+    { path: "/abyss-usage", icon: "ri:percent-line", titleKey: "abyss-usage.title" },
+    { path: "/achievement", icon: "ri:trophy-line", titleKey: "achievement.title" },
+    { path: "/more", icon: "ri:more-line", titleKey: "more.title" },
+] satisfies { path: string; icon: IconTypes; titleKey: string }[]
 
 const OPEN_SERVER_DATE = "2025-10-28T00:00:00+08:00"
 
@@ -40,12 +29,9 @@ const openServerDays = computed(() => {
     return Math.max(1, diffDays + 1)
 })
 
-onMounted(() => {
-    if (env.isApp) {
-        return
-    }
-})
-
+/**
+ * @description 检查并更新应用版本，成功后提示已是最新版本。
+ */
 async function checkUpdate() {
     await window.updateApp()
     useUIStore().showSuccessMessage("已是最新版本")
@@ -55,95 +41,159 @@ async function checkUpdate() {
 <template>
     <div class="h-full flex flex-col">
         <ScrollArea class="h-full">
-            <div class="hero bg-base-200 py-8 relative bg-linear-to-br from-purple-500/30 via-gray-500/30 to-blue-500/30">
-                <!-- 网格线 -->
-                <div class="absolute inset-0 opacity-20">
-                    <div
-                        class="absolute inset-0"
-                        style="
-                            background-image:
-                                linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
-                                linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
-                            background-size: 50px 50px;
-                        "
-                    />
-                </div>
-                <!-- 闪烁星星 -->
-                <div class="absolute inset-0 overflow-hidden">
-                    <div
-                        v-for="index in 20"
-                        :key="index"
-                        class="absolute aspect-square bg-cyan-400/50 rounded-full animate-ping"
-                        :style="{
-                            width: `${0.1 + Math.random() * 0.2}em`,
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                            animationDelay: `${Math.random() * 3}s`,
-                            animationDuration: `${1 + Math.random() * 2}s`,
-                        }"
-                    />
-                </div>
-                <div class="hero-content text-center container pb-8">
-                    <div>
-                        <h1 class="text-4xl sm:text-5xl font-bold">DNA Builder</h1>
-                        <div class="py-3 sm:py-4">
-                            开服第 {{ openServerDays }} 天
-                            <span class="mx-2">·</span>
-                            {{ $t("home.cureent_version") }}
-                            <a class="link" :href="`https://github.com/pa001024/dna-builder/releases/tag/v${pg.version}`" target="_blank">
-                                {{ pg.version }}
-                            </a>
-                        </div>
-
-                        <div class="inline-flex flex-wrap gap-3 sm:gap-4 justify-center">
-                            <a v-if="!env.isApp" href="/api/download" target="_blank" class="btn btn-primary btn-sm sm:btn-md">
-                                <Icon icon="ri:windows-fill" class="w-5 h-5 sm:w-6 sm:h-6" />
-                                <span class="hidden sm:inline">{{ $t("home.download") }}</span>
-                            </a>
-                            <button v-else @click="checkUpdate" class="btn btn-primary btn-sm sm:btn-md">
-                                <Icon icon="ri:refresh-line" class="w-5 h-5 sm:w-6 sm:h-6" />
-                                <span class="hidden sm:inline">{{ $t("home.checkUpdate") }}</span>
-                            </button>
-                            <a href="https://github.com/pa001024/dna-builder" target="_blank" class="btn btn-primary btn-sm sm:btn-md">
-                                <Icon icon="ri:github-fill" class="w-5 h-5 sm:w-6 sm:h-6" />
-                                <span class="hidden sm:inline">{{ $t("home.starme") }}</span>
-                            </a>
-                        </div>
+            <!-- 主视觉面板：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+            <header class="relative overflow-hidden border-b-2 border-primary bg-base-100">
+                <!-- 引导线网格（装饰性，随主题明暗） -->
+                <div
+                    class="pointer-events-none absolute inset-0"
+                    style="
+                        background-image:
+                            linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                            linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                        background-size: 52px 52px;
+                        mask-image: linear-gradient(to bottom, black, transparent 85%);
+                    "
+                    aria-hidden="true"
+                />
+                <!-- 右上角斜切楔形 -->
+                <span
+                    class="pointer-events-none absolute top-0 right-0 h-12 w-12 bg-primary max-md:h-9 max-md:w-9 [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                    aria-hidden="true"
+                />
+                <div class="mx-auto max-w-6xl px-5 pt-12 pb-10 animate-ef-rise motion-reduce:animate-none sm:pt-14 sm:pb-12">
+                    <p class="mb-4 inline-flex items-center gap-2.5 text-[11px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-7 bg-primary" aria-hidden="true" />
+                        Duet Night Abyss
+                    </p>
+                    <h1 class="font-orbitron text-4xl font-bold leading-none tracking-tight text-base-content sm:text-6xl">
+                        DNA <span class="text-primary">Builder</span>
+                    </h1>
+                    <p class="mt-5 mb-7 flex flex-wrap items-center gap-2.5 text-sm text-base-content/60">
+                        <span
+                            >开服第 <b class="font-orbitron text-primary tabular-nums">{{ openServerDays }}</b> 天</span
+                        >
+                        <span class="h-4 w-px bg-base-content/40" aria-hidden="true" />
+                        <span>{{ $t("home.cureent_version") }}</span>
+                        <a
+                            class="text-primary underline decoration-primary/40 underline-offset-[3px] tabular-nums hover:decoration-primary"
+                            :href="`https://github.com/pa001024/dna-builder/releases/tag/v${pg.version}`"
+                            target="_blank"
+                        >
+                            v{{ pg.version }}
+                        </a>
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <a
+                            v-if="!env.isApp"
+                            href="/api/download"
+                            target="_blank"
+                            class="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-xs bg-primary px-5 text-sm font-semibold text-primary-content transition-all duration-150 hover:bg-primary/90 active:translate-y-px motion-reduce:transition-none"
+                        >
+                            <Icon icon="ri:windows-fill" class="h-5 w-5" />
+                            <span>{{ $t("home.download") }}</span>
+                        </a>
+                        <button
+                            v-else
+                            type="button"
+                            class="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-xs bg-primary px-5 text-sm font-semibold text-primary-content transition-all duration-150 hover:bg-primary/90 active:translate-y-px motion-reduce:transition-none"
+                            @click="checkUpdate"
+                        >
+                            <Icon icon="ri:refresh-line" class="h-5 w-5" />
+                            <span>{{ $t("home.checkUpdate") }}</span>
+                        </button>
+                        <a
+                            href="https://github.com/pa001024/dna-builder"
+                            target="_blank"
+                            class="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-xs border border-base-content/30 bg-base-100 px-5 text-sm font-semibold text-base-content transition-colors duration-150 hover:bg-base-content/5 active:translate-y-px"
+                        >
+                            <Icon icon="ri:github-fill" class="h-5 w-5" />
+                            <span>{{ $t("home.starme") }}</span>
+                        </a>
                     </div>
                 </div>
-            </div>
-            <div class="p-2 sm:p-4 grid grid-cols-2 lg:grid-cols-4 w-full justify-items-center gap-3 sm:gap-4 max-w-6xl mx-auto">
-                <RouterLink
-                    v-for="(item, index) in items"
-                    :key="index"
-                    :to="item.path"
-                    class="w-full shadow-xl/5 flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8 gap-2 bg-base-100/50 hover:bg-base-100 hover:animate-pulse transition-all duration-500 rounded-lg mobile-card"
-                >
-                    <div class="text-primary">
-                        <Icon :icon="item.icon" class="w-10 h-10 sm:w-12 sm:h-12" />
-                    </div>
-                    <div class="text-lg sm:text-xl font-bold text-primary text-center">
-                        {{ $t(`${item.name}.title`) }}
-                    </div>
-                    <div class="text-xs sm:text-sm text-gray-500 text-center">
-                        {{ $t(`${item.name}.desc`) }}
-                    </div>
-                </RouterLink>
-            </div>
+            </header>
 
-            <div class="w-full max-w-6xl mx-auto p-2 sm:p-4">
-                <div class="card bg-base-100 shadow-md">
-                    <div class="card-body p-3 sm:p-4">
-                        <TodoList />
+            <div class="mx-auto max-w-6xl px-5 py-8 pb-10">
+                <div class="flex flex-col gap-10 xl:grid xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start xl:gap-6 xl:[grid-template-areas:'left_right']">
+                    <!-- 左列（分栏时同列堆叠；单列时经 contents 拆散为扁平顺序 01→02→03→04→05） -->
+                    <div class="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-6 xl:[grid-area:left]">
+                        <!-- 01 快捷导航 -->
+                        <section class="order-1">
+                            <div class="mb-4 flex items-center gap-3.5 animate-ef-rise motion-reduce:animate-none">
+                                <span
+                                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-xs bg-primary px-2 font-orbitron text-sm font-semibold tracking-wide text-primary-content tabular-nums"
+                                >
+                                    01
+                                </span>
+                                <span class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">MODULES</span>
+                                <span class="text-[17px] font-semibold text-base-content">{{ $t("home.modules") }}</span>
+                                <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
+                                <span class="text-[11px] font-medium text-base-content/50">
+                                    {{ $t("more.count", { count: quickNav.length }) }}
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 md:grid-cols-4">
+                                <RouterLink
+                                    v-for="(item, index) in quickNav"
+                                    :key="item.path"
+                                    :to="item.path"
+                                    class="group relative flex aspect-square flex-col items-center justify-center rounded-xs border border-base-content/10 bg-base-100 px-2 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/60 md:aspect-video md:items-stretch @container-size motion-reduce:animate-none motion-reduce:transition-none animate-ef-rise"
+                                    :style="{ animationDelay: `calc(0.1s + ${index} * 40ms)` }"
+                                >
+                                    <!-- 图标 + 文字：宽屏时内容左对齐、左边距固定，保证各卡片图标纵向对齐；窄屏保持居中 -->
+                                    <span
+                                        class="flex flex-col items-center gap-2 md:flex-row md:justify-start md:gap-2.5 md:pl-4"
+                                    >
+                                        <span
+                                            class="flex h-[50cqh] w-[50cqh] shrink-0 items-center justify-center rounded-xs bg-primary/10 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-content"
+                                        >
+                                            <Icon :icon="item.icon" class="h-[55%] w-[55%]" />
+                                        </span>
+                                        <span class="text-[16cqh] font-medium leading-snug text-base-content">{{ $t(item.titleKey) }}</span>
+                                    </span>
+                                    <span
+                                        class="absolute right-2 hidden h-[26cqh] w-[26cqh] translate-x-1 items-center justify-center rounded-xs bg-primary text-primary-content opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 md:flex"
+                                        aria-hidden="true"
+                                    >
+                                        <Icon icon="ri:arrow-right-line" class="h-[55%] w-[55%]" />
+                                    </span>
+                                </RouterLink>
+                            </div>
+                        </section>
+
+                        <!-- 03 最近构筑 -->
+                        <RecentBuilds class="order-3" />
+
+                        <!-- 04 活动日历 -->
+                        <section class="order-4">
+                            <div class="mb-4 flex items-center gap-3.5 animate-ef-rise motion-reduce:animate-none">
+                                <span
+                                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-xs bg-primary px-2 font-orbitron text-sm font-semibold tracking-wide text-primary-content tabular-nums"
+                                >
+                                    04
+                                </span>
+                                <span class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">SCHEDULE</span>
+                                <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
+                            </div>
+                            <ActivityCalendar />
+                        </section>
+                    </div>
+
+                    <!-- 右列（分栏时独立高度，不撑开左列） -->
+                    <div class="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-6 xl:[grid-area:right]">
+                        <!-- 02 待办 -->
+                        <aside class="order-2">
+                            <TodoList />
+                        </aside>
+
+                        <!-- 05 更新日志 -->
+                        <Changelog class="order-5" />
                     </div>
                 </div>
-            </div>
 
-            <!-- 活动日历组件 -->
-            <ActivityCalendar />
-
-            <div v-if="!env.isApp" class="flex items-center justify-center p-4">
-                <a class="link center" href="https://beian.miit.gov.cn" target="_blank" one-link-mark="yes">浙ICP备2024097919号</a>
+                <footer v-if="!env.isApp" class="flex justify-center pt-6 pb-2 text-[13px] text-base-content/50">
+                    <a class="link" href="https://beian.miit.gov.cn" target="_blank" one-link-mark="yes">浙ICP备2024097919号</a>
+                </footer>
             </div>
         </ScrollArea>
     </div>

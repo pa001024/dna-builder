@@ -6687,10 +6687,15 @@
         "workflow": "使用フロー"
     },
     "home": {
+        "changelog": "更新履歴",
         "checkUpdate": "更新を確認",
         "cureent_version": "現在のバージョン:",
         "download": "Windows アプリをダウンロード",
+        "modules": "クイックナビ",
         "noupdate": "現在のバージョンに更新はありません",
+        "recentBuilds": "最近の構築",
+        "recentBuildsCount": "最新 {{count}} 件",
+        "recentBuildsEmpty": "おすすめの構築はまだありません",
         "starme": "Githubでスターを付ける",
         "title": "ホーム",
         "understand": "了解しました",
@@ -6812,7 +6817,32 @@
         "title": "号令者詳細"
     },
     "more": {
+        "badge": "More",
+        "count": "全 {{count}} 機能",
         "desc": "その他の機能",
+        "entryCount": "機能",
+        "section": {
+            "build": {
+                "badge": "Build",
+                "description": "キャラクター育成と装備ビルドのツール。育成リソース計算と見た目設定に対応。",
+                "title": "ビルドと育成"
+            },
+            "data": {
+                "badge": "Data",
+                "description": "ゲームデータと統計情報をまとめて表示。検索、ランキング、実績の集計に対応。",
+                "title": "データと統計"
+            },
+            "system": {
+                "badge": "System",
+                "description": "アプリ設定、アカウント、コミュニティ入口、公式ツールの統合。",
+                "title": "システムとコミュニティ"
+            },
+            "tools": {
+                "badge": "Tools",
+                "description": "計算・編集・自動化のための小ツールで、日々の作業を効率化します。",
+                "title": "ツールと創作"
+            }
+        },
         "title": "もっと"
     },
     "music-detail": {
@@ -7492,7 +7522,17 @@
         "system": "システム",
         "title": "TODO",
         "titlePlaceholder": "TODOのタイトル",
-        "updateFailed": "TODOの更新に失敗しました"
+        "updateFailed": "TODOの更新に失敗しました",
+        "weekly": "週間",
+        "weeklyBait": "餌",
+        "weeklyDungeonMoling": "ダンジョンジェネモン",
+        "weeklyFishMoling": "釣りジェネモン",
+        "weeklyGuildReputation": "協会名声",
+        "weeklyGuildShop": "協会ショップ",
+        "weeklyHint": "毎週月曜 5:00 更新",
+        "weeklyNightmare": "ナイトメア",
+        "weeklyRace": "競逐",
+        "weeklyRouge": "迷宮"
     },
     "tour": {
         "back": "前へ",

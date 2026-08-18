@@ -6769,10 +6769,15 @@
         "workflow": "사용 흐름"
     },
     "home": {
+        "changelog": "업데이트 로그",
         "checkUpdate": "업데이트 확인",
         "cureent_version": "현재 버전:",
         "download": "Windows 앱 다운로드",
+        "modules": "빠른 탐색",
         "noupdate": "현재 버전에 업데이트 내용이 없습니다",
+        "recentBuilds": "최근 빌드",
+        "recentBuildsCount": "최신 {{count}}개",
+        "recentBuildsEmpty": "추천 빌드가 아직 없습니다",
         "starme": "Github에서 별 추가",
         "title": "홈",
         "understand": "알겠습니다",
@@ -6894,7 +6899,32 @@
         "title": "지휘자 상세"
     },
     "more": {
+        "badge": "More",
+        "count": "총 {{count}}개 기능",
         "desc": "기타 기능",
+        "entryCount": "개 기능",
+        "section": {
+            "build": {
+                "badge": "Build",
+                "description": "캐릭터 육성과 장비 빌드를 위한 도구로, 육성 자원 계산과 외형 설정을 다룹니다.",
+                "title": "빌드와 육성"
+            },
+            "data": {
+                "badge": "Data",
+                "description": "게임 데이터와 통계 정보를 한곳에 모아 조회, 순위, 업적 집계를 지원합니다.",
+                "title": "데이터와 통계"
+            },
+            "system": {
+                "badge": "System",
+                "description": "앱 설정, 계정, 커뮤니티 진입점 및 공식 도구 통합.",
+                "title": "시스템과 커뮤니티"
+            },
+            "tools": {
+                "badge": "Tools",
+                "description": "계산·편집·자동화를 위한 소형 도구로 일상 작업 효율을 높입니다.",
+                "title": "도구와 창작"
+            }
+        },
         "title": "더보기"
     },
     "music-detail": {
@@ -7574,7 +7604,17 @@
         "system": "시스템",
         "title": "할 일",
         "titlePlaceholder": "할 일 제목",
-        "updateFailed": "할 일 업데이트에 실패했습니다"
+        "updateFailed": "할 일 업데이트에 실패했습니다",
+        "weekly": "주간",
+        "weeklyBait": "미끼",
+        "weeklyDungeonMoling": "던전 마령",
+        "weeklyFishMoling": "낚시 마령",
+        "weeklyGuildReputation": "협회 평판",
+        "weeklyGuildShop": "협회 상점",
+        "weeklyHint": "매주 월요일 5:00 갱신",
+        "weeklyNightmare": "나이트메어",
+        "weeklyRace": "경쟁",
+        "weeklyRouge": "미궁"
     },
     "tour": {
         "back": "이전",

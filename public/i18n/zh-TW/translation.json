@@ -5908,10 +5908,15 @@
         "workflow": "使用流程"
     },
     "home": {
+        "changelog": "更新日誌",
         "checkUpdate": "檢查更新",
         "cureent_version": "當前版本:",
         "download": "下載 Windows App",
+        "modules": "快捷導航",
         "noupdate": "當前版本無更新內容",
+        "recentBuilds": "最近構築",
+        "recentBuildsCount": "最新 {{count}} 個",
+        "recentBuildsEmpty": "暫無推薦構築",
         "starme": "去Github點個星",
         "title": "主頁",
         "understand": "了解了",
@@ -6033,7 +6038,32 @@
         "title": "號令者詳情"
     },
     "more": {
+        "badge": "More",
+        "count": "共 {{count}} 個功能",
         "desc": "更多功能",
+        "entryCount": "個功能",
+        "section": {
+            "build": {
+                "badge": "Build",
+                "description": "圍繞角色成長與裝備構築的工具，涵蓋養成資源計算與外觀方案。",
+                "title": "構築與養成"
+            },
+            "data": {
+                "badge": "Data",
+                "description": "集中呈現遊戲資料與統計資訊，服務查詢、排行榜與成就統計。",
+                "title": "資料與統計"
+            },
+            "system": {
+                "badge": "System",
+                "description": "應用程式設定、帳號與社群入口，以及官方工具整合。",
+                "title": "系統與社群"
+            },
+            "tools": {
+                "badge": "Tools",
+                "description": "面向計算、編輯與自動化的小工具，提升日常使用效率。",
+                "title": "工具與創作"
+            }
+        },
         "title": "更多"
     },
     "music-detail": {
@@ -6713,7 +6743,17 @@
         "system": "系統",
         "title": "待辦",
         "titlePlaceholder": "待辦事項標題",
-        "updateFailed": "更新待辦事項失敗"
+        "updateFailed": "更新待辦事項失敗",
+        "weekly": "周常",
+        "weeklyBait": "魚餌",
+        "weeklyDungeonMoling": "副本魔靈",
+        "weeklyFishMoling": "釣魚魔靈",
+        "weeklyGuildReputation": "協會聲望",
+        "weeklyGuildShop": "協會商店",
+        "weeklyHint": "每週一 5:00 刷新",
+        "weeklyNightmare": "夢魘",
+        "weeklyRace": "競逐",
+        "weeklyRouge": "迷津"
     },
     "tour": {
         "back": "上一步",

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
-import { computed, onMounted, ref } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import { completeTodoMutation, createTodoMutation, deleteTodoMutation, todosQuery, updateTodoMutation } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
@@ -36,6 +36,35 @@ interface EditTodoForm {
     startTime: string
     endTime: string
 }
+
+// 周常 TODO 定义（每周一 5:00 +08 刷新）
+const WEEKLY_ITEMS = [
+    { id: "race", titleKey: "todo.weeklyRace" },
+    { id: "nightmare", titleKey: "todo.weeklyNightmare" },
+    { id: "rouge", titleKey: "todo.weeklyRouge" },
+    { id: "bait", titleKey: "todo.weeklyBait" },
+    { id: "dungeon-moling", titleKey: "todo.weeklyDungeonMoling" },
+    { id: "fish-moling", titleKey: "todo.weeklyFishMoling" },
+    { id: "guild-reputation", titleKey: "todo.weeklyGuildReputation" },
+    { id: "guild-shop", titleKey: "todo.weeklyGuildShop" },
+] as const
+
+/**
+ * @description 计算当前周一起始点（周一 05:00 +08:00）的 UTC 时间戳，
+ * 用于生成本周的 weekKey 字符串。
+ */
+function getWeekKey(now = Date.now()) {
+    const CST_OFFSET = 8 * 3600 * 1000
+    const cst = new Date(now + CST_OFFSET)
+    const daysSinceMonday = (cst.getUTCDay() + 6) % 7
+    const mondayMidnightUtc = Date.UTC(cst.getUTCFullYear(), cst.getUTCMonth(), cst.getUTCDate()) - daysSinceMonday * 86400000
+    return new Date(mondayMidnightUtc + 5 * 3600 * 1000).toISOString().slice(0, 10)
+}
+
+// 周常完成状态：todo.weekly_completed = { [itemId]: weekKey }
+const weeklyCompleted = useLocalStorage<Record<string, string>>("todo.weekly_completed", {})
+const weekKey = ref(getWeekKey())
+let weekTimer: number | null = null
 
 // 待办事项列表数据
 const todos = ref<Todo[]>([])
@@ -86,6 +115,22 @@ const filteredSystemTodos = computed(() => {
 const visibleTodosCount = computed(() => {
     return userTodos.value.length + filteredSystemTodos.value.length
 })
+
+// 周常完成判定
+function isWeeklyDone(id: string) {
+    return weeklyCompleted.value[id] === weekKey.value
+}
+
+// 切换周常完成状态
+function toggleWeekly(id: string) {
+    const next = { ...weeklyCompleted.value }
+    if (isWeeklyDone(id)) {
+        delete next[id]
+    } else {
+        next[id] = weekKey.value
+    }
+    weeklyCompleted.value = next
+}
 
 // 获取待办事项列表
 const fetchTodos = async () => {
@@ -291,65 +336,119 @@ const formatTime = (timestamp: number | null) => {
     return formatDateTime(timestamp)
 }
 
-// 页面挂载时获取待办事项列表
+// 每分钟检查周常是否跨周
 onMounted(() => {
     fetchTodos()
+    weekTimer = window.setInterval(() => {
+        const next = getWeekKey()
+        if (next !== weekKey.value) weekKey.value = next
+    }, 60 * 1000)
+})
+
+onBeforeUnmount(() => {
+    if (weekTimer !== null) window.clearInterval(weekTimer)
 })
 </script>
 
 <template>
-    <div>
-        <!-- 页面标题 -->
-        <div class="mb-4 flex items-center justify-between">
-            <div>
-                <h3 class="text-lg font-semibold text-base-content">{{ $t("todo.title") }}</h3>
+    <div class="w-full">
+        <!-- 章节头：序号 + 标签 + 标题 -->
+        <div class="mb-5 flex items-center gap-3.5 animate-ef-rise motion-reduce:animate-none">
+            <span
+                class="inline-flex h-9 min-w-9 items-center justify-center rounded-xs bg-primary px-2 font-orbitron text-sm font-semibold tracking-wide text-primary-content tabular-nums"
+            >
+                02
+            </span>
+            <span class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">OPERATIONS</span>
+            <span class="text-[17px] font-semibold text-base-content">{{ $t("todo.title") }}</span>
+            <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
+        </div>
+
+        <!-- 周常 TODO -->
+        <div class="mb-5">
+            <div class="mb-2.5 flex items-center gap-2">
+                <span class="text-[13px] font-semibold text-base-content">{{ $t("todo.weekly") }}</span>
+                <span class="rounded-xs border border-primary/40 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                    {{ $t("todo.weeklyHint") }}
+                </span>
             </div>
-            <div class="flex items-center gap-3">
-                <label class="label cursor-pointer gap-2 py-0">
-                    <span class="label-text text-sm">{{ $t("todo.hideCompleted") }}</span>
-                    <input v-model="hideCompleted" type="checkbox" class="toggle toggle-sm toggle-primary" />
-                </label>
-                <button class="btn btn-sm btn-primary px-4 flex items-center gap-2" @click="openCreateDialog">
-                    <Icon icon="ri:add-line"></Icon>
-                    <span>{{ $t("todo.create") }}</span>
+            <div class="space-y-1.5">
+                <button
+                    v-for="item in WEEKLY_ITEMS"
+                    :key="item.id"
+                    type="button"
+                    class="group flex w-full items-center gap-2.5 rounded-xs border border-base-content/10 bg-base-100/60 px-3 py-2 text-left transition-colors hover:border-primary/40"
+                    :class="{ 'opacity-60': isWeeklyDone(item.id) }"
+                    @click="toggleWeekly(item.id)"
+                >
+                    <span
+                        class="flex h-5 w-5 shrink-0 items-center justify-center rounded-xs border transition-colors"
+                        :class="
+                            isWeeklyDone(item.id)
+                                ? 'border-primary bg-primary text-primary-content'
+                                : 'border-base-content/30 group-hover:border-primary'
+                        "
+                    >
+                        <Icon v-if="isWeeklyDone(item.id)" icon="radix-icons:check" class="h-3.5 w-3.5" />
+                    </span>
+                    <span
+                        class="flex-1 text-[13px] text-base-content"
+                        :class="{ 'line-through': isWeeklyDone(item.id) }"
+                    >
+                        {{ $t(item.titleKey) }}
+                    </span>
                 </button>
             </div>
         </div>
 
+        <div class="mb-5 h-px bg-base-content/10" aria-hidden="true" />
+
+        <!-- 工具栏：隐藏已完成 + 新建 -->
+        <div class="mb-4 flex items-center justify-between gap-2">
+            <label class="flex cursor-pointer items-center gap-2 py-0">
+                <span class="text-xs text-base-content/60">{{ $t("todo.hideCompleted") }}</span>
+                <input v-model="hideCompleted" type="checkbox" class="toggle toggle-sm toggle-primary rounded-xs" />
+            </label>
+            <button class="btn btn-sm btn-primary rounded-xs" @click="openCreateDialog">
+                <Icon icon="ri:add-line" class="h-4 w-4" />
+                <span>{{ $t("todo.create") }}</span>
+            </button>
+        </div>
+
         <!-- 加载状态 -->
         <div v-if="loading" class="flex justify-center py-8">
-            <span class="loading loading-spinner loading-lg"></span>
+            <span class="loading loading-spinner loading-lg" />
         </div>
 
         <!-- 待办事项列表 -->
         <div v-else class="space-y-2">
             <!-- 用户待办事项 -->
             <div v-if="userTodos.length > 0" class="mb-4">
-                <h4 class="text-sm font-medium text-base-content/80 mb-2 px-2">{{ $t("todo.personal") }}</h4>
+                <h4 class="mb-2 px-2 text-sm font-medium text-base-content/80">{{ $t("todo.personal") }}</h4>
                 <div class="space-y-2">
                     <div
                         v-for="todo in userTodos"
                         :key="todo.id"
-                        class="card bg-base-100 border border-base-300 p-4 hover:border-primary/50 transition-colors duration-200"
+                        class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 transition-colors duration-200 hover:border-primary/40"
                     >
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex-1">
-                                <div class="font-medium text-base-content mb-1">{{ todo.title }}</div>
-                                <div v-if="todo.description" class="text-sm text-base-content/70 mb-2">
+                                <div class="mb-1 text-[13px] font-medium text-base-content">{{ todo.title }}</div>
+                                <div v-if="todo.description" class="mb-2 text-xs text-base-content/70">
                                     {{ todo.description }}
                                 </div>
-                                <div v-if="todo.startTime || todo.endTime" class="text-xs text-base-content/50">
+                                <div v-if="todo.startTime || todo.endTime" class="text-[11px] text-base-content/50">
                                     <span v-if="todo.startTime">{{ $t("todo.start") }}: {{ formatTime(todo.startTime) }}</span>
                                     <span v-if="todo.startTime && todo.endTime"> ~ </span>
                                     <span v-if="todo.endTime">{{ $t("todo.end") }}: {{ formatTime(todo.endTime) }}</span>
                                 </div>
                             </div>
-                            <div class="flex gap-2">
-                                <button class="btn btn-ghost btn-sm" @click="openEditDialog(todo)">
-                                    <Icon icon="ri:edit-line"></Icon>
+                            <div class="flex gap-1">
+                                <button class="btn btn-ghost btn-sm rounded-xs" @click="openEditDialog(todo)">
+                                    <Icon icon="ri:edit-line" class="h-4 w-4" />
                                 </button>
-                                <button class="btn btn-ghost btn-sm text-error" @click="deleteTodo(todo.id)">
-                                    <Icon icon="ri:delete-bin-line"></Icon>
+                                <button class="btn btn-ghost btn-sm rounded-xs text-error" @click="deleteTodo(todo.id)">
+                                    <Icon icon="ri:delete-bin-line" class="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
@@ -359,12 +458,12 @@ onMounted(() => {
 
             <!-- 系统待办事项 -->
             <div v-if="filteredSystemTodos.length > 0">
-                <h4 class="text-sm font-medium text-base-content/80 mb-2 px-2">{{ $t("todo.system") }}</h4>
+                <h4 class="mb-2 px-2 text-sm font-medium text-base-content/80">{{ $t("todo.system") }}</h4>
                 <div class="space-y-2">
                     <div
                         v-for="todo in filteredSystemTodos"
                         :key="todo.id"
-                        class="card bg-base-100 border border-base-300 p-4 hover:border-primary/50 transition-colors duration-200"
+                        class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 transition-colors duration-200 hover:border-primary/40"
                         :class="{ 'opacity-60': todo.isCompleted }"
                     >
                         <div class="flex items-start justify-between gap-3">
@@ -372,29 +471,29 @@ onMounted(() => {
                                 <!-- 完成状态复选框 -->
                                 <input
                                     type="checkbox"
-                                    class="checkbox checkbox-primary checkbox-sm mt-1"
+                                    class="checkbox checkbox-primary checkbox-sm mt-1 rounded-none"
                                     :checked="todo.isCompleted || localCompletedTodos[todo.id]"
                                     @click="toggleComplete(todo)"
                                 />
                                 <div class="flex-1">
                                     <div
-                                        class="font-medium text-base-content mb-1"
+                                        class="mb-1 text-[13px] font-medium text-base-content"
                                         :class="{ 'line-through text-base-content/50': todo.isCompleted || localCompletedTodos[todo.id] }"
                                     >
                                         {{ todo.title }}
 
                                         <span
-                                            class="inline-block cursor-pointer hover:text-primary ml-1"
+                                            class="ml-1 inline-block cursor-pointer hover:text-primary"
                                             @click="copyText(todo.title.replace('兑换码:', '').trim())"
                                             v-if="todo.title.includes('兑换码')"
                                         >
-                                            <Icon icon="ri:file-copy-line" />
+                                            <Icon icon="ri:file-copy-line" class="h-4 w-4" />
                                         </span>
                                     </div>
-                                    <div v-if="todo.description" class="text-sm text-base-content/70 mb-2">
+                                    <div v-if="todo.description" class="mb-2 text-xs text-base-content/70">
                                         {{ todo.description }}
                                     </div>
-                                    <div v-if="todo.startTime || todo.endTime" class="text-xs text-base-content/50">
+                                    <div v-if="todo.startTime || todo.endTime" class="text-[11px] text-base-content/50">
                                         <span v-if="todo.startTime">{{ $t("todo.start") }}: {{ formatTime(todo.startTime) }}</span>
                                         <span v-if="todo.startTime && todo.endTime"> ~ </span>
                                         <span v-if="todo.endTime">{{ $t("todo.end") }}: {{ formatTime(todo.endTime) }}</span>
@@ -407,7 +506,7 @@ onMounted(() => {
             </div>
 
             <!-- 空状态 -->
-            <div v-if="visibleTodosCount === 0" class="text-center text-base-content/50">
+            <div v-if="visibleTodosCount === 0" class="text-base-content/50 text-center text-[13px]">
                 <p>{{ $t("todo.empty") }}</p>
             </div>
         </div>
@@ -433,9 +532,9 @@ onMounted(() => {
                         <textarea
                             v-model="createForm.description"
                             :placeholder="$t('todo.descriptionPlaceholder')"
-                            class="textarea textarea-bordered w-full h-24"
+                            class="textarea textarea-bordered h-24 w-full"
                             :disabled="formSubmitting"
-                        ></textarea>
+                        />
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
@@ -462,18 +561,14 @@ onMounted(() => {
             <template #actions>
                 <button class="btn" :disabled="formSubmitting" @click="closeCreateDialog">{{ $t("setting.cancel") }}</button>
                 <button class="btn btn-primary" :disabled="formSubmitting" @click="submitCreate">
-                    <span v-if="formSubmitting" class="loading loading-spinner loading-sm mr-2"></span>
-                    {{ $t("todo.create") }}
+                    <span v-if="formSubmitting" class="loading loading-spinner loading-sm mr-2" />
+                    {{ $t("todo.save") }}
                 </button>
             </template>
         </Dialog>
 
         <!-- 编辑待办事项对话框 -->
-        <Dialog
-            v-model:open="editDialogOpen"
-            :title="editingTodo ? $t('todo.editDialogTitle') : ''"
-            :description="editingTodo ? $t('todo.editDialogDescription', { title: editingTodo.title }) : ''"
-        >
+        <Dialog v-model:open="editDialogOpen" :title="$t('todo.editDialogTitle')">
             <template #content>
                 <div class="space-y-4 py-4">
                     <div class="space-y-2">
@@ -493,9 +588,9 @@ onMounted(() => {
                         <textarea
                             v-model="editForm.description"
                             :placeholder="$t('todo.descriptionPlaceholder')"
-                            class="textarea textarea-bordered w-full h-24"
+                            class="textarea textarea-bordered h-24 w-full"
                             :disabled="formSubmitting"
-                        ></textarea>
+                        />
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
@@ -522,7 +617,7 @@ onMounted(() => {
             <template #actions>
                 <button class="btn" :disabled="formSubmitting" @click="closeEditDialog">{{ $t("setting.cancel") }}</button>
                 <button class="btn btn-primary" :disabled="formSubmitting" @click="submitEdit">
-                    <span v-if="formSubmitting" class="loading loading-spinner loading-sm mr-2"></span>
+                    <span v-if="formSubmitting" class="loading loading-spinner loading-sm mr-2" />
                     {{ $t("todo.save") }}
                 </button>
             </template>

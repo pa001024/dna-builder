@@ -6767,10 +6767,15 @@
         "workflow": "Usage Workflow"
     },
     "home": {
+        "changelog": "Changelog",
         "checkUpdate": "Check for Updates",
         "cureent_version": "Current version:",
         "download": "Download Windows App",
+        "modules": "Quick Nav",
         "noupdate": "No updates available",
+        "recentBuilds": "Recent Builds",
+        "recentBuildsCount": "Latest {{count}}",
+        "recentBuildsEmpty": "No recommended builds yet",
         "starme": "Go to Github and give it a star",
         "title": "Home",
         "understand": "Understood",
@@ -6892,7 +6897,32 @@
         "title": "Commander Details"
     },
     "more": {
+        "badge": "More",
+        "count": "{{count}} modules",
         "desc": "More features",
+        "entryCount": "modules",
+        "section": {
+            "build": {
+                "badge": "Build",
+                "description": "Tools for character growth and gear building, covering resource planning and cosmetic setups.",
+                "title": "Build & Progression"
+            },
+            "data": {
+                "badge": "Data",
+                "description": "Game data and statistics in one place — lookups, leaderboards and achievement tracking.",
+                "title": "Data & Stats"
+            },
+            "system": {
+                "badge": "System",
+                "description": "App settings, accounts, community entrances and official tool integrations.",
+                "title": "System & Community"
+            },
+            "tools": {
+                "badge": "Tools",
+                "description": "Handy utilities for calculations, editing and automation to speed up daily use.",
+                "title": "Tools & Creation"
+            }
+        },
         "title": "More"
     },
     "music-detail": {
@@ -7575,7 +7605,17 @@
         "system": "System",
         "title": "Todo",
         "titlePlaceholder": "Todo title",
-        "updateFailed": "Failed to update todo"
+        "updateFailed": "Failed to update todo",
+        "weekly": "Weekly",
+        "weeklyBait": "Bait",
+        "weeklyDungeonMoling": "Dungeon Geniemon",
+        "weeklyFishMoling": "Fishing Geniemon",
+        "weeklyGuildReputation": "Association Reputation",
+        "weeklyGuildShop": "Association Shop",
+        "weeklyHint": "Resets Mon 05:00",
+        "weeklyNightmare": "Nightmare",
+        "weeklyRace": "Race",
+        "weeklyRouge": "Maze"
     },
     "tour": {
         "back": "Previous",
