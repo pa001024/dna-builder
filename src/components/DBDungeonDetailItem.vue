@@ -2,7 +2,15 @@
 import { computed, ref, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import type { Dungeon, RewardChild } from "@/data"
-import { defenceData, ironSurvivalData, ironSurvivalDungeonData, LeveledChar, LeveledMonsterHelper, MonsterLevelUpperLimit, rewardMap } from "@/data"
+import {
+    defenceData,
+    ironSurvivalData,
+    ironSurvivalDungeonData,
+    LeveledChar,
+    LeveledMonsterHelper,
+    MonsterLevelUpperLimit,
+    rewardMap,
+} from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import { getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
@@ -26,7 +34,8 @@ type SpawnGroupMemberInfo = NonNullable<SpawnGroupInfo["m"]>[number]
 type SpawnTagMonsterInfo = NonNullable<SpawnGenerator["sm"]>[number]
 type DetailTab = "monster" | "wave" | "reward"
 type RewardCostValue = number | [number, number, "Mod" | "Draft"]
-const endlessWave = ref(1)
+const endlessStartWave = ref(1)
+const endlessEndWave = ref(2)
 const useNihaoBoxBonus = ref(false)
 const useMobileSpawnRadius = ref(false)
 
@@ -88,10 +97,33 @@ function getDungeonMonsterHpMultiplier(): number {
 }
 
 /**
- * 计算当前设定波次对应的等级基数（每波 +5，最高为副本等级上限）。
+ * 是否为铁血副本（深境探险），使用等级区间滑块。
+ */
+const isIronSurvivalDungeon = computed(() => props.dungeon.id in ironSurvivalDungeonData)
+
+/**
+ * 计算结束波次对应的等级基数（每波 +5，最高为副本等级上限）。
+ * 铁血副本直接取等级区间的实际覆盖末档（结束等级不含）。
  */
 const endlessLevelBase = computed(() => {
-    const level = props.dungeon.lv + (endlessWave.value - 1) * ENDLESS_LEVEL_STEP
+    if (isIronSurvivalDungeon.value) {
+        return selectedIronEndLevel.value - ENDLESS_LEVEL_STEP
+    }
+
+    const level = props.dungeon.lv + (displayEndWave.value - 1) * ENDLESS_LEVEL_STEP
+    return Math.min(maxMonsterLevel.value, level)
+})
+
+/**
+ * 计算起始波次对应的等级基数（每波 +5，最高为副本等级上限）。
+ * 铁血副本直接取等级区间的起始等级。
+ */
+const endlessStartLevelBase = computed(() => {
+    if (isIronSurvivalDungeon.value) {
+        return selectedIronStartLevel.value
+    }
+
+    const level = props.dungeon.lv + (displayStartWave.value - 1) * ENDLESS_LEVEL_STEP
     return Math.min(maxMonsterLevel.value, level)
 })
 
@@ -114,15 +146,62 @@ const ironMaxWave = computed(() => {
  */
 const endlessMaxWave = computed(() => (ironMaxWave.value > 0 ? ironMaxWave.value : ENDLESS_MAX_WAVE))
 
+// —— 铁血副本：等级区间滑块 [startLevel, endLevel) ——
+
+const ironStartLevel = ref(props.dungeon.lv)
+const ironEndLevel = ref(props.dungeon.lv + ENDLESS_LEVEL_STEP)
+
 /**
- * 当前无尽波次（限制在 1~上限）。
+ * 铁血副本起始等级（含），与结束等级保持至少一个步长的间距。
+ */
+const selectedIronStartLevel = computed(() =>
+    Math.max(props.dungeon.lv, Math.min(ironStartLevel.value, ironEndLevel.value - ENDLESS_LEVEL_STEP))
+)
+
+/**
+ * 铁血副本结束等级（不含），上限为副本等级上限（240），与起始等级保持至少一个步长的间距。
+ */
+const selectedIronEndLevel = computed(() =>
+    Math.max(props.dungeon.lv + ENDLESS_LEVEL_STEP, Math.min(ironEndLevel.value, maxMonsterLevel.value))
+)
+
+// —— 非铁血无尽副本：波次区间滑块 [startWave, endWave) ——
+
+/**
+ * 当前无尽波次区间（限制在 1~上限，且起始不晚于结束）。
  */
 const selectedEndlessWave = computed(() => {
-    return Math.max(1, Math.min(endlessMaxWave.value, endlessWave.value))
+    return Math.max(1, Math.min(endlessMaxWave.value, endlessEndWave.value))
+})
+
+const selectedEndlessStartWave = computed(() => {
+    return Math.max(1, Math.min(selectedEndlessWave.value, endlessStartWave.value))
 })
 
 /**
- * 怪物页签展示等级；无尽副本跟随波次，其他副本跟随等级滑块。
+ * 半开区间实际覆盖的起始波次。
+ */
+const displayStartWave = computed(() => {
+    if (isIronSurvivalDungeon.value) {
+        return Math.max(1, (selectedIronStartLevel.value - props.dungeon.lv) / ENDLESS_LEVEL_STEP + 1)
+    }
+
+    return selectedEndlessStartWave.value
+})
+
+/**
+ * 半开区间实际覆盖的结束波次（含）。
+ */
+const displayEndWave = computed(() => {
+    if (isIronSurvivalDungeon.value) {
+        return Math.max(1, (selectedIronEndLevel.value - props.dungeon.lv) / ENDLESS_LEVEL_STEP)
+    }
+
+    return Math.max(1, selectedEndlessWave.value - 1)
+})
+
+/**
+ * 怪物页签展示等级；无尽副本跟随区间选择，其他副本跟随等级滑块。
  */
 const monsterTabLevel = computed(() => {
     if (isEndlessDungeon.value) {
@@ -133,25 +212,25 @@ const monsterTabLevel = computed(() => {
 })
 
 /**
- * 需要累计的波次数（不能超过奖励数组长度）。
+ * 需要累计的奖励组数量（区间内覆盖的波次数，不能超过奖励数组长度）。
  */
 const cumulativeWaveCount = computed(() => {
     if (!isEndlessDungeon.value || !props.dungeon.r?.length) {
         return 0
     }
 
-    return Math.min(selectedEndlessWave.value, props.dungeon.r.length)
+    return Math.max(0, Math.min(displayEndWave.value, props.dungeon.r.length) - displayStartWave.value + 1)
 })
 
 /**
- * 当前波次累计奖励的奖励组ID列表。
+ * 区间内累计奖励的奖励组ID列表。
  */
 const cumulativeWaveRewardIds = computed(() => {
     if (!cumulativeWaveCount.value) {
         return []
     }
 
-    return props.dungeon.r?.slice(0, cumulativeWaveCount.value) || []
+    return props.dungeon.r?.slice(displayStartWave.value - 1, displayEndWave.value) || []
 })
 
 /**
@@ -484,7 +563,10 @@ watch(
     () => props.dungeon.id,
     () => {
         currentLevel.value = props.dungeon.lv
-        endlessWave.value = 1
+        endlessStartWave.value = 1
+        endlessEndWave.value = 2
+        ironStartLevel.value = props.dungeon.lv
+        ironEndLevel.value = props.dungeon.lv + ENDLESS_LEVEL_STEP
         useNihaoBoxBonus.value = false
         useMobileSpawnRadius.value = false
     }
@@ -527,21 +609,47 @@ watch(
         </div>
 
         <div v-if="isEndlessDungeon" class="card bg-base-200 rounded-lg p-3">
-            <div class="mb-1 flex items-center justify-between text-sm">
-                <span>无尽波次</span>
-                <span>{{ selectedEndlessWave }} / {{ endlessMaxWave }}</span>
-            </div>
-            <input
-                v-model.number="endlessWave"
-                type="range"
-                class="range range-primary range-xs w-full"
-                min="1"
-                :max="endlessMaxWave"
-                step="1"
-            />
-            <div class="mt-1 text-xs text-base-content/70">
-                当前怪物等级基数 Lv.{{ endlessLevelBase }}（每波 +{{ ENDLESS_LEVEL_STEP }}，最高 {{ maxMonsterLevel }}）
-            </div>
+            <template v-if="isIronSurvivalDungeon">
+                <div class="mb-1 flex items-center justify-between text-sm">
+                    <span>怪物等级区间</span>
+                    <span>Lv.{{ selectedIronStartLevel }} ~ Lv.{{ selectedIronEndLevel }} / Lv.{{ maxMonsterLevel }}</span>
+                </div>
+                <DualRangeSlider
+                    v-model:start="ironStartLevel"
+                    v-model:end="ironEndLevel"
+                    :min="dungeon.lv"
+                    :max="maxMonsterLevel"
+                    :step="ENDLESS_LEVEL_STEP"
+                    :min-gap="ENDLESS_LEVEL_STEP"
+                    start-label="起始等级"
+                    end-label="结束等级"
+                />
+                <div class="mt-1 text-xs text-base-content/70">
+                    区间 [起始, 结束)，实际覆盖 Lv.{{ endlessStartLevelBase }} ~ Lv.{{ endlessLevelBase }}
+                </div>
+            </template>
+            <template v-else>
+                <div class="mb-1 flex items-center justify-between text-sm">
+                    <span>无尽波次</span>
+                    <span>第 {{ selectedEndlessStartWave }} ~ {{ selectedEndlessWave - 1 }} 波 / {{ endlessMaxWave - 1 }}</span>
+                </div>
+                <DualRangeSlider
+                    v-model:start="endlessStartWave"
+                    v-model:end="endlessEndWave"
+                    :min="1"
+                    :max="endlessMaxWave"
+                    :step="1"
+                    :min-gap="1"
+                    start-label="起始波次"
+                    end-label="结束波次"
+                />
+                <div class="mt-1 text-xs text-base-content/70">
+                    区间 [起始, 结束) ，实际覆盖第 {{ displayStartWave }} ~ {{ displayEndWave }} 波，怪物等级 Lv.{{
+                        endlessStartLevelBase
+                    }}
+                    ~ Lv.{{ endlessLevelBase }}（每波 +{{ ENDLESS_LEVEL_STEP }}，最高 {{ maxMonsterLevel }}）
+                </div>
+            </template>
         </div>
 
         <template v-if="activeTab === 'monster'">
@@ -589,7 +697,12 @@ watch(
         </template>
 
         <template v-else-if="activeTab === 'wave'">
-            <DBIronSurvivalSpawn v-if="ironSurvivalData[dungeon.id] || defenceData[dungeon.id]" :dungeon-id="dungeon.id" hideTitle :wave="selectedEndlessWave" />
+            <DBIronSurvivalSpawn
+                v-if="ironSurvivalData[dungeon.id] || defenceData[dungeon.id]"
+                :dungeon-id="dungeon.id"
+                hideTitle
+                :wave="displayEndWave"
+            />
             <template v-else>
                 <div class="card bg-base-200 rounded-lg p-3">
                     <div class="flex items-center justify-between">
@@ -819,7 +932,7 @@ watch(
             <template v-else>
                 <div v-if="isEndlessDungeon && dungeon.r?.length" class="card bg-base-200 rounded-lg p-3">
                     <div class="mb-2 flex items-center justify-between">
-                        <h3 class="font-bold">波数累计奖励 (1~{{ cumulativeWaveCount }}波)</h3>
+                        <h3 class="font-bold">波数累计奖励 ({{ displayStartWave }}~{{ displayEndWave }}波)</h3>
                         <label class="label cursor-pointer gap-2 text-xs">
                             <span>你好箱</span>
                             <input v-model="useNihaoBoxBonus" type="checkbox" class="checkbox checkbox-xs" />
@@ -841,7 +954,8 @@ watch(
                     v-if="ironSurvivalDungeonData[dungeon.id]"
                     :dungeon-id="dungeon.id"
                     hideTitle
-                    :wave="selectedEndlessWave"
+                    :start-level="selectedIronStartLevel"
+                    :end-level="selectedIronEndLevel"
                 />
                 <!-- 奖励列表 -->
                 <div v-if="dungeon.r?.length" class="card bg-base-200 rounded-lg p-3">

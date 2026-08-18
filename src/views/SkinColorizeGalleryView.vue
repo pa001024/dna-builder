@@ -201,7 +201,9 @@ watch(filterSkinIds, () => {
                                     class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                                     loading="lazy"
                                 />
-                                <span class="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/75 to-transparent px-1.5 pb-0.5 pt-3 text-[10px] font-medium text-white">
+                                <span
+                                    class="absolute inset-x-0 bottom-0 truncate bg-linear-to-t from-black/75 to-transparent px-1.5 pb-0.5 pt-3 text-[10px] font-medium text-white"
+                                >
                                     {{ character.名称 }}
                                 </span>
                             </button>
@@ -228,11 +230,17 @@ watch(filterSkinIds, () => {
                                     class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                                     loading="lazy"
                                 />
-                                <div v-else class="flex h-full w-full items-center justify-center bg-base-200 text-[10px] opacity-60">暂无图标</div>
-                                <span class="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/75 to-transparent px-1.5 pb-0.5 pt-3 text-[10px] font-medium text-white">
+                                <div v-else class="flex h-full w-full items-center justify-center bg-base-200 text-[10px] opacity-60">
+                                    暂无图标
+                                </div>
+                                <span
+                                    class="absolute inset-x-0 bottom-0 truncate bg-linear-to-t from-black/75 to-transparent px-1.5 pb-0.5 pt-3 text-[10px] font-medium text-white"
+                                >
                                     {{ series.name }}
                                 </span>
-                                <span class="absolute right-1 top-1 rounded bg-black/60 px-1 text-[9px] leading-4 text-white">×{{ series.count }}</span>
+                                <span class="absolute right-1 top-1 rounded bg-black/60 px-1 text-[9px] leading-4 text-white"
+                                    >×{{ series.count }}</span
+                                >
                             </button>
                         </div>
                     </div>
@@ -259,9 +267,7 @@ watch(filterSkinIds, () => {
                         {{ tab.label }}
                     </button>
                 </div>
-                <button class="btn btn-primary btn-sm" type="button" @click="goCreate">
-                    发布染色方案
-                </button>
+                <button class="btn btn-primary btn-sm" type="button" @click="goCreate">发布染色方案</button>
             </div>
 
             <div v-if="loading" class="flex flex-1 items-center justify-center">
@@ -274,14 +280,14 @@ watch(filterSkinIds, () => {
             </div>
 
             <template v-else>
-                <div class="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
+                <div class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
                     <div
                         v-for="plan in plans"
                         :key="plan.id"
-                        class="group cursor-pointer overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                        class="group cursor-pointer overflow-hidden rounded border border-base-200 bg-base-100 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                         @click="router.push(`/skin-colorize/${plan.id}`)"
                     >
-                        <div class="relative aspect-[4/3] overflow-hidden bg-base-200">
+                        <div class="relative aspect-4/3 overflow-hidden bg-base-200">
                             <img
                                 v-if="plan.imageUrl"
                                 :src="plan.imageUrl"
@@ -289,7 +295,11 @@ watch(filterSkinIds, () => {
                                 class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 loading="lazy"
                             />
-                            <div v-else class="flex h-full w-full flex-col items-center justify-center gap-2" :style="{ background: getFallbackColor(plan) }">
+                            <div
+                                v-else
+                                class="flex h-full w-full flex-col items-center justify-center gap-2"
+                                :style="{ background: getFallbackColor(plan) }"
+                            >
                                 <img
                                     v-if="getSkin(plan)?.icon"
                                     :src="resolveSkinIconUrl(getSkin(plan)!.icon)"
@@ -309,13 +319,11 @@ watch(filterSkinIds, () => {
                         <div class="flex flex-col gap-2 p-3">
                             <div class="line-clamp-2 text-sm font-medium leading-snug">{{ plan.title }}</div>
                             <div class="flex items-center gap-2">
-                                <div class="avatar placeholder">
-                                    <div class="w-5 rounded-full bg-base-300 text-[10px] text-base-content/70">
-                                        <span>{{ (plan.user?.name || "?")[0] }}</span>
-                                    </div>
-                                </div>
+                                <QQAvatar class="w-5" :qq="plan.user?.qq" />
                                 <span class="min-w-0 flex-1 truncate text-xs opacity-70">{{ plan.user?.name || "匿名" }}</span>
-                                <span class="shrink-0 text-[10px] opacity-50">{{ formatRelativeTime(plan.createdAt, i18next.language) }}</span>
+                                <span class="shrink-0 text-[10px] opacity-50">{{
+                                    formatRelativeTime(plan.createdAt, i18next.language)
+                                }}</span>
                             </div>
                             <div class="flex items-center gap-3 text-[11px] opacity-60">
                                 <span class="flex items-center gap-1"><Icon icon="ri:heart-line" />{{ plan.likes }}</span>
@@ -327,13 +335,7 @@ watch(filterSkinIds, () => {
                 </div>
 
                 <div class="mt-4 flex justify-center">
-                    <button
-                        v-if="hasMore"
-                        class="btn btn-outline btn-sm"
-                        type="button"
-                        :disabled="loadingMore"
-                        @click="loadPlans(false)"
-                    >
+                    <button v-if="hasMore" class="btn btn-outline btn-sm" type="button" :disabled="loadingMore" @click="loadPlans(false)">
                         {{ loadingMore ? "加载中..." : "加载更多" }}
                     </button>
                     <span v-else class="text-xs opacity-50">已经到底啦～</span>

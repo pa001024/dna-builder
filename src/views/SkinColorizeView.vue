@@ -612,13 +612,13 @@ onBeforeUnmount(() => {
                                 </div>
                                 <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs opacity-60">
                                     <span class="flex items-center gap-1.5">
-                                        <span class="flex h-5 w-5 items-center justify-center rounded-full bg-base-300 text-[10px]">
-                                            {{ (loadedPlan.user?.name || "?")[0] }}
-                                        </span>
+                                        <QQAvatar class="w-5" :qq="loadedPlan.user?.qq" />
                                         <span class="font-medium">{{ loadedPlan.user?.name || "匿名" }}</span>
                                     </span>
-                                    <span>{{ formatRelativeTime(loadedPlan.createdAt, i18next.language) }}</span>
-                                    <span><Icon icon="ri:eye-line" class="align-[-2px]" /> {{ loadedPlan.views }} 浏览</span>
+                                    <span class="flex gap-1">{{ formatRelativeTime(loadedPlan.createdAt, i18next.language) }}</span>
+                                    <span class="flex gap-1"
+                                        ><Icon icon="ri:eye-line" class="align-[-2px]" /> {{ loadedPlan.views }} 浏览</span
+                                    >
                                     <button
                                         class="flex items-center gap-1 transition-colors hover:opacity-80"
                                         :class="loadedPlan.isLiked ? 'text-error' : ''"
@@ -628,7 +628,9 @@ onBeforeUnmount(() => {
                                         <Icon :icon="loadedPlan.isLiked ? 'ri:heart-fill' : 'ri:heart-line'" class="align-[-2px]" />
                                         {{ loadedPlan.likes }} 点赞
                                     </button>
-                                    <span><Icon icon="ri:message-2-line" class="align-[-2px]" /> {{ loadedPlan.commentsCount }} 评论</span>
+                                    <span class="flex gap-1"
+                                        ><Icon icon="ri:message-2-line" class="align-[-2px]" /> {{ loadedPlan.commentsCount }} 评论</span
+                                    >
                                 </div>
                                 <div v-if="!loadedPlan.isOriginal && loadedPlan.source" class="mt-1.5 text-xs opacity-60">
                                     来源：{{ loadedPlan.source }}
@@ -705,7 +707,7 @@ onBeforeUnmount(() => {
                                             : 'transparent',
                                     }"
                                 />
-                                <span class="opacity-70">部位 {{ part.id }}</span>
+                                <span class="opacity-70">{{ part.id }}</span>
                                 <span class="font-mono opacity-60">{{ currentColorId(part.id) || "默认" }}</span>
                             </div>
                         </div>

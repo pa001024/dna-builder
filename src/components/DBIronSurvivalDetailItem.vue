@@ -7,32 +7,23 @@ import {
     LeveledChar,
     MonsterLevelUpperLimit,
     monsterLevelDropData,
-    rewardMap,
 } from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
-import type { Reward, RewardChild } from "@/data/data-types"
 import { getDungeonType } from "@/utils/dungeon-utils"
+import type { CumulativeRewardBucket, IronSurvivalRewardRow } from "@/utils/iron-survival-reward-utils"
+import {
+    collectRewardExpectationBucketsFromReward,
+    computeCompoundCumulativeBuckets,
+    IRON_SURVIVAL_LEVEL_STEP,
+    IRON_SURVIVAL_REWARD_BATCH_COUNT,
+} from "@/utils/iron-survival-reward-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
-
-interface IronSurvivalRewardRow {
-    threshold: number
-    rewardId: number
-}
 
 interface MonsterLevelDropRow {
     level: number
     probability: number
     probabilityUp: number
     rewardId: number
-}
-
-interface CumulativeRewardBucket {
-    key: string
-    t: string
-    id: number
-    n: string
-    d?: 1
-    amount: number
 }
 
 interface CumulativeRewardDisplayItem {
@@ -47,16 +38,21 @@ type CumulativeRewardValue = [number | string, number | string, "Mod" | "Draft" 
 const props = defineProps<{
     dungeonId: number
     hideTitle?: boolean
-    wave?: number
+    /** 起始等级（含），缺省为副本基础等级 */
+    startLevel?: number
+    /** 结束等级（不含），[startLevel, endLevel) 半开区间 */
+    endLevel?: number
 }>()
 
 const dungeon = computed(() => ironSurvivalData[props.dungeonId] || null)
 const dungeonDetail = computed(() => ironSurvivalDungeonData[props.dungeonId] || null)
 const dungeonBase = computed(() => dungeonMap.get(props.dungeonId) || null)
-const IRON_SURVIVAL_LEVEL_STEP = 5
-const IRON_SURVIVAL_REWARD_BATCH_COUNT = 1
 const strongKillCount = computed(() => dungeon.value?.StrongKillCount?.[0] || 50)
-const selectedWave = computed(() => Math.max(1, props.wave ?? 1))
+const baseMonsterLevel = computed(() => dungeonBase.value?.lv || 1)
+const selectedStartLevel = computed(() => Math.max(baseMonsterLevel.value, props.startLevel ?? baseMonsterLevel.value))
+const selectedEndLevel = computed(() =>
+    Math.max(selectedStartLevel.value + IRON_SURVIVAL_LEVEL_STEP, props.endLevel ?? selectedStartLevel.value + IRON_SURVIVAL_LEVEL_STEP)
+)
 const useCompoundReward = ref(false)
 const monsterLevelLimit = computed(() => {
     const ticketMax = Math.max(0, ...(dungeonDetail.value?.AvaliableTicketLevel || [0]))
@@ -66,15 +62,13 @@ const monsterLevelLimit = computed(() => {
     return dungeonDetail.value ? IronSurvivalMonsterLevelLimit : MonsterLevelUpperLimit
 })
 
-/**
- * 计算深境探险怪物展示等级。
- * @returns 当前波次对应的怪物等级
- */
-const ironSurvivalMonsterLevel = computed(() => {
-    const baseLevel = dungeonBase.value?.lv || 1
-    const level = baseLevel + (selectedWave.value - 1) * IRON_SURVIVAL_LEVEL_STEP
-    return Math.min(monsterLevelLimit.value, level)
-})
+/** 起始等级的怪物等级（封顶展示） */
+const ironSurvivalStartMonsterLevel = computed(() => Math.min(monsterLevelLimit.value, selectedStartLevel.value))
+
+/** 结束等级前一级（区间实际覆盖的最后一档）的怪物等级 */
+const ironSurvivalEndMonsterLevel = computed(() =>
+    Math.min(monsterLevelLimit.value, selectedEndLevel.value - IRON_SURVIVAL_LEVEL_STEP)
+)
 
 const monsterLevelDropRows = computed<MonsterLevelDropRow[]>(() => {
     return (dungeonDetail.value?.MonsterLevelDrop || [])
@@ -111,100 +105,6 @@ function formatRewardAmount(amount: number): number {
     return rounded
 }
 
-/**
- * 归档单个奖励项到累计表。
- * @param buckets 累计容器
- * @param rewardChild 奖励项
- * @param amount 该奖励项应累计的数量
- */
-function pushRewardBucket(buckets: Map<string, CumulativeRewardBucket>, rewardChild: RewardChild, amount: number): void {
-    if (amount <= 0) {
-        return
-    }
-
-    const key = `${rewardChild.t}-${rewardChild.id}-${rewardChild.d ? "draft" : "normal"}-${rewardChild.n || ""}`
-    const existed = buckets.get(key)
-    if (existed) {
-        existed.amount += amount
-        return
-    }
-
-    buckets.set(key, {
-        key,
-        t: rewardChild.t,
-        id: rewardChild.id,
-        n: rewardChild.n || `${rewardChild.t} ${rewardChild.id}`,
-        d: rewardChild.d,
-        amount,
-    })
-}
-
-/**
- * 计算单个奖励子项的实际概率。
- * @param reward 父奖励组
- * @param rewardChild 奖励子项
- * @param totalP 父奖励组的总权重
- * @returns 实际概率，取值为 0~1
- */
-function getRewardChildProbability(reward: Reward, rewardChild: RewardChild, totalP: number): number {
-    if (reward.m === "Fixed") {
-        return 1
-    }
-
-    if (reward.m === "Independent") {
-        return (rewardChild.p || 0) / 10000
-    }
-
-    if (totalP <= 0) {
-        return 0
-    }
-
-    return (rewardChild.p || 0) / totalP
-}
-
-/**
- * 将奖励树按实际概率转换为累计桶。
- * @param rewardId 奖励组ID
- * @param buckets 累计容器
- * @param multiplier 当前累计倍率
- * @param visiting 当前递归路径上的奖励组ID，防止循环引用
- */
-function collectRewardExpectationBucketsFromReward(
-    rewardId: number,
-    buckets: Map<string, CumulativeRewardBucket>,
-    multiplier = 1,
-    visiting: Set<number> = new Set()
-): void {
-    if (visiting.has(rewardId)) {
-        return
-    }
-
-    const reward = rewardMap.get(rewardId)
-    if (!reward?.child?.length) {
-        return
-    }
-
-    const nextVisiting = new Set(visiting)
-    nextVisiting.add(rewardId)
-
-    const totalP = reward.child.reduce((sum, child) => sum + (child.p || 0), 0)
-
-    reward.child.forEach(rewardChild => {
-        const probability = getRewardChildProbability(reward, rewardChild, totalP)
-        if (probability <= 0) {
-            return
-        }
-
-        const nextMultiplier = multiplier * probability * rewardChild.c
-        if (rewardChild.t === "Reward") {
-            collectRewardExpectationBucketsFromReward(rewardChild.id, buckets, nextMultiplier, nextVisiting)
-            return
-        }
-
-        pushRewardBucket(buckets, rewardChild, nextMultiplier)
-    })
-}
-
 const rewardRows = computed<IronSurvivalRewardRow[]>(() => {
     const rewardMap = dungeonDetail.value?.IronRoundsRewardView || dungeonDetail.value?.IronRoundsReward || {}
     return Object.entries(rewardMap)
@@ -216,20 +116,17 @@ const rewardRows = computed<IronSurvivalRewardRow[]>(() => {
 })
 
 /**
- * 计算某个奖励阈值在当前波次范围内实际生效的波次数量。
+ * 计算某个奖励阈值在「起始等级 ~ 结束等级」半开区间内实际生效的等级档数。
  * @param threshold 当前奖励阈值
- * @returns 生效波次数
+ * @returns 生效档数
  */
-function getRewardRowWaveCount(threshold: number): number {
-    const baseLevel = dungeonBase.value?.lv || 1
-    const startWave = Math.max(1, Math.ceil((threshold - baseLevel) / IRON_SURVIVAL_LEVEL_STEP) + 1)
-    const endWave = selectedWave.value
-
-    if (endWave < startWave) {
+function getRewardRowLevelCount(threshold: number): number {
+    const fromLevel = Math.max(threshold, selectedStartLevel.value)
+    if (selectedEndLevel.value <= fromLevel) {
         return 0
     }
 
-    return endWave - startWave + 1
+    return Math.ceil((selectedEndLevel.value - fromLevel) / IRON_SURVIVAL_LEVEL_STEP)
 }
 
 /**
@@ -243,6 +140,7 @@ function toCumulativeDisplayItems(
     excludeIronTicket = false
 ): CumulativeRewardDisplayItem[] {
     return Array.from(buckets.values())
+        .filter(bucket => formatRewardAmount(bucket.amount) !== 0)
         .filter(bucket => !(excludeIronTicket && bucket.t === "IronTicket"))
         .map(bucket => {
             const finalAmount = formatRewardAmount(bucket.amount)
@@ -280,79 +178,41 @@ const roundsCumulativeRewards = computed<CumulativeRewardDisplayItem[]>(() => {
     }
 
     const buckets = new Map<string, CumulativeRewardBucket>()
-    const currentThreshold = ironSurvivalMonsterLevel.value
 
     rewardRows.value.forEach(row => {
         if (!row.rewardId) {
             return
         }
 
-        if (row.threshold > currentThreshold) {
+        if (row.threshold >= selectedEndLevel.value) {
             return
         }
 
-        const waveCount = getRewardRowWaveCount(row.threshold)
-        if (waveCount <= 0) {
+        const levelCount = getRewardRowLevelCount(row.threshold)
+        if (levelCount <= 0) {
             return
         }
 
-        collectRewardExpectationBucketsFromReward(row.rewardId, buckets, waveCount * IRON_SURVIVAL_REWARD_BATCH_COUNT)
+        collectRewardExpectationBucketsFromReward(row.rewardId, buckets, levelCount * IRON_SURVIVAL_REWARD_BATCH_COUNT)
     })
 
     return toCumulativeDisplayItems(buckets)
 })
 
-const ironTicketExpectationCache = new Map<number, number>()
-
 /**
- * 计算单个奖励组展开后罗盘（IronTicket）的总掉落期望。
- * @param rewardId 奖励组ID
- * @returns 罗盘掉落期望数量
- */
-function getIronTicketExpectation(rewardId: number): number {
-    const cached = ironTicketExpectationCache.get(rewardId)
-    if (cached !== undefined) {
-        return cached
-    }
-
-    const buckets = new Map<string, CumulativeRewardBucket>()
-    collectRewardExpectationBucketsFromReward(rewardId, buckets)
-    const expectation = Array.from(buckets.values()).reduce((sum, bucket) => sum + (bucket.t === "IronTicket" ? bucket.amount : 0), 0)
-    ironTicketExpectationCache.set(rewardId, expectation)
-    return expectation
-}
-
-/**
- * 复利累计奖励：每波正常打一次，同时将掉落罗盘（等级为下一波等级）继续投入下一波，
- * 逐波递归，直到达到当前设定波次等级。
- * 第 w 波被打次数 Q_w 满足 Q_{w+1} = 1 + Q_w × t_w（t_w 为该波打一次的罗盘掉落期望）。
+ * 复利累计奖励：起始档投入 1 趟，波次等级逐档递增，每一趟打到 L 档时掉落罗盘（等级为下一档）
+ * 继续投入下一档开新趟，且该趟本身也推进到下一档，逐档复投直到结束等级（不含）。
+ * 第 L 档被打次数 Q_L 满足 Q_{start} = 1、Q_{L+5} = Q_L × (1 + t_L)。
  * 罗盘项保留展示，数量为复利路径下含再投资产生的总期望。
  */
 const compoundCumulativeRewards = computed<CumulativeRewardDisplayItem[]>(() => {
-    const buckets = new Map<string, CumulativeRewardBucket>()
-    const baseLevel = dungeonBase.value?.lv || 1
-    const maxLevel = ironSurvivalMonsterLevel.value
-    let playCount = 1
-
-    for (let wave = 1; ; wave++) {
-        const level = baseLevel + (wave - 1) * IRON_SURVIVAL_LEVEL_STEP
-        if (level > maxLevel) {
-            break
-        }
-
-        const rows = rewardRows.value.filter(row => row.threshold <= level)
-        if (!rows.length) {
-            continue
-        }
-
-        let waveTicket = 0
-        for (const row of rows) {
-            collectRewardExpectationBucketsFromReward(row.rewardId, buckets, playCount * IRON_SURVIVAL_REWARD_BATCH_COUNT)
-            waveTicket += getIronTicketExpectation(row.rewardId)
-        }
-        playCount = 1 + playCount * waveTicket
-    }
-
+    const buckets = computeCompoundCumulativeBuckets(
+        rewardRows.value,
+        selectedStartLevel.value,
+        selectedEndLevel.value,
+        IRON_SURVIVAL_LEVEL_STEP,
+        IRON_SURVIVAL_REWARD_BATCH_COUNT
+    )
     return toCumulativeDisplayItems(buckets)
 })
 
@@ -396,7 +256,7 @@ const rewardRowDetails = computed(() => {
                         <span class="text-xs text-base-content/70">复利</span>
                         <input v-model="useCompoundReward" type="checkbox" class="checkbox checkbox-xs" />
                     </label>
-                    <span class="text-xs text-base-content/70">Lv.{{ ironSurvivalMonsterLevel }} 及以下</span>
+                    <span class="text-xs text-base-content/70">Lv.{{ ironSurvivalStartMonsterLevel }} ~ Lv.{{ ironSurvivalEndMonsterLevel }}</span>
                 </div>
             </div>
             <div v-if="displayedCumulativeRewards.length" class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
@@ -453,6 +313,10 @@ const rewardRowDetails = computed(() => {
             </div>
         </div>
 
-        <DBIronSurvivalSpawn v-if="dungeon && !hideTitle" :dungeon-id="props.dungeonId" :wave="wave" />
+        <DBIronSurvivalSpawn
+            v-if="dungeon && !hideTitle"
+            :dungeon-id="props.dungeonId"
+            :wave="Math.max(1, Math.round((selectedEndLevel - baseMonsterLevel) / IRON_SURVIVAL_LEVEL_STEP))"
+        />
     </div>
 </template>

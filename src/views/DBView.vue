@@ -434,7 +434,7 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
     <ScrollArea class="h-full">
         <div class="mx-auto flex min-h-full w-full max-w-7xl flex-col px-4 md:px-6 lg:px-8">
             <!-- 检索带：下划线输入 + 搜索范围方章 -->
-            <section class="db-rise border-b border-base-content/15 py-8" style="animation-delay: 0.06s">
+            <section class="db-rise relative z-40 border-b border-base-content/15 py-8" style="animation-delay: 0.06s">
                 <div class="flex flex-col gap-4">
                     <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-10">
                         <DBGlobalSearchAutocomplete

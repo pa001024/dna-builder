@@ -115,7 +115,9 @@ onMounted(() => {
             <div class="text-sm font-medium">
                 评论 <span class="opacity-60">({{ comments.length }})</span>
             </div>
-            <button class="btn btn-ghost btn-xs" type="button" @click="loadComments">刷新</button>
+            <button class="btn btn-ghost btn-xs" type="button" @click="loadComments">
+                <Icon icon="ri:refresh-line" />
+            </button>
         </div>
 
         <div class="flex items-center gap-2">
@@ -136,25 +138,21 @@ onMounted(() => {
         <div v-else-if="!comments.length" class="py-2 text-xs opacity-60">暂无评论，快来抢沙发～</div>
         <div v-else class="space-y-3">
             <div v-for="comment in comments" :key="comment.id" class="flex gap-2.5">
-                <div class="avatar placeholder">
-                    <div class="w-8 rounded-full bg-base-300 text-xs text-base-content/70">
-                        <span>{{ (comment.user?.name || "?")[0] }}</span>
-                    </div>
-                </div>
+                <QQAvatar class="w-8" :qq="comment.user?.qq" />
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium">{{ comment.user?.name || "匿名" }}</span>
                         <span class="text-[10px] opacity-50">{{ formatRelativeTime(comment.createdAt, i18next.language) }}</span>
                         <button
                             v-if="canDelete(comment)"
-                            class="btn btn-ghost btn-xs ml-auto shrink-0 opacity-60 hover:opacity-100"
+                            class="btn btn-ghost btn-xs btn-square ml-auto shrink-0 opacity-60 hover:opacity-100"
                             type="button"
                             @click="removeComment(comment)"
                         >
-                            删除
+                            <Icon icon="ri:delete-bin-line" />
                         </button>
                     </div>
-                    <div class="mt-0.5 break-words text-sm leading-relaxed">{{ comment.content }}</div>
+                    <div class="mt-0.5 wrap-break-word text-sm leading-relaxed">{{ comment.content }}</div>
                 </div>
             </div>
         </div>

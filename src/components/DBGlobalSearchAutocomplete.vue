@@ -126,7 +126,7 @@ function handleBlur() {
 
         <div
             v-if="isOpen && modelValue.trim()"
-            class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg overflow-hidden"
+            class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-base-100/40 border border-base-300 rounded-lg shadow-lg overflow-hidden backdrop-blur-md"
             :class="props.panelClass"
         >
             <div v-if="!visibleOptions.length" class="px-3 py-4 text-sm text-base-content/60 text-center">
