@@ -31,7 +31,7 @@ const buffData: Buff[] = [
     {
         名称: "权火将熄5熔",
         描述: "处于[烈火焚身]效果时，自身近战同律武器的暴击率、暴击伤害、触发概率获得提升。数值为权火将熄对应属性的25.0%。",
-        code: "if(skillWeaponAttr){skillWeaponAttr.暴击+=meleeWeaponAttr.暴击*0.25;skillWeaponAttr.暴伤+=meleeWeaponAttr.暴伤*0.25;skillWeaponAttr.触发+=meleeWeaponAttr.触发*0.25;}",
+        code: "if(skillWeaponAttr){skillWeaponAttr.暴击+=(skillWeapon.基础暴击*(meleeMods.暴击||0)*0.25);skillWeaponAttr.暴伤+=(skillWeapon.基础暴伤*(meleeMods.暴伤||0)*0.25);skillWeaponAttr.触发+=(skillWeapon.基础触发*(meleeMods.触发||0)*0.25);}",
     },
     {
         名称: "反转",

@@ -711,9 +711,11 @@ export class CharBuild {
         if (nocode) return attrs
         if (this.dynamicBuffs.length > 0) {
             const all = this.getAllWeaponsAttrs()
+            // 惰性 MOD 原始属性：仅当 BUFF code 实际访问对应槽位时才汇总
+            const modAttrs = this.getModAttrs()
             if (this.dynamicBuffs.length > 0) {
                 for (const b of this.dynamicBuffs) {
-                    const { weapon, ...rest } = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all, this.enemy)
+                    const { weapon, ...rest } = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all, this.enemy, modAttrs)
                     attrs = rest
                 }
             }
@@ -902,9 +904,11 @@ export class CharBuild {
         if (this.dynamicBuffs.length > 0) {
             // TODO: 没做其他武器属性的code计算, 可能有问题 不过递归太多次也很麻烦
             const all = this.getAllWeaponsAttrs(weapon, attrs.weapon)
+            // 惰性 MOD 原始属性：仅当 BUFF code 实际访问对应槽位时才汇总
+            const modAttrs = this.getModAttrs()
             if (this.dynamicBuffs.length > 0) {
                 for (const b of this.dynamicBuffs) {
-                    attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all, this.enemy)
+                    attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all, this.enemy, modAttrs)
                 }
             }
         }
@@ -1177,6 +1181,45 @@ export class CharBuild {
             })
 
         return bonus
+    }
+
+    /**
+     * 统计各装备槽位 MOD 的原始属性加成总和（惰性求值）。
+     * 返回带惰性 getter 的对象：仅当动态 BUFF 的 code 实际访问对应槽位（如 meleeMods.暴击）时才汇总，
+     * 未被访问的槽位不产生任何计算，避免算力浪费。
+     * 仅汇总 MOD 区（魔之楔词条）自身的加成，不含 BUFF、角色基础值或武器基础值，
+     * 因此结果不会被其他 BUFF（如[色散成霓]的暴击加成）影响。
+     * 属性为不可枚举 accessor，防止返回值展开/解构时被误触发。
+     * @returns 各槽位（角色/近战/远程/同律）的 MOD 属性总和（惰性求值）
+     */
+    public getModAttrs() {
+        const slots: Record<string, (LeveledMod | null)[]> = {
+            charMods: this.charMods,
+            meleeMods: this.meleeMods,
+            rangedMods: this.rangedMods,
+            skillMods: this.skillMods,
+        }
+        const lazy: Record<string, Record<string, number>> = {}
+        for (const [slot, mods] of Object.entries(slots)) {
+            let cached: Record<string, number> | undefined
+            Object.defineProperty(lazy, slot, {
+                enumerable: false,
+                configurable: false,
+                get() {
+                    if (!cached) {
+                        cached = {}
+                        for (const mod of mods) {
+                            if (!mod) continue
+                            for (const [key, value] of Object.entries(mod.addAttr)) {
+                                if (typeof value === "number") cached[key] = (cached[key] || 0) + value
+                            }
+                        }
+                    }
+                    return cached
+                },
+            })
+        }
+        return lazy
     }
 
     // 获取总加成

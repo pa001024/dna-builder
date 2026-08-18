@@ -202,6 +202,59 @@ describe("DynamicBuff", () => {
 
         expect(attrs.技能威力).toBe(3)
     })
+
+    it("applyDynamicAttr 支持读取原始 MOD 属性总和（不受 BUFF 影响）", () => {
+        const buff = new LeveledBuff({
+            名称: "测试读取原始MOD效果",
+            描述: "测试用动态属性",
+            code: "技能威力+=meleeMods.暴击+charMods.技能伤害,攻击+=skillMods.触发",
+        })
+        const char = new LeveledChar("妮弗尔夫人")
+        // 构造各槽位原始 MOD 属性总和，模拟 CharBuild.getModAttrs() 的输出
+        const modAttrs = {
+            charMods: { 技能伤害: 0.2 },
+            meleeMods: { 暴击: 1, 暴伤: 1.5, 触发: 0.5 },
+            rangedMods: { 攻击: 0.75 },
+            skillMods: { 触发: 0.3 },
+        }
+        let attrs: CharAttr = {
+            攻击: 1,
+            生命: 1,
+            护盾: 1,
+            防御: 1,
+            神智: 1,
+            技能威力: 1,
+            技能耐久: 1,
+            技能效益: 1,
+            技能范围: 1,
+            昂扬: 1,
+            背水: 1,
+            增伤: 1,
+            武器伤害: 1,
+            技能伤害: 1,
+            独立增伤: 1,
+            属性穿透: 1,
+            无视防御: 1,
+            技能无视防御: 1,
+            技能速度: 1,
+            失衡易伤: 1,
+            技能倍率加数: 1,
+            召唤物属性继承比例: 1,
+            召唤物攻击速度: 1,
+            召唤物范围: 1,
+            召唤物伤害: 1,
+            减伤: 1,
+            技能倍率赋值: 0,
+            技能倍率乘数: 1,
+            有效生命: 1,
+        }
+
+        attrs = buff.applyDynamicAttr(char, attrs, [], undefined, undefined, modAttrs)
+
+        // meleeMods.暴击(1) + charMods.技能伤害(0.2) 加到技能威力，skillMods.触发(0.3) 加到攻击
+        expect(attrs.技能威力).toBe(2.2)
+        expect(attrs.攻击).toBe(1.3)
+    })
 })
 // 测试LeveledBuff类
 describe("LeveledBuff类测试", () => {

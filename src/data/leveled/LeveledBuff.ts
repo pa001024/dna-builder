@@ -95,49 +95,57 @@ export class LeveledBuff implements Buff {
      * @param weapon 武器
      * @param weaponAttrs 武器属性
      * @param enemy 目标怪物
+     * @param modAttrs 各槽位 MOD 原始属性总和（读取原始 MOD 效果，不受 BUFF 影响）
      */
     applyDynamicAttr(
         char: LeveledChar,
         attrs: CharAttr,
         weapons: (LeveledWeapon | LeveledSkillWeapon | undefined)[],
         wAttrs?: (WeaponAttr | undefined)[],
-        enemy?: LeveledMonster
+        enemy?: LeveledMonster,
+        modAttrs?: Record<string, Record<string, number>>
     ): ReturnType<CharBuild["calculateWeaponAttributes"]> {
         const [weapon, meleeWeapon, rangedWeapon, skillWeapon] = weapons
         const [weaponAttr, meleeWeaponAttr, rangedWeaponAttr, skillWeaponAttr] = wAttrs || []
-        const sandbox = {
+        const sandbox: Record<string, any> = {
             ...attrs,
-            char: { attack: char.基础攻击, health: char.基础生命, shield: char.基础护盾, defense: char.基础防御, sanity: char.基础神智 },
+            char: {
+                基础攻击: char.基础攻击,
+                基础生命: char.基础生命,
+                基础护盾: char.基础护盾,
+                基础防御: char.基础防御,
+                基础神智: char.基础神智,
+            },
             weapon: weapon
                 ? {
-                      attack: weapon.基础攻击,
-                      critRate: weapon.基础暴击,
-                      critDamage: weapon.基础暴伤,
-                      triggerRate: weapon.基础触发,
+                      基础攻击: weapon.基础攻击,
+                      基础暴击: weapon.基础暴击,
+                      基础暴伤: weapon.基础暴伤,
+                      基础触发: weapon.基础触发,
                   }
                 : undefined,
             meleeWeapon: meleeWeapon
                 ? {
-                      attack: meleeWeapon.基础攻击,
-                      critRate: meleeWeapon.基础暴击,
-                      critDamage: meleeWeapon.基础暴伤,
-                      triggerRate: meleeWeapon.基础触发,
+                      基础攻击: meleeWeapon.基础攻击,
+                      基础暴击: meleeWeapon.基础暴击,
+                      基础暴伤: meleeWeapon.基础暴伤,
+                      基础触发: meleeWeapon.基础触发,
                   }
                 : undefined,
             rangedWeapon: rangedWeapon
                 ? {
-                      attack: rangedWeapon.基础攻击,
-                      critRate: rangedWeapon.基础暴击,
-                      critDamage: rangedWeapon.基础暴伤,
-                      triggerRate: rangedWeapon.基础触发,
+                      基础攻击: rangedWeapon.基础攻击,
+                      基础暴击: rangedWeapon.基础暴击,
+                      基础暴伤: rangedWeapon.基础暴伤,
+                      基础触发: rangedWeapon.基础触发,
                   }
                 : undefined,
             skillWeapon: skillWeapon
                 ? {
-                      attack: skillWeapon.基础攻击,
-                      critRate: skillWeapon.基础暴击,
-                      critDamage: skillWeapon.基础暴伤,
-                      triggerRate: skillWeapon.基础触发,
+                      基础攻击: skillWeapon.基础攻击,
+                      基础暴击: skillWeapon.基础暴击,
+                      基础暴伤: skillWeapon.基础暴伤,
+                      基础触发: skillWeapon.基础触发,
                   }
                 : undefined,
             weaponAttr,
@@ -145,7 +153,11 @@ export class LeveledBuff implements Buff {
             rangedWeaponAttr,
             skillWeaponAttr,
             enemy,
-        } as any
+        }
+        // 惰性注入各槽位 MOD 原始属性总和：accessor 不可枚举，仅当 code 实际访问（如 meleeMods.暴击）时才触发计算
+        if (modAttrs) {
+            Object.defineProperties(sandbox, Object.getOwnPropertyDescriptors(modAttrs))
+        }
         const func = new Function("attr", `with(attr){${this.code};return attr}`)
         let result = null
         try {

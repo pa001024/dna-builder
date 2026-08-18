@@ -349,6 +349,51 @@ describe("CharBuild类测试", () => {
         expect(meleeWeaponAttrs2!.暴击).toBeCloseTo(基础暴击 * 3, 1)
     })
 
+    it("权火将熄5熔按近战MOD原始属性25%提升同律武器，且不受BUFF影响", () => {
+        // 贝蕾妮卡拥有同律近战武器「伊弥尔」
+        const makeBuild = (buffs: string[]) =>
+            new CharBuild({
+                char: new LeveledChar("贝蕾妮卡"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                meleeMods: [new LeveledMod(42002)], // 专注：暴击1.0（相对值）
+                rangedMods: [],
+                skillMods: [],
+                buffs: buffs.map(name => new LeveledBuff(name, name === "色散成霓" ? 10 : undefined)),
+                melee: new LeveledWeapon(10399), // 权火将熄
+                ranged: new LeveledWeapon(20601),
+                baseName: "普通攻击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+
+        const skillWeaponCrit = (build: CharBuild) => build.calculateWeaponAttributes(build.skillWeapon).weapon?.暴击 ?? 0
+        const baseCrit = skillWeaponCrit(makeBuild([]))
+        const skillBaseCrit = makeBuild([]).skillWeapon!.基础暴击
+
+        // 原始MOD区加成：近战MOD专注提供100%暴击1.0（相对值）
+        expect(makeBuild([]).getModAttrs().meleeMods.暴击).toBeCloseTo(1, 10)
+
+        // 权火将熄5熔：最终暴击增加量 = 同律基础暴击 × 近战MOD暴击 × 25%
+        const expectedIncrease = skillBaseCrit * 1 * 0.25
+        const qhBuild = makeBuild([])
+        qhBuild.dynamicBuffs.push(new LeveledBuff("权火将熄5熔"))
+        expect(skillWeaponCrit(qhBuild)).toBeCloseTo(baseCrit + expectedIncrease, 10)
+
+        // 色散成霓BUFF提高近战/同律武器暴击，但不应影响权火将熄5熔读取的原始MOD值
+        const snBuild = makeBuild(["色散成霓"])
+        const bothBuild = makeBuild(["色散成霓"])
+        bothBuild.dynamicBuffs.push(new LeveledBuff("权火将熄5熔"))
+        const marginalWithoutSn = skillWeaponCrit(qhBuild) - baseCrit
+        const marginalWithSn = skillWeaponCrit(bothBuild) - skillWeaponCrit(snBuild)
+        expect(marginalWithSn).toBeCloseTo(marginalWithoutSn, 10)
+        expect(marginalWithSn).toBeCloseTo(expectedIncrease, 10)
+    })
+
     it("应该将近战武器普通攻击替换为技能替换MOD中的字段", () => {
         const charBuild = new CharBuild({
             char: new LeveledChar("黎瑟"),
