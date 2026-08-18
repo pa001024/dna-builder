@@ -281,10 +281,10 @@ function getDisplayBuff(buff: LeveledBuff) {
     <div class="space-y-3">
         <div class="flex flex-wrap items-center gap-2">
             <input v-model="searchKeyword" type="search" class="input input-bordered input-sm flex-1 min-w-48" placeholder="搜索BUFF" />
-            <button class="btn btn-sm" title="复制BUFF" @click="copySelectedBuffs">
+            <button class="btn btn-ghost btn-sm" title="复制BUFF" @click="copySelectedBuffs">
                 <Icon icon="ri:file-copy-line" class="size-4" />
             </button>
-            <button class="btn btn-sm" title="粘贴BUFF" @click="pasteBuffs">
+            <button class="btn btn-ghost btn-sm" title="粘贴BUFF" @click="pasteBuffs">
                 <Icon icon="ri:clipboard-line" class="size-4" />
             </button>
         </div>

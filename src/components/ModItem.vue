@@ -3,39 +3,47 @@ import { computed, ref } from "vue"
 import { CharBuild, LeveledMod } from "../data"
 import { format100r } from "../util"
 
-function getQualityColor(quality: string): string {
-    // 实现根据品质返回颜色类名的逻辑
+/**
+ * 根据品质返回右上角斜切楔形的背景色，用于区分稀有度。
+ * @param quality 品质（金/紫/蓝/绿/白）
+ * @returns 楔形背景色类名
+ */
+function getQualityWedgeColor(quality: string): string {
     switch (quality) {
         case "金":
-            return "border-yellow-500"
+            return "bg-yellow-400"
         case "紫":
-            return "border-purple-500"
+            return "bg-purple-500"
         case "蓝":
-            return "border-blue-500"
+            return "bg-blue-500"
         case "绿":
-            return "border-green-500"
+            return "bg-green-500"
         case "白":
-            return "border-gray-400"
+            return "bg-gray-300"
         default:
-            return ""
+            return "bg-base-content/30"
     }
 }
 
+/**
+ * 根据品质返回卡片 hover 边框色（与角色列表卡片按元素强调一致，此处按稀有度）。
+ * @param quality 品质（金/紫/蓝/绿/白）
+ * @returns hover 边框类名
+ */
 function getQualityHoverBorder(quality: string): string {
-    // 实现根据品质返回 hover 边框颜色类名的逻辑
     switch (quality) {
         case "金":
-            return "hover:border-yellow-400"
+            return "hover:border-yellow-500/70"
         case "紫":
-            return "hover:border-purple-400"
+            return "hover:border-purple-500/70"
         case "蓝":
-            return "hover:border-blue-400"
+            return "hover:border-blue-500/70"
         case "绿":
-            return "hover:border-green-400"
+            return "hover:border-green-500/70"
         case "白":
-            return "hover:border-gray-300"
+            return "hover:border-gray-400/70"
         default:
-            return "hover:border-gray-400"
+            return "hover:border-base-content/40"
     }
 }
 
@@ -164,96 +172,119 @@ function handleMouseUp(event: MouseEvent) {
 }
 </script>
 <template>
+    <!-- 方形卡片：固定高度（aspect-square），底部信息半透明叠加，hover 无位移动画，避免闪烁 -->
     <div
-        class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors duration-200 cursor-pointer group"
-        :class="[mod ? getQualityColor(mod.品质) : 'border-dashed border-gray-600', getQualityHoverBorder(mod?.品质!)]"
+        class="group relative flex aspect-square w-full cursor-pointer items-center justify-center rounded-xs border bg-base-200/60 backdrop-blur-sm transition-colors duration-200"
+        :class="[mod ? ['border-base-content/15', getQualityHoverBorder(mod.品质)] : 'border-dashed border-base-content/25']"
         :style="dragStyle"
         :data-index="index"
         @mousedown="handleMouseDown"
     >
-        <div class="relative w-full h-full flex items-center justify-center">
-            <ShowProps
-                v-if="mod"
-                :link="`/db/mod/${mod.id}`"
-                :props="mod.getProperties()"
-                :title="`${$t(mod.系列)}${$t(mod.名称)}`"
-                :rarity="mod.品质"
-                :polarity="mod.极性"
-                :cost="mod.耐受"
-                :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
-                :effdesc="mod.效果"
-                :eff="charBuild?.checkModEffective(mod) || mod.getCondition()"
-            >
-                <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">
-                    <!-- 背景 -->
-                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <img class="object-cover w-full h-full" :src="mod.url" :alt="mod.名称" />
-                    </div>
-                    <div class="absolute top-2 left-2 text-xs pointer-events-none flex items-center" :class="{ 'text-green-500': polset }">
-                        <Icon v-if="mod.极性" class="inline-block" :icon="`po-${mod.极性 as 'A' | 'D' | 'V' | 'O'}`" />
-                        {{ polset ? Math.ceil(mod.耐受 / 2) : mod.耐受 }}
-                    </div>
-                    <!-- MOD名称 -->
-                    <div class="relative mt-auto w-full bg-base-content/30 z-10 text-left p-2">
-                        <div class="text-base-100 text-sm font-bold mb-1 flex items-center">
-                            <Icon v-if="selected" icon="ri:checkbox-circle-fill" class="inline-block mr-1 text-green-500" />
-                            {{ $t(mod.名称) }}
-                        </div>
-                        <div class="relative">
-                            <div
-                                v-if="control && (selected || selected === undefined)"
-                                class="text-base-300 text-xs pb-4"
-                                :class="[count && !nolv ? 'group-hover:pb-16' : 'group-hover:pb-8']"
-                            >
-                                <NumberInput
-                                    v-if="!nolv"
-                                    class="absolute w-full max-h-0 group-hover:max-h-20"
-                                    :model-value="mod.等级"
-                                    :min="0"
-                                    :max="mod.maxLevel"
-                                    :step="1"
-                                    @update:model-value="emit('lvChange', $event)"
-                                />
-                                <NumberInput
-                                    v-if="count"
-                                    class="absolute w-full max-h-0 group-hover:max-h-20"
-                                    :class="{ 'mt-8': !nolv }"
-                                    :model-value="count"
-                                    :min="1"
-                                    :max="8"
-                                    :step="1"
-                                    @update:model-value="emit('countChange', $event)"
-                                />
-                                <div class="absolute w-full flex justify-between max-h-20 overflow-hidden group-hover:max-h-0">
-                                    <div class="text-base-300 text-xs">Lv.{{ mod.等级 }}</div>
-                                    <div v-if="income" class="text-base-300 text-xs">
-                                        {{ format100r(income, 1) }}
-                                    </div>
-                                    <div v-if="count" class="text-base-300 text-xs">x {{ count }}</div>
-                                </div>
-                            </div>
-                            <div v-else class="flex justify-between">
-                                <div class="text-base-300 text-xs">
-                                    {{ control && selected !== undefined && !nolv ? $t("未拥有") : `Lv.${mod.等级}` }}
-                                </div>
-                                <div v-if="income" class="text-base-300 text-xs">
-                                    {{ format100r(income, 1) }}
-                                </div>
-                                <div v-if="count" class="text-base-300 text-xs">x{{ count }}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 删除按钮 -->
-                    <button
-                        v-if="!noremove"
-                        class="absolute cursor-pointer -top-2 -right-2 w-5 h-5 bg-red-400 bg-opacity-50 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors duration-200"
-                        @click.stop="emit('removeMod')"
-                    >
-                        <span class="text-white text-xs">×</span>
-                    </button>
+        <ShowProps
+            v-if="mod"
+            :link="`/db/mod/${mod.id}`"
+            :props="mod.getProperties()"
+            :title="`${$t(mod.系列)}${$t(mod.名称)}`"
+            :rarity="mod.品质"
+            :polarity="mod.极性"
+            :cost="mod.耐受"
+            :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
+            :effdesc="mod.效果"
+            :eff="charBuild?.checkModEffective(mod) || mod.getCondition()"
+        >
+            <div class="relative h-full w-full overflow-hidden rounded-xs">
+                <!-- MOD 图 -->
+                <img class="h-full w-full object-cover" :src="mod.url" :alt="mod.名称" />
+                <!-- 悬停遮罩 -->
+                <div class="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/15" />
+                <!-- 极性 + 耐受 -->
+                <div class="pointer-events-none absolute top-2 left-2 z-10 flex items-center text-xs" :class="{ 'text-green-500': polset }">
+                    <Icon v-if="mod.极性" class="inline-block" :icon="`po-${mod.极性 as 'A' | 'D' | 'V' | 'O'}`" />
+                    {{ polset ? Math.ceil(mod.耐受 / 2) : mod.耐受 }}
                 </div>
-            </ShowProps>
-            <div v-else class="text-gray-500">+</div>
+
+                <!-- 底部信息条：半透明叠加，固定高度（hover 等级控件原地覆盖，不撑高） -->
+                <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-base-100/25 px-2 py-2 backdrop-blur-sm">
+                    <!-- 名称 -->
+                    <div class="flex items-center gap-1 text-sm leading-tight font-bold text-base-content/80">
+                        <Icon v-if="selected" icon="ri:checkbox-circle-fill" class="shrink-0 text-green-500" />
+                        <span class="truncate">{{ $t(mod.名称) }}</span>
+                    </div>
+                    <!-- 状态行：固定高度 -->
+                    <div class="relative h-6 text-xs leading-8 text-base-content/80">
+                        <div
+                            class="absolute inset-0 flex items-center justify-between gap-1"
+                            :class="
+                                control && (selected || selected === undefined)
+                                    ? 'transition-opacity duration-200 group-hover:opacity-0'
+                                    : ''
+                            "
+                        >
+                            <span class="truncate">
+                                {{ control && selected !== undefined && !nolv ? $t("未拥有") : `Lv.${mod.等级}` }}
+                            </span>
+                            <span v-if="income" class="shrink-0">{{ format100r(income, 1) }}</span>
+                            <span v-if="count" class="shrink-0">×{{ count }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 悬停等级/数量输入：绝对定位叠加于底部，不撑高 -->
+                <div
+                    v-if="control && (selected || selected === undefined)"
+                    class="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-0.5 bg-base-100/25 px-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                >
+                    <NumberInput
+                        v-if="!nolv"
+                        class="scale-90"
+                        :model-value="mod.等级"
+                        :min="0"
+                        :max="mod.maxLevel"
+                        :step="1"
+                        @update:model-value="emit('lvChange', $event)"
+                    />
+                    <NumberInput
+                        v-if="count"
+                        class="scale-90"
+                        :model-value="count"
+                        :min="1"
+                        :max="8"
+                        :step="1"
+                        @update:model-value="emit('countChange', $event)"
+                    />
+                </div>
+            </div>
+        </ShowProps>
+
+        <!-- 空槽位：虚线占位 -->
+        <div v-else class="flex h-full w-full items-center justify-center text-base-content/40">
+            <Icon icon="ri:add-line" class="h-8 w-8" />
         </div>
+
+        <!-- 稀有度斜切楔形（右上角，颜色区分品质） -->
+        <span
+            v-if="mod"
+            class="pointer-events-none absolute top-0 right-0 z-10 h-8 w-8 [clip-path:polygon(100%_0,100%_100%,0_0)]"
+            :class="getQualityWedgeColor(mod.品质)"
+            aria-hidden="true"
+        />
+
+        <!-- 删除判定区：比可视楔形更大的命中区，hover 时右上角变红，点击删除 -->
+        <button
+            v-if="mod && !noremove"
+            type="button"
+            class="group/rm absolute -top-3 -right-3 z-30 h-14 w-14 cursor-pointer"
+            :title="$t('common.delete')"
+            @click.stop="emit('removeMod')"
+        >
+            <!-- hover 时右上角变红（覆盖稀有度楔形） -->
+            <span
+                class="pointer-events-none absolute top-3 right-3 h-8 w-8 bg-red-500 opacity-0 transition-opacity duration-200 group-hover/rm:opacity-90 [clip-path:polygon(100%_0,100%_100%,0_0)]"
+            />
+            <Icon
+                icon="ri:close-line"
+                class="pointer-events-none absolute top-4 right-4 h-4 w-4 text-white opacity-0 transition-opacity duration-200 group-hover/rm:opacity-100"
+            />
+        </button>
     </div>
 </template>

@@ -304,8 +304,8 @@ defineExpose({
 <template>
     <div class="h-full flex flex-col">
         <!-- 搜索和筛选栏 -->
-        <div class="p-3">
-            <div class="flex gap-2 flex-wrap">
+        <div class="p-2">
+            <div class="flex flex-wrap gap-2 rounded-xs border border-base-content/10 bg-base-100/70 p-2.5 backdrop-blur-sm">
                 <input
                     v-model="searchKeyword"
                     type="text"
@@ -339,18 +339,19 @@ defineExpose({
 
             <div v-else class="p-2 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
                 <div
-                    v-for="build in builds"
+                    v-for="(build, index) in builds"
                     :key="build.id"
-                    class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-200 border border-base-200"
+                    class="group flex flex-col rounded-xs border border-base-content/10 bg-base-100/60 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-lg animate-ef-rise motion-reduce:animate-none"
+                    :style="{ animationDelay: `${Math.min(index * 40, 400)}ms` }"
                 >
-                    <div class="card-body p-4">
+                    <div class="flex flex-1 flex-col p-4">
                         <!-- 标题和标签 -->
                         <div class="flex items-start justify-between mb-2">
                             <a
                                 :href="`${env.endpoint}/char/${charId}/${build.id}`"
                                 title="点击复制链接"
                                 @click.prevent="copyLink(`${env.endpoint}/char/${charId}/${build.id}`)"
-                                class="card-title text-base line-clamp-2 flex-1 link"
+                                class="line-clamp-2 flex-1 text-base font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
                             >
                                 {{ build.title }}
                             </a>
@@ -392,12 +393,12 @@ defineExpose({
                         <!-- 统计信息 -->
                         <div class="flex items-center justify-between text-xs text-base-content/50 mb-3">
                             <div class="flex items-center gap-3">
-                                <div class="flex items-center gap-1">
+                                <div class="flex items-center gap-1 font-orbitron tabular-nums">
                                     <Icon icon="ri:eye-line" class="w-4 h-4" />
                                     <span>{{ build.views }}</span>
                                 </div>
                                 <div
-                                    class="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                                    class="flex items-center gap-1 font-orbitron tabular-nums cursor-pointer hover:opacity-80 transition-opacity duration-200"
                                     @click="toggleLike(build)"
                                 >
                                     <Icon
@@ -408,7 +409,7 @@ defineExpose({
                                     <span>{{ build.likes }}</span>
                                 </div>
                             </div>
-                            <span>{{ formatDate(build.updateAt) }}</span>
+                            <span class="font-orbitron tabular-nums">{{ formatDate(build.updateAt) }}</span>
                         </div>
 
                         <!-- 操作按钮 -->
@@ -441,7 +442,7 @@ defineExpose({
             <div class="flex justify-center p-4">
                 <button
                     v-if="builds.length >= LIMIT && builds.length < totalCount"
-                    class="btn btn-sm"
+                    class="btn btn-ghost btn-sm border border-base-content/15"
                     :class="{ 'btn-disabled': loading }"
                     @click="loadMore"
                 >
@@ -452,8 +453,8 @@ defineExpose({
         </ScrollArea>
 
         <!-- 统计栏 -->
-        <div class="p-2 border-t border-base-200 text-center text-xs text-base-content/50">
-            {{ $t("共") }} {{ totalCount }} {{ $t("个构筑") }}
+        <div class="p-2 border-t border-base-content/10 text-center text-xs text-base-content/50">
+            {{ $t("共") }} <span class="font-orbitron tabular-nums">{{ totalCount }}</span> {{ $t("个构筑") }}
         </div>
     </div>
 

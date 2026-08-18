@@ -195,8 +195,7 @@ const rangedWeaponOptions = computed(() => {
 // 状态变量
 const useGlobalEffects = () => charSettings.value.useGlobal
 const effectConfig = () => charSettings.value.effectConfig || {}
-const getBuffLv = (modId: number) =>
-    useGlobalEffects() ? inv.getBuffLv(modId) : getModBuffLvFromSetting(effectConfig(), modId)
+const getBuffLv = (modId: number) => (useGlobalEffects() ? inv.getBuffLv(modId) : getModBuffLvFromSetting(effectConfig(), modId))
 const getWBuffLv = (weaponId: number, elm: string) =>
     useGlobalEffects() ? inv.getWBuffLv(weaponId, elm) : getWBuffLvFromSetting(effectConfig(), weaponId, elm)
 const selectedCharMods = computed(() => {
@@ -1334,19 +1333,30 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
     <div class="h-full flex flex-col relative">
         <!-- 背景图 -->
         <div
-            class="inset-0 absolute opacity-50"
+            class="inset-0 absolute opacity-40"
             :style="{
                 backgroundImage: `url(${charBuild.char.bg})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
             }"
         />
-        <!-- 顶部操作栏 -->
+        <!-- 顶部操作栏（含合并的 header 内容：角色名 + 属性 + 等级） -->
         <div
             data-tour="top-actions"
-            class="sticky top-0 z-1 bg-base-300/50 backdrop-blur-sm rounded-md p-2 sm:p-3 m-1 sm:m-2 shadow-lg border border-base-200"
+            class="sticky top-0 z-1 m-1 sm:m-2 rounded-xs border border-base-content/10 bg-base-100/70 p-2 shadow-lg backdrop-blur-sm sm:p-3"
         >
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-2">
+                <div class="flex min-w-0 items-center gap-2.5 px-1">
+                    <h1 class="font-orbitron text-base font-bold leading-none tracking-tight text-base-content truncate sm:text-lg">
+                        {{ $t(selectedChar) || $t("char-build.title") }}
+                        <span class="text-primary">Build</span>
+                    </h1>
+                    <span v-if="charBuild.char.属性" class="h-4 w-px shrink-0 bg-base-content/40" aria-hidden="true" />
+                    <span v-if="charBuild.char.属性" class="shrink-0 text-xs text-base-content/60 sm:text-sm">
+                        {{ $t(charBuild.char.属性 + "属性") }}
+                    </span>
+                    <span class="shrink-0 text-xs text-base-content/60 tabular-nums sm:text-sm">Lv. {{ charSettings.charLevel }}</span>
+                </div>
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:ml-auto">
                     <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" data-tour="tour-button" @click="tour?.startTour()">
                         <Icon icon="ri:question-line" class="w-4 h-4" />
@@ -1517,19 +1527,15 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <!-- 角色 -->
                     <div
                         v-if="charTab === '角色'"
-                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-3 space-y-3 border border-base-200"
+                        class="rounded-xs border border-base-content/10 bg-base-100/70 backdrop-blur-sm shadow-sm p-3 space-y-3"
                     >
-                        <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2 p-1">
-                            <div class="flex flex-col">
-                                <div class="text-lg font-bold">
-                                    {{ $t(selectedChar) }}
-                                </div>
-                                <div class="text-sm opacity-60">
-                                    {{ $t(charBuild.char.别名 || "") }}
-                                </div>
-                            </div>
-                            <div class="ml-auto flex">Lv. {{ charSettings.charLevel }}</div>
-                        </h3>
+                        <SectionHeader :title="$t(selectedChar) || $t('char-build.title')" no-animate compact>
+                            <template #trailing>
+                                <span class="font-orbitron text-sm font-semibold text-primary tabular-nums"
+                                    >Lv. {{ charSettings.charLevel }}</span
+                                >
+                            </template>
+                        </SectionHeader>
                         <div class="flex items-center gap-2 text-sm p-1">
                             <div class="flex-1">
                                 <input
@@ -1614,18 +1620,19 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <!-- 目标函数 -->
                     <div
                         data-tour="target-function"
-                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
+                        class="rounded-xs border border-base-content/10 bg-base-100/70 backdrop-blur-sm shadow-sm p-3 space-y-3"
                     >
-                        <div class="space-y-2 p-1">
-                            <div class="text-sm flex justify-between">
-                                <div class="flex items-center gap-2">
-                                    {{ isTimeline ? "时间线" : "表达式" }}
-                                    <div class="btn btn-xs text-lg btn-ghost btn-circle" @click="ast_help_model_show = true">
+                        <SectionHeader :title="isTimeline ? $t('时间线') : $t('目标函数')" no-animate compact>
+                            <template #trailing>
+                                <div class="flex items-center gap-1">
+                                    <div class="btn btn-xs btn-ghost btn-circle" @click="ast_help_model_show = true">
                                         <Icon icon="ri:question-line" />
                                     </div>
+                                    <input v-model="isTimeline" type="checkbox" class="toggle toggle-secondary toggle-sm" />
                                 </div>
-                                <input v-model="isTimeline" type="checkbox" class="toggle toggle-secondary" />
-                            </div>
+                            </template>
+                        </SectionHeader>
+                        <div class="space-y-2 p-1">
                             <div v-if="!isTimeline" class="space-y-2">
                                 <div
                                     v-for="(variable, index) in customVariableInputs"
@@ -1727,6 +1734,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 <div class="p-2 space-y-4">
                     <!-- 配装分享 -->
                     <CollapsibleSection
+                        number="01"
+                        kicker="SHARE"
                         :title="$t('char-build.share_build')"
                         :is-open="!collapsedSections.share"
                         lazy
@@ -1741,6 +1750,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     </CollapsibleSection>
                     <!-- 角色详情 -->
                     <CollapsibleSection
+                        number="02"
+                        kicker="PROFILE"
                         :title="$t('dna-role-detail.title')"
                         :is-open="!collapsedSections.detail"
                         lazy
@@ -1751,6 +1762,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     </CollapsibleSection>
                     <!-- 基本设置卡片 -->
                     <CollapsibleSection
+                        number="03"
+                        kicker="SETTINGS"
                         :title="$t('char-build.basic_settings')"
                         :is-open="!collapsedSections.basic"
                         lazy
@@ -1879,6 +1892,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <!-- 角色MOD -->
                     <CollapsibleSection
                         data-tour="char-mods"
+                        number="04"
+                        kicker="MODS"
                         :title="`${$t('魔之楔')} (${charBuild.getModCostMax(charTab)}/${charBuild.getModCap(charTab)})`"
                         :badge="`${charBuild.getModCostTransfer(charTab).length}模块`"
                         :is-open="!collapsedSections.mods"
@@ -1976,6 +1991,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <!-- MODBUFF列表 -->
                     <CollapsibleSection
                         v-if="charBuild.modsWithWeapons.some(v => v.buff)"
+                        number="05"
+                        kicker="EFFECTS"
                         :title="$t('char-build.special_effect_config')"
                         :badge="charBuild.modsWithWeapons.filter(v => v.buff).length"
                         :is-open="!collapsedSections.effects"
@@ -1995,6 +2012,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
                     <!-- BUFF列表 -->
                     <CollapsibleSection
+                        number="06"
+                        kicker="BUFFS"
                         :title="$t('char-build.buff_list')"
                         :badge="selectedBuffs.length"
                         :is-open="!collapsedSections.buffs"
@@ -2002,8 +2021,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         @toggle="toggleSection('buffs')"
                     >
                         <!-- 协战选择 -->
-                        <div class="flex flex-wrap items-center gap-4 my-2 p-3 bg-base-200/50 rounded-lg">
-                            <span class="text-sm font-semibold">{{ $t("char-build.team") }}</span>
+                        <div class="flex flex-wrap items-center gap-4 my-2 p-3 rounded-xs border border-base-content/10 bg-base-200/40">
+                            <span class="text-[13px] font-semibold text-base-content/80">{{ $t("char-build.team") }}</span>
                             <Select v-model="charSettings.team1" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
                                 <template v-for="charWithElm in groupedTeam1Options" :key="charWithElm[0].elm">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">
@@ -2063,17 +2082,16 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     </CollapsibleSection>
 
                     <!-- 自定义BUFF -->
-                    <div
+                    <CustomBuffEditor
                         v-if="selectedBuffs.some(v => v.名称 === '自定义BUFF')"
-                        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden border border-base-200"
-                    >
-                        <div class="p-4">
-                            <CustomBuffEditor :buffs="charSettings.customBuff" @submit="charSettings.customBuff = $event" />
-                        </div>
-                    </div>
+                        :buffs="charSettings.customBuff"
+                        @submit="charSettings.customBuff = $event"
+                    />
 
                     <!-- 动作序列 -->
                     <CollapsibleSection
+                        number="07"
+                        kicker="ACTIONS"
                         :title="$t('char-build.actions')"
                         :is-open="!collapsedSections.actions"
                         lazy
@@ -2084,6 +2102,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
                     <!-- 装配预览 -->
                     <CollapsibleSection
+                        number="08"
+                        kicker="LOADOUT"
                         :title="$t('char-build.equipment_preview')"
                         :is-open="!collapsedSections.preview"
                         lazy

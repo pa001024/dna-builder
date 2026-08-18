@@ -148,7 +148,7 @@ watchEffect(() => {
                     <ResizeableWindowTimers />
                 </div>
                 <!-- fix resize shadow -->
-                <div v-if="env.isApp" class="pointer-events-none flex-none opacity-0 self-start transition-none">
+                <div class="pointer-events-none flex-none opacity-0 self-start transition-none">
                     <div class="flex items-center space-x-2">
                         <button class="btn btn-ghost btn-sm btn-square" type="button" :title="$t('setting.lang')">
                             <Icon bold icon="ri:translate-2" />
@@ -171,14 +171,16 @@ watchEffect(() => {
                                 />
                             </svg>
                         </label>
-                        <button class="btn btn-ghost btn-sm btn-square" />
-                        <button class="btn btn-ghost btn-sm btn-square disabled:bg-transparent" :disabled="!minimizable" />
-                        <button class="btn btn-ghost btn-sm btn-square disabled:bg-transparent" :disabled="!maximizable" />
-                        <button class="btn btn-ghost btn-sm btn-square" />
+                        <template v-if="env.isApp">
+                            <button class="btn btn-ghost btn-sm btn-square" />
+                            <button class="btn btn-ghost btn-sm btn-square disabled:bg-transparent" :disabled="!minimizable" />
+                            <button class="btn btn-ghost btn-sm btn-square disabled:bg-transparent" :disabled="!maximizable" />
+                            <button class="btn btn-ghost btn-sm btn-square" />
+                        </template>
                     </div>
                 </div>
-                <!-- fix resize -->
-                <div v-if="env.isApp" class="pointer-events-none fixed right-1 top-1">
+                <!-- fix resize: 语言/主题切换 App 与 Web 均显示，窗口控制仅 App 显示 -->
+                <div class="pointer-events-none fixed right-1 top-1">
                     <div class="flex pointer-events-auto items-center space-x-2">
                         <button class="btn btn-ghost btn-sm btn-square" type="button" :title="$t('setting.lang')" @click="openLangDialog">
                             <Icon bold icon="ri:translate-2" />
@@ -201,30 +203,32 @@ watchEffect(() => {
                                 />
                             </svg>
                         </label>
-                        <Tooltip side="bottom" :tooltip="alwaysOnTop ? $t('main.btn_unpin_window') : $t('main.btn_pin_window')">
-                            <button class="btn btn-ghost btn-sm btn-square" @click="alwaysOnTop = !alwaysOnTop">
-                                <Icon v-if="alwaysOnTop" bold icon="ri:pushpin-2-fill" />
-                                <Icon v-else bold icon="ri:pushpin-fill" />
+                        <template v-if="env.isApp">
+                            <Tooltip side="bottom" :tooltip="alwaysOnTop ? $t('main.btn_unpin_window') : $t('main.btn_pin_window')">
+                                <button class="btn btn-ghost btn-sm btn-square" @click="alwaysOnTop = !alwaysOnTop">
+                                    <Icon v-if="alwaysOnTop" bold icon="ri:pushpin-2-fill" />
+                                    <Icon v-else bold icon="ri:pushpin-fill" />
+                                </button>
+                            </Tooltip>
+                            <button
+                                class="btn btn-ghost btn-sm btn-square disabled:bg-transparent"
+                                :disabled="!minimizable"
+                                @click="handleMinimize"
+                            >
+                                <Icon bold icon="codicon:chrome-minimize" />
                             </button>
-                        </Tooltip>
-                        <button
-                            class="btn btn-ghost btn-sm btn-square disabled:bg-transparent"
-                            :disabled="!minimizable"
-                            @click="handleMinimize"
-                        >
-                            <Icon bold icon="codicon:chrome-minimize" />
-                        </button>
-                        <button
-                            class="btn btn-ghost btn-sm btn-square disabled:bg-transparent"
-                            :disabled="!maximizable"
-                            @click="handleMaximize"
-                        >
-                            <Icon v-if="!maximized" bold icon="codicon:chrome-maximize" />
-                            <Icon v-else bold icon="codicon:chrome-restore" />
-                        </button>
-                        <button class="btn btn-ghost btn-sm btn-square" @click="handleClose">
-                            <Icon bold icon="codicon:chrome-close" />
-                        </button>
+                            <button
+                                class="btn btn-ghost btn-sm btn-square disabled:bg-transparent"
+                                :disabled="!maximizable"
+                                @click="handleMaximize"
+                            >
+                                <Icon v-if="!maximized" bold icon="codicon:chrome-maximize" />
+                                <Icon v-else bold icon="codicon:chrome-restore" />
+                            </button>
+                            <button class="btn btn-ghost btn-sm btn-square" @click="handleClose">
+                                <Icon bold icon="codicon:chrome-close" />
+                            </button>
+                        </template>
                     </div>
                 </div>
             </div>

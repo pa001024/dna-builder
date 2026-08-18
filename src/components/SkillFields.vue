@@ -154,7 +154,7 @@ onBeforeUnmount(() => {
         <div
             v-for="(field, index) in skillFields"
             :key="index"
-            class="flex flex-col group hover:bg-base-200/50 rounded-md p-2"
+            class="flex flex-col group hover:bg-base-200/40 rounded-xs p-2"
             :class="{
                 'cursor-pointer': selectedIdentifiers,
                 'shadow-md shadow-primary/50 outline-2 outline-primary/60': isIdentifierUsed(field.名称),

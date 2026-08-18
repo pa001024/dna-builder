@@ -167,7 +167,7 @@ const modAttributeBonusSources = computed(() => {
             </div>
         </template>
         <div
-            class="cursor-pointer flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100/60 hover:shadow-md"
+            class="cursor-pointer flex justify-between items-center p-1 px-2 rounded-xs transition-all duration-200 hover:bg-base-100 hover:shadow-sm"
             :class="{
                 'shadow-md shadow-primary/50 text-shadow-sm outline outline-primary': charBuild
                     .getIdentifierNames(charBuild.targetFunction)

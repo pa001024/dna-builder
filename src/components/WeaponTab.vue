@@ -234,27 +234,34 @@ const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
     <!-- 武器 -->
     <div
         v-if="charBuild[`${wkey}Weapon`] && weaponAttrs"
-        class="bg-base-100/50 backdrop-blur-sm rounded-md shadow-md p-4 space-y-3 border border-base-200"
+        class="rounded-xs border border-base-content/10 bg-base-100/70 backdrop-blur-sm shadow-sm p-3 space-y-3"
     >
-        <h3 class="flex items-center gap-4 text-lg font-bold text-base-content/90 mb-2">
-            <div class="flex flex-1 flex-col" data-tour="weapon-select">
-                <div class="text-lg font-bold cursor-pointer" @click="wkey !== 'skill' && openWeaponSelect()">
-                    {{ $t(charBuild[`${wkey}Weapon`]!.名称 || "") }}
-                    <Icon v-if="wkey !== 'skill'" icon="ri:exchange-line" class="inline-block w-5 h-5 text-primary" />
+        <SectionHeader no-animate compact>
+            <template #title>
+                <div class="flex min-w-0 flex-col gap-1" data-tour="weapon-select">
+                    <div
+                        class="flex cursor-pointer items-center gap-1.5 text-[17px] font-semibold text-base-content"
+                        @click="wkey !== 'skill' && openWeaponSelect()"
+                    >
+                        <span class="truncate">{{ $t(charBuild[`${wkey}Weapon`]!.名称 || "") }}</span>
+                        <Icon v-if="wkey !== 'skill'" icon="ri:exchange-line" class="h-4 w-4 shrink-0 text-primary" />
+                    </div>
+                    <Select
+                        v-if="wkey !== 'skill' && !charBuild[`${wkey}Weapon`]._originalWeaponData.熔炉"
+                        v-model="charSettings[`${wkey}WeaponRefine`]"
+                        hidebtn
+                        class="text-sm text-primary"
+                    >
+                        <SelectItem v-for="i in [0, 1, 2, 3, 4, 5]" :key="i" :value="i">{{ $t("精炼") + i }}</SelectItem>
+                    </Select>
                 </div>
-                <Select
-                    v-if="wkey !== 'skill' && !charBuild[`${wkey}Weapon`]._originalWeaponData.熔炉"
-                    v-model="charSettings[`${wkey}WeaponRefine`]"
-                    hidebtn
-                    class="text-sm text-primary"
-                >
-                    <SelectItem v-for="i in [0, 1, 2, 3, 4, 5]" :key="i" :value="i">{{ $t("精炼") + i }}</SelectItem>
-                </Select>
-            </div>
-            <div class="ml-auto flex flex-none">
-                Lv. {{ wkey === "skill" ? charSettings.charLevel : charSettings[`${wkey}WeaponLevel`] }}
-            </div>
-        </h3>
+            </template>
+            <template #trailing>
+                <span class="shrink-0 font-orbitron text-sm font-semibold text-primary tabular-nums">
+                    Lv. {{ wkey === "skill" ? charSettings.charLevel : charSettings[`${wkey}WeaponLevel`] }}
+                </span>
+            </template>
+        </SectionHeader>
         <div class="flex items-center gap-2 text-sm p-1">
             <div class="flex-1">
                 <input

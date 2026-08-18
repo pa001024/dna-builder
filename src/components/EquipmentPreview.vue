@@ -55,7 +55,7 @@ function getWeaponAttackLabelPrefix(key: string) {
 <template>
     <!-- 角色头部信息 -->
     <div class="flex flex-col md:flex-row gap-6 mb-6 mt-2">
-        <div class="relative w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden border-2 border-primary/30 shadow-xl self-start">
+        <div class="relative w-32 h-32 md:w-40 md:h-40 rounded-xs overflow-hidden border-2 border-primary/30 shadow-xl self-start">
             <ImageFallback :src="charBuild.char.url" alt="角色头像" class="w-full h-full object-cover object-top">
                 <Icon icon="ri:question-mark" class="w-full h-full" />
             </ImageFallback>
@@ -69,7 +69,7 @@ function getWeaponAttackLabelPrefix(key: string) {
                     {{ $t(charName) }}
                 </h3>
 
-                <span class="px-4 py-2 rounded-full bg-cyan-500/20 text-cyan-400 text-sm border border-cyan-500/30 font-orbitron"
+                <span class="inline-flex items-center gap-1 rounded-xs bg-primary px-3 py-1 font-orbitron text-sm font-semibold text-primary-content tabular-nums"
                     >LV {{ charBuild.char.等级 }}</span
                 >
             </div>
@@ -84,15 +84,16 @@ function getWeaponAttackLabelPrefix(key: string) {
     <div class="space-y-6">
         <!-- 角色属性 -->
         <div>
-            <h4 class="text-lg font-bold mb-3 flex items-center gap-2">
-                <span>{{ $t("char-build.char_attributes") }}</span>
-                <span class="text-sm text-base-content/50"
-                    >{{ $t("char-build.resonance_gain") }} {{ charSettings.resonanceGain * 100 }}%</span
-                >
-            </h4>
+            <SectionHeader number="01" kicker="STATS" :title="$t('char-build.char_attributes')" no-animate>
+                <template #trailing>
+                    <span class="text-[11px] font-medium text-base-content/50"
+                        >{{ $t("char-build.resonance_gain") }} {{ charSettings.resonanceGain * 100 }}%</span
+                    >
+                </template>
+            </SectionHeader>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
                 <div
-                    class="col-span-2 bg-linear-to-br from-primary/10 to-primary/5 rounded-lg p-3 border border-primary/20 hover:border-primary/40 transition-colors duration-200"
+                    class="col-span-2 rounded-xs bg-linear-to-br from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 p-3 transition-colors duration-200"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
                         {{ charSettings.baseName }} -
@@ -111,7 +112,7 @@ function getWeaponAttackLabelPrefix(key: string) {
                 <div
                     v-for="[key, val] in Object.entries(attributes).filter(([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && v)"
                     :key="key"
-                    class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20 hover:border-secondary/40 transition-colors duration-200"
+                    class="rounded-xs bg-linear-to-br from-secondary/10 to-secondary/5 border border-secondary/20 hover:border-secondary/40 p-3 transition-colors duration-200"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
                         {{ key === "攻击" ? $t(getWeaponAttackLabelPrefix(key)) : "" }}{{ $t(key) }}
@@ -129,14 +130,17 @@ function getWeaponAttackLabelPrefix(key: string) {
 
         <!-- 召唤物属性 -->
         <div v-if="summonAttributes">
-            <h4 class="text-lg font-bold mb-3">
-                {{ summonAttributes.find(p => p.名称 === "召唤物名称")?.格式 || "召唤物" }}
-            </h4>
+            <SectionHeader
+                number="02"
+                kicker="SUMMON"
+                :title="summonAttributes.find(p => p.名称 === '召唤物名称')?.格式 || '召唤物'"
+                no-animate
+            />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
                 <div
                     v-for="prop in summonAttributes.filter(p => p.值)"
                     :key="prop.名称"
-                    class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20"
+                    class="rounded-xs bg-linear-to-br from-secondary/10 to-secondary/5 border border-secondary/20 p-3"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
                         {{ prop.名称 }}
@@ -150,14 +154,12 @@ function getWeaponAttackLabelPrefix(key: string) {
 
         <!-- 武器属性 -->
         <div v-if="charBuild.selectedWeapon && weaponAttrs">
-            <h4 class="text-lg font-bold mb-3">
-                {{ $t("char-build.weapon_attributes") }}
-            </h4>
+            <SectionHeader number="03" kicker="WEAPON" :title="$t('char-build.weapon_attributes')" no-animate />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
                 <div
                     v-for="[key, val] in Object.entries(weaponAttrs).filter(([_, v]) => v)"
                     :key="key"
-                    class="bg-linear-to-br from-secondary/10 to-secondary/5 rounded-lg p-3 border border-secondary/20"
+                    class="rounded-xs bg-linear-to-br from-secondary/10 to-secondary/5 border border-secondary/20 p-3"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
                         {{ key === "攻击" ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) }) : $t(key) }}
@@ -177,7 +179,7 @@ function getWeaponAttackLabelPrefix(key: string) {
         <!-- MOD展示 -->
         <template v-for="key in ['charMods', 'meleeMods', 'rangedMods', 'skillMods'] satisfies (keyof CharBuild)[]" :key="key">
             <div v-if="charBuild[key].filter(v => v).length > 0">
-                <h4 class="text-lg font-bold mb-3">{{ $t(`char-build.${key.slice(0, -4)}`) }}MOD</h4>
+                <SectionHeader number="04" kicker="MODS" :title="`${$t(`char-build.${key.slice(0, -4)}`)}MOD`" no-animate />
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
                     <div
                         v-for="mod in charBuild[key].reduce((r, v) => {
@@ -190,13 +192,16 @@ function getWeaponAttackLabelPrefix(key: string) {
                             return r
                         }, {} as any)"
                         :key="mod.mod.名称"
-                        class="flex items-center gap-2 px-3 py-2 rounded-lg bg-linear-to-r from-secondary/10 to-secondary/5 border border-secondary/30 text-sm"
+                        class="relative flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-100/70 px-3 py-2 text-sm"
                     >
-                        <img class="w-8 h-8 object-cover rounded" :src="mod.mod.url" alt="" />
-                        <span class="font-medium"
-                            >{{ mod.count > 1 ? `${mod.count} x ` : "" }}{{ $t(mod.mod.名称) }}
-                            <span class="text-base-content/60">+{{ mod.mod.等级 }}</span>
-                        </span>
+                        <!-- 重复数量角标（右上角） -->
+                        <span
+                            v-if="mod.count > 1"
+                            class="absolute -top-2 -right-2 inline-flex h-5 min-w-5 items-center justify-center rounded-xs bg-primary px-1 font-orbitron text-[11px] font-semibold text-primary-content tabular-nums"
+                            >×{{ mod.count }}</span
+                        >
+                        <img class="w-8 h-8 object-cover rounded-xs" :src="mod.mod.url" alt="" />
+                        <span class="font-medium">{{ $t(mod.mod.名称) }} <span class="text-base-content/60">+{{ mod.mod.等级 }}</span></span>
                     </div>
                 </div>
             </div>
@@ -204,12 +209,12 @@ function getWeaponAttackLabelPrefix(key: string) {
 
         <!-- BUFF展示 -->
         <div v-if="charBuild.buffs.length > 0">
-            <h4 class="text-lg font-bold mb-3">BUFF</h4>
+            <SectionHeader number="05" kicker="BUFFS" title="BUFF" no-animate />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
                 <span
                     v-for="buff in charBuild.buffs.map(v => v.名称)"
                     :key="buff"
-                    class="px-4 py-2 rounded-lg bg-linear-to-r from-secondary/10 to-secondary/5 border border-secondary/30 text-sm"
+                    class="rounded-xs border border-base-content/10 bg-base-100/70 px-4 py-2 text-sm"
                 >
                     {{ buff }}
                 </span>

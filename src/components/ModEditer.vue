@@ -439,14 +439,20 @@ const aMod = computed(() => {
             <dialog class="modal" :class="{ 'modal-open': mod_model_show }">
                 <div class="modal-box max-w-11/12 h-11/12 relative">
                     <!-- 选择新MOD -->
-                    <div class="flex">
-                        <h4 class="text-sm font-medium mb-3 p-2">{{ $t("char-build.select_mod_slot") }} {{ localSelectedSlot + 1 }}</h4>
-
-                        <!-- 关闭按钮 -->
-                        <button class="ml-auto btn btn-ghost btn-sm btn-square" @click="mod_model_show = false">
-                            <Icon bold icon="codicon:chrome-close" />
-                        </button>
-                    </div>
+                    <SectionHeader
+                        number="01"
+                        kicker="MOD"
+                        :title="`${$t('char-build.select_mod_slot')} ${localSelectedSlot + 1}`"
+                        no-animate
+                        compact
+                    >
+                        <template #trailing>
+                            <!-- 关闭按钮 -->
+                            <button class="btn btn-ghost btn-sm btn-square" @click="mod_model_show = false">
+                                <Icon bold icon="codicon:chrome-close" />
+                            </button>
+                        </template>
+                    </SectionHeader>
 
                     <!-- 品质筛选 -->
                     <div class="tabs tabs-box bg-transparent">
@@ -461,7 +467,7 @@ const aMod = computed(() => {
                             />
                             <div v-if="selectedQuality === quality" class="tab-content py-2">
                                 <ScrollArea class="h-[calc(110vh/1.2-10.5rem)] w-full">
-                                    <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3">
+                                    <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
                                         <ModItem
                                             v-for="mod in visibleModOptions"
                                             :key="mod.value"
@@ -521,13 +527,13 @@ const aMod = computed(() => {
                         </Select>
                     </div>
                 </ShowProps>
-                <div v-if="type !== '同律'" class="btn btn-sm btn-primary" @click="$emit('sync')">
+                <div v-if="type !== '同律'" class="btn btn-secondary btn-sm" @click="$emit('sync')">
                     {{ $t("char-build.sync_game") }}
                 </div>
-                <div class="btn btn-sm btn-primary" @click="handleImportCode">
+                <div class="btn btn-ghost btn-sm border border-base-content/15" @click="handleImportCode">
                     {{ $t("char-build.import_code") }}
                 </div>
-                <div class="btn btn-sm btn-primary" @click="copyText(charBuild.getCode(type))">
+                <div class="btn btn-ghost btn-sm border border-base-content/15" @click="copyText(charBuild.getCode(type))">
                     {{ $t("char-build.export_code") }}
                 </div>
             </div>

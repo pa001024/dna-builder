@@ -75,7 +75,7 @@ function setAllOff() {
 </script>
 <template>
     <div class="flex items-center gap-2 mb-3">
-        <label class="flex items-center gap-2 text-sm cursor-pointer">
+        <label class="flex items-center gap-2 text-sm text-base-content/80 cursor-pointer">
             <input
                 :checked="useGlobal"
                 type="checkbox"
@@ -88,8 +88,8 @@ function setAllOff() {
             </RouterLink>
         </label>
         <div class="ml-auto flex items-center gap-2">
-            <div class="btn btn-sm btn-primary" @click="setAllMax">全部最大</div>
-            <div class="btn btn-sm btn-primary" @click="setAllOff">全部关闭</div>
+            <div class="btn btn-ghost btn-sm border border-base-content/15" @click="setAllMax">全部最大</div>
+            <div class="btn btn-ghost btn-sm border border-base-content/15" @click="setAllOff">全部关闭</div>
         </div>
     </div>
     <BuffEditer

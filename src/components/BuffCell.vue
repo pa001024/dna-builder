@@ -21,19 +21,19 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
     <div class="flex">
         <ShowProps side="top" :props="buff.getProperties()" :attr="buff.attr" :code="buff.code" :title="title">
             <div
-                class="flex-1 bg-base-200/50 rounded-lg p-3 cursor-pointer hover:bg-gray-200/20 transition-colors duration-200"
+                class="flex-1 rounded-xs border border-base-content/10 bg-base-100/70 p-3 cursor-pointer hover:border-primary/40 transition-colors duration-200"
                 :class="{
-                    ' border border-green-500/20 hover:bg-green-200/20': selected,
+                    ' border-primary bg-primary/5 shadow-sm shadow-primary/10 hover:border-primary': selected,
                 }"
             >
                 <div class="flex items-center justify-between mb-2">
                     <div class="text-sm font-medium flex items-center gap-1">
-                        <div v-if="selected" class="text-green-500">
+                        <div v-if="selected" class="text-primary">
                             <Icon icon="ri:checkbox-circle-fill" />
                         </div>
                         {{ buff.名称 }}
                     </div>
-                    <div v-if="buff.mx" class="text-xs text-gray-400">
+                    <div v-if="buff.mx" class="text-xs text-base-content/60 font-orbitron tabular-nums">
                         Lv.
                         <NumberInput
                             v-if="selected"
@@ -46,12 +46,12 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                         <span v-else>{{ lv }}</span>
                     </div>
                 </div>
-                <div class="text-xs text-base-content/50 mb-2">
+                <div class="text-xs text-base-content/60 mb-2">
                     {{ buff.描述 }}
                 </div>
-                <div class="text-xs text-base-content/30" v-if="income">
+                <div class="text-xs text-base-content/40" v-if="income">
                     {{ $t("char-build.income") }}:
-                    {{ format100(income) }}
+                    <span class="font-orbitron tabular-nums">{{ format100(income) }}</span>
                 </div>
             </div>
         </ShowProps>
