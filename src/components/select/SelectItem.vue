@@ -8,13 +8,13 @@ const props = defineProps<Omit<SelectItemProps, "value"> & { value: any }>()
 <template>
     <SelectItem
         v-bind="props as any"
-        class="px-3 py-2 text-sm flex items-center rounded-btn transition-colors duration-200 cursor-pointer data-highlighted:outline-none data-highlighted:bg-base-content/10 data-highlighted:text-base-content"
+        class="relative flex items-center gap-2 px-3 py-2 text-sm rounded-btn transition-colors duration-200 cursor-pointer select-none outline-none data-highlighted:bg-primary/10 data-highlighted:text-primary data-[state=checked]:text-primary data-[state=checked]:font-medium data-[state=checked]:shadow-[inset_2px_0_0_var(--color-primary)] data-disabled:opacity-40 data-disabled:pointer-events-none"
     >
-        <SelectItemText>
+        <SelectItemText class="min-w-0 flex-1 truncate">
             <slot />
         </SelectItemText>
-        <SelectItemIndicator class="absolute left-1 inline-flex items-center justify-center opacity-50">
-            <Icon icon="ri:checkbox-circle-fill" />
+        <SelectItemIndicator class="flex-none text-primary/70">
+            <Icon icon="ri:checkbox-circle-fill" class="size-4" />
         </SelectItemIndicator>
     </SelectItem>
 </template>

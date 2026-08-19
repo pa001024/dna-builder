@@ -74,6 +74,12 @@ const routes: readonly RouteRecordRaw[] = [
         component: env.isApp ? () => import("./views/GameLauncher.vue") : () => undefined,
         beforeEnter: () => setMinSize(360, 430),
     },
+    {
+        name: "mod-manager",
+        path: "/mods",
+        component: () => import("./views/ModManagerView.vue"),
+        beforeEnter: () => setMinSize(360, 430),
+    },
     { name: "game-accounts", path: "/game-accounts", component: UserManager, beforeEnter: () => setMinSize(360, 430) },
     { name: "unpack", path: "/unpack", component: () => import("./views/UnpackView.vue"), beforeEnter: () => setMinSize(360, 430) },
     {
@@ -196,6 +202,11 @@ const routes: readonly RouteRecordRaw[] = [
                 name: "admin-dyeplan",
                 path: "dyeplan",
                 component: () => import("./admin/DyePlanManagement.vue"),
+            },
+            {
+                name: "admin-game-mod",
+                path: "game-mod",
+                component: () => import("./admin/GameModManagement.vue"),
             },
         ],
     },

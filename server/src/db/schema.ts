@@ -1082,3 +1082,111 @@ export const scriptLikesRelations = relations(scriptLikes, ({ one }) => ({
     script: one(scripts, { fields: [scriptLikes.scriptId], references: [scripts.id] }),
     user: one(users, { fields: [scriptLikes.userId], references: [users.id] }),
 }))
+
+/**
+ * 游戏补丁 MOD 分享（非游戏内 mod，而是替换/新增游戏资源的补丁包）。
+ * 一个「发布」包含名称/描述/封面等元数据，其下可挂多个版本（game_mod_versions，版本号 + 更新说明 + 独立压缩包）。
+ * 用户上传 zip 压缩包，服务端解析并补全 mod.json 与 preview.png，供其他用户查询、下载并一键安装到启动器。
+ */
+export const gameMods = sqliteTable(
+    "game_mods",
+    {
+        id: text("id").$default(id).primaryKey(),
+        name: text("name").notNull(),
+        description: text("description"),
+        /** 适用分类：char | weapon | other | standalone（独立），未指定时默认为 standalone。 */
+        category: text("category")
+            .notNull()
+            .$default(() => "standalone"),
+        /** 适用实体名称（角色名/武器名/自定义实体名），独立分类时为空字符串。 */
+        entity: text("entity"),
+        /** 封面 OSS 对象 key（mods/hash/<sha256>.<ext>），可能为空。 */
+        coverKey: text("cover_key"),
+        /** 服务端补全后的 mod.json 内容（字符串）。 */
+        modJson: text("mod_json"),
+        /** 来源链接（http/https），空表示原创。 */
+        source: text("source"),
+        /** 需要的前置 MOD 名称/ID 列表。 */
+        requires: text("requires", { mode: "json" }).$type<string[]>(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        /** 全部版本累计下载次数（冗余计数，实际下载按版本记录）。 */
+        downloads: integer("downloads")
+            .notNull()
+            .$default(() => 0),
+        views: integer("views")
+            .notNull()
+            .$default(() => 0),
+        likes: integer("likes")
+            .notNull()
+            .$default(() => 0),
+        /** 是否上架展示，管理员可下架。 */
+        isActive: integer("is_active", { mode: "boolean" })
+            .notNull()
+            .$default(() => true),
+        /** 审核状态：pending（待审核）| approved（已通过）| rejected（已拒绝），发布后需管理员审核通过才对其他用户可见。 */
+        status: text("status")
+            .notNull()
+            .$default(() => "pending"),
+        /** 预览图（非封面）OSS 对象 key 列表（JSON 数组字符串，如 mods/hash/<sha256>.png）。 */
+        images: text("images", { mode: "json" }).$type<string[]>(),
+        isRecommended: integer("is_recommended", { mode: "boolean" })
+            .notNull()
+            .$default(() => false),
+        isPinned: integer("is_pinned", { mode: "boolean" })
+            .notNull()
+            .$default(() => false),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at").$onUpdate(now),
+    },
+    gameMods => [
+        index("game_mods_category_idx").on(gameMods.category),
+        index("game_mods_entity_idx").on(gameMods.entity),
+        index("game_mods_user_id_idx").on(gameMods.userId),
+        index("game_mods_created_at_idx").on(gameMods.createdAt),
+        index("game_mods_is_active_idx").on(gameMods.isActive),
+    ]
+)
+
+/**
+ * 游戏补丁 MOD 的版本记录。
+ * 同一发布（game_mods）下可上传多个版本，每个版本有独立的压缩包、版本号与更新说明。
+ */
+export const gameModVersions = sqliteTable(
+    "game_mod_versions",
+    {
+        id: text("id").$default(id).primaryKey(),
+        modId: text("mod_id")
+            .notNull()
+            .references(() => gameMods.id, { onDelete: "cascade" }),
+        /** 版本号/标签（如 1.0.0 / v2）。 */
+        version: text("version").notNull(),
+        /** 该版本的更新说明（支持 markdown）。 */
+        changelog: text("changelog"),
+        /** 原始上传文件名。 */
+        fileName: text("file_name").notNull(),
+        /** OSS 对象 key（mods/hash/<sha256>.zip，文件名使用内容哈希）。 */
+        fileKey: text("file_key").notNull(),
+        /** 压缩包大小（字节）。 */
+        fileSize: integer("file_size").notNull(),
+        /** 该版本的下载次数。 */
+        downloads: integer("downloads")
+            .notNull()
+            .$default(() => 0),
+        createdAt: integer("created_at").$default(now),
+    },
+    gameModVersions => [
+        index("game_mod_versions_mod_id_idx").on(gameModVersions.modId),
+        index("game_mod_versions_created_at_idx").on(gameModVersions.createdAt),
+    ]
+)
+
+export const gameModsRelations = relations(gameMods, ({ one, many }) => ({
+    user: one(users, { fields: [gameMods.userId], references: [users.id] }),
+    versions: many(gameModVersions),
+}))
+
+export const gameModVersionsRelations = relations(gameModVersions, ({ one }) => ({
+    mod: one(gameMods, { fields: [gameModVersions.modId], references: [gameMods.id] }),
+}))

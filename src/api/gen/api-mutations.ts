@@ -896,6 +896,376 @@ export const pinGuideMutation = typedMutation<Types.Guide, { id: string; pinned:
     }
 `)
 
+export const updateGameModMutation = typedMutation<Types.GameMod, { id: string; input: Types.GameModInput }>(/* GraphQL */ `
+    mutation ($id: String!, $input: GameModInput!) {
+        updateGameMod(id: $id, input: $input) {
+            id
+            name
+            description
+            category
+            entity
+            fileName
+            fileSize
+            coverUrl
+            modJson
+            requires
+            userId
+            downloads
+            views
+            likes
+            isActive
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const deleteGameModMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteGameMod(id: $id)
+    }
+`)
+
+export const deleteGameModVersionMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteGameModVersion(id: $id)
+    }
+`)
+
+export const recommendGameModMutation = typedMutation<Types.GameMod, { id: string; recommended: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $recommended: Boolean!) {
+        recommendGameMod(id: $id, recommended: $recommended) {
+            id
+            name
+            description
+            category
+            entity
+            fileName
+            fileSize
+            coverUrl
+            modJson
+            requires
+            userId
+            downloads
+            views
+            likes
+            isActive
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const pinGameModMutation = typedMutation<Types.GameMod, { id: string; pinned: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $pinned: Boolean!) {
+        pinGameMod(id: $id, pinned: $pinned) {
+            id
+            name
+            description
+            category
+            entity
+            fileName
+            fileSize
+            coverUrl
+            modJson
+            requires
+            userId
+            downloads
+            views
+            likes
+            isActive
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const setGameModActiveMutation = typedMutation<Types.GameMod, { id: string; active: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $active: Boolean!) {
+        setGameModActive(id: $id, active: $active) {
+            id
+            name
+            description
+            category
+            entity
+            fileName
+            fileSize
+            coverUrl
+            modJson
+            requires
+            userId
+            downloads
+            views
+            likes
+            isActive
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const approveGameModMutation = typedMutation<Types.GameMod, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        approveGameMod(id: $id) {
+            id
+            name
+            description
+            category
+            entity
+            fileName
+            fileSize
+            coverUrl
+            images
+            status
+            modJson
+            requires
+            userId
+            downloads
+            views
+            likes
+            isActive
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
+export const rejectGameModMutation = typedMutation<Types.GameMod, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        rejectGameMod(id: $id) {
+            id
+            name
+            description
+            category
+            entity
+            fileName
+            fileSize
+            coverUrl
+            images
+            status
+            modJson
+            requires
+            userId
+            downloads
+            views
+            likes
+            isActive
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+        }
+    }
+`)
+
 export const createDyePlanMutation = typedMutation<Types.DyePlan, { input: Types.DyePlanInput }>(/* GraphQL */ `
     mutation ($input: DyePlanInput!) {
         createDyePlan(input: $input) {

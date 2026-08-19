@@ -53,6 +53,21 @@ export interface EntityMod {
 
 export type UEntityMod = Omit<EntityMod, "id">
 
+/**
+ * 独立（standalone）分类下多选启用的 MOD 记录，一条表示一个已启用的 MOD。
+ * 与 entityMods（单选，一个实体仅一个）不同，独立分类允许多个 MOD 同时启用。
+ */
+export interface EntityModMulti {
+    id: number
+    entity: string
+    modid: number
+}
+
+export type UEntityModMulti = Omit<EntityModMulti, "id">
+
+/** 独立（standalone）分类使用的固定实体名称。 */
+export const STANDALONE_ENTITY = "独立"
+
 // AI对话相关接口
 export interface Conversation {
     id: number
@@ -184,6 +199,7 @@ interface DB {
     mods: Mod
     customEntitys: CustomEntity
     entityMods: EntityMod
+    entityModsMulti: EntityModMulti
     conversations: Conversation
     messages: Message
     buildAgentChats: BuildAgentChat
@@ -199,6 +215,7 @@ db.version(1).stores({
     mods: "++id, entity, name",
     customEntitys: "++id, &name",
     entityMods: "++id, entity, modid",
+    entityModsMulti: "++id, entity, modid",
     conversations: "++id, createdAt, updatedAt",
     messages: "++id, conversationId, createdAt",
     buildAgentChats: "&id, charName, updatedAt",

@@ -166,7 +166,7 @@ const removeBuff = (index: number) => {
                 <div class="text-xs text-base-content/60 mb-1">属性</div>
                 <Select
                     v-model="newBuff.property"
-                    class="w-full inline-flex items-center justify-between input input-bordered input-md whitespace-nowrap"
+                    class="w-full input input-bordered input-md"
                 >
                     <SelectItem v-for="prop in properties" :key="prop" :value="prop">
                         {{ prop }}

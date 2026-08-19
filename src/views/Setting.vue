@@ -447,7 +447,7 @@ onMounted(() => {
                         <span class="label-text">{{ $t("setting.theme") }}</span>
                         <Select
                             v-model="setting.theme"
-                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
+                            class="input input-bordered input-sm w-40"
                         >
                             <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.lightTheme") }}</SelectLabel>
                             <SelectGroup>
@@ -484,7 +484,7 @@ onMounted(() => {
                         <span class="label-text">{{ $t("setting.winMaterial") }}</span>
                         <Select
                             v-model="setting.winMaterial"
-                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
+                            class="input input-bordered input-sm w-40"
                             :placeholder="$t('setting.winMaterial')"
                         >
                             <SelectItem v-for="th in MATERIALS" :key="th" :value="th">{{ th }}</SelectItem>
@@ -494,7 +494,7 @@ onMounted(() => {
                         <span class="label-text">{{ $t("setting.lang") }}</span>
                         <Select
                             v-model="setting.lang"
-                            class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
+                            class="input input-bordered input-sm w-40"
                             :placeholder="$t('setting.lang')"
                             @update:model-value="setting.setLang($event)"
                         >
@@ -549,7 +549,7 @@ onMounted(() => {
                         <div class="flex items-center gap-2">
                             <Select
                                 v-model="dataPackSourceKind"
-                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
+                                class="input input-bordered input-sm w-40"
                                 @update:model-value="saveSourceKind($event as 'official' | 'custom')"
                             >
                                 <SelectItem value="official">{{ $t("setting.officialSource") }}</SelectItem>
@@ -705,7 +705,7 @@ onMounted(() => {
                         <span class="label-text">{{ $t("setting.protagonistGender1") }}</span>
                         <Select
                             v-model="setting.protagonistGender"
-                            class="inline-flex items-center justify-between input input-bordered input-sm w-64"
+                            class="input input-bordered input-sm w-64"
                         >
                             <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
                             <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
@@ -719,7 +719,7 @@ onMounted(() => {
                         <span class="label-text">{{ $t("setting.protagonistGender2") }}</span>
                         <Select
                             v-model="setting.protagonistGender2"
-                            class="inline-flex items-center justify-between input input-bordered input-sm w-64"
+                            class="input input-bordered input-sm w-64"
                         >
                             <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
                             <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>

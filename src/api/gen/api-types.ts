@@ -265,7 +265,7 @@ export interface RankingList {
     desc?: string
     createdAt: number
     updateAt: number
-    items: RankingListItem[]
+    items?: RankingListItem[]
 }
 
 export interface RankingListItem {
@@ -312,7 +312,7 @@ export interface Reaction {
 export interface Guide {
     id: string
     title: string
-    type: "image" | "text"
+    type: string
     content: string
     images?: string[]
     charId?: number
@@ -328,13 +328,51 @@ export interface Guide {
     isLiked?: boolean
 }
 
+export interface GameModVersion {
+    id: string
+    version: string
+    changelog?: string
+    fileName: string
+    fileSize: number
+    downloads: number
+    createdAt: number
+}
+
+export interface GameMod {
+    id: string
+    name: string
+    description?: string
+    category: string
+    entity?: string
+    fileName: string
+    fileSize: number
+    coverUrl?: string
+    images?: string[]
+    status: string
+    modJson?: string
+    requires?: string[]
+    source?: string
+    userId: string
+    downloads: number
+    views: number
+    likes: number
+    isActive: boolean
+    isRecommended?: boolean
+    isPinned?: boolean
+    createdAt: number
+    updateAt: number
+    user?: User
+    versions?: GameModVersion[]
+    latestVersion?: GameModVersion
+}
+
 export interface DyePlan {
     id: string
     title: string
     desc?: string
     type: string
     skinId: number
-    colorIds: number[]
+    colorIds?: number[]
     hairCode?: string
     imageUrl?: string
     isOriginal: boolean
@@ -573,6 +611,15 @@ export interface GuideInput {
     images: string[]
     charId?: number
     buildId?: string
+}
+
+export interface GameModInput {
+    name?: string
+    description?: string
+    category?: string
+    entity?: string
+    requires?: string[]
+    source?: string
 }
 
 export interface DyePlanInput {

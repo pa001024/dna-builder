@@ -2162,7 +2162,8 @@ const launchGame = async () => {
                             />
                             <Select
                                 v-model="selectedChannel"
-                                class="bg-transparent border-none outline-hidden text-sm appearance-none cursor-pointer min-w-20"
+                                variant="ghost"
+                                class="min-w-20"
                             >
                                 <SelectItem v-for="channel in channels" :key="channel.value" :value="channel.value" xs>
                                     {{ channel.name }}
@@ -2179,7 +2180,8 @@ const launchGame = async () => {
                             <Icon icon="ri:cloud-line" class="text-base-content/40 w-4 h-4" />
                             <Select
                                 v-model="selectedCDN"
-                                class="bg-transparent border-none outline-hidden text-sm appearance-none cursor-pointer min-w-20 truncate"
+                                variant="ghost"
+                                class="min-w-20 truncate"
                             >
                                 <SelectItem v-for="cdn in availableCDN" :key="cdn.url" :value="cdn.url">
                                     {{ cdn.name }}

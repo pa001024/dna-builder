@@ -960,6 +960,172 @@ export const guideQuery = typedQuery(
     ` as const
 )<Types.Guide, { id: string }>()
 
+export const gameModsQuery = typedQuery(
+    /* GraphQL */ `
+        query (
+            $search: String
+            $category: String
+            $entity: String
+            $userId: String
+            $active: Boolean
+            $status: String
+            $mine: Boolean
+            $limit: Int
+            $offset: Int
+            $sortBy: String
+        ) {
+            gameMods(
+                search: $search
+                category: $category
+                entity: $entity
+                userId: $userId
+                active: $active
+                status: $status
+                mine: $mine
+                limit: $limit
+                offset: $offset
+                sortBy: $sortBy
+            ) {
+                id
+                name
+                description
+                category
+                entity
+                fileName
+                fileSize
+                coverUrl
+                modJson
+                requires
+                userId
+                downloads
+                views
+                likes
+                isActive
+                isRecommended
+                isPinned
+                createdAt
+                updateAt
+                user {
+                    id
+                    name
+                    email
+                    qq
+                    pic
+                    uid
+                    roles
+                    experience
+                    points
+                    level
+                    selectedTitleAssetId
+                    selectedNameCardAssetId
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
+                    dailyExperienceStatus {
+                        todayAwardedExp
+                        totalAvailableExp
+                        dailyLaunchProgress
+                        dailyLaunchLimit
+                        dailyOnlineHourProgress
+                        dailyOnlineHourLimit
+                        dailyMessageProgress
+                        dailyMessageLimit
+                        dailyOnlineHourRetryAfterMs
+                    }
+                    abyssUsageUploadStatus {
+                        uploadedThisSeason
+                    }
+                    createdAt
+                    updateAt
+                }
+            }
+        }
+    ` as const
+)<
+    Types.GameMod[],
+    {
+        search?: string
+        category?: string
+        entity?: string
+        userId?: string
+        active?: boolean
+        status?: string
+        mine?: boolean
+        limit?: number
+        offset?: number
+        sortBy?: string
+    }
+>()
+
+export const gameModsCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($search: String, $category: String, $entity: String, $active: Boolean, $status: String, $mine: Boolean) {
+            gameModsCount(search: $search, category: $category, entity: $entity, active: $active, status: $status, mine: $mine)
+        }
+    ` as const
+)<number, { search?: string; category?: string; entity?: string; active?: boolean; status?: string; mine?: boolean }>()
+
+export const gameModQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: String!) {
+            gameMod(id: $id) {
+                id
+                name
+                description
+                category
+                entity
+                fileName
+                fileSize
+                coverUrl
+                modJson
+                requires
+                userId
+                downloads
+                views
+                likes
+                isActive
+                isRecommended
+                isPinned
+                createdAt
+                updateAt
+                user {
+                    id
+                    name
+                    email
+                    qq
+                    pic
+                    uid
+                    roles
+                    experience
+                    points
+                    level
+                    selectedTitleAssetId
+                    selectedNameCardAssetId
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
+                    dailyExperienceStatus {
+                        todayAwardedExp
+                        totalAvailableExp
+                        dailyLaunchProgress
+                        dailyLaunchLimit
+                        dailyOnlineHourProgress
+                        dailyOnlineHourLimit
+                        dailyMessageProgress
+                        dailyMessageLimit
+                        dailyOnlineHourRetryAfterMs
+                    }
+                    abyssUsageUploadStatus {
+                        uploadedThisSeason
+                    }
+                    createdAt
+                    updateAt
+                }
+            }
+        }
+    ` as const
+)<Types.GameMod, { id: string }>()
+
 export const dyePlansQuery = typedQuery(
     /* GraphQL */ `
         query (

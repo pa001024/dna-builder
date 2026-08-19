@@ -517,7 +517,7 @@ const aMod = computed(() => {
                     <div class="flex">
                         <img :src="aMod.url" :alt="aMod.名称" class="w-8 h-8 inline-block" />
                         <Select
-                            class="w-30 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                            class="w-30 input input-bordered input-sm"
                             :model-value="auraMod"
                             @update:model-value="handleSelectAuraMod($event)"
                         >

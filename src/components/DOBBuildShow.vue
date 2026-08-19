@@ -364,7 +364,7 @@ defineExpose({
                                 </div>
                             </div>
                         </div>
-                        <div class="text-sm text-base-content/60 flex-1">
+                        <div class="text-sm text-base-content/60 flex-1 mb-2">
                             <div :class="{ 'line-clamp-2': !isDescriptionExpanded(build.id) }">
                                 {{ build.desc || "作者很懒没填任何东西..." }}
                             </div>

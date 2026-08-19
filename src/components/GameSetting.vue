@@ -1052,7 +1052,7 @@ function openConfigDir() {
                         <div v-else-if="option.type === 'select'" class="flex-1">
                             <Select
                                 :model-value="getOptionValue(option)"
-                                class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-full"
+                                class="input input-bordered input-sm w-full"
                                 @update:model-value="setOptionValue(option, $event)"
                             >
                                 <SelectItem v-for="(opt, idx) in option.options" :key="idx" :value="opt.value">
@@ -1143,7 +1143,7 @@ function openConfigDir() {
                             <div v-else-if="option.type === 'select'" class="flex-1">
                                 <Select
                                     :model-value="getOptionValue(option)"
-                                    class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-full"
+                                    class="input input-bordered input-sm w-full"
                                     :disabled="!isOptionEnabled(option)"
                                     @update:model-value="setOptionValue(option, $event)"
                                 >

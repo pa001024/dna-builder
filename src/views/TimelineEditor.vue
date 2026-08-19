@@ -1560,7 +1560,7 @@ const importTimelineJson = () => {
             </div>
             <!-- 游戏数据关联 -->
             <div class="flex items-center px-4 gap-2">
-                <Select v-model="selectedChar" class="inline-flex justify-between input input-bordered input-sm">
+                <Select v-model="selectedChar" variant="chip">
                     <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
                         <SelectLabel class="p-2 text-sm font-semibold text-primary">
                             {{ charWithElm[0].elm }}
@@ -1577,10 +1577,7 @@ const importTimelineJson = () => {
                     <input v-model="isBuff" type="checkbox" class="toggle toggle-secondary" />
                 </label>
                 <div v-if="isBuff" class="p-2 flex w-50 items-center gap-2">
-                    <Select
-                        v-model="selectedBuff"
-                        class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
-                    >
+                    <Select v-model="selectedBuff" variant="chip" class="flex-1">
                         <SelectItem v-for="buff in buffOptions" :key="buff.label" :value="buff.label">
                             {{ buff.label }}
                         </SelectItem>
@@ -1588,7 +1585,8 @@ const importTimelineJson = () => {
                     <Select
                         v-if="selectedBuffMaxLv > 1"
                         v-model="selectedBuffLv"
-                        class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                        variant="chip"
+                        class="flex-1"
                     >
                         <SelectItem v-for="lv in selectedBuffMaxLv" :key="lv" :value="lv">
                             {{ lv }}
@@ -1596,7 +1594,7 @@ const importTimelineJson = () => {
                     </Select>
                 </div>
                 <div v-else class="p-2 flex items-center gap-2">
-                    <Select v-model="baseName" class="input input-bordered input-sm">
+                    <Select v-model="baseName" variant="chip">
                         <template v-for="baseWithType in groupBy(baseOptions, 'type')" :key="baseWithType[0].type">
                             <SelectLabel class="p-2 text-sm font-semibold text-primary">
                                 {{ baseWithType[0].type }}

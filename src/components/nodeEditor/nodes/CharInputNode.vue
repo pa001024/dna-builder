@@ -61,7 +61,7 @@ const resonanceGain = computed({
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("char-build.hp_percent") }}</label>
                 <Select
                     v-model="hpPercent"
-                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                    class="flex-1 input input-bordered input-sm"
                 >
                     <SelectItem
                         v-for="hp in [
@@ -82,7 +82,7 @@ const resonanceGain = computed({
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("char-build.resonance_gain") }}</label>
                 <Select
                     v-model="resonanceGain"
-                    class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                    class="flex-1 input input-bordered input-sm"
                 >
                     <SelectItem v-for="rg in [0, 0.5, 1, 1.5, 2, 2.5, 3]" :key="rg" :value="rg"> {{ rg * 100 }}% </SelectItem>
                 </Select>

@@ -6,6 +6,7 @@ import { defineStore } from "pinia"
 import {
     getGameInstall,
     importModFiles as importModData,
+    importMod as importModPathsData,
     importPicData,
     isGameRunning,
     launchExe,
@@ -16,7 +17,7 @@ import {
 import { env } from "../env"
 import { sleep } from "../util"
 import { resolveGameVersion } from "../utils/game-download"
-import { type CustomEntity, db, type Mod, type UCustomEntity, type UMod } from "./db"
+import { type CustomEntity, db, type Mod, STANDALONE_ENTITY, type UCustomEntity, type UMod } from "./db"
 
 const GAME_RUNNING_POLL_MS = 1000
 const GAME_LIVE_PERSIST_MS = 1000
@@ -214,7 +215,7 @@ export const useGameStore = defineStore("game", {
             await db.mods.add(mod)
         },
         /**
-         * 删除 MOD，并在删除前撤销其启用状态。
+         * 删除 MOD，并在删除前撤销其启用状态（含独立分类的多选启用记录）。
          * @param mod 待删除的 MOD
          */
         async removeMod(mod: Mod) {
@@ -223,7 +224,9 @@ export const useGameStore = defineStore("game", {
                 await this.disableMod(rel.modid)
                 await db.entityMods.delete(rel.id)
             }
-
+            if (mod.entity === STANDALONE_ENTITY) {
+                await db.entityModsMulti.where({ entity: mod.entity, modid: mod.id }).delete()
+            }
             await db.mods.delete(mod.id)
         },
         /**
@@ -332,12 +335,24 @@ export const useGameStore = defineStore("game", {
             return true
         },
         /**
-         * 导入 MOD 文件并保存其元数据。
+         * 导入 MOD 文件并保存其元数据（导入到当前选中的实体）。
          * @param files 待导入的文件
          * @returns 是否成功
          */
         async importMod(files: File[]) {
             const entity = this.selectedEntity
+            if (!entity || !files.length) return false
+            return this.importModToEntity(files, entity)
+        },
+        /**
+         * 将 MOD 文件导入到指定实体，并可选覆盖名称与预览图。
+         * 供本地拖拽导入与「分享 MOD 一键下载安装」复用。
+         * @param files 待导入的文件
+         * @param entity 目标实体名称
+         * @param meta 可选的名称与预览图信息
+         * @returns 是否成功
+         */
+        async importModToEntity(files: File[], entity: string, meta?: { name?: string; pic?: string }) {
             if (!entity || !files.length) return false
 
             const importedFiles = await Promise.all(
@@ -363,12 +378,88 @@ export const useGameStore = defineStore("game", {
 
             await this.addMod({
                 entity,
-                name: files[0].name.split(/[\\/]/).pop()?.split(".")[0] || "",
+                name: meta?.name || files[0].name.split(/[\\/]/).pop()?.split(".")[0] || "",
                 files: importedNames,
                 addTime: Date.now(),
                 size: totalSize,
-                pic: "",
+                pic: meta?.pic || "",
             })
+            return true
+        },
+        /**
+         * 通过本地文件路径直接导入 MOD（zip 或 .pak 文件，路径模式，不同于字节流导入）。
+         * 供「手动添加 MOD」按钮使用：文件选择框由 Tauri 原生对话框返回路径，后端直接解压/复制进 modsLib。
+         * @param paths 本地文件路径列表。
+         * @param entity 目标实体名称。
+         * @param meta 可选的名称与预览图信息。
+         * @returns 是否成功导入。
+         */
+        async importModPaths(paths: string[], entity: string, meta?: { name?: string; pic?: string }) {
+            if (!entity || !paths.length) return false
+
+            const results = await importModPathsData(this.modsLib, paths)
+            if (!results.length) return false
+
+            let totalSize = 0
+            const importedNames: string[] = []
+            results.forEach(([path, size]) => {
+                const file = path.split(/[\\/]/).pop()
+                if (file) {
+                    importedNames.push(file)
+                    totalSize += size
+                } else {
+                    console.error(`importModPaths error: ${path}`)
+                }
+            })
+
+            await this.addMod({
+                entity,
+                name:
+                    meta?.name ||
+                    paths[0]
+                        .split(/[\\/]/)
+                        .pop()
+                        ?.replace(/\.(zip|pak|paks)$/i, "") ||
+                    "未命名 MOD",
+                files: importedNames,
+                addTime: Date.now(),
+                size: totalSize,
+                pic: meta?.pic || "",
+            })
+            return true
+        },
+        /**
+         * 获取独立（standalone）分类下的全部 MOD。
+         * @returns 独立分类 MOD 列表
+         */
+        async getStandaloneMods() {
+            return await db.mods.where("entity").equals(STANDALONE_ENTITY).toArray()
+        },
+        /**
+         * 获取独立分类下当前已启用的 MOD id 集合。
+         * @returns 已启用的 MOD id 集合
+         */
+        async getStandaloneEnabledModIds() {
+            const rows = await db.entityModsMulti.where("entity").equals(STANDALONE_ENTITY).toArray()
+            return new Set(rows.map(row => row.modid))
+        },
+        /**
+         * 启用或禁用独立分类下的某个 MOD（多选模型，互不影响）。
+         * @param modid MOD ID
+         * @param enabled 是否启用
+         * @returns 是否成功
+         */
+        async setStandaloneModEnabled(modid: number, enabled: boolean) {
+            const mod = await db.mods.get(modid)
+            if (!mod) return false
+
+            if (enabled) {
+                if (!(await this.enableMod(modid))) return false
+                await db.entityModsMulti.add({ entity: STANDALONE_ENTITY, modid })
+                return true
+            }
+            await this.disableMod(modid)
+            await db.entityModsMulti.where({ entity: STANDALONE_ENTITY, modid }).delete()
             return true
         },
         /**

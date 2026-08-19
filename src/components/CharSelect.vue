@@ -15,7 +15,7 @@ const charOptions = charData.map(char => ({
 const model = defineModel<T extends "id" ? number : string>()
 </script>
 <template>
-    <Select v-model="model" class="w-40 inline-flex justify-between input input-bordered input-sm">
+    <Select v-model="model" class="w-40 input input-bordered input-sm">
         <template v-for="charWithElm in groupBy(charOptions, 'elm')" :key="charWithElm[0].elm">
             <SelectLabel class="p-2 text-sm font-semibold text-primary">
                 {{ $t(charWithElm[0].elm) }}

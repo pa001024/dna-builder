@@ -73,6 +73,11 @@ const menuItems: {
         path: "/admin/dyeplan",
         icon: "ri:palette-line",
     },
+    {
+        name: "MOD 分享管理",
+        path: "/admin/game-mod",
+        icon: "ri:puzzle-line",
+    },
 ]
 
 const route = useRoute()

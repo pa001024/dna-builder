@@ -1779,7 +1779,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                         <Select
                                             v-model="charSettings.hpPercent"
-                                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                            class="flex-1 input input-bordered input-sm"
                                             @change="updateCharBuild"
                                         >
                                             <SelectItem v-for="hp in hpPercentOptions" :key="hp" :value="hp / 100"> {{ hp }}% </SelectItem>
@@ -1791,7 +1791,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                         <Select
                                             v-model="charSettings.resonanceGain"
-                                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                            class="flex-1 input input-bordered input-sm"
                                             @change="updateCharBuild"
                                         >
                                             <SelectItem v-for="rg in resonanceGainOptions" :key="rg" :value="rg">
@@ -1818,7 +1818,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                         <Select
                                             v-model="charSettings.enemyId"
-                                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                            class="flex-1 input input-bordered input-sm"
                                             @change="updateCharBuild"
                                         >
                                             <SelectItem v-for="enemy in monsterData" :key="enemy.id" :value="enemy.id">
@@ -1832,7 +1832,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                         <Select
                                             v-model="charSettings.enemyResistance"
-                                            class="flex-1 inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap"
+                                            class="flex-1 input input-bordered input-sm"
                                             @change="updateCharBuild"
                                         >
                                             <SelectItem v-for="res in enemyResistanceOptions" :key="res" :value="res">

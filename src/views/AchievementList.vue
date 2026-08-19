@@ -332,7 +332,7 @@ function getAchievementIcon(category: string) {
                 <div class="bg-base-100 rounded-lg border border-base-200 p-4 m-4 shadow-sm flex gap-4">
                     <Select
                         v-model="selectedVersion"
-                        class="inline-flex items-center justify-between input input-bordered input-sm whitespace-nowrap w-40"
+                        class="input input-bordered input-sm w-40"
                         :placeholder="$t('achievement.selectVersion')"
                     >
                         <SelectItem value="所有版本">

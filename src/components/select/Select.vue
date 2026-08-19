@@ -45,6 +45,13 @@ const props = defineProps<
         placeholder?: string
         modelValue?: any
         hidebtn?: boolean
+        /**
+         * 样式变体，用于适配不同页面的设计语言：
+         * - default：无内置样式，配合 $attrs 传入的 input 类（input input-sm 等）
+         * - ghost：透明无边框紧凑触发器（如 GameUpdate 的胶囊筛选栏，外层自行包胶囊容器）
+         * - chip：自带胶囊底色的触发器（bg-base-content/5 圆角胶囊，适合工具栏/筛选栏）
+         */
+        variant?: "default" | "ghost" | "chip"
     }
 >()
 const emits = defineEmits<{
@@ -219,35 +226,88 @@ onMounted(async () => {
 })
 
 const forward = useForwardPropsEmits(props, emits)
+
+/**
+ * 按变体计算触发器样式。
+ * ghost：透明无边框紧凑触发器；chip：自带胶囊底色；default：不内置样式（依赖 $attrs 的 input 类）。
+ */
+const triggerVariantClass = computed(() => {
+    switch (props.variant) {
+        case "ghost":
+            return "bg-transparent border-none outline-hidden text-sm appearance-none cursor-pointer min-w-20"
+        case "chip":
+            return "bg-base-content/5 hover:bg-base-content/10 backdrop-blur-xs px-2 py-1.5 rounded-xs border border-base-content/5 text-xs appearance-none cursor-pointer min-w-20"
+        default:
+            return "transition-colors hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+    }
+})
+
+/** 按变体调整箭头大小与透明度（ghost/chip 更紧凑低调）。 */
+const chevronClass = computed(() => (props.variant === "default" ? "size-4 opacity-60" : "size-3.5 opacity-40"))
 </script>
 
 <template>
     <SelectRoot :key="selectRootKey" v-bind="forward">
         <slot name="trigger">
-            <SelectTrigger class="inline-flex items-center justify-between" v-bind="$attrs">
-                <SelectValue :placeholder="placeholder">{{ selectedItemText }}</SelectValue>
-                <Icon v-if="!hidebtn" icon="radix-icons:chevron-down" class="ml-auto" />
+            <SelectTrigger
+                :class="['select-trigger inline-flex items-center justify-between gap-1.5', triggerVariantClass]"
+                v-bind="$attrs"
+            >
+                <SelectValue :placeholder="placeholder" class="min-w-0 truncate data-placeholder:text-base-content/40">
+                    {{ selectedItemText }}
+                </SelectValue>
+                <Icon v-if="!hidebtn" icon="radix-icons:chevron-down" :class="['select-chevron ml-auto shrink-0', chevronClass]" />
             </SelectTrigger>
         </slot>
 
         <SelectPortal>
             <SelectContent
                 v-bind="contentProps"
-                class="z-10000 overflow-hidden bg-base-100 border-base-content/20 border rounded-btn shadow-xl animate-slideDownAndFade"
+                class="select-content z-10000 overflow-hidden bg-base-100 border border-base-content/20 border-t-2 border-t-primary rounded-btn shadow-xl shadow-base-content/15 animate-slideDownAndFade"
                 :class="contentClass"
             >
-                <SelectScrollUpButton class="flex items-center justify-center cursor-default h-4">
+                <SelectScrollUpButton
+                    class="select-scroll flex items-center justify-center h-4 cursor-default text-base-content/50 hover:text-base-content transition-colors"
+                >
                     <Icon icon="radix-icons:chevron-up" />
                 </SelectScrollUpButton>
 
-                <SelectViewport class="p-2 bg-base-100 space-y-1">
+                <SelectViewport class="relative p-2 space-y-1">
                     <slot />
                 </SelectViewport>
 
-                <SelectScrollDownButton class="flex items-center justify-center cursor-default h-4">
+                <SelectScrollDownButton
+                    class="select-scroll flex items-center justify-center h-4 cursor-default text-base-content/50 hover:text-base-content transition-colors"
+                >
                     <Icon icon="radix-icons:chevron-down" />
                 </SelectScrollDownButton>
             </SelectContent>
         </SelectPortal>
     </SelectRoot>
 </template>
+
+<style scoped>
+.select-trigger[data-state="open"] .select-chevron {
+    transform: rotate(180deg);
+}
+
+.select-chevron {
+    transition: transform 0.2s ease;
+}
+
+.select-content {
+    position: relative;
+}
+
+.select-content::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 5%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 5%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: linear-gradient(to bottom, black, transparent 92%);
+}
+</style>

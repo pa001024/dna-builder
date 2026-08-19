@@ -81,6 +81,11 @@ const itemsRaw: MoreItem[] = [
         icon: "ri:rocket-2-line",
     },
     {
+        name: "mod-manager",
+        path: "/mods",
+        icon: "ri:puzzle-line",
+    },
+    {
         name: "chat",
         path: "/chat",
         icon: "ri:chat-3-line",
@@ -184,7 +189,7 @@ const sectionConfigs: MoreSectionConfig[] = [
         title: t("more.section.system.title"),
         description: t("more.section.system.description"),
         badge: t("more.section.system.badge"),
-        names: ["dna-home", "game-accounts", "game-launcher", "chat", "setting", "help"],
+        names: ["dna-home", "game-accounts", "game-launcher", "mod-manager", "chat", "setting", "help"],
     },
 ]
 
@@ -209,6 +214,7 @@ const featuredNames = [
     "dna-home",
     "game-accounts",
     "game-launcher",
+    "mod-manager",
     "chat",
     "setting",
     "help",

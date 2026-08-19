@@ -11,6 +11,7 @@ import { yogaPlugin } from "./db"
 import "dotenv/config"
 import { apiPlugin } from "./api"
 import { dnaAuthPlugin } from "./api/dna-auth"
+import { modApiPlugin } from "./api/mod"
 import { raceLotteryPlugin } from "./api/race-lottery"
 
 import { botPlugin } from "./bot"
@@ -21,6 +22,7 @@ const app = new Elysia()
     // .use(staticPlugin({ prefix: "/", assets: "../dist", indexHTML: false, alwaysStatic: true }))
     // .use(cronPlugin())
     .use(apiPlugin())
+    .use(modApiPlugin())
     .use(dnaAuthPlugin())
     .use(raceLotteryPlugin())
     .use(aiPlugin())
