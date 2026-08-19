@@ -800,10 +800,16 @@ const coverInput = ref<HTMLInputElement | null>(null)
 const imagesInput = ref<HTMLInputElement | null>(null)
 
 /**
- * 打开上传弹窗并清空上一次状态。
+ * 打开上传弹窗（保留上次未提交的输入，关闭后重开不丢失草稿）。
  */
 function openUploadModal() {
     uploadOpen.value = true
+}
+
+/**
+ * 重置上传表单状态（发布成功后清空，为下一次发布做准备）。
+ */
+function resetUploadForm() {
     uploadFile.value = undefined
     uploadImages.value = []
     uploadCoverIndex.value = -1
@@ -927,6 +933,7 @@ async function submitUpload() {
             ui.showErrorMessage(res.error || t("game-launcher.uploadModFailed", { error: "" }))
             return
         }
+        resetUploadForm()
         uploadOpen.value = false
         ui.showSuccessMessage(t("game-launcher.uploadModPending"))
         await loadShareMods()
@@ -950,14 +957,17 @@ const versionSubmitting = ref(false)
 const versionZipInput = ref<HTMLInputElement | null>(null)
 
 /**
- * 打开新版本上传弹窗。
+ * 打开新版本上传弹窗（同一发布关闭后重开保留输入，切换目标发布时清空）。
  * @param mod 目标发布
  */
 function openVersionModal(mod: GameMod) {
+    // 切换到其他发布时清空表单，避免残留上一次的输入
+    if (versionMod.value?.id !== mod.id) {
+        versionFile.value = undefined
+        versionLabel.value = ""
+        versionChangelog.value = ""
+    }
     versionMod.value = mod
-    versionFile.value = undefined
-    versionLabel.value = ""
-    versionChangelog.value = ""
     versionOpen.value = true
 }
 
@@ -999,6 +1009,9 @@ async function submitVersion() {
             ui.showErrorMessage(res.error || t("game-launcher.uploadVersionFailed", { error: "" }))
             return
         }
+        versionFile.value = undefined
+        versionLabel.value = ""
+        versionChangelog.value = ""
         versionOpen.value = false
         ui.showSuccessMessage(t("game-launcher.uploadVersionSuccess"))
         await loadShareMods()
@@ -1469,9 +1482,9 @@ onMounted(() => {
         </div>
 
         <!-- 上传 MOD 弹窗 -->
-        <dialog v-if="uploadOpen" class="fixed inset-0 z-30 flex items-center justify-center bg-black/50" @click.self="uploadOpen = false">
+        <dialog class="modal" :class="{ 'modal-open': uploadOpen }">
             <div
-                class="bg-base-100 border border-base-300 rounded-xl shadow-xl max-w-lg w-full p-4 flex flex-col gap-3 max-h-[90vh] overflow-auto"
+                class="bg-base-100 border border-base-300 rounded-xl shadow-xl max-w-lg w-full p-4 flex flex-col gap-3 max-h-[90vh] overflow-auto row-start-1 col-start-1"
             >
                 <h3 class="text-lg font-bold flex items-center gap-2">
                     <Icon icon="ri:upload-2-line" class="size-5 text-primary" />
@@ -1629,12 +1642,14 @@ onMounted(() => {
                     <button class="min-w-20 btn" @click="uploadOpen = false">{{ $t("setting.cancel") }}</button>
                 </div>
             </div>
+            <div class="modal-backdrop" @click="uploadOpen = false" />
         </dialog>
 
         <!-- MOD 详情弹窗 -->
-        <dialog v-if="detailMod" class="fixed inset-0 z-30 flex items-center justify-center bg-black/50" @click.self="detailMod = null">
+        <dialog class="modal" :class="{ 'modal-open': !!detailMod }">
             <div
-                class="bg-base-100 border border-base-300 rounded-xl shadow-xl w-184 max-w-[92vw] flex flex-col max-h-[88vh] overflow-hidden"
+                v-if="detailMod"
+                class="bg-base-100 border border-base-300 rounded-xl shadow-xl w-184 max-w-[92vw] flex flex-col max-h-[88vh] overflow-hidden row-start-1 col-start-1"
             >
                 <div class="flex-none flex items-center gap-2 px-4 py-3 border-b border-base-300">
                     <Icon icon="ri:file-zip-line" class="size-5 text-primary" />
@@ -1778,16 +1793,13 @@ onMounted(() => {
                     </div>
                 </ScrollArea>
             </div>
+            <div class="modal-backdrop" @click="detailMod = null" />
         </dialog>
 
         <!-- 上传新版本弹窗 -->
-        <dialog
-            v-if="versionOpen"
-            class="fixed inset-0 z-30 flex items-center justify-center bg-black/50"
-            @click.self="versionOpen = false"
-        >
+        <dialog class="modal" :class="{ 'modal-open': versionOpen }">
             <div
-                class="bg-base-100 border border-base-300 rounded-xl shadow-xl max-w-md w-full p-4 flex flex-col gap-3 max-h-[90vh] overflow-auto"
+                class="bg-base-100 border border-base-300 rounded-xl shadow-xl max-w-md w-full p-4 flex flex-col gap-3 max-h-[90vh] overflow-auto row-start-1 col-start-1"
             >
                 <h3 class="text-lg font-bold flex items-center gap-2">
                     <Icon icon="ri:upload-cloud-line" class="size-5 text-primary" />
@@ -1832,6 +1844,7 @@ onMounted(() => {
                     <button class="min-w-20 btn" @click="versionOpen = false">{{ $t("setting.cancel") }}</button>
                 </div>
             </div>
+            <div class="modal-backdrop" @click="versionOpen = false" />
         </dialog>
 
         <!-- 导入进度 -->
