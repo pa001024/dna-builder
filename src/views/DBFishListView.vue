@@ -4,7 +4,7 @@ import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollTo
 import { useSearchParam } from "@/composables/useSearchParam"
 import { fishingSpotMap, fishMap } from "@/data"
 import { fishingSpots, fishs } from "@/data/d/fish.data"
-import { matchPinyin } from "../utils/pinyin-utils"
+import { matchPinyin } from "@/utils/pinyin-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedSpotId = useSearchParam<number>("sp", 0)

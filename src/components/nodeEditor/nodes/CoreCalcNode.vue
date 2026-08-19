@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
-import type { CharBuildOptions } from "../../../data/CharBuild"
-import { CharBuild } from "../../../data/CharBuild"
-import { useNodeEditorStore } from "../../../store/nodeEditor"
+import type { CharBuildOptions } from "@/data/CharBuild"
+import { CharBuild } from "@/data/CharBuild"
+import { useNodeEditorStore } from "@/store/nodeEditor"
 import BaseNode from "./BaseNode.vue"
 
 // 定义节点数据类型

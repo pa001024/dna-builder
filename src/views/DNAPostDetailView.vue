@@ -3,10 +3,10 @@ import { DNAAPI, type DNAPostCommentListBean, type DNAPostDetailResponse } from 
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
-import { useUserStore } from "../store/user"
-import { uploadAbyssUsageFromPost } from "../utils/admin-data-sync"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
+import { useUserStore } from "@/store/user"
+import { uploadAbyssUsageFromPost } from "@/utils/admin-data-sync"
 
 const setting = useSettingStore()
 const ui = useUIStore()

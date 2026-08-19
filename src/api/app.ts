@@ -603,6 +603,15 @@ export async function clearScriptInputRecorderActions() {
 export async function getDocumentsDir() {
     return await invoke<string>("get_documents_dir")
 }
+
+/**
+ * 创建指向游戏主程序的桌面快捷方式（名称固定为「二重螺旋」）。
+ * @param path 游戏主程序（EM.exe）路径
+ * @returns 创建结果消息
+ */
+export async function createDesktopShortcut(path: string) {
+    return await invoke<string>("create_desktop_shortcut", { path })
+}
 /**
  * 获取本地登录的QQ号
  * @param port The port of the local QQ

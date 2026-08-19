@@ -2,9 +2,9 @@
 import { DNAAPI, DNACharDetailBean } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { CharBuild, LeveledCharHelper, LeveledModHelper, LeveledWeapon } from "../data"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
+import { CharBuild, LeveledCharHelper, LeveledModHelper, LeveledWeapon } from "@/data"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()

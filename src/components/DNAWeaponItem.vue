@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DNAWeaponBean } from "dna-api"
 import { LeveledWeaponHelper } from "@/data"
-import { useUIStore } from "../store/ui"
+import { useUIStore } from "@/store/ui"
 
 defineProps<{
     weapon: DNAWeaponBean

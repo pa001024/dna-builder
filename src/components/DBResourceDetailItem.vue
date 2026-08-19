@@ -5,6 +5,7 @@ import { fishMap } from "@/data"
 import { optRewardMap } from "@/data/d"
 import { booksData } from "@/data/d/book.data"
 import { regionMap } from "@/data/d/region.data"
+import type { Resource } from "@/data/d/resource.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { collectResourceDraftSources } from "@/utils/draft-source"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
@@ -15,7 +16,6 @@ import {
     collectResourceShopSources,
 } from "@/utils/resource-source"
 import { getRewardDetails, type RewardItem } from "@/utils/reward-utils"
-import type { Resource } from "../data/d/resource.data"
 
 interface ResourceSourceGroup {
     srId: number

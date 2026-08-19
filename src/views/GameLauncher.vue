@@ -2,10 +2,10 @@
 import * as dialog from "@tauri-apps/plugin-dialog"
 import { t } from "i18next"
 import { computed, onMounted, ref } from "vue"
-import { deleteFile, openExplorer, removeDirAll } from "../api/app"
-import { useCloudGameStore } from "../store/cloudgame"
-import { useGameStore } from "../store/game"
-import { useUIStore } from "../store/ui"
+import { createDesktopShortcut as createShortcut, deleteFile, openExplorer, removeDirAll } from "@/api/app"
+import { useCloudGameStore } from "@/store/cloudgame"
+import { useGameStore } from "@/store/game"
+import { useUIStore } from "@/store/ui"
 
 // 状态管理
 const ui = useUIStore()
@@ -86,6 +86,23 @@ const launchGame = async () => {
     }
 }
 
+/**
+ * 在桌面创建指向游戏主程序（EM.exe）的快捷方式，名称为「二重螺旋」。
+ */
+const createDesktopShortcut = async () => {
+    if (!game.path) {
+        ui.showErrorMessage(t("game-launcher.selectGameFileFirst"))
+        return
+    }
+    try {
+        await createShortcut(game.path)
+        ui.showSuccessMessage(t("game-launcher.desktopShortcutCreated"))
+    } catch (error) {
+        console.error("创建桌面快捷方式失败:", error)
+        ui.showErrorMessage(t("game-launcher.desktopShortcutFailed", { error: error instanceof Error ? error.message : String(error) }))
+    }
+}
+
 const cloudGameEntryTitle = computed(() => {
     if (cloudgame.opening) return "正在打开云游戏窗口"
     if (cloudgame.isBridgeConnected) return "聚焦云游戏窗口（已连通）"
@@ -101,7 +118,6 @@ async function openCloudGameFromLauncher() {
 }
 //#endregion
 
-
 /**
  * 初始化云游戏监听。
  */
@@ -112,39 +128,78 @@ onMounted(async () => {
 
 <template>
     <div class="flex flex-col h-full overflow-hidden relative">
-        <div class="flex-none tabs tabs-lift tabs-lg items-center gap-1">
-            <input v-model="tab" type="radio" name="game_mod" class="tab" value="update" :aria-label="$t('game-launcher.gameUpdate')" />
-            <input v-model="tab" type="radio" name="game_mod" class="tab" value="setting" :aria-label="$t('game-launcher.gameSetting')" />
+        <nav class="flex-none flex items-center gap-1 px-2 border-b border-base-300 bg-base-100 relative">
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 6%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 6%, transparent) 1px, transparent 1px);
+                    background-size: 40px 40px;
+                    mask-image: linear-gradient(to bottom, black, transparent 90%);
+                "
+                aria-hidden="true"
+            />
+            <button
+                type="button"
+                class="px-3 py-2 text-sm rounded-t-lg border-b-2 transition-colors flex items-center gap-1.5"
+                :class="
+                    tab === 'update'
+                        ? 'border-primary text-primary font-semibold'
+                        : 'border-transparent text-base-content/60 hover:text-base-content'
+                "
+                @click="tab = 'update'"
+            >
+                <Icon icon="ri:refresh-line" class="size-4" />
+                {{ $t("game-launcher.gameUpdate") }}
+            </button>
+            <button
+                type="button"
+                class="px-3 py-2 text-sm rounded-t-lg border-b-2 transition-colors flex items-center gap-1.5"
+                :class="
+                    tab === 'setting'
+                        ? 'border-primary text-primary font-semibold'
+                        : 'border-transparent text-base-content/60 hover:text-base-content'
+                "
+                @click="tab = 'setting'"
+            >
+                <Icon icon="ri:settings-3-line" class="size-4" />
+                {{ $t("game-launcher.gameSetting") }}
+            </button>
             <RouterLink
                 to="/mods"
-                class="btn btn-square btn-ghost tooltip tooltip-bottom ml-auto"
+                class="btn btn-sm btn-square btn-ghost tooltip tooltip-bottom ml-auto"
                 :data-tip="$t('game-launcher.modManager')"
             >
                 <Icon icon="ri:puzzle-line" class="w-6 h-6" />
             </RouterLink>
             <div
-                class="btn btn-square tooltip tooltip-bottom"
+                class="btn btn-sm btn-square btn-ghost tooltip tooltip-bottom"
                 :data-tip="$t('game-launcher.openGameDir')"
                 @click="openGameDirectory()"
             >
                 <Icon icon="ri:folder-line" class="w-6 h-6" />
             </div>
             <div
-                class="btn btn-square tooltip tooltip-bottom"
+                class="btn btn-sm btn-square btn-ghost tooltip tooltip-bottom"
                 :class="{ 'btn-primary': cloudgame.isWindowOpen || cloudgame.opening }"
                 :data-tip="cloudGameEntryTitle"
                 @click="openCloudGameFromLauncher()"
             >
                 <Icon :icon="cloudgame.isBridgeConnected ? 'ri:cloud-fill' : 'ri:cloud-line'" class="w-6 h-6" />
             </div>
-            <div class="btn btn-square btn-error tooltip tooltip-bottom" :data-tip="$t('game-launcher.uninstall')" @click="uninstallGame()">
+            <div
+                class="btn btn-sm btn-square btn-ghost btn-error tooltip tooltip-bottom"
+                :data-tip="$t('game-launcher.uninstall')"
+                @click="uninstallGame()"
+            >
                 <Icon icon="ri:delete-bin-6-line" class="w-6 h-6" />
             </div>
             <div class="w-40 btn btn-primary mx-2" :class="{ 'btn-disabled': game.running }" @click="launchGame()">
                 <Icon icon="ri:rocket-2-line" class="w-6 h-6" />
                 {{ $t("game-launcher.launch") }}
             </div>
-        </div>
+        </nav>
         <ScrollArea v-if="tab === 'setting'" class="flex-1">
             <div class="bg-base-100 p-4">
                 <div class="max-w-6xl m-auto">
@@ -199,6 +254,12 @@ onMounted(async () => {
                                     <span class="label-text">{{ $t("game-launcher.legacy") }}</span>
                                 </label>
                             </div>
+                        </div>
+                        <div class="p-2 flex flex-row justify-between items-center flex-wrap">
+                            <button class="btn btn-primary btn-sm" :class="{ 'btn-disabled': !game.path }" @click="createDesktopShortcut()">
+                                <Icon icon="ri:file-copy-line" class="w-4 h-4" />
+                                {{ $t("game-launcher.desktopShortcut") }}
+                            </button>
                         </div>
                     </div>
                     <div class="mt-3">

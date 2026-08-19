@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import dungeonData from "../data/d/dungeon.data"
+import dungeonData from "@/data/d/dungeon.data"
 
 const route = useRoute()
 

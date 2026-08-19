@@ -1552,6 +1552,66 @@ async fn decompile_lua_bytecode_files(
     )
 }
 
+/// 创建指向游戏主程序的桌面快捷方式（名称固定为「二重螺旋」）。
+#[tauri::command]
+fn create_desktop_shortcut(path: String) -> Result<String, String> {
+    #[cfg(target_os = "windows")]
+    {
+        use widestring::{U16CStr, U16CString};
+        use windows::core::{Interface, PCWSTR};
+        use windows::Win32::System::Com::{
+            CoCreateInstance, CoInitializeEx, CoTaskMemFree, IPersistFile, CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED,
+        };
+        use windows::Win32::UI::Shell::{FOLDERID_Desktop, IShellLinkW, KNOWN_FOLDER_FLAG, SHGetKnownFolderPath, ShellLink};
+
+        const SHORTCUT_NAME: &str = "二重螺旋";
+
+        let result = unsafe {
+            // 初始化 COM（若线程已初始化则忽略错误）
+            let _ = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
+
+            // 获取桌面目录
+            let desktop_ptr = SHGetKnownFolderPath(&FOLDERID_Desktop, KNOWN_FOLDER_FLAG(0), None)
+                .map_err(|error| format!("获取桌面路径失败: {error}"))?;
+            let desktop = U16CStr::from_ptr_str(desktop_ptr.as_ptr())
+                .to_string_lossy()
+                .to_string();
+            CoTaskMemFree(Some(desktop_ptr.as_ptr() as *const _));
+
+            let shortcut_path = format!("{desktop}\\{SHORTCUT_NAME}.lnk");
+            let game_dir = path.strip_suffix("EM.exe").unwrap_or(&path);
+            let target = U16CString::from_str(&path).map_err(|error| format!("路径编码失败: {error}"))?;
+            let work_dir = U16CString::from_str(game_dir).map_err(|error| format!("路径编码失败: {error}"))?;
+            let save_path = U16CString::from_str(&shortcut_path).map_err(|error| format!("路径编码失败: {error}"))?;
+            let description = U16CString::from_str(SHORTCUT_NAME).map_err(|error| format!("名称编码失败: {error}"))?;
+
+            // 创建快捷方式对象并设置目标、工作目录与描述
+            let link: IShellLinkW =
+                CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER).map_err(|error| format!("创建快捷方式实例失败: {error}"))?;
+            link.SetPath(PCWSTR(target.as_ptr()))
+                .map_err(|error| format!("设置快捷方式目标失败: {error}"))?;
+            link.SetWorkingDirectory(PCWSTR(work_dir.as_ptr()))
+                .map_err(|error| format!("设置工作目录失败: {error}"))?;
+            link.SetDescription(PCWSTR(description.as_ptr()))
+                .map_err(|error| format!("设置描述失败: {error}"))?;
+
+            // 保存为 .lnk 文件
+            let persist: IPersistFile = link.cast().map_err(|error| format!("转换接口失败: {error}"))?;
+            persist
+                .Save(PCWSTR(save_path.as_ptr()), true)
+                .map_err(|error| format!("保存快捷方式失败: {error}"))?;
+
+            format!("已创建桌面快捷方式: {shortcut_path}")
+        };
+        Ok(result)
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("仅支持在 Windows 上创建桌面快捷方式".to_string())
+    }
+}
+
 /// 获取文档目录路径
 #[tauri::command]
 fn get_documents_dir() -> String {
@@ -3572,6 +3632,7 @@ pub fn run() {
         set_window_style,
         get_window_by_process_name,
         get_documents_dir,
+        create_desktop_shortcut,
         rename_file,
         delete_file,
         path_exists,

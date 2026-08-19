@@ -2,7 +2,7 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import shopData from "../data/d/shop.data"
+import shopData from "@/data/d/shop.data"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedShopId = useSearchParam<string>("id", "")

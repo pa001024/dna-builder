@@ -4,9 +4,9 @@ import { DNAAPI, DNAMineBean } from "dna-api"
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
+import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { initEmojiDict } from "@/utils/emoji"
-import { useSettingStore } from "../store/setting"
 
 const setting = useSettingStore()
 const router = useRouter()
@@ -96,11 +96,25 @@ function handleRefreshAll() {
     <div class="w-full h-full flex flex-col">
         <div class="flex-none flex justify-between items-center p-4 bg-base-100 border-b border-base-200">
             <div class="tabs tabs-border gap-2">
-                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.announcement }" @click="activeTab = HOME_TABS.announcement">{{ $t("dna-home.tabs.announcement") }}</div>
-                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.gameInfo }" @click="activeTab = HOME_TABS.gameInfo">{{ $t("dna-home.tabs.gameInfo") }}</div>
-                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.forum }" @click="activeTab = HOME_TABS.forum">{{ $t("dna-home.tabs.forum") }}</div>
-                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.signIn }" @click="activeTab = HOME_TABS.signIn">{{ $t("dna-home.tabs.signIn") }}</div>
-                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.flowQuery }" @click="activeTab = HOME_TABS.flowQuery">{{ $t("dna-home.tabs.flowQuery") }}</div>
+                <div
+                    class="tab"
+                    :class="{ 'tab-active': activeTab === HOME_TABS.announcement }"
+                    @click="activeTab = HOME_TABS.announcement"
+                >
+                    {{ $t("dna-home.tabs.announcement") }}
+                </div>
+                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.gameInfo }" @click="activeTab = HOME_TABS.gameInfo">
+                    {{ $t("dna-home.tabs.gameInfo") }}
+                </div>
+                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.forum }" @click="activeTab = HOME_TABS.forum">
+                    {{ $t("dna-home.tabs.forum") }}
+                </div>
+                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.signIn }" @click="activeTab = HOME_TABS.signIn">
+                    {{ $t("dna-home.tabs.signIn") }}
+                </div>
+                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.flowQuery }" @click="activeTab = HOME_TABS.flowQuery">
+                    {{ $t("dna-home.tabs.flowQuery") }}
+                </div>
             </div>
             <SRouterLink to="/dna/mine" class="flex items-center">
                 <img :src="mine?.headUrl" alt="User Head" class="w-8 h-8 rounded-full mr-2" />

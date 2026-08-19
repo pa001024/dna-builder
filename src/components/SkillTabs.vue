@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { LeveledSkill } from "../data"
+import type { LeveledSkill } from "@/data"
 
 // 组件属性
 const props = defineProps<{

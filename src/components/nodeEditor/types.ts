@@ -1,5 +1,5 @@
 import type { Node } from "@vue-flow/core"
-import { NodeType } from "../../store/nodeEditor"
+import { NodeType } from "@/store/nodeEditor"
 import type { IconTypes } from "../Icon.vue"
 
 /**

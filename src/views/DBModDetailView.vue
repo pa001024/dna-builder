@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import modData from "../data/d/mod.data"
+import modData from "@/data/d/mod.data"
 
 const route = useRoute()
 

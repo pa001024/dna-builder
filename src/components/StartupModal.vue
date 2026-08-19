@@ -3,12 +3,12 @@ import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
 import { computed, onMounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
+import { checkUpdate, downloadAndInstallUpdate } from "@/api/update"
 import { dataPackBootstrapLoading } from "@/data/data-pack-bridge"
+import { env } from "@/env"
 import { useDataPackStore } from "@/store/dataPack"
 import { useUIStore } from "@/store/ui"
 import pg from "../../package.json"
-import { checkUpdate, downloadAndInstallUpdate } from "../api/update"
-import { env } from "../env"
 
 const router = useRouter()
 const ui = useUIStore()

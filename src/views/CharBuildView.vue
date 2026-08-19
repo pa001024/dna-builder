@@ -8,12 +8,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
 import FullTooltip from "@/components/FullTooltip.vue"
-import { MaxMonsterLevelLimit } from "@/data/d/const.data"
-import { env } from "@/env"
-import { copyText, formatBigNumber, formatProp, pasteText } from "@/util"
-import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
-import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
-import { CharSettings, createDefaultCharSettings, normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
+import { CharSettings, createDefaultCharSettings, normalizeCharSettings, useCharSettings } from "@/composables/useCharSettings"
 import {
     buffData,
     CharBuild,
@@ -30,17 +25,22 @@ import {
     monsterData,
     monsterMap,
     weaponData,
-} from "../data"
-import { createBuffFromSettings } from "../data/CharBuildHelper"
-import { dataPackHydrationKey, isDataPackHydrated } from "../data/data-pack-bridge"
-import type { SkillWeapon, Weapon } from "../data/data-types"
-import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "../data/effectLv"
-import { waitForInitialLoad } from "../i18n"
-import { useInvStore } from "../store/inv"
-import { useSettingStore } from "../store/setting"
-import { useTimeline } from "../store/timeline"
-import { useTourStore } from "../store/tour"
-import { useUIStore } from "../store/ui"
+} from "@/data"
+import { createBuffFromSettings } from "@/data/CharBuildHelper"
+import { MaxMonsterLevelLimit } from "@/data/d/const.data"
+import { dataPackHydrationKey, isDataPackHydrated } from "@/data/data-pack-bridge"
+import type { SkillWeapon, Weapon } from "@/data/data-types"
+import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
+import { env } from "@/env"
+import { waitForInitialLoad } from "@/i18n"
+import { useInvStore } from "@/store/inv"
+import { useSettingStore } from "@/store/setting"
+import { useTimeline } from "@/store/timeline"
+import { useTourStore } from "@/store/tour"
+import { useUIStore } from "@/store/ui"
+import { copyText, formatBigNumber, formatProp, pasteText } from "@/util"
+import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
+import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 
 //#region 角色
 const inv = useInvStore()

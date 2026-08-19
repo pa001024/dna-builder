@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue"
-import { MIHAN_MISSIONS, MIHAN_TYPES, type MihanNotifyContext, useMihanNotify } from "../store/mihan"
+import { MIHAN_MISSIONS, MIHAN_TYPES, type MihanNotifyContext, useMihanNotify } from "@/store/mihan"
 
 const props = defineProps<{
     loadref?: (ref: MihanNotifyContext) => void

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { t } from "i18next"
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
-import { LeveledMod, LeveledModHelper } from "../data"
-import { CharBuild } from "../data/CharBuild"
-import type { CharBuildWorkerSnapshot } from "../data/CharBuild.worker"
-import { useInvStore } from "../store/inv"
-import { copyText, pasteText } from "../util"
+import { LeveledMod, LeveledModHelper } from "@/data"
+import { CharBuild } from "@/data/CharBuild"
+import type { CharBuildWorkerSnapshot } from "@/data/CharBuild.worker"
+import { useInvStore } from "@/store/inv"
+import { copyText, pasteText } from "@/util"
 
 interface ModOption {
     value: number
@@ -269,7 +269,7 @@ function cloneForWorker<T>(value: T): T {
  * 刷新当前魔之楔收益。
  */
 function refreshIncomes() {
-    const worker = workerRef.value || new Worker(new URL("../data/CharBuild.worker.ts", import.meta.url), { type: "module" })
+    const worker = workerRef.value || new Worker(new URL("@/data/CharBuild.worker.ts", import.meta.url), { type: "module" })
     workerRef.value = worker
     const id = ++workerRequestId
     worker.onmessage = (event: MessageEvent<{ id: number; incomes?: Record<string, number>; error?: string }>) => {

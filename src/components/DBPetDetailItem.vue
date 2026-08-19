@@ -2,13 +2,13 @@
 import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { petMap, resourceMap } from "@/data"
+import { petEntrys, petToEntey } from "@/data/d/pet.data"
 import { regionMap } from "@/data/d/region.data"
 import shopData from "@/data/d/shop.data"
 import { subRegionData } from "@/data/d/subregion.data"
-import { petEntrys, petToEntey } from "../data/d/pet.data"
-import type { Pet } from "../data/data-types"
-import { LeveledPet } from "../data/leveled/LeveledPet"
-import { getRarityGradientClass } from "../utils/rarity-utils"
+import type { Pet } from "@/data/data-types"
+import { LeveledPet } from "@/data/leveled/LeveledPet"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 const props = defineProps<{
     pet: Pet

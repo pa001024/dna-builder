@@ -4,10 +4,10 @@ import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledWeapon } from "@/data"
-import weaponData from "../data/d/weapon.data"
-import { formatProp } from "../util"
-import { matchPinyin } from "../utils/pinyin-utils"
-import { getRarityGradientClass } from "../utils/rarity-utils"
+import weaponData from "@/data/d/weapon.data"
+import { formatProp } from "@/util"
+import { matchPinyin } from "@/utils/pinyin-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedWeaponId = useSearchParam<number>("id", 0)

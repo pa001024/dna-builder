@@ -3,11 +3,11 @@ import { useLocalStorage } from "@vueuse/core"
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { LeveledChar } from "../data"
-import { charMap } from "../data/d"
-import charData from "../data/d/char.data"
-import { matchPinyin } from "../utils/pinyin-utils"
-import { getRarityGradientClass } from "../utils/rarity-utils"
+import { LeveledChar } from "@/data"
+import { charMap } from "@/data/d"
+import charData from "@/data/d/char.data"
+import { matchPinyin } from "@/utils/pinyin-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedCharId = useSearchParam<number>("id", 0)

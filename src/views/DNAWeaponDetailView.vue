@@ -2,9 +2,9 @@
 import { DNAAPI, DNAWeaponDetailBean } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { LeveledModHelper } from "../data"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
+import { LeveledModHelper } from "@/data"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()

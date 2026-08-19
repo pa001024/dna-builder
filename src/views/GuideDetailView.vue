@@ -4,8 +4,8 @@ import MarkdownIt from "markdown-it"
 import { computed, nextTick, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { Guide, guideQuery, likeGuideMutation, unlikeGuideMutation } from "@/api/graphql"
+import { charMap } from "@/data"
 import { formatDateTime } from "@/utils/time"
-import { charMap } from "../data"
 
 const md = MarkdownIt({
     html: false,

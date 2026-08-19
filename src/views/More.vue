@@ -3,10 +3,10 @@ import { useLocalStorage } from "@vueuse/core"
 import { useTranslation } from "i18next-vue"
 import forge from "node-forge"
 import { computed, onBeforeUnmount, onMounted } from "vue"
+import type { IconTypes } from "@/components/Icon.vue"
+import { env } from "@/env"
 import { useSettingStore } from "@/store/setting"
 import { sha256 } from "@/utils/sha256"
-import type { IconTypes } from "../components/Icon.vue"
-import { env } from "../env"
 
 const setting = useSettingStore()
 const scriptUnlocked = useLocalStorage("script-unlocked", false)

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { fishingSpotMap } from "../data"
+import { fishingSpotMap } from "@/data"
 
 const route = useRoute()
 

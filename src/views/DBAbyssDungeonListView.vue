@@ -3,11 +3,11 @@ import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledChar } from "@/data"
+import type { AbyssDungeon } from "@/data/d/abyss.data"
+import { abyssDungeonMap, charMap } from "@/data/d/index"
+import { getVersionByTime } from "@/data/time.data"
 import { getCurrentVersionLimit } from "@/data/versionGate"
-import type { AbyssDungeon } from "../data/d/abyss.data"
-import { abyssDungeonMap, charMap } from "../data/d/index"
-import { getVersionByTime } from "../data/time.data"
-import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
+import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "@/utils/dungeon-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDungeonId = useSearchParam<number>("id", 0)

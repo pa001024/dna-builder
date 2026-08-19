@@ -2,9 +2,9 @@
 import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
 import { computed, ref, watch } from "vue"
-import { achievementData } from "../data"
-import { useUIStore } from "../store/ui"
-import { matchPinyin } from "../utils/pinyin-utils"
+import { achievementData } from "@/data"
+import { useUIStore } from "@/store/ui"
+import { matchPinyin } from "@/utils/pinyin-utils"
 
 const ui = useUIStore()
 

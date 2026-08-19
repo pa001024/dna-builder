@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import petData, { type PetEntry, petEntrys } from "../data/d/pet.data"
+import petData, { type PetEntry, petEntrys } from "@/data/d/pet.data"
 
 const route = useRoute()
 

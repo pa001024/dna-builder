@@ -13,7 +13,6 @@ import {
 } from "reka-ui"
 import type { VNode } from "vue"
 import { computed, nextTick, onMounted, ref, useSlots, watch } from "vue"
-import Icon from "../Icon.vue"
 
 export interface SelectOption {
     type?: "label" | "group" | "separator" | "option"

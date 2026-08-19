@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import type { SkillCreature } from "../data"
+import type { SkillCreature } from "@/data"
 
 const props = defineProps<{
     creatures: SkillCreature[]

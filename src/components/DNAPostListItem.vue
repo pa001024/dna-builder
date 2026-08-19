@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DNAPostListBean } from "dna-api"
 import { onUnmounted } from "vue"
-import { useUIStore } from "../store/ui"
+import { useUIStore } from "@/store/ui"
 
 const ui = useUIStore()
 

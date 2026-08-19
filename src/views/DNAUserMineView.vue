@@ -3,9 +3,9 @@ import { DNAAPI, DNAMineBean, DNAPostListBean, DNARoleInfoBean } from "dna-api"
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 import { initEmojiDict } from "@/utils/emoji"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
 
 const setting = useSettingStore()
 const ui = useUIStore()

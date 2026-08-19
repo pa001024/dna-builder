@@ -34,7 +34,7 @@ function stripPublicImgsPlugin(): import("vite").Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig(async ({ command }) => ({
+export default defineConfig(async () => ({
     test: {
         includeSource: ["src/**/*.{js,ts}"],
     },

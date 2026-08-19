@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
+import { CharBuild } from "@/data/CharBuild"
+import type { CharBuildWorkerSnapshot } from "@/data/CharBuild.worker"
+import { LeveledBuff } from "@/data/leveled"
+import { useUIStore } from "@/store/ui"
+import { copyText, pasteText } from "@/util"
 import {
     formatBuffClipboardText,
     matchBuffOptionQuery,
@@ -7,11 +12,6 @@ import {
     parseCustomBuffSummary,
     splitBuffClipboardTokens,
 } from "@/utils/buff-editor"
-import { CharBuild } from "../data/CharBuild"
-import type { CharBuildWorkerSnapshot } from "../data/CharBuild.worker"
-import { LeveledBuff } from "../data/leveled"
-import { useUIStore } from "../store/ui"
-import { copyText, pasteText } from "../util"
 
 interface BuffOption {
     label: string
@@ -235,7 +235,7 @@ function refreshIncomes() {
         ...selectedBuffs.value.map(buff => ({ ...buff, minus: true })),
         ...sortedBuffs.value.map(buff => ({ ...buff, minus: false })),
     ]
-    const worker = workerRef.value || new Worker(new URL("../data/CharBuild.worker.ts", import.meta.url), { type: "module" })
+    const worker = workerRef.value || new Worker(new URL("@/data/CharBuild.worker.ts", import.meta.url), { type: "module" })
     workerRef.value = worker
     const id = ++workerRequestId
     worker.onmessage = (event: MessageEvent<{ id: number; incomes?: Record<string, number>; error?: string }>) => {
@@ -246,16 +246,18 @@ function refreshIncomes() {
         }
         incomeMap.value = event.data.incomes || {}
     }
-    worker.postMessage(cloneForWorker({
-        id,
-        build: createWorkerSnapshot(props.charBuild),
-        buffs: visibleBuffs.map(buff => ({
-            key: getIncomeKey(buff, buff.minus),
-            data: buff.value._originalBuffData,
-            level: buff.value.等级,
-            minus: buff.minus,
-        })),
-    }))
+    worker.postMessage(
+        cloneForWorker({
+            id,
+            build: createWorkerSnapshot(props.charBuild),
+            buffs: visibleBuffs.map(buff => ({
+                key: getIncomeKey(buff, buff.minus),
+                data: buff.value._originalBuffData,
+                level: buff.value.等级,
+                minus: buff.minus,
+            })),
+        })
+    )
 }
 
 watch(

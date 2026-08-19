@@ -350,18 +350,18 @@ function applyDyePlan(plan: DyePlan) {
         ui.showErrorMessage("该方案对应的皮肤不在当前数据中")
         return
     }
-    if (plan.colorIds.length > skinColorizeMaxColorParts) {
+    if ((plan.colorIds?.length ?? 0) > skinColorizeMaxColorParts) {
         ui.showErrorMessage("染色部件数量超出游戏上限")
         return
     }
     const validIds = new Set(skinColorizeSwatches.map(swatch => swatch.id))
-    if (plan.colorIds.some(colorId => colorId !== 0 && !validIds.has(colorId))) {
+    if (plan.colorIds?.some(colorId => colorId !== 0 && !validIds.has(colorId))) {
         ui.showErrorMessage("该方案包含当前版本不存在的色板")
         return
     }
     selectedCharacterId.value = skin.charId
     selectedSkinId.value = plan.skinId
-    selectedColorIds.value = Array.from({ length: skinColorizeMaxColorParts }, (_, index) => plan.colorIds[index] || 0)
+    selectedColorIds.value = Array.from({ length: skinColorizeMaxColorParts }, (_, index) => plan.colorIds?.[index] || 0)
     activePartId.value = 1
     applyHairFromCode(plan.hairCode)
     editTitle.value = plan.title

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { groupBy } from "lodash-es"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
+import { useCharSettings } from "@/composables/useCharSettings"
 import { buffData, buffMap, CharBuild, LeveledBuff } from "@/data"
-import { useCharSettings } from "../composables/useCharSettings"
 
 // 动作序列项接口
 interface ActionItem {

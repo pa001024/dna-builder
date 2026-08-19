@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { fishMap } from "../data"
+import { fishMap } from "@/data"
 
 const route = useRoute()
 

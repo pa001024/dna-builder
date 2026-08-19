@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { computed } from "vue"
-import { CharBuild, ModTypeKey, ModTypeMap } from "../data"
-import { useInvStore } from "../store/inv"
+import { CharBuild, ModTypeKey, ModTypeMap } from "@/data"
+import { useInvStore } from "@/store/inv"
 
 // 用户库存
 const inv = useInvStore()

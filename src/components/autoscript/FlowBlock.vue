@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { IconTypes } from "@/components/Icon.vue"
 import { useAutoScriptStore } from "@/store/autoScript"
 import type { FlowNode } from "@/utils/autoscript/types"
-import Icon, { type IconTypes } from "../Icon.vue"
 import FlowList from "./FlowList.vue"
 import { CONTAINER_KINDS, getNodeSlots, NODE_LABELS } from "./palette"
 
@@ -114,7 +114,9 @@ const slots = () => getNodeSlots(props.node)
             <Icon :icon="nodeIcon(node)" class="w-4 h-4 text-primary" />
             <span class="text-xs font-medium">{{ NODE_LABELS[node.kind] }}</span>
             <span class="text-xs text-base-content/60 truncate flex-1">{{ summary(node) }}</span>
-            <span v-if="node.comment" class="text-xs text-base-content/40 truncate max-w-24" :title="node.comment">// {{ node.comment }}</span>
+            <span v-if="node.comment" class="text-xs text-base-content/40 truncate max-w-24" :title="node.comment"
+                >// {{ node.comment }}</span
+            >
             <div class="hidden group-hover:flex items-center gap-0.5 h-4">
                 <button
                     class="inline-flex shrink-0 items-center justify-center w-4 h-4 min-w-0 min-h-0 p-0 border-0 rounded bg-transparent text-base-content/60 cursor-pointer hover:bg-base-content/10"

@@ -2,11 +2,11 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNARoleEntity } from "dna-api"
 import { computed, ref } from "vue"
-import { modMap } from "../data"
-import { ExpPerReason, ExtraExpInputMax, PlayerLevelMaxExp } from "../data/d/player.data"
-import { useInvStore } from "../store/inv"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
+import { modMap } from "@/data"
+import { ExpPerReason, ExtraExpInputMax, PlayerLevelMaxExp } from "@/data/d/player.data"
+import { useInvStore } from "@/store/inv"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 
 const ui = useUIStore()
 const inv = useInvStore()

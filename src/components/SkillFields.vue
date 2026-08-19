@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
-import type { CharAttr, CharBuild, LeveledSkill, SkillField } from "../data"
-import { formatSkillProp } from "../util"
+import type { CharAttr, CharBuild, LeveledSkill, SkillField } from "@/data"
+import { formatSkillProp } from "@/util"
 
 // 组件属性
 const props = defineProps<{

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import type { BuffAttr, BuffBody, BuffDot, EffectAttr, Skill } from "../data/data-types"
+import type { BuffAttr, BuffBody, BuffDot, EffectAttr, Skill } from "@/data/data-types"
 
 // 组件属性
 const props = defineProps<{

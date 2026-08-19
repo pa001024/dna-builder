@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { ColorCallExpr, ExprOperand, FlowExpr, RoiCallExpr, RoiPickOptions, RoiSelection } from "@/utils/autoscript/types"
-import Icon from "../Icon.vue"
 
 const props = withDefaults(
     defineProps<{
@@ -8,7 +7,7 @@ const props = withDefaults(
         variables: string[]
         clearable?: boolean
     }>(),
-    { clearable: true },
+    { clearable: true }
 )
 
 const emit = defineEmits<{
@@ -222,14 +221,18 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
                     <option value="and">全部满足 (and)</option>
                     <option value="or">任一满足 (or)</option>
                 </select>
-                <button v-if="expr" class="btn btn-xs btn-ghost" title="取反" @click="wrapNot"><Icon icon="ri:prohibited-line" class="w-3 h-3" />非</button>
+                <button v-if="expr" class="btn btn-xs btn-ghost" title="取反" @click="wrapNot">
+                    <Icon icon="ri:prohibited-line" class="w-3 h-3" />非
+                </button>
                 <button v-if="expr && clearable" class="btn btn-xs btn-ghost text-error" title="清空条件" @click="update(undefined)">
                     <Icon icon="ri:close-line" class="w-3 h-3" />
                 </button>
             </template>
             <template v-else-if="expr.op === 'and' || expr.op === 'or'">
                 <span class="badge badge-sm">{{ expr.op === "and" ? "全部满足 (and)" : "任一满足 (or)" }}</span>
-                <button class="btn btn-xs btn-ghost" @click="toGroup(expr.op === 'and' ? 'or' : 'and')">切换 {{ expr.op === "and" ? "or" : "and" }}</button>
+                <button class="btn btn-xs btn-ghost" @click="toGroup(expr.op === 'and' ? 'or' : 'and')">
+                    切换 {{ expr.op === "and" ? "or" : "and" }}
+                </button>
                 <button class="btn btn-xs btn-ghost" @click="addGroupItem"><Icon icon="ri:add-line" class="w-3 h-3" />条件</button>
             </template>
             <template v-else-if="expr.op === 'not'">
@@ -247,8 +250,20 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
                 <option value="roiNotExists">区域特征不存在</option>
             </select>
             <template v-if="expr.fn === 'colorExists' || expr.fn === 'colorNotExists'">
-                <input type="number" class="input input-xs input-bordered w-16" :value="expr.x" placeholder="x" @input="onCallFieldInput('x', $event)" />
-                <input type="number" class="input input-xs input-bordered w-16" :value="expr.y" placeholder="y" @input="onCallFieldInput('y', $event)" />
+                <input
+                    type="number"
+                    class="input input-xs input-bordered w-16"
+                    :value="expr.x"
+                    placeholder="x"
+                    @input="onCallFieldInput('x', $event)"
+                />
+                <input
+                    type="number"
+                    class="input input-xs input-bordered w-16"
+                    :value="expr.y"
+                    placeholder="y"
+                    @input="onCallFieldInput('y', $event)"
+                />
                 <input
                     type="text"
                     class="input input-xs input-bordered w-20 font-mono"
@@ -267,22 +282,76 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
                 </button>
             </template>
             <template v-else>
-                <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).x" placeholder="x" @input="setCallField(expr, 'x', Number(($event.target as HTMLInputElement).value))" />
-                <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).y" placeholder="y" @input="setCallField(expr, 'y', Number(($event.target as HTMLInputElement).value))" />
-                <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).width" placeholder="宽" @input="setCallField(expr, 'width', Number(($event.target as HTMLInputElement).value))" />
-                <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).height" placeholder="高" @input="setCallField(expr, 'height', Number(($event.target as HTMLInputElement).value))" />
-                <input type="text" class="input input-xs input-bordered w-28 font-mono" :value="roiExpr(expr).hash" placeholder="phash" @input="setCallField(expr, 'hash', ($event.target as HTMLInputElement).value)" />
-                <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).tolerance" title="汉明容差" @input="setCallField(expr, 'tolerance', Number(($event.target as HTMLInputElement).value))" />
+                <input
+                    type="number"
+                    class="input input-xs input-bordered w-14"
+                    :value="roiExpr(expr).x"
+                    placeholder="x"
+                    @input="setCallField(expr, 'x', Number(($event.target as HTMLInputElement).value))"
+                />
+                <input
+                    type="number"
+                    class="input input-xs input-bordered w-14"
+                    :value="roiExpr(expr).y"
+                    placeholder="y"
+                    @input="setCallField(expr, 'y', Number(($event.target as HTMLInputElement).value))"
+                />
+                <input
+                    type="number"
+                    class="input input-xs input-bordered w-14"
+                    :value="roiExpr(expr).width"
+                    placeholder="宽"
+                    @input="setCallField(expr, 'width', Number(($event.target as HTMLInputElement).value))"
+                />
+                <input
+                    type="number"
+                    class="input input-xs input-bordered w-14"
+                    :value="roiExpr(expr).height"
+                    placeholder="高"
+                    @input="setCallField(expr, 'height', Number(($event.target as HTMLInputElement).value))"
+                />
+                <input
+                    type="text"
+                    class="input input-xs input-bordered w-28 font-mono"
+                    :value="roiExpr(expr).hash"
+                    placeholder="phash"
+                    @input="setCallField(expr, 'hash', ($event.target as HTMLInputElement).value)"
+                />
+                <input
+                    type="number"
+                    class="input input-xs input-bordered w-14"
+                    :value="roiExpr(expr).tolerance"
+                    title="汉明容差"
+                    @input="setCallField(expr, 'tolerance', Number(($event.target as HTMLInputElement).value))"
+                />
                 <button class="btn btn-xs btn-ghost" title="截图并选择 ROI" @click="pickRoiFor(applyPickedRoi)">
                     <Icon icon="ri:screenshot-2-line" class="w-3 h-3" />
                 </button>
                 <label class="flex items-center gap-1 text-xs">
-                    <input type="checkbox" class="checkbox checkbox-xs" :checked="roiExpr(expr).useFilter" @change="setCallField(expr, 'useFilter', ($event.target as HTMLInputElement).checked)" />
+                    <input
+                        type="checkbox"
+                        class="checkbox checkbox-xs"
+                        :checked="roiExpr(expr).useFilter"
+                        @change="setCallField(expr, 'useFilter', ($event.target as HTMLInputElement).checked)"
+                    />
                     滤色
                 </label>
                 <template v-if="roiExpr(expr).useFilter">
-                    <input type="text" class="input input-xs input-bordered w-20 font-mono" :value="'#' + roiExpr(expr).filterColor.toString(16).toUpperCase().padStart(6, '0')" @input="setCallField(expr, 'filterColor', parseInt(($event.target as HTMLInputElement).value.replace('#', ''), 16) || 0)" />
-                    <input type="number" class="input input-xs input-bordered w-14" :value="roiExpr(expr).filterTolerance" title="滤色容差" @input="setCallField(expr, 'filterTolerance', Number(($event.target as HTMLInputElement).value))" />
+                    <input
+                        type="text"
+                        class="input input-xs input-bordered w-20 font-mono"
+                        :value="'#' + roiExpr(expr).filterColor.toString(16).toUpperCase().padStart(6, '0')"
+                        @input="
+                            setCallField(expr, 'filterColor', parseInt(($event.target as HTMLInputElement).value.replace('#', ''), 16) || 0)
+                        "
+                    />
+                    <input
+                        type="number"
+                        class="input input-xs input-bordered w-14"
+                        :value="roiExpr(expr).filterTolerance"
+                        title="滤色容差"
+                        @input="setCallField(expr, 'filterTolerance', Number(($event.target as HTMLInputElement).value))"
+                    />
                 </template>
             </template>
         </div>
@@ -290,7 +359,11 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
         <!-- 比较 -->
         <div v-else-if="expr?.op === 'cmp'" class="flex items-center gap-1 flex-wrap">
             <template v-for="side in ['left', 'right'] as const" :key="side">
-                <select class="select select-xs select-bordered" :value="operandType(expr[side])" @change="onOperandTypeChange(side, $event)">
+                <select
+                    class="select select-xs select-bordered"
+                    :value="operandType(expr[side])"
+                    @change="onOperandTypeChange(side, $event)"
+                >
                     <option value="var">变量</option>
                     <option value="literal">字面量</option>
                     <option value="colorCheck">颜色检查</option>
@@ -345,7 +418,9 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
                     @pickCoord="emit('pickCoord', $event)"
                     @pickRoi="forwardPickRoi"
                 />
-                <button class="btn btn-xs btn-ghost text-error" @click="removeGroupItem(index)"><Icon icon="ri:close-line" class="w-3 h-3" /></button>
+                <button class="btn btn-xs btn-ghost text-error" @click="removeGroupItem(index)">
+                    <Icon icon="ri:close-line" class="w-3 h-3" />
+                </button>
             </div>
         </div>
 

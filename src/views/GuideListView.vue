@@ -2,8 +2,8 @@
 import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { Guide, guidesQuery } from "@/api/graphql"
+import { charData } from "@/data"
 import { formatDateTime } from "@/utils/time"
-import { charData } from "../data"
 
 const router = useRouter()
 

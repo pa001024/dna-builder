@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { abyssDungeonMap } from "../data/d/index"
+import { abyssDungeonMap } from "@/data/d/index"
 
 const route = useRoute()
 

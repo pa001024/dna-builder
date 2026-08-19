@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { MIHAN_TYPES } from "../store/mihan"
-import { timeStr, useGameTimer } from "../util"
+import { MIHAN_TYPES } from "@/store/mihan"
+import { timeStr, useGameTimer } from "@/util"
 
 const { mihan } = useGameTimer()
 

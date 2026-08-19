@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { monsterMap } from "../data"
+import { monsterMap } from "@/data"
 
 const route = useRoute()
 

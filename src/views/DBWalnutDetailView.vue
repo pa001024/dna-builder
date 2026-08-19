@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import walnutData from "../data/d/walnut.data"
+import walnutData from "@/data/d/walnut.data"
 
 const route = useRoute()
 

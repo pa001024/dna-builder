@@ -79,7 +79,7 @@ function getSkin(plan: DyePlan) {
  * @returns CSS 颜色字符串。
  */
 function getFallbackColor(plan: DyePlan) {
-    const colorId = plan.colorIds.find(id => id !== 0)
+    const colorId = plan.colorIds?.find(id => id !== 0)
     const swatch = skinColorizeSwatches.find(item => item.id === colorId)
     return swatch ? formatSkinColorizeRgb(swatch.rgb) : "transparent"
 }
@@ -306,7 +306,7 @@ watch(filterSkinIds, () => {
                                     :alt="plan.title"
                                     class="h-16 w-16 rounded-lg object-cover shadow"
                                 />
-                                <span v-if="!plan.colorIds.some(id => id !== 0)" class="text-xs opacity-70">默认配色</span>
+                                <span v-if="!plan.colorIds?.some(id => id !== 0)" class="text-xs opacity-70">默认配色</span>
                             </div>
                             <span
                                 class="absolute left-2 top-2 rounded px-1.5 py-0.5 text-[10px] font-medium backdrop-blur"

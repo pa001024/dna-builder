@@ -2,11 +2,11 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { petMap } from "../data/d"
-import petData, { type Pet, type PetEntry, petEntrys } from "../data/d/pet.data"
-import { LeveledPet } from "../data/leveled/LeveledPet"
-import { matchPinyin } from "../utils/pinyin-utils"
-import { getRarityGradientClass } from "../utils/rarity-utils"
+import { petMap } from "@/data/d"
+import petData, { type Pet, type PetEntry, petEntrys } from "@/data/d/pet.data"
+import { LeveledPet } from "@/data/leveled/LeveledPet"
+import { matchPinyin } from "@/utils/pinyin-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedPetId = useSearchParam<number>("id", 0)

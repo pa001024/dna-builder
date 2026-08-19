@@ -6,6 +6,7 @@ import { tool } from "langchain"
 import type { Ref } from "vue"
 import { z } from "zod"
 import { renderBuildAgentSystemPrompt } from "@/shared/buildAgentSystemPrompt"
+import type { useInvStore } from "@/store/inv"
 import type { CharSettings, useCharSettings } from "../composables/useCharSettings"
 import {
     buffData,
@@ -24,7 +25,6 @@ import {
     weaponMap,
 } from "../data"
 import { createCharBuildFromSettings } from "../data/CharBuildHelper"
-import type { useInvStore } from "../store/inv"
 import type { OpenAIConfig } from "./openai"
 
 type EffectSourceType = "mod" | "weapon"

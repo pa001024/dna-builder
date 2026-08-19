@@ -3,7 +3,7 @@ import { t } from "i18next"
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watchEffect } from "vue"
 
 //#region UI
-import { useUIStore } from "../store/ui"
+import { useUIStore } from "@/store/ui"
 
 const ui = useUIStore()
 
@@ -271,9 +271,8 @@ const finishEditTrackName = () => {
 
 // 向上移动轨道
 const moveTrackUp = (trackIndex: number) => {
-    if (trackIndex <= 0)
-        return // 已经是第一个轨道
-        // 交换轨道
+    if (trackIndex <= 0) return // 已经是第一个轨道
+    // 交换轨道
     ;[tracks[trackIndex], tracks[trackIndex - 1]] = [tracks[trackIndex - 1], tracks[trackIndex]]
 
     // 更新轨道索引
@@ -299,9 +298,8 @@ const moveTrackUp = (trackIndex: number) => {
 
 // 向下移动轨道
 const moveTrackDown = (trackIndex: number) => {
-    if (trackIndex >= tracks.length - 1)
-        return // 已经是最后一个轨道
-        // 交换轨道
+    if (trackIndex >= tracks.length - 1) return // 已经是最后一个轨道
+    // 交换轨道
     ;[tracks[trackIndex], tracks[trackIndex + 1]] = [tracks[trackIndex + 1], tracks[trackIndex]]
 
     // 更新轨道索引
@@ -1252,7 +1250,7 @@ const resetView = () => {
 //#region 游戏
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy } from "lodash-es"
-import { useCharSettings } from "../composables/useCharSettings"
+import { useCharSettings } from "@/composables/useCharSettings"
 import {
     buffData,
     CharBuild,
@@ -1262,11 +1260,11 @@ import {
     LeveledCharHelper,
     LeveledModHelper,
     LeveledWeaponHelper,
-} from "../data"
-import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "../data/effectLv"
-import { useInvStore } from "../store/inv"
-import { useTimeline } from "../store/timeline"
-import { formatProp, formatSkillProp } from "../util"
+} from "@/data"
+import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
+import { useInvStore } from "@/store/inv"
+import { useTimeline } from "@/store/timeline"
+import { formatProp, formatSkillProp } from "@/util"
 
 const inv = useInvStore()
 const charOptions = charData.map(char => ({ value: char.名称, label: char.名称, elm: char.属性, icon: LeveledChar.url(char.icon) }))
@@ -1279,14 +1277,20 @@ const charBuild = computed(() => {
     const getBuffLv = (modId: number) =>
         charSettings.value.useGlobal ? inv.getBuffLv(modId) : getModBuffLvFromSetting(charSettings.value.effectConfig, modId)
     const getWBuffLv = (weaponId: number) =>
-        charSettings.value.useGlobal ? inv.getWBuffLv(weaponId, char.属性) : getWBuffLvFromSetting(charSettings.value.effectConfig, weaponId, char.属性)
+        charSettings.value.useGlobal
+            ? inv.getWBuffLv(weaponId, char.属性)
+            : getWBuffLvFromSetting(charSettings.value.effectConfig, weaponId, char.属性)
     return new CharBuild({
         char,
         auraMod: LeveledModHelper.fromId(charSettings.value.auraMod),
         charMods: charSettings.value.charMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
         meleeMods: charSettings.value.meleeMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
-        rangedMods: charSettings.value.rangedMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
-        skillMods: charSettings.value.skillWeaponMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
+        rangedMods: charSettings.value.rangedMods
+            .filter(mod => mod !== null)
+            .map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
+        skillMods: charSettings.value.skillWeaponMods
+            .filter(mod => mod !== null)
+            .map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
         skillLevel: charSettings.value.charSkillLevel,
         buffs: charSettings.value.buffs
             .map(v => {
@@ -1582,12 +1586,7 @@ const importTimelineJson = () => {
                             {{ buff.label }}
                         </SelectItem>
                     </Select>
-                    <Select
-                        v-if="selectedBuffMaxLv > 1"
-                        v-model="selectedBuffLv"
-                        variant="chip"
-                        class="flex-1"
-                    >
+                    <Select v-if="selectedBuffMaxLv > 1" v-model="selectedBuffLv" variant="chip" class="flex-1">
                         <SelectItem v-for="lv in selectedBuffMaxLv" :key="lv" :value="lv">
                             {{ lv }}
                         </SelectItem>
@@ -1628,11 +1627,15 @@ const importTimelineJson = () => {
                 <!-- 血量曲线控制 -->
                 <div class="flex items-center gap-2">
                     <label class="label">
-                        <span class="label-text text-sm font-semibold text-secondary whitespace-nowrap">{{ $t("timeline.healthCurve") }}</span>
+                        <span class="label-text text-sm font-semibold text-secondary whitespace-nowrap">{{
+                            $t("timeline.healthCurve")
+                        }}</span>
                         <input v-model="showHealthCurve" type="checkbox" class="toggle toggle-secondary" />
                     </label>
                     <button class="btn btn-xs btn-secondary" @click="generateSampleHealthCurve">{{ $t("timeline.generateSample") }}</button>
-                    <button v-if="healthPoints.length > 0" class="btn btn-xs btn-error" @click="clearHealthCurve">{{ $t("timeline.clear") }}</button>
+                    <button v-if="healthPoints.length > 0" class="btn btn-xs btn-error" @click="clearHealthCurve">
+                        {{ $t("timeline.clear") }}
+                    </button>
                 </div>
                 <div class="p-2 font-orbitron">{{ zoomLevel }}x</div>
                 <div class="btn btn-ghost btn-square border-0" :title="$t('timeline.zoomOut')" @click="zoomOut">

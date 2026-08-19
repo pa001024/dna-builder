@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { LeveledWeapon } from "../data"
-import { formatProp } from "../util"
+import { LeveledWeapon } from "@/data"
+import { formatProp } from "@/util"
 
 defineProps<{
     weapon: LeveledWeapon

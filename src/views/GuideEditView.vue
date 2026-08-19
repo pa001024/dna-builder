@@ -2,11 +2,11 @@
 import { computed, onMounted, onUnmounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { buildsQuery, createGuideMutation, guideQuery, updateGuideMutation } from "@/api/graphql"
+import { charData } from "@/data"
+import { env } from "@/env"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
-import { charData } from "../data"
-import { env } from "../env"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
 
 const route = useRoute()
 const router = useRouter()
@@ -225,7 +225,7 @@ async function loadGuide() {
     const result = await guideQuery({ id: id as string }, { requestPolicy: "network-only" })
     if (result) {
         title.value = result.title
-        type.value = result.type
+        type.value = result.type === "image" ? "image" : "text"
         content.value = result.content
         images.value = result.images || []
         selectedCharId.value = result.charId || 0

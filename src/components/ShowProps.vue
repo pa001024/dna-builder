@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { formatProp } from "../util"
+import { formatProp } from "@/util"
 
 withDefaults(
     defineProps<{

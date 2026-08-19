@@ -2,9 +2,9 @@
 import { t } from "i18next"
 import { debounce } from "lodash-es"
 import { computed, defineComponent, h, ref, type VNode, watch } from "vue"
-import type { CharBuild, LeveledSkill } from "../data"
-import { CharBuild as CharBuildClass } from "../data"
-import { type ASTNode, parseAST } from "../data/ast"
+import type { CharBuild, LeveledSkill } from "@/data"
+import { CharBuild as CharBuildClass } from "@/data"
+import { type ASTNode, parseAST } from "@/data/ast"
 
 const props = defineProps<{
     skill?: LeveledSkill

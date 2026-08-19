@@ -1,8 +1,8 @@
 import type { DNAAPI, DNAGameSignInDayAward, DNAGameSignInShowDataBean, DNAPostListBean } from "dna-api"
 import { shuffle } from "lodash-es"
 import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 import { sleep } from "@/util"
-import { useUIStore } from "../store/ui"
 
 /**
  * 回复内容库 - 用于自动回复帖子

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
 import { petMap } from "@/data"
-import { type PetEntry, petToEntey } from "../data/d/pet.data"
+import { type PetEntry, petToEntey } from "@/data/d/pet.data"
 
 const props = defineProps<{
     entry: PetEntry

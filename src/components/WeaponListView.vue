@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import type { CharSettings } from "../composables/useCharSettings"
-import { CharBuild, LeveledWeapon, weaponData } from "../data"
-import type { Weapon } from "../data/data-types"
-import { getWBuffLvFromSetting } from "../data/effectLv"
-import { useInvStore } from "../store/inv"
-import { format100, format100r } from "../util"
-import { matchPinyin } from "../utils/pinyin-utils"
+import type { CharSettings } from "@/composables/useCharSettings"
+import { CharBuild, LeveledWeapon, weaponData } from "@/data"
+import type { Weapon } from "@/data/data-types"
+import { getWBuffLvFromSetting } from "@/data/effectLv"
+import { useInvStore } from "@/store/inv"
+import { format100, format100r } from "@/util"
+import { matchPinyin } from "@/utils/pinyin-utils"
 
 const props = defineProps<{
     charBuild?: CharBuild
@@ -19,7 +19,9 @@ const props = defineProps<{
 
 const inv = useInvStore()
 const getWBuffLv = (weaponId: number, elm: string) =>
-    props.useGlobal || !props.charSettings ? inv.getWBuffLv(weaponId, elm) : getWBuffLvFromSetting(props.charSettings.effectConfig, weaponId, elm)
+    props.useGlobal || !props.charSettings
+        ? inv.getWBuffLv(weaponId, elm)
+        : getWBuffLvFromSetting(props.charSettings.effectConfig, weaponId, elm)
 const tabs = ["全部", "近战", "远程", "单手剑", "长柄", "重剑", "双刀", "鞭刃", "太刀", "手枪", "双枪", "榴炮", "霰弹枪", "突击枪", "弓"]
 const activeTab = ref(props.defaultTab || tabs[0])
 const searchQuery = ref("")
@@ -228,7 +230,9 @@ function selectWeapon(weapon: Weapon) {
 
                         <!-- 底部属性条 -->
                         <div class="grid grid-cols-3 gap-1 pt-2 border-t border-base-200">
-                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-warning transition-colors duration-200">
+                            <div
+                                class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-warning transition-colors duration-200"
+                            >
                                 <svg
                                     aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -244,7 +248,9 @@ function selectWeapon(weapon: Weapon) {
                                 </svg>
                                 <span>{{ format100(weapon.暴击) }}</span>
                             </div>
-                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-success transition-colors duration-200">
+                            <div
+                                class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-success transition-colors duration-200"
+                            >
                                 <svg
                                     aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -260,7 +266,9 @@ function selectWeapon(weapon: Weapon) {
                                 </svg>
                                 <span>{{ format100(weapon.暴伤) }}</span>
                             </div>
-                            <div class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-primary transition-colors duration-200">
+                            <div
+                                class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-primary transition-colors duration-200"
+                            >
                                 <svg
                                     aria-hidden="true"
                                     width="1em"

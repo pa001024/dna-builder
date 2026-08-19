@@ -1,9 +1,9 @@
 <script lang="tsx" setup>
 import { computed } from "vue"
+import type { IconTypes } from "@/components/Icon.vue"
+import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import pg from "../../package.json"
-import type { IconTypes } from "../components/Icon.vue"
-import { env } from "../env"
 
 // 快捷导航：小图标 + 标题，宽屏 2 行 4 列 / 窄屏 4 行 2 列
 const quickNav = [
@@ -109,12 +109,16 @@ async function checkUpdate() {
                             <Icon icon="ri:github-fill" class="h-5 w-5" />
                             <span>{{ $t("home.starme") }}</span>
                         </a>
+                        <!-- 迷你游戏启动器（仅 app 端，与检查更新同一行靠右对齐） -->
+                        <MiniGameLauncher v-if="env.isApp" class="ml-auto" />
                     </div>
                 </div>
             </header>
 
             <div class="mx-auto max-w-6xl px-5 py-8 pb-10">
-                <div class="flex flex-col gap-10 xl:grid xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start xl:gap-6 xl:[grid-template-areas:'left_right']">
+                <div
+                    class="flex flex-col gap-10 xl:grid xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start xl:gap-6 xl:[grid-template-areas:'left_right']"
+                >
                     <!-- 左列（分栏时同列堆叠；单列时经 contents 拆散为扁平顺序 01→02→03→04→05） -->
                     <div class="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-6 xl:[grid-area:left]">
                         <!-- 01 快捷导航 -->
@@ -141,9 +145,7 @@ async function checkUpdate() {
                                     :style="{ animationDelay: `calc(0.1s + ${index} * 40ms)` }"
                                 >
                                     <!-- 图标 + 文字：宽屏时内容左对齐、左边距固定，保证各卡片图标纵向对齐；窄屏保持居中 -->
-                                    <span
-                                        class="flex flex-col items-center gap-2 md:flex-row md:justify-start md:gap-2.5 md:pl-4"
-                                    >
+                                    <span class="flex flex-col items-center gap-2 md:flex-row md:justify-start md:gap-2.5 md:pl-4">
                                         <span
                                             class="flex h-[50cqh] w-[50cqh] shrink-0 items-center justify-center rounded-xs bg-primary/10 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-content"
                                         >

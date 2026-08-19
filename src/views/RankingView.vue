@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { type RankingList, rankingListQuery, rankingListsQuery } from "@/api/graphql"
+import { type RankingList, type RankingListItem, rankingListQuery, rankingListsQuery } from "@/api/graphql"
 import { normalizeCharSettings } from "@/composables/useCharSettings"
 import { charMap, LeveledChar } from "@/data"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
@@ -42,7 +42,7 @@ function getCharIcon(charId: number) {
     return LeveledChar.url(charMap.get(charId)?.icon)
 }
 
-function calcBuildDps(build: RankingList["items"][number]["build"]) {
+function calcBuildDps(build: RankingListItem["build"]) {
     if (!build) return
     try {
         const settings = normalizeCharSettings(JSON.parse(build.charSettings))

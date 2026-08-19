@@ -2,9 +2,9 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNAGameSignInDayAward, DNAGameSignInShowDataBean, DNAUserTaskProcessEntity } from "dna-api"
 import { computed, onMounted, ref } from "vue"
-import { canSignToday as checkCanSignToday, executeSignFlow, getFirstUnsignedDay } from "../api/dna-sign"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
+import { canSignToday as checkCanSignToday, executeSignFlow, getFirstUnsignedDay } from "@/api/dna-sign"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 
 defineProps<{
     nobtn?: boolean

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { CharBuild, LeveledMod } from "../data"
-import { format100r } from "../util"
+import { CharBuild, LeveledMod } from "@/data"
+import { format100r } from "@/util"
 
 /**
  * 根据品质返回右上角斜切楔形的背景色，用于区分稀有度。

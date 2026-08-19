@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import type { DNAMapMatterCategorizeOption } from "dna-api"
 import { computed, onMounted, ref, watch } from "vue"
+import { getMapAPI } from "@/api/app"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
-import { getMapAPI } from "../api/app"
 import {
     buildDBMapList,
     buildDBMapMarkers,
@@ -10,8 +10,8 @@ import {
     type DBMapMarker,
     loadMapCategorizeListWithCache,
     loadMapDetailWithCache,
-} from "../data/d/map.data"
-import { env } from "../env"
+} from "@/data/d/map.data"
+import { env } from "@/env"
 
 const dnaApi = getMapAPI()
 

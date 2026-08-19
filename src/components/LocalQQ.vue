@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue"
 import { getLocalQQ } from "@/api/app"
-import { env } from "../env"
+import { env } from "@/env"
 
 type LocalQQ = (ReturnType<typeof getLocalQQ> extends Promise<infer T> ? T : never)[number]
 

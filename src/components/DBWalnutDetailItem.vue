@@ -2,8 +2,8 @@
 import { t } from "i18next"
 import { computed, ref, watch } from "vue"
 import { LeveledMod, LeveledWeaponHelper, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
-import { Walnut } from "../data/d/walnut.data"
-import { WalnutSequenceSimulator } from "../utils/walnut-utils"
+import { Walnut } from "@/data/d/walnut.data"
+import { WalnutSequenceSimulator } from "@/utils/walnut-utils"
 
 const props = defineProps<{
     walnut: Walnut

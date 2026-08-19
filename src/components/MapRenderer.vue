@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import type { DNAMapMatterCategorizeOption, DNAMapSiteDetailRes } from "dna-api"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
-import { getMapAPI } from "../api/app"
-import type { DBMapMarker } from "../data/d/map.data"
-import { db, type UserMapMarker } from "../store/db"
+import { getMapAPI } from "@/api/app"
+import type { DBMapMarker } from "@/data/d/map.data"
+import { db, type UserMapMarker } from "@/store/db"
 import Select from "./select/Select.vue"
 import SelectItem from "./select/SelectItem.vue"
 

@@ -3,8 +3,8 @@ import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledMod, LeveledWeaponHelper, modMap, resourceMap, weaponMap } from "@/data"
-import walnutData, { Walnut } from "../data/d/walnut.data"
-import { matchPinyin } from "../utils/pinyin-utils"
+import walnutData, { Walnut } from "@/data/d/walnut.data"
+import { matchPinyin } from "@/utils/pinyin-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedWalnutId = useSearchParam<number>("id", 0)

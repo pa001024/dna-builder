@@ -191,7 +191,7 @@ const config: AdminCrudConfig<DyePlan> = {
                     desc: String(form.desc || "").trim() || undefined,
                     type: item.type,
                     skinId: item.skinId,
-                    colorIds: item.colorIds,
+                    colorIds: item.colorIds || [],
                     hairCode: String(form.hairCode || "").trim() || undefined,
                     imageUrl: item.imageUrl || undefined,
                     isOriginal: form.isOriginal === "1",

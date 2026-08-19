@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import charData from "../data/d/char.data"
+import charData from "@/data/d/char.data"
 
 const route = useRoute()
 

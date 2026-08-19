@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, ref } from "vue"
-import { activitiesQuery } from "../api/gen/api-queries"
-import type { AbyssDungeon } from "../data"
-import { charMap, eventData } from "../data"
-import { abyssDungeons } from "../data/d/abyss.data"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
+import { activitiesQuery } from "@/api/gen/api-queries"
+import type { AbyssDungeon } from "@/data"
+import { charMap, eventData } from "@/data"
+import { abyssDungeons } from "@/data/d/abyss.data"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 
 const { t, i18next } = useTranslation()
 const settingStore = useSettingStore()

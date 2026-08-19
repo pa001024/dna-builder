@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import type { CharSettings } from "../composables/useCharSettings"
-import { CharBuild, LeveledBuff, LeveledMod, LeveledWeapon } from "../data"
-import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "../data/effectLv"
-import { useInvStore } from "../store/inv"
+import type { CharSettings } from "@/composables/useCharSettings"
+import { CharBuild, LeveledBuff, LeveledMod, LeveledWeapon } from "@/data"
+import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
+import { useInvStore } from "@/store/inv"
 
 const inv = useInvStore()
 const props = defineProps<{

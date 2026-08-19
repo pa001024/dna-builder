@@ -2,8 +2,8 @@
 import gsap from "gsap"
 import { useTranslation } from "i18next-vue"
 import { ref, watchEffect } from "vue"
-import { useUIStore } from "../store/ui"
-import { useState } from "../util"
+import { useUIStore } from "@/store/ui"
+import { useState } from "@/util"
 import SidebarButton from "./SidebarButton.vue"
 
 const { t } = useTranslation()

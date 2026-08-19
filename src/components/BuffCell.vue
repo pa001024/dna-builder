@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { LeveledBuff } from "../data/leveled"
-import { format100 } from "../util"
+import { LeveledBuff } from "@/data/leveled"
+import { format100 } from "@/util"
 
 defineProps<{
     buff: LeveledBuff

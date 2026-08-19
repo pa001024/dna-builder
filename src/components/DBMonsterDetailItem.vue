@@ -3,15 +3,15 @@ import * as echarts from "echarts"
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
+import { abyssDungeonMap, Monster } from "@/data"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
+import dungeonData from "@/data/d/dungeon.data"
 import { soloTreasureDropData } from "@/data/d/solotreasure.data"
 import { Faction } from "@/data/game-const"
+import { LeveledMonster } from "@/data/leveled/LeveledMonster"
 import { format100, formatBigNumber } from "@/util"
-import { abyssDungeonMap, Monster } from "../data"
-import dungeonData from "../data/d/dungeon.data"
-import { LeveledMonster } from "../data/leveled/LeveledMonster"
-import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "../utils/dungeon-utils"
-import { getMonsterTagGroupsByMonster } from "../utils/monster-tag-utils"
+import { getAbyssDungeonGroup, getAbyssDungeonLevel } from "@/utils/dungeon-utils"
+import { getMonsterTagGroupsByMonster } from "@/utils/monster-tag-utils"
 
 const props = defineProps<{
     monster: Monster
@@ -247,7 +247,12 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
         },
         legend: {
             top: 6,
-            data: [t("monster-detail.hp"), t("monster-detail.shield"), t("monster-detail.effectiveHealth"), t("monster-detail.levelDamageReductionRate")],
+            data: [
+                t("monster-detail.hp"),
+                t("monster-detail.shield"),
+                t("monster-detail.effectiveHealth"),
+                t("monster-detail.levelDamageReductionRate"),
+            ],
         },
         grid: {
             left: 16,
@@ -537,7 +542,9 @@ function getFactionName(faction: number | undefined): string {
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <div>{{ $t("monster-detail.dropMonsterTag") }}: {{ entry.MonsterTag }}</div>
-                    <div v-if="entry.DropMechanismId !== undefined">{{ $t("monster-detail.dropMechanismId") }}: {{ entry.DropMechanismId }}</div>
+                    <div v-if="entry.DropMechanismId !== undefined">
+                        {{ $t("monster-detail.dropMechanismId") }}: {{ entry.DropMechanismId }}
+                    </div>
                     <div v-if="entry.BoxDropRate !== undefined">{{ $t("monster-detail.dropRate") }}: {{ entry.BoxDropRate }}</div>
                     <div v-if="entry.KillScore !== undefined">{{ $t("monster-detail.killScore") }}: {{ entry.KillScore }}</div>
                 </div>

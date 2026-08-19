@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { charData, LeveledChar } from "../data"
-import { matchPinyin } from "../utils/pinyin-utils"
+import { charData, LeveledChar } from "@/data"
+import { matchPinyin } from "@/utils/pinyin-utils"
 
 const tabs = ["全部", "输出", "同律武器", "武器伤害", "技能伤害", "辅助", "召唤物", "控制", "神智回复", "治疗", "最大生命", "防御", "护盾"]
 const activeTab = ref(tabs[1])

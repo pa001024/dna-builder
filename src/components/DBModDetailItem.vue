@@ -2,17 +2,17 @@
 import { computed, nextTick, ref, watch } from "vue"
 import { LeveledSkill } from "@/data"
 import { modConvertData } from "@/data/d/convert.data"
+import { modDraftMap, modDungeonMap } from "@/data/d/index"
 import shopData from "@/data/d/shop.data"
+import { walnutMap } from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
+import type { Draft, Mod, WeaponSkill } from "@/data/data-types"
+import { LeveledMod } from "@/data/leveled/LeveledMod"
+import { formatProp } from "@/util"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { collectModCharBreakthroughSources, collectModPackSources, collectModQuestSources } from "@/utils/resource-source"
 import { getModDropInfo } from "@/utils/reward-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
-import { modDraftMap, modDungeonMap } from "../data/d/index"
-import { walnutMap } from "../data/d/walnut.data"
-import type { Draft, Mod, WeaponSkill } from "../data/data-types"
-import { LeveledMod } from "../data/leveled/LeveledMod"
-import { formatProp } from "../util"
 
 const props = defineProps<{
     mod: Mod

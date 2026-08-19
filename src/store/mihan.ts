@@ -5,8 +5,8 @@ import { t } from "i18next"
 import { ref, watch } from "vue"
 import { getInstanceInfo } from "@/api/external"
 import { missionsIngameQuery } from "@/api/graphql"
+import { useSettingStore } from "@/store/setting"
 import { env } from "../env"
-import { useSettingStore } from "../store/setting"
 import { useUIStore } from "./ui"
 
 export const MIHAN_TYPES = ["角色", "武器", "魔之楔"] as const

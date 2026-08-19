@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue"
+import { LeveledChar, LeveledSkillWeapon } from "@/data"
+import { type SkinItem, skinData } from "@/data/d/accessory.data"
+import { type CharExt, charExtData } from "@/data/d/charext.data"
+import { type CharVoice, charVoiceData } from "@/data/d/charvoice.data"
+import { resourceMap } from "@/data/d/resource.data"
+import weaponData from "@/data/d/weapon.data"
+import type { Char, Weapon } from "@/data/data-types"
+import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 import { useSettingStore } from "@/store/setting"
+import { formatProp } from "@/util"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRewardTypeText } from "@/utils/i18n-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
-import { LeveledChar, LeveledSkillWeapon } from "../data"
-import { type SkinItem, skinData } from "../data/d/accessory.data"
-import { type CharExt, charExtData } from "../data/d/charext.data"
-import { type CharVoice, charVoiceData } from "../data/d/charvoice.data"
-import { resourceMap } from "../data/d/resource.data"
-import weaponData from "../data/d/weapon.data"
-import type { Char, Weapon } from "../data/data-types"
-import { LeveledWeapon } from "../data/leveled/LeveledWeapon"
-import { formatProp } from "../util"
 
 const props = defineProps<{
     char: Char
@@ -59,16 +59,16 @@ const charVoiceDataCache: Partial<Record<VoiceLocale, CharVoice[]>> = {
     zh: charVoiceData,
 }
 const charExtLoaderMap: Record<CharExtExtendedLocale, () => Promise<CharExt[]>> = {
-    en: async () => (await import("../data/d/charext.en.data")).charExtData_en,
-    jp: async () => (await import("../data/d/charext.jp.data")).charExtData_jp,
-    kr: async () => (await import("../data/d/charext.kr.data")).charExtData_kr,
-    fr: async () => (await import("../data/d/charext.fr.data")).charExtData_fr,
-    tc: async () => (await import("../data/d/charext.tc.data")).charExtData_tc,
+    en: async () => (await import("@/data/d/charext.en.data")).charExtData_en,
+    jp: async () => (await import("@/data/d/charext.jp.data")).charExtData_jp,
+    kr: async () => (await import("@/data/d/charext.kr.data")).charExtData_kr,
+    fr: async () => (await import("@/data/d/charext.fr.data")).charExtData_fr,
+    tc: async () => (await import("@/data/d/charext.tc.data")).charExtData_tc,
 }
 const charVoiceLoaderMap: Record<VoiceExtendedLocale, () => Promise<CharVoice[]>> = {
-    en: async () => (await import("../data/d/charvoice.en.data")).charVoiceData_en,
-    jp: async () => (await import("../data/d/charvoice.jp.data")).charVoiceData_jp,
-    kr: async () => (await import("../data/d/charvoice.kr.data")).charVoiceData_kr,
+    en: async () => (await import("@/data/d/charvoice.en.data")).charVoiceData_en,
+    jp: async () => (await import("@/data/d/charvoice.jp.data")).charVoiceData_jp,
+    kr: async () => (await import("@/data/d/charvoice.kr.data")).charVoiceData_kr,
 }
 
 // 创建LeveledChar实例

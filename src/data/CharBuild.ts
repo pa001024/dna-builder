@@ -1,5 +1,5 @@
 import { groupBy } from "lodash-es"
-import type { RawTimelineData } from "../store/timeline"
+import type { RawTimelineData } from "@/store/timeline"
 import { type ASTNode, parseAST } from "./ast"
 import { sumCharBuildBonusContributions } from "./charbuild-simd"
 import type { AbstractMod, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
@@ -208,7 +208,7 @@ export class CharBuild {
     static fromCharSetting: (
         selectedChar: string,
         charSettings: typeof import("../composables/useCharSettings").defaultCharSettings,
-        inv?: ReturnType<typeof import("../store/inv").useInvStore>,
+        inv?: ReturnType<typeof import("@/store/inv").useInvStore>,
         timeline?: CharBuildTimeline
     ) => CharBuild
 

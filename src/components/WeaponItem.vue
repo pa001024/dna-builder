@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { LeveledWeapon } from "../data"
-import { format100r } from "../util"
+import { LeveledWeapon } from "@/data"
+import { format100r } from "@/util"
 
 defineProps<{
     weapon: LeveledWeapon | null
@@ -16,7 +16,9 @@ const emit = defineEmits<{
 }>()
 </script>
 <template>
-    <div class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors duration-200 cursor-pointer group">
+    <div
+        class="aspect-square bg-base-200 rounded-lg border-2 flex items-center justify-center transition-colors duration-200 cursor-pointer group"
+    >
         <div class="relative w-full h-full flex items-center justify-center">
             <ShowProps v-if="weapon" :props="weapon.getProperties()">
                 <div class="w-full h-full flex items-center justify-center bg-opacity-30 rounded-lg overflow-hidden">

@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import type { Fish, FishingSpot } from "@/data"
+import { fishMap, petMap } from "@/data"
 import { calculateFishPrice, getRandomFish } from "@/utils/fish-utils"
 import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
-import type { Fish, FishingSpot } from "../data"
-import { fishMap, petMap } from "../data"
 
 const props = defineProps<{
     spot: FishingSpot

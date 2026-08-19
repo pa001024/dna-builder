@@ -1,12 +1,12 @@
 <script setup lang="ts">
 // 引入必要的依赖
 import { computed, ref } from "vue"
+import { LeveledMod, LeveledModHelper, LeveledWeapon, LeveledWeaponHelper, modData, weaponData } from "@/data"
+import { useInvStore } from "@/store/inv"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { copyText, pasteText } from "@/util"
-import { LeveledMod, LeveledModHelper, LeveledWeapon, LeveledWeaponHelper, modData, weaponData } from "../data"
-import { useInvStore } from "../store/inv"
-import { matchPinyin } from "../utils/pinyin-utils"
+import { matchPinyin } from "@/utils/pinyin-utils"
 
 const inv = useInvStore()
 const ui = useUIStore()
@@ -242,7 +242,7 @@ async function syncInventory() {
 }
 
 // 特效编辑功能
-import { LeveledBuff } from "../data"
+import { LeveledBuff } from "@/data"
 
 // 获取所有武器和MOD的buffs
 const allItemsWithBuffs = computed(() => {

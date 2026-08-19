@@ -3,8 +3,8 @@ import { useInfiniteScroll, useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNAPostListBean } from "dna-api"
 import { t } from "i18next"
 import { onMounted, ref } from "vue"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 
 defineProps<{
     nobtn?: boolean

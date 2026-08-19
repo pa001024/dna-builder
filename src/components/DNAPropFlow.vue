@@ -729,7 +729,7 @@ import * as dialog from "@tauri-apps/plugin-dialog"
 import { debounce } from "lodash-es"
 import * as XLSX from "xlsx"
 import { exportBinaryFile } from "@/api/app"
-import { env } from "../env"
+import { env } from "@/env"
 
 const debouncedLoadDisplayData = debounce(() => {
     loadDisplayData()
@@ -975,7 +975,11 @@ defineExpose({
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, index) in propFlowList" :key="index" class="transition-colors duration-200 hover:bg-base-300">
+                                <tr
+                                    v-for="(item, index) in propFlowList"
+                                    :key="index"
+                                    class="transition-colors duration-200 hover:bg-base-300"
+                                >
                                     <td>{{ new Date(item.time * 1000).toLocaleString() }}</td>
                                     <td class="font-medium">{{ item.prop_name }}</td>
                                     <td>{{ item.category_name }}</td>

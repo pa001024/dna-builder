@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import { type DPS, dpsListQuery } from "@/api/graphql"
+import { charMap } from "@/data"
 import { formatDateTime } from "@/utils/time"
-import { charMap } from "../data"
 
 // 状态管理
 const searchQuery = ref("")
@@ -146,7 +146,9 @@ const filterDPSList = (dpsList: DPS[]) => {
                             >
                                 <div class="flex items-center justify-between">
                                     <span class="font-bold">{{ tier.level }} Tier</span>
-                                    <span class="bg-white text-gray-800 px-2 py-1 rounded-full text-sm">{{ $t("dps-view.tierCount", { count: tier.count }) }}</span>
+                                    <span class="bg-white text-gray-800 px-2 py-1 rounded-full text-sm">{{
+                                        $t("dps-view.tierCount", { count: tier.count })
+                                    }}</span>
                                 </div>
                                 <div class="text-sm text-white mt-1">{{ tier.range }}</div>
                             </div>

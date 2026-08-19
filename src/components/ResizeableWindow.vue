@@ -4,11 +4,11 @@ import { getCurrentWindow } from "@tauri-apps/api/window"
 import { exit } from "@tauri-apps/plugin-process"
 import { onMounted, onUnmounted, ref, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
-import { applyMaterial, getOSVersion } from "../api/app"
-import { env } from "../env"
-import { i18nLanguages } from "../i18n"
-import { useSettingStore } from "../store/setting"
-import { useUIStore } from "../store/ui"
+import { applyMaterial, getOSVersion } from "@/api/app"
+import { env } from "@/env"
+import { i18nLanguages } from "@/i18n"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 
 const props = defineProps({
     title: { type: String },

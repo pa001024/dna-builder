@@ -2,7 +2,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import { cloneDeep } from "lodash-es"
 import { computed, reactive, ref } from "vue"
-import { type CharSettings, normalizeCharSettings, useCharSettings } from "../composables/useCharSettings"
+import { type CharSettings, normalizeCharSettings, useCharSettings } from "@/composables/useCharSettings"
 import {
     Buff,
     buffData,
@@ -17,10 +17,10 @@ import {
     LeveledWeaponHelper,
     modData,
     WeaponAttr,
-} from "../data"
-import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "../data/effectLv"
-import { useInvStore } from "../store/inv"
-import { useTimeline } from "../store/timeline"
+} from "@/data"
+import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
+import { useInvStore } from "@/store/inv"
+import { useTimeline } from "@/store/timeline"
 
 // Initialize stores and data
 const inv = useInvStore()
@@ -616,7 +616,9 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 <ModEditer
                                     :title="$t('char-build.skill_weapon_mod_config')"
                                     :mods="config.additionalMods[3].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
-                                    :other-mods="config.charSettings.skillWeaponMods.map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
+                                    :other-mods="
+                                        config.charSettings.skillWeaponMods.map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))
+                                    "
                                     :mod-options="
                                         modOptions.filter(
                                             m =>

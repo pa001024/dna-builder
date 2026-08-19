@@ -4,9 +4,9 @@ import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledChar } from "@/data"
-import dungeonData from "../data/d/dungeon.data"
-import { getDungeonName, getDungeonRewardNames, getDungeonType } from "../utils/dungeon-utils"
-import { matchPinyin } from "../utils/pinyin-utils"
+import dungeonData from "@/data/d/dungeon.data"
+import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
+import { matchPinyin } from "@/utils/pinyin-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDungeonId = useSearchParam<number>("id", 0)

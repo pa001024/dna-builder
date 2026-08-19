@@ -2,13 +2,13 @@
 import { useLocalStorage } from "@vueuse/core"
 import { useTranslation } from "i18next-vue"
 import { nextTick, ref, watch } from "vue"
-import { BuildAgent } from "../api/buildAgent"
-import { useCharSettings } from "../composables/useCharSettings"
-import type { CharBuild } from "../data"
-import { env } from "../env"
-import { type BuildAgentChatMessage, db } from "../store/db"
-import { useInvStore } from "../store/inv"
-import { useSettingStore } from "../store/setting"
+import { BuildAgent } from "@/api/buildAgent"
+import { useCharSettings } from "@/composables/useCharSettings"
+import type { CharBuild } from "@/data"
+import { env } from "@/env"
+import { type BuildAgentChatMessage, db } from "@/store/db"
+import { useInvStore } from "@/store/inv"
+import { useSettingStore } from "@/store/setting"
 
 const props = defineProps<{
     charBuild: CharBuild
@@ -525,7 +525,7 @@ async function clearChat() {
         >
             <!-- 头部 -->
             <div class="flex items-center justify-between p-4 border-b border-base-content/20 bg-base-200 rounded-t-xl">
-                    <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2">
                     <span class="font-semibold">{{ $t("ai-chat.title") }}</span>
                 </div>
                 <div class="flex gap-2">
@@ -630,13 +630,13 @@ async function clearChat() {
             <!-- 输入区域 -->
             <div class="p-4 border-t border-base-content/20 bg-base-200">
                 <div class="flex gap-2">
-                        <input
-                            v-model="inputMessage"
-                            type="text"
-                            :placeholder="$t('ai-chat.inputPlaceholder')"
-                            class="input input-bordered input-sm flex-1"
-                            :disabled="isLoading"
-                            @keyup.enter="handleKeyPress"
+                    <input
+                        v-model="inputMessage"
+                        type="text"
+                        :placeholder="$t('ai-chat.inputPlaceholder')"
+                        class="input input-bordered input-sm flex-1"
+                        :disabled="isLoading"
+                        @keyup.enter="handleKeyPress"
                     />
                     <button class="btn btn-primary btn-sm" :disabled="isLoading || !inputMessage.trim()" @click="handleKeyPress">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

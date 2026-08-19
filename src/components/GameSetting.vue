@@ -2,9 +2,9 @@
 import { parse, stringify } from "js-ini"
 import { debounce } from "lodash-es"
 import { computed, onMounted, ref, watch } from "vue"
-import { openExplorer, readTextFile, writeTextFile } from "../api/app"
-import { useGameStore } from "../store/game"
-import { type ConfigOption, engineConfigCategories, gameUserSettingsConfigCategories } from "../utils/game-config"
+import { openExplorer, readTextFile, writeTextFile } from "@/api/app"
+import { useGameStore } from "@/store/game"
+import { type ConfigOption, engineConfigCategories, gameUserSettingsConfigCategories } from "@/utils/game-config"
 
 const game = useGameStore()
 ;(globalThis as any).__chapterCounter = 1

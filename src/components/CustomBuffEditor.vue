@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue"
-import { formatProp } from "../util"
+import { formatProp } from "@/util"
 
 // 获取所有可用的属性名
 const properties = [
@@ -164,10 +164,7 @@ const removeBuff = (index: number) => {
         <div class="flex gap-3 mb-4">
             <div class="flex-1">
                 <div class="text-xs text-base-content/60 mb-1">属性</div>
-                <Select
-                    v-model="newBuff.property"
-                    class="w-full input input-bordered input-md"
-                >
+                <Select v-model="newBuff.property" class="w-full input input-bordered input-md">
                     <SelectItem v-for="prop in properties" :key="prop" :value="prop">
                         {{ prop }}
                     </SelectItem>
