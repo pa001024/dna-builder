@@ -36,6 +36,9 @@ const MAX_DESC_LENGTH = 2000
 /** 转载来源标注长度上限。 */
 const MAX_SOURCE_LENGTH = 500
 
+/** 发型染色码长度上限（H + 10 位 ID + 6 色 × 2 位 Base36 = 23）。 */
+const MAX_HAIR_CODE_LENGTH = 64
+
 /**
  * @description 批量统计染色方案的评论数（通用评论表按 dp_ 前缀目标 ID 查询）。
  * @param planIds 染色方案 ID 列表。
@@ -67,6 +70,7 @@ function validateDyePlanInput(input: {
     type: string
     skinId: number
     colorIds: number[]
+    hairCode?: string | null
     imageUrl?: string | null
     isOriginal: boolean
     source?: string | null
@@ -91,6 +95,12 @@ function validateDyePlanInput(input: {
     }
     if (input.colorIds.some(colorId => !Number.isInteger(colorId) || colorId < 0 || colorId > MAX_COLOR_ID)) {
         throw createGraphQLError(`色板 ID 必须在 0 到 ${MAX_COLOR_ID} 之间`)
+    }
+    if (input.hairCode && !/^H[0-9A-Z]{10}([0-9A-Z]{2})*$/.test(input.hairCode.trim().toUpperCase())) {
+        throw createGraphQLError("发型染色码格式不合法")
+    }
+    if (input.hairCode && input.hairCode.length > MAX_HAIR_CODE_LENGTH) {
+        throw createGraphQLError(`发型染色码长度不能超过 ${MAX_HAIR_CODE_LENGTH}`)
     }
     if (input.imageUrl && !/^https?:\/\//i.test(input.imageUrl)) {
         throw createGraphQLError("预览图地址不合法")
@@ -121,6 +131,7 @@ function toDyePlanRow(row: typeof schema.dyePlans.$inferSelect & { user?: unknow
     return {
         ...row,
         colorIds,
+        hairCode: row.hairCode || undefined,
         isOriginal: row.isOriginal ?? true,
         views: row.views ?? 0,
         likes: row.likes ?? 0,
@@ -154,6 +165,7 @@ export const typeDefs = /* GraphQL */ `
         type: String!
         skinId: Int!
         colorIds: [Int!]!
+        hairCode: String
         imageUrl: String
         isOriginal: Boolean!
         source: String
@@ -175,6 +187,7 @@ export const typeDefs = /* GraphQL */ `
         type: String!
         skinId: Int!
         colorIds: [Int!]!
+        hairCode: String
         imageUrl: String
         isOriginal: Boolean!
         source: String
@@ -315,6 +328,7 @@ export const resolvers = {
                     type: input.type,
                     skinId: input.skinId,
                     colorIds: JSON.stringify(input.colorIds),
+                    hairCode: input.hairCode?.trim().toUpperCase() || null,
                     imageUrl: input.imageUrl,
                     isOriginal: input.isOriginal,
                     source: input.isOriginal ? null : input.source,
@@ -365,6 +379,7 @@ export const resolvers = {
                     type: input.type,
                     skinId: input.skinId,
                     colorIds: JSON.stringify(input.colorIds),
+                    hairCode: input.hairCode?.trim().toUpperCase() || null,
                     imageUrl: input.imageUrl,
                     isOriginal: input.isOriginal,
                     source: input.isOriginal ? null : input.source,

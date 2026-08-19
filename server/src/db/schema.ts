@@ -722,6 +722,8 @@ export const dyePlans = sqliteTable(
         type: text("type").notNull().default("Char"),
         skinId: integer("skin_id").notNull(),
         colorIds: text("color_ids").notNull(),
+        /** 可选的发型染色码（H 开头游戏社区码），仅保存代码，不存发型 ID。 */
+        hairCode: text("hair_code"),
         imageUrl: text("image_url"),
         /** 是否原创，false 表示转载。 */
         isOriginal: integer("is_original", { mode: "boolean" }).notNull().default(true),

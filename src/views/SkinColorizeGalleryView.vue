@@ -314,6 +314,12 @@ watch(filterSkinIds, () => {
                             >
                                 {{ plan.isOriginal ? "原创" : "转载" }}
                             </span>
+                            <span
+                                v-if="plan.hairCode"
+                                class="absolute right-2 top-2 rounded bg-primary/80 px-1.5 py-0.5 text-[10px] font-medium text-primary-content backdrop-blur"
+                            >
+                                含发型
+                            </span>
                         </div>
 
                         <div class="flex flex-col gap-2 p-3">

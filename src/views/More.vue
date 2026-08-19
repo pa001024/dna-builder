@@ -189,13 +189,36 @@ const sectionConfigs: MoreSectionConfig[] = [
 ]
 
 /** 快速访问推荐的核心功能入口。 */
-const featuredNames = ["char-build", "database", "guides", "counter", "levelup", "inventory"]
+const featuredNames = [
+    "char-build",
+    "build-compare",
+    "levelup",
+    "inventory",
+    "skin-colorize",
+    "guides",
+    "database",
+    "abyss-usage",
+    "ranking",
+    "achievement",
+    "race-lottery",
+    "flow",
+    "timeline",
+    "counter",
+    "unpack",
+    "script-list",
+    "dna-home",
+    "game-accounts",
+    "game-launcher",
+    "chat",
+    "setting",
+    "help",
+]
 
 /**
  * 生成快速访问的推荐入口，优先展示高频使用的核心功能。
  */
 const featuredItems = computed(() =>
-    featuredNames.map(name => visibleItemMap.value.get(name)).filter((item): item is MoreItem => item !== undefined),
+    featuredNames.map(name => visibleItemMap.value.get(name)).filter((item): item is MoreItem => item !== undefined)
 )
 
 /**
@@ -205,7 +228,7 @@ const sections = computed(() =>
     sectionConfigs.map(section => ({
         ...section,
         items: section.names.map(name => visibleItemMap.value.get(name)).filter((item): item is MoreItem => item !== undefined),
-    })),
+    }))
 )
 
 /**

@@ -14,7 +14,7 @@ import {
 import { useSearchParam } from "@/composables/useSearchParam"
 import { skinData } from "@/data/d/accessory.data"
 import charData from "@/data/d/char.data"
-import { skinColorizeMaxColorParts, skinColorizeParts, skinColorizeSwatches } from "@/data/d/skin-colorize.data"
+import { skinColorizeMaxColorParts, skinColorizeMaxHairColorParts, skinColorizeParts, skinColorizeSwatches } from "@/data/d/skin-colorize.data"
 import { decodeSkinColorizeCode, encodeSkinColorizeCode, formatSkinColorizeRgb, type SkinColorizeSwatch } from "@/data/skin-colorize"
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
@@ -34,6 +34,15 @@ const selectedSkinId = ref<number>()
 const selectedColorIds = ref<number[]>([])
 /** 当前正在编辑的部件序号，颜色选择器作用于该部件。 */
 const activePartId = ref(1)
+
+/** 是否附带可选的发型染色。 */
+const includeHair = ref(false)
+/** 发型染色目标 ID：无发型替换功能，默认用角色 ID（角色的默认发型），导入/加载发型码时以其为准。 */
+const hairTargetId = ref<number>()
+/** 发型染色的色板 ID 列表（6 个，0 表示默认色），发型码长度与皮肤码不同。 */
+const hairColorIds = ref<number[]>(Array.from({ length: skinColorizeMaxHairColorParts }, () => 0))
+/** 当前正在编辑的发型部件序号（1~6），发型颜色选择器作用于该部件。 */
+const activeHairPartId = ref(1)
 
 /** 当前预览图：用户上传的图片（blob URL）或分享方案携带的远程图片。 */
 const previewImage = ref("")
@@ -120,6 +129,31 @@ const selectedCode = computed(() => {
     return encodeSkinColorizeCode({ type: "Char", skinId: selectedSkin.value.id, colorIds: selectedColorIds.value })
 })
 
+/** 发型染色部件列表（1~6，全部部件可使用所有色板）。 */
+const hairParts = computed(() => Array.from({ length: skinColorizeMaxHairColorParts }, (_, index) => index + 1))
+
+/** 按发色染剂（hairResourceId）聚合的色板分组，发型染色使用。 */
+const hairDyeGroups = computed(() => {
+    const groups: { resourceId: number; name: string; swatches: SkinColorizeSwatch[] }[] = []
+    for (const swatch of skinColorizeSwatches) {
+        let group = groups.find(item => item.resourceId === swatch.hairResourceId)
+        if (!group) {
+            group = { resourceId: swatch.hairResourceId, name: swatch.hairResourceName, swatches: [] }
+            groups.push(group)
+        }
+        group.swatches.push(swatch)
+    }
+    return groups
+})
+
+/** 当前发型染色社区码（H 开头），未勾选或未选角色时为空。 */
+const hairCode = computed(() => {
+    if (!includeHair.value) return ""
+    const targetId = hairTargetId.value || selectedCharacterId.value
+    if (!targetId) return ""
+    return encodeSkinColorizeCode({ type: "Hair", skinId: targetId, colorIds: hairColorIds.value })
+})
+
 /** 新建模式下标题编辑框的默认值（随皮肤变化）。 */
 const defaultPlanTitle = computed(() => (selectedSkin.value ? `${selectedSkin.value.name}染色` : ""))
 
@@ -130,6 +164,7 @@ function resetSelection() {
     selectedSkinId.value = character ? characterSkins.value[0]?.id : undefined
     selectedColorIds.value = Array.from({ length: skinColorizeMaxColorParts }, () => 0)
     activePartId.value = 1
+    resetHairSelection()
     editTitle.value = ""
     editDesc.value = ""
 }
@@ -155,6 +190,7 @@ function selectCharacter(characterId: number) {
     selectedCharacterId.value = characterId
     selectedSkinId.value = characterSkins.value[0]?.id
     selectedColorIds.value = Array.from({ length: skinColorizeMaxColorParts }, () => 0)
+    resetHairSelection()
 }
 
 /** 切换皮肤并清空不应跨皮肤复用的染色方案。 */
@@ -198,6 +234,41 @@ function applyColorToActivePart(swatch: SkinColorizeSwatch) {
 /** 将当前编辑中的部件恢复为默认色。 */
 function resetActivePartColor() {
     selectColor(activePartId.value, 0)
+}
+
+/** 重置发型染色状态（跟随角色，发型无替换功能，目标默认用角色 ID）。 */
+function resetHairSelection() {
+    includeHair.value = false
+    hairTargetId.value = undefined
+    hairColorIds.value = Array.from({ length: skinColorizeMaxHairColorParts }, () => 0)
+    activeHairPartId.value = 1
+}
+
+/** 修改一个发型部件序号对应的色板 ID。 */
+function selectHairColor(partId: number, colorId: number) {
+    hairColorIds.value = hairColorIds.value.map((value, index) => (index + 1 === partId ? colorId : value))
+}
+
+/** 获取发型部件当前的色板 ID，0 表示默认色。 */
+function currentHairColorId(partId: number): number {
+    return hairColorIds.value[partId - 1] || 0
+}
+
+/** 获取发型部件当前选中的色板对象，默认色返回空。 */
+function currentHairSwatch(partId: number): SkinColorizeSwatch | undefined {
+    const colorId = currentHairColorId(partId)
+    if (!colorId) return undefined
+    return skinColorizeSwatches.find(swatch => swatch.id === colorId)
+}
+
+/** 将色板应用到当前编辑中的发型部件（发型色位无限制，可用全部色板）。 */
+function applyHairColorToActivePart(swatch: SkinColorizeSwatch) {
+    selectHairColor(activeHairPartId.value, swatch.id)
+}
+
+/** 将当前编辑中的发型部件恢复为默认色。 */
+function resetActiveHairPartColor() {
+    selectHairColor(activeHairPartId.value, 0)
 }
 
 /** 校验并应用一张用户选择的图片作为预览图。 */
@@ -290,6 +361,7 @@ function applyDyePlan(plan: DyePlan) {
     selectedSkinId.value = plan.skinId
     selectedColorIds.value = Array.from({ length: skinColorizeMaxColorParts }, (_, index) => plan.colorIds[index] || 0)
     activePartId.value = 1
+    applyHairFromCode(plan.hairCode)
     editTitle.value = plan.title
     editDesc.value = plan.desc || ""
     if (previewImage.value.startsWith("blob:")) URL.revokeObjectURL(previewImage.value)
@@ -297,6 +369,31 @@ function applyDyePlan(plan: DyePlan) {
     previewFile.value = undefined
     uploadedImageUrl.value = plan.imageUrl || ""
     loadedPlan.value = plan
+}
+
+/** 应用一段发型染色码到页面（解码出目标 ID 与色板，供颜色选择器回显）。 */
+function applyHairFromCode(code?: string) {
+    if (!code) {
+        resetHairSelection()
+        return
+    }
+    try {
+        const decoded = decodeSkinColorizeCode(code)
+        if (decoded.type !== "Hair") {
+            resetHairSelection()
+            return
+        }
+        includeHair.value = true
+        hairTargetId.value = decoded.skinId
+        hairColorIds.value = Array.from(
+            { length: skinColorizeMaxHairColorParts },
+            (_, index) => decoded.colorIds[index] || 0
+        )
+        activeHairPartId.value = 1
+    } catch (error) {
+        console.error("解析发型染色码失败:", error)
+        resetHairSelection()
+    }
 }
 
 /** 从服务器加载一份染色方案。 */
@@ -345,6 +442,7 @@ async function confirmShare() {
                 type: "Char",
                 skinId: selectedSkin.value.id,
                 colorIds: selectedColorIds.value,
+                hairCode: hairCode.value || undefined,
                 imageUrl: imageUrl || undefined,
                 isOriginal: shareIsOriginal.value,
                 source: shareIsOriginal.value ? undefined : shareSource.value.trim(),
@@ -379,6 +477,7 @@ async function savePlan() {
                 type: "Char",
                 skinId: selectedSkin.value.id,
                 colorIds: selectedColorIds.value,
+                hairCode: hairCode.value || undefined,
                 imageUrl: uploadedImageUrl.value || undefined,
                 isOriginal: loadedPlan.value.isOriginal,
                 source: loadedPlan.value.isOriginal ? undefined : loadedPlan.value.source,
@@ -391,6 +490,7 @@ async function savePlan() {
                 desc: editDesc.value.trim() || undefined,
                 skinId: selectedSkin.value.id,
                 colorIds: [...selectedColorIds.value],
+                hairCode: hairCode.value || undefined,
                 imageUrl: uploadedImageUrl.value || loadedPlan.value.imageUrl,
                 updateAt: Date.now(),
             }
@@ -426,6 +526,7 @@ async function uploadPreview() {
                 type: "Char",
                 skinId: selectedSkin.value.id,
                 colorIds: selectedColorIds.value,
+                hairCode: hairCode.value || undefined,
                 imageUrl,
                 isOriginal: loadedPlan.value.isOriginal,
                 source: loadedPlan.value.isOriginal ? undefined : loadedPlan.value.source,
@@ -437,6 +538,7 @@ async function uploadPreview() {
                 imageUrl,
                 title: editTitle.value.trim() || loadedPlan.value.title,
                 desc: editDesc.value.trim() || undefined,
+                hairCode: hairCode.value || undefined,
             }
             previewImage.value = imageUrl
             uploadedImageUrl.value = imageUrl
@@ -484,10 +586,33 @@ async function copyCode() {
     ui.showSuccessMessage("染色码已复制")
 }
 
-/** 从系统剪贴板读取社区码，并验证皮肤和色板存在。 */
+/** 将当前发型染色码复制到系统剪贴板。 */
+async function copyHairCode() {
+    if (!hairCode.value) return
+    await copyText(hairCode.value)
+    ui.showSuccessMessage("发型染色码已复制")
+}
+
+/** 从系统剪贴板读取社区码：发型码应用到发型染色，皮肤码应用到皮肤。 */
 async function importCode() {
     try {
         const imported = decodeSkinColorizeCode(await navigator.clipboard.readText())
+        if (imported.type === "Hair") {
+            if (imported.colorIds.length > skinColorizeMaxHairColorParts) throw new Error("发型染色部件数量超出游戏上限")
+            const validIds = new Set(skinColorizeSwatches.map(swatch => swatch.id))
+            if (imported.colorIds.some(colorId => colorId !== 0 && !validIds.has(colorId))) {
+                throw new Error("发型染色码包含当前版本不存在的色板")
+            }
+            includeHair.value = true
+            hairTargetId.value = imported.skinId
+            hairColorIds.value = Array.from(
+                { length: skinColorizeMaxHairColorParts },
+                (_, index) => imported.colorIds[index] || 0
+            )
+            activeHairPartId.value = 1
+            ui.showSuccessMessage("发型染色码已导入")
+            return
+        }
         if (imported.type !== "Char") throw new Error("当前页面只支持角色皮肤染色码")
         const skin = skinData.find(item => item.id === imported.skinId)
         if (!skin) throw new Error("数据中不存在该皮肤")
@@ -685,6 +810,15 @@ onBeforeUnmount(() => {
                         <code class="block overflow-x-auto rounded-lg bg-base-200 px-3 py-2 text-center font-mono text-lg tracking-widest">
                             {{ selectedCode || "请先选择角色与皮肤" }}
                         </code>
+                        <template v-if="hairCode">
+                            <div class="mt-2 flex items-center justify-between">
+                                <span class="text-xs opacity-60">发型染色码</span>
+                                <button class="btn btn-ghost btn-xs" type="button" @click="copyHairCode">复制</button>
+                            </div>
+                            <code class="block overflow-x-auto rounded-lg bg-base-200 px-3 py-2 text-center font-mono text-lg tracking-widest">
+                                {{ hairCode }}
+                            </code>
+                        </template>
                     </div>
 
                     <!-- 颜色预览 & 所需资源 -->
@@ -709,6 +843,32 @@ onBeforeUnmount(() => {
                                 />
                                 <span class="opacity-70">{{ part.id }}</span>
                                 <span class="font-mono opacity-60">{{ currentColorId(part.id) || "默认" }}</span>
+                            </div>
+                        </div>
+
+                        <!-- 发型颜色预览（可选） -->
+                        <div v-if="includeHair" class="mt-4 border-t border-base-200 pt-4">
+                            <div class="mb-3 text-sm font-medium">发型颜色预览</div>
+                            <div class="flex flex-wrap gap-1.5">
+                                <div
+                                    v-for="partId in hairParts"
+                                    :key="partId"
+                                    class="flex items-center gap-1.5 rounded-lg border border-base-300 px-2 py-1 text-xs"
+                                    :class="activeHairPartId === partId ? 'border-primary ring-1 ring-primary' : ''"
+                                    :title="currentHairSwatch(partId)?.name || '默认'"
+                                    @click="activeHairPartId = partId"
+                                >
+                                    <span
+                                        class="h-3.5 w-3.5 rounded-full border border-base-content/20"
+                                        :style="{
+                                            backgroundColor: currentHairSwatch(partId)
+                                                ? formatSkinColorizeRgb(currentHairSwatch(partId)!.rgb)
+                                                : 'transparent',
+                                        }"
+                                    />
+                                    <span class="opacity-70">{{ partId }}</span>
+                                    <span class="font-mono opacity-60">{{ currentHairColorId(partId) || "默认" }}</span>
+                                </div>
                             </div>
                         </div>
 
@@ -821,6 +981,78 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
 
+                    <!-- 发型染色（可选）：勾选后显示发型染色信息，仅保存代码无需上传图片 -->
+                    <div class="mt-4 border-t border-base-200 pt-4">
+                        <label class="flex cursor-pointer items-center gap-2">
+                            <input v-model="includeHair" type="checkbox" class="checkbox checkbox-sm" />
+                            <span class="text-sm font-medium">附带发型染色</span>
+                        </label>
+
+                        <template v-if="includeHair">
+                            <div class="mt-3 mb-2 flex items-center justify-between">
+                                <span class="text-xs opacity-60">发型色位</span>
+                                <button class="btn btn-ghost btn-xs" type="button" @click="resetActiveHairPartColor">
+                                    恢复默认色
+                                </button>
+                            </div>
+                            <div class="mb-3 flex flex-wrap gap-1.5">
+                                <button
+                                    v-for="partId in hairParts"
+                                    :key="partId"
+                                    class="flex items-center gap-1 rounded-full border px-2 py-1 text-xs"
+                                    :class="
+                                        activeHairPartId === partId ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 hover:bg-base-200'
+                                    "
+                                    type="button"
+                                    @click="activeHairPartId = partId"
+                                >
+                                    <span
+                                        class="h-3 w-3 rounded-full border border-base-content/20"
+                                        :style="{
+                                            backgroundColor: currentHairSwatch(partId)
+                                                ? formatSkinColorizeRgb(currentHairSwatch(partId)!.rgb)
+                                                : 'transparent',
+                                        }"
+                                    />
+                                    {{ partId }}
+                                </button>
+                            </div>
+
+                            <!-- 发色染剂行：图标 + 分割线 + 所属颜色 -->
+                            <div class="space-y-1.5">
+                                <div
+                                    v-for="group in hairDyeGroups"
+                                    :key="group.resourceId"
+                                    class="flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors hover:bg-base-200/60"
+                                >
+                                    <ResourceCostItem
+                                        :name="group.name"
+                                        :value="[1, group.resourceId, 'Resource']"
+                                        mini
+                                        class="w-9 shrink-0"
+                                    />
+                                    <div class="divider divider-horizontal my-0 mx-0 before:bg-base-300 after:bg-base-300" />
+                                    <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+                                        <button
+                                            v-for="swatch in group.swatches"
+                                            :key="swatch.id"
+                                            class="h-6 w-6 rounded-full border-2 border-base-content/20 transition-transform hover:scale-110"
+                                            :class="[currentHairColorId(activeHairPartId) === swatch.id ? 'ring-2 ring-primary' : '']"
+                                            :style="{ backgroundColor: formatSkinColorizeRgb(swatch.rgb) }"
+                                            type="button"
+                                            :title="`${swatch.name} #${swatch.id}`"
+                                            @click="applyHairColorToActivePart(swatch)"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 rounded-lg bg-base-200 px-3 py-2 text-xs opacity-70">
+                                仅保存发型染色码，无需上传图片；染色码以角色默认发型为目标生成。
+                            </div>
+                        </template>
+                    </div>
+
                     <!-- 保存 / 上传 -->
                     <div v-if="canEdit" class="mt-4 flex flex-col gap-2">
                         <button
@@ -889,6 +1121,9 @@ onBeforeUnmount(() => {
                 <img :src="previewImage" alt="预览图" class="max-h-48 rounded object-contain" />
             </div>
             <div v-else class="mt-2 text-xs opacity-60">未上传预览图，发布后将不包含图片。</div>
+            <div v-if="hairCode" class="mt-2 text-sm opacity-70">
+                发型染色码：<code class="font-mono">{{ hairCode }}</code>
+            </div>
             <div v-if="sharing" class="mt-2 text-sm opacity-60">正在发布...</div>
         </DialogModel>
     </div>

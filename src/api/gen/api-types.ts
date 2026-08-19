@@ -335,6 +335,7 @@ export interface DyePlan {
     type: string
     skinId: number
     colorIds: number[]
+    hairCode?: string
     imageUrl?: string
     isOriginal: boolean
     source?: string
@@ -580,6 +581,7 @@ export interface DyePlanInput {
     type: string
     skinId: number
     colorIds: number[]
+    hairCode?: string
     imageUrl?: string
     isOriginal: boolean
     source?: string

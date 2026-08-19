@@ -23,6 +23,8 @@ export interface SkinColorizePartData {
 
 /** 染色部件上限，由 importdata 从 GlobalConstant.json 自动写入。 */
 export const skinColorizeMaxColorParts = 9
+/** 发型染色部件上限，由 importdata 从 GlobalConstant.json 的 HairColorPart 写入（发型码长度与皮肤不同）。 */
+export const skinColorizeMaxHairColorParts = 6
 /** 默认色板 ID，由 importdata 从 GlobalConstant.json 自动写入。 */
 export const skinColorizeDefaultColorId = -1
 /** 染色部件列表，固定写死，与游戏 DyePart.json 一致（部件 8 仅允许泪湖/群鸦色板）。 */

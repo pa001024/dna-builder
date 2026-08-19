@@ -1,0 +1,1 @@
+ALTER TABLE `dye_plans` ADD `hair_code` text;

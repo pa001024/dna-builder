@@ -130,6 +130,34 @@ export default defineConfig(async ({ command }) => ({
             },
         }),
     ],
+    // 这些依赖只被懒加载 chunk 首次引入：它们由 unplugin-vue-components 自动注册的组件
+    // （DNAGameInfo、CharHPCurve、GameSimulator、CodeEditor、ResourceTreeGraph、Sidebar 等）在运行时才带入，
+    // Vite 启动时的依赖扫描器无法跟踪这种插件注入的 import，会在用户首次进入对应页面时才"新发现"依赖，
+    // 触发 "optimized dependencies changed. reloading page" 整页刷新。
+    // 这里显式预声明，让它们从启动时就进入预构建缓存（node_modules/.vite），避免进页面被强制 reload。
+    optimizeDeps: {
+        include: [
+            "html-to-image",
+            "echarts",
+            "three",
+            "@antv/g",
+            "@antv/g6",
+            "@codemirror/commands",
+            "@codemirror/lang-javascript",
+            "@codemirror/language",
+            "@codemirror/state",
+            "@codemirror/view",
+            "@lezer/highlight",
+            "gsap",
+            "js-ini",
+            "@tauri-apps/plugin-updater",
+            "@tauri-apps/plugin-process",
+            "@langchain/core/messages",
+            "@langchain/openai",
+            "langchain",
+            "zod",
+        ],
+    },
     build: {
         rollupOptions: {
             input: {

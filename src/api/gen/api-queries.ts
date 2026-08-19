@@ -988,6 +988,7 @@ export const dyePlansQuery = typedQuery(
                 type
                 skinId
                 colorIds
+                hairCode
                 imageUrl
                 isOriginal
                 source
@@ -1040,6 +1041,7 @@ export const dyePlanQuery = typedQuery(
                 type
                 skinId
                 colorIds
+                hairCode
                 imageUrl
                 isOriginal
                 source
