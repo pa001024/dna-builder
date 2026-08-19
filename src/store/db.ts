@@ -45,6 +45,22 @@ export interface CustomEntity {
 
 export type UCustomEntity = Omit<CustomEntity, "id">
 
+/**
+ * 已保存的游戏账号（cachedLogin 登录缓存）。
+ */
+export interface GameAccount {
+    id: number
+    name: string
+    /** cachedLogin 文件内容 */
+    content: string
+    /** 添加时间戳 */
+    addTime: number
+    /** 最近使用时间戳 */
+    lastUsed: number
+}
+
+export type UGameAccount = Omit<GameAccount, "id">
+
 export interface EntityMod {
     id: number
     entity: string
@@ -208,6 +224,7 @@ interface DB {
     nodeEditorGraphs: NodeEditorGraph
     propFlows: PropFlow
     scriptColorToolStates: ScriptColorToolState
+    gameAccounts: GameAccount
 }
 
 // 加表不需要改version!
@@ -224,4 +241,5 @@ db.version(1).stores({
     nodeEditorGraphs: "++id, name, createdAt, updatedAt",
     propFlows: "++id, time, prop_name, category_name",
     scriptColorToolStates: "&id, updatedAt",
+    gameAccounts: "++id, name, addTime, lastUsed",
 })

@@ -2,7 +2,7 @@
 import * as dialog from "@tauri-apps/plugin-dialog"
 import { t } from "i18next"
 import { computed, onMounted, ref } from "vue"
-import { createDesktopShortcut as createShortcut, deleteFile, openExplorer, removeDirAll } from "@/api/app"
+import { createDesktopShortcut as createShortcut, deleteFile, openExplorer, pathExists, removeDirAll, renameFile } from "@/api/app"
 import { useCloudGameStore } from "@/store/cloudgame"
 import { useGameStore } from "@/store/game"
 import { useUIStore } from "@/store/ui"
@@ -11,6 +11,8 @@ import { useUIStore } from "@/store/ui"
 const ui = useUIStore()
 const keys = ["path", "beforeGame", "afterGame"] as const
 const tab = ref("update")
+// 卸载游戏时是否保留用户设置（EM\Saved 目录），默认勾选
+const uninstallKeepSettings = ref(true)
 const cloudgame = useCloudGameStore()
 const game = useGameStore()
 
@@ -54,20 +56,61 @@ const uninstallGame = async () => {
         ui.showErrorMessage(t("game-launcher.selectGamePathFirst"))
         return
     }
+    // 弹出自定义卸载确认框（含「保留用户设置」选项）
+    const modal = document.getElementById("uninstall_modal") as HTMLDialogElement | null
+    modal?.showModal()
+}
 
-    const confirmed = await ui.showDialog(t("game-launcher.uninstall"), t("game-launcher.confirmUninstall"))
-    if (!confirmed) return
+/**
+ * 关闭卸载确认框。
+ */
+const uninstallModalClose = () => {
+    const modal = document.getElementById("uninstall_modal") as HTMLDialogElement | null
+    modal?.close()
+}
+
+/**
+ * 确认卸载游戏：勾选「保留用户设置」时保留 EM\Saved 目录，删除其余文件。
+ */
+const confirmUninstall = async () => {
+    const modal = document.getElementById("uninstall_modal") as HTMLDialogElement | null
+    modal?.close()
+    const gameDir = game.gameDir
+    const savedDir = `${gameDir}EM\\Saved`
+    const backupDir = `${gameDir}.uninstall_saved_backup`
 
     try {
+        // 先将 EM\Saved 移动到临时位置，删除 EM 后再移回，避免逐个删除大目录下的文件
+        if (uninstallKeepSettings.value) {
+            if (await pathExists(savedDir)) {
+                // 清理可能残留的旧备份，避免重命名失败
+                await removeDirAll(backupDir)
+                await renameFile(savedDir, backupDir)
+            }
+        }
         await deleteFile(game.path, true)
-        await deleteFile(`${game.gameDir}BaseVersion.json`, true)
-        await deleteFile(`${game.gameDir}GameVersion.json`, true)
-        await deleteFile(`${game.gameDir}.extracting`, true)
-        await removeDirAll(`${game.gameDir}EM`)
-        await removeDirAll(`${game.gameDir}Engine`)
+        await deleteFile(`${gameDir}BaseVersion.json`, true)
+        await deleteFile(`${gameDir}GameVersion.json`, true)
+        await deleteFile(`${gameDir}.extracting`, true)
+        await removeDirAll(`${gameDir}EM`)
+        await removeDirAll(`${gameDir}Engine`)
+        // 将保留的用户设置目录移回原位
+        if (uninstallKeepSettings.value && (await pathExists(backupDir))) {
+            await renameFile(backupDir, savedDir)
+        }
         await game.refreshGameInstalled()
         ui.showSuccessMessage(t("game-launcher.uninstallSuccess"))
     } catch (error) {
+        // 卸载失败时尝试恢复被移动的用户设置目录，避免数据丢失
+        if (uninstallKeepSettings.value) {
+            try {
+                if ((await pathExists(backupDir)) && !(await pathExists(savedDir))) {
+                    await renameFile(backupDir, savedDir)
+                }
+            } catch (restoreError) {
+                console.error("恢复用户设置目录失败:", restoreError)
+            }
+        }
         console.error("卸载游戏失败:", error)
         ui.showErrorMessage(t("game-launcher.uninstallFailed", { error: error instanceof Error ? error.message : String(error) }))
     }
@@ -165,6 +208,19 @@ onMounted(async () => {
             >
                 <Icon icon="ri:settings-3-line" class="size-4" />
                 {{ $t("game-launcher.gameSetting") }}
+            </button>
+            <button
+                type="button"
+                class="px-3 py-2 text-sm rounded-t-lg border-b-2 transition-colors flex items-center gap-1.5"
+                :class="
+                    tab === 'account'
+                        ? 'border-primary text-primary font-semibold'
+                        : 'border-transparent text-base-content/60 hover:text-base-content'
+                "
+                @click="tab = 'account'"
+            >
+                <Icon icon="ri:user-line" class="size-4" />
+                {{ $t("game-launcher.accountManage") }}
             </button>
             <RouterLink
                 to="/mods"
@@ -271,5 +327,40 @@ onMounted(async () => {
         <div v-if="tab === 'update'" class="flex-1 bg-base-100 border-base-300 h-full overflow-hidden">
             <GameUpdate />
         </div>
+        <ScrollArea v-if="tab === 'account'" class="flex-1">
+            <div class="bg-base-100 p-4">
+                <div class="max-w-6xl m-auto">
+                    <GameSessionManager />
+                </div>
+            </div>
+        </ScrollArea>
+
+        <!-- 自定义卸载游戏确认框 -->
+        <dialog id="uninstall_modal" class="modal">
+            <div class="modal-box">
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                    <Icon icon="ri:delete-bin-6-line" class="size-5" />
+                    {{ $t("game-launcher.uninstallTitle") }}
+                </h3>
+                <p class="py-4 text-base-content/70">{{ $t("game-launcher.uninstallContent") }}</p>
+                <label class="label cursor-pointer justify-start gap-2 rounded-lg bg-base-200 p-3">
+                    <input v-model="uninstallKeepSettings" type="checkbox" class="checkbox checkbox-primary" />
+                    <div class="flex flex-col">
+                        <span class="label-text font-semibold">{{ $t("game-launcher.uninstallKeepSettings") }}</span>
+                        <span class="text-xs text-base-content/50">{{ $t("game-launcher.uninstallKeepSettingsHint") }}</span>
+                    </div>
+                </label>
+                <div class="modal-action">
+                    <form method="dialog" class="space-x-2">
+                        <button class="min-w-20 btn btn-error" @click="confirmUninstall()">
+                            <Icon icon="ri:delete-bin-6-line" class="size-4" />
+                            {{ $t("game-launcher.uninstall") }}
+                        </button>
+                        <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-backdrop" @click="uninstallModalClose()" />
+        </dialog>
     </div>
 </template>
