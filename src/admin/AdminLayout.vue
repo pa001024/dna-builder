@@ -68,6 +68,11 @@ const menuItems: {
         path: "/admin/ranking",
         icon: "ri:bar-chart-line",
     },
+    {
+        name: "染色方案管理",
+        path: "/admin/dyeplan",
+        icon: "ri:palette-line",
+    },
 ]
 
 const route = useRoute()

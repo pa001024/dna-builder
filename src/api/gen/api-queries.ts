@@ -968,6 +968,7 @@ export const dyePlansQuery = typedQuery(
             $skinId: Int
             $skinIds: [Int!]
             $userId: String
+            $hasHair: Boolean
             $limit: Int
             $offset: Int
             $sortBy: String
@@ -978,6 +979,7 @@ export const dyePlansQuery = typedQuery(
                 skinId: $skinId
                 skinIds: $skinIds
                 userId: $userId
+                hasHair: $hasHair
                 limit: $limit
                 offset: $offset
                 sortBy: $sortBy
@@ -1017,6 +1019,7 @@ export const dyePlansQuery = typedQuery(
         skinId?: number
         skinIds?: number[]
         userId?: string
+        hasHair?: boolean
         limit?: number
         offset?: number
         sortBy?: string
@@ -1025,11 +1028,11 @@ export const dyePlansQuery = typedQuery(
 
 export const dyePlansCountQuery = typedQuery(
     /* GraphQL */ `
-        query ($search: String, $type: String, $skinId: Int, $skinIds: [Int!]) {
-            dyePlansCount(search: $search, type: $type, skinId: $skinId, skinIds: $skinIds)
+        query ($search: String, $type: String, $skinId: Int, $skinIds: [Int!], $hasHair: Boolean) {
+            dyePlansCount(search: $search, type: $type, skinId: $skinId, skinIds: $skinIds, hasHair: $hasHair)
         }
     ` as const
-)<number, { search?: string; type?: string; skinId?: number; skinIds?: number[] }>()
+)<number, { search?: string; type?: string; skinId?: number; skinIds?: number[]; hasHair?: boolean }>()
 
 export const dyePlanQuery = typedQuery(
     /* GraphQL */ `

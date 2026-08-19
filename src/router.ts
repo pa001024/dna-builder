@@ -192,6 +192,11 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "ranking",
                 component: () => import("./admin/RankingManagement.vue"),
             },
+            {
+                name: "admin-dyeplan",
+                path: "dyeplan",
+                component: () => import("./admin/DyePlanManagement.vue"),
+            },
         ],
     },
     {

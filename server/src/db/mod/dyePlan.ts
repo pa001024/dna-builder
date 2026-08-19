@@ -204,8 +204,8 @@ export const typeDefs = /* GraphQL */ `
     }
 
     type Query {
-        dyePlans(search: String, type: String, skinId: Int, skinIds: [Int!], userId: String, limit: Int = 20, offset: Int = 0, sortBy: String): [DyePlan!]!
-        dyePlansCount(search: String, type: String, skinId: Int, skinIds: [Int!]): Int!
+        dyePlans(search: String, type: String, skinId: Int, skinIds: [Int!], userId: String, hasHair: Boolean, limit: Int = 20, offset: Int = 0, sortBy: String): [DyePlan!]!
+        dyePlansCount(search: String, type: String, skinId: Int, skinIds: [Int!], hasHair: Boolean): Int!
         dyePlan(id: String!): DyePlan
     }
 `
@@ -225,7 +225,7 @@ async function attachDyePlanCommentCounts(rows: ReturnType<typeof toDyePlanRow>[
 export const resolvers = {
     Query: {
         dyePlans: async (_parent, args, context, info) => {
-            const { search, type, skinId, skinIds, userId, limit = 20, offset = 0, sortBy = "latest" } = args || {}
+            const { search, type, skinId, skinIds, userId, hasHair, limit = 20, offset = 0, sortBy = "latest" } = args || {}
             const conditions = []
 
             if (search) {
@@ -242,6 +242,9 @@ export const resolvers = {
             }
             if (userId) {
                 conditions.push(eq(schema.dyePlans.userId, userId))
+            }
+            if (typeof hasHair === "boolean") {
+                conditions.push(hasHair ? sql`${schema.dyePlans.hairCode} IS NOT NULL` : sql`${schema.dyePlans.hairCode} IS NULL`)
             }
 
             let orderBy: any[]
@@ -271,7 +274,7 @@ export const resolvers = {
             )
         },
         dyePlansCount: async (_parent, args) => {
-            const { search, type, skinId, skinIds } = args || {}
+            const { search, type, skinId, skinIds, hasHair } = args || {}
             const conditions = []
 
             if (search) {
@@ -285,6 +288,9 @@ export const resolvers = {
             }
             if (skinIds?.length) {
                 conditions.push(inArray(schema.dyePlans.skinId, skinIds))
+            }
+            if (typeof hasHair === "boolean") {
+                conditions.push(hasHair ? sql`${schema.dyePlans.hairCode} IS NOT NULL` : sql`${schema.dyePlans.hairCode} IS NULL`)
             }
 
             const whereClause = conditions.length > 0 ? and(...conditions) : undefined
@@ -367,7 +373,7 @@ export const resolvers = {
                 throw createGraphQLError("染色方案不存在")
             }
 
-            if (plan.userId !== context.user.id) {
+            if (plan.userId !== context.user.id && !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("无权修改此染色方案")
             }
 

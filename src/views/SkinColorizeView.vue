@@ -43,6 +43,8 @@ const hairTargetId = ref<number>()
 const hairColorIds = ref<number[]>(Array.from({ length: skinColorizeMaxHairColorParts }, () => 0))
 /** 当前正在编辑的发型部件序号（1~6），发型颜色选择器作用于该部件。 */
 const activeHairPartId = ref(1)
+/** 发型染色码手动导入输入框内容。 */
+const hairCodeInput = ref("")
 
 /** 当前预览图：用户上传的图片（blob URL）或分享方案携带的远程图片。 */
 const previewImage = ref("")
@@ -593,23 +595,54 @@ async function copyHairCode() {
     ui.showSuccessMessage("发型染色码已复制")
 }
 
+/** 解析并应用一段发型染色码到页面（校验格式、数量与色板存在），失败时抛出错误。 */
+function applyHairCode(rawCode: string) {
+    const imported = decodeSkinColorizeCode(rawCode)
+    if (imported.type !== "Hair") throw new Error("当前内容不是发型染色码")
+    if (imported.colorIds.length > skinColorizeMaxHairColorParts) throw new Error("发型染色部件数量超出游戏上限")
+    const validIds = new Set(skinColorizeSwatches.map(swatch => swatch.id))
+    if (imported.colorIds.some(colorId => colorId !== 0 && !validIds.has(colorId))) {
+        throw new Error("发型染色码包含当前版本不存在的色板")
+    }
+    includeHair.value = true
+    hairTargetId.value = imported.skinId
+    hairColorIds.value = Array.from({ length: skinColorizeMaxHairColorParts }, (_, index) => imported.colorIds[index] || 0)
+    activeHairPartId.value = 1
+}
+
+/** 从系统剪贴板导入发型染色码（发型染色区专用入口）。 */
+async function importHairCode() {
+    try {
+        applyHairCode(await navigator.clipboard.readText())
+        ui.showSuccessMessage("发型染色码已导入")
+    } catch (error) {
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    }
+}
+
+/** 从发型染色区的手动输入框导入发型染色码。 */
+function importHairCodeFromInput() {
+    const value = hairCodeInput.value.trim()
+    if (!value) {
+        ui.showErrorMessage("请先粘贴发型染色码")
+        return
+    }
+    try {
+        applyHairCode(value)
+        hairCodeInput.value = ""
+        ui.showSuccessMessage("发型染色码已导入")
+    } catch (error) {
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    }
+}
+
 /** 从系统剪贴板读取社区码：发型码应用到发型染色，皮肤码应用到皮肤。 */
 async function importCode() {
     try {
-        const imported = decodeSkinColorizeCode(await navigator.clipboard.readText())
+        const rawCode = await navigator.clipboard.readText()
+        const imported = decodeSkinColorizeCode(rawCode)
         if (imported.type === "Hair") {
-            if (imported.colorIds.length > skinColorizeMaxHairColorParts) throw new Error("发型染色部件数量超出游戏上限")
-            const validIds = new Set(skinColorizeSwatches.map(swatch => swatch.id))
-            if (imported.colorIds.some(colorId => colorId !== 0 && !validIds.has(colorId))) {
-                throw new Error("发型染色码包含当前版本不存在的色板")
-            }
-            includeHair.value = true
-            hairTargetId.value = imported.skinId
-            hairColorIds.value = Array.from(
-                { length: skinColorizeMaxHairColorParts },
-                (_, index) => imported.colorIds[index] || 0
-            )
-            activeHairPartId.value = 1
+            applyHairCode(rawCode)
             ui.showSuccessMessage("发型染色码已导入")
             return
         }
@@ -813,7 +846,10 @@ onBeforeUnmount(() => {
                         <template v-if="hairCode">
                             <div class="mt-2 flex items-center justify-between">
                                 <span class="text-xs opacity-60">发型染色码</span>
-                                <button class="btn btn-ghost btn-xs" type="button" @click="copyHairCode">复制</button>
+                                <div class="flex items-center gap-1">
+                                    <button class="btn btn-ghost btn-xs" type="button" @click="importHairCode">导入</button>
+                                    <button class="btn btn-ghost btn-xs" type="button" @click="copyHairCode">复制</button>
+                                </div>
                             </div>
                             <code class="block overflow-x-auto rounded-lg bg-base-200 px-3 py-2 text-center font-mono text-lg tracking-widest">
                                 {{ hairCode }}
@@ -1045,6 +1081,20 @@ onBeforeUnmount(() => {
                                         />
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="mt-3 flex gap-1.5">
+                                <input
+                                    v-model="hairCodeInput"
+                                    type="text"
+                                    class="input input-bordered input-sm min-w-0 flex-1 font-mono"
+                                    placeholder="粘贴发型染色码（H 开头），回车导入"
+                                    @keydown.enter="importHairCodeFromInput"
+                                />
+                                <button class="btn btn-ghost btn-xs shrink-0" type="button" @click="importHairCodeFromInput">导入</button>
+                                <button class="btn btn-ghost btn-xs shrink-0" type="button" title="读取剪贴板内容" @click="importHairCode">
+                                    剪贴板
+                                </button>
                             </div>
 
                             <div class="mt-3 rounded-lg bg-base-200 px-3 py-2 text-xs opacity-70">
