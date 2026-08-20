@@ -6590,6 +6590,7 @@
         "afterGame": "시작 후 실행",
         "all_files": "모든 파일",
         "allCategories": "전체 분류",
+        "appOnlyDownload": "다운로드 및 설치 기능은 데스크톱 앱에서만 사용할 수 있습니다",
         "beforeGame": "시작 전 실행",
         "changelog": "변경 사항",
         "char": "캐릭터",
@@ -6941,6 +6942,15 @@
     },
     "modEditor": {
         "inputCode": "캐릭터 또는 무기 코드를 입력하세요"
+    },
+    "mods-detail": {
+        "back": "뒤로",
+        "loadFailed": "MOD 상세 정보를 불러오지 못했습니다",
+        "title": "MOD 상세"
+    },
+    "mods-list": {
+        "title": "MOD 공유 스토어",
+        "viewDetail": "자세히 보기"
     },
     "monster": {
         "dropInfo": "드롭 정보",

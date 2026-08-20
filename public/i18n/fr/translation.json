@@ -6624,6 +6624,7 @@
         "afterGame": "Exécuter après le lancement",
         "all_files": "Tous les fichiers",
         "allCategories": "Toutes les catégories",
+        "appOnlyDownload": "Le téléchargement et l'installation ne sont disponibles que dans l'application de bureau",
         "beforeGame": "Exécuter avant le lancement",
         "changelog": "Journal des modifications",
         "char": "Personnage",
@@ -6975,6 +6976,15 @@
     },
     "modEditor": {
         "inputCode": "Veuillez entrer le code du personnage ou de l'arme"
+    },
+    "mods-detail": {
+        "back": "Retour",
+        "loadFailed": "Échec du chargement des détails du MOD",
+        "title": "Détail du MOD"
+    },
+    "mods-list": {
+        "title": "Boutique de partage de MOD",
+        "viewDetail": "Voir les détails"
     },
     "monster": {
         "dropInfo": "Infos de butin",

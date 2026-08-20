@@ -1002,6 +1002,7 @@
         "afterGame": "启动后执行",
         "all_files": "所有文件",
         "allCategories": "全部分类",
+        "appOnlyDownload": "下载安装仅桌面客户端可用",
         "beforeGame": "启动前执行",
         "changelog": "更新说明",
         "char": "角色",
@@ -1352,6 +1353,15 @@
     },
     "modEditor": {
         "inputCode": "请输入角色或武器代码"
+    },
+    "mods-detail": {
+        "back": "返回",
+        "loadFailed": "MOD 详情加载失败",
+        "title": "MOD 详情"
+    },
+    "mods-list": {
+        "title": "MOD 分享商店",
+        "viewDetail": "查看详情"
     },
     "monster": {
         "dropInfo": "掉落信息",

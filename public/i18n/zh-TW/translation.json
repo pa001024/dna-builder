@@ -5729,6 +5729,7 @@
         "afterGame": "啟動後執行",
         "all_files": "所有檔案",
         "allCategories": "所有分類",
+        "appOnlyDownload": "下載安裝僅桌面客戶端可用",
         "beforeGame": "啟動前執行",
         "changelog": "更新說明",
         "char": "角色",
@@ -6080,6 +6081,15 @@
     },
     "modEditor": {
         "inputCode": "請輸入角色或武器代碼"
+    },
+    "mods-detail": {
+        "back": "返回",
+        "loadFailed": "MOD 詳情載入失敗",
+        "title": "MOD 詳情"
+    },
+    "mods-list": {
+        "title": "MOD 分享商店",
+        "viewDetail": "查看詳情"
     },
     "monster": {
         "dropInfo": "掉落資訊",

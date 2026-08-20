@@ -6508,6 +6508,7 @@
         "afterGame": "起動後に実行",
         "all_files": "すべてのファイル",
         "allCategories": "すべてのカテゴリ",
+        "appOnlyDownload": "ダウンロードとインストールはデスクトップ版でのみ利用できます",
         "beforeGame": "起動前に実行",
         "changelog": "更新内容",
         "char": "キャラクター",
@@ -6859,6 +6860,15 @@
     },
     "modEditor": {
         "inputCode": "キャラクターまたは武器コードを入力してください"
+    },
+    "mods-detail": {
+        "back": "戻る",
+        "loadFailed": "MOD 詳細の読み込みに失敗しました",
+        "title": "MOD 詳細"
+    },
+    "mods-list": {
+        "title": "MOD 共有ストア",
+        "viewDetail": "詳細を見る"
     },
     "monster": {
         "dropInfo": "ドロップ情報",

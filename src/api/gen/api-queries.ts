@@ -418,16 +418,6 @@ export const adminShopRedemptionsQuery = typedQuery(
                     name
                     email
                     qq
-                    pic
-                    uid
-                    roles
-                    experience
-                    points
-                    level
-                    selectedTitleAssetId
-                    selectedNameCardAssetId
-                    createdAt
-                    updateAt
                 }
                 product {
                     id
@@ -740,7 +730,6 @@ export const rankingListItemsQuery = typedQuery(
                     desc
                     charId
                     charSettings
-                    userId
                     views
                     likes
                     isRecommended
@@ -750,35 +739,7 @@ export const rankingListItemsQuery = typedQuery(
                     user {
                         id
                         name
-                        email
                         qq
-                        pic
-                        uid
-                        roles
-                        experience
-                        points
-                        level
-                        selectedTitleAssetId
-                        selectedNameCardAssetId
-                        currentTitleText
-                        currentTitleClass
-                        nameEffectClass
-                        dailyExperienceStatus {
-                            todayAwardedExp
-                            totalAvailableExp
-                            dailyLaunchProgress
-                            dailyLaunchLimit
-                            dailyOnlineHourProgress
-                            dailyOnlineHourLimit
-                            dailyMessageProgress
-                            dailyMessageLimit
-                            dailyOnlineHourRetryAfterMs
-                        }
-                        abyssUsageUploadStatus {
-                            uploadedThisSeason
-                        }
-                        createdAt
-                        updateAt
                     }
                     isLiked
                 }
@@ -996,6 +957,7 @@ export const gameModsQuery = typedQuery(
                 coverUrl
                 modJson
                 requires
+                source
                 userId
                 downloads
                 views
@@ -1008,35 +970,7 @@ export const gameModsQuery = typedQuery(
                 user {
                     id
                     name
-                    email
                     qq
-                    pic
-                    uid
-                    roles
-                    experience
-                    points
-                    level
-                    selectedTitleAssetId
-                    selectedNameCardAssetId
-                    currentTitleText
-                    currentTitleClass
-                    nameEffectClass
-                    dailyExperienceStatus {
-                        todayAwardedExp
-                        totalAvailableExp
-                        dailyLaunchProgress
-                        dailyLaunchLimit
-                        dailyOnlineHourProgress
-                        dailyOnlineHourLimit
-                        dailyMessageProgress
-                        dailyMessageLimit
-                        dailyOnlineHourRetryAfterMs
-                    }
-                    abyssUsageUploadStatus {
-                        uploadedThisSeason
-                    }
-                    createdAt
-                    updateAt
                 }
             }
         }
@@ -1079,6 +1013,7 @@ export const gameModQuery = typedQuery(
                 coverUrl
                 modJson
                 requires
+                source
                 userId
                 downloads
                 views
@@ -1088,38 +1023,11 @@ export const gameModQuery = typedQuery(
                 isPinned
                 createdAt
                 updateAt
+                images
                 user {
                     id
                     name
-                    email
                     qq
-                    pic
-                    uid
-                    roles
-                    experience
-                    points
-                    level
-                    selectedTitleAssetId
-                    selectedNameCardAssetId
-                    currentTitleText
-                    currentTitleClass
-                    nameEffectClass
-                    dailyExperienceStatus {
-                        todayAwardedExp
-                        totalAvailableExp
-                        dailyLaunchProgress
-                        dailyLaunchLimit
-                        dailyOnlineHourProgress
-                        dailyOnlineHourLimit
-                        dailyMessageProgress
-                        dailyMessageLimit
-                        dailyOnlineHourRetryAfterMs
-                    }
-                    abyssUsageUploadStatus {
-                        uploadedThisSeason
-                    }
-                    createdAt
-                    updateAt
                 }
             }
         }
@@ -1288,35 +1196,7 @@ export const commentsQuery = typedQuery(
                 user {
                     id
                     name
-                    email
                     qq
-                    pic
-                    uid
-                    roles
-                    experience
-                    points
-                    level
-                    selectedTitleAssetId
-                    selectedNameCardAssetId
-                    currentTitleText
-                    currentTitleClass
-                    nameEffectClass
-                    dailyExperienceStatus {
-                        todayAwardedExp
-                        totalAvailableExp
-                        dailyLaunchProgress
-                        dailyLaunchLimit
-                        dailyOnlineHourProgress
-                        dailyOnlineHourLimit
-                        dailyMessageProgress
-                        dailyMessageLimit
-                        dailyOnlineHourRetryAfterMs
-                    }
-                    abyssUsageUploadStatus {
-                        uploadedThisSeason
-                    }
-                    createdAt
-                    updateAt
                 }
             }
         }

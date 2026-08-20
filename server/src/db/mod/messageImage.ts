@@ -80,17 +80,6 @@ function rememberHashUploadUrl(hash: string, url: string): void {
 }
 
 /**
- * @description 给 OSS 图片 URL 追加自动格式压缩参数，避免返回消息体过大。
- * @param url 原始 OSS 图片地址。
- * @returns 追加 `x-oss-process=image/format,auto` 后的地址。
- */
-export function appendOssAutoFormat(url: string): string {
-    if (!url || /(?:\?|&)x-oss-process=/.test(url)) return url
-    const separator = url.includes("?") ? "&" : "?"
-    return `${url}${separator}x-oss-process=image/format,auto`
-}
-
-/**
  * @description 估算 Data URL 对应的原始二进制大小（字节）。
  * @param dataUrl Base64 Data URL。
  * @returns 估算后的字节大小。
@@ -122,7 +111,7 @@ export async function uploadDataUrlImageToOss(dataUrl: string): Promise<string> 
     }
 
     const uploadedUrl = await uploadImageBufferByHash(parsed.buffer, parsed.mimeType)
-    return appendOssAutoFormat(uploadedUrl)
+    return uploadedUrl
 }
 
 /**

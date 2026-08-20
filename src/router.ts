@@ -80,6 +80,12 @@ const routes: readonly RouteRecordRaw[] = [
         component: () => import("./views/ModManagerView.vue"),
         beforeEnter: () => setMinSize(360, 430),
     },
+    {
+        name: "mods-detail",
+        path: "/mods/:id",
+        component: () => import("./views/ModDetailView.vue"),
+        beforeEnter: () => setMinSize(360, 430),
+    },
     { name: "game-accounts", path: "/game-accounts", component: UserManager, beforeEnter: () => setMinSize(360, 430) },
     { name: "unpack", path: "/unpack", component: () => import("./views/UnpackView.vue"), beforeEnter: () => setMinSize(360, 430) },
     {

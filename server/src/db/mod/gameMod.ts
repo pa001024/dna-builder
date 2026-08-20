@@ -45,7 +45,6 @@ function validateGameModInput(input: {
     if (input.requires !== undefined && input.requires !== null && !Array.isArray(input.requires)) {
         throw createGraphQLError("前置 MOD 列表不合法")
     }
-    // 来源：任意文本（空表示原创），无格式限制；前端渲染时将其中链接转为 a 标签
 }
 
 /**

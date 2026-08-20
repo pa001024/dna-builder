@@ -8,11 +8,52 @@ import {
     setGameModActiveMutation,
     updateGameModMutation,
 } from "@/api/gen/api-mutations"
-import { gameModsCountQuery, gameModsQuery } from "@/api/gen/api-queries"
+import { gameModsCountQuery } from "@/api/gen/api-queries"
 import type { GameMod } from "@/api/gen/api-types"
+import { typedQuery } from "@/api/query"
 import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
 import type { AdminCrudConfig } from "./crud-config"
+
+/** 管理页列表查询参数。 */
+interface AdminGameModsQueryVariables {
+    search?: string
+    category?: string
+    status?: string
+    limit?: number
+    offset?: number
+    sortBy?: string
+}
+
+/**
+ * 管理页专用 MOD 列表查询。
+ * 公共列表不读取审核状态，管理页需要显式查询 status 供审核展示与操作判断。
+ */
+const adminGameModsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($search: String, $category: String, $status: String, $limit: Int, $offset: Int, $sortBy: String) {
+            gameMods(search: $search, category: $category, status: $status, limit: $limit, offset: $offset, sortBy: $sortBy) {
+                id
+                name
+                description
+                category
+                entity
+                source
+                downloads
+                views
+                status
+                isActive
+                isRecommended
+                isPinned
+                createdAt
+                user {
+                    id
+                    name
+                }
+            }
+        }
+    ` as const
+)<GameMod[], AdminGameModsQueryVariables>()
 
 /**
  * 分类显示名。
@@ -162,7 +203,7 @@ const config: AdminCrudConfig<GameMod> = {
             status: params.filters.status ? String(params.filters.status) : undefined,
         }
         const [items, total] = await Promise.all([
-            gameModsQuery(
+            adminGameModsQuery(
                 { ...common, limit: params.pageSize, offset: (params.page - 1) * params.pageSize, sortBy: "latest" },
                 { requestPolicy: "network-only" }
             ),

@@ -6589,6 +6589,7 @@
         "afterGame": "Execute After Launch",
         "all_files": "All Files",
         "allCategories": "All categories",
+        "appOnlyDownload": "Download & install is only available in the desktop app",
         "beforeGame": "Execute Before Launch",
         "changelog": "Changelog",
         "char": "Character",
@@ -6939,6 +6940,15 @@
     },
     "modEditor": {
         "inputCode": "Please enter character or weapon code"
+    },
+    "mods-detail": {
+        "back": "Back",
+        "loadFailed": "Failed to load MOD details",
+        "title": "MOD Detail"
+    },
+    "mods-list": {
+        "title": "MOD Share Store",
+        "viewDetail": "View Details"
     },
     "monster": {
         "dropInfo": "Drop info",

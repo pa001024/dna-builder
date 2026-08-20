@@ -259,6 +259,97 @@ describe("evaluateAST函数测试", () => {
             expect(buffedBuild.calculate()).toBe(baseBuild.calculate())
         })
 
+        it("同律武器普攻连段字段应该吃同律近战普攻增伤", () => {
+            const baseBuild = new CharBuild({
+                char: new LeveledChar("贝蕾妮卡"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "伊弥尔", // 同律近战武器
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "一段伤害", // 普攻连段字段，不携带攻击类型关键字
+                skillLevel: 10,
+            })
+
+            const buffedBuild = baseBuild.clone()
+            buffedBuild.buffs = [
+                new LeveledBuff({
+                    名称: "测试同律近战普攻加成",
+                    描述: "测试用",
+                    同律近战普攻增伤: 1,
+                }),
+            ]
+
+            expect(buffedBuild.calculate()).toBeCloseTo(baseBuild.calculate() * 2, 6)
+        })
+
+        it("同律武器蓄力字段应该吃同律近战蓄力增伤", () => {
+            const baseBuild = new CharBuild({
+                char: new LeveledChar("贝蕾妮卡"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "伊弥尔", // 同律近战武器
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "蓄力攻击伤害",
+                skillLevel: 10,
+            })
+
+            const buffedBuild = baseBuild.clone()
+            buffedBuild.buffs = [
+                new LeveledBuff({
+                    名称: "测试同律近战蓄力加成",
+                    描述: "测试用",
+                    同律近战蓄力增伤: 1,
+                }),
+            ]
+
+            expect(buffedBuild.calculate()).toBeCloseTo(baseBuild.calculate() * 2, 6)
+        })
+
+        it("同律近战普攻增伤不应该作用到同律武器蓄力字段", () => {
+            const baseBuild = new CharBuild({
+                char: new LeveledChar("贝蕾妮卡"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "伊弥尔", // 同律近战武器
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "蓄力攻击伤害",
+                skillLevel: 10,
+            })
+
+            const buffedBuild = baseBuild.clone()
+            buffedBuild.buffs = [
+                new LeveledBuff({
+                    名称: "测试同律近战普攻加成",
+                    描述: "测试用",
+                    同律近战普攻增伤: 1,
+                }),
+            ]
+
+            expect(buffedBuild.calculate()).toBe(baseBuild.calculate())
+        })
+
+        it("普攻连段字段判定应排除其他攻击类型字段", () => {
+            const getPrefix = (baseName: string, fieldName?: string) => (charBuild as any).getWeaponAttackTypePrefix(baseName, fieldName)
+            // "下落攻击二段伤害" 属于下落攻击而非普攻
+            expect(getPrefix("下落攻击", "下落攻击二段伤害")).toBe("下落")
+            // "骑乘攻击一段伤害" 属于骑乘攻击而非普攻
+            expect(getPrefix("饱饱工作", "骑乘攻击一段伤害")).toBeUndefined()
+            // "一段剑气伤害" 不属于普攻连段
+            expect(getPrefix("伊弥尔", "一段剑气伤害")).toBeUndefined()
+        })
+
         it("循环引用的自定义变量应按0处理", () => {
             charBuild.customVariables = [
                 ["A", "B + 1"],
