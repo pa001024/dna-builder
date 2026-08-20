@@ -299,107 +299,116 @@ function getPriceIcon(name: string) {
 <template>
     <div class="space-y-3">
         <!-- 商品项内容 -->
-        <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200 flex items-center gap-4">
-            <div class="size-16 hover:size-32 transition-all duration-200">
-                <img :src="itemDetail?.icon" class="w-full h-full object-cover rounded" :alt="item.typeName" />
+        <div
+            class="group flex w-full items-center gap-2.5 border border-base-content/15 bg-base-100 p-2 transition-colors duration-200 hover:border-primary/60"
+        >
+            <div class="relative size-11 shrink-0 overflow-hidden rounded bg-base-200/40">
+                <img
+                    :src="itemDetail?.icon"
+                    class="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-110"
+                    :alt="item.typeName"
+                />
             </div>
-            <div class="flex-1">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="flex items-center gap-2">
-                        <span
-                            v-if="item.diffState"
-                            class="inline-flex h-5 min-w-5 items-center justify-center rounded text-xs font-bold"
-                            :class="item.diffState === 'added' ? 'bg-success text-success-content' : 'bg-error text-error-content'"
-                        >
-                            {{ item.diffState === "added" ? "+" : "-" }}
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                    <span
+                        v-if="item.diffState"
+                        class="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded text-xs font-bold"
+                        :class="item.diffState === 'added' ? 'bg-success text-success-content' : 'bg-error text-error-content'"
+                    >
+                        {{ item.diffState === "added" ? "+" : "-" }}
+                    </span>
+                    <h4
+                        class="min-w-0 flex-1 truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
+                    >
+                        <SRouterLink v-if="itemDetail?.link" :to="itemDetail?.link" class="hover:underline">
+                            {{ itemDetail?.name || item.typeName }}
+                        </SRouterLink>
+                        <span v-else>{{ itemDetail?.name || item.typeName }}</span>
+                    </h4>
+                    <span class="shrink-0 bg-base-content px-1 py-px text-[10px] uppercase text-base-100">
+                        {{ $t(getRewardTypeText(item.itemType)) }}
+                    </span>
+                    <span class="shrink-0 text-[10px] text-base-content/60">x{{ item.num }}</span>
+                    <span class="shrink-0 text-[10px] text-base-content/60">限购 {{ item.limit || "∞" }}</span>
+                    <FullTooltip v-if="payInfo" side="top">
+                        <template #tooltip>
+                            <div class="flex flex-col gap-2 min-w-28">
+                                <div class="text-sm font-bold">现实货币</div>
+                                <div
+                                    v-for="currency in payInfo.currencies"
+                                    :key="currency.code"
+                                    class="flex items-center justify-between gap-3 text-sm"
+                                >
+                                    <span class="text-xs text-neutral-500 whitespace-nowrap">{{ currency.code }}</span>
+                                    <span class="font-medium text-primary">{{ currency.value }}</span>
+                                </div>
+                            </div>
+                        </template>
+                        <span class="ml-auto shrink-0 border border-base-content/25 bg-base-100/60 px-1 py-px text-[10px]">
+                            {{ payInfo.currency }} {{ payInfo.amount }}
                         </span>
-                        <div>
-                            <SRouterLink v-if="itemDetail?.link" :to="itemDetail?.link" class="hover:underline">
-                                {{ itemDetail?.name || item.typeName }}
-                            </SRouterLink>
-                            <span v-else>{{ itemDetail?.name || item.typeName }}</span>
-                            <span class="ml-1 text-xs text-base-content/70">({{ $t(getRewardTypeText(item.itemType)) }})</span>
-                            <span class="text-xs px-1.5 py-0.5 rounded bg-base-300">x{{ item.num }}</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <FullTooltip v-if="payInfo" side="top">
-                            <template #tooltip>
-                                <div class="flex flex-col gap-2 min-w-28">
-                                    <div class="text-sm font-bold">现实货币</div>
-                                    <div
-                                        v-for="currency in payInfo.currencies"
-                                        :key="currency.code"
-                                        class="flex items-center justify-between gap-3 text-sm"
-                                    >
-                                        <span class="text-xs text-neutral-500 whitespace-nowrap">{{ currency.code }}</span>
-                                        <span class="font-medium text-primary">{{ currency.value }}</span>
+                    </FullTooltip>
+                    <FullTooltip v-else-if="cutoffInfo" side="top">
+                        <template #tooltip>
+                            <div class="flex flex-col gap-2 max-w-75 min-w-28">
+                                <div class="text-sm font-bold">{{ $t("shop-detail.discountInfo") }}</div>
+                                <div class="flex justify-between items-center gap-2 text-sm">
+                                    <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.discount") }}</div>
+                                    <div class="font-medium text-primary">{{ +(cutoffInfo.discount / 10).toFixed(1) }}折</div>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 text-sm">
+                                    <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.originalPrice") }}</div>
+                                    <div class="font-medium text-primary line-through">{{ cutoffInfo.originalPrice }}</div>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 text-sm">
+                                    <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.currentPrice") }}</div>
+                                    <div class="font-medium text-primary">{{ cutoffInfo.price }}</div>
+                                </div>
+                                <div class="text-xs text-neutral-500">
+                                    <div>{{ $t("shop-detail.startTime") }}：{{ formatCutoffTime(cutoffInfo.startTime) }}</div>
+                                    <div v-if="typeof cutoffInfo.endTime === 'number'">
+                                        {{ $t("shop-detail.endTime") }}：{{ formatCutoffTime(cutoffInfo.endTime) }}
                                     </div>
                                 </div>
-                            </template>
-                            <div class="flex items-center gap-1">
-                                <span class="text-xs text-base-content/70">{{ payInfo.currency }}</span>
-                                <span class="text-sm font-medium">{{ payInfo.amount }}</span>
                             </div>
-                        </FullTooltip>
-                        <FullTooltip v-else-if="cutoffInfo" side="top">
-                            <template #tooltip>
-                                <div class="flex flex-col gap-2 max-w-75 min-w-28">
-                                    <div class="text-sm font-bold">{{ $t("shop-detail.discountInfo") }}</div>
-                                    <div class="flex justify-between items-center gap-2 text-sm">
-                                        <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.discount") }}</div>
-                                        <div class="font-medium text-primary">{{ +(cutoffInfo.discount / 10).toFixed(1) }}折</div>
-                                    </div>
-                                    <div class="flex justify-between items-center gap-2 text-sm">
-                                        <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.originalPrice") }}</div>
-                                        <div class="font-medium text-primary line-through">{{ cutoffInfo.originalPrice }}</div>
-                                    </div>
-                                    <div class="flex justify-between items-center gap-2 text-sm">
-                                        <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("shop-detail.currentPrice") }}</div>
-                                        <div class="font-medium text-primary">{{ cutoffInfo.price }}</div>
-                                    </div>
-                                    <div class="text-xs text-neutral-500">
-                                        <div>{{ $t("shop-detail.startTime") }}：{{ formatCutoffTime(cutoffInfo.startTime) }}</div>
-                                        <div v-if="typeof cutoffInfo.endTime === 'number'">
-                                            {{ $t("shop-detail.endTime") }}：{{ formatCutoffTime(cutoffInfo.endTime) }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                            <div class="flex items-center gap-1">
-                                <img :src="getPriceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
-                                <span class="text-xs text-base-content/70">{{ item.priceName }}</span>
-                                <span class="text-sm font-medium">{{ currentPrice }}</span>
-                                <span class="text-xs text-base-content/40 line-through">{{ cutoffInfo.originalPrice }}</span>
-                            </div>
-                        </FullTooltip>
-                        <div v-else class="flex items-center gap-1">
-                            <img :src="getPriceIcon(item.priceName)" class="w-4 h-4 object-cover rounded" :alt="item.priceName" />
-                            <span class="text-xs text-base-content/70">{{ item.priceName }}</span>
-                            <span class="text-sm font-medium">{{ currentPrice }}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-4 gap-2 text-xs">
-                    <div>
-                        <CopyID :id="item.id" />
-                    </div>
-                    <div>
-                        <CopyID :id="item.typeId" name="物品ID" />
-                    </div>
-                    <div><span class="text-base-content/70">限购:</span> {{ item.limit || "∞" }}</div>
-                    <div v-if="item.lv"><span class="text-base-content/70">解锁等级:</span> {{ item.lv }}</div>
-                    <div v-if="item.cond"><span class="text-base-content/70">解锁条件:</span> {{ item.cond }}</div>
-                </div>
-                <div v-if="item.imprCheck" class="mt-1">
-                    <span class="rounded border border-info/40 bg-info/10 px-1.5 py-0.5 text-[10px] leading-none text-info">
-                        {{ formatImpressionCheck(item.imprCheck) }}
+                        </template>
+                        <span
+                            class="ml-auto flex shrink-0 items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs"
+                        >
+                            <img :src="getPriceIcon(item.priceName)" class="size-3 object-cover rounded" :alt="item.priceName" />
+                            {{ currentPrice }}
+                            <span class="font-normal text-base-content/40 line-through">{{ cutoffInfo.originalPrice }}</span>
+                        </span>
+                    </FullTooltip>
+                    <span
+                        v-else
+                        class="ml-auto flex shrink-0 items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs"
+                    >
+                        <img :src="getPriceIcon(item.priceName)" class="size-3 object-cover rounded" :alt="item.priceName" />
+                        {{ item.priceName }} {{ currentPrice }}
                     </span>
                 </div>
-                <div v-if="item.startTime" class="mt-1 text-xs text-base-content/70">
-                    <span>开始时间:</span> {{ formatDateTime(item.startTime) }}
-                    <span v-if="item.endTime" class="ml-2">结束时间:</span>
-                    {{ item.endTime ? formatDateTime(item.endTime) : "" }}
+                <div class="flex gap-2 items-center mt-1">
+                    <div v-if="item.lv || item.cond" class="flex gap-2 text-xs text-base-content/45">
+                        <span v-if="item.lv">Lv.{{ item.lv }}</span>
+                        <span v-if="item.cond">解锁条件: {{ item.cond }}</span>
+                    </div>
+                    <div v-if="item.imprCheck">
+                        <span class="rounded border border-info/40 bg-info/10 px-1.5 py-0.5 text-xs leading-none text-info">
+                            {{ formatImpressionCheck(item.imprCheck) }}
+                        </span>
+                    </div>
+                    <div v-if="item.startTime || item.endTime" class="text-xs text-base-content/45 flex gap-2">
+                        <span v-if="item.startTime">{{ formatDateTime(item.startTime) }}</span>
+                        <span class="text-primary">~</span>
+                        <span v-if="item.endTime">{{ formatDateTime(item.endTime) }}</span>
+                        <span v-else>{{ $t("database.until_now") }}</span>
+                    </div>
+                </div>
+                <div class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-base-content/45">
+                    <CopyID :id="item.id" />
+                    <CopyID :id="item.typeId" name="物品ID" />
                 </div>
                 <div v-if="item.itemType === 'Reward'" class="mt-1">
                     <RewardItem :reward="getRewardDetails(item.typeId)!" />
@@ -407,8 +416,11 @@ function getPriceIcon(name: string) {
             </div>
         </div>
 
-        <!-- 递归渲染子项 -->
-        <div v-if="item.children && item.children.length" class="ml-6 pl-3">
+        <!-- 递归渲染子项（同层子卡 grid autofill 并排） -->
+        <div
+            v-if="item.children && item.children.length"
+            class="ml-6 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-2 border-l border-base-content/10 pl-3"
+        >
             <ShopItem v-for="child in item.children" :key="child.id" :item="child" />
         </div>
     </div>

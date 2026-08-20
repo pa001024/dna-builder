@@ -48,25 +48,45 @@ const sourceIconUrl = computed(() => {
 <template>
     <div v-if="displayQuestSources.length > 0" class="space-y-2">
         <div class="text-xs text-base-content/60">{{ $t("database.questchain") }}</div>
-        <div v-for="source in displayQuestSources" :key="source.key">
-            <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200 flex items-center gap-4">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between gap-2 min-w-0">
-                        <div class="min-w-0">
-                            <SRouterLink :to="`/db/questchain/${source.questChainId}`" class="hover:underline min-w-0 truncate">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+            <div
+                v-for="source in displayQuestSources"
+                :key="source.key"
+                class="group flex w-full items-center gap-2.5 border border-base-content/15 bg-base-100 p-2 transition-colors duration-200 hover:border-primary/60"
+            >
+                <div class="relative size-11 shrink-0 overflow-hidden rounded bg-linear-to-b from-blue-500/25 to-blue-100/10">
+                    <img
+                        :src="sourceIconUrl"
+                        :alt="sourceName"
+                        class="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-110"
+                    />
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5">
+                        <h4
+                            class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
+                        >
+                            <SRouterLink :to="`/db/questchain/${source.questChainId}`" class="hover:underline">
                                 {{ source.questChainName }}
                             </SRouterLink>
-                            <div class="text-xs text-base-content/70 mt-1">{{ source.chapterName }} - {{ source.episode }}</div>
-                        </div>
-                        <div class="flex items-center gap-1 shrink-0">
-                            <img :src="sourceIconUrl" class="w-4 h-4 object-cover rounded" :alt="sourceName" />
-                            <span class="text-xs text-base-content/70">{{
-                                source.d ? `${$t("UI_FORGING_BLUEPRINT")}${sourceName}` : sourceName
-                            }}</span>
-                            <span class="text-sm text-base-content/70">{{ source.num ?? 1 }}</span>
-                        </div>
+                        </h4>
+                        <span
+                            class="ml-auto shrink-0 border border-base-content/25 px-1 py-px font-mono text-[9px] tracking-[0.12em] text-base-content/70"
+                        >
+                            x{{ source.num ?? 1 }}
+                        </span>
                     </div>
-                    <div class="mt-1 text-xs text-base-content/70">
+                    <div class="mt-0.5 flex items-center gap-1.5 text-[10px] text-base-content/45">
+                        <span
+                            class="shrink-0 bg-blue-500 px-1 py-px font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-white"
+                        >
+                            QUEST
+                        </span>
+                        <span class="truncate"
+                            >{{ source.d ? `${$t("UI_FORGING_BLUEPRINT")} · ` : "" }}{{ source.chapterName }} - {{ source.episode }}</span
+                        >
+                    </div>
+                    <div class="mt-0.5 truncate text-[10px] text-base-content/45">
                         {{ formatTimeRange(source.timeStart, source.timeEnd, $t("database.until_now")) }}
                     </div>
                 </div>

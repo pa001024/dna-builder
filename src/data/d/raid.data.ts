@@ -21,6 +21,7 @@ export const RaidCalculation: RaidCalculationItem[] = [
 
 export interface RaidDungeonItem {
     BaseRaidPoint: number
+    DSEnable?: boolean
     DifficultyLevel: number
     DungeonId: number
     FomulaId: number
@@ -469,6 +470,7 @@ export const RaidDungeon: Record<string | number, RaidDungeonItem> = {
     },
     "21514": {
         BaseRaidPoint: 1500000,
+        DSEnable: true,
         DifficultyLevel: 4,
         DungeonId: 21514,
         FomulaId: 2,

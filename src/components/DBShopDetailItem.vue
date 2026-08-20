@@ -512,7 +512,7 @@ function formatShopTimeShort(timestamp: number): string {
 
         <AniTabs v-model="selectedShop" :tabs="shopTabs" />
 
-        <div v-if="shopTimePoints.length > 0" class="rounded-lg border border-base-200 bg-base-100 p-3 space-y-3">
+        <div v-if="shopTimePoints.length > 0" class="border border-base-content/15 bg-base-100 p-3 space-y-3">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="space-y-1">
                     <div class="font-medium">时间过滤</div>
@@ -537,11 +537,18 @@ function formatShopTimeShort(timestamp: number): string {
             </div>
 
             <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/70">
-                <span class="rounded bg-base-200 px-2 py-1">{{ shopTimePoints.length }} 个时间点</span>
+                <span class="border border-base-content/25 bg-base-100/60 px-1.5 py-0.5 text-xs text-base-content/70">
+                    {{ shopTimePoints.length }} 个时间点
+                </span>
                 <span v-if="selectedTimePoint">当前时间点：{{ selectedTimePoint.label }}</span>
                 <span v-if="selectedTimePoint">可购买 {{ selectedTimePoint.activeItemCount }} 件</span>
                 <span v-if="diffOnlyEnabled && previousSelectedTimePoint">对比上一时间点：{{ previousSelectedTimePoint.label }}</span>
-                <span v-if="selectedTimePoint?.isCurrent" class="rounded bg-primary px-2 py-1 text-primary-content">当前</span>
+                <span
+                    v-if="selectedTimePoint?.isCurrent"
+                    class="bg-base-content px-1.5 py-0.5 text-xs font-semibold uppercase text-base-100"
+                >
+                    当前
+                </span>
             </div>
 
             <div v-if="timeFilterEnabled && shopTimePoints.length > 1" class="flex items-center gap-3">
@@ -564,25 +571,32 @@ function formatShopTimeShort(timestamp: number): string {
             <div
                 v-for="subTab in mainTab.subTabs"
                 :key="subTab.id"
-                class="mb-4 bg-base-100 border rounded-lg p-3"
-                :class="isRouteSubTab(subTab.id) ? 'border-primary ring-1 ring-primary/30' : 'border-base-200'"
+                class="mb-4 bg-base-100 border p-2.5"
+                :class="isRouteSubTab(subTab.id) ? 'border-primary ring-1 ring-primary/30' : 'border-base-content/15'"
             >
                 <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-                    <h4 class="font-medium">{{ $t(subTab.name) }}</h4>
-                    <span v-if="timeFilterEnabled" class="text-xs text-base-content/60">
+                    <h4 class="truncate text-sm font-semibold">{{ $t(subTab.name) }}</h4>
+                    <span
+                        v-if="timeFilterEnabled"
+                        class="shrink-0 border border-base-content/25 bg-base-100/60 px-1.5 py-0.5 text-xs text-base-content/70"
+                    >
                         <template v-if="diffOnlyEnabled">
-                            {{ subTab.changedItemCount }} 件发生变化，另保留
-                            {{ subTab.visibleItems.length - subTab.changedItemCount }} 件依赖项
+                            {{ subTab.changedItemCount }} 件变化 +{{ subTab.visibleItems.length - subTab.changedItemCount }} 依赖
                         </template>
                         <template v-else>
-                            {{ subTab.activeVisibleItemCount }} 件当前可购买，另保留
-                            {{ subTab.visibleItems.length - subTab.activeVisibleItemCount }} 件依赖项
+                            {{ subTab.activeVisibleItemCount }} 件可购 +{{
+                                subTab.visibleItems.length - subTab.activeVisibleItemCount
+                            }}
+                            依赖
                         </template>
                     </span>
                 </div>
 
-                <!-- 商品列表 - 树形结构 -->
-                <div v-if="diffOnlyEnabled ? subTab.changedItemCount > 0 : subTab.activeVisibleItemCount > 0" class="space-y-3">
+                <!-- 商品列表 - 树形结构（同层商品卡 grid autofill 并排） -->
+                <div
+                    v-if="diffOnlyEnabled ? subTab.changedItemCount > 0 : subTab.activeVisibleItemCount > 0"
+                    class="grid grid-cols-[repeat(auto-fill,minmax(360px,1fr))] gap-2"
+                >
                     <!-- 使用 ShopItem 组件递归渲染商品树 -->
                     <ShopItem v-for="item in buildItemTree(subTab.visibleItems)" :key="item.id" :item="item" />
                 </div>

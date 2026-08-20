@@ -957,6 +957,7 @@ export const gameModsQuery = typedQuery(
                 coverUrl
                 modJson
                 requires
+                status
                 source
                 userId
                 downloads

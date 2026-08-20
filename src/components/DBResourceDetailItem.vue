@@ -4,9 +4,8 @@ import type { RouteLocationRaw } from "vue-router"
 import { fishMap } from "@/data"
 import { optRewardMap } from "@/data/d"
 import { booksData } from "@/data/d/book.data"
-import { regionMap } from "@/data/d/region.data"
+import { musicData, musicScoreData } from "@/data/d/music.data"
 import type { Resource } from "@/data/d/resource.data"
-import { subRegionMap } from "@/data/d/subregion.data"
 import { collectResourceDraftSources } from "@/utils/draft-source"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import {
@@ -16,14 +15,6 @@ import {
     collectResourceShopSources,
 } from "@/utils/resource-source"
 import { getRewardDetails, type RewardItem } from "@/utils/reward-utils"
-
-interface ResourceSourceGroup {
-    srId: number
-    regionId: number
-    subRegionName: string
-    regionName: string
-    count: number
-}
 
 const props = defineProps<{
     resource: Resource
@@ -105,43 +96,43 @@ const fishLink = computed<RouteLocationRaw | null>(() => {
         },
     }
 })
-const mapSources = computed<ResourceSourceGroup[]>(() => {
-    const grouped = new Map<number, ResourceSourceGroup>()
+/** 资源所属的乐谱（按乐谱条目中的资源 ID 反查）。 */
+const musicTarget = computed(() => {
+    for (const music of musicData) {
+        if (music.rId !== props.resource.id) {
+            continue
+        }
 
-    for (const source of props.resource.source || []) {
-        const subRegion = subRegionMap.get(source.srId)
-        if (!subRegion) continue
-        const region = regionMap.get(subRegion.rid)
-        if (!region) continue
-        const current = grouped.get(source.srId)
-        const nextCount = (current?.count || 0) + (source.pos?.length || 0)
-        grouped.set(source.srId, {
-            srId: source.srId,
-            regionId: subRegion.rid,
-            subRegionName: subRegion.name,
-            regionName: region.name,
-            count: nextCount,
-        })
+        return music
     }
 
-    return [...grouped.values()].sort((a, b) => b.count - a.count || a.srId - b.srId)
+    return null
 })
+/** 乐谱所属的专辑。 */
+const musicAlbum = computed(() => {
+    if (!musicTarget.value) {
+        return null
+    }
 
-/**
- * 生成跳转到本地地图的资源点位链接。
- * @param regionId 地区 ID
- * @returns 路由对象
- */
-function getMapLocalLink(regionId: number): RouteLocationRaw {
+    return musicScoreData.find(score => score.id === musicTarget.value!.scoreId) || null
+})
+/** 乐谱详情页路由。 */
+const musicLink = computed<RouteLocationRaw | null>(() => {
+    if (!musicTarget.value) {
+        return null
+    }
+
     return {
-        name: "map-local",
-        query: {
-            regionId: String(regionId),
-            rid: String(props.resource.id),
+        name: "music-detail",
+        params: {
+            id: String(musicTarget.value.id),
         },
     }
-}
-
+})
+/** 专辑列表页路由（按专辑浏览乐谱）。 */
+const musicAlbumLink = computed<RouteLocationRaw>(() => ({
+    name: "music-list",
+}))
 const sourceCounts = computed(
     () =>
         draftSources.value.length +
@@ -225,9 +216,41 @@ function getResourceIconUrl(icon: string): string {
             </div>
         </div>
 
+        <div v-if="musicTarget && musicLink" class="p-3 bg-base-200 rounded">
+            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.music") }}</div>
+            <div class="flex items-center gap-3">
+                <img
+                    v-if="musicAlbum"
+                    :src="`/imgs/music/${musicAlbum.icon}.webp`"
+                    :alt="musicAlbum.name"
+                    class="size-12 shrink-0 rounded bg-base-100 object-cover"
+                />
+                <div class="min-w-0 flex-1 space-y-1">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="shrink-0 text-xs text-base-content/50">{{ $t("resource.musicAlbum") }}</span>
+                        <SRouterLink
+                            v-if="musicAlbum"
+                            :to="musicAlbumLink"
+                            class="link link-primary wrap-break-word truncate"
+                        >
+                            {{ $t(musicAlbum.name) }}
+                        </SRouterLink>
+                        <CopyID v-if="musicAlbum" :id="musicAlbum.id" />
+                    </div>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="shrink-0 text-xs text-base-content/50">{{ $t("resource.musicScore") }}</span>
+                        <SRouterLink :to="musicLink" class="link link-primary wrap-break-word truncate">
+                            {{ $t(musicTarget.name) }}
+                        </SRouterLink>
+                        <CopyID :id="musicTarget.id" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div
             class="p-3 bg-base-200 rounded"
-            v-if="draftSources.length || dungeonSources.length || hardbossSources.length || questSources.length || shopSources.length"
+            v-if="draftSources.length || dungeonSources.length || hardbossSources.length || questSources.length || shopSources.length || resource.source?.length"
         >
             <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.source") }}</div>
             <div class="space-y-3">
@@ -236,23 +259,7 @@ function getResourceIconUrl(icon: string): string {
                 <BossSource :boss-sources="hardbossSources" />
                 <QuestSource :quest-sources="questSources" :resource-id="resource.id" />
                 <ShopSource :shop-sources="shopSources" />
-            </div>
-        </div>
-
-        <div v-if="mapSources.length" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.mapPointsJump") }}</div>
-            <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
-                <div v-for="source in mapSources" :key="source.srId" class="p-2 bg-base-100 rounded border border-base-200">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="min-w-0">
-                            <SRouterLink :to="getMapLocalLink(source.regionId)" class="hover:underline min-w-0 wrap-break-word">
-                                {{ source.subRegionName }}
-                            </SRouterLink>
-                            <div class="text-xs text-base-content/60 mt-1">{{ source.regionName }}</div>
-                        </div>
-                        <span class="text-xs text-base-content/70 shrink-0">{{ source.count }} {{ $t("resource.mapPointCount") }}</span>
-                    </div>
-                </div>
+                <MapSource :resource="resource" />
             </div>
         </div>
     </div>

@@ -20,25 +20,43 @@ function getHardbossIcon(hardbossId?: number) {
 <template>
     <div v-if="props.bossSources.length > 0" class="space-y-2">
         <div class="text-xs text-base-content/60">{{ $t("database.hardboss") }}</div>
-        <div v-for="source in props.bossSources" :key="source.key">
-            <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200 flex items-center gap-4">
-                <div class="size-16 shrink-0">
-                    <img :src="getHardbossIcon(source.hardbossId)" class="w-full h-full object-cover rounded" :alt="source.hardbossName" />
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+            <div
+                v-for="source in props.bossSources"
+                :key="source.key"
+                class="group flex w-full items-center gap-2.5 border border-base-content/15 bg-base-100 p-2 transition-colors duration-200 hover:border-primary/60"
+            >
+                <div class="relative size-11 shrink-0 overflow-hidden rounded bg-linear-to-b from-gray-600/25 to-gray-200/10">
+                    <img
+                        :src="getHardbossIcon(source.hardbossId)"
+                        :alt="source.hardbossName"
+                        class="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-110"
+                    />
                 </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <SRouterLink
-                            v-if="source.hardbossId"
-                            :to="`/db/hardboss/${source.hardbossId}`"
-                            class="hover:underline min-w-0 truncate"
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5">
+                        <h4
+                            class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
                         >
-                            {{ source.hardbossName }}
-                        </SRouterLink>
-                        <span v-else class="min-w-0 truncate">{{ source.hardbossName }}</span>
-                        <span v-if="source.hardbossLv" class="badge badge-sm badge-neutral">Lv.{{ source.hardbossLv }}</span>
+                            <SRouterLink v-if="source.hardbossId" :to="`/db/hardboss/${source.hardbossId}`" class="hover:underline">
+                                {{ source.hardbossName }}
+                            </SRouterLink>
+                            <span v-else>{{ source.hardbossName }}</span>
+                        </h4>
+                        <span
+                            v-if="source.hardbossLv"
+                            class="ml-auto shrink-0 border border-base-content/25 px-1 py-px font-mono text-[9px] tracking-[0.12em] text-base-content/70"
+                        >
+                            Lv.{{ source.hardbossLv }}
+                        </span>
                     </div>
-                    <div class="mt-1 text-xs text-base-content/70">
-                        {{ formatWeaponSourceTimeRange(source, $t("database.until_now")) }}
+                    <div class="mt-0.5 flex items-center gap-1.5 text-[10px] text-base-content/45">
+                        <span
+                            class="shrink-0 bg-red-500 px-1 py-px font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-white"
+                        >
+                            BOSS
+                        </span>
+                        <span class="truncate">{{ formatWeaponSourceTimeRange(source, $t("database.until_now")) }}</span>
                     </div>
                 </div>
             </div>

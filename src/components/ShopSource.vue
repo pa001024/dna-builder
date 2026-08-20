@@ -48,71 +48,89 @@ function formatCutoffTime(timestamp: number) {
 <template>
     <div v-if="displayShopSources.length > 0" class="space-y-2">
         <div class="text-xs text-base-content/60">商店购买</div>
-        <div v-for="source in displayShopSources" :key="source.key">
-            <div class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200 flex items-center gap-4">
-                <div class="flex-1">
-                    <div class="flex justify-between items-center gap-2 mb-2">
-                        <div class="flex items-center gap-2 min-w-0">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+            <div
+                v-for="source in displayShopSources"
+                :key="source.key"
+                class="group flex w-full items-center gap-2.5 border border-base-content/15 bg-base-100 p-2 transition-colors duration-200 hover:border-primary/60"
+            >
+                <div class="relative size-11 shrink-0 overflow-hidden rounded bg-linear-to-b from-emerald-500/25 to-emerald-100/10">
+                    <img
+                        :src="getPriceIcon(source.priceName)"
+                        :alt="source.priceName"
+                        class="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-110"
+                    />
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5">
+                        <h4 class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary">
                             <SRouterLink
                                 v-if="source.shopId && source.subTabId"
                                 :to="`/db/shop/${source.shopId}/${source.subTabId}`"
-                                class="hover:underline min-w-0 truncate"
+                                class="hover:underline"
                             >
                                 {{ source.detail }}
                             </SRouterLink>
-                            <span v-else class="min-w-0 truncate">{{ source.detail }}</span>
-                            <span v-if="source.shopName" class="text-xs text-base-content/70">({{ source.shopName }})</span>
-                        </div>
-                        <div v-if="source.priceName" class="flex items-center gap-1">
-                            <img :src="getPriceIcon(source.priceName)" class="w-4 h-4 object-cover rounded" :alt="source.priceName" />
-                            <span class="text-xs text-base-content/70">{{ source.priceName }}</span>
-                            <template v-if="source.cutoffInfo">
-                                <FullTooltip side="top">
-                                    <template #tooltip>
-                                        <div class="flex flex-col gap-2 max-w-75 min-w-28">
-                                            <div class="text-sm font-bold">{{ $t("shop-detail.discountInfo") }}</div>
-                                            <div class="flex justify-between items-center gap-2 text-sm">
-                                                <div class="text-xs text-neutral-500 whitespace-nowrap">
-                                                    {{ $t("shop-detail.discount") }}
-                                                </div>
-                                                <div class="font-medium text-primary">
-                                                    {{ +(source.cutoffInfo.discount / 10).toFixed(1) }}折
-                                                </div>
+                            <span v-else>{{ source.detail }}</span>
+                        </h4>
+                        <span
+                            v-if="source.cutoffInfo"
+                            class="ml-auto shrink-0 border border-base-content/25 px-1 py-px font-mono text-[9px] tracking-[0.12em] text-base-content/70"
+                        >
+                            <FullTooltip side="top">
+                                <template #tooltip>
+                                    <div class="flex flex-col gap-2 max-w-75 min-w-28">
+                                        <div class="text-sm font-bold">{{ $t("shop-detail.discountInfo") }}</div>
+                                        <div class="flex justify-between items-center gap-2 text-sm">
+                                            <div class="text-xs text-neutral-500 whitespace-nowrap">
+                                                {{ $t("shop-detail.discount") }}
                                             </div>
-                                            <div class="flex justify-between items-center gap-2 text-sm">
-                                                <div class="text-xs text-neutral-500 whitespace-nowrap">
-                                                    {{ $t("shop-detail.originalPrice") }}
-                                                </div>
-                                                <div class="font-medium text-primary line-through">
-                                                    {{ source.cutoffInfo.originalPrice }}
-                                                </div>
-                                            </div>
-                                            <div class="flex justify-between items-center gap-2 text-sm">
-                                                <div class="text-xs text-neutral-500 whitespace-nowrap">
-                                                    {{ $t("shop-detail.currentPrice") }}
-                                                </div>
-                                                <div class="font-medium text-primary">{{ source.cutoffInfo.price }}</div>
-                                            </div>
-                                            <div class="text-xs text-neutral-500">
-                                                <div>
-                                                    {{ $t("shop-detail.startTime") }}：{{ formatCutoffTime(source.cutoffInfo.startTime) }}
-                                                </div>
-                                                <div v-if="typeof source.cutoffInfo.endTime === 'number'">
-                                                    {{ $t("shop-detail.endTime") }}：{{ formatCutoffTime(source.cutoffInfo.endTime) }}
-                                                </div>
+                                            <div class="font-medium text-primary">
+                                                {{ +(source.cutoffInfo.discount / 10).toFixed(1) }}折
                                             </div>
                                         </div>
-                                    </template>
-                                    <span class="text-sm font-medium">{{ source.cutoffInfo.price }}</span>
-                                </FullTooltip>
-                                <span class="text-xs text-base-content/40 line-through">{{ source.cutoffInfo.originalPrice }}</span>
-                            </template>
-                            <span v-else class="text-sm font-medium">{{ source.price }}</span>
-                        </div>
+                                        <div class="flex justify-between items-center gap-2 text-sm">
+                                            <div class="text-xs text-neutral-500 whitespace-nowrap">
+                                                {{ $t("shop-detail.originalPrice") }}
+                                            </div>
+                                            <div class="font-medium text-primary line-through">
+                                                {{ source.cutoffInfo.originalPrice }}
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center gap-2 text-sm">
+                                            <div class="text-xs text-neutral-500 whitespace-nowrap">
+                                                {{ $t("shop-detail.currentPrice") }}
+                                            </div>
+                                            <div class="font-medium text-primary">{{ source.cutoffInfo.price }}</div>
+                                        </div>
+                                        <div class="text-xs text-neutral-500">
+                                            <div>
+                                                {{ $t("shop-detail.startTime") }}：{{ formatCutoffTime(source.cutoffInfo.startTime) }}
+                                            </div>
+                                            <div v-if="typeof source.cutoffInfo.endTime === 'number'">
+                                                {{ $t("shop-detail.endTime") }}：{{ formatCutoffTime(source.cutoffInfo.endTime) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <span class="text-primary line-through">{{ source.cutoffInfo.originalPrice }}</span>
+                            </FullTooltip>
+                        </span>
+                        <span
+                            v-else
+                            class="ml-auto shrink-0 border border-base-content/25 px-1 py-px font-mono text-[9px] tracking-[0.12em] text-base-content/70"
+                        >
+                            {{ source.price }}
+                        </span>
                     </div>
-                    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-base-content/70">
-                        <div>{{ formatTimeRange(source.timeStart, source.timeEnd, t("database.until_now")) }}</div>
-                        <div class="shrink-0 whitespace-nowrap">限购: {{ source.limit || "∞" }} 数量: x{{ source.num }}</div>
+                    <div class="mt-0.5 flex items-center gap-1.5 text-[10px] text-base-content/45">
+                        <span class="shrink-0 bg-emerald-500 px-1 py-px font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-white">
+                            SHOP
+                        </span>
+                        <span class="truncate">{{ source.shopName }} · 限购: {{ source.limit || "∞" }} 数量: x{{ source.num }}</span>
+                    </div>
+                    <div class="mt-0.5 truncate text-[10px] text-base-content/45">
+                        {{ formatTimeRange(source.timeStart, source.timeEnd, t("database.until_now")) }}
                     </div>
                 </div>
             </div>
