@@ -29,7 +29,10 @@ const ui = useUIStore()
 const setting = useSettingStore()
 const alwaysOnTop = ref(false)
 const maximized = ref(false)
-const isDark = ref(setting.theme === "dark")
+// 自定义主题按 colorScheme 决定初始明暗图标状态
+const isDark = ref(
+    setting.theme === "dark" || (setting.theme === "custom" && setting.customTheme.colorScheme === "dark")
+)
 const langDialogOpen = ref(false)
 const langDialogRef = ref<HTMLDialogElement | null>(null)
 

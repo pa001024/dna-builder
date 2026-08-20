@@ -352,18 +352,6 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="w-full">
-        <!-- 章节头：序号 + 标签 + 标题 -->
-        <div class="mb-5 flex items-center gap-3.5 animate-ef-rise motion-reduce:animate-none">
-            <span
-                class="inline-flex h-9 min-w-9 items-center justify-center rounded-xs bg-primary px-2 font-orbitron text-sm font-semibold tracking-wide text-primary-content tabular-nums"
-            >
-                02
-            </span>
-            <span class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">OPERATIONS</span>
-            <span class="text-[17px] font-semibold text-base-content">{{ $t("todo.title") }}</span>
-            <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
-        </div>
-
         <!-- 周常 TODO -->
         <div class="mb-5">
             <div class="mb-2.5 flex items-center gap-2">

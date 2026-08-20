@@ -12,6 +12,7 @@ import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
 import { useUserStore } from "./store/user"
 import { startAdminDataSyncCron, stopAdminDataSyncCron } from "./utils/admin-data-sync"
+import { buildCustomThemeCss, CUSTOM_THEME_ID, captureCurrentThemeVars } from "./utils/customTheme"
 import { postVisitorCount } from "./vercount"
 
 const setting = useSettingStore()
@@ -136,10 +137,44 @@ function stopOnlineExperienceTimer() {
     onlineExperienceTimer = null
 }
 
+/**
+ * @description 切换到自定义主题时，先捕获当前已应用主题（body 此刻仍挂在上一个 data-theme 上）
+ * 的全部 CSS 变量作为编辑起点，保证页面视觉零变化；之后再应用自定义主题。
+ * 此 watch 必须注册在下方设置 data-theme 的 watchEffect 之前，才能读到旧主题的样式。
+ */
+watch(
+    () => setting.theme,
+    (next, prev) => {
+        if (next === "custom" && prev !== "custom") {
+            setting.customTheme = captureCurrentThemeVars(setting.customTheme)
+        }
+    }
+)
+
 watchEffect(() => {
-    document.body.setAttribute("data-theme", setting.theme)
+    // 自定义主题使用固定的 data-theme id（配套注入的 [data-theme] 样式）
+    const themeName = setting.theme === "custom" ? CUSTOM_THEME_ID : setting.theme
+    document.body.setAttribute("data-theme", themeName)
     document.body.style.background = setting.windowTrasnparent ? "transparent" : "var(--color-base-300)"
     document.documentElement.style.setProperty("--uiscale", String(setting.uiScale))
+})
+
+/**
+ * @description 自定义主题样式注入：将用户设计的主题变量以 [data-theme] 规则写入 <style>，
+ * 与 daisyUI 内置主题同机制生效；切换回内置主题时移除注入的样式。
+ */
+let customThemeStyleEl: HTMLStyleElement | null = null
+watchEffect(() => {
+    if (setting.theme !== "custom") {
+        customThemeStyleEl?.remove()
+        customThemeStyleEl = null
+        return
+    }
+    if (!customThemeStyleEl) {
+        customThemeStyleEl = document.createElement("style")
+        document.head.appendChild(customThemeStyleEl)
+    }
+    customThemeStyleEl.textContent = buildCustomThemeCss(setting.customTheme)
 })
 
 watch(

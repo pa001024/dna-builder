@@ -53,21 +53,6 @@ onMounted(fetchRecentBuilds)
 
 <template>
     <section>
-        <!-- 章节头：序号 + 标签 + 标题 -->
-        <div class="mb-4 flex items-center gap-3.5 animate-ef-rise motion-reduce:animate-none">
-            <span
-                class="inline-flex h-9 min-w-9 items-center justify-center rounded-xs bg-primary px-2 font-orbitron text-sm font-semibold tracking-wide text-primary-content tabular-nums"
-            >
-                03
-            </span>
-            <span class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">BUILDS</span>
-            <span class="text-[17px] font-semibold text-base-content">{{ $t("home.recentBuilds") }}</span>
-            <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
-            <span v-if="displayBuilds.length > 0" class="text-[11px] font-medium text-base-content/50">
-                {{ $t("home.recentBuildsCount", { count: displayBuilds.length }) }}
-            </span>
-        </div>
-
         <!-- 加载状态 -->
         <div v-if="loading" class="flex justify-center py-8">
             <span class="loading loading-spinner loading-lg" />

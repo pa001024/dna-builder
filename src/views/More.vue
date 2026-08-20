@@ -1,22 +1,32 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
-import { useTranslation } from "i18next-vue"
 import forge from "node-forge"
-import { computed, onBeforeUnmount, onMounted } from "vue"
+import { ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from "reka-ui"
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
+import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
+import type { QuickNavItem } from "@/components/HomeQuickNav.vue"
 import type { IconTypes } from "@/components/Icon.vue"
+import type { POCardSize } from "@/components/POCard.vue"
 import { env } from "@/env"
 import { useSettingStore } from "@/store/setting"
+import { isValidHex } from "@/utils/customTheme"
 import { sha256 } from "@/utils/sha256"
 
 const setting = useSettingStore()
 const scriptUnlocked = useLocalStorage("script-unlocked", false)
-const { t } = useTranslation()
 
 type MoreItem = {
     name: string
     path: string
     icon: IconTypes
     show?: boolean
+}
+
+/** 磁贴项：在入口基础上附加 Win10 磁贴的尺寸与纯色渐变主题。 */
+type TileItem = MoreItem & {
+    size: POCardSize
+    gradient?: string
+    glow?: string
 }
 
 const itemsRaw: MoreItem[] = [
@@ -150,101 +160,440 @@ const items = computed<MoreItem[]>(() => [
 /** 当前环境下可见的入口（过滤 show 为 false 的项）。 */
 const visibleItems = computed(() => items.value.filter(item => item.show !== false))
 
-/** 以入口名为键的可见项索引，供分节与快速访问解析。 */
-const visibleItemMap = computed(() => new Map(visibleItems.value.map(item => [item.name, item])))
+/** 入口风格：false = Win10 磁贴（当前风格），true = Home 快捷入口风格；localStorage 持久化。 */
+const useQuickNavStyle = useLocalStorage("po-style-v1", false)
 
-type MoreSectionConfig = {
-    id: string
-    title: string
-    description: string
-    badge: string
-    names: string[]
-}
-
-/** 分节配置：参照资料库章节索引结构，按功能域划分入口。 */
-const sectionConfigs: MoreSectionConfig[] = [
-    {
-        id: "build",
-        title: t("more.section.build.title"),
-        description: t("more.section.build.description"),
-        badge: t("more.section.build.badge"),
-        names: ["char-build", "build-compare", "levelup", "inventory", "skin-colorize", "guides"],
-    },
-    {
-        id: "data",
-        title: t("more.section.data.title"),
-        description: t("more.section.data.description"),
-        badge: t("more.section.data.badge"),
-        names: ["database", "abyss-usage", "ranking", "achievement", "race-lottery"],
-    },
-    {
-        id: "tools",
-        title: t("more.section.tools.title"),
-        description: t("more.section.tools.description"),
-        badge: t("more.section.tools.badge"),
-        names: ["flow", "timeline", "counter", "unpack", "script-list"],
-    },
-    {
-        id: "system",
-        title: t("more.section.system.title"),
-        description: t("more.section.system.description"),
-        badge: t("more.section.system.badge"),
-        names: ["dna-home", "game-accounts", "game-launcher", "mod-manager", "chat", "setting", "help"],
-    },
-]
-
-/** 快速访问推荐的核心功能入口。 */
-const featuredNames = [
-    "char-build",
-    "build-compare",
-    "levelup",
-    "inventory",
-    "skin-colorize",
-    "guides",
-    "database",
-    "abyss-usage",
-    "ranking",
-    "achievement",
-    "race-lottery",
-    "flow",
-    "timeline",
-    "counter",
-    "unpack",
-    "script-list",
-    "dna-home",
-    "game-accounts",
-    "game-launcher",
-    "mod-manager",
-    "chat",
-    "setting",
-    "help",
-]
-
-/**
- * 生成快速访问的推荐入口，优先展示高频使用的核心功能。
- */
-const featuredItems = computed(() =>
-    featuredNames.map(name => visibleItemMap.value.get(name)).filter((item): item is MoreItem => item !== undefined)
-)
-
-/**
- * 将扁平入口重组为页面分区，形成更清晰的信息架构。
- */
-const sections = computed(() =>
-    sectionConfigs.map(section => ({
-        ...section,
-        items: section.names.map(name => visibleItemMap.value.get(name)).filter((item): item is MoreItem => item !== undefined),
+/** Home 快捷入口风格条目：将可见入口映射为 HomeQuickNav 的 props 结构（标题复用 ${name}.title 键）。 */
+const quickNavItems = computed<QuickNavItem[]>(() =>
+    visibleItems.value.map(item => ({
+        path: item.path,
+        icon: item.icon,
+        titleKey: `${item.name}.title`,
     }))
 )
 
 /**
- * 将章节下标格式化为两位数字（0 → "01"），用作索引序号。
- * @param index 章节下标
- * @returns 两位补零的序号字符串
+ * 每个入口对应的磁贴尺寸（缺省 small）。大磁贴 2x2、宽磁贴 2x1，用于营造
+ * Win10 开始屏幕式的疏密节奏。
  */
-function formatIndex(index: number) {
-    return String(index + 1).padStart(2, "0")
+const TILE_SIZES: Record<string, POCardSize> = {
+    "char-build": "large",
+    database: "large",
+    "dna-home": "large",
+    "abyss-usage": "wide",
+    timeline: "wide",
+    "game-launcher": "wide",
+    "skin-colorize": "wide",
+    "script-list": "wide",
+    ranking: "wide",
+    levelup: "wide",
+    "mod-manager": "wide",
+    flow: "small",
+    "build-compare": "small",
 }
+
+/** 兜底基础色：入口未配置主题时使用（与 POCard 默认渐变同源）。 */
+const DEFAULT_TILE_COLOR = "#2b6cb0"
+
+/**
+ * 由单一基础色以 OKLCH 方式生成磁贴主题（渐变 + 辉光）。
+ * 浅色端 = 基础色向白色混合提升明度，深色端 = 基础色向黑色混合压暗，
+ * 辉光 = 基础色向白色轻度混合的浅色调；全部经 color-mix(in oklch, …) 在 OKLCH 空间插值。
+ * @param color 基础色（任意 CSS 颜色值，如 #f5576c）
+ * @returns 渐变背景与辉光强调色
+ */
+function makeTileTheme(color: string): { gradient: string; glow: string } {
+    const light = `color-mix(in oklch, ${color} 58%, white)`
+    const dark = `color-mix(in oklch, ${color} 78%, black)`
+    const glow = `color-mix(in oklch, ${color} 50%, white)`
+    return {
+        gradient: `linear-gradient(135deg, ${light}, ${dark})`,
+        glow,
+    }
+}
+
+/**
+ * 每个入口的基础色（单一色值），磁贴渐变/辉光由 makeTileTheme 以 OKLCH 派生。
+ */
+const TILE_THEMES: Record<string, string> = {
+    "char-build": "#f5576c",
+    guides: "#f7971e",
+    counter: "#fc466b",
+    "build-compare": "#a6c1ee",
+    "dna-home": "#4facfe",
+    database: "#00c6ff",
+    levelup: "#43e97b",
+    achievement: "#7f00ff",
+    "abyss-usage": "#30cfd0",
+    ranking: "#f83600",
+    setting: "#12c2e9",
+    "game-launcher": "#00c6ff",
+    "mod-manager": "#7f00ff",
+    chat: "#4facfe",
+    flow: "#fc466b",
+    inventory: "#43e97b",
+    timeline: "#a6c1ee",
+    help: "#f7971e",
+    "game-accounts": "#f5576c",
+    unpack: "#30cfd0",
+    "skin-colorize": "#12c2e9",
+    "race-lottery": "#fa709a",
+    "script-list": "#7f00ff",
+}
+
+/**
+ * 右键菜单可选配色：单一基础色（渐变由 makeTileTheme 以 OKLCH 派生），供「切换颜色」子菜单选择。
+ */
+const TILE_PALETTE: { name: string; color: string }[] = [
+    { name: "pink", color: "#f5576c" },
+    { name: "orange", color: "#f7971e" },
+    { name: "yellow", color: "#fde047" },
+    { name: "green", color: "#43e97b" },
+    { name: "cyan", color: "#4facfe" },
+    { name: "blue", color: "#00c6ff" },
+    { name: "purple", color: "#7f00ff" },
+    { name: "red", color: "#f83600" },
+    { name: "teal", color: "#30cfd0" },
+    { name: "gray", color: "#9ca3af" },
+]
+
+/** 右键菜单可选尺寸（与 POCard 的 小/宽/大 对应）。 */
+const SIZE_OPTIONS: POCardSize[] = ["small", "wide", "large"]
+
+/** 磁贴的自定义覆盖（右键菜单设置，localStorage 持久化）。 */
+type TileOverride = {
+    size?: POCardSize
+    /** 基础色（渐变/辉光由 makeTileTheme 以 OKLCH 派生）。 */
+    color?: string
+    /** 兼容旧版数据：已生成的渐变与辉光（存在时直接使用）。 */
+    gradient?: string
+    glow?: string
+}
+
+/** 每个磁贴的颜色/尺寸覆盖表：key 为入口名。 */
+const tileOverrides = useLocalStorage<Record<string, TileOverride>>("po-tile-overrides-v1", {})
+
+/**
+ * 将可见入口装饰为磁贴项：附加尺寸与主题（基础色 → OKLCH 派生渐变）。
+ * 优先应用右键菜单的自定义覆盖；旧版已存 gradient/glow 覆盖时直接沿用。
+ * @param list 可见入口列表
+ * @returns 装饰后的磁贴项列表
+ */
+function decorate(list: MoreItem[]): TileItem[] {
+    return list.map(item => {
+        const override = tileOverrides.value[item.name]
+        const theme =
+            override?.gradient != null
+                ? { gradient: override.gradient, glow: override.glow ?? "" }
+                : makeTileTheme(override?.color ?? TILE_THEMES[item.name] ?? DEFAULT_TILE_COLOR)
+        return {
+            ...item,
+            size: override?.size ?? TILE_SIZES[item.name] ?? "small",
+            gradient: theme.gradient,
+            glow: theme.glow,
+        }
+    })
+}
+
+/** 应用右键菜单选择的基础色（渐变/辉光由 OKLCH 派生）。 */
+function setTileColor(name: string, color: string) {
+    tileOverrides.value = {
+        ...tileOverrides.value,
+        [name]: { ...tileOverrides.value[name], color },
+    }
+}
+
+/** 磁贴当前基础色（自定义覆盖优先，用于自定义取色器预填）。 */
+function currentTileColor(name: string): string {
+    return tileOverrides.value[name]?.color ?? TILE_THEMES[name] ?? DEFAULT_TILE_COLOR
+}
+
+/** 自定义颜色弹窗状态：目标磁贴名与临时色值（确定时才应用）。 */
+const customColorState = reactive({
+    tile: "",
+    hex: DEFAULT_TILE_COLOR,
+})
+
+/** 打开自定义颜色弹窗：预填当前基础色，用原生取色器/hex 输入选色。 */
+function openCustomColor(tile: string) {
+    customColorState.tile = tile
+    customColorState.hex = currentTileColor(tile)
+    void nextTick(() => {
+        ;(document.getElementById("po-tile-color-modal") as HTMLDialogElement | null)?.showModal()
+    })
+}
+
+/** 确定：应用自定义基础色并关闭弹窗。 */
+function applyCustomColor() {
+    if (customColorState.tile && isValidHex(customColorState.hex)) {
+        setTileColor(customColorState.tile, customColorState.hex.toLowerCase())
+    }
+    closeCustomColor()
+}
+
+/** 关闭自定义颜色弹窗。 */
+function closeCustomColor() {
+    ;(document.getElementById("po-tile-color-modal") as HTMLDialogElement | null)?.close()
+}
+
+/** 手动输入 hex：非法输入回退为当前值。 */
+function onCustomHexInput(event: Event) {
+    const input = event.target as HTMLInputElement
+    const value = input.value.trim()
+    if (isValidHex(value)) {
+        customColorState.hex = value.toLowerCase()
+    } else {
+        input.value = customColorState.hex
+    }
+}
+
+/** 应用右键菜单选择的尺寸。 */
+function setTileSize(name: string, size: POCardSize) {
+    tileOverrides.value = {
+        ...tileOverrides.value,
+        [name]: { ...tileOverrides.value[name], size },
+    }
+}
+
+/** 清除磁贴的自定义覆盖，恢复默认配色与尺寸。 */
+function resetTileOverride(name: string) {
+    const next = { ...tileOverrides.value }
+    delete next[name]
+    tileOverrides.value = next
+}
+
+/** 判断磁贴是否存在自定义覆盖（决定是否显示「恢复默认」）。 */
+function hasOverride(name: string): boolean {
+    return !!tileOverrides.value[name]
+}
+
+/** 尺寸菜单项左侧的小方块预览（按 1x1 / 2x1 / 2x2 比例）。 */
+function tileSizePreviewStyle(size: POCardSize): { width: string; height: string } {
+    if (size === "wide") return { width: "1rem", height: "0.55rem" }
+    if (size === "large") return { width: "1rem", height: "1rem" }
+    return { width: "0.7rem", height: "0.7rem" }
+}
+
+/** 用户自定义磁贴排序（长按拖拽后写入，localStorage 持久化）。 */
+const tileOrder = useLocalStorage<string[]>("po-tile-order-v1", [])
+
+/**
+ * 按保存的排序重组磁贴：已保存项按顺序排列，新增/未知项按原顺序追加末尾。
+ * @param list 装饰后的磁贴项
+ * @returns 应用用户排序后的列表
+ */
+function applyOrder(list: TileItem[]): TileItem[] {
+    const order = tileOrder.value
+    if (!order.length) return list
+    const byName = new Map(list.map(tile => [tile.name, tile]))
+    const seen = new Set<string>()
+    const ordered: TileItem[] = []
+    for (const name of order) {
+        const tile = byName.get(name)
+        if (tile && !seen.has(name)) {
+            ordered.push(tile)
+            seen.add(name)
+        }
+    }
+    for (const tile of list) {
+        if (!seen.has(tile.name)) ordered.push(tile)
+    }
+    return ordered
+}
+
+/** 当前渲染的磁贴列表：可见项/自定义覆盖变化时重建并保留用户排序。 */
+const tileList = ref<TileItem[]>([])
+watch(
+    [visibleItems, tileOverrides],
+    () => {
+        tileList.value = applyOrder(decorate(visibleItems.value))
+    },
+    { immediate: true }
+)
+
+/** 长按触发拖拽的时长（毫秒）。 */
+const LONG_PRESS_MS = 380
+/** 长按等待期内允许的指针位移（px，超出视为滚动/滑动意图而取消长按）。 */
+const DRAG_MOVE_THRESHOLD = 8
+
+/** 拖拽过程状态：指针位置与幽灵卡片尺寸。 */
+const dragState = reactive({
+    active: false,
+    name: "",
+    x: 0,
+    y: 0,
+    w: 0,
+    h: 0,
+})
+
+/** 拖拽中的磁贴当前索引（随实时重排更新）。 */
+let dragIndex = -1
+/** 上一次的落点磁贴元素（同一落点只交换一次，防止来回抖动）。 */
+let lastTargetEl: HTMLElement | null = null
+/** 长按计时器句柄。 */
+let pressTimer: number | undefined
+/** 按下时的指针坐标（用于长按等待期的位移判定）。 */
+let pressStartX = 0
+let pressStartY = 0
+/** 按下时记录的 pointerId（用于进入拖拽后捕获指针）。 */
+let pressPointerId = 0
+/** 是否刚经历长按/拖拽（用于吞掉随后的 click，避免误导航）。 */
+let justDragged = false
+/** justDragged 的兜底清理计时器。 */
+let suppressClickTimer: number | undefined
+/** 当前按压/拖拽的磁贴根元素。 */
+let pressedEl: HTMLElement | null = null
+
+/**
+ * 磁贴按下：启动长按计时；等待期间位移超过阈值则取消（视为滚动）。
+ * @param event 指针事件
+ * @param name 磁贴名称
+ */
+function onTilePointerDown(event: PointerEvent, name: string) {
+    if (dragState.active || (event.pointerType === "mouse" && event.button !== 0)) return
+    // 新的按下视为离开拖拽状态：解除点击抑制（拖拽释放的合成 click 没有 pointerdown，仍会被吞掉）
+    justDragged = false
+    pressedEl = event.currentTarget as HTMLElement
+    pressPointerId = event.pointerId
+    pressStartX = event.clientX
+    pressStartY = event.clientY
+    clearTimeout(pressTimer)
+    pressTimer = window.setTimeout(() => beginDrag(event, name), LONG_PRESS_MS)
+}
+
+/**
+ * 磁贴指针移动：拖拽中实时跟随与重排；长按等待期位移超阈值则取消长按。
+ * @param event 指针事件
+ */
+function onTilePointerMove(event: PointerEvent) {
+    if (dragState.active) {
+        updateDrag(event)
+        return
+    }
+    if (pressTimer !== undefined && Math.hypot(event.clientX - pressStartX, event.clientY - pressStartY) > DRAG_MOVE_THRESHOLD) {
+        clearTimeout(pressTimer)
+        pressTimer = undefined
+    }
+}
+
+/** 磁贴指针释放：结束拖拽并持久化排序。 */
+function onTilePointerUp() {
+    clearTimeout(pressTimer)
+    pressTimer = undefined
+    if (dragState.active) endDrag()
+}
+
+/** 磁贴指针取消（滚动/系统打断）：取消长按并结束拖拽。 */
+function onTilePointerCancel() {
+    clearTimeout(pressTimer)
+    pressTimer = undefined
+    if (dragState.active) endDrag()
+}
+
+/**
+ * 进入拖拽模式：捕获指针、记录幽灵尺寸，并禁用容器触摸滚动。
+ * @param event 触发长按的指针事件
+ * @param name 磁贴名称
+ */
+function beginDrag(event: PointerEvent, name: string) {
+    if (dragState.active) return
+    const index = tileList.value.findIndex(tile => tile.name === name)
+    if (index < 0) return
+    dragIndex = index
+    lastTargetEl = null
+    dragState.active = true
+    dragState.name = name
+    dragState.x = event.clientX
+    dragState.y = event.clientY
+    if (pressedEl) {
+        dragState.w = pressedEl.offsetWidth
+        dragState.h = pressedEl.offsetHeight
+        pressedEl.setPointerCapture?.(pressPointerId)
+    }
+    justDragged = true
+    clearTimeout(suppressClickTimer)
+    if (pressedEl?.parentElement) pressedEl.parentElement.style.touchAction = "none"
+}
+
+/**
+ * 拖拽跟随：更新幽灵位置，以指针正下方的磁贴为落点实时重排。
+ * 同一落点只交换一次（lastTargetEl 去重），避免指针停在原位时来回抖动。
+ * @param event 指针事件
+ */
+function updateDrag(event: PointerEvent) {
+    dragState.x = event.clientX
+    dragState.y = event.clientY
+    autoScroll()
+    // 指针正下方的磁贴即为落点（幽灵 pointer-events: none，不干扰命中；大磁贴中心远，不能按中心距离判断）
+    const under = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-po-name]") as HTMLElement | null
+    if (!under || under.dataset.poName === dragState.name) {
+        lastTargetEl = null
+        return
+    }
+    if (under === lastTargetEl) return
+    const targetIndex = Number(under.dataset.poIndex)
+    if (targetIndex === dragIndex || Number.isNaN(targetIndex)) return
+    const list = [...tileList.value]
+    const [item] = list.splice(dragIndex, 1)
+    list.splice(targetIndex, 0, item)
+    tileList.value = list
+    dragIndex = targetIndex
+    lastTargetEl = under
+    // 重排经 Vue nextTick 移动被捕获的 DOM 节点，Chromium 会因此释放指针捕获
+    // （lostpointercapture），需在节点移动完成后重新捕获
+    void nextTick(() => {
+        pressedEl?.setPointerCapture?.(pressPointerId)
+    })
+}
+
+/** 拖拽接近滚动容器上下边缘时自动滚动（便于跨行/跨屏排序）。 */
+function autoScroll() {
+    const grid = pressedEl?.parentElement
+    const viewport = grid?.closest("[data-reka-scroll-area-viewport]") as HTMLElement | null
+    if (!viewport) return
+    const rect = viewport.getBoundingClientRect()
+    if (dragState.y < rect.top + 64) viewport.scrollTop -= 12
+    else if (dragState.y > rect.bottom - 64) viewport.scrollTop += 12
+}
+
+/** 结束拖拽：恢复触摸滚动、持久化排序，并抑制随后的一次 click。 */
+function endDrag() {
+    dragState.active = false
+    lastTargetEl = null
+    if (pressedEl?.parentElement) pressedEl.parentElement.style.touchAction = ""
+    pressedEl = null
+    tileOrder.value = tileList.value.map(tile => tile.name)
+    clearTimeout(suppressClickTimer)
+    suppressClickTimer = window.setTimeout(() => {
+        justDragged = false
+    }, 600)
+}
+
+/**
+ * 网格点击捕获：刚结束长按/拖拽时吞掉该 click，避免误导航。
+ * @param event 点击事件
+ */
+function onGridClickCapture(event: MouseEvent) {
+    if (!justDragged) return
+    justDragged = false
+    event.preventDefault()
+    event.stopPropagation()
+}
+
+/** 长按/拖拽期间屏蔽右键菜单（触屏长按释放后会补发 contextmenu）。 */
+function onGridContextMenu(event: MouseEvent) {
+    if (pressTimer !== undefined || dragState.active || justDragged) event.preventDefault()
+}
+
+/** 幽灵卡片的渲染数据：当前拖拽的磁贴项。 */
+const ghostTile = computed(() => tileList.value.find(tile => tile.name === dragState.name) ?? null)
+
+/** 幽灵卡片样式：跟随指针居中，轻微放大与旋转以示浮起。 */
+const ghostStyle = computed(() => ({
+    width: `${dragState.w}px`,
+    height: `${dragState.h}px`,
+    transform: `translate3d(${dragState.x - dragState.w / 2}px, ${dragState.y - dragState.h / 2}px, 0) scale(1.07) rotate(1.5deg)`,
+}))
 
 let hh: string[] = []
 
@@ -306,213 +655,274 @@ onBeforeUnmount(() => {
 
 <template>
     <ScrollArea class="h-full">
-        <div class="mx-auto flex min-h-full w-full max-w-7xl flex-col px-4 md:px-6 lg:px-8">
-            <!-- 页眉带：功能索引标题 + 模块计数 -->
-            <section class="more-rise relative z-40 border-b border-base-content/15 py-8" style="animation-delay: 0.06s">
-                <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
-                    <div class="flex flex-col gap-2">
-                        <span class="more-badge">{{ $t("more.badge") }}</span>
-                        <h1 class="text-2xl font-bold tracking-tight text-base-content md:text-3xl">{{ $t("more.desc") }}</h1>
-                    </div>
-                    <p class="font-mono text-xs tabular-nums tracking-wide text-base-content/45">
-                        {{ $t("more.count", { count: visibleItems.length }) }}
-                    </p>
-                </div>
-            </section>
-
-            <!-- 快速访问：内联文字链接条 -->
-            <div
-                class="more-rise flex flex-wrap items-center gap-x-2 gap-y-2.5 border-b border-base-content/15 py-6"
-                style="animation-delay: 0.12s"
-            >
-                <span class="mr-2 text-xs font-semibold text-base-content/45">{{ $t("view.featuredEntry") }}</span>
-                <template v-for="(item, index) in featuredItems" :key="item.name">
-                    <span v-if="index" class="select-none text-base-content/25">·</span>
-                    <RouterLink
-                        :to="item.path"
-                        class="group inline-flex items-center gap-1 text-sm font-medium text-base-content/80 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
-                    >
-                        {{ $t(`${item.name}.title`) }}
-                        <Icon
-                            icon="ri:arrow-right-line"
-                            class="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
-                        />
-                    </RouterLink>
-                </template>
-            </div>
-
-            <!-- 章节索引：01–04 幽灵序号横带 -->
-            <main class="flex-1">
-                <section
-                    v-for="(section, index) in sections"
-                    :key="section.id"
-                    class="more-rise border-b border-base-content/15"
-                    :style="{ animationDelay: `${0.16 + 0.06 * index}s` }"
+        <!-- Win10 磁贴画布：auto-fit 自动填充列，未占满宽度时整组居中（每行共享同一轨道偏移） -->
+        <div class="mx-auto min-h-full w-full max-w-7xl px-4 py-8 md:px-6 lg:px-8">
+            <!-- 顶部工具行：右上角入口风格切换（磁贴 / Home 快捷入口） -->
+            <div class="sticky top-0 z-10 mb-6 flex justify-end">
+                <label
+                    class="flex cursor-pointer items-center gap-2 rounded-lg border border-base-content/15 bg-base-100/80 px-3 py-1.5 shadow-sm backdrop-blur-sm"
+                    :title="$t('more.style.title')"
                 >
-                    <div class="grid gap-x-12 gap-y-6 py-9 md:py-11 xl:grid-cols-[7.5rem_minmax(0,1fr)]">
-                        <div class="flex items-baseline gap-4 xl:block">
-                            <span class="more-numeral">{{ formatIndex(index) }}</span>
-                            <span class="more-badge xl:mt-3 xl:block">{{ section.badge }}</span>
-                        </div>
-
-                        <div class="min-w-0">
-                            <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-                                <h2 class="text-xl font-bold tracking-tight text-base-content md:text-2xl">{{ section.title }}</h2>
-                                <span class="font-mono text-xs tabular-nums text-base-content/40">
-                                    {{ section.items.length }} {{ $t("more.entryCount") }}
-                                </span>
-                            </div>
-
-                            <p class="mt-2.5 max-w-2xl text-sm leading-6 text-base-content/55">{{ section.description }}</p>
-
-                            <ul class="mt-5 grid grid-cols-1 gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
-                                <li v-for="item in section.items" :key="item.name" class="more-item">
-                                    <RouterLink
-                                        :to="item.path"
-                                        class="more-entry focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                                    >
-                                        <span class="more-entry-icon" aria-hidden="true">
-                                            <Icon :icon="item.icon" class="h-4 w-4" />
-                                        </span>
-                                        <span class="min-w-0 truncate text-sm font-medium">{{ $t(`${item.name}.title`) }}</span>
-                                        <span class="more-leader" aria-hidden="true" />
-                                        <Icon icon="ri:arrow-right-line" class="more-entry-arrow" />
-                                    </RouterLink>
-                                    <p class="more-entry-desc">{{ $t(`${item.name}.desc`) }}</p>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-            </main>
+                    <span class="text-xs font-medium transition-colors" :class="useQuickNavStyle ? 'text-base-content/40' : 'text-primary'">
+                        {{ $t("more.style.tile") }}
+                    </span>
+                    <input
+                        v-model="useQuickNavStyle"
+                        type="checkbox"
+                        class="toggle toggle-sm toggle-primary"
+                        :aria-label="$t('more.style.title')"
+                    />
+                    <span class="text-xs font-medium transition-colors" :class="useQuickNavStyle ? 'text-primary' : 'text-base-content/40'">
+                        {{ $t("more.style.quicknav") }}
+                    </span>
+                </label>
+            </div>
+            <div
+                v-if="!useQuickNavStyle"
+                class="po-grid"
+                @click.capture="onGridClickCapture"
+                @contextmenu="onGridContextMenu"
+                @dragstart.capture.prevent
+            >
+                <ContextMenu
+                    v-for="(item, index) in tileList"
+                    :key="item.name"
+                    class="po-tile-rise po-tile-slot"
+                    :class="[`po-tile-slot--${item.size}`, { 'po-tile-dragging': dragState.active && dragState.name === item.name }]"
+                    :style="{ animationDelay: `${0.08 + index * 0.03}s` }"
+                    :data-po-name="item.name"
+                    :data-po-index="index"
+                    @pointerdown="(event: PointerEvent) => onTilePointerDown(event, item.name)"
+                    @pointermove="onTilePointerMove"
+                    @pointerup="onTilePointerUp"
+                    @pointercancel="onTilePointerCancel"
+                >
+                    <POCard
+                        :size="item.size"
+                        :to="item.path"
+                        :icon="item.icon"
+                        :title="$t(`${item.name}.title`)"
+                        :description="$t(`${item.name}.desc`)"
+                        :gradient="item.gradient"
+                        :glow="item.glow"
+                    />
+                    <template #menu>
+                        <!-- 切换颜色：弹出调色板子菜单 -->
+                        <ContextMenuSub>
+                            <ContextMenuSubTrigger class="po-tile-menu-item">
+                                <Icon class="size-4 mr-2" icon="ri:palette-line" />
+                                {{ $t("more.contextMenu.changeColor") }}
+                            </ContextMenuSubTrigger>
+                            <ContextMenuSubContent
+                                class="min-w-55 z-30 bg-base-100/80 outline-none rounded-lg p-2 shadow-lg will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
+                            >
+                                <ContextMenuItem
+                                    v-for="color in TILE_PALETTE"
+                                    :key="color.name"
+                                    class="po-tile-menu-item"
+                                    @click="setTileColor(item.name, color.color)"
+                                >
+                                    <span
+                                        class="size-3 mr-2 rounded-full shrink-0"
+                                        :style="{ background: makeTileTheme(color.color).gradient }"
+                                    />
+                                    {{ $t(`more.contextMenu.color.${color.name}`) }}
+                                </ContextMenuItem>
+                                <!-- 自定义颜色：弹出取色器弹窗 -->
+                                <ContextMenuItem class="po-tile-menu-item" @click="openCustomColor(item.name)">
+                                    <span
+                                        class="size-3 mr-2 rounded-full shrink-0"
+                                        :style="{
+                                            background:
+                                                'conic-gradient(#f5576c, #f7971e, #fde047, #43e97b, #00c6ff, #7f00ff, #f83600, #f5576c)',
+                                        }"
+                                    />
+                                    {{ $t("more.contextMenu.customColor") }}
+                                </ContextMenuItem>
+                            </ContextMenuSubContent>
+                        </ContextMenuSub>
+                        <!-- 切换大小：弹出 小/宽/大 子菜单 -->
+                        <ContextMenuSub>
+                            <ContextMenuSubTrigger class="po-tile-menu-item">
+                                <Icon class="size-4 mr-2" icon="ri:grid-line" />
+                                {{ $t("more.contextMenu.changeSize") }}
+                            </ContextMenuSubTrigger>
+                            <ContextMenuSubContent
+                                class="min-w-55 z-30 bg-base-100/80 outline-none rounded-lg p-2 shadow-lg will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
+                            >
+                                <ContextMenuItem
+                                    v-for="size in SIZE_OPTIONS"
+                                    :key="size"
+                                    class="po-tile-menu-item"
+                                    @click="setTileSize(item.name, size)"
+                                >
+                                    <span
+                                        class="mr-2 rounded-xs border border-base-content/40 shrink-0"
+                                        :style="tileSizePreviewStyle(size)"
+                                    />
+                                    {{ $t(`more.contextMenu.size.${size}`) }}
+                                    <Icon v-if="item.size === size" class="size-4 ml-auto" icon="ri:checkbox-circle-fill" />
+                                </ContextMenuItem>
+                            </ContextMenuSubContent>
+                        </ContextMenuSub>
+                        <!-- 恢复默认（仅存在自定义覆盖时显示） -->
+                        <ContextMenuItem v-if="hasOverride(item.name)" class="po-tile-menu-item" @click="resetTileOverride(item.name)">
+                            <Icon class="size-4 mr-2" icon="ri:restart-line" />
+                            {{ $t("more.contextMenu.reset") }}
+                        </ContextMenuItem>
+                    </template>
+                </ContextMenu>
+            </div>
+            <!-- Home 快捷入口风格：复用首页快捷导航样式，auto-fill 自适应列数 -->
+            <HomeQuickNav v-else autofill :items="quickNavItems" />
         </div>
+        <!-- 拖拽幽灵：Teleport 到 body 跟随指针，不参与网格布局 -->
+        <Teleport to="body">
+            <div v-if="dragState.active && ghostTile" class="po-drag-ghost" :style="ghostStyle" aria-hidden="true">
+                <POCard
+                    :size="ghostTile.size"
+                    :to="ghostTile.path"
+                    :icon="ghostTile.icon"
+                    :title="$t(`${ghostTile.name}.title`)"
+                    :description="$t(`${ghostTile.name}.desc`)"
+                    :gradient="ghostTile.gradient"
+                    :glow="ghostTile.glow"
+                    :tilt="false"
+                />
+            </div>
+        </Teleport>
     </ScrollArea>
+
+    <!-- 自定义颜色弹窗：原生取色器 + hex 输入，确定后应用为基础色 -->
+    <dialog id="po-tile-color-modal" class="modal z-40">
+        <div class="modal-box">
+            <h3 class="text-lg font-bold">{{ $t("more.contextMenu.customColor") }}</h3>
+            <div class="mt-5 flex flex-col items-center gap-4">
+                <!-- 原生取色器：直接选取任意颜色 -->
+                <input
+                    v-model="customColorState.hex"
+                    type="color"
+                    class="h-16 w-28 cursor-pointer rounded-lg border border-base-content/20 bg-transparent p-1"
+                />
+                <!-- 手动 hex 输入（非法输入自动回退） -->
+                <input
+                    :value="customColorState.hex"
+                    type="text"
+                    class="input input-sm input-bordered w-36 text-center font-mono"
+                    @input="onCustomHexInput"
+                />
+                <!-- 预览：OKLCH 派生后的磁贴渐变 -->
+                <span class="h-8 w-36 rounded-lg" :style="{ background: makeTileTheme(customColorState.hex).gradient }" />
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-sm" @click="closeCustomColor">{{ $t("more.contextMenu.cancel") }}</button>
+                <button class="btn btn-sm btn-primary" @click="applyCustomColor">{{ $t("more.contextMenu.confirm") }}</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>{{ $t("more.contextMenu.cancel") }}</button>
+        </form>
+    </dialog>
 </template>
 
 <style scoped>
-/* 页面级一次性入场动画：轻量上浮淡入，仅播放一次，不做循环装饰 */
-.more-rise {
-    animation: more-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+/* Win10 磁贴画布：auto-fit 自动填充列，行高与列宽取同一单元格尺寸，保证各尺寸磁贴严格对齐。
+   justify-content: center 使未占满宽度的行整组居中（auto-fit 折叠空轨道，各行共享同一偏移）。 */
+.po-grid {
+    --po-cell: clamp(5.25rem, 9vw, 7.5rem);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, var(--po-cell));
+    grid-auto-rows: var(--po-cell);
+    grid-auto-flow: dense;
+    justify-content: center;
+    gap: 0.75rem;
 }
 
-@keyframes more-rise {
+/* 磁贴跨度：右键菜单包装层（ContextMenu 触发元素）按 POCard 三种尺寸映射到网格占位 */
+.po-grid :deep(.po-tile-slot) {
+    grid-column: span 1;
+    grid-row: span 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.po-grid :deep(.po-tile-slot--large) {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.po-grid :deep(.po-tile-slot--wide) {
+    grid-column: span 2;
+    grid-row: span 1;
+}
+
+/* 包装层内的磁贴占满单元格（网格拉伸不再直接作用于 POCard 根元素） */
+.po-grid :deep(.po-tile-slot .po-card) {
+    width: 100%;
+    height: 100%;
+}
+
+/* 右键菜单项：与全站 ContextMenu 使用一致的高亮/禁用样式 */
+.po-tile-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1;
+    color: var(--color-base-content);
+    border-radius: 0.5rem;
+    position: relative;
+    user-select: none;
+    outline: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.po-tile-menu-item[data-highlighted] {
+    background: var(--color-primary);
+    color: var(--color-base-100);
+}
+
+.po-tile-menu-item[data-disabled] {
+    color: var(--color-base-content);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* 磁贴一次性入场动画：轻量上浮淡入，逐块错峰显现，仅播放一次 */
+.po-tile-rise {
+    animation: po-tile-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes po-tile-rise {
     from {
         opacity: 0;
-        transform: translateY(14px);
+        transform: translateY(10px) scale(0.97);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
-/* 章节幽灵数字：超大号低对比数字，作为索引主锚点 */
-.more-numeral {
-    font-size: clamp(2.75rem, 5vw, 4.5rem);
-    line-height: 0.95;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--color-base-content) 13%, transparent);
+/* 拖拽中的磁贴：降低亮度作为占位提示（filter 不受入场动画 fill 影响） */
+.po-tile-dragging {
+    filter: brightness(0.72) saturate(0.45);
 }
 
-/* 章节英文徽记：等宽小号字距大写 */
-.more-badge {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    font-size: 0.625rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-base-content) 45%, transparent);
-}
-
-/* 索引条目行：图标方章 + 名称 + 虚线引导线 + 箭头，模仿目录条目 */
-.more-entry {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    width: 100%;
-    padding: 0.55rem 0 0.15rem;
-    cursor: pointer;
-    text-align: left;
-    color: color-mix(in srgb, var(--color-base-content) 82%, transparent);
-    transition: color 0.2s ease;
-}
-
-.more-entry:hover {
-    color: var(--color-primary);
-}
-
-/* 图标方章：直角细边框的小方块，延续"方章"造型语言 */
-.more-entry-icon {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    border: 1px solid color-mix(in srgb, var(--color-base-content) 22%, transparent);
-    color: color-mix(in srgb, var(--color-base-content) 52%, transparent);
-    transition:
-        color 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.more-entry:hover .more-entry-icon {
-    color: var(--color-primary);
-    border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
-}
-
-/* 目录点线：悬停时跟随强调色 */
-.more-leader {
-    flex: 1 1 auto;
-    min-width: 1.25rem;
-    border-bottom: 1px dotted color-mix(in srgb, var(--color-base-content) 30%, transparent);
-    transform: translateY(-0.12em);
-    transition: border-color 0.2s ease;
-}
-
-.more-entry:hover .more-leader {
-    border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
-}
-
-/* 条目箭头：悬停时滑入显现 */
-.more-entry-arrow {
-    flex-shrink: 0;
-    width: 0.875rem;
-    height: 0.875rem;
-    opacity: 0;
-    transform: translateX(-0.4rem);
-    transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
-}
-
-.more-entry:hover .more-entry-arrow {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-.more-entry:active {
-    transform: scale(0.985);
-}
-
-/* 条目描述：小号弱化文本，缩进对齐条目名称 */
-.more-entry-desc {
-    margin: 0.1rem 0 0.6rem;
-    padding-left: 2.35rem;
-    padding-right: 0.25rem;
-    font-size: 0.75rem;
-    line-height: 1.5;
-    color: color-mix(in srgb, var(--color-base-content) 45%, transparent);
-}
-
-.more-item {
-    min-width: 0;
+/* 拖拽幽灵：fixed 跟随指针，浮于页面之上，不响应指针事件 */
+.po-drag-ghost {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 60;
+    pointer-events: none;
+    filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.45));
 }
 
 /* 减少动态偏好：关闭入场动画 */
 @media (prefers-reduced-motion: reduce) {
-    .more-rise {
+    .po-tile-rise {
         animation: none;
     }
 }

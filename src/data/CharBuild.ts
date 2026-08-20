@@ -1020,7 +1020,7 @@ export class CharBuild {
         if (fieldPrefix) return fieldPrefix
         // 普攻连段字段（如"一段伤害"、"[萨麦尔]三段伤害"）不携带攻击类型关键字，
         // 通过"段伤害"后缀归入普攻；但排除已含其他攻击类型关键字的字段（如"下落攻击二段伤害"、"骑乘攻击一段伤害"）。
-        if (fieldName && /段伤害$/.test(fieldName) && !/(蓄力|下落|滑行|射击)攻击/.test(fieldName)) {
+        if (fieldName && /段伤害$/.test(fieldName) && !/(蓄力|下落|滑行|射击|骑乘)攻击/.test(fieldName)) {
             return "普攻"
         }
         const basePrefix = weaponAttackTypeMap.find(({ patterns }) => patterns.some(pattern => baseName === pattern))?.prefix

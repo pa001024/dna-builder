@@ -5,6 +5,40 @@
     exclude: properties;
 }
 
+@plugin "daisyui/theme" {
+    name: "ez";
+    prefersdark: false;
+    color-scheme: "light";
+    --color-base-100: oklch(100% 0 0);
+    --color-base-200: oklch(93% 0 0);
+    --color-base-300: oklch(86% 0 0);
+    --color-base-content: oklch(35.519% 0.032 262.988);
+    --color-primary: oklch(80% 0.105 251.813);
+    --color-primary-content: oklch(33.387% 0.04 162.24);
+    --color-secondary: oklch(70% 0.183 293.541);
+    --color-secondary-content: oklch(100% 0 0);
+    --color-accent: oklch(91% 0.08 205.041);
+    --color-accent-content: oklch(0% 0 0);
+    --color-neutral: oklch(55% 0.046 257.417);
+    --color-neutral-content: oklch(98.462% 0.001 247.838);
+    --color-info: oklch(88% 0.059 254.128);
+    --color-info-content: oklch(0% 0 0);
+    --color-success: oklch(76% 0.177 163.223);
+    --color-success-content: oklch(0% 0 0);
+    --color-warning: oklch(82% 0.189 84.429);
+    --color-warning-content: oklch(0% 0 0);
+    --color-error: oklch(70% 0.191 22.216);
+    --color-error-content: oklch(0% 0 0);
+    --radius-selector: 0.25rem;
+    --radius-field: 0.25rem;
+    --radius-box: 0.25rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
+}
+
 /* @import "animate.css"; */
 
 [id$="-tooltip"] {

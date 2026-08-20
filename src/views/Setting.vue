@@ -114,6 +114,7 @@ const lightThemes = [
     "autumn",
     "acid",
     "lemonade",
+    "ez",
 ]
 const darkThemes = ["dark", "black", "synthwave", "halloween", "forest", "dracula", "business", "night", "coffee"]
 
@@ -445,10 +446,7 @@ onMounted(() => {
                 <div class="bg-base-100 p-2 rounded-lg">
                     <div v-if="env.isApp" class="flex justify-between items-center p-2">
                         <span class="label-text">{{ $t("setting.theme") }}</span>
-                        <Select
-                            v-model="setting.theme"
-                            class="input input-bordered input-sm w-40"
-                        >
+                        <Select v-model="setting.theme" class="input input-bordered input-sm w-40">
                             <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.lightTheme") }}</SelectLabel>
                             <SelectGroup>
                                 <SelectItem v-for="th in lightThemes" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
@@ -458,8 +456,14 @@ onMounted(() => {
                             <SelectGroup>
                                 <SelectItem v-for="th in darkThemes" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
                             </SelectGroup>
+                            <SelectSeparator />
+                            <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.customTheme") }}</SelectLabel>
+                            <SelectGroup>
+                                <SelectItem value="custom">{{ $t("setting.customThemeOption") }}</SelectItem>
+                            </SelectGroup>
                         </Select>
                     </div>
+                    <CustomThemeDesigner v-if="env.isApp && setting.theme === 'custom'" class="p-2" />
                     <div v-if="env.isApp" class="flex justify-between items-center p-2">
                         <span class="label-text">
                             {{ $t("setting.windowTrasnparent") }}
@@ -585,7 +589,10 @@ onMounted(() => {
                                 <span>{{ imgsDownloadProgressLabel }}</span>
                                 <span> {{ imgsDownloadProgressValue }}% </span>
                             </div>
-                            <div v-if="imgsDownloadState.stage === 'pack-current' && imgsDownloadState.packTotal > 1" class="mt-1 text-[11px] text-base-content/55">
+                            <div
+                                v-if="imgsDownloadState.stage === 'pack-current' && imgsDownloadState.packTotal > 1"
+                                class="mt-1 text-[11px] text-base-content/55"
+                            >
                                 包({{ imgsDownloadState.packCompleted }}/{{ imgsDownloadState.packTotal }})
                                 {{ imgsDownloadState.version }} · {{ imgsDownloadState.currentPackFiles }} 张 ·
                                 {{
@@ -703,10 +710,7 @@ onMounted(() => {
                     </div>
                     <div class="flex justify-between items-center p-2 gap-4">
                         <span class="label-text">{{ $t("setting.protagonistGender1") }}</span>
-                        <Select
-                            v-model="setting.protagonistGender"
-                            class="input input-bordered input-sm w-64"
-                        >
+                        <Select v-model="setting.protagonistGender" class="input input-bordered input-sm w-64">
                             <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
                             <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
                         </Select>
@@ -717,10 +721,7 @@ onMounted(() => {
                     </div>
                     <div class="flex justify-between items-center p-2 gap-4">
                         <span class="label-text">{{ $t("setting.protagonistGender2") }}</span>
-                        <Select
-                            v-model="setting.protagonistGender2"
-                            class="input input-bordered input-sm w-64"
-                        >
+                        <Select v-model="setting.protagonistGender2" class="input input-bordered input-sm w-64">
                             <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
                             <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
                         </Select>

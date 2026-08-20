@@ -5,6 +5,8 @@ import { sleep } from "@/util"
 import { applyMaterial, isLaunchAtStartupEnabled, setLaunchAtStartupEnabled, startHeartbeat, stopHeartbeat, tauriFetch } from "../api/app"
 import { executeSignFlow } from "../api/dna-sign"
 import { applyLanguageFontClass, changeLanguage } from "../i18n"
+import type { CustomTheme } from "../utils/customTheme"
+import { DEFAULT_CUSTOM_THEME } from "../utils/customTheme"
 import { db } from "./db"
 
 let apiCache: DNAAPI | null = null
@@ -45,6 +47,10 @@ export const useSettingStore = defineStore("setting", {
             protagonistGender2: useLocalStorage<"male" | "female">("story_protagonist_gender_2", "female"),
             safeMode: useLocalStorage("setting_safe_mode", true),
             lastHeartbeatTime: 0,
+            // 自定义主题（设置页主题设计器），缺失字段时用默认值合并兜底
+            customTheme: useLocalStorage<CustomTheme>("setting_custom_theme", structuredClone(DEFAULT_CUSTOM_THEME), {
+                mergeDefaults: true,
+            }),
         }
     },
     getters: {},
@@ -56,6 +62,13 @@ export const useSettingStore = defineStore("setting", {
         },
         setTheme(theme: string) {
             this.theme = theme
+        },
+        /**
+         * 整体替换自定义主题（用于重置/导入）。
+         * @param theme 新的自定义主题
+         */
+        setCustomTheme(theme: CustomTheme) {
+            this.customTheme = theme
         },
         /**
          * 同步桌面端开机启动状态，避免本地缓存与系统真实状态不一致。

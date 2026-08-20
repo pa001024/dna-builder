@@ -223,6 +223,44 @@ const getActivityStatus = (activity: Activity) => {
 }
 
 /**
+ * 获取活动块的样式类（左强调条颜色 + 边框虚线 + 过期降透明）。
+ * @param activity 活动条目
+ * @returns 状态相关样式类
+ */
+function activityBlockClass(activity: Activity): string {
+    if (activity.isMoling && isMolingCompleted.value) {
+        return "border-l-success"
+    }
+    const status = getActivityStatus(activity)
+    if (status === "ongoing") {
+        return "border-l-primary"
+    }
+    if (status === "upcoming") {
+        return "border-l-base-content/25 border-dashed"
+    }
+    return "border-l-base-content/25 opacity-60"
+}
+
+/**
+ * 获取活动状态徽标的样式类（主题色感知）。
+ * @param activity 活动条目
+ * @returns 徽标样式类
+ */
+function statusBadgeClass(activity: Activity): string {
+    if (activity.isMoling && isMolingCompleted.value) {
+        return "bg-success text-success-content"
+    }
+    const status = getActivityStatus(activity)
+    if (status === "ongoing") {
+        return "bg-primary text-primary-content"
+    }
+    if (status === "upcoming") {
+        return "bg-base-content/10 text-base-content/60"
+    }
+    return "bg-base-content/15 text-base-content/55"
+}
+
+/**
  * 将活动数据归一化为组件内部结构。
  * @param activity 活动条目
  * @returns 归一化后的活动
@@ -634,44 +672,44 @@ onMounted(() => {
 
 <template>
     <div class="w-full">
-        <div class="card bg-base-100 shadow-md">
-            <div class="card-body p-3 sm:p-4">
-                <h2 class="card-title text-lg sm:text-xl mb-6 text-primary flex items-center gap-3">
-                    <Icon icon="ri:calendar-event-line" class="w-6 h-6" />
-                    {{ $t("activity-calendar.title") }}
-                    <div class="flex items-center ml-auto text-sm gap-2">
-                        <span :class="{ 'text-base-content': activitySource === 'local' }">{{ $t("activity-calendar.local") }}</span>
-                        <input
-                            type="checkbox"
-                            class="toggle toggle-primary"
-                            :checked="activitySource === 'remote'"
-                            @change="switchActivitySource(($event.target as HTMLInputElement).checked ? 'remote' : 'local')"
-                        />
-                        <span :class="{ 'text-base-content': activitySource === 'remote' }">{{ $t("activity-calendar.remote") }}</span>
-                    </div>
-                </h2>
+        <div class="rounded-xs border border-base-content/10 bg-base-100/60">
+            <div class="p-3 sm:p-4">
+                <!-- 活动来源切换（本地 / 线上） -->
+                <div class="mb-2 flex items-center justify-end gap-2 text-[11px] text-base-content/50">
+                    <span :class="{ 'text-base-content': activitySource === 'local' }">{{ $t("activity-calendar.local") }}</span>
+                    <input
+                        type="checkbox"
+                        class="toggle toggle-sm toggle-primary rounded-xs"
+                        :checked="activitySource === 'remote'"
+                        @change="switchActivitySource(($event.target as HTMLInputElement).checked ? 'remote' : 'local')"
+                    />
+                    <span :class="{ 'text-base-content': activitySource === 'remote' }">{{ $t("activity-calendar.remote") }}</span>
+                </div>
                 <!-- 加载状态 -->
                 <div v-if="loading" class="flex items-center justify-center py-12">
                     <span class="loading loading-spinner loading-lg"></span>
                 </div>
 
                 <!-- 错误状态 -->
-                <div v-else-if="error" class="alert alert-warning">
-                    <Icon icon="ri:error-warning-line" class="w-6 h-6" />
-                    <span class="ml-2">{{ error }}</span>
+                <div
+                    v-else-if="error"
+                    class="flex items-center gap-2 rounded-xs border border-warning/40 bg-warning/10 px-3 py-2.5 text-sm text-warning"
+                >
+                    <Icon icon="ri:error-warning-line" class="h-4 w-4 shrink-0" />
+                    <span>{{ error }}</span>
                 </div>
 
                 <!-- 空状态 -->
-                <div v-else-if="activities.length === 0 && groupedActivities.length === 0" class="text-center py-12 text-gray-500">
-                    <Icon icon="ri:inbox-line" class="w-16 h-16 mb-3 opacity-50" />
-                    <p class="text-lg">{{ $t("activity-calendar.no_activities") }}</p>
+                <div v-else-if="activities.length === 0 && groupedActivities.length === 0" class="text-center py-10 text-base-content/50">
+                    <Icon icon="ri:inbox-line" class="h-8 w-8 mb-2 opacity-50" />
+                    <p class="text-[13px]">{{ $t("activity-calendar.no_activities") }}</p>
                 </div>
 
                 <!-- 活动时间轴 -->
                 <div v-else class="relative">
                     <!-- 拖动提示 -->
-                    <div class="text-xs text-gray-400 mb-2 flex items-center gap-1">
-                        <Icon icon="ri:drag-move-line" class="w-4 h-4" />
+                    <div class="text-xs text-base-content/45 mb-2 flex items-center gap-1">
+                        <Icon icon="ri:drag-move-line" class="w-3.5 h-3.5" />
                         {{ t("activity-calendar.drag_hint") }}
                     </div>
 
@@ -686,13 +724,8 @@ onMounted(() => {
                                 v-for="item in groupedActivities"
                                 v-show="stickyActivities.has(item.activity.originalIndex!)"
                                 :key="`sticky-${item.activity.originalIndex}`"
-                                class="absolute bg-base-100 rounded-lg shadow-md border-l-4 truncate"
-                                :class="{
-                                    'border-primary': getActivityStatus(item.activity) === 'ongoing',
-                                    'border-gray-300': getActivityStatus(item.activity) === 'ended',
-                                    'border-dashed border-gray-300': getActivityStatus(item.activity) === 'upcoming',
-                                    'opacity-60': getActivityStatus(item.activity) === 'ended',
-                                }"
+                                class="absolute truncate rounded-xs border border-base-content/10 border-l-2 bg-base-100/90"
+                                :class="activityBlockClass(item.activity)"
                                 :style="getStickyContentStyle(item.groupIndex, item.activity.originalIndex!)"
                             >
                                 <!-- 粘性内容 -->
@@ -700,15 +733,7 @@ onMounted(() => {
                                     <div>
                                         <!-- 状态标签 -->
                                         <div class="flex items-center gap-2 mb-2">
-                                            <span
-                                                class="px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap"
-                                                :class="{
-                                                    'bg-primary text-primary-content': getActivityStatus(item.activity) === 'ongoing',
-                                                    'bg-gray-400 text-white': getActivityStatus(item.activity) === 'ended',
-                                                    'bg-gray-200 text-gray-600': getActivityStatus(item.activity) === 'upcoming',
-                                                    'bg-green-500 text-white': item.activity.isMoling && isMolingCompleted,
-                                                }"
-                                            >
+                                            <span class="px-1.5 py-0.5 rounded-xs text-[10px] font-semibold whitespace-nowrap" :class="statusBadgeClass(item.activity)">
                                                 {{
                                                     item.activity.isMoling && isMolingCompleted
                                                         ? $t("activity-calendar.moling_completed")
@@ -728,7 +753,7 @@ onMounted(() => {
                                             </div>
                                         </div>
                                         <!-- 活动标题 -->
-                                        <h3 class="font-bold text-sm sm:text-base mb-1 text-base-content line-clamp-1">
+                                        <h3 class="font-semibold text-sm mb-1 text-base-content line-clamp-1">
                                             <a
                                                 v-if="item.activity.postId"
                                                 :href="getRemoteActivityUrl(item.activity.postId)"
@@ -752,12 +777,12 @@ onMounted(() => {
                                     </div>
 
                                     <!-- 活动描述 -->
-                                    <p v-if="item.activity.description" class="text-xs text-gray-600 line-clamp-2">
+                                    <p v-if="item.activity.description" class="text-xs text-base-content/60 line-clamp-2">
                                         {{ item.activity.description }}
                                     </p>
 
                                     <!-- 时间信息 -->
-                                    <div class="flex gap-2 text-xs text-gray-500">
+                                    <div class="flex gap-2 text-xs text-base-content/50">
                                         <div class="flex items-center gap-1">
                                             <Icon icon="ri:play-circle-line" class="w-3.5 h-3.5 shrink-0" />
                                             <span class="whitespace-nowrap">{{ formatFullDateTime(item.activity.begin_at) }}</span>
@@ -775,7 +800,7 @@ onMounted(() => {
                     <!-- 时间轴滚动容器 -->
                     <div
                         ref="timelineRef"
-                        class="absolute inset-0 top-6 overflow-x-auto overflow-y-hidden border-l border-r border-b border-base-300 bg-base-200/50"
+                        class="absolute inset-0 top-6 overflow-x-auto overflow-y-hidden border-l border-r border-b border-base-content/10 bg-base-200/40"
                         @mousedown="startDrag"
                     >
                         <!-- 时间轴背景内容 -->
@@ -785,10 +810,10 @@ onMounted(() => {
                                 <div
                                     v-for="tick in dateTicks"
                                     :key="tick.timestamp"
-                                    class="absolute top-0 bottom-0 w-px border-l border-dashed border-base-300/50"
+                                    class="absolute top-0 bottom-0 w-px border-l border-dashed border-base-content/15"
                                     :style="{ left: `${tick.position}px` }"
                                 >
-                                    <div class="absolute top-1 left-2 text-xs text-gray-400 font-medium">
+                                    <div class="absolute top-1 left-2 text-xs text-base-content/45 font-medium tabular-nums">
                                         {{ tick.dateStr }}
                                     </div>
                                 </div>
@@ -797,13 +822,13 @@ onMounted(() => {
                             <!-- 当前时间竖线 -->
                             <div
                                 ref="currentLineRef"
-                                class="absolute top-0 bottom-0 w-1 bg-linear-to-b from-blue-500 via-blue-400 to-blue-300 z-20 pointer-events-none"
+                                class="absolute top-0 bottom-0 w-0.5 bg-linear-to-b from-primary via-primary to-primary/40 z-20 pointer-events-none"
                                 :style="{ left: `${getTimestampPosition(currentTimestamp)}px` }"
                             >
                                 <div
-                                    class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full shadow-lg"
+                                    class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-2.5 w-2.5 bg-primary rounded-full"
                                 >
-                                    <div class="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-75"></div>
+                                    <div class="absolute inset-0 bg-primary rounded-full animate-ping opacity-60"></div>
                                 </div>
                             </div>
 
@@ -812,13 +837,8 @@ onMounted(() => {
                                 v-for="item in groupedActivities"
                                 :key="`${item.category}-${item.activity.originalIndex}`"
                                 :ref="(el: any) => el && activityRefs.set(item.activity.originalIndex!, el as HTMLElement)"
-                                class="absolute bg-base-100 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border-l-4 cursor-pointer group"
-                                :class="{
-                                    'border-primary': getActivityStatus(item.activity) === 'ongoing',
-                                    'border-gray-300': getActivityStatus(item.activity) === 'ended',
-                                    'border-dashed border-gray-300': getActivityStatus(item.activity) === 'upcoming',
-                                    'opacity-60': getActivityStatus(item.activity) === 'ended',
-                                }"
+                                class="absolute cursor-pointer rounded-xs border border-base-content/10 border-l-2 bg-base-100/90 transition-colors duration-200 group hover:bg-base-100"
+                                :class="activityBlockClass(item.activity)"
                                 :style="{
                                     ...getActivityStyle(item.activity),
                                     top: `${item.groupIndex * 120 + 40}px`,
@@ -834,15 +854,7 @@ onMounted(() => {
                                     <div>
                                         <!-- 状态标签 -->
                                         <div class="flex items-center gap-2 mb-2">
-                                            <span
-                                                class="px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap"
-                                                :class="{
-                                                    'bg-primary text-primary-content': getActivityStatus(item.activity) === 'ongoing',
-                                                    'bg-gray-400 text-white': getActivityStatus(item.activity) === 'ended',
-                                                    'bg-gray-200 text-gray-600': getActivityStatus(item.activity) === 'upcoming',
-                                                    'bg-green-500 text-white': item.activity.isMoling && isMolingCompleted,
-                                                }"
-                                            >
+                                            <span class="px-1.5 py-0.5 rounded-xs text-[10px] font-semibold whitespace-nowrap" :class="statusBadgeClass(item.activity)">
                                                 {{
                                                     item.activity.isMoling && isMolingCompleted
                                                         ? $t("activity-calendar.moling_completed")
@@ -863,7 +875,7 @@ onMounted(() => {
                                         </div>
 
                                         <!-- 活动标题 -->
-                                        <h3 class="font-bold text-sm sm:text-base mb-1 text-base-content line-clamp-1">
+                                        <h3 class="font-semibold text-sm mb-1 text-base-content line-clamp-1">
                                             <a
                                                 v-if="item.activity.postId"
                                                 :href="getRemoteActivityUrl(item.activity.postId)"
@@ -889,17 +901,17 @@ onMounted(() => {
                                                 !isMolingCompleted &&
                                                 getActivityStatus(item.activity) === 'ongoing'
                                             "
-                                            class="text-xs text-gray-400"
+                                            class="text-xs text-base-content/45"
                                         >
                                             {{ $t("activity-calendar.click_to_complete") }}
                                         </div>
                                         <!-- 活动描述 -->
-                                        <p v-else-if="item.activity.description" class="text-xs text-gray-600 line-clamp-2">
+                                        <p v-else-if="item.activity.description" class="text-xs text-base-content/60 line-clamp-2">
                                             {{ item.activity.description }}
                                         </p>
 
                                         <!-- 时间信息 -->
-                                        <div class="flex gap-2 text-xs text-gray-500">
+                                        <div class="flex gap-2 text-xs text-base-content/50">
                                             <div class="flex items-center gap-1">
                                                 <Icon icon="ri:play-circle-line" class="w-3.5 h-3.5 shrink-0" />
                                                 <span class="whitespace-nowrap">{{ formatFullDateTime(item.activity.begin_at) }}</span>
