@@ -9,6 +9,7 @@ use opencv::{
     },
 };
 use std::{
+    borrow::Cow,
     io::{Cursor, Read, Write},
     sync::atomic::{AtomicUsize, Ordering},
     thread,
@@ -1117,11 +1118,15 @@ pub fn batch_match_color_impl(
 }
 
 /// 将哈希字符串标准化为无前缀、小写十六进制字符串。
-pub fn normalize_hash_hex(hash: &str) -> Result<String, String> {
-    let mut normalized = hash.trim().to_ascii_lowercase();
-    if let Some(stripped) = normalized.strip_prefix("0x") {
-        normalized = stripped.to_string();
-    }
+pub fn normalize_hash_hex(hash: &str) -> Result<Cow<'_, str>, String> {
+    let trimmed = hash.trim();
+    let normalized: Cow<'_, str> = if trimmed.starts_with("0x") {
+        Cow::Owned(trimmed.strip_prefix("0x").unwrap().to_ascii_lowercase())
+    } else if trimmed.bytes().any(|byte| byte.is_ascii_uppercase()) {
+        Cow::Owned(trimmed.to_ascii_lowercase())
+    } else {
+        Cow::Borrowed(trimmed)
+    };
     if normalized.is_empty() {
         return Err("哈希字符串不能为空".to_string());
     }

@@ -63,3 +63,4 @@ server/data/race-lottery/*.jsonl
 server/data/race-lottery/*.final-speeds.json
 src/data/txt/*
 output/playwright/
+.workbuddy/

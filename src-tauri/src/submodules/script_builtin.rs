@@ -15,6 +15,7 @@ use opencv::{
 };
 use serde::Deserialize;
 use std::{
+    borrow::Cow,
     cell::RefCell,
     collections::{HashMap, HashSet},
     fs::{self, File},
@@ -416,19 +417,26 @@ fn _current_script_dir() -> Option<PathBuf> {
 }
 
 /// 按当前脚本目录解析资源路径（绝对路径保持不变，相对路径转绝对）。
-fn _resolve_script_resource_path(path: &str) -> String {
-    let normalized = String::from(path).trim().to_string();
-    if normalized.is_empty() {
-        return normalized;
+///
+/// 使用 `Cow` 优化：空路径、绝对路径以及无法定位脚本目录时的相对路径，
+/// 均直接借用输入切片 `Cow::Borrowed` 返回，避免原实现中
+/// `String::from(path).trim().to_string()` 的双次堆分配；
+/// 仅当相对路径需要拼接脚本目录时才生成 owned 字符串。
+fn _resolve_script_resource_path(path: &str) -> Cow<'_, str> {
+    let trimmed = path.trim();
+    if trimmed.is_empty() {
+        return Cow::Borrowed(trimmed);
     }
-    let raw_path = Path::new(normalized.as_str());
+    let raw_path = Path::new(trimmed);
     if raw_path.is_absolute() {
-        return normalized;
+        return Cow::Borrowed(trimmed);
     }
-    if let Some(script_dir) = _current_script_dir() {
-        return script_dir.join(raw_path).to_string_lossy().to_string();
+    match _current_script_dir() {
+        Some(script_dir) => {
+            Cow::Owned(script_dir.join(raw_path).to_string_lossy().into_owned())
+        }
+        None => Cow::Borrowed(trimmed),
     }
-    normalized
 }
 
 /// 记录 readConfig 注册的配置格式，供 setConfig 做类型规整与校验。
@@ -2362,7 +2370,7 @@ fn _get_template(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> 
         .to_std_string_lossy();
     let resolved_path = _resolve_script_resource_path(&path);
 
-    if let Ok(mat) = get_template(&resolved_path) {
+    if let Ok(mat) = get_template(&*resolved_path) {
         let js_mat = Box::new(mat).into_js(ctx)?;
         Ok(js_mat)
     } else {
@@ -2393,7 +2401,7 @@ fn _imread(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
         .to_std_string_lossy();
     let resolved_path = _resolve_script_resource_path(&path);
 
-    if let Ok(mat) = opencv::imgcodecs::imread(&resolved_path, opencv::imgcodecs::IMREAD_COLOR) {
+    if let Ok(mat) = opencv::imgcodecs::imread(&*resolved_path, opencv::imgcodecs::IMREAD_COLOR) {
         let js_mat = Box::new(mat).into_js(ctx)?;
         Ok(js_mat)
     } else {
@@ -2408,7 +2416,7 @@ fn _imread_rgba(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
         .to_std_string_lossy();
     let resolved_path = _resolve_script_resource_path(&path);
 
-    if let Ok(mat) = opencv::imgcodecs::imread(&resolved_path, opencv::imgcodecs::IMREAD_UNCHANGED)
+    if let Ok(mat) = opencv::imgcodecs::imread(&*resolved_path, opencv::imgcodecs::IMREAD_UNCHANGED)
     {
         let js_mat = Box::new(mat).into_js(ctx)?;
         Ok(js_mat)
@@ -2429,7 +2437,7 @@ fn _imwrite(
         .to_string(ctx)?
         .to_std_string_lossy();
     let resolved_path = _resolve_script_resource_path(&path);
-    let resolved_file_path = Path::new(&resolved_path);
+    let resolved_file_path = Path::new(&*resolved_path);
 
     // 在保存图片前自动创建父目录，避免目标路径不存在导致写入失败
     if let Some(parent_dir) = resolved_file_path.parent() {
@@ -2447,7 +2455,7 @@ fn _imwrite(
 
     // 保存图像到文件
     match opencv::imgcodecs::imwrite(
-        &resolved_path,
+        &*resolved_path,
         &*js_img_mat.borrow().data().inner,
         &opencv::core::Vector::new(),
     ) {
@@ -2561,7 +2569,7 @@ fn _read_text(path: Option<JsValue>, url: Option<JsValue>, ctx: &mut Context) ->
 
     // path 不为空时优先读取本地文本。
     if !path.is_empty()
-        && let Ok(content) = std::fs::read_to_string(&resolved_path)
+        && let Ok(content) = std::fs::read_to_string(&*resolved_path)
     {
         return Ok(JsValue::from(js_string!(content)));
     }
@@ -2587,7 +2595,7 @@ fn _read_text(path: Option<JsValue>, url: Option<JsValue>, ctx: &mut Context) ->
     })?;
 
     if !path.is_empty() {
-        let target_path = Path::new(resolved_path.as_str());
+        let target_path = Path::new(&*resolved_path);
         if let Some(parent_dir) = target_path.parent()
             && !parent_dir.as_os_str().is_empty()
         {
@@ -2625,7 +2633,7 @@ fn _delete_file(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
     }
 
     let resolved_path = _resolve_script_resource_path(&path);
-    let target_path = Path::new(resolved_path.as_str());
+    let target_path = Path::new(&*resolved_path);
 
     if !target_path.exists() {
         return Ok(JsValue::new(false));
@@ -2652,7 +2660,7 @@ fn _exists_file(path: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
     }
 
     let resolved_path = _resolve_script_resource_path(&path);
-    Ok(JsValue::new(Path::new(resolved_path.as_str()).exists()))
+    Ok(JsValue::new(Path::new(&*resolved_path).exists()))
 }
 
 /// 从本地或网络加载图像Mat对象函数
@@ -2689,7 +2697,7 @@ fn _download_file(
             .into());
     }
 
-    let resolved_filename = _resolve_script_resource_path(&filename);
+    let resolved_filename = _resolve_script_resource_path(&filename).into_owned();
     let (promise, resolvers) = JsPromise::new_pending(ctx);
     let resolvers_clone = resolvers.clone();
 
@@ -2697,7 +2705,7 @@ fn _download_file(
         NativeAsyncJob::new(async move |context| {
             let async_result =
                 _spawn_blocking_with_script_stop_snapshot(move || -> Result<(), String> {
-                    let target_path = Path::new(resolved_filename.as_str());
+                    let target_path = Path::new(&*resolved_filename);
 
                     // force=false 且文件已存在时直接返回成功，不重复下载。
                     if !force && target_path.exists() {
@@ -2782,8 +2790,8 @@ fn _imread_url(
 
     // 如果 local_path 不为空，先尝试从本地加载
     if !local_path.is_empty() {
-        if let Ok(mat) =
-            opencv::imgcodecs::imread(&resolved_local_path, opencv::imgcodecs::IMREAD_COLOR)
+            if let Ok(mat) =
+                opencv::imgcodecs::imread(&*resolved_local_path, opencv::imgcodecs::IMREAD_COLOR)
         {
             let js_mat = Box::new(mat).into_js(ctx)?;
             return Ok(js_mat);
@@ -2801,7 +2809,7 @@ fn _imread_url(
 
                         // 如果 local_path 不为空，保存原始数据到本地
                         if !local_path.is_empty() {
-                            if let Err(_) = std::fs::write(&resolved_local_path, &byte_vec) {
+                            if let Err(_) = std::fs::write(&*resolved_local_path, &byte_vec) {
                                 return Ok(JsValue::undefined());
                             }
                         }
@@ -2848,8 +2856,8 @@ fn _imread_url_rgba(
 
     // 如果 local_path 不为空，先尝试从本地加载
     if !local_path.is_empty() {
-        if let Ok(mat) =
-            opencv::imgcodecs::imread(&resolved_local_path, opencv::imgcodecs::IMREAD_UNCHANGED)
+            if let Ok(mat) =
+                opencv::imgcodecs::imread(&*resolved_local_path, opencv::imgcodecs::IMREAD_UNCHANGED)
         {
             let js_mat = Box::new(mat).into_js(ctx)?;
             return Ok(js_mat);
@@ -2867,7 +2875,7 @@ fn _imread_url_rgba(
 
                         // 如果 local_path 不为空，保存原始数据到本地
                         if !local_path.is_empty() {
-                            if let Err(_) = std::fs::write(&resolved_local_path, &byte_vec) {
+                            if let Err(_) = std::fs::write(&*resolved_local_path, &byte_vec) {
                                 return Ok(JsValue::undefined());
                             }
                         }
@@ -2921,7 +2929,7 @@ fn _init_ocr(
         if normalized.is_empty() {
             None
         } else {
-            Some(PathBuf::from(_resolve_script_resource_path(&normalized)))
+            Some(PathBuf::from(&*_resolve_script_resource_path(&normalized)))
         }
     };
 
@@ -2974,7 +2982,7 @@ fn _init_mono_depth(
         if normalized.is_empty() {
             None
         } else {
-            Some(PathBuf::from(_resolve_script_resource_path(&normalized)))
+            Some(PathBuf::from(&*_resolve_script_resource_path(&normalized)))
         }
     };
 
@@ -3520,7 +3528,7 @@ fn _match_hamming_hash(
         if normalized.len() != source_hash.len() {
             continue;
         }
-        let distance = hamming_distance_hex(&source_hash, &normalized)
+        let distance = hamming_distance_hex(&*source_hash, &*normalized)
             .map_err(|msg| JsNativeError::error().with_message(msg))?;
         if distance <= max_distance && distance < best_distance {
             best_distance = distance;
@@ -4532,11 +4540,21 @@ fn _emit_runoks_status(text: impl Into<String>) {
 }
 
 /// 规范化 OK 宏里的按键名，兼容常见别名。
-fn _normalize_oks_key(key: &str) -> String {
-    match key.trim().to_lowercase().as_str() {
-        "shift" => "lshift".to_string(),
-        "ctrl" => "lctrl".to_string(),
-        other => other.to_string(),
+fn _normalize_oks_key(key: &str) -> Cow<'_, str> {
+    let trimmed = key.trim();
+    // 已是纯小写且无需重映射：零分配借用返回
+    if !trimmed.bytes().any(|byte| byte.is_ascii_uppercase())
+        && trimmed != "shift"
+        && trimmed != "ctrl"
+    {
+        return Cow::Borrowed(trimmed);
+    }
+    // 需要小写化或重映射时再分配
+    let lowered = trimmed.to_ascii_lowercase();
+    match lowered.as_str() {
+        "shift" => Cow::Borrowed("lshift"),
+        "ctrl" => Cow::Borrowed("lctrl"),
+        _ => Cow::Owned(lowered),
     }
 }
 
@@ -4656,7 +4674,7 @@ fn _execute_oks_action_with_hwnd(action: &OksAction, hwnd: HWND) -> Result<(), S
                 .as_deref()
                 .ok_or_else(|| "runoks key_down 缺少 key".to_string())?;
             let normalized = _normalize_oks_key(key);
-            let vkey = key_to_vkey(normalized.as_str());
+            let vkey = key_to_vkey(&*normalized);
             if vkey == 0 {
                 return Err(format!("runoks 不支持的按键: {normalized}"));
             }
@@ -4673,7 +4691,7 @@ fn _execute_oks_action_with_hwnd(action: &OksAction, hwnd: HWND) -> Result<(), S
                 .as_deref()
                 .ok_or_else(|| "runoks key_up 缺少 key".to_string())?;
             let normalized = _normalize_oks_key(key);
-            let vkey = key_to_vkey(normalized.as_str());
+            let vkey = key_to_vkey(&*normalized);
             if vkey == 0 {
                 return Err(format!("runoks 不支持的按键: {normalized}"));
             }
@@ -5130,7 +5148,7 @@ fn _play_oks_macro_node_with_hwnd(node: &OksMacroFile, hwnd: HWND) -> Result<(),
 
 /// 执行 OK 外部 mod 的主流程。
 fn _run_oks_impl(path: &str, hwnd: HWND) -> Result<(), String> {
-    let resolved_input = PathBuf::from(_resolve_script_resource_path(path));
+    let resolved_input = PathBuf::from(&*_resolve_script_resource_path(path));
     _emit_runoks_console(
         "info",
         format!("start path={}", resolved_input.to_string_lossy()),
@@ -5859,8 +5877,8 @@ mod tests {
 
     #[test]
     fn oks_normalize_key_aliases() {
-        assert_eq!(_normalize_oks_key("Shift"), "lshift");
-        assert_eq!(_normalize_oks_key("CTRL"), "lctrl");
-        assert_eq!(_normalize_oks_key("f"), "f");
+        assert_eq!(&*_normalize_oks_key("Shift"), "lshift");
+        assert_eq!(&*_normalize_oks_key("CTRL"), "lctrl");
+        assert_eq!(&*_normalize_oks_key("f"), "f");
     }
 }
