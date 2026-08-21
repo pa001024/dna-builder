@@ -550,7 +550,7 @@ onMounted(() => {
             </button>
 
             <!-- MCP 服务器控制 -->
-            <div class="mt-4 p-3 bg-base-200 rounded-lg">
+            <div v-if="env.isApp" class="mt-4 p-3 bg-base-200 rounded-lg">
                 <div class="text-sm font-medium mb-2">{{ $t("ai.mcpTitle") }}</div>
                 <div class="text-xs opacity-70 mb-2">
                     {{ mcpStatus }}
