@@ -1366,6 +1366,10 @@
     "map-local": {
         "title": "地图"
     },
+    "map-tool": {
+        "desc": "查看地图资源和魔灵分布",
+        "title": "地图工具"
+    },
     "misc": {
         "all_files": "所有文件",
         "exec_files": "可执行文件"

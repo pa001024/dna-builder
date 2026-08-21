@@ -6094,6 +6094,10 @@
     "map-local": {
         "title": "地圖"
     },
+    "map-tool": {
+        "desc": "查看地圖資源與魔靈分佈",
+        "title": "地圖工具"
+    },
     "misc": {
         "all_files": "所有檔案",
         "exec_files": "可執行檔"

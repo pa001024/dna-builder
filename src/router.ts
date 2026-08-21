@@ -228,6 +228,12 @@ const routes: readonly RouteRecordRaw[] = [
         component: () => import("./views/RankingView.vue"),
         beforeEnter: () => setMinSize(360, 430),
     },
+    {
+        name: "map-tool",
+        path: "/map-tool",
+        component: () => import("./components/MapTool.vue"),
+        beforeEnter: () => setMinSize(360, 430),
+    },
     // 资料库路由
     {
         path: "/db",

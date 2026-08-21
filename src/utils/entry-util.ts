@@ -50,6 +50,7 @@ export function getMoreItems(envs: MoreItemEnv): MoreItem[] {
         { name: "flow", path: "/flow", icon: "ri:node-tree" },
         { name: "inventory", path: "/inventory", icon: "ri:box-1-line" },
         { name: "timeline", path: "/timeline", icon: "ri:timeline-view" },
+        { name: "map-tool", path: "/db/map-local", icon: "ri:map-2-line" },
         { name: "help", path: "/help", icon: "ri:question-line" },
         { name: "game-accounts", path: "/game-accounts", icon: "ri:user-line", show: isApp },
         { name: "unpack", path: "/unpack", icon: "ri:file-zip-line", show: isApp && !envs.safeMode },

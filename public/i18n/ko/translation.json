@@ -6955,6 +6955,10 @@
     "map-local": {
         "title": "지도"
     },
+    "map-tool": {
+        "desc": "지도 자원과 몬스터 분포 보기",
+        "title": "지도 도구"
+    },
     "misc": {
         "all_files": "모든 파일",
         "exec_files": "실행 파일"

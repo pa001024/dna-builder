@@ -5663,8 +5663,8 @@
         "noExportableSubmissions": "No exportable abyss submissions",
         "noResult": "No results",
         "noUploadData": "No abyss data to upload",
-        "pet": "Pet",
-        "petId": "Pet ID",
+        "pet": "Geniemon",
+        "petId": "Geniemon ID",
         "rangedWeapon": "Ranged Weapon",
         "rangedWeaponId": "Ranged Weapon ID",
         "refresh": "Refresh",
@@ -5789,10 +5789,10 @@
         "ended_suffix": "ago",
         "load_error": "Failed to load activity data",
         "local": "Local",
-        "moling_completed": "This period's Echo completed",
+        "moling_completed": "This period's Geniemon completed",
         "moling_desc": "Refreshes every 3 days",
-        "moling_refresh": "Echo Refresh",
-        "moling_refresh_next": "Next Echo Refresh",
+        "moling_refresh": "Geniemon Refresh",
+        "moling_refresh_next": "Next Geniemon Refresh",
         "no_activities": "No activities",
         "remote": "Remote",
         "start": "Start",
@@ -6245,8 +6245,8 @@
         "create": "Create counter",
         "defaultName": "Counter {{index}}",
         "defaults": {
-            "dungeonMoling": "Dungeon Moling",
-            "endlessDungeonMoling": "Endless Dungeon Moling",
+            "dungeonMoling": "Dungeon Geniemon",
+            "endlessDungeonMoling": "Endless Dungeon Geniemon",
             "fishingBonus": "Fishing bonus"
         },
         "deleteCounter": "Delete counter",
@@ -6327,8 +6327,8 @@
         "ironTicket_desc": "View Iron Ticket information and icons",
         "map": "Map",
         "map_desc": "View Map Markers",
-        "mapLocal": "Moling map",
-        "mapLocal_desc": "Detailed Moling spawn points",
+        "mapLocal": "Geniemon map",
+        "mapLocal_desc": "Detailed Geniemon spawn points",
         "mod": "Mod",
         "mod_desc": "View mod information and attributes",
         "monster": "Monster",
@@ -6953,6 +6953,10 @@
     "map-local": {
         "title": "Map"
     },
+    "map-tool": {
+        "desc": "View map resources and Geniemon distribution",
+        "title": "Map Tool"
+    },
     "misc": {
         "all_files": "All files",
         "exec_files": "Executable files"
@@ -7364,7 +7368,7 @@
         "mihanNotificationBody": "Your followed {{types}} have refreshed",
         "mihanNotificationTitle": "Entrusted Secret Letter Reminder",
         "mihanTitle": "Entrusted Secret Letter",
-        "moling": "Magic Spirit",
+        "moling": "Geniemon",
         "monitorSettings": "Monitor Settings",
         "nextRefresh": "Next Refresh",
         "onlyOnce": "Only Once",

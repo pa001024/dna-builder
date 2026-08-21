@@ -6989,6 +6989,10 @@
     "map-local": {
         "title": "Carte"
     },
+    "map-tool": {
+        "desc": "Voir les ressources de la carte et la distribution des monstres",
+        "title": "Outil carte"
+    },
     "misc": {
         "all_files": "Tous les fichiers",
         "exec_files": "Fichiers exécutables"

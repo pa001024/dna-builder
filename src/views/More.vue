@@ -57,8 +57,7 @@ const TILE_SIZES: Record<string, POCardSize> = {
     ranking: "wide",
     levelup: "wide",
     "mod-manager": "wide",
-    flow: "small",
-    "build-compare": "small",
+    "map-tool": "wide",
 }
 
 /** 兜底基础色：入口未配置主题时使用（与 POCard 默认渐变同源）。 */
@@ -106,6 +105,7 @@ const TILE_THEMES: Record<string, string> = {
     "game-accounts": "#f5576c",
     unpack: "#30cfd0",
     "skin-colorize": "#12c2e9",
+    "map-tool": "#43e97b",
     "race-lottery": "#fa709a",
     "script-list": "#7f00ff",
 }

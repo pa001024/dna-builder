@@ -6873,6 +6873,10 @@
     "map-local": {
         "title": "マップ"
     },
+    "map-tool": {
+        "desc": "マップの資源と魔霊の分布を確認",
+        "title": "マップツール"
+    },
     "misc": {
         "all_files": "すべてのファイル",
         "exec_files": "実行可能ファイル"
