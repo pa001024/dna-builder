@@ -56,6 +56,7 @@ export function getMoreItems(envs: MoreItemEnv): MoreItem[] {
         { name: "unpack", path: "/unpack", icon: "ri:file-zip-line", show: isApp && !envs.safeMode },
         { name: "skin-colorize", path: "/skin-colorize", icon: "ri:palette-line" },
         { name: "race-lottery", path: "/race-lottery", icon: "ri:run-line" },
+        { name: "skin-gacha", path: "/skin-gacha", icon: "ri:sparkling-line" },
         { name: "script-list", path: "/scripts", icon: "ri:code-s-slash-line", show: envs.scriptUnlocked },
     ]
 }

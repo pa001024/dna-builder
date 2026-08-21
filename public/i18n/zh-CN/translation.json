@@ -2090,6 +2090,11 @@
     "skin-colorize-share": {
         "title": "染色方案详情"
     },
+    "skin-gacha": {
+        "desc": "万华抽卡模拟",
+        "guaranteeSpecial": "距离下次必定获取金色品质道具还有至多<highlight>%d</>次",
+        "title": "万华"
+    },
     "tag": {
         "防御": "防御",
         "辅助": "辅助",

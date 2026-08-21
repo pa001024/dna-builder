@@ -7680,6 +7680,11 @@
     "skin-colorize-share": {
         "title": "염색 플랜 상세"
     },
+    "skin-gacha": {
+        "desc": "스킨 가챠 시뮬레이터",
+        "guaranteeSpecial": "골드 등급 아이템을 반드시 획득할 때까지 최대 <highlight>%d</>회 남았습니다.",
+        "title": "만화"
+    },
     "tag": {
         "防御": "방어",
         "辅助": "서포터",

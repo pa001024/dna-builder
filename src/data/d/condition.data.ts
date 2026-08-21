@@ -2,7 +2,7 @@
 // 由 tools/import_i18n_data.ts 从 DuetNightAbyssData2/out/Condition.json 自动填充
 
 /** 条件表条目 */
-export interface RougeCondition {
+export interface ConditionItem {
     id: number
     logic: "AND" | "OR"
     map: Record<string, unknown>
@@ -10,7 +10,7 @@ export interface RougeCondition {
     remark?: string
 }
 
-export const rougeConditions: Record<number, RougeCondition> = {
+export const conditionsMap: Record<number, ConditionItem> = {
     "1": {
         id: 1,
         logic: "AND",

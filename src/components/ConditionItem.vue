@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import type { RougeCondition } from "@/data/d/condition.data"
+import type { ConditionItem } from "@/data/d/condition.data"
 import { rougeLikeBlessingGroups, rougeProTreasureGroups } from "@/data/d/rouge.data"
 
 const props = defineProps<{
-    condition: RougeCondition
+    condition: ConditionItem
 }>()
 
 const condition = computed(() => props.condition)

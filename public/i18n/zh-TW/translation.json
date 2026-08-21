@@ -6819,6 +6819,11 @@
     "skin-colorize-share": {
         "title": "染色方案詳情"
     },
+    "skin-gacha": {
+        "desc": "萬華抽卡模擬",
+        "guaranteeSpecial": "距離下次必定獲取金色品質道具還有至多<highlight>%d</>次",
+        "title": "萬華"
+    },
     "tag": {
         "防御": "防禦",
         "辅助": "輔助",

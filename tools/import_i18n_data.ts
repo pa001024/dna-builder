@@ -337,6 +337,25 @@ const MAPPINGS: Mapping[] = [
     },
     { source: "ShopItem", targetStem: "shop", targetVar: "shopData_i", locales: ["cn"] },
     { source: "Skin", targetStem: "accessory", targetVar: "skinData", locales: ["cn"] },
+    { source: "SkinGacha", targetStem: "skingacha", targetVar: "skinGachaData", locales: ["cn"] },
+    { source: "SkinGachaItem", targetStem: "skingacha", targetVar: "skinGachaItems", locales: ["cn"] },
+    { source: "SkinGachaTab", targetStem: "skingacha", targetVar: "skinGachaTabs", locales: ["cn"] },
+    { source: "SkinGachaType", targetStem: "skingacha", targetVar: "skinGachaTypes", locales: ["cn"] },
+    { source: "SkinGachaCumulative", targetStem: "skingacha", targetVar: "skinGachaCumulative", locales: ["cn"] },
+    {
+        source: async () => {
+            const probabilityText = await readFile(path.join(OUT_ROOT, "GachaProbability.json"), "utf8")
+
+            return [
+                {
+                    targetVar: "gachaProbabilities",
+                    text: formatTsValue(JSON.parse(probabilityText), 0),
+                },
+            ]
+        },
+        targetStem: "skingacha",
+        targetVar: "gachaProbabilities",
+    },
     { source: "SubRegion", targetStem: "subregion", targetVar: "subRegionData", locales: ["cn", "en", "fr", "jp", "kr", "tc"] },
     { source: "Title", targetStem: "title", targetVar: "titleData", locales: ["cn"] },
     { source: "Walnut", targetStem: "walnut", targetVar: "t", locales: ["cn"] },
@@ -618,7 +637,9 @@ function parseFileTypes(): Set<string> | null {
         throw new Error("-f 需要至少指定一个模块名，例如：-f Weapon")
     }
 
-    const availableFileTypes = new Set(MAPPINGS.flatMap(mapping => (typeof mapping.source === "string" ? [mapping.source] : [])))
+    const availableFileTypes = new Set(
+        MAPPINGS.flatMap(mapping => (typeof mapping.source === "string" ? [mapping.source] : [mapping.targetStem]))
+    )
     const unknownFileTypes = fileTypes.filter(fileType => !availableFileTypes.has(fileType))
     if (unknownFileTypes.length > 0) {
         throw new Error(`未知模块：${unknownFileTypes.join(", ")}`)
@@ -634,7 +655,14 @@ function parseFileTypes(): Set<string> | null {
  * @returns 是否应执行该映射
  */
 function shouldProcessMapping(mapping: Mapping, fileTypes: Set<string> | null): boolean {
-    return fileTypes === null || (typeof mapping.source === "string" && fileTypes.has(mapping.source))
+    if (fileTypes === null) {
+        return true
+    }
+    // 字符串源按源模块名匹配，函数源按目标文件 stem 匹配
+    if (typeof mapping.source === "string") {
+        return fileTypes.has(mapping.source)
+    }
+    return fileTypes.has(mapping.targetStem)
 }
 
 type MonsterLevelDropRow = {

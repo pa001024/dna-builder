@@ -7678,6 +7678,11 @@
     "skin-colorize-share": {
         "title": "Dye Plan Details"
     },
+    "skin-gacha": {
+        "desc": "Skin gacha simulator",
+        "guaranteeSpecial": "At most <highlight>%d</> more draws until you are guaranteed a gold-quality item.",
+        "title": "Wanhua"
+    },
     "tag": {
         "防御": "DEF",
         "辅助": "Support",

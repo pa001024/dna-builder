@@ -1835,7 +1835,12 @@ export class CharBuild {
         const getSummonAttrs = (base?: string, temporaryAttributes?: TemporaryAttributes, fieldName?: string) => {
             const key = base || this.baseName
             const summonSkill = this.allSkills.find(skill => skill.名称 === key)
-            const summonRatio = summonSkill?.召唤物 ? attrs.召唤物属性继承比例 : 1
+            // 召唤物属性继承判断：技能声明了召唤物，或字段名含「召唤物」（如「[召唤物·战车]技能伤害」，技能本身未声明召唤物元数据）
+            const resolvedFieldName = fieldName
+                ? summonSkill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))?.名称 || fieldName
+                : undefined
+            const isSummonField = !!summonSkill?.召唤物 || !!resolvedFieldName?.includes("召唤物")
+            const summonRatio = isSummonField ? attrs.召唤物属性继承比例 : 1
             const currentAttrs =
                 summonRatio === 1
                     ? attrs

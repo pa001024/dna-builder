@@ -33,7 +33,7 @@ const sourceTitle = computed(() => props.sourceTitle || "道具箱")
 <template>
     <div v-if="displayPackSources.length > 0" class="space-y-2">
         <div class="text-xs text-base-content/60">{{ sourceTitle }}</div>
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(560px,1fr))] gap-2">
             <div
                 v-for="source in displayPackSources"
                 :key="source.key"

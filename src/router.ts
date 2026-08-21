@@ -45,6 +45,12 @@ const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(360, 430),
     },
     {
+        name: "skin-gacha",
+        path: "/skin-gacha",
+        component: () => import("./views/SkinGachaView.vue"),
+        beforeEnter: () => setMinSize(360, 430),
+    },
+    {
         path: "/char",
         children: [
             { name: "char-build-list", path: "", component: CharListView, beforeEnter: () => setMinSize(360, 430) },

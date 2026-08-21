@@ -7713,6 +7713,11 @@
     "skin-colorize-share": {
         "title": "Détails du plan de teinture"
     },
+    "skin-gacha": {
+        "desc": "Simulateur de gacha de skins",
+        "guaranteeSpecial": "Encore au plus <highlight>%d</> tirages avant d'obtenir à coup sûr un objet de qualité dorée.",
+        "title": "Wanhua"
+    },
     "tag": {
         "防御": "DÉF",
         "辅助": "Soutien",

@@ -228,6 +228,75 @@ describe("CharBuild类测试", () => {
         expect(buffedDamage / baseDamage).toBeCloseTo(1.5, 5)
     })
 
+    it("[召唤物·战车]技能伤害应被无止无休5熔的召唤物属性继承比例增幅", () => {
+        const createBuild = (buffs: LeveledBuff[]) =>
+            new CharBuild({
+                char: new LeveledChar("艾达（？？）"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                buffs,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "乐园构想",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[召唤物·战车]技能伤害",
+            })
+        const baseBuild = createBuild([])
+        const buffedBuild = createBuild([
+            new LeveledBuff({
+                名称: "无止无休5熔",
+                mx: 30,
+                描述: "[降灵]最多叠加层数提高至30.0层，每层[降灵]使自身召唤召唤物时，召唤物属性继承比例提高0.25%。",
+                召唤物属性继承比例: 0.0025,
+            }),
+        ])
+
+        const baseDamage = baseBuild.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")
+        const buffedDamage = buffedBuild.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")
+
+        // 无止无休5熔满层30层：每层0.25% → 召唤物属性继承比例 = 1 + 0.0025×30 = 1.075
+        expect(baseDamage).toBeGreaterThan(0)
+        expect(buffedDamage).toBeGreaterThan(baseDamage)
+        expect(buffedDamage / baseDamage).toBeCloseTo(1.075, 5)
+    })
+
+    it("[召唤物·皇帝]技能伤害应被无止无休5熔的召唤物属性继承比例增幅", () => {
+        const createBuild = (buffs: LeveledBuff[]) =>
+            new CharBuild({
+                char: new LeveledChar("艾达（？？）"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                buffs,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "乐园构想",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[召唤物·皇帝]技能伤害",
+            })
+        const baseBuild = createBuild([])
+        const buffedBuild = createBuild([
+            new LeveledBuff({
+                名称: "无止无休5熔",
+                mx: 30,
+                描述: "[降灵]最多叠加层数提高至30.0层，每层[降灵]使自身召唤召唤物时，召唤物属性继承比例提高0.25%。",
+                召唤物属性继承比例: 0.0025,
+            }),
+        ])
+
+        const baseDamage = baseBuild.calculateTargetFunction(undefined, "[召唤物·皇帝]技能伤害")
+        const buffedDamage = buffedBuild.calculateTargetFunction(undefined, "[召唤物·皇帝]技能伤害")
+
+        expect(baseDamage).toBeGreaterThan(0)
+        expect(buffedDamage).toBeGreaterThan(baseDamage)
+        expect(buffedDamage / baseDamage).toBeCloseTo(1.075, 5)
+    })
+
     it("[降灵]召唤物属性应按比例缩放召唤物伤害", () => {
         const baseBuild = new CharBuild({
             char: new LeveledChar("塔比瑟"),

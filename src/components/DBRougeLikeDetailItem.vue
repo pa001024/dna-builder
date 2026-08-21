@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
-import { rougeConditions } from "@/data/d/condition.data"
+import { conditionsMap } from "@/data/d/condition.data"
 import {
     type RougeLikeBlessing,
     type RougeLikeContract,
@@ -181,7 +181,7 @@ const roomConditions = computed(() => {
         return []
     }
     const ids = item.value.roomCondition as number[]
-    return ids.map(id => rougeConditions[id]).filter(Boolean)
+    return ids.map(id => conditionsMap[id]).filter(Boolean)
 })
 </script>
 
@@ -207,7 +207,9 @@ const roomConditions = computed(() => {
                     <span v-if="groupName" class="rounded px-1.5 py-0.5 bg-base-300/70">{{ $t(groupName) }}</span>
                     <span v-if="treasureGroupName" class="rounded px-1.5 py-0.5 bg-base-300/70">{{ $t(treasureGroupName) }}</span>
                     <span v-if="talentBranch" class="rounded px-1.5 py-0.5 bg-base-300/70">{{ $t(talentBranch.name) }}</span>
-                    <span v-if="'type' in item && typeof item.type === 'number'">{{ $t(talentTypeNames[item.type] || `类型 ${item.type}`) }}</span>
+                    <span v-if="'type' in item && typeof item.type === 'number'">{{
+                        $t(talentTypeNames[item.type] || `类型 ${item.type}`)
+                    }}</span>
                     <span v-if="'roomType' in item">{{ getRougeRoomTypeInfo(item.roomType)?.name || `房间类型 ${item.roomType}` }}</span>
                     <span v-if="'heatValue' in item">{{ $t("深潜深度") }} {{ item.heatValue }}</span>
                     <span v-if="'moment' in item">{{ item.type }}</span>

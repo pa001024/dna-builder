@@ -7598,6 +7598,11 @@
     "skin-colorize-share": {
         "title": "染色プラン詳細"
     },
+    "skin-gacha": {
+        "desc": "スキンガチャシミュレーター",
+        "guaranteeSpecial": "ゴールド品質アイテムが確定で獲得できるまで、あと最大<highlight>%d</>回。",
+        "title": "万華"
+    },
     "tag": {
         "防御": "防御",
         "辅助": "サポート",

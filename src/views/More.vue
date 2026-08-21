@@ -285,7 +285,7 @@ const LONG_PRESS_MS = 380
 /** 长按等待期内允许的指针位移（px，超出视为滚动/滑动意图而取消长按）。 */
 const DRAG_MOVE_THRESHOLD = 8
 
-/** 拖拽过程状态：指针位置与幽灵卡片尺寸。 */
+/** 拖拽过程状态：指针位置、幽灵卡片尺寸与抓取偏移（仿 Win10 手感）。 */
 const dragState = reactive({
     active: false,
     name: "",
@@ -293,6 +293,8 @@ const dragState = reactive({
     y: 0,
     w: 0,
     h: 0,
+    offX: 0,
+    offY: 0,
 })
 
 /** 拖拽中的磁贴当前索引（随实时重排更新）。 */
@@ -375,8 +377,11 @@ function beginDrag(event: PointerEvent, name: string) {
     dragState.x = event.clientX
     dragState.y = event.clientY
     if (pressedEl) {
+        const rect = pressedEl.getBoundingClientRect()
         dragState.w = pressedEl.offsetWidth
         dragState.h = pressedEl.offsetHeight
+        dragState.offX = event.clientX - rect.left
+        dragState.offY = event.clientY - rect.top
         pressedEl.setPointerCapture?.(pressPointerId)
     }
     justDragged = true
@@ -457,11 +462,11 @@ function onGridContextMenu(event: MouseEvent) {
 /** 幽灵卡片的渲染数据：当前拖拽的磁贴项。 */
 const ghostTile = computed(() => tileList.value.find(tile => tile.name === dragState.name) ?? null)
 
-/** 幽灵卡片样式：跟随指针居中，轻微放大与旋转以示浮起。 */
+/** 幽灵卡片样式：外层仅做定位（以抓取点为锚跟随指针），缩放/倾斜交给内层卡片动画。 */
 const ghostStyle = computed(() => ({
     width: `${dragState.w}px`,
     height: `${dragState.h}px`,
-    transform: `translate3d(${dragState.x - dragState.w / 2}px, ${dragState.y - dragState.h / 2}px, 0) scale(1.07) rotate(1.5deg)`,
+    transform: `translate3d(${dragState.x - dragState.offX}px, ${dragState.y - dragState.offY}px, 0)`,
 }))
 
 let hh: string[] = []
@@ -546,8 +551,11 @@ onBeforeUnmount(() => {
                     </span>
                 </label>
             </div>
-            <div
+            <!-- TransitionGroup：拖拽交换时其余磁贴以 FLIP 平滑滑动让位（仿 Win10 开始屏幕） -->
+            <TransitionGroup
                 v-if="!useQuickNavStyle"
+                tag="div"
+                name="po-tile"
                 class="po-grid"
                 @click.capture="onGridClickCapture"
                 @contextmenu="onGridContextMenu"
@@ -641,23 +649,25 @@ onBeforeUnmount(() => {
                         </ContextMenuItem>
                     </template>
                 </ContextMenu>
-            </div>
+            </TransitionGroup>
             <!-- Home 快捷入口风格：复用首页快捷导航样式，auto-fill 自适应列数 -->
             <HomeQuickNav v-else autofill :items="quickNavItems" />
         </div>
-        <!-- 拖拽幽灵：Teleport 到 body 跟随指针，不参与网格布局 -->
+        <!-- 拖拽幽灵：Teleport 到 body，外层定位跟随指针，内层卡片做“浮起”缩放动画 -->
         <Teleport to="body">
             <div v-if="dragState.active && ghostTile" class="po-drag-ghost" :style="ghostStyle" aria-hidden="true">
-                <POCard
-                    :size="ghostTile.size"
-                    :to="ghostTile.path"
-                    :icon="ghostTile.icon"
-                    :title="$t(`${ghostTile.name}.title`)"
-                    :description="$t(`${ghostTile.name}.desc`)"
-                    :gradient="ghostTile.gradient"
-                    :glow="ghostTile.glow"
-                    :tilt="false"
-                />
+                <div class="po-drag-ghost__card">
+                    <POCard
+                        :size="ghostTile.size"
+                        :to="ghostTile.path"
+                        :icon="ghostTile.icon"
+                        :title="$t(`${ghostTile.name}.title`)"
+                        :description="$t(`${ghostTile.name}.desc`)"
+                        :gradient="ghostTile.gradient"
+                        :glow="ghostTile.glow"
+                        :tilt="false"
+                    />
+                </div>
             </div>
         </Teleport>
     </ScrollArea>
@@ -758,9 +768,10 @@ onBeforeUnmount(() => {
     pointer-events: none;
 }
 
-/* 磁贴一次性入场动画：轻量上浮淡入，逐块错峰显现，仅播放一次 */
+/* 磁贴一次性入场动画：轻量上浮淡入，逐块错峰显现，仅播放一次。
+   fill 用 backwards（不用 both）：结束后动画不再钉住 transform，FLIP 位移动画才能接管 */
 .po-tile-rise {
-    animation: po-tile-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: po-tile-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @keyframes po-tile-rise {
@@ -774,25 +785,62 @@ onBeforeUnmount(() => {
     }
 }
 
-/* 拖拽中的磁贴：降低亮度作为占位提示（filter 不受入场动画 fill 影响） */
-.po-tile-dragging {
-    filter: brightness(0.72) saturate(0.45);
+/* TransitionGroup 移动过渡：拖拽交换时其余磁贴平滑滑动让位（FLIP） */
+.po-tile-move {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* 拖拽幽灵：fixed 跟随指针，浮于页面之上，不响应指针事件 */
+/* 拖拽中的磁贴：原位整体隐藏（visibility 保留网格占位形成空槽，不参与指针命中），仅留镜像跟随指针（仿 Win10） */
+.po-tile-dragging {
+    visibility: hidden;
+}
+
+/* 拖拽幽灵外层：fixed 以抓取点为锚跟随指针，只负责定位；不响应指针事件 */
 .po-drag-ghost {
     position: fixed;
     left: 0;
     top: 0;
     z-index: 60;
     pointer-events: none;
-    filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.45));
 }
 
-/* 减少动态偏好：关闭入场动画 */
+/* 拖拽幽灵内层卡片：明显缩小 + 轻微倾斜 + 大投影，入场时播放“浮起”动画；
+   缩小让空槽四周边缘露出，形成明确的脱离网格悬浮感（仿 Win10） */
+.po-drag-ghost__card {
+    width: 100%;
+    height: 100%;
+    animation: po-ghost-lift 0.16s cubic-bezier(0.22, 1, 0.36, 1) both;
+    filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.5));
+}
+
+/* 幽灵内的 POCard 撑满外层尺寸（与网格内一致，保证镜像与原磁贴同尺寸） */
+.po-drag-ghost__card :deep(.po-card) {
+    width: 100%;
+    height: 100%;
+}
+
+@keyframes po-ghost-lift {
+    from {
+        transform: scale(1) rotate(0deg);
+    }
+    to {
+        transform: scale(0.85) rotate(2deg);
+    }
+}
+
+/* 减少动态偏好：关闭入场与浮起动画（浮起改为静态缩小态） */
 @media (prefers-reduced-motion: reduce) {
     .po-tile-rise {
         animation: none;
+    }
+
+    .po-tile-move {
+        transition: none;
+    }
+
+    .po-drag-ghost__card {
+        animation: none;
+        transform: scale(0.85) rotate(2deg);
     }
 }
 </style>
