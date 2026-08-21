@@ -7,23 +7,87 @@ import HomeHardboss from "@/components/HomeHardboss.vue"
 import HomeMihan from "@/components/HomeMihan.vue"
 import HomeQuickNav, { type QuickNavItem } from "@/components/HomeQuickNav.vue"
 import HomeSectionHeader from "@/components/HomeSectionHeader.vue"
+import type { IconTypes } from "@/components/Icon.vue"
 import RecentBuilds from "@/components/RecentBuilds.vue"
 import TodoList from "@/components/TodoList.vue"
 import { env } from "@/env"
+import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
+import { getMoreItems } from "@/utils/entry-util"
 import pg from "../../package.json"
 
-// 快捷导航：小图标 + 标题，宽屏 2 行 4 列 / 窄屏 4 行 2 列
-const quickNav: QuickNavItem[] = [
-    { path: "/char", icon: "ri:hammer-line", titleKey: "char-build.title" },
-    { path: "/db", icon: "ri:book-line", titleKey: "database.title" },
-    { path: "/levelup", icon: "ri:calculator-line", titleKey: "levelup.title" },
+/** 首页快捷导航候选：复用 More 页功能入口 + 首页专属入口。 */
+type QuickNavCandidate = {
+    path: string
+    icon: IconTypes
+    titleKey: string
+}
+
+/** 首页专属快捷入口（不在 More 页列表中，追加在候选末尾）。 */
+const HOME_ONLY_NAV: QuickNavCandidate[] = [
     { path: "/db/resource", icon: "ri:box-1-line", titleKey: "database.resource" },
-    { path: "/ranking", icon: "ri:bar-chart-line", titleKey: "ranking.title" },
-    { path: "/abyss-usage", icon: "ri:percent-line", titleKey: "abyss-usage.title" },
-    { path: "/achievement", icon: "ri:trophy-line", titleKey: "achievement.title" },
     { path: "/more", icon: "ri:more-line", titleKey: "more.title" },
 ]
+
+const setting = useSettingStore()
+const scriptUnlocked = useLocalStorage("script-unlocked", false)
+
+/**
+ * 全部可选快捷导航项：More 页全功能（按当前环境过滤）+ 首页专属入口。
+ */
+const quickNavCandidates = computed<QuickNavCandidate[]>(() => [
+    ...getMoreItems({ safeMode: setting.safeMode, scriptUnlocked: scriptUnlocked.value })
+        .filter(item => item.show !== false)
+        .map(item => ({ path: item.path, icon: item.icon, titleKey: `${item.name}.title` })),
+    ...HOME_ONLY_NAV,
+])
+
+/** 默认快捷导航路径（保持原首页 8 项）。 */
+const DEFAULT_QUICK_NAV_PATHS = ["/char", "/db", "/levelup", "/db/resource", "/ranking", "/abyss-usage", "/achievement", "/more"]
+
+/** 用户选择的快捷导航路径（顺序即展示顺序，localStorage 持久化）。 */
+const quickNavPaths = useLocalStorage<string[]>("home.quickNavPaths", [...DEFAULT_QUICK_NAV_PATHS])
+// 快捷导航自定义弹窗显示状态
+const showCustomizeNav = ref(false)
+
+/**
+ * 当前渲染的快捷导航项（按用户选择顺序，过滤失效/不可见路径）。
+ */
+const quickNavItems = computed<QuickNavItem[]>(() =>
+    quickNavPaths.value
+        .map(path => quickNavCandidates.value.find(c => c.path === path))
+        .filter((c): c is QuickNavCandidate => !!c)
+        .map(c => ({ path: c.path, icon: c.icon, titleKey: c.titleKey }))
+)
+
+/**
+ * 切换单个快捷导航项的显示/隐藏状态。
+ * @param item 候选导航项
+ */
+function toggleQuickNavItem(item: QuickNavCandidate) {
+    const paths = [...quickNavPaths.value]
+    const index = paths.indexOf(item.path)
+    if (index >= 0) {
+        paths.splice(index, 1)
+    } else {
+        paths.push(item.path)
+    }
+    quickNavPaths.value = paths
+}
+
+/**
+ * 全选所有候选导航项。
+ */
+function selectAllQuickNav() {
+    quickNavPaths.value = quickNavCandidates.value.map(c => c.path)
+}
+
+/**
+ * 取消全选（仅保留"更多"入口）。
+ */
+function selectNoneQuickNav() {
+    quickNavPaths.value = ["/more"]
+}
 
 /**
  * 首页板块 ID。
@@ -320,12 +384,13 @@ async function checkUpdate() {
                                 :editing="editingSections"
                                 :is-first="columnIndexOf(def.id) === 0"
                                 :is-last="columnIndexOf(def.id) === columnSizeOf(def.id) - 1"
-                                :count="def.id === 'quicknav' ? $t('more.count', { count: quickNav.length }) : undefined"
+                                :action-label="def.id === 'quicknav' ? $t('home.customizeNav') : undefined"
                                 @move-up="moveSection(def.id, -1)"
                                 @move-down="moveSection(def.id, 1)"
                                 @hide="toggleSection(def.id)"
+                                @action="showCustomizeNav = true"
                             />
-                            <component :is="def.component" :items="def.id === 'quicknav' ? quickNav : undefined" />
+                            <component :is="def.component" :items="def.id === 'quicknav' ? quickNavItems : undefined" />
                         </section>
                     </div>
 
@@ -376,5 +441,110 @@ async function checkUpdate() {
                 </footer>
             </div>
         </ScrollArea>
+
+        <!-- 快捷导航自定义弹窗 -->
+        <DialogRoot v-model:open="showCustomizeNav">
+            <DialogPortal>
+                <DialogOverlay class="bg-gray-900/50 data-[state=open]:animate-overlayShow fixed inset-0 z-30" />
+                <DialogContent
+                    class="data-[state=open]:animate-contentShow fixed top-1/2 left-1/2 z-100 flex max-h-[85vh] w-[90vw] max-w-112.5 translate-x-[-50%] translate-y-[-50%] flex-col overflow-hidden rounded-lg bg-base-100 shadow-lg"
+                >
+                    <!-- 弹窗头部 -->
+                    <div class="shrink-0 p-6 pb-3">
+                        <DialogTitle class="text-lg font-semibold text-base-content">
+                            {{ $t("home.customizeNavTitle") }}
+                        </DialogTitle>
+                        <DialogDescription class="mt-1.5 text-sm text-base-content/60">
+                            {{ $t("home.customizeNavHint") }}
+                        </DialogDescription>
+                    </div>
+
+                    <!-- 功能选择列表 -->
+                    <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-4">
+                        <div class="grid grid-cols-2 gap-2 max-md:grid-cols-1">
+                            <button
+                                v-for="item in quickNavCandidates"
+                                :key="item.path"
+                                type="button"
+                                class="flex cursor-pointer items-center gap-3 rounded-xs border p-3 transition-colors duration-150"
+                                :class="
+                                    quickNavPaths.includes(item.path)
+                                        ? 'border-primary/50 bg-primary/5 text-base-content'
+                                        : 'border-base-content/15 text-base-content/40 hover:border-primary/30'
+                                "
+                                @click="toggleQuickNavItem(item)"
+                            >
+                                <!-- 复选框图标 -->
+                                <span
+                                    class="flex h-5 w-5 shrink-0 items-center justify-center rounded-xs border transition-colors duration-150"
+                                    :class="
+                                        quickNavPaths.includes(item.path)
+                                            ? 'border-primary bg-primary text-primary-content'
+                                            : 'border-base-content/30'
+                                    "
+                                >
+                                    <Icon
+                                        v-if="quickNavPaths.includes(item.path)"
+                                        icon="ri:check-line"
+                                        class="h-3.5 w-3.5"
+                                    />
+                                </span>
+                                <!-- 功能图标 -->
+                                <span
+                                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xs"
+                                    :class="
+                                        quickNavPaths.includes(item.path)
+                                            ? 'bg-primary/10 text-primary'
+                                            : 'bg-base-content/5 text-base-content/30'
+                                    "
+                                >
+                                    <Icon :icon="item.icon" class="h-4 w-4" />
+                                </span>
+                                <span class="text-sm font-medium leading-tight">{{ $t(item.titleKey) }}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 底部操作栏 -->
+                    <div class="shrink-0 border-t border-base-300 bg-base-100 px-6 py-4">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex gap-2">
+                                <button
+                                    type="button"
+                                    class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 px-3 text-xs font-medium text-base-content/70 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                                    @click="selectAllQuickNav"
+                                >
+                                    <Icon icon="ri:checkbox-circle-line" class="h-3.5 w-3.5" />
+                                    {{ $t("home.customizeNavAll") }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 px-3 text-xs font-medium text-base-content/70 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                                    @click="selectNoneQuickNav"
+                                >
+                                    <Icon icon="ri:subtract-line" class="h-3.5 w-3.5" />
+                                    {{ $t("home.customizeNavNone") }}
+                                </button>
+                            </div>
+                            <button
+                                type="button"
+                                class="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-xs bg-primary px-5 text-sm font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:translate-y-px"
+                                @click="showCustomizeNav = false"
+                            >
+                                <Icon icon="ri:check-line" class="h-4 w-4" />
+                                {{ $t("setting.confirm") }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <DialogClose
+                        class="btn btn-square btn-sm btn-ghost absolute top-2.5 right-2.5 text-lg"
+                        aria-label="close"
+                    >
+                        <Icon icon="radix-icons:cross2" />
+                    </DialogClose>
+                </DialogContent>
+            </DialogPortal>
+        </DialogRoot>
     </div>
 </template>

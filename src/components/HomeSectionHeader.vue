@@ -12,14 +12,17 @@ defineProps<{
     isFirst?: boolean
     /** 是否为其所在列的可见板块中的最后一个 */
     isLast?: boolean
-    /** 标题行右侧的计数文本（非编辑模式） */
+    /** 标题行右侧的计数文本（非编辑模式，优先级低于 actionLabel） */
     count?: string
+    /** 标题行右侧的操作按钮文本（非编辑模式，提供时替代 count） */
+    actionLabel?: string
 }>()
 
 const emit = defineEmits<{
     "move-up": []
     "move-down": []
     hide: []
+    action: []
 }>()
 </script>
 
@@ -68,6 +71,16 @@ const emit = defineEmits<{
             </button>
         </div>
 
+        <!-- 非编辑模式：操作按钮（优先） -->
+        <button
+            v-else-if="actionLabel"
+            type="button"
+            class="inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 px-2.5 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+            @click="emit('action')"
+        >
+            <Icon icon="ri:settings-3-line" class="h-3.5 w-3.5" />
+            {{ actionLabel }}
+        </button>
         <!-- 非编辑模式：计数文本 -->
         <span v-else-if="count" class="text-[11px] font-medium text-base-content/50">{{ count }}</span>
     </div>

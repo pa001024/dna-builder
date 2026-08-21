@@ -5,22 +5,14 @@ import { ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from "re
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
 import type { QuickNavItem } from "@/components/HomeQuickNav.vue"
-import type { IconTypes } from "@/components/Icon.vue"
 import type { POCardSize } from "@/components/POCard.vue"
-import { env } from "@/env"
 import { useSettingStore } from "@/store/setting"
 import { isValidHex } from "@/utils/customTheme"
+import { getMoreItems, type MoreItem } from "@/utils/entry-util"
 import { sha256 } from "@/utils/sha256"
 
 const setting = useSettingStore()
 const scriptUnlocked = useLocalStorage("script-unlocked", false)
-
-type MoreItem = {
-    name: string
-    path: string
-    icon: IconTypes
-    show?: boolean
-}
 
 /** 磁贴项：在入口基础上附加 Win10 磁贴的尺寸与纯色渐变主题。 */
 type TileItem = MoreItem & {
@@ -29,133 +21,10 @@ type TileItem = MoreItem & {
     glow?: string
 }
 
-const itemsRaw: MoreItem[] = [
-    {
-        name: "char-build",
-        path: "/char",
-        icon: "ri:hammer-line",
-    },
-    {
-        name: "guides",
-        path: "/guides",
-        icon: "ri:book-line",
-    },
-    {
-        name: "counter",
-        path: "/counter",
-        icon: "plus_one",
-    },
-    {
-        name: "build-compare",
-        path: "/char-build-compare",
-        icon: "ri:table-view",
-    },
-    {
-        name: "dna-home",
-        path: "/dna",
-        icon: "ri:chat-thread-line",
-    },
-    {
-        name: "database",
-        path: "/db",
-        icon: "ri:book-line",
-    },
-    {
-        name: "levelup",
-        path: "/levelup",
-        icon: "ri:calculator-line",
-    },
-    {
-        name: "achievement",
-        path: "/achievement",
-        icon: "ri:trophy-line",
-    },
-    {
-        name: "abyss-usage",
-        path: "/abyss-usage",
-        icon: "ri:bar-chart-line",
-    },
-    {
-        name: "ranking",
-        path: "/ranking",
-        icon: "ri:sort-number-asc",
-    },
-    {
-        name: "setting",
-        path: "/setting",
-        icon: "ri:settings-3-line",
-    },
-    {
-        name: "game-launcher",
-        path: "/game-launcher",
-        icon: "ri:rocket-2-line",
-    },
-    {
-        name: "mod-manager",
-        path: "/mods",
-        icon: "ri:puzzle-line",
-    },
-    {
-        name: "chat",
-        path: "/chat",
-        icon: "ri:chat-3-line",
-    },
-    {
-        name: "flow",
-        path: "/flow",
-        icon: "ri:node-tree",
-    },
-    {
-        name: "inventory",
-        path: "/inventory",
-        icon: "ri:box-1-line",
-    },
-    {
-        name: "timeline",
-        path: "/timeline",
-        icon: "ri:timeline-view",
-    },
-    {
-        name: "help",
-        path: "/help",
-        icon: "ri:question-line",
-    },
-    {
-        name: "game-accounts",
-        path: "/game-accounts",
-        icon: "ri:user-line",
-        show: env.isApp,
-    },
-    {
-        name: "unpack",
-        path: "/unpack",
-        icon: "ri:file-zip-line",
-        show: env.isApp && !setting.safeMode,
-    },
-    {
-        name: "skin-colorize",
-        path: "/skin-colorize",
-        icon: "ri:palette-line",
-    },
-    {
-        name: "race-lottery",
-        path: "/race-lottery",
-        icon: "ri:run-line",
-    },
-]
-
 /**
- * 全量入口列表：在基础列表上按解锁状态追加脚本管理入口。
+ * 全量入口列表：共享数据源 getMoreItems 按当前环境与解锁状态生成。
  */
-const items = computed<MoreItem[]>(() => [
-    ...itemsRaw,
-    {
-        name: "script-list",
-        path: "/scripts",
-        icon: "ri:code-s-slash-line",
-        show: scriptUnlocked.value,
-    },
-])
+const items = computed<MoreItem[]>(() => getMoreItems({ safeMode: setting.safeMode, scriptUnlocked: scriptUnlocked.value }))
 
 /** 当前环境下可见的入口（过滤 show 为 false 的项）。 */
 const visibleItems = computed(() => items.value.filter(item => item.show !== false))
