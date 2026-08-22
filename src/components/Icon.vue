@@ -2,7 +2,7 @@
 import type { SVGAttributes } from "vue"
 
 // remixicon: https://remixicon.com/
-// managed by tools/icon_tool.ts
+// managed by tools/icon-tool.ts
 // use `bun icon add <icon names ...>` to add icon
 const data = {
     kezhou: [

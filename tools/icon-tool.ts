@@ -567,7 +567,7 @@ async function listAvailableIcons(pattern?: string): Promise<void> {
     } else {
         console.log(`可用的 Remixicon 图标总数: ${icons.length}`)
         console.log("使用 list <pattern> 搜索特定图标")
-        console.log("示例: bun tools/icon_tool.ts list subtract")
+        console.log("示例: bun tools/icon-tool.ts list subtract")
     }
 }
 
@@ -591,22 +591,22 @@ async function main(): Promise<void> {
 
     if (!command || command === "help") {
         console.log("图标管理工具 - 用法:")
-        console.log("  bun tools/icon_tool.ts add <icon-name> [icon-name ...] - 添加 Remixicon 图标到 Icon.vue")
-        console.log("  bun tools/icon_tool.ts check             - 检查图标使用情况，标记未使用的图标")
-        console.log("  bun tools/icon_tool.ts clean             - 删除 Icon.vue 中未使用的图标")
-        console.log("  bun tools/icon_tool.ts ignore <icon>     - 将图标添加到忽略列表（不清除）")
-        console.log("  bun tools/icon_tool.ts unignore <icon>   - 从忽略列表中移除图标")
-        console.log("  bun tools/icon_tool.ts ignored            - 列出所有被忽略的图标")
-        console.log("  bun tools/icon_tool.ts list [pattern]     - 列出可用的 Remixicon 图标")
-        console.log("  bun tools/icon_tool.ts use [pattern]     - 查询当前使用的图标")
+        console.log("  bun tools/icon-tool.ts add <icon-name> [icon-name ...] - 添加 Remixicon 图标到 Icon.vue")
+        console.log("  bun tools/icon-tool.ts check             - 检查图标使用情况，标记未使用的图标")
+        console.log("  bun tools/icon-tool.ts clean             - 删除 Icon.vue 中未使用的图标")
+        console.log("  bun tools/icon-tool.ts ignore <icon>     - 将图标添加到忽略列表（不清除）")
+        console.log("  bun tools/icon-tool.ts unignore <icon>   - 从忽略列表中移除图标")
+        console.log("  bun tools/icon-tool.ts ignored            - 列出所有被忽略的图标")
+        console.log("  bun tools/icon-tool.ts list [pattern]     - 列出可用的 Remixicon 图标")
+        console.log("  bun tools/icon-tool.ts use [pattern]     - 查询当前使用的图标")
         console.log("")
         console.log("示例:")
-        console.log("  bun tools/icon_tool.ts add subtract-line user-line  # 添加多个图标")
-        console.log("  bun tools/icon_tool.ts check              # 检查使用情况")
-        console.log("  bun tools/icon_tool.ts clean              # 清理未使用的图标")
-        console.log("  bun tools/icon_tool.ts ignore ri:user-line  # 忽略 user-line 图标")
-        console.log("  bun tools/icon_tool.ts list subtract     # 搜索包含 subtract 的图标")
-        console.log("  bun tools/icon_tool.ts use subtract      # 查询当前使用的包含 subtract 的图标")
+        console.log("  bun tools/icon-tool.ts add subtract-line user-line  # 添加多个图标")
+        console.log("  bun tools/icon-tool.ts check              # 检查使用情况")
+        console.log("  bun tools/icon-tool.ts clean              # 清理未使用的图标")
+        console.log("  bun tools/icon-tool.ts ignore ri:user-line  # 忽略 user-line 图标")
+        console.log("  bun tools/icon-tool.ts list subtract     # 搜索包含 subtract 的图标")
+        console.log("  bun tools/icon-tool.ts use subtract      # 查询当前使用的包含 subtract 的图标")
         process.exit(0)
     }
 
@@ -615,7 +615,7 @@ async function main(): Promise<void> {
             const iconNames = args.slice(1)
             if (iconNames.length === 0) {
                 console.error("❌ 请指定要添加的图标名称")
-                console.log("示例: bun tools/icon_tool.ts add subtract-line")
+                console.log("示例: bun tools/icon-tool.ts add subtract-line")
                 process.exit(1)
             }
             for (const iconName of iconNames) {
@@ -629,7 +629,7 @@ async function main(): Promise<void> {
             const iconName = args[1]
             if (!iconName) {
                 console.error("❌ 请指定要忽略的图标")
-                console.log("示例: bun tools/icon_tool.ts ignore ri:user-line")
+                console.log("示例: bun tools/icon-tool.ts ignore ri:user-line")
                 process.exit(1)
             }
             await ignoreIcon(iconName)
@@ -637,7 +637,7 @@ async function main(): Promise<void> {
             const iconName = args[1]
             if (!iconName) {
                 console.error("❌ 请指定要移除忽略的图标")
-                console.log("示例: bun tools/icon_tool.ts unignore ri:user-line")
+                console.log("示例: bun tools/icon-tool.ts unignore ri:user-line")
                 process.exit(1)
             }
             await unignoreIcon(iconName)

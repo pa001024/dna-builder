@@ -138,7 +138,7 @@ src/
 server/              # Bun + Elysia backend
 src-tauri/           # Tauri Rust backend
 mcp_server/          # MCP server (Rust)
-tools/               # Dev tools (i18n_tool.ts, icon_tool.ts)
+tools/               # Dev tools (i18n-tool.ts, icon-tool.ts)
 externals/dna-api/   # DNA API package
 public/i18n/         # Translation files
 ```
@@ -157,9 +157,9 @@ public/i18n/         # Translation files
 
 ## Dev Tools
 
-- **i18n**: `bun tools/i18n_tool.ts export|import` — export missing translations, import completed ones
-- **Icons**: `bun tools/icon_tool.ts add|check|clean|list` — manage icons in `src/components/Icon.vue` use when lint error on icon not found
-- **API gen**: `pnpm gen` — generate API calls from tools/generateApiCalls.ts
+- **i18n**: `bun tools/i18n-tool.ts export|import` — export missing translations, import completed ones
+- **Icons**: `bun tools/icon-tool.ts add|check|clean|list` — manage icons in `src/components/Icon.vue` use when lint error on icon not found
+- **API gen**: `pnpm gen` — generate API calls from tools/generate-api-calls.ts
 
 ## Git Hooks (Husky)
 

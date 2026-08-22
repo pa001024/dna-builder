@@ -21,7 +21,8 @@ type Mapping = {
 
 type GeneratedReplacement = {
     targetVar: string
-    text: string
+    /** 原始 JS 值，写入前才序列化，便于与文件现有值做语义 diff */
+    value: unknown
 }
 
 const MAPPINGS: Mapping[] = [
@@ -85,7 +86,7 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "modConvertData",
-                    text: formatTsValue(JSON.parse(convertText), 0),
+                    value: JSON.parse(convertText),
                 },
             ]
         },
@@ -99,7 +100,7 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "dynamicRewardMap",
-                    text: formatTsValue(JSON.parse(dynamicRewardText), 0),
+                    value: JSON.parse(dynamicRewardText),
                 },
             ]
         },
@@ -170,15 +171,15 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "RaidCalculation",
-                    text: formatTsValue(JSON.parse(raidCalculationText), 0),
+                    value: JSON.parse(raidCalculationText),
                 },
                 {
                     targetVar: "RaidDungeon",
-                    text: formatTsValue(JSON.parse(raidDungeonText), 0),
+                    value: JSON.parse(raidDungeonText),
                 },
                 {
                     targetVar: "RaidSeason",
-                    text: formatTsValue(JSON.parse(raidSeasonText), 0),
+                    value: JSON.parse(raidSeasonText),
                 },
             ]
         },
@@ -349,7 +350,7 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "gachaProbabilities",
-                    text: formatTsValue(JSON.parse(probabilityText), 0),
+                    value: JSON.parse(probabilityText),
                 },
             ]
         },
@@ -403,11 +404,11 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "immortalMonsterLevelRules",
-                    text: formatTsValue(rules, 0),
+                    value: rules,
                 },
                 {
                     targetVar: "defaultImmortalSeasonId",
-                    text: String(defaultSeasonId),
+                    value: defaultSeasonId,
                 },
             ]
         },
@@ -426,15 +427,15 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "limitedPrizeCostRules",
-                    text: formatTsValue(JSON.parse(costRuleText), 0),
+                    value: JSON.parse(costRuleText),
                 },
                 {
                     targetVar: "limitedPrizeItems",
-                    text: formatTsValue(JSON.parse(itemText), 0),
+                    value: JSON.parse(itemText),
                 },
                 {
                     targetVar: "limitedPrizePools",
-                    text: formatTsValue(JSON.parse(poolText), 0),
+                    value: JSON.parse(poolText),
                 },
             ]
         },
@@ -474,7 +475,7 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "conditionsMap",
-                    text: formatTsValue(record, 0),
+                    value: record,
                 },
             ]
         },
@@ -491,11 +492,11 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "ironSurvivalData",
-                    text: formatTsValue(JSON.parse(ironSurvivalText), 0),
+                    value: JSON.parse(ironSurvivalText),
                 },
                 {
                     targetVar: "ironSurvivalDungeonData",
-                    text: formatTsValue(JSON.parse(ironSurvivalDungeonText), 0),
+                    value: JSON.parse(ironSurvivalDungeonText),
                 },
             ]
         },
@@ -514,7 +515,7 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "monsterLevelDropData",
-                    text: formatTsValue(record, 0),
+                    value: record,
                 },
             ]
         },
@@ -569,19 +570,19 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "skinColorizeSwatches",
-                    text: formatTsValue(swatches, 0),
+                    value: swatches,
                 },
                 {
                     targetVar: "skinColorizeSpecialSwatches",
-                    text: formatTsValue(specialSwatches, 0),
+                    value: specialSwatches,
                 },
                 {
                     targetVar: "skinColorizeMaxColorParts",
-                    text: String(maxColorParts),
+                    value: maxColorParts,
                 },
                 {
                     targetVar: "skinColorizeDefaultColorId",
-                    text: String(defaultColorId),
+                    value: defaultColorId,
                 },
             ]
         },
@@ -606,7 +607,7 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "defenceData",
-                    text: formatTsValue(calamity, 0),
+                    value: calamity,
                 },
             ]
         },
@@ -792,9 +793,89 @@ function findFirstCollectionLiteral(node: ts.Node): ts.ArrayLiteralExpression | 
 }
 
 /**
- * 根据变量名定位目标数组的替换区间。
+ * 深度比较两个 JSON 兼容值是否完全一致（区分键顺序，保证文件向导出数据收敛）。
+ * @param left 现有值。
+ * @param right 导出值。
+ * @returns 是否一致。
  */
-function findReplacementSpan(sourceFile: ts.SourceFile, targetVar: string): { start: number; end: number } {
+function deepEqual(left: unknown, right: unknown): boolean {
+    if (left === right) {
+        return true
+    }
+    if (Array.isArray(left) && Array.isArray(right)) {
+        return left.length === right.length && left.every((item, index) => deepEqual(item, right[index]))
+    }
+    if (isRecord(left) && isRecord(right)) {
+        const leftKeys = Object.keys(left)
+        const rightKeys = Object.keys(right)
+        // 键顺序也参与比较：顺序变化同样视为变更，避免文件长期与导出数据不同序
+        return (
+            leftKeys.length === rightKeys.length &&
+            leftKeys.join("\u0000") === rightKeys.join("\u0000") &&
+            leftKeys.every(key => deepEqual(left[key], right[key]))
+        )
+    }
+    return false
+}
+
+/**
+ * 从 AST 字面量节点还原 JS 值，用于与导出数据做语义比较。
+ *
+ * 目标文件由本工具生成并经 Biome 格式化，仅包含纯 JSON 数据字面量，
+ * 遇到其他语法即视为无法比较并抛错。
+ *
+ * @param node 字面量表达式节点。
+ * @returns 还原后的 JS 值。
+ */
+function literalToValue(node: ts.Node): unknown {
+    if (ts.isArrayLiteralExpression(node)) {
+        return node.elements.map(element => {
+            if (ts.isOmittedExpression(element)) {
+                throw new Error("数组字面量包含省略元素，无法还原值")
+            }
+            return literalToValue(element)
+        })
+    }
+    if (ts.isObjectLiteralExpression(node)) {
+        const result: Record<string, unknown> = {}
+        for (const property of node.properties) {
+            if (!ts.isPropertyAssignment(property)) {
+                throw new Error(`对象字面量包含不支持的属性形式: ${ts.SyntaxKind[property.kind]}`)
+            }
+            const { name } = property
+            if (!ts.isIdentifier(name) && !ts.isStringLiteral(name) && !ts.isNumericLiteral(name)) {
+                throw new Error(`对象字面量包含不支持的属性名: ${ts.SyntaxKind[name.kind]}`)
+            }
+            result[name.text] = literalToValue(property.initializer)
+        }
+        return result
+    }
+    if (ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
+        return ts.isNumericLiteral(node) ? Number(node.text) : node.text
+    }
+    // 负数字面量（如 -1）
+    if (ts.isPrefixUnaryExpression(node) && node.operator === ts.SyntaxKind.MinusToken) {
+        const operand = node.operand
+        if (ts.isNumericLiteral(operand)) {
+            return -Number(operand.text)
+        }
+    }
+    if (node.kind === ts.SyntaxKind.TrueKeyword) {
+        return true
+    }
+    if (node.kind === ts.SyntaxKind.FalseKeyword) {
+        return false
+    }
+    if (node.kind === ts.SyntaxKind.NullKeyword || node.kind === ts.SyntaxKind.UndefinedKeyword) {
+        return null
+    }
+    throw new Error(`不支持的字面量语法: ${ts.SyntaxKind[node.kind]}`)
+}
+
+/**
+ * 根据变量名定位目标数组的替换区间对应的字面量节点。
+ */
+function findReplacementNode(sourceFile: ts.SourceFile, targetVar: string): ts.ArrayLiteralExpression | ts.ObjectLiteralExpression {
     for (const statement of sourceFile.statements) {
         if (!ts.isVariableStatement(statement)) {
             continue
@@ -810,19 +891,16 @@ function findReplacementSpan(sourceFile: ts.SourceFile, targetVar: string): { st
             if (!collectionNode) {
                 throw new Error(`在 ${sourceFile.fileName} 中找不到 ${targetVar} 的数组或对象字面量`)
             }
-            return {
-                start: collectionNode.getStart(sourceFile),
-                end: collectionNode.getEnd(),
-            }
+            return collectionNode
         }
     }
     throw new Error(`在 ${sourceFile.fileName} 中找不到变量 ${targetVar}`)
 }
 
 /**
- * 根据变量名定位变量初始化表达式区间。
+ * 根据变量名定位变量初始化表达式节点。
  */
-function findVariableInitializerSpan(sourceFile: ts.SourceFile, targetVar: string): { start: number; end: number } {
+function findVariableInitializerNode(sourceFile: ts.SourceFile, targetVar: string): ts.Expression {
     for (const statement of sourceFile.statements) {
         if (!ts.isVariableStatement(statement)) {
             continue
@@ -831,10 +909,7 @@ function findVariableInitializerSpan(sourceFile: ts.SourceFile, targetVar: strin
             if (!ts.isIdentifier(declaration.name) || declaration.name.text !== targetVar || !declaration.initializer) {
                 continue
             }
-            return {
-                start: declaration.initializer.getStart(sourceFile),
-                end: declaration.initializer.getEnd(),
-            }
+            return declaration.initializer
         }
     }
     throw new Error(`在 ${sourceFile.fileName} 中找不到变量 ${targetVar}`)
@@ -943,6 +1018,27 @@ function isAbyssLevelRow(value: unknown): value is AbyssLevelRow {
 }
 
 /**
+ * 仅对本次实际写入的文件执行 Biome 格式化，避免全仓库扫描。
+ * @param files 本次变更文件的相对路径列表。
+ * @returns Biome 非零退出时抛出错误。
+ */
+async function formatWithBiome(files: string[]): Promise<void> {
+    if (files.length === 0) {
+        return
+    }
+    // 通过 process.execPath（即当前 bun 可执行文件）调用 `bun x biome`，规避 Windows 下 .cmd 垫片问题
+    const proc = Bun.spawn([process.execPath, "x", "biome", "check", "--write", "--linter-enabled=false", ...files], {
+        stdout: "inherit",
+        stderr: "inherit",
+        stdin: "inherit",
+    })
+    const exitCode = await proc.exited
+    if (exitCode !== 0) {
+        throw new Error(`Biome 格式化失败，退出码 ${exitCode}`)
+    }
+}
+
+/**
  * 执行导入。
  */
 async function main() {
@@ -958,6 +1054,8 @@ async function main() {
     }
 
     const updatedFiles: string[] = []
+    // 因数据无变化而跳过的变量数量
+    let skippedCount = 0
 
     for (const [targetStem, mappings] of grouped) {
         for (const locale of LOCALES) {
@@ -984,10 +1082,15 @@ async function main() {
                 const sourceValue = JSON.parse(jsonText)
                 const parsed = mapping.postProcess?.(sourceValue) ?? sourceValue
                 const targetVar = mapping.targetVars?.[locale] ?? mapping.targetVar
-                const span = findReplacementSpan(sourceFile, targetVar)
+                const node = findReplacementNode(sourceFile, targetVar)
+                // 语义 diff：文件现有值与导出数据一致时跳过
+                if (deepEqual(literalToValue(node), parsed)) {
+                    skippedCount++
+                    continue
+                }
                 replacements.push({
-                    start: span.start,
-                    end: span.end,
+                    start: node.getStart(sourceFile),
+                    end: node.getEnd(),
                     text: formatTsValue(parsed, 0),
                 })
             }
@@ -1013,14 +1116,20 @@ async function main() {
         const originalText = await readFile(targetFile, "utf-8")
         const sourceFile = ts.createSourceFile(targetFile, originalText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
         const generatedReplacements = await mapping.source()
-        const replacements = generatedReplacements.map(replacement => {
-            const span = findVariableInitializerSpan(sourceFile, replacement.targetVar)
-            return {
-                start: span.start,
-                end: span.end,
-                text: replacement.text,
+        const replacements: Array<{ start: number; end: number; text: string }> = []
+        for (const replacement of generatedReplacements) {
+            const node = findVariableInitializerNode(sourceFile, replacement.targetVar)
+            // 语义 diff：文件现有值与导出数据一致时跳过
+            if (deepEqual(literalToValue(node), replacement.value)) {
+                skippedCount++
+                continue
             }
-        })
+            replacements.push({
+                start: node.getStart(sourceFile),
+                end: node.getEnd(),
+                text: formatTsValue(replacement.value, 0),
+            })
+        }
 
         if (replacements.length === 0) {
             continue
@@ -1034,9 +1143,14 @@ async function main() {
     }
 
     console.log(`已更新 ${updatedFiles.length} 个文件`)
+    if (skippedCount > 0) {
+        console.log(`已跳过 ${skippedCount} 个无变化的变量（未落盘）`)
+    }
     for (const file of updatedFiles) {
         console.log(`- ${file}`)
     }
+
+    await formatWithBiome(updatedFiles)
 
     if (SKIPPED_SOURCES.length > 0) {
         console.log(`已跳过未对应到现有 data 文件的源表：${SKIPPED_SOURCES.join(", ")}`)

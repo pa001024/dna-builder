@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 /**
- * i18n_check.ts — 扫描代码中引用但未在翻译文件中配置的 i18n 键。
+ * i18n-check.ts — 扫描代码中引用但未在翻译文件中配置的 i18n 键。
  *
  * 用法:
- *   bun tools/i18n_check.ts                 # 扫描并打印未配置的键（含引用位置）
- *   bun tools/i18n_check.ts --json          # 额外把报告写入 tools/i18n_check_report.json
- *   bun tools/i18n_check.ts --locale-gap    # 额外检查 zh-CN 已定义但其它语言缺失的键
+ *   bun tools/i18n-check.ts                 # 扫描并打印未配置的键（含引用位置）
+ *   bun tools/i18n-check.ts --json          # 额外把报告写入 tools/i18n-check-report.json
+ *   bun tools/i18n-check.ts --locale-gap    # 额外检查 zh-CN 已定义但其它语言缺失的键
  *
  * 检测内容:
  *   1. 主检测: 代码中通过 t(...)/$t(...)/i18next.t(...) 静态引用, 但 zh-CN 翻译文件中不存在的键
@@ -22,7 +22,7 @@ import { extname, join, relative } from "node:path"
 const ROOT = process.cwd()
 const SRC_DIR = join(ROOT, "src")
 const I18N_DIR = join(ROOT, "public", "i18n")
-const REPORT_FILE = join(ROOT, "tools", "i18n_check_report.json")
+const REPORT_FILE = join(ROOT, "tools", "i18n-check-report.json")
 
 /** 作为基准的源语言（fallbackLng），代码引用的键必须在此语言中存在 */
 const SOURCE_LOCALE = "zh-CN"

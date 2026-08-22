@@ -107,10 +107,10 @@ async function main() {
     const newText = `${fileText.slice(0, start)}${replacement}${fileText.slice(end)}`
 
     await writeFile(TARGET_FILE, newText, "utf-8")
-    console.log(`[update_map_cache] updated: ${TARGET_FILE}`)
+    console.log(`[update-map-cache] updated: ${TARGET_FILE}`)
 }
 
 main().catch(error => {
-    console.error("[update_map_cache] failed:", error)
+    console.error("[update-map-cache] failed:", error)
     process.exit(1)
 })

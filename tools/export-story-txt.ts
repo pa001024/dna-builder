@@ -712,7 +712,7 @@ function writeTextFile(filePath: string, content: string): void {
  * 执行剧情文本导出。
  */
 async function main(): Promise<void> {
-    ;(globalThis as Record<string, number>)[DNA_CURRENT_VERSION_GLOBAL_KEY] = Number.POSITIVE_INFINITY
+    ;(globalThis as unknown as Record<string, number>)[DNA_CURRENT_VERSION_GLOBAL_KEY] = Number.POSITIVE_INFINITY
 
     const [
         { questData: loadedQuestData },

@@ -4,7 +4,7 @@ import { readdir, readFile, unlink, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 
 const I18N_DIR = "public/i18n"
-const DIFF_FILE = "tools/i18n_diff.json"
+const DIFF_FILE = "tools/i18n-diff.json"
 
 function flattenKeys(obj: Record<string, any>, prefix = ""): Map<string, string> {
     const result = new Map<string, string>()
@@ -131,9 +131,9 @@ async function main() {
     } else if (command === "import") {
         await importDiff()
     } else {
-        console.log("Usage: bun tools/i18n_tool.ts [export|import]")
-        console.log("  export - Export missing translation differences to tools/i18n_diff.json")
-        console.log("  import  - Import differences from tools/i18n_diff.json and delete the file")
+        console.log("Usage: bun tools/i18n-tool.ts [export|import]")
+        console.log("  export - Export missing translation differences to tools/i18n-diff.json")
+        console.log("  import  - Import differences from tools/i18n-diff.json and delete the file")
         process.exit(1)
     }
 }

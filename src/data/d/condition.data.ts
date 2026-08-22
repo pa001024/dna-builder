@@ -1,5 +1,5 @@
 // 条件表（Condition）
-// 由 tools/import_i18n_data.ts 从 DuetNightAbyssData2/out/Condition.json 自动填充
+// 由 tools/import-i18n-data.ts 从 DuetNightAbyssData2/out/Condition.json 自动填充
 
 /** 条件表条目 */
 export interface ConditionItem {

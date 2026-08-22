@@ -1,5 +1,5 @@
 // 迷津数据：其一（RougeLike）与 合作（RougePro）
-// 由 tools/import_i18n_data.ts 从 DuetNightAbyssData2/final/i18n/cn/*.json 自动填充
+// 由 tools/import-i18n-data.ts 从 DuetNightAbyssData2/final/i18n/cn/*.json 自动填充
 
 /** 其一·烛芯分类（祝福组） */
 export interface RougeLikeBlessingGroup {
